@@ -94,7 +94,9 @@ if ($resqlproducts) {
 			}
 
 			$pricetoshow = price2num($priceinstance['fix'], 'MT');
-			if (empty($pricetoshow)) $pricetoshow = 0;
+			if (empty($pricetoshow)) {
+				$pricetoshow = 0;
+			}
 			$arrayofplans[$obj->rowid] = $label;
 
 			// Set $priceforlabel
@@ -134,7 +136,9 @@ if ($resqlproducts) {
 		}
 		$i++;
 	}
-} else dol_print_error($db);
+} else {
+	dol_print_error($db);
+}
 
 
 // List of available options
@@ -199,7 +203,9 @@ if ($resqloptions) {
 			*/
 
 			$pricetoshow = price2num($priceoption['fix'], 'MT');
-			if (empty($pricetoshow)) $pricetoshow = 0;
+			if (empty($pricetoshow)) {
+				$pricetoshow = 0;
+			}
 			$labelprice = price($pricetoshow, 1, $langs, 1, 0, -1, $conf->currency);
 			$tmpduration = '';
 			if ($tmpprod->duration) {
@@ -216,10 +222,14 @@ if ($resqloptions) {
 				}
 			}
 
-			if ($tmpprod->duration) $labelprice.=$tmpduration;
+			if ($tmpprod->duration) {
+				$labelprice.=$tmpduration;
+			}
 			if ($priceoption['user']) {
 				$labelprice.=' + '.price(price2num($priceoption['user'], 'MT'), 1, $langs, 1, 0, -1, $conf->currency).' / '.$langs->trans("User");
-				if ($tmpprod->duration) $labelprice.=$tmpduration;
+				if ($tmpprod->duration) {
+					$labelprice.=$tmpduration;
+				}
 			}
 
 			$arrayofoptionsfull[$obj->rowid]['id'] = $obj->rowid;
@@ -262,10 +272,18 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 	$arrayforsort = array();
 	foreach ($listofcontractid as $id => $contract) {
 		$position = 20;
-		if ($contract->array_options['options_deployment_status'] == 'processing') $position = 1;
-		if ($contract->array_options['options_deployment_status'] == 'suspended')  $position = 10;	// This is not a status
-		if ($contract->array_options['options_deployment_status'] == 'done')       $position = 20;
-		if ($contract->array_options['options_deployment_status'] == 'undeployed') $position = 100;
+		if ($contract->array_options['options_deployment_status'] == 'processing') {
+			$position = 1;
+		}
+		if ($contract->array_options['options_deployment_status'] == 'suspended') {
+			$position = 10;
+		}	// This is not a status
+		if ($contract->array_options['options_deployment_status'] == 'done') {
+			$position = 20;
+		}
+		if ($contract->array_options['options_deployment_status'] == 'undeployed') {
+			$position = 100;
+		}
 
 		$arrayforsort[$id] = array('position'=>$position, 'id'=>$id, 'contract'=>$contract);
 	}
@@ -281,7 +299,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
 		$dbprefix = empty($contract->array_options['options_prefix_db']) ? '' : $contract->array_options['options_prefix_db'];
-		if (empty($dbprefix)) $dbprefix = 'llx_';
+		if (empty($dbprefix)) {
+			$dbprefix = 'llx_';
+		}
 
 		// Get info about PLAN of Contract
 		$planlabel = $planref;			// By default, but we will take the name of service of type 'app' just after
@@ -308,11 +328,22 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 			}
 		}
-		$color = "#4DB3A2"; $displayforinstance = "";
-		if ($statuslabel == 'processing') { $color = 'orange'; }
-		if ($statuslabel == 'suspended') { $color = 'orange'; }
-		if ($statuslabel == 'undeployed') { $color = 'grey'; $displayforinstance='display:none;'; }
-		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; $displayforinstance='display:none;'; }
+		$color = "#4DB3A2";
+		$displayforinstance = "";
+		if ($statuslabel == 'processing') {
+			$color = 'orange';
+		}
+		if ($statuslabel == 'suspended') {
+			$color = 'orange';
+		}
+		if ($statuslabel == 'undeployed') {
+			$color = 'grey';
+			$displayforinstance='display:none;';
+		}
+		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			$color = 'lightgrey';
+			$displayforinstance='display:none;';
+		}
 
 
 		// Update resources of instance
@@ -354,12 +385,19 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;"'.($statuslabeltitle ? ' title="'.$statuslabeltitle.'"' : '').'>';
 		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 			print $langs->trans("Redirection");
-		} elseif ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
-		elseif ($statuslabel == 'done') print $langs->trans("Alive");
-		elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
-		elseif ($statuslabel == 'undeployed') print $langs->trans("Undeployed");
-		elseif ($statuslabel == 'unreachable') print $langs->trans("Unreachable").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
-		else print $statuslabel;
+		} elseif ($statuslabel == 'processing') {
+			print $langs->trans("DeploymentInProgress");
+		} elseif ($statuslabel == 'done') {
+			print $langs->trans("Alive");
+		} elseif ($statuslabel == 'suspended') {
+			print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
+		} elseif ($statuslabel == 'undeployed') {
+			print $langs->trans("Undeployed");
+		} elseif ($statuslabel == 'unreachable') {
+			print $langs->trans("Unreachable").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
+		} else {
+			print $statuslabel;
+		}
 		print '</span></span>';
 
 		// Instance name
@@ -368,7 +406,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		print '<br>';
 
-		print '<p style="padding-top: 8px;'.($statuslabel == 'undeployed'?' margin-bottom: 0px':'').'" class="clearboth">';
+		print '<p style="padding-top: 8px;'.($statuslabel == 'undeployed' ? ' margin-bottom: 0px' : '').'" class="clearboth">';
 
 		// ID
 		print '<span class="caption-helper small"><span class="opacitymedium">'.$langs->trans("ID").' : </span><span class="font-green-sharp">'.$contract->ref.'</span></span><br>';
@@ -376,8 +414,11 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		// URL
 		if ($statuslabel != 'undeployed') {
 			print '<span class="caption-helper"><span class="opacitymedium">';
-			if ($conf->dol_optimize_smallscreen) print $langs->trans("URL");
-			else print $langs->trans("YourURLToGoOnYourAppInstance");
+			if ($conf->dol_optimize_smallscreen) {
+				print $langs->trans("URL");
+			} else {
+				print $langs->trans("YourURLToGoOnYourAppInstance");
+			}
 			print ' : </span>';
 			print '<a class="font-green-sharp linktoinstance" href="https://'.$contract->ref_customer.'" target="blankinstance">';
 			print 'https://'.$contract->ref_customer;
@@ -406,14 +447,17 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		// Calculate price on invoicing
 		$contract->fetchObjectLinked();
 
-		$foundtemplate=0; $datenextinvoice='';
-		$pricetoshow = ''; $priceinvoicedht = 0;
+		$foundtemplate=0;
+		$datenextinvoice='';
+		$pricetoshow = '';
+		$priceinvoicedht = 0;
 		$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
 		if (isset($contract->linkedObjects['facturerec']) && is_array($contract->linkedObjects['facturerec'])) {
 			foreach ($contract->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice) {
 				$foundtemplate++;
-				if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] == 'undeployed') $pricetoshow = '';
-				else {
+				if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] == 'undeployed') {
+					$pricetoshow = '';
+				} else {
 					if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency == 1) {
 						$pricetoshow = price($templateinvoice->total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT").' / '.$langs->trans("Month");
 						$priceinvoicedht = $templateinvoice->total_ht;
@@ -451,9 +495,15 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				            <li><a id="a_tab_resource_'.$contract->id.'" href="#tab_resource_'.$contract->id.'" data-toggle="tab"'.(! in_array($action, array('updateurlxxx')) ? ' class="active"' : '').'>'.$langs->trans("ResourcesAndOptions").'</a></li>';
 
 		print '<li><a id="a_tab_domain_'.$contract->id.'" href="#tab_domain_'.$contract->id.'" data-toggle="tab"'.($action == 'updateurlxxx' ? ' class="active"' : '').'>'.$langs->trans("Domain").'</a></li>';
-		if (in_array($statuslabel, array('done','suspended')) && $directaccess) print '<li><a id="a_tab_ssh_'.$contract->id.'" href="#tab_ssh_'.$contract->id.'" data-toggle="tab">'.$langs->trans("SSH").' / '.$langs->trans("SFTP").'</a></li>';
-		if (in_array($statuslabel, array('done','suspended')) && $directaccess) print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
-		if (in_array($statuslabel, array('done','suspended'))) print '<li><a id="a_tab_danger_'.$contract->id.'" href="#tab_danger_'.$contract->id.'" data-toggle="tab">'.$langs->trans("CancelInstance").'</a></li>';
+		if (in_array($statuslabel, array('done','suspended')) && $directaccess) {
+			print '<li><a id="a_tab_ssh_'.$contract->id.'" href="#tab_ssh_'.$contract->id.'" data-toggle="tab">'.$langs->trans("SSH").' / '.$langs->trans("SFTP").'</a></li>';
+		}
+		if (in_array($statuslabel, array('done','suspended')) && $directaccess) {
+			print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
+		}
+		if (in_array($statuslabel, array('done','suspended'))) {
+			print '<li><a id="a_tab_danger_'.$contract->id.'" href="#tab_danger_'.$contract->id.'" data-toggle="tab">'.$langs->trans("CancelInstance").'</a></li>';
+		}
 		print '
 				          </ul>
 
@@ -621,7 +671,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 			// Add here the Option panel
 
-			print '<div id="optionpanel_'.$id.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" && GETPOST("keylineoption", "int") == $keyline ? '' :'hidden').'">';
+			print '<div id="optionpanel_'.$id.'" class="optionpanel '.(GETPOST("keylineoption", "int") != "" && GETPOST("keylineoption", "int") == $keyline ? '' : 'hidden').'">';
 			print '<br>';
 			print '<div class="areaforresources sectionresources">';
 			print '<br>';
@@ -947,14 +997,18 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 					&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 					$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-					if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+					if (! empty($conf->global->$newnamekey)) {
+						$sellyoursaasemail = $conf->global->$newnamekey;
+					}
 				}
 
 				print '<span style="color:orange">'.$langs->trans("WarningFoundMoreThanOneInvoicingTemplate", $sellyoursaasemail).'</span>';
 			} else {
 				// Invoice amount line
 				if ($foundtemplate != 0 && $priceinvoicedht != $contract->total_ht) {
-					if ($pricetoshow != '') print $langs->trans("FlatOrDiscountedPrice").' = ';
+					if ($pricetoshow != '') {
+						print $langs->trans("FlatOrDiscountedPrice").' = ';
+					}
 				}
 				print '<span class="bold">'.($freemodeinstance ? $langs->trans("FreePrice") : $pricetoshow).'</span>';
 
@@ -965,11 +1019,16 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					}
 
 					print ' <span style="color:'.$color.'">';
-					if ($contract->array_options['options_date_endfreeperiod'] > 0) print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
-					else print $langs->trans("Trial");
+					if ($contract->array_options['options_date_endfreeperiod'] > 0) {
+						print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
+					} else {
+						print $langs->trans("Trial");
+					}
 					print '</span>';
 					if ($contract->array_options['options_date_endfreeperiod'] < $now) {
-						if ($statuslabel == 'suspended') print ' - <span style="color: orange">'.$langs->trans("Suspended").'</span>';
+						if ($statuslabel == 'suspended') {
+							print ' - <span style="color: orange">'.$langs->trans("Suspended").'</span>';
+						}
 						//else print ' - <span style="color: orange">'.$langs->trans("SuspendWillBeDoneSoon").'</span>';
 					}
 					if ($freemodeinstance) {
@@ -1059,8 +1118,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 		}
 
-								//print '<input type="submit" class="btn btn-warning default change-domain-link" name="changedomain" value="'.$langs->trans("ChangeDomain").'">';
-								print '
+		//print '<input type="submit" class="btn btn-warning default change-domain-link" name="changedomain" value="'.$langs->trans("ChangeDomain").'">';
+		print '
 									</div></div>
 
 							  	</form>
@@ -1073,7 +1132,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			// Show message "To connect, you will need the following information:"
 			print '<br>'.$langs->trans("SSHFTPDesc2").' :';
 		}
-								print '</p>';
+		print '</p>';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && !empty($foundtemplate))) {
 			$ssh_server_port = (!empty($contract->array_options['options_port_os']) ? $contract->array_options['options_port_os'] : (empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? 22 : $conf->global->SELLYOURSAAS_SSH_SERVER_PORT));
@@ -1140,7 +1199,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			// Show message "To connect, you will need the following information:"
 			print '<br>'.$langs->trans("DBDesc2").' :';
 		}
-								print '</p>
+		print '</p>
                                 ';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
@@ -1217,8 +1276,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
     				                </form>
                                     ';
 		} elseif ($directaccess == 4) {
-				print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
-				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';
+			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
+			print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';
 		} else {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			if ($directaccess == 3 && empty($foundtemplate)) {
@@ -1239,7 +1298,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 				              <div class="">
 								';
-								$hasopeninvoices = sellyoursaasHasOpenInvoices($contract);
+		$hasopeninvoices = sellyoursaasHasOpenInvoices($contract);
 		if ($hasopeninvoices) {
 			print '<span class="opacitymedium">'.$langs->trans("CantCloseBecauseOfOpenInvoices").'</span><br><br>';
 		} else {
@@ -1263,7 +1322,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 									<input type="hidden" name="action" value="'.$actiontoundeploy.'" />
 									<input type="hidden" name="contractid" value="'.$contract->id.'" />
 									<input type="hidden" name="tab" value="danger_'.$contract->id.'" />
-									<input type="submit" '.($hasopeninvoices?' disabled="disabled"':'').' class="btn btn-danger'.($hasopeninvoices?' disabled':'').'" name="undeploy" value="'.$langs->trans("UndeployInstance").'">
+									<input type="submit" '.($hasopeninvoices ? ' disabled="disabled"' : '').' class="btn btn-danger'.($hasopeninvoices ? ' disabled' : '').'" name="undeploy" value="'.$langs->trans("UndeployInstance").'">
 								</p>
 				              </div>
 
@@ -1606,22 +1665,30 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 					if (GETPOST('country')) {	// Can force a country instead of default autodetected value
 						$countryuser = GETPOST('country');
 					}
-					if (empty($countryuser)) $countryuser='US';
+					if (empty($countryuser)) {
+						$countryuser='US';
+					}
 					$countryuser = strtolower($countryuser);
 
 					if (in_array($countryuser, $servercountries)) {
-						if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+						if (! preg_match('/^\./', $newval)) {
+							$newval='.'.$newval;
+						}
 						$domainstosuggestcountryfilter[] = $newval; // Servers with user country
 					} else {
 						print '<!-- '.$newval.' disabled. Server country range '.$deploymentserver->servercountries.' does not contain '.$countryuser.' -->';
 						continue;
 					}
 				} else {
-					if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+					if (! preg_match('/^\./', $newval)) {
+						$newval='.'.$newval;
+					}
 					$domainstosuggest[] = $newval;
 				}
 			} else {
-				if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+				if (! preg_match('/^\./', $newval)) {
+					$newval='.'.$newval;
+				}
 				$domainstosuggest[] = $newval;
 			}
 		}
@@ -1633,7 +1700,8 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		}
 
 		// Defined a preselected domain
-		$randomselect = ''; $randomindex = 0;
+		$randomselect = '';
+		$randomindex = 0;
 		if (empty($tldid) && ! GETPOSTISSET('tldid') && ! GETPOSTISSET('forcesubdomain') && count($domainstosuggest) >= 1) {
 			$maxforrandom = (count($domainstosuggest) - 1);
 			$randomindex = mt_rand(0, $maxforrandom);
@@ -1649,7 +1717,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
 				print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
 			}
-			print '" value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"':'').'>'.$val.'</option>';
+			print '" value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '').'>'.$val.'</option>';
 		}
 
 		print '</select>
@@ -1720,7 +1788,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+		if (! empty($conf->global->$newnamekey)) {
+			$sellyoursaasemail = $conf->global->$newnamekey;
+		}
 	}
 
 	print '<div class="warning">'.$langs->trans("MaxNumberOfInstanceReached", $MAXINSTANCESPERACCOUNT, $sellyoursaasemail).'</div>';

@@ -2,7 +2,6 @@
 
 namespace Dolibarr\Rector\Renaming;
 
-
 use PhpParser\Node;
 use PhpParser\Node\Arg;
 use PhpParser\Node\Scalar\String_;
@@ -36,7 +35,8 @@ class UserRightsToFunction extends AbstractRector
 			[new CodeSample(
 				'$user->rights->module->permission',
 				'$user->hasRight(\'module\', \'permission\')'
-			)]);
+			)]
+		);
 	}
 
 	/**
@@ -62,7 +62,6 @@ class UserRightsToFunction extends AbstractRector
 	 */
 	public function refactor(Node $node)
 	{
-
 		if ($node instanceof Node\Stmt\ClassMethod) {
 			$excludeMethods = ['getrights', 'hasRight'];
 			/** @var \PHPStan\Analyser\MutatingScope $scope */

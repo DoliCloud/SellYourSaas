@@ -468,7 +468,9 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 
 							$i++;
 						}
-					} else dol_print_error($this->db);
+					} else {
+						dol_print_error($this->db);
+					}
 				}
 				break;
 		}
@@ -527,13 +529,21 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					$this->errors=$sellyoursaasutils->errors;
 				} else {
 					if (! preg_match('/sellyoursaas/', session_name())) {	// No popup message after trigger if we are not into the backoffice
-						if ($remoteaction == 'suspend') setEventMessage($langs->trans("InstanceWasSuspended", $contract->ref_customer.' ('.$contract->ref.')'));
-						elseif ($remoteaction == 'unsuspend') setEventMessage($langs->trans("InstanceWasUnsuspended", $contract->ref_customer.' ('.$contract->ref.')'));
-						elseif ($remoteaction == 'deploy') setEventMessage($langs->trans("InstanceWasDeployed", $contract->ref_customer.' ('.$contract->ref.')'));
-						elseif ($remoteaction == 'undeploy') setEventMessage($langs->trans("InstanceWasUndeployed", $contract->ref_customer.' ('.$contract->ref.')'));
-						elseif ($remoteaction == 'deployall') setEventMessage($langs->trans("InstanceWasDeployed", $contract->ref_customer.' ('.$contract->ref.')').' (deployall)');
-						elseif ($remoteaction == 'undeployall') setEventMessage($langs->trans("InstanceWasUndeployed", $contract->ref_customer.' ('.$contract->ref.')').' (undeployall)');
-						elseif ($remoteaction == 'rename') setEventMessage($langs->trans("InstanceWasRenamed", $contract->ref_customer.' '.$contract->array_options['options_custom_url'].' ('.$contract->ref.')'));
+						if ($remoteaction == 'suspend') {
+							setEventMessage($langs->trans("InstanceWasSuspended", $contract->ref_customer.' ('.$contract->ref.')'));
+						} elseif ($remoteaction == 'unsuspend') {
+							setEventMessage($langs->trans("InstanceWasUnsuspended", $contract->ref_customer.' ('.$contract->ref.')'));
+						} elseif ($remoteaction == 'deploy') {
+							setEventMessage($langs->trans("InstanceWasDeployed", $contract->ref_customer.' ('.$contract->ref.')'));
+						} elseif ($remoteaction == 'undeploy') {
+							setEventMessage($langs->trans("InstanceWasUndeployed", $contract->ref_customer.' ('.$contract->ref.')'));
+						} elseif ($remoteaction == 'deployall') {
+							setEventMessage($langs->trans("InstanceWasDeployed", $contract->ref_customer.' ('.$contract->ref.')').' (deployall)');
+						} elseif ($remoteaction == 'undeployall') {
+							setEventMessage($langs->trans("InstanceWasUndeployed", $contract->ref_customer.' ('.$contract->ref.')').' (undeployall)');
+						} elseif ($remoteaction == 'rename') {
+							setEventMessage($langs->trans("InstanceWasRenamed", $contract->ref_customer.' '.$contract->array_options['options_custom_url'].' ('.$contract->ref.')'));
+						}
 					}
 				}
 			}

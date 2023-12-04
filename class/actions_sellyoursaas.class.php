@@ -117,7 +117,7 @@ class ActionsSellyoursaas
 				}
 
 				if ($url) {
-					$this->resprints = (empty($parameters['notiret'])?' -':'').'<!-- Added by getNomUrl hook of SellYourSaas -->';
+					$this->resprints = (empty($parameters['notiret']) ? ' -' : '').'<!-- Added by getNomUrl hook of SellYourSaas -->';
 					$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft"></span></a>';
 				}
 			}
@@ -609,12 +609,24 @@ class ActionsSellyoursaas
 					$this->errors=$sellyoursaasutils->errors;
 					//setEventMessages($this->error, $this->errors, 'errors'); // We already return errors with this->errors, no need to seEventMessages()
 				} else {
-					if ($action == 'refresh') setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
-					if ($action == 'refreshmetrics') setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
-					if ($action == 'refreshfilesonly') setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
-					if ($action == 'recreateauthorizedkeys') setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
-					if ($action == 'recreatelock') setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
-					if ($action == 'deletelock') setEventMessages($langs->trans("FilesDeleted"), null, 'mesgs');
+					if ($action == 'refresh') {
+						setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
+					}
+					if ($action == 'refreshmetrics') {
+						setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
+					}
+					if ($action == 'refreshfilesonly') {
+						setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
+					}
+					if ($action == 'recreateauthorizedkeys') {
+						setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
+					}
+					if ($action == 'recreatelock') {
+						setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
+					}
+					if ($action == 'deletelock') {
+						setEventMessages($langs->trans("FilesDeleted"), null, 'mesgs');
+					}
 				}
 			}
 
@@ -882,8 +894,11 @@ class ActionsSellyoursaas
 		if ($user->hasRight('sellyoursaas', 'read')) {
 			if (is_object($object)) {
 				$thirdparty = null;
-				if (is_object($object->thirdparty)) $thirdparty = $object->thirdparty;
-				elseif ($object->element == 'societe') $thirdparty = $object;
+				if (is_object($object->thirdparty)) {
+					$thirdparty = $object->thirdparty;
+				} elseif ($object->element == 'societe') {
+					$thirdparty = $object;
+				}
 
 				if (is_object($thirdparty)) {
 					$categ_customer_sellyoursaas = $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG;
@@ -938,15 +953,25 @@ class ActionsSellyoursaas
 			// Read version
 			$server = $contract->ref_customer;
 			$hostname_db = $object->hostname_db;
-			if (empty($hostname_db)) $hostname_db = $object->array_options['options_hostname_db'];
+			if (empty($hostname_db)) {
+				$hostname_db = $object->array_options['options_hostname_db'];
+			}
 			$port_db = $object->port_db;
-			if (empty($port_db)) $port_db = (! empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+			if (empty($port_db)) {
+				$port_db = (! empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+			}
 			$username_db = $contract->username_db;
-			if (empty($username_db)) $username_db = $contract->array_options['options_username_db'];
+			if (empty($username_db)) {
+				$username_db = $contract->array_options['options_username_db'];
+			}
 			$password_db = $object->password_db;
-			if (empty($password_db)) $password_db = $contract->array_options['options_password_db'];
+			if (empty($password_db)) {
+				$password_db = $contract->array_options['options_password_db'];
+			}
 			$database_db = $object->database_db;
-			if (empty($database_db)) $database_db = $contract->array_options['options_database_db'];
+			if (empty($database_db)) {
+				$database_db = $contract->array_options['options_database_db'];
+			}
 
 			$server = (! empty($hostname_db) ? $hostname_db : $server);
 
@@ -991,10 +1016,12 @@ class ActionsSellyoursaas
 
 		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo'))) {
 			$langs->load("sellyoursaas@sellyoursaas");
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID))
+			if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) {
 				print_liste_field_titre("TrialOrPaid", $_SERVER["PHP_SELF"], '', '', $param, ' align="center"', $sortfield, $sortorder);
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED))
+			}
+			if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED)) {
 				print_liste_field_titre("PaymentModeSaved", $_SERVER["PHP_SELF"], '', '', $param, ' align="center"', $sortfield, $sortorder);
+			}
 		}
 		if ($parameters['currentcontext'] == 'thirdpartybancard') {
 			$langs->load("sellyoursaas@sellyoursaas");
@@ -1081,7 +1108,9 @@ class ActionsSellyoursaas
 
 					$atleastonepaymentmode = sellyoursaasThirdpartyHasPaymentMode($parameters['obj']->socid);
 
-					if ($atleastonepaymentmode) print $langs->trans("Yes");
+					if ($atleastonepaymentmode) {
+						print $langs->trans("Yes");
+					}
 				}
 				print '</td>';
 			}
@@ -1162,7 +1191,7 @@ class ActionsSellyoursaas
 		// If this is a customer of SellYourSaas, we add logo of SellYourSaas
 		$outputlangs=$langs;
 
-		$this->marge_haute =isset($conf->global->MAIN_PDF_MARGIN_TOP)?$conf->global->MAIN_PDF_MARGIN_TOP:10;
+		$this->marge_haute =isset($conf->global->MAIN_PDF_MARGIN_TOP) ? $conf->global->MAIN_PDF_MARGIN_TOP : 10;
 
 		//var_dump($parameters['object']);
 
@@ -1268,10 +1297,10 @@ class ActionsSellyoursaas
 		}
 
 		//if ($parameters['tabfamily'] == 'sellyoursaas') {
-			$head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily'])?'':'&tabfamily='.$parameters['tabfamily']);
-			$head[$h][1] = $langs->trans("CustomReports");
-			$head[$h][2] = 'customreports';
-			$h++;
+		$head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily']) ? '' : '&tabfamily='.$parameters['tabfamily']);
+		$head[$h][1] = $langs->trans("CustomReports");
+		$head[$h][2] = 'customreports';
+		$h++;
 		//}
 
 		if ($parameters['tabfamily'] == 'sellyoursaas') {

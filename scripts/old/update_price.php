@@ -24,9 +24,15 @@
  *      This script call the update_total on all recurring invoice into tmp_tmp table.
  */
 
-if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
-if (!defined('NOSESSION')) define('NOSESSION', '1');
-if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
+if (!defined('NOREQUIREDB')) {
+	define('NOREQUIREDB', '1');
+}					// Do not create database handler $db
+if (!defined('NOSESSION')) {
+	define('NOSESSION', '1');
+}
+if (!defined('NOREQUIREVIRTUALURL')) {
+	define('NOREQUIREVIRTUALURL', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -55,18 +61,39 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+}
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res && file_exists("../../../../master.inc.php")) $res=@include "../../../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../../../master.inc.php")) $res=@include __DIR__."/../../../../master.inc.php";
+if (! $res && file_exists("../master.inc.php")) {
+	$res=@include "../master.inc.php";
+}
+if (! $res && file_exists("../../master.inc.php")) {
+	$res=@include "../../master.inc.php";
+}
+if (! $res && file_exists("../../../master.inc.php")) {
+	$res=@include "../../../master.inc.php";
+}
+if (! $res && file_exists("../../../../master.inc.php")) {
+	$res=@include "../../../../master.inc.php";
+}
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) {
+	$res=@include __DIR__."/../../master.inc.php";
+}
+if (! $res && file_exists(__DIR__."/../../../master.inc.php")) {
+	$res=@include __DIR__."/../../../master.inc.php";
+}
+if (! $res && file_exists(__DIR__."/../../../../master.inc.php")) {
+	$res=@include __DIR__."/../../../../master.inc.php";
+}
 if (! $res) {
 	print "Include of master fails";
 	exit(-1);
@@ -153,10 +180,12 @@ if ($dbmaster->error) {
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
-if (empty($db)) $db=$dbmaster;
+if (empty($db)) {
+	$db=$dbmaster;
+}
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 
 //$langs->setDefaultLang('en_US'); 	// To change default language of $langs
 $langs->load("main");				// To load language file for default language
@@ -204,7 +233,7 @@ $instancesbackupsuccess=array();
 $instancesbackupsuccessdiscarded=array();
 
 
-$instancefilter=(isset($argv[2])?$argv[2]:'');
+$instancefilter=(isset($argv[2]) ? $argv[2] : '');
 $instancefiltercomplete=$instancefilter;
 
 // Forge complete name of instance

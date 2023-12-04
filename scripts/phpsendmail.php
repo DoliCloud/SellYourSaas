@@ -174,8 +174,10 @@ chmod($tmpfile, 0660);
 $command = 'cat '.$tmpfile.' | '.$sendmail_bin.' -t -i ';
 $optionffound=0;
 for ($i = 1; $i < $_SERVER['argc']; $i++) {
-	if (preg_match('/-f/', $_SERVER['argv'][$i])) $optionffound++;
-		$command .= escapeshellarg($_SERVER['argv'][$i]).' ';
+	if (preg_match('/-f/', $_SERVER['argv'][$i])) {
+		$optionffound++;
+	}
+	$command .= escapeshellarg($_SERVER['argv'][$i]).' ';
 }
 
 if (! $optionffound) {
@@ -222,13 +224,17 @@ if ($resexec > $MAXALLOWED) {
 // Write the log
 //file_put_contents($logfile, var_export($_SERVER, true)."\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $toline, FILE_APPEND);
-if ($ccline)  file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ccline, FILE_APPEND);
-if ($bccline) file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $bccline, FILE_APPEND);
+if ($ccline) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ccline, FILE_APPEND);
+}
+if ($bccline) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $bccline, FILE_APPEND);
+}
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $fromline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' Email detected into From: '. $emailfrom."\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $messageidline, FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $referenceline, FILE_APPEND);
-file_put_contents($logfile, date('Y-m-d H:i:s') . ' PWD=' . (empty($_ENV['PWD'])?(empty($_SERVER["PWD"])?'':$_SERVER["PWD"]):$_ENV['PWD'])." - REQUEST_URI=".(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' PWD=' . (empty($_ENV['PWD']) ? (empty($_SERVER["PWD"]) ? '' : $_SERVER["PWD"]) : $_ENV['PWD'])." - REQUEST_URI=".(empty($_SERVER["REQUEST_URI"]) ? '' : $_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
 
 
 // Check if IP is in blacklist
@@ -291,10 +297,10 @@ if (empty($fromline) && empty($emailfrom)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' cant send email - exit 1. From not provided. See tmp file '.$tmpfile."\n", FILE_APPEND);
 	exit(1);
 } elseif (($nbto + $nbcc + $nbbcc) > $MAXOK) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko toomanyrecipient - exit 2. ( >'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' ) ' . (empty($_ENV['PWD'])?'':$_ENV['PWD'])."\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko toomanyrecipient - exit 2. ( >'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' ) ' . (empty($_ENV['PWD']) ? '' : $_ENV['PWD'])."\n", FILE_APPEND);
 	exit(2);
 } else {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ok ( <'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' - '.(empty($_SERVER["REQUEST_URI"])?'':$_SERVER["REQUEST_URI"]).' ) ' . (empty($_ENV['PWD'])?'':$_ENV['PWD'])."\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ok ( <'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' - '.(empty($_SERVER["REQUEST_URI"]) ? '' : $_SERVER["REQUEST_URI"]).' ) ' . (empty($_ENV['PWD']) ? '' : $_ENV['PWD'])."\n", FILE_APPEND);
 }
 
 
@@ -305,9 +311,15 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' .$command."\n", FILE_APPEN
 // We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
 $resexec =  shell_exec($command);
 
-if (empty($ip)) file_put_contents($logfile, "--- no ip detected ---", FILE_APPEND);
-if (empty($ip)) file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
-if (empty($ip)) file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
+if (empty($ip)) {
+	file_put_contents($logfile, "--- no ip detected ---", FILE_APPEND);
+}
+if (empty($ip)) {
+	file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
+}
+if (empty($ip)) {
+	file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
+}
 
 time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successfull spamming
 

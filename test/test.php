@@ -24,8 +24,11 @@ foreach ($domainemails as $domainemail) {
 		$weight=array();
 		getmxrr(idn_to_ascii($domainemail), $mxhosts, $weight);
 		var_dump($mxhosts);
-		if (count($mxhosts) == 1 && empty($mxhosts[0])) print "KO<br>\n";
-		else print "OK";
+		if (count($mxhosts) == 1 && empty($mxhosts[0])) {
+			print "KO<br>\n";
+		} else {
+			print "OK";
+		}
 	}
 	print "\n";
 }

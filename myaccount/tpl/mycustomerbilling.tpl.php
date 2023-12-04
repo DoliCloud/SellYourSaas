@@ -134,12 +134,16 @@ if (is_numeric($nbtotalofrecords) && $limit > $nbtotalofrecords) {
 				$i=0; $totalpaidht = 0;
 while ($i < min($num, $limit)) {
 	$obj = $db->fetch_object($resql);
-	if (empty($obj)) break;		// Should not happen
+	if (empty($obj)) {
+		break;
+	}		// Should not happen
 
 	$tmpthirdparty->fetch($obj->fk_soc);	// To get current default commission of this customer
 	$tmpinvoice->fetch($obj->rowid);
 
-	if ($tmpinvoice->statut == FactureFournisseur::STATUS_DRAFT) continue;
+	if ($tmpinvoice->statut == FactureFournisseur::STATUS_DRAFT) {
+		continue;
+	}
 
 	$titleinvoice = $obj->ref.($obj->ref_supplier ? ' ('.$obj->ref_supplier.')' : '');
 
@@ -153,7 +157,7 @@ while ($i < min($num, $limit)) {
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
-	$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
+	$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT ? DOL_URL_ROOT.'/' : '').$publicurltodownload;
 	//print '<br><a href="'.$urltouse.'" target="_download">'.$langs->trans("Download").'</a>';
 
 	$totalpaidht += $obj->total_ht;
@@ -294,17 +298,24 @@ if (is_numeric($nbtotalofrecords) && $limit2 > $nbtotalofrecords) {
 		$i=0;
 while ($i < min($num, $limit2)) {
 	$obj = $db->fetch_object($resql);
-	if (empty($obj)) break;		// Should not happen
+	if (empty($obj)) {
+		break;
+	}		// Should not happen
 
 	$tmpthirdparty->fetch($obj->fk_soc);	// To get current default commission of this customer
 	$tmpinvoice->fetch($obj->rowid);
 
-	if ($tmpinvoice->statut == Facture::STATUS_DRAFT) continue;
+	if ($tmpinvoice->statut == Facture::STATUS_DRAFT) {
+		continue;
+	}
 
 	$currentcommissionpercent = $tmpthirdparty->array_options['options_commission'];
 	$commissionpercent = $obj->commission;
-	if ($obj->paye) $commission = price2num($obj->total_ht * $commissionpercent / 100, 'MT');
-	else $commission = 0;
+	if ($obj->paye) {
+		$commission = price2num($obj->total_ht * $commissionpercent / 100, 'MT');
+	} else {
+		$commission = 0;
+	}
 
 	print '
 						<tr>
@@ -327,7 +338,7 @@ while ($i < min($num, $limit2)) {
 		print $hookmanager->resPrint;
 	} else {
 		$publicurltodownload = $tmpinvoice->getLastMainDocLink($tmpinvoice->element, 0, 1);
-		$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
+		$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT ? DOL_URL_ROOT.'/' : '').$publicurltodownload;
 		print '<a href="'.$urltouse.'" target="_download">'.$tmpinvoice->ref.img_mime('pdf.pdf', $titleinvoice, 'paddingleft').'</a>';
 	}
 
@@ -350,7 +361,7 @@ while ($i < min($num, $limit2)) {
 	print '
 		              </td>
 		              <td align="right">
-		                '.($commissionpercent?$commissionpercent:0).'
+		                '.($commissionpercent ? $commissionpercent : 0).'
 		              </td>
 		              <td align="right">
 		                '.price($commission).'
@@ -364,9 +375,15 @@ while ($i < min($num, $limit2)) {
 if ($nbtotalofrecords > $limit2) {
 	// Show navigation previous - next
 	print '<tr><td colspan="6" class="center">';
-	if ($page2 > 0) print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2-1).'">'.$langs->trans("Previous").'</a>';
-	if ($page2 > 0 && (($page2 + 1) * $limit2) <= $nbtotalofrecords) print ' &nbsp; ... &nbsp; ';
-	if ((($page2 + 1) * $limit2) <= $nbtotalofrecords) print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2+1).'">'.$langs->trans("Next").'</a>';
+	if ($page2 > 0) {
+		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2-1).'">'.$langs->trans("Previous").'</a>';
+	}
+	if ($page2 > 0 && (($page2 + 1) * $limit2) <= $nbtotalofrecords) {
+		print ' &nbsp; ... &nbsp; ';
+	}
+	if ((($page2 + 1) * $limit2) <= $nbtotalofrecords) {
+		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&limit='.$limit2.'&page='.($page2+1).'">'.$langs->trans("Next").'</a>';
+	}
 	print '<br><br>';
 	print '</td>';
 	print '<td class="right">...<br><br></td>';
@@ -425,9 +442,9 @@ if ($totalpaidht) {
 		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
-		$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+	$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 	if (getDolGlobalString($newnamekey)) {
-			$emailforresellerinvoice = getDolGlobalString($newnamekey);
+		$emailforresellerinvoice = getDolGlobalString($newnamekey);
 	}
 }
 

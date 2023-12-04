@@ -24,16 +24,31 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
 require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
@@ -210,7 +225,9 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
-					if ($obj) $conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+					if ($obj) {
+						$conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+					}
 				} else {
 					setEventMessages("Failed to get remote MAIN_SECURITY_HASH_ALGO", null, 'warnings');
 				}
@@ -218,7 +235,9 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
-					if ($obj) $conf->global->MAIN_SECURITY_SALT = $obj->value;
+					if ($obj) {
+						$conf->global->MAIN_SECURITY_SALT = $obj->value;
+					}
 				} else {
 					setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
 				}
@@ -250,8 +269,11 @@ if (empty($reshook)) {
 				$sql .= " '".$newdb->escape(dolEncrypt($password, '', '', 'dolibarr'))."')";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
-					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
-					else setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+						dol_print_error($newdb);
+					} else {
+						setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+					}
 				}
 
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
@@ -267,8 +289,11 @@ if (empty($reshook)) {
 				$sql .= ")";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
-					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
-					else setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+						dol_print_error($newdb);
+					} else {
+						setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+					}
 				} else {
 					$insertedid = $newdb->last_insert_id('glpi_users', 'id');
 					if ($insertedid > 0) {
@@ -311,19 +336,27 @@ if (empty($reshook)) {
 			if ($fordolibarr) {
 				$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM ".$prefix_db."user WHERE login = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."')";
 				$resql=$newdb->query($sql);
-				if (! $resql) dol_print_error($newdb);
+				if (! $resql) {
+					dol_print_error($newdb);
+				}
 
 				$sql="DELETE FROM ".$prefix_db."user WHERE login = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
 				$resql=$newdb->query($sql);
-				if (! $resql) dol_print_error($newdb);
+				if (! $resql) {
+					dol_print_error($newdb);
+				}
 			} elseif ($forglpi) {
 				$sql="DELETE FROM glpi_profiles_users WHERE users_id = (SELECT id FROM glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."')";
 				$resql=$newdb->query($sql);
-				if (! $resql) dol_print_error($newdb);
+				if (! $resql) {
+					dol_print_error($newdb);
+				}
 
 				$sql="DELETE FROM glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
 				$resql=$newdb->query($sql);
-				if (! $resql) dol_print_error($newdb);
+				if (! $resql) {
+					dol_print_error($newdb);
+				}
 			}
 		}
 	}
@@ -345,8 +378,11 @@ if (empty($reshook)) {
 			}
 
 			$resql=$newdb->query($sql);
-			if (! $resql) dol_print_error($newdb);
-			else setEventMessages("UserDisabled", null, 'mesgs');
+			if (! $resql) {
+				dol_print_error($newdb);
+			} else {
+				setEventMessages("UserDisabled", null, 'mesgs');
+			}
 		}
 	}
 	if ($action == "enableuser") {
@@ -366,8 +402,11 @@ if (empty($reshook)) {
 			}
 
 			$resql=$newdb->query($sql);
-			if (! $resql) dol_print_error($newdb);
-			else setEventMessages("UserEnabled", null, 'mesgs');
+			if (! $resql) {
+				dol_print_error($newdb);
+			} else {
+				setEventMessages("UserEnabled", null, 'mesgs');
+			}
 		}
 	}
 
@@ -393,7 +432,9 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
-					if ($obj) $conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+					if ($obj) {
+						$conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+					}
 				} else {
 					setEventMessages("Failed to get remote MAIN_SECURITY_HASH_ALGO", null, 'warnings');
 				}
@@ -401,7 +442,9 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
-					if ($obj) $conf->global->MAIN_SECURITY_SALT = $obj->value;
+					if ($obj) {
+						$conf->global->MAIN_SECURITY_SALT = $obj->value;
+					}
 				} else {
 					setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
 				}
@@ -554,7 +597,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	// Contract card
 
-	$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/list.php?restore_lastsearch_values=1'.(! empty($socid)?'&socid='.$socid:'').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/list.php?restore_lastsearch_values=1'.(! empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	// Ref customer
@@ -913,7 +956,7 @@ function print_user_table($newdb, $object)
 					print '</td>';
 				}
 				print '<td>';
-				print ($i+1);
+				print($i+1);
 				print '</td>';
 				foreach ($arrayfields as $key => $value) {
 					$cssforfield = (empty($value['csslist']) ? '' : $value['csslist']);
@@ -930,7 +973,7 @@ function print_user_table($newdb, $object)
 								print '</td>';
 							}
 						} elseif ($key == 'pass') {
-							$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+							$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted ? $obj->pass_crypted : 'NA').($obj->pass ? ')' : '');
 							print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($valtoshow).'">'.dol_escape_htmltag($valtoshow).'</td>';
 						} elseif ($key == 'login') {
 							print '<td class="nowraponall tdoverflowmax150" title="'.dol_escape_htmltag($obj->$key).'">';

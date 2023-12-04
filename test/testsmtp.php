@@ -23,6 +23,6 @@ fclose($handle);
 
 
 if ($a) {
-		print "Close\n";
-		fclose($a);
+	print "Close\n";
+	fclose($a);
 }

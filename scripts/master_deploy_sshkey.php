@@ -25,7 +25,9 @@
  *                  This script erases the old version of authorized_keys_support files.
  */
 
-if (!defined('NOSESSION')) define('NOSESSION', '1');
+if (!defined('NOSESSION')) {
+	define('NOSESSION', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -49,23 +51,40 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+}
 // Try master.inc.php using relative path
-if (! $res && file_exists("./master.inc.php")) $res=@include "./master.inc.php";
-if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res) die("Include of master fails");
+if (! $res && file_exists("./master.inc.php")) {
+	$res=@include "./master.inc.php";
+}
+if (! $res && file_exists("../master.inc.php")) {
+	$res=@include "../master.inc.php";
+}
+if (! $res && file_exists("../../master.inc.php")) {
+	$res=@include "../../master.inc.php";
+}
+if (! $res && file_exists("../../../master.inc.php")) {
+	$res=@include "../../../master.inc.php";
+}
+if (! $res) {
+	die("Include of master fails");
+}
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 
 //$langs->setDefaultLang('en_US'); 	// To change default language of $langs
 $langs->load("main");				// To load language file for default language
@@ -111,7 +130,7 @@ $nbofactivesusp=0;
 $nbofactivepaymentko=0;
 $nbofalltime=0;
 $nboferrors=0;
-$instancefilter=(isset($argv[2])?$argv[2]:'');
+$instancefilter=(isset($argv[2]) ? $argv[2] : '');
 $instancefiltercomplete=$instancefilter;
 
 $instances=array();
@@ -156,8 +175,9 @@ if ($resql) {
 
 				$instance_status = '';
 				$result = $object->fetch($obj->id);
-				if ($result <= 0) $found=false;
-				else {
+				if ($result <= 0) {
+					$found=false;
+				} else {
 					if ($object->array_options['options_deployment_status'] == 'processing') {
 						$instance_status = 'PROCESSING';
 					} elseif ($object->array_options['options_deployment_status'] == 'undeployed') {
@@ -174,7 +194,9 @@ if ($resql) {
 					$payment_status='TRIAL';
 				} else {
 					$ispaymentko = sellyoursaasIsPaymentKo($object);
-					if ($ispaymentko) $payment_status='FAILURE';
+					if ($ispaymentko) {
+						$payment_status='FAILURE';
+					}
 				}
 
 				print "Analyze instance ".($i+1)." ".$instance." status=".$instance_status." instance_status=".$instance_status." payment_status=".$payment_status."\n";
@@ -189,8 +211,11 @@ if ($resql) {
 						if (! in_array($instance_status, array('PROCESSING')) && ! in_array($instance_status, array('UNDEPLOYED'))) {		// Nb of active
 							$nbofactive++;
 
-							if (in_array($instance_status, array('SUSPENDED'))) $nbofactivesusp++;
-							else $nbofactiveok++; // not suspended, not close request
+							if (in_array($instance_status, array('SUSPENDED'))) {
+								$nbofactivesusp++;
+							} else {
+								$nbofactiveok++;
+							} // not suspended, not close request
 
 							$instances[$obj->id]=$object;
 							print "Qualify instance ".($i+1)." ".$instance." with instance_status=".$instance_status." instance_status_bis=".$instance_status." payment_status=".$payment_status." subscription_status(not used)=".$obj->subscription_status."\n";
@@ -223,7 +248,9 @@ if ($action == 'test' || $action == 'confirm') {
 
 			$now=dol_now();
 
-			$return_val=0; $error=0; $errors=array();	// No error by default into each loop
+			$return_val=0;
+			$error=0;
+			$errors=array();	// No error by default into each loop
 
 			// Run backup
 			print "--- Process deploy of public key to instance ".($i+1)." (id ".$key.") ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";
@@ -239,7 +266,9 @@ if ($action == 'test' || $action == 'confirm') {
 				echo "Test mode, nothing done\n";
 			}
 
-			if (! empty($errors)) $error++;
+			if (! empty($errors)) {
+				$error++;
+			}
 
 			//
 			if (! $error) {
@@ -260,7 +289,7 @@ if ($action == 'test' || $action == 'confirm') {
 // Result
 print "Nb of instances deployment ok: ".$nbofok."\n";
 print "Nb of instances deployment ko: ".$nboferrors;
-print (count($instanceserror)?", error for deploy public key on ".join(',', $instanceserror):"");
+print(count($instanceserror) ? ", error for deploy public key on ".join(',', $instanceserror) : "");
 print "\n";
 if (! $nboferrors) {
 	print '--- end ok - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')."\n";

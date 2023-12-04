@@ -12,7 +12,8 @@ $langs->load("errors");
 if ($action == 'addauthorizedkey') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -73,10 +74,12 @@ if ($action == 'addauthorizedkey') {
 					$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/.ssh/authorized_keys_support');
 					setEventMessages($langs->transnoentitiesnoconv("FileCreated"), null, 'mesgs');
 				}
-			} else setEventMessages($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), null, 'warnings');
+			} else {
+				setEventMessages($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), null, 'warnings');
+			}
 
-			$object->fileauthorizedkey=(empty($fstat['atime'])?'':$fstat['atime']);
-			$object->array_options['options_fileauthorizekey']=(empty($fstat['atime'])?'':$fstat['atime']);
+			$object->fileauthorizedkey=(empty($fstat['atime']) ? '' : $fstat['atime']);
+			$object->array_options['options_fileauthorizekey']=(empty($fstat['atime']) ? '' : $fstat['atime']);
 
 			if (! empty($fstat['atime'])) {
 				$result = $object->update($user);
@@ -88,7 +91,8 @@ if ($action == 'addauthorizedkey') {
 } elseif ($action == 'addinstalllock') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -126,20 +130,25 @@ if ($action == 'addauthorizedkey') {
 				fclose($stream);
 				$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/install.lock');
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
-			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
+			} else {
+				setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
+			}
 
 			//$object->filelock=(empty($fstat['atime'])?'':$fstat['atime']);
-			$object->array_options['options_filelock']=(empty($fstat['atime'])?'':$fstat['atime']);
+			$object->array_options['options_filelock']=(empty($fstat['atime']) ? '' : $fstat['atime']);
 
 			if (! empty($fstat['atime'])) {
 				$result = $object->update($user);
 			}
 		}
-	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	} else {
+		setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	}
 } elseif ($action == 'addupgradeunlock') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -177,19 +186,24 @@ if ($action == 'addauthorizedkey') {
 				fclose($stream);
 				$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/upgrade.unlock');
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
-			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
+			} else {
+				setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
+			}
 
-			$object->array_options['options_fileunlock']=(empty($fstat['atime'])?'':$fstat['atime']);
+			$object->array_options['options_fileunlock']=(empty($fstat['atime']) ? '' : $fstat['atime']);
 
 			if (! empty($fstat['atime'])) {
 				$result = $object->update($user);
 			}
 		}
-	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	} else {
+		setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	}
 } elseif ($action == 'addinstallmoduleslock') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -227,20 +241,25 @@ if ($action == 'addauthorizedkey') {
 				fclose($stream);
 				$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
 				setEventMessage($langs->transnoentitiesnoconv("FileCreated"), 'mesgs');
-			} else setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
+			} else {
+				setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
+			}
 
 			//$object->fileinstallmoduleslock=(empty($fstat['atime'])?'':$fstat['atime']);
-			$object->array_options['options_fileinstallmoduleslock']=(empty($fstat['atime'])?'':$fstat['atime']);
+			$object->array_options['options_fileinstallmoduleslock']=(empty($fstat['atime']) ? '' : $fstat['atime']);
 
 			if (! empty($fstat['atime'])) {
 				$result = $object->update($user);
 			}
 		}
-	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	} else {
+		setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	}
 } elseif ($action == 'delauthorizedkey') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -269,8 +288,11 @@ if ($action == 'addauthorizedkey') {
 			$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/.ssh/authorized_keys_support';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
-			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
-			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/.ssh/authorized_keys_support'), 'warnings');
+			if ($result) {
+				setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
+			} else {
+				setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/.ssh/authorized_keys_support'), 'warnings');
+			}
 
 			$object->fileauthorizedkey='';
 			$object->array_options['options_fileauthorizekey']='';
@@ -279,11 +301,14 @@ if ($action == 'addauthorizedkey') {
 				$result = $object->update($user);
 			}
 		}
-	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	} else {
+		setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	}
 } elseif ($action == 'delinstalllock') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -313,8 +338,11 @@ if ($action == 'addauthorizedkey') {
 			$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/install.lock';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
-			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
-			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/install.lock'), 'warnings');
+			if ($result) {
+				setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
+			} else {
+				setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/install.lock'), 'warnings');
+			}
 
 			//$object->filelock='';
 			$object->array_options['options_filelock']='';
@@ -323,11 +351,14 @@ if ($action == 'addauthorizedkey') {
 				$result = $object->update($user);
 			}
 		}
-	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	} else {
+		setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	}
 } elseif ($action == 'delupgradeunlock') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -357,8 +388,11 @@ if ($action == 'addauthorizedkey') {
 			$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/upgrade.unlock';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
-			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
-			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/upgrade.unlock'), 'warnings');
+			if ($result) {
+				setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
+			} else {
+				setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/upgrade.unlock'), 'warnings');
+			}
 
 			//$object->filelock='';
 			$object->array_options['options_fileunlock']='';
@@ -367,11 +401,14 @@ if ($action == 'addauthorizedkey') {
 				$result = $object->update($user);
 			}
 		}
-	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	} else {
+		setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	}
 } elseif ($action == 'delinstallmoduleslock') {
 	// SSH connect
 	if (! function_exists("ssh2_connect")) {
-		dol_print_error('', 'ssh2_connect function does not exists'); exit;
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit;
 	}
 
 	$type_db = $conf->db->type;
@@ -401,8 +438,11 @@ if ($action == 'addauthorizedkey') {
 			$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$username_os.'/'.$dir.'/documents/installmodules.lock';
 			$result=ssh2_sftp_unlink($sftp, $filetodelete);
 
-			if ($result) setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
-			else setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/installmodules.lock'), 'warnings');
+			if ($result) {
+				setEventMessage($langs->transnoentitiesnoconv("FileDeleted"), 'mesgs');
+			} else {
+				setEventMessage($langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $username_os.'/'.$dir.'/documents/installmodules.lock'), 'warnings');
+			}
 
 			//$object->fileinstallmoduleslock='';
 			$object->array_options['options_fileinstallmoduleslock']='';
@@ -411,5 +451,7 @@ if ($action == 'addauthorizedkey') {
 				$result = $object->update($user);
 			}
 		}
-	} else setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	} else {
+		setEventMessage($langs->transnoentitiesnoconv("FailedToConnectToSftp", $server), 'errors');
+	}
 }

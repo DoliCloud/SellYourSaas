@@ -104,7 +104,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 	 */
 	public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0, $moreparams = null)
 	{
-	    // phpcs:enable
+		// phpcs:enable
 		global $conf, $hookmanager, $langs, $user, $mysoc;
 
 		if (!is_object($outputlangs)) {
@@ -160,7 +160,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				$pdf=pdf_getInstance($this->format);
 				$default_font_size = pdf_getPDFFontSize($outputlangs);	// Must be after pdf_getInstance
 				$heightforinfotot = 50;	// Height reserved to output the info and total part
-				$heightforfreetext= (isset($conf->global->MAIN_PDF_FREETEXT_HEIGHT)?$conf->global->MAIN_PDF_FREETEXT_HEIGHT:5);	// Height reserved to output the free text on last page
+				$heightforfreetext= (isset($conf->global->MAIN_PDF_FREETEXT_HEIGHT) ? $conf->global->MAIN_PDF_FREETEXT_HEIGHT : 5);	// Height reserved to output the free text on last page
 				$heightforfooter = $this->marge_basse + 8;	// Height reserved to output the footer (value include bottom margin)
 				if (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS)) {
 					$heightforfooter += 6;
@@ -460,7 +460,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 
-		$diffsizetitle=(empty($conf->global->PDF_DIFFSIZE_TITLE)?1:$conf->global->PDF_DIFFSIZE_TITLE);
+		$diffsizetitle=(empty($conf->global->PDF_DIFFSIZE_TITLE) ? 1 : $conf->global->PDF_DIFFSIZE_TITLE);
 
 		$posy+=$this->_signature_area($pdf, $object, $posy, $outputlangs);
 

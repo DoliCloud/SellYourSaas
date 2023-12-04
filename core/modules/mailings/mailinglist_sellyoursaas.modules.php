@@ -89,7 +89,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s.='<select name="filter" id="sellyoursaas_filter" class="flat">';
 		$s.='<option value="none">&nbsp;</option>';
 		foreach ($arraystatus as $key => $status) {
-			$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected':'').'>'.$status.'</option>';
+			$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected' : '').'>'.$status.'</option>';
 		}
 		$s.='</select>';
 		$s .= ajax_combobox("sellyoursaas_filter");
@@ -105,7 +105,9 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 				$listofipwithinstances[$obj->rowid] = array('ref'=>$obj->ref, 'ipaddress'=>$obj->ipaddress, 'status'=>$obj->status, 'servercountries'=>$obj->servercountries);
 			}
 			$this->db->free($resql);
-		} else dol_print_error($this->db);
+		} else {
+			dol_print_error($this->db);
+		}
 
 		$s.=$langs->trans("DeploymentHost").': ';
 		$s.='<select name="filterip" id="sellyoursaas_filterip" class="flat">';
@@ -113,7 +115,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		foreach ($listofipwithinstances as $key => $val) {
 			$label = $val['ref'].' - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : '('.$val['servercountries'].')');
 			$labelhtml = $val['ref'].'<span class="opacitymedium"> - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : ' ('.$val['servercountries'].')').'</span>';
-			$s.='<option value="'.$val['ipaddress'].'"'.(GETPOST('filterip', 'alpha') == $val['ipaddress'] ? ' selected':'').' data-html="'.dol_escape_htmltag($labelhtml).'">'.dol_escape_htmltag($label).'</option>';
+			$s.='<option value="'.$val['ipaddress'].'"'.(GETPOST('filterip', 'alpha') == $val['ipaddress'] ? ' selected' : '').' data-html="'.dol_escape_htmltag($labelhtml).'">'.dol_escape_htmltag($label).'</option>';
 		}
 		$s.='</select>';
 		$s .= ajax_combobox("sellyoursaas_filterip");
@@ -202,7 +204,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') ||
 			(! empty($_POST['filterip']) && $_POST['filterip'] != 'none') ||
 			($productid > 0)) {
-				$sql .= ", coe.deployment_host";
+			$sql .= ", coe.deployment_host";
 		}
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
@@ -217,8 +219,12 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."facturedet_rec as fdr on fdr.fk_facture = fr.rowid";
 		}
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
-		if (GETPOST('lang_id') && GETPOST('lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id', 'array')), 3);
-		if (GETPOST('not_lang_id') && GETPOST('not_lang_id') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id', 'array')), -3);
+		if (GETPOST('lang_id') && GETPOST('lang_id') != 'none') {
+			$sql.= natural_search('default_lang', join(',', GETPOST('lang_id', 'array')), 3);
+		}
+		if (GETPOST('not_lang_id') && GETPOST('not_lang_id') != 'none') {
+			$sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id', 'array')), -3);
+		}
 		if (GETPOST('country_id') && GETPOST('country_id') != 'none' && GETPOST('country_id') != '-1') {
 			$sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
 		}
@@ -347,7 +353,9 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		}
 
 		$a = parent::getNbOfRecipients($sql);
-		if ($a < 0) return -1;
+		if ($a < 0) {
+			return -1;
+		}
 		return $a;
 	}
 }

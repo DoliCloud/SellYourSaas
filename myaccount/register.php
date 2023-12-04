@@ -26,10 +26,18 @@
 //if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');			// If there is no need to load and show top and left menu
 //if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
-if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
-if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
-if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
-if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
+if (! defined("NOLOGIN")) {
+	define("NOLOGIN", '1');
+}				    // If this page is public (can be called outside logged session)
+if (! defined('NOIPCHECK')) {
+	define('NOIPCHECK', '1');
+}				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) {
+	define('MAIN_LANG_DEFAULT', 'auto');
+}
+if (! defined('NOBROWSERNOTIF')) {
+	define('NOBROWSERNOTIF', '1');
+}
 
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
@@ -37,16 +45,31 @@ include './mainmyaccount.inc.php';
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
@@ -80,7 +103,7 @@ $sldAndSubdomain=strtolower(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid=GETPOST('tldid', 'alpha');
 $origin = GETPOST('origin', 'aZ09');
 
-$socid=GETPOST('socid', 'int')?GETPOST('socid', 'int'):GETPOST('reusesocid', 'int');
+$socid=GETPOST('socid', 'int') ? GETPOST('socid', 'int') : GETPOST('reusesocid', 'int');
 $reusecontractid = GETPOST('reusecontractid', 'int');
 $reusesocid = GETPOST('reusesocid', 'int');
 $fromsocid = GETPOST('fromsocid', 'int');
@@ -98,7 +121,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
 $productid=GETPOST('service', 'int');
-$productref=(GETPOST('productref', 'alpha')?GETPOST('productref', 'alpha'):'');
+$productref=(GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : '');
 $defaultproduct = '';
 if (empty($productid) && empty($productref)) {
 	$productref = $plan;
@@ -237,13 +260,19 @@ $conf->dol_hide_topmenu = 1;
 $conf->dol_hide_leftmenu = 1;
 
 $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
-if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
-if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
+if (! preg_match('/\.(png|jpg)$/', $favicon)) {
+	$favicon.='.png';
+}
+if (! empty($conf->global->MAIN_FAVICON_URL)) {
+	$favicon=$conf->global->MAIN_FAVICON_URL;
+}
 
 $head = '';
 if ($favicon) {
 	$href = 'img/'.$favicon;
-	if (preg_match('/^http/i', $favicon)) $href = $favicon;
+	if (preg_match('/^http/i', $favicon)) {
+		$href = $favicon;
+	}
 	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
 $head .= '<!-- Bootstrap core CSS -->';
@@ -252,11 +281,11 @@ $head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
 
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
 $arrayofjs=array(
-	'/includes/jstz/jstz.min.js'.(empty($conf->dol_use_jmobile)?'':'?version='.urlencode(DOL_VERSION)),
-	'/core/js/dst.js'.(empty($conf->dol_use_jmobile)?'':'?version='.urlencode(DOL_VERSION))
+	'/includes/jstz/jstz.min.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION)),
+	'/core/js/dst.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION))
 );
 
-$title = $langs->trans("Registration").($tmpproduct->label?' ('.$tmpproduct->label.')':'');
+$title = $langs->trans("Registration").($tmpproduct->label ? ' ('.$tmpproduct->label.')' : '');
 
 $prefix=dol_getprefix('');
 $cookieregistrationa='DOLREGISTERA_'.$prefix;
@@ -348,12 +377,13 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				  <a href="<?php echo $homepage ?>"><img class="logoheader"  src="<?php echo $linklogo; ?>" id="logo" /></a><br>
 				  </div>
 				  <?php if (empty($mythirdparty->id)) {
-						$langs->load("website");
-						?>
+						$langs->load("website"); ?>
 				  <div class="paddingtop20" style="float: right;">
 					  <div class="btn-sm">
 					  <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
-						<?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
+						<?php if (! empty($partner) || ! empty($partnerkey)) {
+							print '<br class="hideonsmartphone">';
+						} ?>
 					  <a href="/" class="btn blue btn-sm btnalreadyanaccount valignmiddle"><?php echo $langs->trans("LoginAction"); ?></a>
 					  </div>
 						<?php if (! empty($homepage)) { ?>
@@ -362,7 +392,8 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 					  </div>
 						<?php } ?>
 				  </div>
-				  <?php } ?>
+						<?php
+				  } ?>
 			  </div>
 
 			  <!-- BEGIN TOP NAVIGATION MENU -->
@@ -380,11 +411,13 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			?>
 		<header class="invers">
 			<div class="customregisterheader">
-				<h1><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
+				<h1><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo($tmpproduct->label ? '('.$tmpproduct->label.')' : ''); ?></small></h1>
 				<div class="paddingtop20">
 					<div class="btn-sm">
 					<span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
-						<?php if (! empty($partner) || ! empty($partnerkey)) { print '<br class="hideonsmartphone">'; } ?>
+						<?php if (! empty($partner) || ! empty($partnerkey)) {
+							print '<br class="hideonsmartphone">';
+						} ?>
 					<a href="/" class="btn blue btn-sm btnalreadyanaccount valignmiddle"><?php echo $langs->trans("LoginAction"); ?></a>
 					</div>
 						<?php if (! empty($homepage)) { ?>
@@ -394,7 +427,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						<?php } ?>
 				</div>
 			</div>
-		  <h1 class="defaultheader"><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo ($tmpproduct->label?'('.$tmpproduct->label.')':''); ?></small></h1>
+		  <h1 class="defaultheader"><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo($tmpproduct->label ? '('.$tmpproduct->label.')' : ''); ?></small></h1>
 		</header>
 			<?php
 		}
@@ -436,7 +469,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			  <input type="hidden" name="token" value="<?php echo newToken(); ?>" />
 			  <input type="hidden" name="forcesubdomain" value="<?php echo dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')); ?>" />
 			  <input type="hidden" name="service" value="<?php echo dol_escape_htmltag($tmpproduct->id); ?>" />
-			  <input type="hidden" name="productref" value="<?php echo ($productref == 'none' ? 'none' : dol_escape_htmltag($tmpproduct->ref)); ?>" />
+			  <input type="hidden" name="productref" value="<?php echo($productref == 'none' ? 'none' : dol_escape_htmltag($tmpproduct->ref)); ?>" />
 			  <input type="hidden" name="extcss" value="<?php echo dol_escape_htmltag($extcss); ?>" />
 			  <input type="hidden" name="package" value="<?php echo dol_escape_htmltag($tmppackage->ref); ?>" />
 			  <input type="hidden" name="partner" value="<?php echo dol_escape_htmltag($partner); ?>" />
@@ -450,7 +483,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			  <!-- the utm_source_cookie=<?php echo dol_escape_htmltag(empty($_COOKIE["utm_source_cookie"]) ? '' : $_COOKIE["utm_source_cookie"]); ?> will be saved into options_source_utm -->
 
 			  <input type="hidden" name="disablecustomeremail" value="<?php echo dol_escape_htmltag($disablecustomeremail); ?>" />
-			  <!-- _SESSION['dol_loginsellyoursaas'] = <?php echo (empty($_SESSION['dol_loginsellyoursaas']) ? '' : $_SESSION['dol_loginsellyoursaas']); ?> -->
+			  <!-- _SESSION['dol_loginsellyoursaas'] = <?php echo(empty($_SESSION['dol_loginsellyoursaas']) ? '' : $_SESSION['dol_loginsellyoursaas']); ?> -->
 
 			  <section id="enterUserAccountDetails">
 
@@ -519,8 +552,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				<?php
 			}
 			if (empty($reusecontractid)) {
-				$langs->load("sellyoursaas@sellyoursaas");
-				?>
+				$langs->load("sellyoursaas@sellyoursaas"); ?>
 			<div class="group">
 				<div class="horizontal-fld">
 
@@ -559,10 +591,11 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 				if (GETPOST('country')) {	// Can force a country instead of default autodetected value
 					$countryuser = GETPOST('country');
 				}
-				if (empty($countryuser)) $countryuser='US';
+				if (empty($countryuser)) {
+					$countryuser='US';
+				}
 				$countryuser = strtoupper($countryuser);
-				print $form->select_country($countryuser, 'country', 'optionsValue="name"'.$disabled, 0, ($conf->dol_optimize_smallscreen ? 'minwidth200' : 'minwidth300'), 'code2', 1, 1);
-				?>
+				print $form->select_country($countryuser, 'country', 'optionsValue="name"'.$disabled, 0, ($conf->dol_optimize_smallscreen ? 'minwidth200' : 'minwidth300'), 'code2', 1, 1); ?>
 				</div>
 			</div>
 
@@ -574,10 +607,11 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 		  <?php
 			if ($productref != 'none') {
-				if (empty($reusecontractid)) print '<br>';
-				else print '<hr/>';
-
-				?>
+				if (empty($reusecontractid)) {
+					print '<br>';
+				} else {
+					print '<hr/>';
+				} ?>
 
 			  <!-- Selection of domain to create instance -->
 			  <section id="selectDomain">
@@ -648,22 +682,30 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 									if (GETPOST('country')) {	// Can force a country instead of default autodetected value
 										$countryuser = GETPOST('country');
 									}
-									if (empty($countryuser)) $countryuser='US';
+									if (empty($countryuser)) {
+										$countryuser='US';
+									}
 									$countryuser = strtolower($countryuser);
 
 									if (in_array($countryuser, $servercountries)) {
-										if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+										if (! preg_match('/^\./', $newval)) {
+											$newval='.'.$newval;
+										}
 										$domainstosuggestcountryfilter[] = $newval; // Servers with user country
 									} else {
 										print '<!-- '.$newval.' disabled. Server country range '.$deploymentserver->servercountries.' does not contain '.$countryuser.' -->';
 										continue;
 									}
 								} else {
-									if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+									if (! preg_match('/^\./', $newval)) {
+										$newval='.'.$newval;
+									}
 									$domainstosuggest[] = $newval;
 								}
 							} else {
-								if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+								if (! preg_match('/^\./', $newval)) {
+									$newval='.'.$newval;
+								}
 								$domainstosuggest[] = $newval;
 							}
 						}
@@ -675,7 +717,8 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 						}
 
 						// Defined a preselected domain
-						$randomselect = ''; $randomindex = 0;
+						$randomselect = '';
+						$randomindex = 0;
 						if (empty($tldid) && ! GETPOSTISSET('tldid') && ! GETPOSTISSET('forcesubdomain') && count($domainstosuggest) >= 1) {
 							$maxforrandom = (count($domainstosuggest) - 1);
 							$randomindex = mt_rand(0, $maxforrandom);
@@ -687,10 +730,8 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 							$domainstosuggest[] = $randomselect;
 						}
 						foreach ($domainstosuggest as $val) {
-							print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"':'').'>'.$val.'</option>';
-						}
-
-						?>
+							print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '').'>'.$val.'</option>';
+						} ?>
 					</select>
 						<?php
 						// Show warning if forcesubdomain set and not found
@@ -708,8 +749,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 							} else {
 								print '<input type="hidden" name="forcesubdomain" value="'.dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')).'">';
 							}
-						}
-						?>
+						} ?>
 					<br class="unfloat" />
 				  </div>
 				</div>
@@ -732,7 +772,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<!-- Checkbox for non profit orga -->
 			<section id="checkboxnonprofitorgaid">
 			<div class="group required">
-				<input type="checkbox" id="checkboxnonprofitorga" name="checkboxnonprofitorga" class="valignmiddle inline" style="margin-top: 0" value="nonprofit" required=""<?php echo (GETPOST('checkboxnonprofitorga') ? ' checked="checked"' : ''); ?>>
+				<input type="checkbox" id="checkboxnonprofitorga" name="checkboxnonprofitorga" class="valignmiddle inline" style="margin-top: 0" value="nonprofit" required=""<?php echo(GETPOST('checkboxnonprofitorga') ? ' checked="checked"' : ''); ?>>
 				<label for="checkboxnonprofitorga" class="valignmiddle small inline"><?php
 				if (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') == 2) {
 					echo $langs->trans("ConfirmNonProfitOrgaCaritative", $sellyoursaasname).'. ';
@@ -754,7 +794,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			<!-- mandatory checkbox for terms and conditions -->
 			<section id="checkboxtermsandconditions">
 				<div class="group required">
-					<input type="checkbox" id="checkboxtermsandconditions" name="checkboxtermsandconditions" class="valignmiddle inline" style="margin-top: 0" value="1" required="1"<?php echo (GETPOST('checkboxtermsandconditions') ? ' checked="checked"' : ''); ?>>
+					<input type="checkbox" id="checkboxtermsandconditions" name="checkboxtermsandconditions" class="valignmiddle inline" style="margin-top: 0" value="1" required="1"<?php echo(GETPOST('checkboxtermsandconditions') ? ' checked="checked"' : ''); ?>>
 					<label for="checkboxtermsandconditions" class="valignmiddle small inline"><?php
 						$urlfortermofuse = 'https://www.'.getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/'.getDolGlobalString('SELLYOURSAAS_TERMSANDCONDITIONS');
 						echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse);
@@ -773,8 +813,12 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 			$urlfortermofuse = '';
 			if ($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME == 'dolicloud.com') {
 				$urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/en-terms-and-conditions.php';
-				if (preg_match('/^fr/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/fr-conditions-utilisations.php';
-				if (preg_match('/^es/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/es-terminos-y-condiciones.php';
+				if (preg_match('/^fr/i', $langs->defaultlang)) {
+					$urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/fr-conditions-utilisations.php';
+				}
+				if (preg_match('/^es/i', $langs->defaultlang)) {
+					$urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/es-terminos-y-condiciones.php';
+				}
 			}
 			if ($urlfortermofuse) {
 				?>
@@ -882,4 +926,3 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
 
 llxFooter('', 'public', 1);		// We disabled output of messages. Already done into page
 $db->close();
-

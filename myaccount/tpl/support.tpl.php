@@ -80,7 +80,7 @@ print '
 	$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-		$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
+	$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
 	if (! empty($conf->global->$newnamekey)) {
 		$sellyoursaassupporturl = $conf->global->$newnamekey;
 	}
@@ -131,7 +131,9 @@ if ($sellyoursaassupporturl) {
 			$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
 			$dbprefix = empty($contract->array_options['options_prefix_db']) ? '' : $contract->array_options['options_prefix_db'];
-			if (empty($dbprefix)) $dbprefix = 'llx_';
+			if (empty($dbprefix)) {
+				$dbprefix = 'llx_';
+			}
 
 			if ($statuslabel == 'undeployed') {
 				continue;
@@ -147,11 +149,11 @@ if ($sellyoursaassupporturl) {
 			$tmpproduct = new Product($db);
 			foreach ($contract->lines as $keyline => $line) {
 				if ($line->statut == 5 && $contract->array_options['options_deployment_status'] != 'undeployed') {
-									$statuslabel = 'suspended';
+					$statuslabel = 'suspended';
 				}
 
 				if ($line->fk_product > 0) {
-						$tmpproduct->fetch($line->fk_product);
+					$tmpproduct->fetch($line->fk_product);
 					if ($tmpproduct->array_options['options_app_or_option'] == 'app') {
 						$planref = $tmpproduct->ref;			// Warning, ref is in language of user
 						$planlabel = $tmpproduct->label;		// Warning, label is in language of user
@@ -166,10 +168,18 @@ if ($sellyoursaassupporturl) {
 			$ispaid = sellyoursaasIsPaidInstance($contract);
 
 			$color = "green";
-			if ($statuslabel == 'processing') { $color = 'orange'; }
-			if ($statuslabel == 'suspended') { $color = 'orange'; }
-			if ($statuslabel == 'undeployed') { $color = 'grey'; }
-			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
+			if ($statuslabel == 'processing') {
+				$color = 'orange';
+			}
+			if ($statuslabel == 'suspended') {
+				$color = 'orange';
+			}
+			if ($statuslabel == 'undeployed') {
+				$color = 'grey';
+			}
+			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				$color = 'lightgrey';
+			}
 
 			if ($tmpproduct->array_options['options_typesupport'] != 'none'
 				&& !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
@@ -198,7 +208,7 @@ if ($sellyoursaassupporturl) {
 				$labeltoshow .= ' - ';
 				$labeltoshow .= $prioritylabel;
 
-				print '<option value="'.$optionid.'"'.(GETPOST('supportchannel', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
+				print '<option value="'.$optionid.'"'.(GETPOST('supportchannel', 'alpha') == $optionid ? ' selected="selected"' : '').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
 				print dol_escape_htmltag($labeltoshow);
 				print '</option>';
 				//print ajax_combobox('supportchannel');
@@ -217,7 +227,7 @@ if ($sellyoursaassupporturl) {
 
 	$labelother .= ' &nbsp; <span class="prioritylow">'.$langs->trans("Priority").' '.$langs->trans("Low").'</span>';
 
-	print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"':'').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
+	print '<option value="low_other"'.(GETPOST('supportchannel', 'alpha') == 'low_other' ? ' selected="selected"' : '').' data-html="'.dol_escape_htmltag($labelother).'">'.dol_escape_htmltag($labelother).'</option>';
 	if (empty($atleastonehigh)) {
 		$labeltoshow = $langs->trans("PremiumSupport").' <span class="priorityhigh">'.$langs->trans("Priority").' '.$langs->trans("High").'</span> ('.$langs->trans("NoPremiumPlan").')';
 		print '<option value="high_premium" disabled="disabled" data-html="'.dol_escape_htmltag('<strike>'.$labeltoshow).'</strike>">'.dol_escape_htmltag($labeltoshow).'</option>';
@@ -285,7 +295,9 @@ if ($sellyoursaassupporturl) {
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 			$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-			if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+			if (! empty($conf->global->$newnamekey)) {
+				$sellyoursaasemail = $conf->global->$newnamekey;
+			}
 		}
 
 		if (! empty($conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM) && preg_match('/high/', GETPOST('supportchannel', 'alpha'))) {
@@ -300,7 +312,7 @@ if ($sellyoursaassupporturl) {
 			}
 		}
 
-		$subject = (GETPOST('subject', 'none')?GETPOST('subject', 'none'):'');
+		$subject = (GETPOST('subject', 'none') ? GETPOST('subject', 'none') : '');
 
 		print '<input type="hidden" name="to" value="'.$sellyoursaasemail.'">';
 
@@ -373,14 +385,14 @@ if ($sellyoursaassupporturl) {
 				console.log("We change group of ticket");
 				groupticketchange();';
 
-			$stringtoprint .= '
+		$stringtoprint .= '
 				tmp = $("#ticketcategory_select_child_id").val();
 				$("#ticketcategory_child_id_back").val(tmp);
 				tmp = $("#ticketcategory_select").val();
 				console.log($("#ticketcategory_back"));
 				$("#ticketcategory_back").val(tmp);
 				';
-			$stringtoprint .= '
+		$stringtoprint .= '
 					if ("' . getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE').'" == $("#ticketcategory").val()){
 						console.log("We hide for automigration");
 						$(".hideforautomigration").hide();
@@ -395,7 +407,7 @@ if ($sellyoursaassupporturl) {
 						$("#modeforchangemmode").val("autoupgrade")
 					} else {';
 
-			$stringtoprint .= '
+		$stringtoprint .= '
 						if ($("#ticketcategory").val() != "") {
 							console.log("We show full form");
 							$(".hideforautomigration").show();
@@ -412,7 +424,7 @@ if ($sellyoursaassupporturl) {
 						}
 						$("#buttonforautomigrationwithhidden").hide();
 					}';
-			$stringtoprint .= '
+		$stringtoprint .= '
 			});';
 
 		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
@@ -497,7 +509,7 @@ if ($sellyoursaassupporturl) {
 		print '<div class="hideforautomigration">';
 
 		// From
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' class="minwidth300" id="from" name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'" placeholder="email@domain.com"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' class="minwidth300" id="from" name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'" placeholder="email@domain.com"><br><br>';
 
 		// Topic
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
@@ -542,7 +554,7 @@ if ($sellyoursaassupporturl) {
 		}
 	}
 
-				print ' 	</div></div>
+	print ' 	</div></div>
 
 					</div> <!-- END PORTLET -->
 

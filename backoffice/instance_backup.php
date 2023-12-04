@@ -24,16 +24,31 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
 require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
@@ -72,7 +87,7 @@ $hookmanager->initHooks(array('contractcard','globalcard'));
 
 
 if ($id > 0 || $ref) {
-	$result = $object->fetch($id?$id:$instanceoldid, $ref?$ref:$refold);
+	$result = $object->fetch($id ? $id : $instanceoldid, $ref ? $ref : $refold);
 	if ($result < 0) {
 		setEventMessages('Failed to read remote customer instance: '.$object->error, null, 'warnings');
 		$error++;
@@ -318,7 +333,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/list.php?restore_lastsearch_values=1'.(! empty($socid)?'&socid='.$socid:'').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/list.php?restore_lastsearch_values=1'.(! empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	// Ref customer
@@ -360,7 +375,7 @@ if (($id > 0 || $instanceoldid > 0) && $action != 'edit' && $action != 'create')
 
 	$nodbprefix=0;
 
-	dol_banner_tab($object, ($instanceoldid?'refold':'ref'), $linkback, 1, ($instanceoldid?'name':'ref'), 'ref', $morehtmlref, '', $nodbprefix, '', '', 1);
+	dol_banner_tab($object, ($instanceoldid ? 'refold' : 'ref'), $linkback, 1, ($instanceoldid ? 'name' : 'ref'), 'ref', $morehtmlref, '', $nodbprefix, '', '', 1);
 }
 
 if ($id > 0 || $instanceoldid > 0) {
@@ -405,7 +420,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("DateLastBackup").'</td>';
 	print '<td>';
-	if ($object->array_options['options_latestbackup_date']) print dol_print_date($object->array_options['options_latestbackup_date'], 'dayhour', 'tzuser');
+	if ($object->array_options['options_latestbackup_date']) {
+		print dol_print_date($object->array_options['options_latestbackup_date'], 'dayhour', 'tzuser');
+	}
 	print '</td>';
 	print '</tr>';
 
@@ -413,7 +430,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("DateLastBackupOK").'</td>';
 	print '<td>';
-	if ($object->array_options['options_latestbackup_date_ok']) print dol_print_date($object->array_options['options_latestbackup_date_ok'], 'dayhour', 'tzuser');
+	if ($object->array_options['options_latestbackup_date_ok']) {
+		print dol_print_date($object->array_options['options_latestbackup_date_ok'], 'dayhour', 'tzuser');
+	}
 	print '</td>';
 	print '</tr>';
 
@@ -421,9 +440,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("CurrentBackupStatus").'</td>';
 	print '<td>';
-	print ($object->array_options['options_latestbackup_status'] == 'KO' ? '<span class="error">' : '');
+	print($object->array_options['options_latestbackup_status'] == 'KO' ? '<span class="error">' : '');
 	print $object->array_options['options_latestbackup_status'];
-	print ($object->array_options['options_latestbackup_status'] == 'KO' ? '</span>' : '');
+	print($object->array_options['options_latestbackup_status'] == 'KO' ? '</span>' : '');
 	print '</td>';
 	print '</tr>';
 

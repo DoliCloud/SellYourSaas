@@ -25,9 +25,15 @@
  *      \brief      Script to upgrade an instant
  */
 
-if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
-if (!defined('NOSESSION')) define('NOSESSION', '1');
-if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
+if (!defined('NOREQUIREDB')) {
+	define('NOREQUIREDB', '1');
+}					// Do not create database handler $db
+if (!defined('NOSESSION')) {
+	define('NOSESSION', '1');
+}
+if (!defined('NOREQUIREVIRTUALURL')) {
+	define('NOREQUIREVIRTUALURL', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -43,9 +49,9 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 $version='1.0';
 $error=0;
 
-$dirroot=isset($argv[1])?$argv[1]:'';
-$instance=isset($argv[2])?$argv[2]:'';
-$mode=isset($argv[3])?$argv[3]:'';
+$dirroot=isset($argv[1]) ? $argv[1] : '';
+$instance=isset($argv[2]) ? $argv[2] : '';
+$mode=isset($argv[3]) ? $argv[3] : '';
 
 // Include Dolibarr environment
 @set_time_limit(0);							// No timeout for this script
@@ -72,15 +78,30 @@ if (empty($dolibarrdir)) {
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+}
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res) die("Include of master fails");
+if (! $res && file_exists("../master.inc.php")) {
+	$res=@include "../master.inc.php";
+}
+if (! $res && file_exists("../../master.inc.php")) {
+	$res=@include "../../master.inc.php";
+}
+if (! $res && file_exists("../../../master.inc.php")) {
+	$res=@include "../../../master.inc.php";
+}
+if (! $res) {
+	die("Include of master fails");
+}
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
@@ -139,7 +160,9 @@ if ($dbmaster->error) {
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
-if (empty($db)) $db=$dbmaster;
+if (empty($db)) {
+	$db=$dbmaster;
+}
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "Update an instance on remote server with new ref version.\n";
@@ -220,10 +243,17 @@ print 'SFTP connect string : '.$sftpconnectstring."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode, array('confirm','confirmunlock','confirmwithtestdir','confirmclean'))) $param[]="-n";
+if (! in_array($mode, array('confirm','confirmunlock','confirmwithtestdir','confirmclean'))) {
+	$param[]="-n";
+}
 //$param[]="-a";
-if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
-else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
+if (! in_array($mode, array('diff','diffadd','diffchange'))) {
+	$param[]="-rlt";
+} else {
+	$param[]="-rlD";
+	$param[]="--modify-window=1000000000";
+	$param[]="--delete -n";
+}
 $param[]="-v";
 //$param[]="--noatime";				// launching server must be lower then 20.10
 //$param[]="--open-noatime";		// version must be 20.10 on both side
@@ -254,8 +284,12 @@ $param[]="--exclude htdocs/conf/conf.php*";
 $param[]="--exclude glpi_config/config_db.php*";
 $param[]="--exclude htdocs/inc/downstream.php*";
 $param[]="--exclude htdocs/custom";
-if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
-if (in_array($mode, array('testclean','confirmclean'))) $param[]="--delete";
+if (! in_array($mode, array('diff','diffadd','diffchange'))) {
+	$param[]="--stats";
+}
+if (in_array($mode, array('testclean','confirmclean'))) {
+	$param[]="--delete";
+}
 $param[]="-e 'ssh -p ".$server_port." -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
 $param[]=$dirroot.'/';
@@ -276,7 +310,10 @@ foreach ($output as $outputline) {
 // Remove install.lock and create upgrade.unlock file if mode confirmunlock
 if ($mode == 'confirmunlock') {
 	// SFTP connect
-	if (! function_exists("ssh2_connect")) { dol_print_error('', 'ssh2_connect function does not exists'); exit(1); }
+	if (! function_exists("ssh2_connect")) {
+		dol_print_error('', 'ssh2_connect function does not exists');
+		exit(1);
+	}
 
 	$connection = ssh2_connect($server, $server_port);
 	if ($connection) {
@@ -322,7 +359,9 @@ if ($mode != 'test') {
 
 	if ($user->id > 0) {
 		$actioncomm=new ActionComm($db);
-		if (is_object($object->thirdparty)) $actioncomm->socid=$object->thirdparty->id;
+		if (is_object($object->thirdparty)) {
+			$actioncomm->socid=$object->thirdparty->id;
+		}
 		$actioncomm->datep = dol_now('tzserver');
 		$actioncomm->percentage = 100;
 		$actioncomm->label = 'Upgrade from CLI rsync_instance.php, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;

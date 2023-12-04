@@ -92,12 +92,12 @@ $exludefiles = array('.','..','README');
 $files = array_diff($files, $exludefiles);
 $langstrings_3d = array();
 $langstrings_full = array();
-foreach ($files AS $file) {
+foreach ($files as $file) {
 	$path_file = pathinfo($file);
 	// we're only interested in .lang files
 	if ($path_file['extension']=='lang') {
 		$content = file($workdir.$file);
-		foreach ($content AS $line => $row) {
+		foreach ($content as $line => $row) {
 			// don't want comment lines
 			if (substr($row, 0, 1) !== '#') {
 				// don't want lines without the separator (why should those even be here, anyway...)
@@ -113,11 +113,11 @@ foreach ($files AS $file) {
 	}
 }
 
-foreach ($langstrings_3d AS $filename => $file) {
-	foreach ($file AS $linenum => $value) {
+foreach ($langstrings_3d as $filename => $file) {
+	foreach ($file as $linenum => $value) {
 		$keys = array_keys($langstrings_full, $value);
 		if (count($keys)>1) {
-			foreach ($keys AS $key) {
+			foreach ($keys as $key) {
 				$dups[$value][$filename][$linenum] = trim($langstrings_3dtrans[$filename][$linenum]);
 			}
 		}
@@ -136,7 +136,7 @@ foreach ($dups as $string => $pages) {
 	echo "<td align=\"center\">$count</td>";
 	echo "<td>$string</td>";
 	echo "<td>";
-	foreach ($pages AS $page => $lines) {
+	foreach ($pages as $page => $lines) {
 		echo "$page ";
 		foreach ($lines as $line => $translatedvalue) {
 			//echo "($line - ".(substr($translatedvalue,0,20)).") ";
@@ -154,7 +154,7 @@ echo "</table>";
 
 
 if (! empty($_REQUEST['unused']) && $_REQUEST['unused'] == 'true') {
-	foreach ($langstrings_dist AS $value) {
+	foreach ($langstrings_dist as $value) {
 		$search = '\'trans("'.$value.'")\'';
 		$string =  'grep -R -m 1 -F --exclude=includes/* --include=*.php '.$search.' '.$htdocs.'*';
 		exec($string, $output);

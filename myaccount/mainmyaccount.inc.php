@@ -67,7 +67,7 @@ if (! function_exists("llxHeader")) {
 		// html header
 		top_htmlhead_sellyoursaas($head, $title, $disablejs, $disablehead, $arrayofjs, $arrayofcss);
 
-		print '<body id="mainbody"'.($morecssonbody?' class="'.$morecssonbody.'"':'').'>' . "\n";
+		print '<body id="mainbody"'.($morecssonbody ? ' class="'.$morecssonbody.'"' : '').'>' . "\n";
 
 		// top menu and left menu area
 		if (empty($conf->dol_hide_topmenu) || GETPOST('dol_invisible_topmenu', 'int')) {
@@ -229,13 +229,17 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		}
 		// Favicon. Note, even if we remove this meta, the browser and android webview try to find a favicon.ico
 		$favicon = getDomainFromURL($_SERVER['SERVER_NAME'], 0);
-		if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
+		if (! preg_match('/\.(png|jpg)$/', $favicon)) {
+			$favicon.='.png';
+		}
 		if (getDolGlobalString('MAIN_FAVICON_URL')) {
 			$favicon = getDolGlobalString('MAIN_FAVICON_URL');
 		}
 		if ($favicon && empty($conf->dol_use_jmobile)) {
 			$href = 'img/'.$favicon;
-			if (preg_match('/^http/i', $favicon)) $href = $favicon;
+			if (preg_match('/^http/i', $favicon)) {
+				$href = $favicon;
+			}
 			print '<link rel="shortcut icon" type="image/x-icon" href="'.$href.'">'."\n";
 		}
 
@@ -246,9 +250,13 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		}
 
 		print '<title>';
-		if ($title && !empty($conf->global->MAIN_HTML_TITLE) && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) print dol_htmlentities($title);
-		elseif ($title) print dol_htmlentities($appli.' - '.$title);
-		else print dol_htmlentities($appli);
+		if ($title && !empty($conf->global->MAIN_HTML_TITLE) && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) {
+			print dol_htmlentities($title);
+		} elseif ($title) {
+			print dol_htmlentities($appli.' - '.$title);
+		} else {
+			print dol_htmlentities($appli);
+		}
 		print '</title>';
 
 		print "\n";
@@ -280,7 +288,8 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			$themeparam .= '&amp;dol_no_mouse_hover='.GETPOST('dol_no_mouse_hover', 'int');
 		}
 		if (GETPOSTISSET('dol_use_jmobile')) {
-			$themeparam .= '&amp;dol_use_jmobile='.GETPOST('dol_use_jmobile', 'int'); $conf->dol_use_jmobile = GETPOST('dol_use_jmobile', 'int');
+			$themeparam .= '&amp;dol_use_jmobile='.GETPOST('dol_use_jmobile', 'int');
+			$conf->dol_use_jmobile = GETPOST('dol_use_jmobile', 'int');
 		}
 		if (GETPOSTISSET('THEME_DARKMODEENABLED')) {
 			$themeparam .= '&amp;THEME_DARKMODEENABLED='.GETPOST('THEME_DARKMODEENABLED', 'int');
@@ -302,21 +311,21 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			if (constant('JS_JQUERY_UI')) {
 				print '<link rel="stylesheet" type="text/css" href="'.JS_JQUERY_UI.'css/'.$jquerytheme.'/jquery-ui.min.css'.($ext ? '?'.$ext : '').'">'."\n"; // Forced JQuery
 			} else {
-				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/css/'.$jquerytheme.'/jquery-ui.css'.($ext?'?'.$ext:'').'">'."\n";    // JQuery
+				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/css/'.$jquerytheme.'/jquery-ui.css'.($ext ? '?'.$ext : '').'">'."\n";    // JQuery
 			}
 			if (! defined('DISABLE_JQUERY_JNOTIFY')) {
-				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify-alt.min.css'.($ext?'?'.$ext:'').'">'."\n";          // JNotify
+				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify-alt.min.css'.($ext ? '?'.$ext : '').'">'."\n";          // JNotify
 			}
 			if (! defined('DISABLE_SELECT2') && (! empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {     // jQuery plugin "mutiselect", "multiple-select", "select2"...
-				$tmpplugin=empty($conf->global->MAIN_USE_JQUERY_MULTISELECT)?constant('REQUIRE_JQUERY_MULTISELECT'):$conf->global->MAIN_USE_JQUERY_MULTISELECT;
-				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/css/'.$tmpplugin.'.css'.($ext?'?'.$ext:'').'">'."\n";
+				$tmpplugin=empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) ? constant('REQUIRE_JQUERY_MULTISELECT') : $conf->global->MAIN_USE_JQUERY_MULTISELECT;
+				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/css/'.$tmpplugin.'.css'.($ext ? '?'.$ext : '').'">'."\n";
 			}
 		}
 
 		if (! defined('DISABLE_FONT_AWSOME')) {
 			print '<!-- Includes CSS for font awesome -->'."\n";
-			print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/fontawesome-5/css/all.min.css'.($ext?'?'.$ext:'').'">'."\n";
-			print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/fontawesome-5/css/v4-shims.min.css'.($ext?'?'.$ext:'').'">'."\n";
+			print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/fontawesome-5/css/all.min.css'.($ext ? '?'.$ext : '').'">'."\n";
+			print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/fontawesome-5/css/v4-shims.min.css'.($ext ? '?'.$ext : '').'">'."\n";
 		}
 
 		print '<!-- Includes CSS for Dolibarr theme -->'."\n";
@@ -348,18 +357,18 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			// JQuery. Must be before other includes
 			print '<!-- Includes JS for JQuery -->'."\n";
 			if (defined('JS_JQUERY') && constant('JS_JQUERY')) {
-				print '<script src="'.JS_JQUERY.'jquery.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script src="'.JS_JQUERY.'jquery.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
 			} else {
-				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
 			}
 			if (defined('JS_JQUERY_UI') && constant('JS_JQUERY_UI')) {
-				print '<script src="'.JS_JQUERY_UI.'jquery-ui.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script src="'.JS_JQUERY_UI.'jquery-ui.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
 			} else {
-				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery-ui.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/js/jquery-ui.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
 			}
 			// jQuery jnotify
 			if (empty($conf->global->MAIN_DISABLE_JQUERY_JNOTIFY) && ! defined('DISABLE_JQUERY_JNOTIFY')) {
-				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n";
 			}
 			// Table drag and drop lines
 			if (empty($disableforlogin) && !defined('DISABLE_JQUERY_TABLEDND')) {
@@ -371,7 +380,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			}
 			if (!defined('DISABLE_SELECT2') && (!empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) || defined('REQUIRE_JQUERY_MULTISELECT'))) {
 				// jQuery plugin "mutiselect", "multiple-select", "select2", ...
-				$tmpplugin = empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) ?constant('REQUIRE_JQUERY_MULTISELECT') : $conf->global->MAIN_USE_JQUERY_MULTISELECT;
+				$tmpplugin = empty($conf->global->MAIN_USE_JQUERY_MULTISELECT) ? constant('REQUIRE_JQUERY_MULTISELECT') : $conf->global->MAIN_USE_JQUERY_MULTISELECT;
 				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/js/'.$tmpplugin.'.full.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n"; // We include full because we need the support of containerCssClass
 			}
 			if (!defined('DISABLE_MULTISELECT')) {     // jQuery plugin "mutiselect" to select with checkboxes. Can be removed once we have an enhanced search tool
@@ -398,7 +407,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				print 'var ckeditorFilebrowserBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print 'var ckeditorFilebrowserImageBrowseUrl = \''.DOL_URL_ROOT.'/core/filemanagerdol/browser/default/browser.php?Type=Image&Connector='.DOL_URL_ROOT.'/core/filemanagerdol/connectors/php/connector.php\';'."\n";
 				print '</script>'."\n";
-				print '<script src="'.$pathckeditor.$jsckeditor.($ext?'?'.$ext:'').'"></script>'."\n";
+				print '<script src="'.$pathckeditor.$jsckeditor.($ext ? '?'.$ext : '').'"></script>'."\n";
 				print '<script>';
 				if (GETPOST('mode', 'aZ09') == 'Full_inline') {
 					print 'CKEDITOR.disableAutoInline = false;'."\n";
@@ -419,14 +428,14 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				}
 				if ($enablebrowsernotif) {
 					print '<!-- Includes JS of Dolibarr (browser layout = '.$conf->browser->layout.')-->'."\n";
-					print '<script src="'.DOL_URL_ROOT.'/core/js/lib_notification.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
+					print '<script src="'.DOL_URL_ROOT.'/core/js/lib_notification.js.php'.($ext ? '?'.$ext : '').'"></script>'."\n";
 				}
 			}
 
 			// Global js function
 			print '<!-- Includes JS of Dolibarr -->'."\n";
-			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php?lang='.$langs->defaultlang.($ext?'&'.$ext:'').'"></script>'."\n";
-			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_foot.js.php?lang='.$langs->defaultlang.($ext?'&'.$ext:'').'"></script>'."\n";
+			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php?lang='.$langs->defaultlang.($ext ? '&'.$ext : '').'"></script>'."\n";
+			print '<script src="'.DOL_URL_ROOT.'/core/js/lib_foot.js.php?lang='.$langs->defaultlang.($ext ? '&'.$ext : '').'"></script>'."\n";
 
 			// JS forced by page in top_htmlhead (relative url starting with /)
 			if (is_array($arrayofjs)) {
@@ -481,8 +490,12 @@ if (! function_exists("llxFooter")) {
 			foreach ($user->lastsearch_values_tmp as $key => $val) {
 				unset($_SESSION['lastsearch_values_tmp_'.$key]);
 				if (count($val)) {
-					if (empty($val['sortfield'])) unset($val['sortfield']);
-					if (empty($val['sortorder'])) unset($val['sortorder']);
+					if (empty($val['sortfield'])) {
+						unset($val['sortfield']);
+					}
+					if (empty($val['sortorder'])) {
+						unset($val['sortorder']);
+					}
 					dol_syslog('Save lastsearch_values_tmp_'.$key.'='.json_encode($val, 0, 1));
 					$_SESSION['lastsearch_values_tmp_'.$key]=json_encode($val);
 					unset($_SESSION['lastsearch_values_'.$key]);
@@ -509,10 +522,14 @@ if (! function_exists("llxFooter")) {
 
 		print '</div> <!-- End div class="fiche" -->'."\n"; // End div fiche
 
-		if (empty($conf->dol_hide_leftmenu)) print '</div> <!-- End div id-right -->'; // End div id-right
+		if (empty($conf->dol_hide_leftmenu)) {
+			print '</div> <!-- End div id-right -->';
+		} // End div id-right
 
 		print "\n";
-		if ($comment) print '<!-- '.$comment.' -->'."\n";
+		if ($comment) {
+			print '<!-- '.$comment.' -->'."\n";
+		}
 
 		printCommonFooter($zone);
 		//var_dump($langs);		// Uncommment to see the property _tab_loaded to see which language file were loaded
@@ -522,9 +539,13 @@ if (! function_exists("llxFooter")) {
 		}
 
 
-		if (empty($conf->dol_hide_leftmenu) && empty($conf->dol_use_jmobile)) print '</div> <!-- End div id-container -->'."\n";	// End div container
+		if (empty($conf->dol_hide_leftmenu) && empty($conf->dol_use_jmobile)) {
+			print '</div> <!-- End div id-container -->'."\n";
+		}	// End div container
 
-		if (! empty($delayedhtmlcontent)) print $delayedhtmlcontent;
+		if (! empty($delayedhtmlcontent)) {
+			print $delayedhtmlcontent;
+		}
 
 		// Wrapper to manage document_preview
 		if (! empty($conf->use_javascript_ajax) && ($conf->browser->layout != 'phone')) {
@@ -667,7 +688,7 @@ function dol_loginfunction($langs, $conf, $mysoc)
 	global $hookmanager;
 
 	//$langs=new Translate('', $conf);
-	$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
+	$langs->setDefaultLang(GETPOST('lang', 'aZ09') ? GETPOST('lang', 'aZ09') : 'auto');
 
 	$langs->loadLangs(array("main","other","help","admin","sellyoursaas@sellyoursaas"));
 
@@ -683,13 +704,17 @@ function dol_loginfunction($langs, $conf, $mysoc)
 	// Title
 	$appli=constant('DOL_APPLICATION_TITLE');
 	$title=$appli.' '.constant('DOL_VERSION');
-	if (! empty($conf->global->MAIN_APPLICATION_TITLE)) $title=$conf->global->MAIN_APPLICATION_TITLE;
+	if (! empty($conf->global->MAIN_APPLICATION_TITLE)) {
+		$title=$conf->global->MAIN_APPLICATION_TITLE;
+	}
 	$titletruedolibarrversion=constant('DOL_VERSION');	// $title used by login template after the @ to inform of true Dolibarr version
 	$title=$langs->trans("YourCustomerDashboard");
-	if (GETPOST('reseller', 'alpha')) $title=$langs->trans("YourCustomerOrResellerDashboard");
+	if (GETPOST('reseller', 'alpha')) {
+		$title=$langs->trans("YourCustomerOrResellerDashboard");
+	}
 
 	// Note: $conf->css looks like '/theme/eldy/style.css.php'
-	$conf->css = "/theme/".(GETPOST('theme', 'alpha')?GETPOST('theme', 'alpha'):$conf->theme)."/style.css.php";
+	$conf->css = "/theme/".(GETPOST('theme', 'alpha') ? GETPOST('theme', 'alpha') : $conf->theme)."/style.css.php";
 	$themepath=dol_buildpath($conf->css, 1);
 	if (! empty($conf->modules_parts['theme'])) {		// Using this feature slow down application
 		foreach ($conf->modules_parts['theme'] as $reldir) {
@@ -712,11 +737,17 @@ function dol_loginfunction($langs, $conf, $mysoc)
 		setcookie($sessiontimeout, $conf->global->MAIN_SESSION_TIMEOUT, 0, "/", null, false, true);
 	}
 
-	if (GETPOST('urlfrom', 'alpha')) $_SESSION["urlfrom"]=GETPOST('urlfrom', 'alpha');
-	else unset($_SESSION["urlfrom"]);
+	if (GETPOST('urlfrom', 'alpha')) {
+		$_SESSION["urlfrom"]=GETPOST('urlfrom', 'alpha');
+	} else {
+		unset($_SESSION["urlfrom"]);
+	}
 
-	if (! GETPOST("username", 'alpha')) $focus_element='username';
-	else $focus_element='password';
+	if (! GETPOST("username", 'alpha')) {
+		$focus_element='username';
+	} else {
+		$focus_element='password';
+	}
 
 	$demologin='';
 	$demopassword='';
@@ -816,14 +847,18 @@ function dol_loginfunction($langs, $conf, $mysoc)
 	}
 
 	// Google AD
-	$main_google_ad_client = ((! empty($conf->global->MAIN_GOOGLE_AD_CLIENT) && ! empty($conf->global->MAIN_GOOGLE_AD_SLOT))?1:0);
+	$main_google_ad_client = ((! empty($conf->global->MAIN_GOOGLE_AD_CLIENT) && ! empty($conf->global->MAIN_GOOGLE_AD_SLOT)) ? 1 : 0);
 
 	// Set jquery theme
-	$dol_loginmesg = (! empty($_SESSION["dol_loginmesg"])?$_SESSION["dol_loginmesg"]:'');
+	$dol_loginmesg = (! empty($_SESSION["dol_loginmesg"]) ? $_SESSION["dol_loginmesg"] : '');
 	$favicon='';
-	if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
+	if (! empty($conf->global->MAIN_FAVICON_URL)) {
+		$favicon=$conf->global->MAIN_FAVICON_URL;
+	}
 	$jquerytheme = 'base';
-	if (! empty($conf->global->MAIN_USE_JQUERY_THEME)) $jquerytheme = $conf->global->MAIN_USE_JQUERY_THEME;
+	if (! empty($conf->global->MAIN_USE_JQUERY_THEME)) {
+		$jquerytheme = $conf->global->MAIN_USE_JQUERY_THEME;
+	}
 
 	// Set dol_hide_topmenu, dol_hide_leftmenu, dol_optimize_smallscreen, dol_no_mouse_hover
 	$dol_hide_topmenu=GETPOST('dol_hide_topmenu', 'int');

@@ -31,37 +31,59 @@ if (empty($conf) || ! is_object($conf)) {
 header('Cache-Control: Public, must-revalidate');
 header("Content-type: text/html; charset=".$conf->file->character_set_client);
 
-if (GETPOST('dol_hide_topmenu')) $conf->dol_hide_topmenu=1;
-if (GETPOST('dol_hide_leftmenu')) $conf->dol_hide_leftmenu=1;
-if (GETPOST('dol_optimize_smallscreen')) $conf->dol_optimize_smallscreen=1;
-if (GETPOST('dol_no_mouse_hover')) $conf->dol_no_mouse_hover=1;
-if (GETPOST('dol_use_jmobile')) $conf->dol_use_jmobile=1;
+if (GETPOST('dol_hide_topmenu')) {
+	$conf->dol_hide_topmenu=1;
+}
+if (GETPOST('dol_hide_leftmenu')) {
+	$conf->dol_hide_leftmenu=1;
+}
+if (GETPOST('dol_optimize_smallscreen')) {
+	$conf->dol_optimize_smallscreen=1;
+}
+if (GETPOST('dol_no_mouse_hover')) {
+	$conf->dol_no_mouse_hover=1;
+}
+if (GETPOST('dol_use_jmobile')) {
+	$conf->dol_use_jmobile=1;
+}
 
 // If we force to use jmobile, then we reenable javascript
-if (! empty($conf->dol_use_jmobile)) $conf->use_javascript_ajax=1;
+if (! empty($conf->dol_use_jmobile)) {
+	$conf->use_javascript_ajax=1;
+}
 
 $php_self = dol_escape_htmltag($_SERVER['PHP_SELF']);
-$php_self.= dol_escape_htmltag($_SERVER["QUERY_STRING"])?'?'.dol_escape_htmltag($_SERVER["QUERY_STRING"]):'';
-if (! preg_match('/mainmenu=/', $php_self)) $php_self.=(preg_match('/\?/', $php_self)?'&':'?').'mainmenu=home';
+$php_self.= dol_escape_htmltag($_SERVER["QUERY_STRING"]) ? '?'.dol_escape_htmltag($_SERVER["QUERY_STRING"]) : '';
+if (! preg_match('/mainmenu=/', $php_self)) {
+	$php_self.=(preg_match('/\?/', $php_self) ? '&' : '?').'mainmenu=home';
+}
 
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
 $arrayofjs=array(
-	'/includes/jstz/jstz.min.js'.(empty($conf->dol_use_jmobile)?'':'?version='.urlencode(DOL_VERSION)),
-	'/core/js/dst.js'.(empty($conf->dol_use_jmobile)?'':'?version='.urlencode(DOL_VERSION))
+	'/includes/jstz/jstz.min.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION)),
+	'/core/js/dst.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION))
 );
 $titleofpage=$langs->trans('Login').' @ '.$titletruedolibarrversion;	// $titletruedolibarrversion is defined by dol_loginfunction in security2.lib.php. We must keep the @, some tools use it to know it is login page and find true dolibarr version.
 
 $disablenofollow=1;
-if (! preg_match('/'.constant('DOL_APPLICATION_TITLE').'/', $titleofpage)) $disablenofollow=0;
+if (! preg_match('/'.constant('DOL_APPLICATION_TITLE').'/', $titleofpage)) {
+	$disablenofollow=0;
+}
 
 $head = '';
 
 $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
-if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
-if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
+if (! preg_match('/\.(png|jpg)$/', $favicon)) {
+	$favicon.='.png';
+}
+if (! empty($conf->global->MAIN_FAVICON_URL)) {
+	$favicon=$conf->global->MAIN_FAVICON_URL;
+}
 if ($favicon) {
 	$href = 'img/'.$favicon;
-	if (preg_match('/^http/i', $favicon)) $href = $favicon;
+	if (preg_match('/^http/i', $favicon)) {
+		$href = $favicon;
+	}
 	$head .= '<link rel="icon" href="'.$href.'">'."\n";
 }
 
@@ -127,7 +149,7 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 		print '
     		<div class="containermessage"><br><div class="note note-warning">';
 		print '<b>'.dol_print_date($datemessage, 'dayhour').'</b> : ';
-		   $reg=array();
+		$reg=array();
 		if (preg_match('/^\((.*)\)$/', $conf->global->SELLYOURSAAS_ANNOUNCE, $reg)) {
 			$texttoshow = $langs->trans($reg[1]);
 		} else {
@@ -164,7 +186,9 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
 	?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php
 }
-if (GETPOST('usernamebis', 'alpha')) $login=GETPOST('usernamebis', 'alpha');
+if (GETPOST('usernamebis', 'alpha')) {
+	$login=GETPOST('usernamebis', 'alpha');
+}
 ?>
 <span class="span-icon-user fa fa-user">
 <input type="email" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" name="username" class="flat input-field input-icon-user" value="<?php echo dol_escape_htmltag($login); ?>" tabindex="1" autofocus="autofocus" />
@@ -177,7 +201,7 @@ if (GETPOST('usernamebis', 'alpha')) $login=GETPOST('usernamebis', 'alpha');
 <br>
 <?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="password" class="hidden"><?php echo $langs->trans("Password"); ?></label><?php } ?>
 <span class="span-icon-password fa fa-lock">
-<input type="password" id="password" maxlength="128" placeholder="<?php echo $langs->trans("Password"); ?>" name="password" class="flat input-field input-icon-password" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="<?php echo empty($conf->global->MAIN_LOGIN_ENABLE_PASSWORD_AUTOCOMPLETE)?'off':'on'; ?>" />
+<input type="password" id="password" maxlength="128" placeholder="<?php echo $langs->trans("Password"); ?>" name="password" class="flat input-field input-icon-password" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="<?php echo empty($conf->global->MAIN_LOGIN_ENABLE_PASSWORD_AUTOCOMPLETE) ? 'off' : 'on'; ?>" />
 </span>
 <br>
 </td></tr>
@@ -203,9 +227,11 @@ if (! empty($morelogincontent)) {
 if (0) {
 	// Add a variable param to force not using cache (jmobile)
 	$php_self = preg_replace('/[&\?]time=(\d+)/', '', $php_self);	// Remove param time
-	if (preg_match('/\?/', $php_self)) $php_self.='&time='.dol_print_date(dol_now(), 'dayhourlog');
-	else $php_self.='?time='.dol_print_date(dol_now(), 'dayhourlog');
-	?>
+	if (preg_match('/\?/', $php_self)) {
+		$php_self.='&time='.dol_print_date(dol_now(), 'dayhourlog');
+	} else {
+		$php_self.='?time='.dol_print_date(dol_now(), 'dayhourlog');
+	} ?>
 	<!-- Captcha -->
 	<tr>
 	<td class="nowrap none center">
@@ -221,7 +247,8 @@ if (0) {
 	</tr></table>
 
 	</td></tr>
-<?php } ?>
+	<?php
+} ?>
 
 <tr><td><br><br></td></tr>
 </table>
@@ -252,10 +279,18 @@ if (! empty($_SESSION['dol_loginmesg'])) {
 <?php
 if ($forgetpasslink || $helpcenterlink) {
 	$moreparam='';
-	if ($dol_hide_topmenu)   $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_topmenu='.$dol_hide_topmenu;
-	if ($dol_hide_leftmenu)  $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_leftmenu='.$dol_hide_leftmenu;
-	if ($dol_no_mouse_hover) $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_no_mouse_hover='.$dol_no_mouse_hover;
-	if ($dol_use_jmobile)    $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_use_jmobile='.$dol_use_jmobile;
+	if ($dol_hide_topmenu) {
+		$moreparam.=(strpos($moreparam, '?')===false ? '?' : '&').'dol_hide_topmenu='.$dol_hide_topmenu;
+	}
+	if ($dol_hide_leftmenu) {
+		$moreparam.=(strpos($moreparam, '?')===false ? '?' : '&').'dol_hide_leftmenu='.$dol_hide_leftmenu;
+	}
+	if ($dol_no_mouse_hover) {
+		$moreparam.=(strpos($moreparam, '?')===false ? '?' : '&').'dol_no_mouse_hover='.$dol_no_mouse_hover;
+	}
+	if ($dol_use_jmobile) {
+		$moreparam.=(strpos($moreparam, '?')===false ? '?' : '&').'dol_use_jmobile='.$dol_use_jmobile;
+	}
 
 	echo '<br>';
 	echo '<div class="center" style="margin-top: 8px;">';
@@ -285,14 +320,16 @@ if ($forgetpasslink || $helpcenterlink) {
 
 <!-- authentication mode = <?php echo $main_authentication ?> -->
 <!-- cookie name used for this session = <?php echo $session_name ?> -->
-<!-- urlfrom in this session = <?php echo isset($_SESSION["urlfrom"])?$_SESSION["urlfrom"]:''; ?> -->
+<!-- urlfrom in this session = <?php echo isset($_SESSION["urlfrom"]) ? $_SESSION["urlfrom"] : ''; ?> -->
 
 <!-- Common footer is not used for login page, this is same than footer but inside login tpl -->
 
 <?php
 
 
-if (! empty($conf->global->MAIN_HTML_FOOTER)) print $conf->global->MAIN_HTML_FOOTER;
+if (! empty($conf->global->MAIN_HTML_FOOTER)) {
+	print $conf->global->MAIN_HTML_FOOTER;
+}
 
 if (! empty($morelogincontent) && is_array($morelogincontent)) {
 	foreach ($morelogincontent as $format => $option) {

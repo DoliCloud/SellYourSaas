@@ -25,9 +25,15 @@
  *      			- to run on deployment hosts for action backup* (payed customers rsync + databases backup)
  */
 
-if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
-if (!defined('NOSESSION')) define('NOSESSION', '1');
-if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
+if (!defined('NOREQUIREDB')) {
+	define('NOREQUIREDB', '1');
+}					// Do not create database handler $db
+if (!defined('NOSESSION')) {
+	define('NOSESSION', '1');
+}
+if (!defined('NOREQUIREVIRTUALURL')) {
+	define('NOREQUIREVIRTUALURL', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -56,16 +62,33 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+}
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
+if (! $res && file_exists("../master.inc.php")) {
+	$res=@include "../master.inc.php";
+}
+if (! $res && file_exists("../../master.inc.php")) {
+	$res=@include "../../master.inc.php";
+}
+if (! $res && file_exists("../../../master.inc.php")) {
+	$res=@include "../../../master.inc.php";
+}
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) {
+	$res=@include __DIR__."/../../master.inc.php";
+}
+if (! $res && file_exists(__DIR__."/../../../master.inc.php")) {
+	$res=@include __DIR__."/../../../master.inc.php";
+}
 if (! $res) {
 	print "Include of master fails";
 	exit(-1);
@@ -182,10 +205,12 @@ if ($dbmaster->error) {
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
-if (empty($db)) $db=$dbmaster;
+if (empty($db)) {
+	$db=$dbmaster;
+}
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 
 //$langs->setDefaultLang('en_US'); 	// To change default language of $langs
 $langs->load("main");				// To load language file for default language
@@ -250,7 +275,7 @@ $instancesbackupsuccess=array();
 $instancesbackupsuccessdiscarded=array();
 
 
-$instancefilter=(isset($argv[2])?$argv[2]:'');
+$instancefilter=(isset($argv[2]) ? $argv[2] : '');
 $instancefiltercomplete=$instancefilter;
 
 // Forge complete name of instance
@@ -278,7 +303,9 @@ if ($instancefiltercomplete) {
 	$stringforsearch = '';
 	$tmparray = explode(',', $instancefiltercomplete);
 	foreach ($tmparray as $instancefiltecompletevalue) {
-		if (! empty($stringforsearch)) $stringforsearch.=", ";
+		if (! empty($stringforsearch)) {
+			$stringforsearch.=", ";
+		}
 		$stringforsearch.="'".trim($instancefiltecompletevalue)."'";
 	}
 	$sql.= " AND c.ref_customer IN (".$stringforsearch.")";
@@ -410,7 +437,9 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 
 			$now = dol_now();
 
-			$return_val=0; $error=0; $errors=array();	// No error by default into each loop
+			$return_val=0;
+			$error=0;
+			$errors=array();	// No error by default into each loop
 
 			$qualifiedforbackup = 1;
 			// TODO Use a frequency on contract to know if we have to do backup or not
@@ -430,16 +459,16 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 				print "***** Process backup of paid instance ".($i+1)." ".$instance.' at '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." - Previous success was on ".dol_print_date($arrayofinstance['latestbackup_date_ok'], "%Y%m%d-%H%M%S").".\n";
 
 				$mode = 'unknown';
-				$mode = ($action == 'backup'?'confirm':$mode);
-				$mode = ($action == 'backupdelete'?'confirm':$mode);
-				$mode = ($action == 'backupdeleteexclude'?'confirm':$mode);
-				$mode = ($action == 'backuprsync'?'confirmrsync':$mode);
-				$mode = ($action == 'backupdatabase'?'confirmdatabase':$mode);
-				$mode = ($action == 'backuptest'?'test':$mode);
-				$mode = ($action == 'backuptestdatabase'?'testdatabase':$mode);
-				$mode = ($action == 'backuptestrsync'?'testrsync':$mode);
+				$mode = ($action == 'backup' ? 'confirm' : $mode);
+				$mode = ($action == 'backupdelete' ? 'confirm' : $mode);
+				$mode = ($action == 'backupdeleteexclude' ? 'confirm' : $mode);
+				$mode = ($action == 'backuprsync' ? 'confirmrsync' : $mode);
+				$mode = ($action == 'backupdatabase' ? 'confirmdatabase' : $mode);
+				$mode = ($action == 'backuptest' ? 'test' : $mode);
+				$mode = ($action == 'backuptestdatabase' ? 'testdatabase' : $mode);
+				$mode = ($action == 'backuptestrsync' ? 'testrsync' : $mode);
 
-				$command = ($path?$path:'')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
+				$command = ($path ? $path : '')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
 				if ($action == 'backupdelete') {
 					$command .= ' --delete';
 				}
@@ -511,7 +540,9 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 		foreach ($instances as $arrayofinstance) {
 			$instance = $arrayofinstance['instance'];
 
-			$return_val=0; $error=0; $errors=array();
+			$return_val=0;
+			$error=0;
+			$errors=array();
 
 			// Run database update
 			print "Process update database info (nb of user) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
@@ -519,13 +550,15 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 			$dbmaster->begin();
 
 			$result=$object->fetch('', '', $instance);
-			if ($result < 0) dol_print_error('', $object->error);
+			if ($result < 0) {
+				dol_print_error('', $object->error);
+			}
 
 			$object->oldcopy=dol_clone($object, 1);
 
 			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $object);
 			if ($result <= 0) {
-				$errors[] = 'Failed to do sellyoursaasRemoteAction(refresh) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors)?' '.join(',', $sellyoursaasutils->errors):'');
+				$errors[] = 'Failed to do sellyoursaasRemoteAction(refresh) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors) ? ' '.join(',', $sellyoursaasutils->errors) : '');
 			}
 
 			if (count($errors) == 0) {
@@ -642,20 +675,48 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 								$benefit = ($total * (1 - $part) - $serverprice - $totalcommissions);
 
 								$y=0;
-								if ($statkey == 'total') $y=$total;
-								if ($statkey == 'totalcommissions') $y=$totalcommissions;
-								if ($statkey == 'totalnewinstances') $y=$totalnewinstances;
-								if ($statkey == 'totallostinstances') $y=$totallostinstances;
-								if ($statkey == 'totalinstancespaying') $y=$totalinstancespaying;
-								if ($statkey == 'totalinstancespayingall') $y=$totalinstancespayingall;
-								if ($statkey == 'totalinstances') $y=$totalinstances;
-								if ($statkey == 'totalusers') $y=$totalusers;
-								if ($statkey == 'totalcustomerspaying') $y=$totalcustomerspaying;
-								if ($statkey == 'totalcustomers') $y=$totalcustomers;
-								if ($statkey == 'newinstances') $y=$newinstances;
-								if ($statkey == 'lostinstances') $y=$lostinstances;
-								if ($statkey == 'serverprice') $y=$serverprice;
-								if ($statkey == 'benefit') $y=$benefit;
+								if ($statkey == 'total') {
+									$y=$total;
+								}
+								if ($statkey == 'totalcommissions') {
+									$y=$totalcommissions;
+								}
+								if ($statkey == 'totalnewinstances') {
+									$y=$totalnewinstances;
+								}
+								if ($statkey == 'totallostinstances') {
+									$y=$totallostinstances;
+								}
+								if ($statkey == 'totalinstancespaying') {
+									$y=$totalinstancespaying;
+								}
+								if ($statkey == 'totalinstancespayingall') {
+									$y=$totalinstancespayingall;
+								}
+								if ($statkey == 'totalinstances') {
+									$y=$totalinstances;
+								}
+								if ($statkey == 'totalusers') {
+									$y=$totalusers;
+								}
+								if ($statkey == 'totalcustomerspaying') {
+									$y=$totalcustomerspaying;
+								}
+								if ($statkey == 'totalcustomers') {
+									$y=$totalcustomers;
+								}
+								if ($statkey == 'newinstances') {
+									$y=$newinstances;
+								}
+								if ($statkey == 'lostinstances') {
+									$y=$lostinstances;
+								}
+								if ($statkey == 'serverprice') {
+									$y=$serverprice;
+								}
+								if ($statkey == 'benefit') {
+									$y=$benefit;
+								}
 
 								print " -> ".$y."\n";
 
@@ -716,12 +777,12 @@ $out.= "\n\n";
 $out.= "* Nb of instances deployed: ".$nbofinstancedeployed."\n\n";
 $out.= "* Nb of paying instances (deployed with or without payment error): ".count($instances)."\n\n";	// $instance is qualified instances
 $out.= "* Nb of paying instances (deployed suspended): ".count($instancespaidsuspended)."\n";
-$out.= (count($instancespaidsuspended)?"Suspension on ".join(', ', $instancespaidsuspended)."\n\n":"\n");
+$out.= (count($instancespaidsuspended) ? "Suspension on ".join(', ', $instancespaidsuspended)."\n\n" : "\n");
 $out.= "* Nb of paying instances (deployed suspended and payment error): ".count($instancespaidsuspendedandpaymenterror)."\n";
-$out.= (count($instancespaidsuspendedandpaymenterror)?"Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n\n":"\n");
+$out.= (count($instancespaidsuspendedandpaymenterror) ? "Suspension and payment error on ".join(', ', $instancespaidsuspendedandpaymenterror)."\n\n" : "\n");
 $out.= "* Nb of paying instances (deployed not suspended): ".count($instancespaidnotsuspended)."\n\n";
 $out.= "* Nb of paying instances (deployed not suspended but payment error): ".count($instancespaidnotsuspendedpaymenterror)."\n";
-$out.= (count($instancespaidnotsuspendedpaymenterror)?"Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n":"\n");
+$out.= (count($instancespaidnotsuspendedpaymenterror) ? "Not yet suspended but payment error on ".join(', ', $instancespaidnotsuspendedpaymenterror)."\n\n" : "\n");
 
 $out.= "\n";
 
@@ -866,14 +927,15 @@ if (! $nboferrors) {
 					}*/
 
 					$titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Backup in error', 90);
-					$statsd->event($titleofevent,
+					$statsd->event(
+						$titleofevent,
 						array(
 							'text'       => $titleofevent." : \n".$msg,
 							'alert_type' => 'warning',
 							'source_type_name' => 'API',
 							'host'       => gethostname()
 							)
-						);
+					);
 
 					print "Event sent to DataDog\n";
 				} catch (Exception $e) {

@@ -82,10 +82,18 @@ if (count($listofcontractidreseller) == 0) {
 	$arrayforsort = array();
 	foreach ($listofcontractidreseller as $id => $contract) {
 		$position = 20;
-		if ($contract->array_options['options_deployment_status'] == 'processing') $position = 1;
-		if ($contract->array_options['options_deployment_status'] == 'suspended')  $position = 10;	// This is not a status
-		if ($contract->array_options['options_deployment_status'] == 'done')       $position = 20;
-		if ($contract->array_options['options_deployment_status'] == 'undeployed') $position = 100;
+		if ($contract->array_options['options_deployment_status'] == 'processing') {
+			$position = 1;
+		}
+		if ($contract->array_options['options_deployment_status'] == 'suspended') {
+			$position = 10;
+		}	// This is not a status
+		if ($contract->array_options['options_deployment_status'] == 'done') {
+			$position = 20;
+		}
+		if ($contract->array_options['options_deployment_status'] == 'undeployed') {
+			$position = 100;
+		}
 
 		$arrayforsort[$id] = array('position'=>$position, 'id'=>$id, 'contract'=>$contract);
 	}
@@ -95,8 +103,12 @@ if (count($listofcontractidreseller) == 0) {
 	foreach ($arrayforsort as $id => $tmparray) {
 		$i++;
 
-		if ($i < $firstrecord) continue;
-		if ($i > $lastrecord) break;
+		if ($i < $firstrecord) {
+			continue;
+		}
+		if ($i > $lastrecord) {
+			break;
+		}
 
 		$id = $tmparray['id'];
 		$contract = $tmparray['contract'];
@@ -106,7 +118,9 @@ if (count($listofcontractidreseller) == 0) {
 		$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
 		$dbprefix = $contract->array_options['options_prefix_db'];
-		if (empty($dbprefix)) $dbprefix = 'llx_';
+		if (empty($dbprefix)) {
+			$dbprefix = 'llx_';
+		}
 
 		// Get info about PLAN of Contract
 		$planlabel = $planref;			// By default, but we will take the name of service of type 'app' just after
@@ -132,11 +146,22 @@ if (count($listofcontractidreseller) == 0) {
 				}
 			}
 		}
-		$color = "#4DB3A2"; $displayforinstance = "";
-		if ($statuslabel == 'processing') { $color = 'orange'; }
-		if ($statuslabel == 'suspended') { $color = 'orange'; }
-		if ($statuslabel == 'undeployed') { $color = 'grey'; $displayforinstance='display:none;'; }
-		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; $displayforinstance='display:none;'; }
+		$color = "#4DB3A2";
+		$displayforinstance = "";
+		if ($statuslabel == 'processing') {
+			$color = 'orange';
+		}
+		if ($statuslabel == 'suspended') {
+			$color = 'orange';
+		}
+		if ($statuslabel == 'undeployed') {
+			$color = 'grey';
+			$displayforinstance='display:none;';
+		}
+		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+			$color = 'lightgrey';
+			$displayforinstance='display:none;';
+		}
 
 
 		// Update resources of instance
@@ -181,12 +206,19 @@ if (count($listofcontractidreseller) == 0) {
 		print '<span class="bold uppercase badge-myaccount-status" style="background-color:'.$color.'; border-radius: 5px; padding: 10px; color: #fff;">';
 		if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 			print $langs->trans("Redirection");
-		} elseif ($statuslabel == 'processing') print $langs->trans("DeploymentInProgress");
-		elseif ($statuslabel == 'done') print $langs->trans("Alive");
-		elseif ($statuslabel == 'suspended') print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
-		elseif ($statuslabel == 'undeployed') print $langs->trans("Undeployed");
-		elseif ($statuslabel == 'unreachable') print $langs->trans("Unreachable").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
-		else print $statuslabel;
+		} elseif ($statuslabel == 'processing') {
+			print $langs->trans("DeploymentInProgress");
+		} elseif ($statuslabel == 'done') {
+			print $langs->trans("Alive");
+		} elseif ($statuslabel == 'suspended') {
+			print $langs->trans("Suspended").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
+		} elseif ($statuslabel == 'undeployed') {
+			print $langs->trans("Undeployed");
+		} elseif ($statuslabel == 'unreachable') {
+			print $langs->trans("Unreachable").' '.img_warning('default', 'style="color: #fff"', 'pictowarning');
+		} else {
+			print $statuslabel;
+		}
 		print '</span></span>';
 
 		// Instance name
@@ -195,7 +227,7 @@ if (count($listofcontractidreseller) == 0) {
 
 		print '<br>';
 
-		print '<p style="padding-top: 8px;'.($statuslabel == 'undeployed'?' margin-bottom: 0px':'').'" class="clearboth">';
+		print '<p style="padding-top: 8px;'.($statuslabel == 'undeployed' ? ' margin-bottom: 0px' : '').'" class="clearboth">';
 
 		// ID
 		print '<span class="caption-helper small"><span class="opacitymedium">'.$langs->trans("ID").' : </span><span class="font-green-sharp">'.$contract->ref.'</span></span><br>';
@@ -209,8 +241,11 @@ if (count($listofcontractidreseller) == 0) {
 		// URL
 		if ($statuslabel != 'undeployed') {
 			print '<span class="caption-helper"><span class="opacitymedium">';
-			if ($conf->dol_optimize_smallscreen) print $langs->trans("URL");
-			else print $langs->trans("YourURLToGoOnYourAppInstance");
+			if ($conf->dol_optimize_smallscreen) {
+				print $langs->trans("URL");
+			} else {
+				print $langs->trans("YourURLToGoOnYourAppInstance");
+			}
 			print ' : </span>';
 			print '<a class="font-green-sharp linktoinstance" href="https://'.$contract->ref_customer.'" target="blankinstance">';
 			print 'https://'.$contract->ref_customer;
@@ -240,14 +275,17 @@ if (count($listofcontractidreseller) == 0) {
 		// Calculate price on invoicing
 		$contract->fetchObjectLinked();
 
-		$foundtemplate=0; $datenextinvoice='';
-		$pricetoshow = ''; $priceinvoicedht = 0;
+		$foundtemplate=0;
+		$datenextinvoice='';
+		$pricetoshow = '';
+		$priceinvoicedht = 0;
 		$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
 		if (is_array($contract->linkedObjects['facturerec'])) {
 			foreach ($contract->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice) {
 				$foundtemplate++;
-				if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] == 'undeployed') $pricetoshow = '';
-				else {
+				if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] == 'undeployed') {
+					$pricetoshow = '';
+				} else {
 					if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency == 1) {
 						$pricetoshow = price($templateinvoice->total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT").' / '.$langs->trans("Month");
 						$priceinvoicedht = $templateinvoice->total_ht;
@@ -260,7 +298,9 @@ if (count($listofcontractidreseller) == 0) {
 						$pricetoshow .= price($templateinvoice->total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT");
 						$priceinvoicedht = $templateinvoice->total_ht;
 					}
-					if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] != 'done') $pricetoshow = $langs->trans("InvoicingSuspended");	// Replace price
+					if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] != 'done') {
+						$pricetoshow = $langs->trans("InvoicingSuspended");
+					}	// Replace price
 				}
 				if ((! $templateinvoice->suspended) && $contract->array_options['options_deployment_status'] == 'done') {
 					$datenextinvoice = $templateinvoice->date_when;
@@ -282,8 +322,12 @@ if (count($listofcontractidreseller) == 0) {
     				          <ul class="nav nav-tabs nav-justified centpercent">
     				            <li><a id="a_tab_resource_'.$contract->id.'" href="#tab_resource_'.$contract->id.'" data-toggle="tab"'.(! in_array($action, array('updateurlxxx')) ? ' class="active"' : '').'>'.$langs->trans("ResourcesAndOptions").'</a></li>';
 		//print '<li><a id="a_tab_domain_'.$contract->id.'" href="#tab_domain_'.$contract->id.'" data-toggle="tab"'.($action == 'updateurlxxx' ? ' class="active"' : '').'>'.$langs->trans("Domain").'</a></li>';
-		if (in_array($statuslabel, array('done','suspended')) && $directaccess) print '<li><a id="a_tab_ssh_'.$contract->id.'" href="#tab_ssh_'.$contract->id.'" data-toggle="tab">'.$langs->trans("SSH").' / '.$langs->trans("SFTP").'</a></li>';
-		if (in_array($statuslabel, array('done','suspended')) && $directaccess) print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
+		if (in_array($statuslabel, array('done','suspended')) && $directaccess) {
+			print '<li><a id="a_tab_ssh_'.$contract->id.'" href="#tab_ssh_'.$contract->id.'" data-toggle="tab">'.$langs->trans("SSH").' / '.$langs->trans("SFTP").'</a></li>';
+		}
+		if (in_array($statuslabel, array('done','suspended')) && $directaccess) {
+			print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
+		}
 		//if (in_array($statuslabel, array('done','suspended')) ) print '<li><a id="a_tab_danger_'.$contract->id.'" href="#tab_danger_'.$contract->id.'" data-toggle="tab">'.$langs->trans("CancelInstance").'</a></li>';
 		print '
     				          </ul>
@@ -393,7 +437,7 @@ if (count($listofcontractidreseller) == 0) {
 				}
 			} else { // If there is no product, this is a free product
 				print '<span class="opacitymedium small">';
-				print ($this->description ? $this->description : ($line->label ? $line->label : $line->libelle));
+				print($this->description ? $this->description : ($line->label ? $line->label : $line->libelle));
 				// TODO
 				print ' / '.$langs->trans("Month");
 				print '</span>';
@@ -467,27 +511,38 @@ if (count($listofcontractidreseller) == 0) {
 				if (! empty($tmpcustomer->array_options['options_domain_registration_page'])
 					&& $tmpcustomer->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 					$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$tmpcustomer->array_options['options_domain_registration_page'];
-					if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+					if (! empty($conf->global->$newnamekey)) {
+						$sellyoursaasemail = $conf->global->$newnamekey;
+					}
 				}
 
 				print '<span style="color:orange">'.$langs->trans("WarningFoundMoreThanOneInvoicingTemplate", $sellyoursaasemail).'</span>';
 			} else {
 				// Invoice amount line
 				if ($foundtemplate != 0 && $priceinvoicedht != $contract->total_ht) {
-					if ($pricetoshow != '') print $langs->trans("FlatOrDiscountedPrice").' = ';
+					if ($pricetoshow != '') {
+						print $langs->trans("FlatOrDiscountedPrice").' = ';
+					}
 				}
 				print '<span class="bold">'.$pricetoshow.'</span>';
 
 				// Discount and next invoice line
 				if ($foundtemplate == 0) {	// foundtemplate means there is at least one template invoice (so contract is a paying contract)
-					if ($contract->array_options['options_date_endfreeperiod'] < $now) $color='orange';
+					if ($contract->array_options['options_date_endfreeperiod'] < $now) {
+						$color='orange';
+					}
 
 					print ' <span style="color:'.$color.'">';
-					if ($contract->array_options['options_date_endfreeperiod'] > 0) print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
-					else print $langs->trans("Trial");
+					if ($contract->array_options['options_date_endfreeperiod'] > 0) {
+						print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
+					} else {
+						print $langs->trans("Trial");
+					}
 					print '</span>';
 					if ($contract->array_options['options_date_endfreeperiod'] < $now) {
-						if ($statuslabel == 'suspended') print ' - <span style="color: orange">'.$langs->trans("Suspended").'</span>';
+						if ($statuslabel == 'suspended') {
+							print ' - <span style="color: orange">'.$langs->trans("Suspended").'</span>';
+						}
 						//else print ' - <span style="color: orange">'.$langs->trans("SuspendWillBeDoneSoon").'</span>';
 					}
 					if ($statuslabel == 'suspended') {
@@ -516,7 +571,9 @@ if (count($listofcontractidreseller) == 0) {
 								while ($j < $num_rowspaymentmodes) {
 									$objpaymentmodes = $db->fetch_object($resqlpaymentmodes);
 									if ($objpaymentmodes) {
-										if ($objpaymentmodes->default_rib != 1) continue;	// Keep the default payment mode only
+										if ($objpaymentmodes->default_rib != 1) {
+											continue;
+										}	// Keep the default payment mode only
 
 										$companypaymentmodetemp = new CompanyPaymentMode($db);
 										$companypaymentmodetemp->fetch($objpaymentmodes->rowid);
@@ -563,10 +620,10 @@ if (count($listofcontractidreseller) == 0) {
 			// Show message "To connect, you will need the following information:"
 			print '<br>'.$langs->trans("SSHFTPDesc2").' :';
 		}
-								print '</p>';
+		print '</p>';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
-			$ssh_server_port = ($contract->array_options['options_port_os']?$contract->array_options['options_port_os']:(! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT)?$conf->global->SELLYOURSAAS_SSH_SERVER_PORT:22));
+			$ssh_server_port = ($contract->array_options['options_port_os'] ? $contract->array_options['options_port_os'] : (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22));
 			print '
 
                                 <form class="form-horizontal" role="form">
@@ -609,7 +666,7 @@ if (count($listofcontractidreseller) == 0) {
 			}
 		}
 
-						print '
+		print '
 				              </div> <!-- END TAB SSH PANE -->
 
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
@@ -618,7 +675,7 @@ if (count($listofcontractidreseller) == 0) {
 			// Show message "To connect, you will need the following information:"
 			print '<br>'.$langs->trans("DBDesc2").' :';
 		}
-								print '</p>
+		print '</p>
                                 ';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
@@ -685,7 +742,7 @@ if (count($listofcontractidreseller) == 0) {
 			}
 		}
 
-						print '
+		print '
                             </div> <!-- END TAB DB PANE -->
 				          </div> <!-- END TAB CONTENT -->
 				        </div> <!-- END TABABLE CUSTOM-->
@@ -864,12 +921,14 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 		}
 		// $newval is subdomain (with.mysaasdomainname.com for example)
 
-		if (! preg_match('/^\./', $newval)) $newval='.'.$newval;
+		if (! preg_match('/^\./', $newval)) {
+			$newval='.'.$newval;
+		}
 		print '<option class="optionfordomain';
 		foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
 			print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
 		}
-		print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"':'').'>'.$newval.'</option>';
+		print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"' : '').'>'.$newval.'</option>';
 	}
 	print '</select>
 	    		<br class="unfloat" />
