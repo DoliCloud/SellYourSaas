@@ -759,7 +759,7 @@ function print_user_table($newdb, $object)
 		'login'=>array('label'=>"Login", 'checked'=>1, 'position'=>15),
 		'lastname'=>array('label'=>"Lastname", 'checked'=>1, 'position'=>20, 'csslist'=>'tdoverflowmax150'),
 		'firstname'=>array('label'=>"Firstname", 'checked'=>1, 'position'=>50, 'csslist'=>'tdoverflowmax150'),
-		'admin'=>array('label'=>"Admin", 'checked'=>1, 'position'=>22),
+		'admin'=>array('label'=>"Admin", 'checked'=>1, 'position'=>22, 'csslist'=>'nowraponall'),
 		'email'=>array('label'=>"Email", 'checked'=>1, 'position'=>25),
 		'pass'=>array('label'=>"Pass", 'checked'=>-1, 'position'=>27),
 		'datec'=>array('label'=>"DateCreation", 'checked'=>1, 'position'=>31),
@@ -901,11 +901,13 @@ function print_user_table($newdb, $object)
 				}
 			}
 		} elseif ($forglpi) {
-			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
-			$sql .= " glpi_useremails.email as email";
+			//$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut";
+			$sql = "SELECT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, CONCAT(gp.interface, ' (', gp.name,')') as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
+			//$sql .= ", glpi_useremails.email as email";
+			$sql .= ", GROUP_CONCAT(glpi_useremails.email) as email";
 			$sql .= " FROM glpi_users as gu";
-			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
 			$sql .= " LEFT JOIN glpi_profiles_users as gpu ON gpu.users_id = gu.id";
+			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
 			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id AND gp.interface = 'central'";
 			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.is_deleted = 1)";
 			$key = 'rowid';
@@ -932,6 +934,7 @@ function print_user_table($newdb, $object)
 			if ($search[$key]) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
+			$sql .= " GROUP BY gu.id, gu.name, gu.realname, gu.firstname, admin, gp.interface, pass, gu.password, gu.date_creation, gu.date_mod, gu.last_login, nu1, nu2, nu3, gu.entities_id, gu.is_active";
 
 			$sql .= $newdb->order($sortfield, $sortorder);
 		} else {
@@ -981,7 +984,12 @@ function print_user_table($newdb, $object)
 							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 							print '</td>';
 						} elseif ($key == 'email') {
-							print '<td class="tdoverflowma150" title="'.dol_escape_htmltag($obj->$key).'">'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
+							print '<td class="tdoverflowma150" title="'.dol_escape_htmltag($obj->$key).'">';
+							$tmparray = explode(',', $obj->$key);
+							foreach ($tmparray as $tmpemail) {
+								print dol_print_email($tmpemail, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1)." ";
+							}
+							print '</td>';
 						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
 							print '<td class="nowraponall">'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
 						} else {
