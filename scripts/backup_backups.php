@@ -408,7 +408,7 @@ if (!empty($instanceserver)) {
 	$object=new Contrat($dbmaster);
 
 	$sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
-	$sql.= " ce.deployment_status as instance_status, ce.username_os as osu";
+	$sql.= " ce.deployment_status as instance_status, ce.username_os as osu, ce.latestbackup_date_ok, ce.backup_frequency";
 	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 	$sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 	if (isset($argv[3]) && $argv[3] != "--delete") {
