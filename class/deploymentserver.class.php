@@ -129,7 +129,7 @@ class Deploymentserver extends CommonObject
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>0, 'cssview'=>'wordbreak', 'validate'=>'1',),
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
-		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserLastModif', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
+		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModification', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
 	);
 
 	/**
