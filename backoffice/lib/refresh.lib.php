@@ -429,8 +429,8 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 
 		if (! $error && $done) {
 			$now=dol_now();
-			$object->date_lastcheck=$now;
-			$object->lastcheck=$now;	// For backward compatibility
+			$object->date_lastcheck = $now;
+			$object->lastcheck = $now;	// For backward compatibility
 
 			//$object->array_options['options_filelock']=$now;
 			//$object->array_options['options_fileauthorizekey']=$now;
