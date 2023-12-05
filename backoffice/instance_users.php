@@ -901,8 +901,8 @@ function print_user_table($newdb, $object)
 				}
 			}
 		} elseif ($forglpi) {
-			//$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut";
-			$sql = "SELECT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, CONCAT(gp.interface, ' (', gp.name,')') as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
+			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
+			//$sql = "SELECT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, CONCAT(gp.interface, ' (', gp.name,')') as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
 			//$sql .= ", glpi_useremails.email as email";
 			$sql .= ", GROUP_CONCAT(glpi_useremails.email) as email";
 			$sql .= " FROM glpi_users as gu";
@@ -984,9 +984,15 @@ function print_user_table($newdb, $object)
 							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 							print '</td>';
 						} elseif ($key == 'email') {
-							print '<td class="tdoverflowma150" title="'.dol_escape_htmltag($obj->$key).'">';
 							$tmparray = explode(',', $obj->$key);
+							print '<td class="tdoverflowmax200" title="'.dol_escape_htmltag(join(', ', array_unique($tmparray))).'">';
+							$tmparray = explode(',', $obj->$key);
+							$cacheforthisline = array();
 							foreach ($tmparray as $tmpemail) {
+								if (!empty($cacheforthisline[$tmpemail])) {
+									continue;
+								}
+								$cacheforthisline[$tmpemail] = 1;
 								print dol_print_email($tmpemail, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1)." ";
 							}
 							print '</td>';
