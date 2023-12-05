@@ -846,8 +846,8 @@ class Deploymentserver extends CommonObject
 			$return .= ' <div class="inline-block opacitymedium valignmiddle tdoverflowmax100">'.$this->label.'</div>';
 		}
 
-		$return .= '<br><span class="opacitymedium">'.$langs->trans("NbOfInstances").':</span> '.(empty($this->nb_instances) ? 0 : $this->nb_instances);
-		$return .= '<br><span class="opacitymedium">'.$langs->trans("NbOfBackups").':</span> ';
+		$return .= '<br><div class="opacitymedium small inline-block valignmiddle" title="'.$langs->trans("NbOfInstances").'">'.$langs->trans("NbOfInstances").':</div> '.(empty($this->nb_instances) ? 0 : $this->nb_instances);
+		$return .= '<br><div class="opacitymedium small tdoverflowmax100 inline-block valignmiddle" title="'.$langs->trans("NbOfBackups").'">'.$langs->trans("NbOfBackups").':</div> ';
 		if ($this->nb_backuptotal) {
 			if ($this->nb_backuptotal != $this->nb_backupok) {
 				$return .= '<span class="error">';
@@ -858,7 +858,7 @@ class Deploymentserver extends CommonObject
 			}
 		}
 		if (method_exists($this, 'getLibStatut')) {
-			$return .= '<br><div class="info-box-status margintoponly">'.$this->getLibStatut(3).'</div>';
+			$return .= '<br><div class="info-box-status">'.$this->getLibStatut(3).'</div>';
 		}
 		$return .= '</div>';
 		$return .= '</div>';
