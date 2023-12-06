@@ -300,6 +300,7 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file = $certko"
 	
+	
 	echo "Link certificate for virtualhost with
 		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
 		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
@@ -308,6 +309,18 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
 	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
 	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
+	
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate beeing loaded"
+	service apache2 reload
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running service apache2 reload
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi	
 fi
 
 if [ "x$vhostko" != "x0" ] || [ "x$certko" != "x0" ]; then
