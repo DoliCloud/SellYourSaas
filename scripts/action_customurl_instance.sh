@@ -39,7 +39,7 @@ else
 	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
-	export vhostfilewebsite="$templatesdir/vhostHttps-sellyoursaas-dolibarrwebsite.template"
+	export vhostfilewebsite="$scriptdir/templates/vhostHttps-sellyoursaas-dolibarrwebsite.template"
 fi
 
 if [ "$(id -u)" != "0" ]; then
