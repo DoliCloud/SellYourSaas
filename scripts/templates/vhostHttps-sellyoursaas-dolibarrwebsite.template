@@ -72,14 +72,14 @@
         
         #SSLProxyEngine on
         # Use ProxyPass
-        #ProxyPass /public https://__instanceName____domainName__/public
-        #ProxyPassReverse https://__instanceName____domainName__/public /public
+        #ProxyPass /public https://__instanceName__.__domainName__/public
+        #ProxyPassReverse https://__instanceName__.__domainName__/public /public
         #ProxyRequests off
         # or use RewriteCond/Rule with [P] flag
         #RewriteCond %{HTTP_HOST} ^public\. [NC]
         #RewriteRule "(.*)$" "https://testldr4.with4.dolicloud.com/$1" [P]
         
-		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__.crt">
+		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.crt">
 	        #   SSL Engine Switch:
 	        #   Enable/Disable SSL for this virtual host.
 	        SSLEngine on
@@ -92,10 +92,10 @@
 	        # The leading slash is made optional so that this will work either in httpd.conf
 	        # or .htaccess context
 	
-	        SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__.crt
-	        SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__.key
-	        SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__-intermediate.crt
-	        SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName____domainName__-__webSiteDomain__-intermediate.crt
+	        SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.crt
+	        SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.key
+	        SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__-intermediate.crt
+	        SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__-intermediate.crt
         </IfFile>
 
 </VirtualHost>
