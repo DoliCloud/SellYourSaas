@@ -62,10 +62,10 @@ if (! function_exists("llxHeader")) {
 	 */
 	function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '', $disablenofollow = 0, $disablenoindex = 0)
 	{
-		global $conf, $hookmanager;
+		global $conf;
 
 		// html header
-		top_htmlhead_sellyoursaas($head, $title, $disablejs, $disablehead, $arrayofjs, $arrayofcss);
+		top_htmlhead_sellyoursaas($head, $title, $disablejs, $disablehead, $arrayofjs, $arrayofcss, '', $disablenofollow, $disablenoindex);
 
 		print '<body id="mainbody"'.($morecssonbody ? ' class="'.$morecssonbody.'"' : '').'>' . "\n";
 

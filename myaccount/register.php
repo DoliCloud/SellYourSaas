@@ -194,7 +194,7 @@ if ($productref != 'none') {
 	}
 }
 
-if ($conf->global->CONTRACT_ADDON == 'mod_contract_olive') {
+if (getDolGlobalString('CONTRACT_ADDON') == 'mod_contract_olive') {
 	print "You must configure the module Contract to a numbering module that is able to generate new number for new contracts.";
 	exit;
 }
@@ -293,7 +293,7 @@ if (empty($_COOKIE[$cookieregistrationa])) {
 	setcookie($cookieregistrationa, 1, 0, "/", null, false, true);	// Cookie to count nb of registration from this computer
 }
 
-llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register');
+llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register', '', 0, 1);
 
 ?>
 
