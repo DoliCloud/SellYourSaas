@@ -380,7 +380,7 @@ print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSa
 print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_ACCOUNT_URL" value="'.getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL').'">';
 print '</td>';
-print '<td><span class="opacitymedium small">https://myaccount.mysaasdomainname.com<br>Note: Virtual hosts for such domains must link to <strong>'.dol_buildpath('sellyoursaas/myaccount').'</strong></span></td>';
+print '<td><span class="opacitymedium small">https://myaccount.mysaasdomainname.com<br>Note: The virtual host for this domain must point to <strong>'.dol_buildpath('sellyoursaas/myaccount').'</strong></span></td>';
 print '</tr>';
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
