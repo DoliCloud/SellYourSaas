@@ -88,7 +88,7 @@ if ($action != 'create') {
 }
 
 // Initialize array of search criterias
-$search_all = GETPOST('search_all', 'alphanohtml');
+$search_all = trim(GETPOST('search_all', 'alphanohtml'));
 $search = array();
 $arrayoffields = array('rowid', 'login', 'firstname', 'lastname', 'admin', 'email');
 foreach ($arrayoffields as $key) {
@@ -161,7 +161,15 @@ foreach ($object->lines as $keyline => $line) {
  *	Actions
  */
 
-$parameters=array('id'=>$id);
+if (GETPOST('cancel', 'alpha')) {
+	$action = 'list';
+	$massaction = '';
+}
+if (!GETPOST('confirmmassaction', 'alpha') && $massaction != 'presend' && $massaction != 'confirm_presend') {
+	$massaction = '';
+}
+
+$parameters = array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
@@ -499,14 +507,21 @@ $formcompany = new FormCompany($db);
 
 $title = $langs->trans("Users");
 $help_url='';
+
+// Output page
+// --------------------------------------------------------------------
+
 llxHeader('', $title, $help_url);
 
 $param = '';
-/*if (!empty($mode)) {
+if (!empty($mode)) {
 	$param .= '&mode='.urlencode($mode);
-}*/
+}
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
 	$param .= '&contextpage='.urlencode($contextpage);
+}
+if ($id > 0) {
+	$param .= '&id='.((int) $id);
 }
 /*if ($limit > 0 && $limit != $conf->liste_limit) {
 	$param .= '&limit='.((int) $limit);
@@ -748,7 +763,7 @@ $db->close();
  */
 function print_user_table($newdb, $object)
 {
-	global $db, $langs, $form;
+	global $db, $langs, $form, $hookmanager;
 	global $search, $id, $contextpage, $param;
 
 	$sortfield = GETPOST('sortfield', 'aZ09comma');
@@ -779,18 +794,24 @@ function print_user_table($newdb, $object)
 		$sortorder = "ASC";
 	}
 
+	$arrayofmassactions = array();
+	$moreforfilter = '';
+
 	$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
 
 	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
-	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
+	$selectedfields = ($mode != 'kanban' ? $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN', '')) : ''); // This also change content of $arrayfields
+	$selectedfields .= (count($arrayofmassactions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
 
-	print '<div class="div-table-responsive">';
-	print '<table class="noborder centpercent">';
+	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
+	print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwithfilterbefore" : "").'">'."\n";
+
 
 	$cssforfield = '';
 
-	// Filters line
-	print '<tr class="liste_titre">';
+	// Fields title search
+	// --------------------------------------------------------------------
+	print '<tr class="liste_titre_filter">';
 	// Action column
 	if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 		print '<td class="liste_titre center maxwidthsearch">';
@@ -798,7 +819,8 @@ function print_user_table($newdb, $object)
 		print $searchpicto;
 		print '</td>';
 	}
-	print '<td>#</td>';
+	// Num
+	print '<td></td>';
 	foreach ($arrayfields as $key => $value) {
 		if ($key == 'statut') {
 			$cssforfield = ($cssforfield ? ' ' : '').'center';
@@ -818,48 +840,75 @@ function print_user_table($newdb, $object)
 			} else {
 				print '<td class="liste_titre"></td>';
 			}
-
-			if (in_array($key, array('rowid', 'login', 'lastname', 'firstname', 'admin', 'email'))) {
-				//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
-				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
-				print '<input type="text" class="flat maxwidth50" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
-				print '</td>';
-			} else {
-				print '<td class="liste_titre"></td>';
-			}
 		}
 	}
+	// Extra fields
+	//include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
+
+	// Fields from hook
+	$parameters = array('arrayfields'=>$arrayfields);
+	$reshook = $hookmanager->executeHooks('printFieldListOption', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+	print $hookmanager->resPrint;
+	/*if (!empty($arrayfields['anotherfield']['checked'])) {
+	 print '<td class="liste_titre"></td>';
+	 }*/
 	// Action column
 	if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 		print '<td class="liste_titre center maxwidthsearch">';
-		$searchpicto = $form->showFilterButtons('left');
+		$searchpicto = $form->showFilterButtons();
 		print $searchpicto;
 		print '</td>';
 	}
-	print '</tr>';
+	print '</tr>'."\n";
 
-	// Fitled title line
+	$totalarray = array();
+	$totalarray['nbfield'] = 0;
+
+	// Fields title label
+	// --------------------------------------------------------------------
 	print '<tr class="liste_titre">';
 	// Action column
 	if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-		print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";
+		print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ')."\n";
+		$totalarray['nbfield']++;
 	}
+	// Numero
 	print '<td>#</td>';
+	$totalarray['nbfield']++;
 	foreach ($arrayfields as $key => $value) {
+		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 		if ($key == 'statut') {
-			$cssforfield = ($cssforfield ? ' ' : '').'center';
-		} else {
-			$cssforfield = (empty($value['csslist']) ? '' : $value['csslist']);
+			$cssforfield .= ($cssforfield ? ' ' : '').'center';
+		} elseif (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'center';
+		} elseif (in_array($val['type'], array('timestamp'))) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+		} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('id', 'rowid', 'ref', 'status')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'right';
 		}
+		$cssforfield = preg_replace('/small\s*/', '', $cssforfield);	// the 'small' css must not be used for the title label
 		if (!empty($arrayfields[$key]['checked'])) {
-			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id.$param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''), 0, (empty($val['helplist']) ? '' : $val['helplist']))."\n";
+			$totalarray['nbfield']++;
 		}
 	}
+	// Extra fields
+	//include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_title.tpl.php';
+	// Hook fields
+	$parameters = array('arrayfields'=>$arrayfields, 'param'=>$param, 'sortfield'=>$sortfield, 'sortorder'=>$sortorder, 'totalarray'=>&$totalarray);
+	$reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+	print $hookmanager->resPrint;
+	/*if (!empty($arrayfields['anotherfield']['checked'])) {
+	 print '<th class="liste_titre right">'.$langs->trans("AnotherField").'</th>';
+	 $totalarray['nbfield']++;
+	 }*/
 	// Action column
 	if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-		print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";
+		print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ')."\n";
+		$totalarray['nbfield']++;
 	}
-	print '</tr>';
+	print '</tr>'."\n";
+
 
 	if (is_object($newdb) && $newdb->connected) {
 		$fordolibarr = 1;
@@ -904,13 +953,14 @@ function print_user_table($newdb, $object)
 			$resql=$newdb->query($sql);
 			if (empty($resql)) {	// Alternative for Dolibarr 3.7-
 				$sql = "SELECT rowid, login, lastname as lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-				$sql .= " FROM ".$prefix_db."user";
+				$sql .= " FROM ".$prefix_db."user as t ";
 				$sql .= $newdb->order($sortfield, $sortorder);
 				$resql = $newdb->query($sql);
 				if (empty($resql)) {	// Alternative for Dolibarr 3.3-
 					$sql = "SELECT rowid, login, nom as lastname, prenom as firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-					$sql .= " FROM ".$prefix_db."user";
+					$sql .= " FROM ".$prefix_db."user as t";
 					$sql .= $newdb->order($sortfield, $sortorder);
+					$resql = $newdb->query($sql);
 				}
 			}
 		} elseif ($forglpi) {
