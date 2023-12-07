@@ -755,7 +755,7 @@ function print_user_table($newdb, $object)
 	$sortorder = GETPOST('sortorder', 'aZ09comma');
 
 	$arrayfields = array(
-		'rowid'=>array('label'=>"ID", 'checked'=>1, 'position'=>10),
+		'rowid'=>array('label'=>"ID", 'checked'=>1, 'position'=>10, 'csslist'=>'maxwidth50'),
 		'login'=>array('label'=>"Login", 'checked'=>1, 'position'=>15),
 		'lastname'=>array('label'=>"Lastname", 'checked'=>1, 'position'=>20, 'csslist'=>'tdoverflowmax150'),
 		'firstname'=>array('label'=>"Firstname", 'checked'=>1, 'position'=>50, 'csslist'=>'tdoverflowmax150'),
@@ -806,10 +806,23 @@ function print_user_table($newdb, $object)
 			$cssforfield = (empty($value['csslist']) ? '' : $value['csslist']);
 		}
 		if (!empty($arrayfields[$key]['checked'])) {
+			if (in_array($key, array('rowid', 'admin'))) {
+				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
+				print '<input type="text" class="flat maxwidth50" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+				print '</td>';
+			} elseif (in_array($key, array('login', 'lastname', 'firstname', 'email'))) {
+				//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''),      $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
+				print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+				print '</td>';
+			} else {
+				print '<td class="liste_titre"></td>';
+			}
+
 			if (in_array($key, array('rowid', 'login', 'lastname', 'firstname', 'admin', 'email'))) {
 				//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
-				print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+				print '<input type="text" class="flat maxwidth50" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
 				print '</td>';
 			} else {
 				print '<td class="liste_titre"></td>';
@@ -901,7 +914,17 @@ function print_user_table($newdb, $object)
 				}
 			}
 		} elseif ($forglpi) {
-			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
+			$sql .= "SELECT gu.id AS rowid, gu.name as login, gu.realname as lastname, gu.firstname,";
+			$sql .= " GROUP_CONCAT(DISTINCT IF(gp.interface = 'central', 'central', NULL)) AS admin,";
+			$sql .= " GROUP_CONCAT(DISTINCT gue.email) AS email,";
+			$sql .= " '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login AS datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
+			$sql .= " FROM glpi_users as gu LEFT JOIN glpi_profiles_users AS gpu ON gu.id = gpu.users_id";
+			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id LEFT JOIN glpi_useremails AS gue ON gue.users_id = gu.id";
+			$sql .= " WHERE gu.is_deleted = 0 AND gu.name NOT IN ('supportcloud')";
+			//$sql .= " GROUP BY rowid, login, realname, firstname, pass, pass_crypted, datec, datem, datelastlogin, nu1, nu2, nu3, entity, statut, admin;";
+			/*
+			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname,";
+			$sql .= " gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
 			//$sql = "SELECT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, CONCAT(gp.interface, ' (', gp.name,')') as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
 			//$sql .= ", glpi_useremails.email as email";
 			$sql .= ", GROUP_CONCAT(glpi_useremails.email) as email";
@@ -910,6 +933,7 @@ function print_user_table($newdb, $object)
 			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
 			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id AND gp.interface = 'central'";
 			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.is_deleted = 1)";
+			*/
 			$key = 'rowid';
 			if ($search[$key]) {
 				$sql .= natural_search($key, $search[$key], 1);
@@ -928,13 +952,15 @@ function print_user_table($newdb, $object)
 			}
 			$key = 'admin';
 			if ($search[$key]) {
-				$sql .= natural_search('gp.interface', $search[$key], 0);
+				//$sql .= natural_search('gp.interface', $search[$key], 0);
+				$sql .= natural_search('gp.name', $search[$key], 0);
 			}
 			$key = 'email';
 			if ($search[$key]) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
-			$sql .= " GROUP BY gu.id, gu.name, gu.realname, gu.firstname, admin, gp.interface, pass, gu.password, gu.date_creation, gu.date_mod, gu.last_login, nu1, nu2, nu3, gu.entities_id, gu.is_active";
+			//$sql .= " GROUP BY gu.id, gu.name, gu.realname, gu.firstname, admin, gp.interface, pass, gu.password, gu.date_creation, gu.date_mod, gu.last_login, nu1, nu2, nu3, gu.entities_id, gu.is_active";
+			$sql .= " GROUP BY rowid, login, realname, firstname, pass, pass_crypted, datec, datem, datelastlogin, nu1, nu2, nu3, entity, statut";
 
 			$sql .= $newdb->order($sortfield, $sortorder);
 		} else {
