@@ -976,7 +976,7 @@ function print_user_table($newdb, $object)
 				$obj = $newdb->fetch_object($resql);
 
 				global $object;
-				$url='https://'.$object->ref_customer.'?username='.$obj->login.'&amp;password='.$obj->pass;
+				$url='https://'.$object->ref_customer.'?username='.urlencode($obj->login).'&amp;password='.urlencode($obj->pass);
 				print '<tr class="oddeven">';
 				// Action column
 				if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
