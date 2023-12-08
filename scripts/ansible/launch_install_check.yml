@@ -1007,6 +1007,14 @@
   become_method: sudo
   become_user: root
   tasks:
+    #- name: Set sshd config files /etc/ssh/sshd_config.d/sellyousaas.conf
+    #  ansible.builtin.template:
+    #    src: ../../etc/ssh/sshd_config.d/sellyoursaas.conf
+    #    dest: /etc/ssh/sshd_config.d/sellyoursaas.conf
+    #    owner: root
+    #    group: root
+    #    mode: '0644'
+
     - name: Add a section into the sshd_config
       ansible.builtin.blockinfile:
         path: /etc/ssh/sshd_config
@@ -1061,9 +1069,10 @@
   become_method: sudo
   become_user: root
   tasks:
-  - name: Launch perms.sh to set permissions, create some dirs and files
+  - name: Launch perms.ksh to set permissions, create some dirs and files
     command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh confirm"
     register: command_output
+    #changed_when: false
 
   - debug:
       var: command_output.stdout_lines  

@@ -169,6 +169,11 @@ if ($fp) {
 	exit(-1);
 }
 
+if (!$masterserver && !$instanceserver) {
+	fwrite(STDERR, "This server is not a master server nor a deployment server, so info_users.php can't be used here to get ip or public key of user.\n");
+	exit(0);
+}
+
 
 /*
  *	Main

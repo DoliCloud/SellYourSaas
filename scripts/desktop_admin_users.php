@@ -80,13 +80,17 @@ if (! isset($argv[4])) {	// Check parameters
 	print 'Administer unix users of a SellYourSaas infrastructure remotely.'."\n";
 	print "This script must be ran remotely from an allowed desktop.\n";
 	print "\n";
-	print "Usage:\n".$script_file." (create|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userroot=0|1] [userip=userip] [userpublickey=\"userpublickey\"] [userpassword=\"userpassword\"]\n";
+	print "Usage:\n".$script_file." (create|update|deactivate|reactivate|remove) logintoupdate hostfile (master,deployment,web) [loginforansible] [userroot=0|1] [userip=userip] [userpublickey=\"userpublickey\"] [userpassword=\"userpassword\"]\n";
 	print "\n";
 	print "Example:\n";
-	print "To create a first admin user (root allowed): ".$script_file.' create logintocreate hostfile master,deployment,web ubuntu userroot=1 userpassword=... userpublickey="ABC..."'."\n";
-	print "To add an admin user (root not allowed): ".$script_file.' create logintocreate hostfile master,deployment,web userroot=0 userip=ipofuser userpassword=... userpublickey="ABC..."'."\n";
-	print "To update root access of a user: ".$script_file.' create logintoupdate hostfile withX.sellyoursaasdomain.com userroot=X'."\n";
-	print "To remove a user: ".$script_file.' remove logintodelete hostfile master,deployment,web'."\n";
+	print "- To create a sysadmin user (like the first one, root allowed):\n";
+	print $script_file.' create logintocreate hostfile master,deployment,web ubuntu userroot=1 userpassword=... userpublickey="ABC..."'."\n";
+	print "- To add a sysadmin user (root not allowed):\n";
+	print $script_file.' create logintocreate hostfile master,deployment,web userroot=0 userip=ipofuser userpassword=... userpublickey="ABC..."'."\n";
+	print "- To update a user (for example to change root access):\n";
+	print $script_file.' update logintoupdate hostfile withX.sellyoursaasdomain.com userroot=X'."\n";
+	print "- To remove a user:\n";
+	print $script_file.' remove logintodelete hostfile master,deployment,web'."\n";
 	exit(-1);
 }
 print '--- start'."\n";
@@ -143,13 +147,13 @@ if ($action == 'create' && ($userroot === '' || empty($userpublickey))) {
 	echo "Error: To create a personal user login, the parameter userroot and userpublickey are mandatory.\n";
 	exit(-1);
 }
-if ($userroot && empty($userpassword)) {
+if ($action == 'create' && $userroot && empty($userpassword)) {
 	echo "Error: To create a personal user login allowed to get root access (userroot=1), the parameter userpassword is mandatory.\n";
 	exit(-1);
 }
 
 $scriptyaml = '';
-if ($action == 'create') {
+if ($action == 'create' || $action == 'update') {
 	$scriptyaml = 'user_create.yml';
 } elseif ($action == 'reactivate') {
 	$scriptyaml = 'user_reactivate.yml';
@@ -169,6 +173,8 @@ if (empty($target)) {
 }
 
 $currentdir = getcwd();
+
+echo "Go into directory $path./ansible\n";
 
 chdir($path.'/ansible');
 

@@ -25,6 +25,7 @@
     command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php ip {{login}}"
     register: command_for_userip
     when: sellyoursaas_installed_rules.stat.exists == True
+    changed_when: false
 
   - name: Get public key into a variable
     command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php public_key {{login}}"
@@ -32,6 +33,7 @@
     when: 
       - sellyoursaas_installed_rules.stat.exists == True
       - userpublickey is not defined
+    changed_when: false
 
   - name: Set var userip if not defined
     set_fact:
@@ -110,9 +112,9 @@
       - userpublickey is defined
       - userpublickey|length > 0
 
-  - name: Add user to AllowUsers in SSH sellyoursaas conf
+  - name: Add user to AllowUsers in SSH sellyoursaas-users.conf
     lineinfile:
-      path: /etc/ssh/sshd_config.d/sellyoursaas.conf
+      path: /etc/ssh/sshd_config.d/sellyoursaas-users.conf
       line: "AllowUsers {{ login }}"
       create: yes
     register: addlineinsshconf

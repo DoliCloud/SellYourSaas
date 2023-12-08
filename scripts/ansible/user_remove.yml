@@ -23,11 +23,18 @@
       state: absent
     register: removelineinsshconf
 
+  - name: Remove user from SSH conf
+    lineinfile:
+      path: /etc/ssh/sshd_config.d/sellyoursaas-users.conf
+      line: "AllowUsers {{ login }}"
+      state: absent
+    register: removelineinsshconf2
+
   - name: Restart SSH service to flush that user from in-memory configuration
     service:
       name: ssh
       state: restarted
-    when: removelineinsshconf.changed
+    when: removelineinsshconf.changed|removelineinsshconf2.changed
 
   - name: Remove IP file from sellyoursaas.d
     ansible.builtin.file:

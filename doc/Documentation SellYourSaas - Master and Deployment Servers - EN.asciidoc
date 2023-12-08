@@ -8,7 +8,7 @@ This document describes the technical and functional implementation of Sell-Your
 :title: Document installation and operation of SellYourSaas
 :subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...).
 :keywords: sellyoursaas, saas, dolibarr, wamp, glpi
-:imagesdir: ./img
+:imagesdir: ./img_
 :city: Bordeaux
 :toc: manual
 :toclevels: 3
@@ -341,54 +341,21 @@ chmod go-rw /etc/ssh/sshd_config
 ---------------
 
 
-Create a file */etc/ssh/sshd_config.d/sellyoursaas.conf* to change login permissions with the following content:
+Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas.conf* on the server in file */etc/ssh/sshd_config.d/sellyoursaas.conf*
 
 For Ubuntu 18.04: you can concat the content into file *sshd_config*, but be sure to not have duplicate values.
 
+
+Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas-users.conf* on the server in file */etc/ssh/sshd_config.d/sellyoursaas-users.conf* and
+add entries for each sysadmin users.
+
 [source, conf]
 ---------------
-# Privilege Separation is turned on for security
-#UsePrivilegeSeparation yes
-# Permissions on files must be correct to allow login
-StrictModes yes
-
-Port 22
-
-# MaxAuthTries 6
-MaxAuthTries 10
-# MaxSessions 10
-MaxSessions 25
-
-# Disallow login to root
-PermitRootLogin no
-# Disallow empty passwords
-PermitEmptyPasswords no
-# Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
-ChallengeResponseAuthentication no
-
-# Define list of allowed method to authenticate
-PasswordAuthentication no   # This will be allowed for osu users only into main sshd_config file with a Match User rule
-PubkeyAuthentication yes
-
-DenyUsers guest
-
-AuthorizedKeysFile     .ssh/authorized_keys .ssh/authorized_keys_support
-
-# Legacy changes - To allow an old client (like old PHP) to connect to
-HostKeyAlgorithms +ssh-rsa
-KexAlgorithms +diffie-hellman-group1-sha1
-Ciphers +aes128-cbc
-
-ClientAliveInterval 30
-#ClientAliveCountMax 3
-
-AllowUsers admin osu*
 AllowUsers myunixlogin
-
+AllowUsers otherunixlogin
 ---------------
 
-Please note: replace *myunixlogin* with the correct value before taking changes into account with:
-
+Please note: replace *myunixlogin* and *otherunixlogin* with the correct value before taking changes into account.
 
 
 Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rules into the custom file)
