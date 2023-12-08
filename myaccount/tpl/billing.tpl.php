@@ -166,8 +166,8 @@ if (count($listofcontractid) > 0) {
 					              </div>
 
 								  <!-- Payment mode -->
-								  <div class="col-md-2 tdoverflowmax150" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)).'">
-									'.dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)).'
+								  <div class="col-md-2 tdoverflowmax150" title="'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'">
+									'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'
 					              </div>
 
 					              <div class="col-md-2 nowrap">
