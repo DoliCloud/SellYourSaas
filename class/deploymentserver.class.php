@@ -129,7 +129,7 @@ class Deploymentserver extends CommonObject
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>0, 'cssview'=>'wordbreak', 'validate'=>'1',),
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
-		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserLastModif', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
+		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModification', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
 	);
 
 	/**
@@ -580,7 +580,8 @@ class Deploymentserver extends CommonObject
 				$sql .= " WHERE filename LIKE '".$this->db->escape($this->ref)."%' AND filepath = 'deploymentserver/".$this->db->escape($this->ref)."' and entity = ".$conf->entity;
 				$resql = $this->db->query($sql);
 				if (!$resql) {
-					$error++; $this->error = $this->db->lasterror();
+					$error++;
+					$this->error = $this->db->lasterror();
 				}
 
 				// We rename directory ($this->ref = old ref, $num = new ref) in order not to lose the attachments
@@ -749,7 +750,7 @@ class Deploymentserver extends CommonObject
 				$label = $langs->trans("ShowDeploymentserver");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
-			$linkclose .= ($label ? ' title="'.dol_escape_htmltag($label, 1).'"' :  ' title="tocomplete"');
+			$linkclose .= ($label ? ' title="'.dol_escape_htmltag($label, 1).'"' : ' title="tocomplete"');
 			$linkclose .= $dataparams.' class="'.$classfortooltip.($morecss ? ' '.$morecss : '').'"';
 		} else {
 			$linkclose = ($morecss ? ' class="'.$morecss.'"' : '');
@@ -845,8 +846,8 @@ class Deploymentserver extends CommonObject
 			$return .= ' <div class="inline-block opacitymedium valignmiddle tdoverflowmax100">'.$this->label.'</div>';
 		}
 
-		$return .= '<br><span class="opacitymedium">'.$langs->trans("NbOfInstances").':</span> '.(empty($this->nb_instances) ? 0 : $this->nb_instances);
-		$return .= '<br><span class="opacitymedium">'.$langs->trans("NbOfBackups").':</span> ';
+		$return .= '<br><div class="opacitymedium small inline-block valignmiddle" title="'.$langs->trans("NbOfInstances").'">'.$langs->trans("NbOfInstances").':</div> '.(empty($this->nb_instances) ? 0 : $this->nb_instances);
+		$return .= '<br><div class="opacitymedium small tdoverflowmax100 inline-block valignmiddle" title="'.$langs->trans("NbOfBackups").'">'.$langs->trans("NbOfBackups").':</div> ';
 		if ($this->nb_backuptotal) {
 			if ($this->nb_backuptotal != $this->nb_backupok) {
 				$return .= '<span class="error">';
@@ -857,7 +858,7 @@ class Deploymentserver extends CommonObject
 			}
 		}
 		if (method_exists($this, 'getLibStatut')) {
-			$return .= '<br><div class="info-box-status margintoponly">'.$this->getLibStatut(3).'</div>';
+			$return .= '<br><div class="info-box-status">'.$this->getLibStatut(3).'</div>';
 		}
 		$return .= '</div>';
 		$return .= '</div>';
@@ -909,7 +910,9 @@ class Deploymentserver extends CommonObject
 		}
 
 		$statusType = 'status'.$status;
-		if ($status == self::STATUS_ENABLED) $statusType = 'status4';
+		if ($status == self::STATUS_ENABLED) {
+			$statusType = 'status4';
+		}
 
 		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
 	}

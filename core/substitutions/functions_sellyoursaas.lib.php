@@ -56,12 +56,16 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 			$result = $companypaymentmode->fetch(0, null, $object->id, 'card');
 			if ($result >= 0) {
 				$substitutionarray['__CARD_LAST4__']=($companypaymentmode->last_four ? $companypaymentmode->last_four : 'Not Defined');
-			} else dol_print_error($db);
+			} else {
+				dol_print_error($db);
+			}
 			$result = $companypaymentmode->fetch(0, null, $object->id, 'paypal');
 			if ($result >= 0) {
 				$substitutionarray['__PAYPAL_START_DATE__']=($companypaymentmode->starting_date ? dol_print_date($companypaymentmode->starting_date, 'dayrfc', 'gmt', $langs) : 'Not Defined');
 				$substitutionarray['__PAYPAL_EXP_DATE__']=($companypaymentmode->ending_date ? dol_print_date($companypaymentmode->ending_date, 'dayrfc', 'gmt', $langs) : 'Not Defined');
-			} else dol_print_error($db);
+			} else {
+				dol_print_error($db);
+			}
 		}
 
 		if (is_object($object) && get_class($object) == 'Contrat') {
@@ -113,7 +117,9 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 
 		dol_syslog("savconf isset = ".isset($savconf));
 
-		if (! isset($savconf)) $savconf = dol_clone($conf);
+		if (! isset($savconf)) {
+			$savconf = dol_clone($conf);
+		}
 
 		dol_syslog("savconf has currently savconf->global->SELLYOURSAAS_NAME = ".$savconf->global->SELLYOURSAAS_NAME." savconf->global->SELLYOURSAAS_MAIN_EMAIL = ".$savconf->global->SELLYOURSAAS_MAIN_EMAIL);
 
@@ -129,7 +135,9 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		// This erase value of setup permanently
 		$constforaltname = $tmpobject->array_options['options_domain_registration_page'];
 		$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
-		if (! empty($conf->global->$newnamekey)) $conf->global->SELLYOURSAAS_NAME = $conf->global->$newnamekey;
+		if (! empty($conf->global->$newnamekey)) {
+			$conf->global->SELLYOURSAAS_NAME = $conf->global->$newnamekey;
+		}
 
 		$urlmyaccount = $savconf->global->SELLYOURSAAS_ACCOUNT_URL;
 		if (! empty($tmpobject->array_options['options_domain_registration_page'])

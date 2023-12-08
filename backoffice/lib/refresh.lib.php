@@ -42,13 +42,21 @@ include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 0, $recreateauthorizekey = 0)
 {
 	$instance = $object->instance;
-	if (empty($instance)) $instance = $object->ref_customer;
+	if (empty($instance)) {
+		$instance = $object->ref_customer;
+	}
 	$username_os = $object->username_os;
-	if (empty($username_os)) $username_os = $object->array_options['options_username_os'];
+	if (empty($username_os)) {
+		$username_os = $object->array_options['options_username_os'];
+	}
 	$password_os = $object->password_os;
-	if (empty($password_os)) $password_os = $object->array_options['options_password_os'];
+	if (empty($password_os)) {
+		$password_os = $object->array_options['options_password_os'];
+	}
 	$database_db = $object->database_db;
-	if (empty($database_db)) $database_db = $object->array_options['options_database_db'];
+	if (empty($database_db)) {
+		$database_db = $object->array_options['options_database_db'];
+	}
 
 	$server=$instance;
 
@@ -56,11 +64,15 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 	if (function_exists("ssh2_connect")) {
 		$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
 
-		if ($printoutput) print "ssh2_connect ".$server." ".$server_port." ".$username_os." ".$password_os."\n";
+		if ($printoutput) {
+			print "ssh2_connect ".$server." ".$server_port." ".$username_os." ".$password_os."\n";
+		}
 
 		$connection = ssh2_connect($server, $server_port);
 		if ($connection) {
-			if ($printoutput) print $instance." ".$username_os." ".$password_os."\n";
+			if ($printoutput) {
+				print $instance." ".$username_os." ".$password_os."\n";
+			}
 
 			if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
 				dol_syslog("Could not authenticate in dolicloud_files_refresh with username ".$username_os." . and password ".preg_replace('/./', '*', $password_os), LOG_ERR);
@@ -90,7 +102,9 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 						$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
 
 						// We overwrite authorized_keys_support
-						if ($printoutput) print 'Write file ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os.'/.ssh/authorized_keys_support.'."\n";
+						if ($printoutput) {
+							print 'Write file ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os.'/.ssh/authorized_keys_support.'."\n";
+						}
 
 						$stream = @fopen($filecert, 'w');
 						//var_dump($stream);exit;
@@ -102,22 +116,26 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 							$errors[]='Failed to open for write '.$filecert."\n";
 						}
 					} else {
-						if ($printoutput) print 'File ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os."/.ssh/authorized_keys_support not found.\n";
+						if ($printoutput) {
+							print 'File ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os."/.ssh/authorized_keys_support not found.\n";
+						}
 					}
 				} else {
-					if ($printoutput) print 'File ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os."/.ssh/authorized_keys_support already exists.\n";
+					if ($printoutput) {
+						print 'File ' . getDolGlobalString('DOLICLOUD_EXT_HOME').'/'.$username_os."/.ssh/authorized_keys_support already exists.\n";
+					}
 				}
-				$object->fileauthorizedkey=(empty($fstat['mtime'])?'':$fstat['mtime']);
+				$object->fileauthorizedkey=(empty($fstat['mtime']) ? '' : $fstat['mtime']);
 
 				// Check if install.lock exists
 				//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.$dir.'/documents/install.lock';
 				//$fileinstalllock="ssh2.sftp://".intval($sftp).$conf->global->DOLICLOUD_EXT_HOME.'/'.$username_os.'/'.$dir.'/documents/install.lock';    // With PHP 5.6.27+
 				$fstatlock=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/'.$dir.'/documents/install.lock');
-				$object->filelock=(empty($fstatlock['atime'])?'':$fstatlock['atime']);
+				$object->filelock=(empty($fstatlock['atime']) ? '' : $fstatlock['atime']);
 
 				// Check if installmodules.lock exists
 				$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/'.$dir.'/documents/installmodules.lock');
-				$object->fileinstallmoduleslock=(empty($fstatinstallmoduleslock['atime'])?'':$fstatinstallmoduleslock['atime']);
+				$object->fileinstallmoduleslock=(empty($fstatinstallmoduleslock['atime']) ? '' : $fstatinstallmoduleslock['atime']);
 
 				// Define dates
 				/*if (empty($object->date_registration) || empty($object->date_endfreeperiod))
@@ -147,33 +165,51 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
  * 	->nbofusers,
  * 	->modulesenabled, version, date_lastcheck, lastcheck
  *
- * @param 	Conf			$conf		Conf
- * @param 	Database		$db			Database handler
- * @param 	Contrat 		$object	    Customer (can modify caller)
- * @param	array			$errors	    Array of errors
+ * @param 	Conf					$conf		Conf
+ * @param 	Database				$db			Database handler
+ * @param 	SellYourSaasContract	$object	    Customer (can modify caller)
+ * @param	array					$errors	    Array of errors
  * @return	int										1
  */
 function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 {
 	$instance = $object->instance;
-	if (empty($instance)) $instance = $object->ref_customer;
+	if (empty($instance)) {
+		$instance = $object->ref_customer;
+	}
 	$username_os = $object->username_os;
-	if (empty($username_os)) $username_os = $object->array_options['options_username_os'];
+	if (empty($username_os)) {
+		$username_os = $object->array_options['options_username_os'];
+	}
 	$password_os = $object->password_os;
-	if (empty($password_os)) $password_os = $object->array_options['options_password_os'];
+	if (empty($password_os)) {
+		$password_os = $object->array_options['options_password_os'];
+	}
 
 	$hostname_db = $object->hostname_db;
-	if (empty($hostname_db)) $hostname_db = $object->array_options['options_hostname_db'];
+	if (empty($hostname_db)) {
+		$hostname_db = $object->array_options['options_hostname_db'];
+	}
 	$port_db = $object->port_db;
-	if (empty($port_db)) $port_db = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+	if (empty($port_db)) {
+		$port_db = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+	}
 	$username_db = $object->username_db;
-	if (empty($username_db)) $username_db = $object->array_options['options_username_db'];
+	if (empty($username_db)) {
+		$username_db = $object->array_options['options_username_db'];
+	}
 	$password_db = $object->password_db;
-	if (empty($password_db)) $password_db = $object->array_options['options_password_db'];
+	if (empty($password_db)) {
+		$password_db = $object->array_options['options_password_db'];
+	}
 	$database_db = $object->database_db;
-	if (empty($database_db)) $database_db = $object->array_options['options_database_db'];
+	if (empty($database_db)) {
+		$database_db = $object->array_options['options_database_db'];
+	}
 	$prefix_db = $object->prefix_db;
-	if (empty($prefix_db)) $prefix_db = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
+	if (empty($prefix_db)) {
+		$prefix_db = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
+	}
 
 	$server = (! empty($hostname_db) ? $hostname_db : $instance);
 
@@ -198,7 +234,9 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 		if ($newdb->connected && $newdb->database_selected) {
 			// Now search the real SQL request to count users
 			foreach ($object->lines as $contractline) {
-				if (empty($contractline->fk_product)) continue;
+				if (empty($contractline->fk_product)) {
+					continue;
+				}
 				$producttmp = new Product($db);
 				$producttmp->fetch($contractline->fk_product);
 
@@ -299,12 +337,16 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 					$lastpassadmin = $object->lastpass_admin;
 
 					$newdb->free($resql);
-				} else $error++;
+				} else {
+					$error++;
+				}
 			}
 
 			// Get list of modules
 			if (! $error) {
-				$modulesenabled=array(); $lastinstall=''; $lastupgrade='';
+				$modulesenabled=array();
+				$lastinstall='';
+				$lastupgrade='';
 				$resql=$newdb->query($sqltogetmodules);
 				if ($resql) {
 					$num = $newdb->num_rows($resql);
@@ -313,8 +355,32 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 						$obj = $newdb->fetch_object($resql);
 						if (preg_match('/MAIN_MODULE_/', $obj->name)) {
 							$name=preg_replace('/^[^_]+_[^_]+_/', '', $obj->name);
-							if (! preg_match('/_/', $name)) $modulesenabled[$name]=$name;
+							if (! preg_match('/_/', $name)) {
+								$modulesenabled[$name]=$name;
+							}
 						}
+						$i++;
+					}
+					$object->modulesenabled=join(',', $modulesenabled);
+
+					$newdb->free($resql);
+				} else {
+					$error++;
+				}
+			}
+
+			// Get version
+			// TODO Use the formula to get version stored on package (Note we do a similar thing previously with the formula of service to count users).
+			if (! $error) {
+				$modulesenabled=array();
+				$lastinstall='';
+				$lastupgrade='';
+				$resql=$newdb->query($sqltogetmodules);
+				if ($resql) {
+					$num = $newdb->num_rows($resql);
+					$i=0;
+					while ($i < $num) {
+						$obj = $newdb->fetch_object($resql);
 						if (preg_match('/MAIN_VERSION_LAST_UPGRADE/', $obj->name)) {
 							$lastupgrade=$obj->value;
 						}
@@ -323,14 +389,16 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 						}
 						$i++;
 					}
-					$object->modulesenabled=join(',', $modulesenabled);
-					$object->version=($lastupgrade?$lastupgrade:$lastinstall);
+
+					$object->version = ($lastupgrade ? $lastupgrade : $lastinstall);
+					$object->array_options['options_instanceversion'] = 'version='.$object->version;
 
 					$newdb->free($resql);
 				} else {
 					$error++;
 				}
 			}
+
 
 			$deltatzserver=(getServerTimeZoneInt()-0)*3600;	// Diff between TZ of NLTechno and DoliCloud
 
@@ -361,19 +429,20 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 
 		if (! $error && $done) {
 			$now=dol_now();
-			$object->date_lastcheck=$now;
-			$object->lastcheck=$now;	// For backward compatibility
+			$object->date_lastcheck = $now;
+			$object->lastcheck = $now;	// For backward compatibility
 
 			//$object->array_options['options_filelock']=$now;
 			//$object->array_options['options_fileauthorizekey']=$now;
 			//$object->array_options['options_latestresupdate_date']=$now;
 
 			$result = $object->update($user);	// persist
-			if (method_exists($object, 'update_old')) $result = $object->update_old($user);	// persist
 
 			if ($result < 0) {
 				dol_syslog("Failed to persist data on object into database", LOG_ERR);
-				if ($object->error) $errors[]=$object->error;
+				if ($object->error) {
+					$errors[]=$object->error;
+				}
 				$errors=array_merge($errors, $object->errors);
 			} else {
 				//var_dump($object);
@@ -407,10 +476,16 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	$total = $totalcommissions = $totalnewinstances = $totallostinstances = $totalinstancespaying = $totalinstancespayingall = $totalinstancespayingwithoutrecinvoice = 0;
 	$totalinstancesexpiredfree = $totalinstancesexpiredpaying = $totalinstancessuspendedfree = $totalinstancessuspendedpaying = 0;
 	$totalinstances = $totalusers = 0;
-	$listofinstancespaying=array(); $listofinstancespayingall=array(); $listofinstancespayingwithoutrecinvoice = array();
-	$listofcustomerstrial=array(); $listofcustomerspaying=array(); $listofcustomerspayingwithoutrecinvoice=array(); $listofcustomerspayingall=array();
+	$listofinstancespaying=array();
+	$listofinstancespayingall=array();
+	$listofinstancespayingwithoutrecinvoice = array();
+	$listofcustomerstrial=array();
+	$listofcustomerspaying=array();
+	$listofcustomerspayingwithoutrecinvoice=array();
+	$listofcustomerspayingall=array();
 	$listofsuspendedrecurringinvoice=array();
-	$listofnewinstances=array(); $listoflostinstances=array();
+	$listofnewinstances=array();
+	$listoflostinstances=array();
 
 	$nbofinstancedeployed = 0;
 
@@ -798,10 +873,10 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 
 	//var_dump($listofinstancespaying);
 	$retarray = array(
-		'total'=>(double) $total,
-		'totalcommissions'=>(double) $totalcommissions,
-		'totalnewinstances'=>(double) $totalnewinstances,
-		'totallostinstances'=>(double) $totallostinstances,
+		'total'=>(float) $total,
+		'totalcommissions'=>(float) $totalcommissions,
+		'totalnewinstances'=>(float) $totalnewinstances,
+		'totallostinstances'=>(float) $totallostinstances,
 		'totalinstancespaying'=>(int) $totalinstancespaying,
 		'totalinstancespayingall'=>(int) $totalinstancespayingall,
 		'totalinstancespayingwithoutrecinvoice'=>(int) $totalinstancespayingwithoutrecinvoice,

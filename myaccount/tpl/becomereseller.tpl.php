@@ -91,30 +91,32 @@ if ($dateapplyreseller) {
 
 				      <div class="portlet-title">
 				        <div class="caption">';
-		print '<!-- form to send a request to be reseller -->'."\n";
-		print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<input type="hidden" name="mode" value="becomereseller">';
-		print '<input type="hidden" name="action" value="sendbecomereseller">';
+	print '<!-- form to send a request to be reseller -->'."\n";
+	print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
+	print '<input type="hidden" name="mode" value="becomereseller">';
+	print '<input type="hidden" name="action" value="sendbecomereseller">';
 
-		// Set email to use when applying for reseller program
-		$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL'));
+	// Set email to use when applying for reseller program
+	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL'));
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+		if (! empty($conf->global->$newnamekey)) {
+			$sellyoursaasemail = $conf->global->$newnamekey;
+		}
 	}
 
-		$subject = (GETPOST('subject', 'none')?GETPOST('subject', 'none'):(preg_match('/fr/i', $langs->defaultlang)?$langs->trans("BecomeReseller"):$langsen->trans("BecomeReseller")).' - '.$sellyoursaasemail);
+	$subject = (GETPOST('subject', 'none') ? GETPOST('subject', 'none') : (preg_match('/fr/i', $langs->defaultlang) ? $langs->trans("BecomeReseller") : $langsen->trans("BecomeReseller")).' - '.$sellyoursaasemail);
 
-		$commissiondefault = (empty($conf->global->SELLYOURSAAS_DEFAULT_COMMISSION) ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
+	$commissiondefault = (empty($conf->global->SELLYOURSAAS_DEFAULT_COMMISSION) ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
 
-		print $langs->trans("MailFrom").' : <input type="text" required name="from" value="'.(GETPOST('from', 'none')?GETPOST('from', 'none'):$mythirdpartyaccount->email).'"><br><br>';
+	print $langs->trans("MailFrom").' : <input type="text" required name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'"><br><br>';
 
-		print $langs->trans("MailTopic").' : <input type="text" required class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
+	print $langs->trans("MailTopic").' : <input type="text" required class="minwidth500" name="subject" value="'.$subject.'"><br><br>';
 
-		$texttouse = GETPOST('content', 'none');
-		// Text is in french or english (no other language for resellers)
+	$texttouse = GETPOST('content', 'none');
+	// Text is in french or english (no other language for resellers)
 	if (! $texttouse) {
 		$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
@@ -125,23 +127,23 @@ if ($dateapplyreseller) {
 			}
 		}
 
-		$texttouse = (preg_match('/fr/i', $langs->defaultlang)?$langs->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault):$langsen->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault));
+		$texttouse = (preg_match('/fr/i', $langs->defaultlang) ? $langs->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault) : $langsen->trans("YourTextBecomeReseller", $sellyoursaasname, $commissiondefault));
 	}
-		$texttouse=preg_replace('/\\\\n/', "\n", $texttouse);
-		print '<textarea rows="6" required style="border: 1px solid #888" name="content" class="centpercent">';
-		print $texttouse;
-		print '</textarea><br><br>';
+	$texttouse=preg_replace('/\\\\n/', "\n", $texttouse);
+	print '<textarea rows="6" required style="border: 1px solid #888" name="content" class="centpercent">';
+	print $texttouse;
+	print '</textarea><br><br>';
 
-		/*include_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
-		 $doleditor = new DolEditor('content', $texttouse, '95%');
-		 $doleditor->Create(0);*/
+	/*include_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
+	 $doleditor = new DolEditor('content', $texttouse, '95%');
+	 $doleditor->Create(0);*/
 
-		print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle">';
-		print ' ';
-		print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
-		print '</center>';
+	print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle">';
+	print ' ';
+	print '<input type="submit" name="cancel" formnovalidate value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
+	print '</center>';
 
-		print '</form>';
+	print '</form>';
 
 	print ' 	</div></div>
 

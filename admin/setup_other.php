@@ -22,22 +22,39 @@
  */
 
 
-if (! defined('NOSCANPOSTFORINJECTION')) define('NOSCANPOSTFORINJECTION', '1');		// Do not check anti CSRF attack test
+if (! defined('NOSCANPOSTFORINJECTION')) {
+	define('NOSCANPOSTFORINJECTION', '1');
+}		// Do not check anti CSRF attack test
 
 
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
@@ -50,7 +67,9 @@ dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 
 // Access control
-if (! $user->admin) accessforbidden();
+if (! $user->admin) {
+	accessforbidden();
+}
 
 // Parameters
 $action = GETPOST('action', 'aZ09');
@@ -72,15 +91,22 @@ if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))
 }
 foreach ($tmpservicessub as $key => $tmpservicesub) {
 	$tmpservicesub = preg_replace('/:.*$/', '', $tmpservicesub);
-	if ($key > 0) $tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);
-	else $tmpservices['0']=getDomainFromURL($tmpservicesub, 1);
+	if ($key > 0) {
+		$tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);
+	} else {
+		$tmpservices['0']=getDomainFromURL($tmpservicesub, 1);
+	}
 }
 $arrayofsuffixfound = array();
 foreach ($tmpservices as $key => $tmpservice) {
 	$suffix = '';
-	if ($key != '0') $suffix='_'.strtoupper(str_replace('.', '_', $tmpservice));
+	if ($key != '0') {
+		$suffix='_'.strtoupper(str_replace('.', '_', $tmpservice));
+	}
 
-	if (in_array($suffix, $arrayofsuffixfound)) continue;
+	if (in_array($suffix, $arrayofsuffixfound)) {
+		continue;
+	}
 	$arrayofsuffixfound[$tmpservice] = $suffix;
 }
 
@@ -116,8 +142,11 @@ if ($action == 'set') {
 		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID')) {
 			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
 		}
-		if (GETPOSTISSET('SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT')) {
-			dolibarr_set_const($db, "SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT", GETPOST("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
+		if (GETPOSTISSET('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT')) {
+			dolibarr_set_const($db, "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", GETPOST("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL')) {
+			dolibarr_set_const($db, "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", GETPOST("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", 'int'), 'chaine', 0, '', $conf->entity);
 		}
 
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', GETPOST("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE", 'int'), 'chaine', 0, '', $conf->entity);
@@ -177,15 +206,21 @@ if ($action == 'set') {
 								if (image_format_supported($imgThumbSmall) >= 0 && preg_match('/([^\\/:]+)$/i', $imgThumbSmall, $reg)) {
 									$imgThumbSmall = $reg[1];    // Save only basename
 									dolibarr_set_const($db, "SELLYOURSAAS_LOGO_SMALL".$suffix, $imgThumbSmall, 'chaine', 0, '', $conf->entity);
-								} else dol_syslog($imgThumbSmall);
+								} else {
+									dol_syslog($imgThumbSmall);
+								}
 
 								// Create mini thumb, Used on menu or for setup page for example
 								$imgThumbMini = vignette($dirforimage.$original_file, $maxwidthmini, $maxheightmini, '_mini', $quality);
 								if (image_format_supported($imgThumbMini) >= 0 && preg_match('/([^\\/:]+)$/i', $imgThumbMini, $reg)) {
 									$imgThumbMini = $reg[1];     // Save only basename
 									dolibarr_set_const($db, "SELLYOURSAAS_LOGO_MINI".$suffix, $imgThumbMini, 'chaine', 0, '', $conf->entity);
-								} else dol_syslog($imgThumbMini);
-							} else dol_syslog("ErrorImageFormatNotSupported", LOG_WARNING);
+								} else {
+									dol_syslog($imgThumbMini);
+								}
+							} else {
+								dol_syslog("ErrorImageFormatNotSupported", LOG_WARNING);
+							}
 						} elseif (preg_match('/^ErrorFileIsInfectedWithAVirus/', $result)) {
 							$error++;
 							$langs->load("errors");
@@ -215,17 +250,23 @@ if ($action == 'removelogo') {
 
 	$constname='SELLYOURSAAS_LOGO'.GETPOST('suffix', 'aZ09');
 	$logofile=$conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') dol_delete_file($logofile);
+	if ($conf->global->$constname != '') {
+		dol_delete_file($logofile);
+	}
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_SMALL'.GETPOST('suffix', 'aZ09');
 	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') dol_delete_file($logosmallfile);
+	if ($conf->global->$constname != '') {
+		dol_delete_file($logosmallfile);
+	}
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_MINI'.GETPOST('suffix', 'aZ09');
 	$logominifile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') dol_delete_file($logominifile);
+	if ($conf->global->$constname != '') {
+		dol_delete_file($logominifile);
+	}
 	dolibarr_del_const($db, $constname, $conf->entity);
 }
 if ($action == 'removelogoblack') {
@@ -233,17 +274,23 @@ if ($action == 'removelogoblack') {
 
 	$constname='SELLYOURSAAS_LOGO_BLACK'.GETPOST('suffix', 'aZ09');
 	$logofile=$conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') dol_delete_file($logofile);
+	if ($conf->global->$constname != '') {
+		dol_delete_file($logofile);
+	}
 	dolibarr_del_const($db, "$constname", $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_SMALL_BLACK'.GETPOST('suffix', 'aZ09');
 	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') dol_delete_file($logosmallfile);
+	if ($conf->global->$constname != '') {
+		dol_delete_file($logosmallfile);
+	}
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_MINI_BLACK'.GETPOST('suffix', 'aZ09');
 	$logominifile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') dol_delete_file($logominifile);
+	if ($conf->global->$constname != '') {
+		dol_delete_file($logominifile);
+	}
 	dolibarr_del_const($db, $constname, $conf->entity);
 }
 
@@ -259,7 +306,7 @@ $formticket = new FormTicket($db);
 $help_url="";
 llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
 
-$linkback='<a href="'.($backtopage?$backtopage:DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
+$linkback='<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre($langs->trans('SellYouSaasSetup'), $linkback, 'setup');
 
 $error=0;
@@ -427,13 +474,23 @@ print '</td>';
 print '<td><span class="opacitymedium small">Set to yes to allow customer to set a custom URL.</td>';
 print '</tr>';
 
-// Allow Custom URL for ?
+// Allow Custom URL for specific thirdparty ID ?
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID").'</td>';
 	print '<td>';
 	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', '').'">';
 	print '</td>';
 	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
+	print '</tr>';
+}
+
+// Product ID for custom URL
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'</td>';
+	print '<td>';
+	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL");
+	print '</td>';
+	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
 }
 
@@ -453,7 +510,7 @@ print '</td>';
 print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
 print '</tr>';
 
-// Allow deployment of Dolibarr website for ?
+// Allow deployment of Dolibarr website for specific thirdparty ID ?
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID").'</td>';
 	print '<td>';
@@ -465,9 +522,9 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
 
 // Product ID for website deployment
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT").'</td>';
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT").'</td>';
 	print '<td>';
-	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_WEBSITE_DEPLOYMENT");
+	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT");
 	print '</td>';
 	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
@@ -564,7 +621,7 @@ print '</tr>';
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<tr class="oddeven"><td>';
-	print ($service ? $service.' - ' : '').$langs->trans("SELLYOURSAAS_SUPPORT_URL").'</td>';
+	print($service ? $service.' - ' : '').$langs->trans("SELLYOURSAAS_SUPPORT_URL").'</td>';
 	print '<td>';
 	print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL'.$suffix.'" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.$suffix).'">';
 	print '</td>';
@@ -575,7 +632,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 
 	if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.$suffix)) {
 		print '<tr class="oddeven"><td>';
-		print ($service ? $service.' - ' : '');
+		print($service ? $service.' - ' : '');
 		print $langs->trans("SELLYOURSAAS_SUPPORT_SHOW_MESSAGE").'</td>';
 		print '<td>';
 		print '<textarea name="SELLYOURSAAS_SUPPORT_SHOW_MESSAGE" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE'.$suffix).'</textarea>';

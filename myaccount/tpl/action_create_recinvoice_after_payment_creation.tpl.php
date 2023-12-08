@@ -145,24 +145,38 @@ if (! $error) {
 			$fk_parent_line = 0;
 			$num = count($lines);
 			for ($i=0; $i < $num; $i++) {
-				$label=(! empty($lines[$i]->label)?$lines[$i]->label:'');
-				$desc=(! empty($lines[$i]->desc)?$lines[$i]->desc:$lines[$i]->libelle);
-				if ($invoice_draft->situation_counter == 1) $lines[$i]->situation_percent =  0;
+				$label=(! empty($lines[$i]->label) ? $lines[$i]->label : '');
+				$desc=(! empty($lines[$i]->desc) ? $lines[$i]->desc : $lines[$i]->libelle);
+				if ($invoice_draft->situation_counter == 1) {
+					$lines[$i]->situation_percent =  0;
+				}
 
 				// Positive line
 				$product_type = ($lines[$i]->product_type ? $lines[$i]->product_type : 0);
 
 				// Date start
 				$date_start = false;
-				if ($lines[$i]->date_debut_prevue) $date_start = $lines[$i]->date_debut_prevue;
-				if ($lines[$i]->date_debut_reel) $date_start = $lines[$i]->date_debut_reel;
-				if ($lines[$i]->date_start) $date_start = $lines[$i]->date_start;
+				if ($lines[$i]->date_debut_prevue) {
+					$date_start = $lines[$i]->date_debut_prevue;
+				}
+				if ($lines[$i]->date_debut_reel) {
+					$date_start = $lines[$i]->date_debut_reel;
+				}
+				if ($lines[$i]->date_start) {
+					$date_start = $lines[$i]->date_start;
+				}
 
 				// Date end
 				$date_end = false;
-				if ($lines[$i]->date_fin_prevue) $date_end = $lines[$i]->date_fin_prevue;
-				if ($lines[$i]->date_fin_reel) $date_end = $lines[$i]->date_fin_reel;
-				if ($lines[$i]->date_end) $date_end = $lines[$i]->date_end;
+				if ($lines[$i]->date_fin_prevue) {
+					$date_end = $lines[$i]->date_fin_prevue;
+				}
+				if ($lines[$i]->date_fin_reel) {
+					$date_end = $lines[$i]->date_fin_reel;
+				}
+				if ($lines[$i]->date_end) {
+					$date_end = $lines[$i]->date_end;
+				}
 
 				// If date start is in past, we set it to now
 				$now = dol_now();
@@ -195,7 +209,9 @@ if (! $error) {
 				}
 
 				$tva_tx = $lines[$i]->tva_tx;
-				if (! empty($lines[$i]->vat_src_code) && ! preg_match('/\(/', $tva_tx)) $tva_tx .= ' ('.$lines[$i]->vat_src_code.')';
+				if (! empty($lines[$i]->vat_src_code) && ! preg_match('/\(/', $tva_tx)) {
+					$tva_tx .= ' ('.$lines[$i]->vat_src_code.')';
+				}
 
 				// View third's localtaxes for NOW and do not use value from origin.
 				$localtax1_tx = get_localtax($tva_tx, 1, $invoice_draft->thirdparty);
@@ -277,7 +293,7 @@ if (! $error) {
 			//$frequency=1;
 			//$frequency_unit='m';
 			$frequency = (! empty($frequency) ? $frequency : 1);	// read frequency of product app
-			$frequency_unit = (! empty($frequency_unit) ? $frequency_unit :'m');	// read frequency_unit of product app
+			$frequency_unit = (! empty($frequency_unit) ? $frequency_unit : 'm');	// read frequency_unit of product app
 			$tmp = dol_getdate($date_start ? $date_start : $now);
 			$reyear = $tmp['year'];
 			$remonth = $tmp['mon'];
@@ -443,7 +459,9 @@ if (! $error) {
 	$db->commit();
 
 	$url=$_SERVER["PHP_SELF"];
-	if ($backurl) $url=$backurl;
+	if ($backurl) {
+		$url=$backurl;
+	}
 
 	if ($thirdpartyhadalreadyapaymentmode > 0) {
 		dol_syslog("PaymentModeHasBeenModified");
@@ -451,7 +469,7 @@ if (! $error) {
 		// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
 		$_SESSION['showconversiontracker']='paymentmodified';
 
-		$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentmodified=1';
+		$url.=(preg_match('/\?/', $url) ? '&' : '?').'paymentmodified=1';
 
 		// Send to DataDog (metric + event)
 		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
@@ -476,7 +494,7 @@ if (! $error) {
 		// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
 		$_SESSION['showconversiontracker']='paymentrecorded';
 
-		$url.=(preg_match('/\?/', $url) ? '&' : '?' ).'paymentrecorded=1';
+		$url.=(preg_match('/\?/', $url) ? '&' : '?').'paymentrecorded=1';
 
 		// Send to DataDog (metric + event)
 		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
@@ -501,23 +519,26 @@ if (! $error) {
 				$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
 				if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 					&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-						$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-						if (! empty($conf->global->$newnamekey)) $sellyoursaasname = $conf->global->$newnamekey;
+					$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+					if (! empty($conf->global->$newnamekey)) {
+						$sellyoursaasname = $conf->global->$newnamekey;
+					}
 				}
 
-					$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langscompany->trans("NewCustomer").': '.$mythirdpartyaccount->name, 90);
-					$messageofevent = ' - '.$langscompany->trans("PaymentModeAddedFrom").' '.getUserRemoteIP()."\n";
-					$messageofevent.= $langscompany->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langscompany->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n".$langscompany->trans("SourceURLOfEvent").": ".$url;
+				$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langscompany->trans("NewCustomer").': '.$mythirdpartyaccount->name, 90);
+				$messageofevent = ' - '.$langscompany->trans("PaymentModeAddedFrom").' '.getUserRemoteIP()."\n";
+				$messageofevent.= $langscompany->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langscompany->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n".$langscompany->trans("SourceURLOfEvent").": ".$url;
 
-					// See https://docs.datadoghq.com/api/?lang=python#post-an-event
-					$statsd->event($titleofevent,
-						array(
+				// See https://docs.datadoghq.com/api/?lang=python#post-an-event
+				$statsd->event(
+					$titleofevent,
+					array(
 							'text'       =>  "%%% \n ".$titleofevent.$messageofevent." \n %%%",      // Markdown text
 							'alert_type' => 'info',
 							'source_type_name' => 'API',
 							'host'       => gethostname()
 						)
-						);
+				);
 			} catch (Exception $e) {
 				// Nothing done
 			}

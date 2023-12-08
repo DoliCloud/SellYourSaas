@@ -196,7 +196,9 @@ if ($enablepermissioncheck) {
 }
 
 // Security check (enable the most restrictive one)
-if ($user->socid > 0) accessforbidden();
+if ($user->socid > 0) {
+	accessforbidden();
+}
 //if ($user->socid > 0) accessforbidden();
 //$socid = 0; if ($user->socid > 0) $socid = $user->socid;
 //$isdraft = (($object->status == $object::STATUS_DRAFT) ? 1 : 0);
@@ -204,7 +206,9 @@ if ($user->socid > 0) accessforbidden();
 if (empty($conf->sellyoursaas->enabled)) {
 	accessforbidden('Module not enabled');
 }
-if (!$permissiontoread) accessforbidden();
+if (!$permissiontoread) {
+	accessforbidden();
+}
 
 
 /*
@@ -721,7 +725,7 @@ while ($i < $imaxinloop) {
 					print $object->showOutputField($val, $key, $object->id, '');
 				} elseif ($key == 'content') {
 					$s = dol_print_ip($object->content, 0);
-					print ($s ? $s : $object->content);
+					print($s ? $s : $object->content);
 				} else {
 					print $object->showOutputField($val, $key, $object->$key, '');
 				}

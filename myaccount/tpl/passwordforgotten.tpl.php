@@ -31,31 +31,51 @@ if (empty($conf) || ! is_object($conf)) {
 header('Cache-Control: Public, must-revalidate');
 header("Content-type: text/html; charset=".$conf->file->character_set_client);
 
-if (GETPOST('dol_hide_topmenu')) $conf->dol_hide_topmenu=1;
-if (GETPOST('dol_hide_leftmenu')) $conf->dol_hide_leftmenu=1;
-if (GETPOST('dol_optimize_smallscreen')) $conf->dol_optimize_smallscreen=1;
-if (GETPOST('dol_no_mouse_hover')) $conf->dol_no_mouse_hover=1;
-if (GETPOST('dol_use_jmobile')) $conf->dol_use_jmobile=1;
+if (GETPOST('dol_hide_topmenu')) {
+	$conf->dol_hide_topmenu=1;
+}
+if (GETPOST('dol_hide_leftmenu')) {
+	$conf->dol_hide_leftmenu=1;
+}
+if (GETPOST('dol_optimize_smallscreen')) {
+	$conf->dol_optimize_smallscreen=1;
+}
+if (GETPOST('dol_no_mouse_hover')) {
+	$conf->dol_no_mouse_hover=1;
+}
+if (GETPOST('dol_use_jmobile')) {
+	$conf->dol_use_jmobile=1;
+}
 
 // If we force to use jmobile, then we reenable javascript
-if (! empty($conf->dol_use_jmobile)) $conf->use_javascript_ajax=1;
+if (! empty($conf->dol_use_jmobile)) {
+	$conf->use_javascript_ajax=1;
+}
 
 $php_self = dol_escape_htmltag($_SERVER['PHP_SELF']);
-$php_self.= dol_escape_htmltag($_SERVER["QUERY_STRING"])?'?'.dol_escape_htmltag($_SERVER["QUERY_STRING"]):'';
+$php_self.= dol_escape_htmltag($_SERVER["QUERY_STRING"]) ? '?'.dol_escape_htmltag($_SERVER["QUERY_STRING"]) : '';
 $php_self = preg_replace('/&hashreset=[0-9a-zA-Z]+/', '', $php_self);
 
 $arrayofjs=array();
 $titleofpage=$langs->trans('SendNewPassword');
 
 $disablenofollow=1;
-if (! preg_match('/'.constant('DOL_APPLICATION_TITLE').'/', $titleofpage)) $disablenofollow=0;
+if (! preg_match('/'.constant('DOL_APPLICATION_TITLE').'/', $titleofpage)) {
+	$disablenofollow=0;
+}
 
 $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
-if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
-if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
+if (! preg_match('/\.(png|jpg)$/', $favicon)) {
+	$favicon.='.png';
+}
+if (! empty($conf->global->MAIN_FAVICON_URL)) {
+	$favicon=$conf->global->MAIN_FAVICON_URL;
+}
 if ($favicon) {
 	$href = 'img/'.$favicon;
-	if (preg_match('/^http/i', $favicon)) $href = $favicon;
+	if (preg_match('/^http/i', $favicon)) {
+		$href = $favicon;
+	}
 	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
 
@@ -103,7 +123,7 @@ $(document).ready(function () {
 		<header class="inverse">
 		  <h1><?php echo dol_escape_htmltag($title); ?></h1>
 
-<div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo empty($conf->global->MAIN_LOGIN_BACKGROUND)?'':' backgroundsemitransparent'; ?>">
+<div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo empty($conf->global->MAIN_LOGIN_BACKGROUND) ? '' : ' backgroundsemitransparent'; ?>">
 <?php if ($mode == 'dolibarr' || ! $disabled) { ?>
 	<span class="passwordmessagedesc opacitymedium">
 	<?php
@@ -154,8 +174,7 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 
 		print '<input type="password" minlength="8" maxlength="128" id="newpassword2" placeholder="'.$langs->trans("PasswordRetype").'" name="newpassword2" class="flat input-icon-user" tabindex="3" required autocomplete="new-password" spellcheck="false" autocapitalize="off" />';
 		print '<br><br>';
-	}
-	?>
+	} ?>
 </td>
 </tr>
 
@@ -181,9 +200,11 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 	if (empty($asknewpass) && 1) {
 		// Add a variable param to force not using cache (jmobile)
 		$php_self = preg_replace('/[&\?]time=(\d+)/', '', $php_self);	// Remove param time
-		if (preg_match('/\?/', $php_self)) $php_self.='&time='.dol_print_date(dol_now(), 'dayhourlog');
-		else $php_self.='?time='.dol_print_date(dol_now(), 'dayhourlog');
-		?>
+		if (preg_match('/\?/', $php_self)) {
+			$php_self.='&time='.dol_print_date(dol_now(), 'dayhourlog');
+		} else {
+			$php_self.='?time='.dol_print_date(dol_now(), 'dayhourlog');
+		} ?>
 	<!-- Captcha -->
 	<tr>
 	<td class="nowrap none center">
@@ -200,9 +221,11 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 
 	</br>
 	</td></tr>
-	<?php } ?>
+		<?php
+	} ?>
 </table>
-<?php } ?>
+	<?php
+} ?>
 </div> <!-- end div login-right -->
 
 </div> <!-- end div login-line1 -->
@@ -217,12 +240,15 @@ if ($message) {
 	?>
 	<div class="center">
 	<?php
-	if (preg_match('/class="ok"/', $message)) print '<br><font class="ok">';
-	elseif (preg_match('/class="warning"/', $message)) print '<br><font class="warning">';
-	else print '<font class="error">';
+	if (preg_match('/class="ok"/', $message)) {
+		print '<br><font class="ok">';
+	} elseif (preg_match('/class="warning"/', $message)) {
+		print '<br><font class="warning">';
+	} else {
+		print '<font class="error">';
+	}
 	print $message;
-	print '</font>';
-	?>
+	print '</font>'; ?>
 	</div><br><br>
 	<?php
 }
@@ -248,13 +274,23 @@ if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 <div align="center" style="margin-top: 8px; margin-bottom: 8px;"">
 	<?php
 	$moreparam='';
-	if (!empty($conf->dol_hide_topmenu))   $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_topmenu='.$conf->dol_hide_topmenu;
-	if (!empty($conf->dol_hide_leftmenu))  $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_hide_leftmenu='.$conf->dol_hide_leftmenu;
-	if (!empty($conf->dol_no_mouse_hover)) $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_no_mouse_hover='.$conf->dol_no_mouse_hover;
-	if (!empty($conf->dol_use_jmobile))    $moreparam.=(strpos($moreparam, '?')===false?'?':'&').'dol_use_jmobile='.$conf->dol_use_jmobile;
-	if (!empty($username)) $moreparam .= (strpos($moreparam, '?')===false?'?':'&').'username='.urlencode($username);
+	if (!empty($conf->dol_hide_topmenu)) {
+		$moreparam.=(strpos($moreparam, '?')===false ? '?' : '&').'dol_hide_topmenu='.$conf->dol_hide_topmenu;
+	}
+	if (!empty($conf->dol_hide_leftmenu)) {
+		$moreparam.=(strpos($moreparam, '?')===false ? '?' : '&').'dol_hide_leftmenu='.$conf->dol_hide_leftmenu;
+	}
+	if (!empty($conf->dol_no_mouse_hover)) {
+		$moreparam.=(strpos($moreparam, '?')===false ? '?' : '&').'dol_no_mouse_hover='.$conf->dol_no_mouse_hover;
+	}
+	if (!empty($conf->dol_use_jmobile)) {
+		$moreparam.=(strpos($moreparam, '?')===false ? '?' : '&').'dol_use_jmobile='.$conf->dol_use_jmobile;
+	}
+	if (!empty($username)) {
+		$moreparam .= (strpos($moreparam, '?')===false ? '?' : '&').'username='.urlencode($username);
+	}
 
-	print '<a class="alogin" href="'.$dol_url_root.'/index.php'.$moreparam.'">('.((empty($asknewpass) || $asknewpass == 2)? $langs->trans('BackToLoginPage') : $langs->trans("Cancel")).')</a>';
+	print '<a class="alogin" href="'.$dol_url_root.'/index.php'.$moreparam.'">('.((empty($asknewpass) || $asknewpass == 2) ? $langs->trans('BackToLoginPage') : $langs->trans("Cancel")).')</a>';
 	?>
 </div>
 
@@ -282,7 +318,9 @@ if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 <?php
 
 
-if (! empty($conf->global->MAIN_HTML_FOOTER)) print $conf->global->MAIN_HTML_FOOTER;
+if (! empty($conf->global->MAIN_HTML_FOOTER)) {
+	print $conf->global->MAIN_HTML_FOOTER;
+}
 
 if (! empty($morelogincontent) && is_array($morelogincontent)) {
 	foreach ($morelogincontent as $format => $option) {

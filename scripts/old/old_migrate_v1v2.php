@@ -19,7 +19,9 @@
  * Update an instance on stratus5 server with new ref version.
  */
 
-if (!defined('NOSESSION')) define('NOSESSION', '1');
+if (!defined('NOSESSION')) {
+	define('NOSESSION', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -42,15 +44,30 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+}
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res) die("Include of master fails");
+if (! $res && file_exists("../master.inc.php")) {
+	$res=@include "../master.inc.php";
+}
+if (! $res && file_exists("../../master.inc.php")) {
+	$res=@include "../../master.inc.php";
+}
+if (! $res && file_exists("../../../master.inc.php")) {
+	$res=@include "../../../master.inc.php";
+}
+if (! $res) {
+	die("Include of master fails");
+}
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
@@ -76,9 +93,9 @@ $contract = new Contrat($db);
 
 $defaultproductref='DOLICLOUD-PACK-Dolibarr';
 
-$oldinstance=isset($argv[1])?$argv[1]:'';
-$newinstance=isset($argv[2])?$argv[2]:'';
-$mode=isset($argv[3])?$argv[3]:'';
+$oldinstance=isset($argv[1]) ? $argv[1] : '';
+$newinstance=isset($argv[2]) ? $argv[2] : '';
+$mode=isset($argv[3]) ? $argv[3] : '';
 
 $langsen = new Translate('', $conf);
 $langsen->setDefaultLang($mysoc->default_lang);
@@ -139,8 +156,9 @@ if (empty($oldinstance) || empty($oldobjectusername_os) || empty($oldobjectpassw
 	print "Error: Some properties for old instance ".$oldinstance." was not registered into database.\n";
 	exit(-3);
 }
-if (isset($argv[4])) $productref = $argv[4];
-elseif ($oldobject->plan == 'Dolibarr ERP & CRM Basic') {
+if (isset($argv[4])) {
+	$productref = $argv[4];
+} elseif ($oldobject->plan == 'Dolibarr ERP & CRM Basic') {
 	$productref='DOLICLOUD-PACK-Dolibarr';
 } elseif ($oldobject->plan == 'Dolibarr ERP & CRM Basic (yearly)') {
 	$productref='DOLICLOUD-PACK-Dolibarr';
@@ -182,13 +200,17 @@ if ($num_rows > 1) {
 	exit(-2);
 } else {
 	$obj = $db->fetch_object($resql);
-	if ($obj) $idofinstancefound = $obj->rowid;
+	if ($obj) {
+		$idofinstancefound = $obj->rowid;
+	}
 }
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $newobject = new Contrat($db);
 $result=0;
-if ($idofinstancefound) $result=$newobject->fetch($idofinstancefound);
+if ($idofinstancefound) {
+	$result=$newobject->fetch($idofinstancefound);
+}
 if ($result <= 0 || $newobject->statut == 0) {
 	print "newinstance ".$newinstance." with status > 0 not found. Do you want to create new instance (and thirdparty with email ".$oldobject->email." if required)";
 
@@ -214,7 +236,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 	$country_code = $oldobject->country_code;
 	$locale = $oldobject->locale;
 	$taxid = $oldobject->vat_number;
-	if (strlen($locale) == 2) $locale = $locale.'_'.strtoupper($locale);
+	if (strlen($locale) == 2) {
+		$locale = $locale.'_'.strtoupper($locale);
+	}
 
 	// $oldobject->plan contains something like 'Dolibarr ERP & CRM Premium'
 	$partner = ($overwritefksoc ? $overwritefksoc : 0);
@@ -324,7 +348,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 		$langs = $langsen;
 
 		$tmpthirdparty->code_client = -1;
-		if ($partner > 0) $tmpthirdparty->parent = $partner;		// Add link to parent/reseller
+		if ($partner > 0) {
+			$tmpthirdparty->parent = $partner;
+		}		// Add link to parent/reseller
 
 		print "Create thirdparty\n";
 		$result = $tmpthirdparty->create($user);
@@ -360,7 +386,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 	$date_next_execution = 0;
 	if (! empty($oldobject->date_current_period_end)) {
 		$date_next_execution = $oldobject->date_current_period_end;
-		if ($date_next_execution < (dol_now() + 3600 * 24 * 7)) $date_next_execution = dol_time_plus_duree($date_next_execution, 1, 'm');
+		if ($date_next_execution < (dol_now() + 3600 * 24 * 7)) {
+			$date_next_execution = dol_time_plus_duree($date_next_execution, 1, 'm');
+		}
 	}
 
 	$date_start = $now;
@@ -443,10 +471,14 @@ if ($result <= 0 || $newobject->statut == 0) {
 		//var_dump($vat);exit(-1);
 
 		$price = $tmpproduct->price;
-		if (! empty($overwritepriceinstance)) $price = $overwritepriceinstance;
+		if (! empty($overwritepriceinstance)) {
+			$price = $overwritepriceinstance;
+		}
 
 		$discount = 0;
-		if (! empty($overwritediscount)) $discount = $overwritediscount;
+		if (! empty($overwritediscount)) {
+			$discount = $overwritediscount;
+		}
 
 		$productidtocreate = $tmpproduct->id;
 
@@ -482,10 +514,14 @@ if ($result <= 0 || $newobject->statut == 0) {
 			$localtax2_tx = get_default_localtax($mysoc, $object, 2, $prodid);
 
 			$price = $tmpsubproduct->price;
-			if (! empty($overwritepriceuser)) $price = $overwritepriceuser;
+			if (! empty($overwritepriceuser)) {
+				$price = $overwritepriceuser;
+			}
 
 			$discount = 0;
-			if (! empty($overwritediscount)) $discount = $overwritediscount;
+			if (! empty($overwritediscount)) {
+				$discount = $overwritediscount;
+			}
 
 			if ($qty > 0) {
 				$j++;
@@ -526,7 +562,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 		if ($result <= 0) {
 			$error++;
 			$errormessages[]=$sellyoursaasutils->errors;
-			if ($sellyoursaasutils->error) $errormessages[]=$sellyoursaasutils->error;
+			if ($sellyoursaasutils->error) {
+				$errormessages[]=$sellyoursaasutils->error;
+			}
 		}
 	}
 
@@ -537,8 +575,11 @@ if ($result <= 0 || $newobject->statut == 0) {
 
 		$contract->context['deployallwasjustdone']=1;		// Add a key so trigger into activateAll will know we have just made a "deployall"
 
-		if ($fromsocid) $comment = 'Activation after deployment from migration for reseller id='.$fromsocid;
-		else $comment = 'Activation after deployment from migration';
+		if ($fromsocid) {
+			$comment = 'Activation after deployment from migration for reseller id='.$fromsocid;
+		} else {
+			$comment = 'Activation after deployment from migration';
+		}
 
 		$result = $contract->activateAll($user, dol_now(), 1, $comment);			// This may execute the triggers
 		if ($result <= 0) {
@@ -603,7 +644,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 
 		// Now create invoice draft
 		$dateinvoice = $contract->array_options['options_date_endfreeperiod'];
-		if ($dateinvoice < $now) $dateinvoice = $now;
+		if ($dateinvoice < $now) {
+			$dateinvoice = $now;
+		}
 
 		$invoice_draft = new Facture($db);
 		$tmpproduct = new Product($db);
@@ -655,24 +698,38 @@ if ($result <= 0 || $newobject->statut == 0) {
 			$fk_parent_line=0;
 			$num=count($lines);
 			for ($i=0; $i<$num; $i++) {
-				$label=(! empty($lines[$i]->label)?$lines[$i]->label:'');
-				$desc=(! empty($lines[$i]->desc)?$lines[$i]->desc:$lines[$i]->libelle);
-				if ($invoice_draft->situation_counter == 1) $lines[$i]->situation_percent =  0;
+				$label=(! empty($lines[$i]->label) ? $lines[$i]->label : '');
+				$desc=(! empty($lines[$i]->desc) ? $lines[$i]->desc : $lines[$i]->libelle);
+				if ($invoice_draft->situation_counter == 1) {
+					$lines[$i]->situation_percent =  0;
+				}
 
 				// Positive line
 				$product_type = ($lines[$i]->product_type ? $lines[$i]->product_type : 0);
 
 				// Date start
 				$date_start = false;
-				if ($lines[$i]->date_debut_prevue) $date_start = $lines[$i]->date_debut_prevue;
-				if ($lines[$i]->date_debut_reel) $date_start = $lines[$i]->date_debut_reel;
-				if ($lines[$i]->date_start) $date_start = $lines[$i]->date_start;
+				if ($lines[$i]->date_debut_prevue) {
+					$date_start = $lines[$i]->date_debut_prevue;
+				}
+				if ($lines[$i]->date_debut_reel) {
+					$date_start = $lines[$i]->date_debut_reel;
+				}
+				if ($lines[$i]->date_start) {
+					$date_start = $lines[$i]->date_start;
+				}
 
 				// Date end
 				$date_end = false;
-				if ($lines[$i]->date_fin_prevue) $date_end = $lines[$i]->date_fin_prevue;
-				if ($lines[$i]->date_fin_reel) $date_end = $lines[$i]->date_fin_reel;
-				if ($lines[$i]->date_end) $date_end = $lines[$i]->date_end;
+				if ($lines[$i]->date_fin_prevue) {
+					$date_end = $lines[$i]->date_fin_prevue;
+				}
+				if ($lines[$i]->date_fin_reel) {
+					$date_end = $lines[$i]->date_fin_reel;
+				}
+				if ($lines[$i]->date_end) {
+					$date_end = $lines[$i]->date_end;
+				}
 
 				// If date start is in past, we set it to now
 				$now = dol_now();
@@ -684,7 +741,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 
 					$date_start = $now;
 					$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
-					if (! empty($date_next_execution)) $date_end = $date_next_execution;
+					if (! empty($date_next_execution)) {
+						$date_end = $date_next_execution;
+					}
 
 					// BecauseWe update the end date planned of contract too
 					$sqltoupdateenddate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$db->idate($date_end)."' WHERE fk_contrat = ".$srcobject->id;
@@ -706,7 +765,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 				}
 
 				$tva_tx = $lines[$i]->tva_tx;
-				if (! empty($lines[$i]->vat_src_code) && ! preg_match('/\(/', $tva_tx)) $tva_tx .= ' ('.$lines[$i]->vat_src_code.')';
+				if (! empty($lines[$i]->vat_src_code) && ! preg_match('/\(/', $tva_tx)) {
+					$tva_tx .= ' ('.$lines[$i]->vat_src_code.')';
+				}
 
 				// View third's localtaxes for NOW and do not use value from origin.
 				$localtax1_tx = get_localtax($tva_tx, 1, $invoice_draft->thirdparty);
@@ -716,7 +777,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 				$price_invoice_template_line = $lines[$i]->subprice;
 
 				// For yearly subscription, increase price by factor 12.
-				if (! empty($overwritefrequencyunit) && $overwritefrequencyunit = 'y') $price_invoice_template_line = 12 * $price_invoice_template_line;
+				if (! empty($overwritefrequencyunit) && $overwritefrequencyunit = 'y') {
+					$price_invoice_template_line = 12 * $price_invoice_template_line;
+				}
 
 				$result = $invoice_draft->addline($desc, $price_invoice_template_line, $lines[$i]->qty, $tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $discount, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $invoice_draft->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_options, $lines[$i]->situation_percent, $lines[$i]->fk_prev_id, $lines[$i]->fk_unit);
 
@@ -751,9 +814,11 @@ if ($result <= 0 || $newobject->statut == 0) {
 
 			$frequency=1;
 			$frequency_unit='m';
-			if (! empty($overwritefrequencyunit)) $frequency_unit = $overwritefrequencyunit;
+			if (! empty($overwritefrequencyunit)) {
+				$frequency_unit = $overwritefrequencyunit;
+			}
 
-			$tmp=dol_getdate($date_start?$date_start:$now);
+			$tmp=dol_getdate($date_start ? $date_start : $now);
 			$reyear=$tmp['year'];
 			$remonth=$tmp['mon'];
 			$reday=$tmp['mday'];
@@ -781,7 +846,9 @@ if ($result <= 0 || $newobject->statut == 0) {
 
 			$invoice_rec->fk_project = 0;
 
-			if (empty($date_next_execution)) $date_next_execution = dol_mktime($rehour, $remin, 0, $remonth, $reday, $reyear);
+			if (empty($date_next_execution)) {
+				$date_next_execution = dol_mktime($rehour, $remin, 0, $remonth, $reday, $reyear);
+			}
 			$invoice_rec->date_when = $date_next_execution;
 
 			// Get first contract linked to invoice used to generate template
@@ -877,12 +944,21 @@ print 'SFTP new connect string : '.$newsftpconnectstring."\n";
 
 $command="rsync";
 $param=array();
-if (! in_array($mode, array('confirm'))) $param[]="-n";
+if (! in_array($mode, array('confirm'))) {
+	$param[]="-n";
+}
 //$param[]="-a";
-if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="-rlt";
-else { $param[]="-rlD"; $param[]="--modify-window=1000000000"; $param[]="--delete -n"; }
+if (! in_array($mode, array('diff','diffadd','diffchange'))) {
+	$param[]="-rlt";
+} else {
+	$param[]="-rlD";
+	$param[]="--modify-window=1000000000";
+	$param[]="--delete -n";
+}
 $param[]="-v";
-if (empty($createthirdandinstance)) $param[]="-u";		// If we have just created instance, we overwrite file during rsync
+if (empty($createthirdandinstance)) {
+	$param[]="-u";
+}		// If we have just created instance, we overwrite file during rsync
 $param[]="--exclude .buildpath";
 $param[]="--exclude dolibarr.log";
 $param[]="--exclude *.comdolibarrSSL";
@@ -894,8 +970,12 @@ $param[]="--exclude htdocs/conf/conf.php";
 $param[]="--exclude glpi_config/config_db.php";
 $param[]="--exclude htdocs/inc/downstream.php";
 $param[]="--exclude ";
-if (! in_array($mode, array('diff','diffadd','diffchange'))) $param[]="--stats";
-if (in_array($mode, array('clean','confirmclean'))) $param[]="--delete";
+if (! in_array($mode, array('diff','diffadd','diffchange'))) {
+	$param[]="--stats";
+}
+if (in_array($mode, array('clean','confirmclean'))) {
+	$param[]="--delete";
+}
 $param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'";
 
 $param[]=$oldlogin.'@'.$oldserver.":".$sourcedir.'/*';
@@ -1019,7 +1099,9 @@ $return_varload=0;
 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanda."\n";
 if ($mode == 'confirm') {
 	exec($fullcommanda, $output, $return_varload);
-	foreach ($output as $line) print $line."\n";
+	foreach ($output as $line) {
+		print $line."\n";
+	}
 }
 
 $fullcommandb='echo "drop table llx_accounting_system;" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
@@ -1028,7 +1110,9 @@ $return_varload=0;
 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommandb."\n";
 if ($mode == 'confirm') {
 	exec($fullcommandb, $output, $return_varload);
-	foreach ($output as $line) print $line."\n";
+	foreach ($output as $line) {
+		print $line."\n";
+	}
 }
 
 $fullcommand="cat /tmp/mysqldump_".$oldobject->database_db.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql | mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db;
@@ -1038,7 +1122,9 @@ if ($mode == 'confirm') {
 	$return_varload=0;
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_varload);
-	foreach ($output as $line) print $line."\n";
+	foreach ($output as $line) {
+		print $line."\n";
+	}
 }
 
 $fullcommandc='echo "UPDATE llx_const set value = \''.$newlogin.'\' WHERE name = \'CRON_KEY\';" | mysql -u'.$newloginbase.' -p'.$newpasswordbase.' -D '.$newobject->database_db;
@@ -1047,7 +1133,9 @@ $return_varcron=0;
 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Update cron key '.$fullcommandc."\n";
 if ($mode == 'confirm') {
 	exec($fullcommandc, $output, $return_varcron);
-	foreach ($output as $line) print $line."\n";
+	foreach ($output as $line) {
+		print $line."\n";
+	}
 }
 
 
@@ -1056,7 +1144,9 @@ print "\n";
 
 if ($mode == 'confirm') {
 	print '-> Dump loaded into database '.$newobject->database_db.'. You can test instance on URL https://'.$newobject->ref_customer."\n";
-	if (empty($createthirdandinstance)) print 'WARNING: The rsync was done with -u'."\n";
+	if (empty($createthirdandinstance)) {
+		print 'WARNING: The rsync was done with -u'."\n";
+	}
 	print "Finished. DON'T FORGET TO\n";
 	print " - SET INVOICING ON OLD SYSTEM FOR ".$oldinstance." TO MANUAL COLLECTION\n";
 	print " - CHANGE TEMPLATE INVOICE PRICE IF SPECIFIC INVOICING\n";

@@ -29,10 +29,18 @@
 //if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');			// If there is no need to load and show top and left menu
 //if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
-if (! defined("NOLOGIN"))        define("NOLOGIN", '1');				    // If this page is public (can be called outside logged session)
-if (! defined('NOIPCHECK'))      define('NOIPCHECK', '1');				// Do not check IP defined into conf $dolibarr_main_restrict_ip
-if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) define('MAIN_LANG_DEFAULT', 'auto');
-if (! defined('NOBROWSERNOTIF')) define('NOBROWSERNOTIF', '1');
+if (! defined("NOLOGIN")) {
+	define("NOLOGIN", '1');
+}				    // If this page is public (can be called outside logged session)
+if (! defined('NOIPCHECK')) {
+	define('NOIPCHECK', '1');
+}				// Do not check IP defined into conf $dolibarr_main_restrict_ip
+if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) {
+	define('MAIN_LANG_DEFAULT', 'auto');
+}
+if (! defined('NOBROWSERNOTIF')) {
+	define('NOBROWSERNOTIF', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -51,31 +59,69 @@ if (substr($sapi_type, 0, 3) != 'cli') {
 $res=0;
 if (substr($sapi_type, 0, 3) != 'cli') {
 	// Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-	if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+	if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+		$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+	}
 	// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-	$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-	while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-	if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-	if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+	$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
+	$tmp2=realpath(__FILE__);
+	$i=strlen($tmp)-1;
+	$j=strlen($tmp2)-1;
+	while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+		$i--;
+		$j--;
+	}
+	if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+		$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+	}
+	if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+		$res=include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+	}
 	// Try main.inc.php using relative path
-	if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-	if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
+	if (! $res && file_exists("../../main.inc.php")) {
+		$res=@include "../../main.inc.php";
+	}
+	if (! $res && file_exists("../../../main.inc.php")) {
+		$res=@include "../../../main.inc.php";
+	}
 } else {
 	// Try master.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
-	$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-	while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-	if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-	if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+	$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];
+	$tmp2=realpath(__FILE__);
+	$i=strlen($tmp)-1;
+	$j=strlen($tmp2)-1;
+	while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+		$i--;
+		$j--;
+	}
+	if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) {
+		$res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+	}
+	if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) {
+		$res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+	}
 	// Try master.inc.php using relative path
-	if (! $res && file_exists("./master.inc.php")) $res=@include "./master.inc.php";
-	if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-	if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-	if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-	if (! $res) die("Include of master fails");
+	if (! $res && file_exists("./master.inc.php")) {
+		$res=@include "./master.inc.php";
+	}
+	if (! $res && file_exists("../master.inc.php")) {
+		$res=@include "../master.inc.php";
+	}
+	if (! $res && file_exists("../../master.inc.php")) {
+		$res=@include "../../master.inc.php";
+	}
+	if (! $res && file_exists("../../../master.inc.php")) {
+		$res=@include "../../../master.inc.php";
+	}
+	if (! $res) {
+		die("Include of master fails");
+	}
 	// After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 	// $user is created but empty.
 }
-if (! $res) die("Include of main fails");
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
@@ -148,7 +194,7 @@ $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
 $service=GETPOST('service', 'int');
 $productid=GETPOST('service', 'int');
 $plan=GETPOST('plan', 'alpha');
-$productref=(GETPOST('productref', 'alpha')?GETPOST('productref', 'alpha'):($plan?$plan:''));
+$productref=(GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : ($plan ? $plan : ''));
 $extcss=GETPOST('extcss', 'alpha');
 if (empty($extcss)) {
 	$extcss = getDolGlobalString('SELLYOURSAAS_EXTCSS', 'dist/css/myaccount.css');
@@ -247,7 +293,9 @@ $newurl=preg_replace('/register_instance\.php/', 'register.php', $_SERVER["PHP_S
 
 if ($reusecontractid) {		// When we use the "Restart deploy" after error from account backoffice
 	$newurl=preg_replace('/register_instance/', 'index', $newurl);
-	if (! preg_match('/\?/', $newurl)) $newurl.='?';
+	if (! preg_match('/\?/', $newurl)) {
+		$newurl.='?';
+	}
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.((int) $reusecontractid);
 } elseif ($reusesocid) {		// When we use the "Add another instance" from myaccount dashboard
@@ -258,17 +306,35 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	}
 
 	$newurl=preg_replace('/register_instance/', 'index', $newurl);
-	if (! preg_match('/\?/', $newurl)) $newurl.='?';
+	if (! preg_match('/\?/', $newurl)) {
+		$newurl.='?';
+	}
 	$newurl.='&reusesocid='.$reusesocid;
-	$newurl.='&mode='.(GETPOST('mode', 'alpha') == 'mycustomerinstances' ? 'mycustomerinstances': 'instances');
-	if (! preg_match('/sldAndSubdomain/i', $sldAndSubdomain)) $newurl.='&sldAndSubdomain='.urlencode($sldAndSubdomain);
-	if (! preg_match('/tldid/i', $tldid)) $newurl.='&tldid='.urlencode($tldid);
-	if (! preg_match('/service/i', $newurl)) $newurl.='&service='.urlencode($service);
-	if (! preg_match('/partner/i', $newurl)) $newurl.='&partner='.urlencode($partner);
-	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
-	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
-	if (! preg_match('/disablecustomeremail/i', $newurl)) $newurl.='&disablecustomeremail='.urlencode($disablecustomeremail);
-	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) $newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
+	$newurl.='&mode='.(GETPOST('mode', 'alpha') == 'mycustomerinstances' ? 'mycustomerinstances' : 'instances');
+	if (! preg_match('/sldAndSubdomain/i', $sldAndSubdomain)) {
+		$newurl.='&sldAndSubdomain='.urlencode($sldAndSubdomain);
+	}
+	if (! preg_match('/tldid/i', $tldid)) {
+		$newurl.='&tldid='.urlencode($tldid);
+	}
+	if (! preg_match('/service/i', $newurl)) {
+		$newurl.='&service='.urlencode($service);
+	}
+	if (! preg_match('/partner/i', $newurl)) {
+		$newurl.='&partner='.urlencode($partner);
+	}
+	if (! preg_match('/partnerkey/i', $newurl)) {
+		$newurl.='&partnerkey='.urlencode($partnerkey);
+	}		// md5 of partner name alias
+	if (! preg_match('/origin/i', $newurl)) {
+		$newurl.='&origin='.urlencode($origin);
+	}
+	if (! preg_match('/disablecustomeremail/i', $newurl)) {
+		$newurl.='&disablecustomeremail='.urlencode($disablecustomeremail);
+	}
+	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) {
+		$newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
+	}
 
 	if ($reusesocid < 0) { // -1, the thirdparty was not selected
 		// Return to dashboard, the only page where the customer is requested.
@@ -340,18 +406,42 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 	$hookmanager->initHooks(array('sellyoursaas-register-instance'));
 
-	if (! preg_match('/\?/', $newurl)) $newurl.='?';
-	if (! preg_match('/orgName/i', $newurl)) $newurl.='&orgName='.urlencode($orgname);
-	if (! preg_match('/phone/i', $newurl)) $newurl.='&phone='.urlencode($phone);
-	if (! preg_match('/username/i', $newurl)) $newurl.='&username='.urlencode($email);
-	if (! preg_match('/country/i', $newurl)) $newurl.='&country='.urlencode($country_code);
-	if (! preg_match('/sldAndSubdomain/i', $sldAndSubdomain)) $newurl.='&sldAndSubdomain='.urlencode($sldAndSubdomain);
-	if (! preg_match('/tldid/i', $tldid)) $newurl.='&tldid='.urlencode($tldid);
-	if (! preg_match('/plan/i', $newurl)) $newurl.='&plan='.urlencode($productref);
-	if (! preg_match('/partner/i', $newurl)) $newurl.='&partner='.urlencode($partner);
-	if (! preg_match('/partnerkey/i', $newurl)) $newurl.='&partnerkey='.urlencode($partnerkey);		// md5 of partner name alias
-	if (! preg_match('/origin/i', $newurl)) $newurl.='&origin='.urlencode($origin);
-	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) $newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
+	if (! preg_match('/\?/', $newurl)) {
+		$newurl.='?';
+	}
+	if (! preg_match('/orgName/i', $newurl)) {
+		$newurl.='&orgName='.urlencode($orgname);
+	}
+	if (! preg_match('/phone/i', $newurl)) {
+		$newurl.='&phone='.urlencode($phone);
+	}
+	if (! preg_match('/username/i', $newurl)) {
+		$newurl.='&username='.urlencode($email);
+	}
+	if (! preg_match('/country/i', $newurl)) {
+		$newurl.='&country='.urlencode($country_code);
+	}
+	if (! preg_match('/sldAndSubdomain/i', $sldAndSubdomain)) {
+		$newurl.='&sldAndSubdomain='.urlencode($sldAndSubdomain);
+	}
+	if (! preg_match('/tldid/i', $tldid)) {
+		$newurl.='&tldid='.urlencode($tldid);
+	}
+	if (! preg_match('/plan/i', $newurl)) {
+		$newurl.='&plan='.urlencode($productref);
+	}
+	if (! preg_match('/partner/i', $newurl)) {
+		$newurl.='&partner='.urlencode($partner);
+	}
+	if (! preg_match('/partnerkey/i', $newurl)) {
+		$newurl.='&partnerkey='.urlencode($partnerkey);
+	}		// md5 of partner name alias
+	if (! preg_match('/origin/i', $newurl)) {
+		$newurl.='&origin='.urlencode($origin);
+	}
+	if (! preg_match('/checkboxnonprofitorga/i', $newurl)) {
+		$newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
+	}
 
 	$parameters = array('tldid' => $tldid, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
 	$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
@@ -664,7 +754,7 @@ if ($reusecontractid) {
 	$generatedunixpassword = $contract->array_options['options_password_os'];
 	$generateddbhostname = $contract->array_options['options_hostname_db'];
 	$generateddbname = $contract->array_options['options_database_db'];
-	$generateddbport = ($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
+	$generateddbport = ($contract->array_options['options_port_db'] ? $contract->array_options['options_port_db'] : 3306);
 	$generateddbusername = $contract->array_options['options_username_db'];
 	$generateddbpassword = $contract->array_options['options_password_db'];
 
@@ -731,7 +821,9 @@ if ($reusecontractid) {
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
-		if ($objselect) $nbofinstancewithsameip = $objselect->nb;
+		if ($objselect) {
+			$nbofinstancewithsameip = $objselect->nb;
+		}
 	}
 	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1. Whitelist ip does not bypass this test)");
 	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIPPERHOUR))) {
@@ -765,7 +857,9 @@ if ($reusecontractid) {
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
-		if ($objselect) $nbofinstanceindeployment = $objselect->nb;
+		if ($objselect) {
+			$nbofinstanceindeployment = $objselect->nb;
+		}
 	} else {
 		dol_print_error($db, 'Bad sql request');
 	}
@@ -863,7 +957,9 @@ if ($reusecontractid) {
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$tmpthirdparty->array_options['options_domain_registration_page'];
-				if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+				if (! empty($conf->global->$newnamekey)) {
+					$sellyoursaasemail = $conf->global->$newnamekey;
+				}
 			}
 
 			if (substr($sapi_type, 0, 3) != 'cli') {
@@ -887,7 +983,9 @@ if ($reusecontractid) {
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$tmpthirdparty->array_options['options_domain_registration_page'];
-				if (! empty($conf->global->$newnamekey)) $myaccounturl = $conf->global->$newnamekey;
+				if (! empty($conf->global->$newnamekey)) {
+					$myaccounturl = $conf->global->$newnamekey;
+				}
 			}
 			$myaccounturl.='?mode=instances&addanotherinstance=1&service='.((int) $service).'&sldAndSubdomain='.urlencode($sldAndSubdomain).'#addanotherinstance';
 
@@ -898,7 +996,9 @@ if ($reusecontractid) {
 				print $langs->trans("AccountAlreadyExistsForEmail", $myaccounturl)."\n";
 			}
 			exit(-78);
-		} else dol_syslog("Email not already used. Good.");
+		} else {
+			dol_syslog("Email not already used. Good.");
+		}
 	}
 
 	$fqdninstance = $sldAndSubdomain.$tldid;
@@ -960,7 +1060,7 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_dolicloud'] = 'yesv2';
 	$tmpthirdparty->array_options['options_date_registration'] = dol_now();
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-	$tmpthirdparty->array_options['options_source'] = 'REGISTERFORM'.($origin?'-'.$origin:'');
+	$tmpthirdparty->array_options['options_source'] = 'REGISTERFORM'.($origin ? '-'.$origin : '');
 	$tmpthirdparty->array_options['options_source_utm'] = (empty($_COOKIE['utm_source_cookie']) ? '' : $_COOKIE['utm_source_cookie']);
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
@@ -1133,7 +1233,7 @@ if ($reusecontractid) {
 		$contract->array_options['options_hostname_os'] = $generatedunixhostname;
 		$contract->array_options['options_username_os'] = $generatedunixlogin;
 		$contract->array_options['options_password_os'] = $generatedunixpassword;
-		$contract->array_options['options_sshaccesstype'] = (empty($tmpproduct->array_options['options_sshaccesstype'])?0:$tmpproduct->array_options['options_sshaccesstype']);
+		$contract->array_options['options_sshaccesstype'] = (empty($tmpproduct->array_options['options_sshaccesstype']) ? 0 : $tmpproduct->array_options['options_sshaccesstype']);
 		$contract->array_options['options_hostname_db'] = $generateddbhostname;
 		$contract->array_options['options_database_db'] = $generateddbname;
 		$contract->array_options['options_port_db'] = $generateddbport;
@@ -1319,7 +1419,9 @@ if (! $error && $productref != 'none') {
 	if ($result <= 0) {
 		$error++;
 		$errormessages=$sellyoursaasutils->errors;
-		if ($sellyoursaasutils->error) $errormessages[]=$sellyoursaasutils->error;
+		if ($sellyoursaasutils->error) {
+			$errormessages[]=$sellyoursaasutils->error;
+		}
 	}
 }
 
@@ -1330,8 +1432,11 @@ if (! $error && $productref != 'none') {
 
 	$contract->context['deployallwasjustdone']=1;		// Add a key so trigger into activateAll will know we have just made a "deployall"
 
-	if ($fromsocid) $comment = 'Activation after deployment from instance creation by reseller id='.$fromsocid;
-	else $comment = 'Activation after deployment from online registration or dashboard';
+	if ($fromsocid) {
+		$comment = 'Activation after deployment from instance creation by reseller id='.$fromsocid;
+	} else {
+		$comment = 'Activation after deployment from online registration or dashboard';
+	}
 
 	$result = $contract->activateAll($user, dol_now(), 1, $comment);			// This may execute the triggers
 	if ($result <= 0) {
@@ -1394,14 +1499,17 @@ if (! $error) {
 	}
 
 	$newurl=$_SERVER["PHP_SELF"];
-	$newurl=preg_replace('/register_instance\.php/', 'index.php?welcomecid='.$contract->id.(($fromsocid > 0)?'&fromsocid='.$fromsocid:''), $newurl);
+	$newurl=preg_replace('/register_instance\.php/', 'index.php?welcomecid='.$contract->id.(($fromsocid > 0) ? '&fromsocid='.$fromsocid : ''), $newurl);
 
 	$anonymoususer=new User($db);
 	$anonymoususer->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
 	$_SESSION['dol_login']=$anonymoususer->login;				// Set dol_login in session so for next page index.php we will load, we are already logged.
 
-	if ($fromsocid > 0) $_SESSION['dol_loginsellyoursaas']=$fromsocid;
-	else $_SESSION['dol_loginsellyoursaas']=$contract->thirdparty->id;
+	if ($fromsocid > 0) {
+		$_SESSION['dol_loginsellyoursaas']=$fromsocid;
+	} else {
+		$_SESSION['dol_loginsellyoursaas']=$contract->thirdparty->id;
+	}
 
 	$_SESSION['initialapplogin']='admin';
 	$_SESSION['initialapppassword']=$password;
@@ -1493,9 +1601,9 @@ $errormessages[] = '<br>';
 
 // If we are here, there was an error
 if ($productref != 'none') {
-	$errormessages[] = 'Deployment of instance '.$sldAndSubdomain.$tldid.' from '.($remoteip?$remoteip:'localhost').' started but failed.';
+	$errormessages[] = 'Deployment of instance '.$sldAndSubdomain.$tldid.' from '.($remoteip ? $remoteip : 'localhost').' started but failed.';
 } else {
-	$errormessages[] = 'Creation of account '.$email.' from '.($remoteip?$remoteip:'localhost').' has failed.';
+	$errormessages[] = 'Creation of account '.$email.' from '.($remoteip ? $remoteip : 'localhost').' has failed.';
 }
 $errormessages[] = $langs->trans("OurTeamHasBeenAlerted");
 
@@ -1539,16 +1647,22 @@ $conf->dol_hide_topmenu = 1;
 $conf->dol_hide_leftmenu = 1;
 
 $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
-if (! preg_match('/\.(png|jpg)$/', $favicon)) $favicon.='.png';
-if (! empty($conf->global->MAIN_FAVICON_URL)) $favicon=$conf->global->MAIN_FAVICON_URL;
+if (! preg_match('/\.(png|jpg)$/', $favicon)) {
+	$favicon.='.png';
+}
+if (! empty($conf->global->MAIN_FAVICON_URL)) {
+	$favicon=$conf->global->MAIN_FAVICON_URL;
+}
 
 $head = '';
-if ($favicon) $head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
+if ($favicon) {
+	$head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
+}
 $head .= '<!-- Bootstrap core CSS -->';
 $head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
 $head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
 
-$title = $langs->trans("Registration").($tmpproduct->label?' ('.$tmpproduct->label.')':'');
+$title = $langs->trans("Registration").($tmpproduct->label ? ' ('.$tmpproduct->label.')' : '');
 
 llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css'));
 
@@ -1602,7 +1716,7 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 	  <div class="block medium">
 
 		<header class="inverse">
-		  <h1><?php echo $langs->trans("Registration") ?> <small><?php echo ($tmpproduct->label?' - '.$tmpproduct->label:''); ?></small></h1>
+		  <h1><?php echo $langs->trans("Registration") ?> <small><?php echo($tmpproduct->label ? ' - '.$tmpproduct->label : ''); ?></small></h1>
 		</header>
 
 

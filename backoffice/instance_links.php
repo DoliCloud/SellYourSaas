@@ -24,16 +24,31 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
 require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
@@ -155,15 +170,25 @@ if (empty($reshook)) {
 
 		$server = $tmpcontract->ref_customer;
 		$hostname_db = $tmpcontract->hostname_db;
-		if (empty($hostname_db)) $hostname_db = $tmpcontract->array_options['options_hostname_db'];
+		if (empty($hostname_db)) {
+			$hostname_db = $tmpcontract->array_options['options_hostname_db'];
+		}
 		$port_db = $tmpcontract->port_db;
-		if (empty($port_db)) $port_db = (! empty($tmpcontract->array_options['options_port_db']) ? $tmpcontract->array_options['options_port_db'] : 3306);
+		if (empty($port_db)) {
+			$port_db = (! empty($tmpcontract->array_options['options_port_db']) ? $tmpcontract->array_options['options_port_db'] : 3306);
+		}
 		$username_db = $tmpcontract->username_db;
-		if (empty($username_db)) $username_db = $tmpcontract->array_options['options_username_db'];
+		if (empty($username_db)) {
+			$username_db = $tmpcontract->array_options['options_username_db'];
+		}
 		$password_db = $object->password_db;
-		if (empty($password_db)) $password_db = $tmpcontract->array_options['options_password_db'];
+		if (empty($password_db)) {
+			$password_db = $tmpcontract->array_options['options_password_db'];
+		}
 		$database_db = $object->database_db;
-		if (empty($database_db)) $database_db = $tmpcontract->array_options['options_database_db'];
+		if (empty($database_db)) {
+			$database_db = $tmpcontract->array_options['options_database_db'];
+		}
 
 		$server = (! empty($hostname_db) ? $hostname_db : $server);
 
@@ -189,7 +214,9 @@ if (empty($reshook)) {
 
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 			$stringtosave = '<script type="text/javascript" src="'.$urlmyaccount.'/public/localdata.js"></script>';
-			if ($action == 'removespamtracker') $stringtosave = '';
+			if ($action == 'removespamtracker') {
+				$stringtosave = '';
+			}
 			dolibarr_set_const($newdb, 'MAIN_HOME', $stringtosave);
 			//$tmpcontract->array_options['spammer'] = 1;
 			//$result= $tmpcontract->update($user, 1);
@@ -273,6 +300,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$hostname_os  = $object->array_options['options_hostname_os'];
 	$username_os  = $object->array_options['options_username_os'];
 	$password_os  = $object->array_options['options_password_os'];
+	$version      = $object->array_options['options_instanceversion'];
 	$username_web = $object->thirdparty->email;
 	$password_web = $object->thirdparty->array_options['options_password'];
 
@@ -288,6 +316,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->username_os  = $username_os;
 	$object->password_os  = $password_os;
 	$object->hostname_os  = $hostname_os;
+	$object->version      = $version;
 	$object->username_web = $username_web;
 	$object->password_web = $password_web;
 
@@ -395,6 +424,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 					}
 					$i++;
 				}
+
+				$object->version = $stringofversion;
+				$object->array_options['options_instanceversion'] = $stringofversion;
 			} else {
 				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
 				$error++;
@@ -409,11 +441,15 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			$i=0;
 			foreach ($confinstance->global as $key => $val) {
 				if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && ! empty($val)) {
-					if ($i > 0) $stringoflistofmodules .= ', ';
+					if ($i > 0) {
+						$stringoflistofmodules .= ', ';
+					}
 					$stringoflistofmodules .= preg_replace('/^MAIN_MODULE_/', '', $key);
 					$i++;
 				}
 			}
+
+			$object->modulesenabled = $stringoflistofmodules;
 		}
 	}
 
@@ -430,7 +466,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	// Object card
 	// ------------------------------------------------------------
-	$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/list.php?restore_lastsearch_values=1'.(! empty($socid)?'&socid='.$socid:'').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/list.php?restore_lastsearch_values=1'.(! empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	// Ref customer
@@ -519,7 +555,9 @@ if (empty($object->nbofusers)) {
 
 		//var_dump($object->lines);
 		foreach ($object->lines as $contractline) {
-			if (empty($contractline->fk_product)) continue;
+			if (empty($contractline->fk_product)) {
+				continue;
+			}
 			$producttmp = new Product($db);
 			$producttmp->fetch($contractline->fk_product, '', '', '', 1, 1, 1);
 
@@ -532,10 +570,10 @@ if (empty($object->nbofusers)) {
 				$sldAndSubdomain=$tmp[0];
 				$domainname=$tmp[1];
 				$generateddbname      =$contract->array_options['options_database_db'];
-				$generateddbport      =($contract->array_options['options_port_db']?$contract->array_options['options_port_db']:3306);
+				$generateddbport      =($contract->array_options['options_port_db'] ? $contract->array_options['options_port_db'] : 3306);
 				$generateddbusername  =$contract->array_options['options_username_db'];
 				$generateddbpassword  =$contract->array_options['options_password_db'];
-				$generateddbprefix    =($contract->array_options['options_prefix_db']?$contract->array_options['options_prefix_db']:'llx_');
+				$generateddbprefix    =($contract->array_options['options_prefix_db'] ? $contract->array_options['options_prefix_db'] : 'llx_');
 				$generatedunixhostname=$contract->array_options['options_hostname_os'];
 				$generateddbhostname  =$contract->array_options['options_hostname_db'];
 				$generateduniquekey   =getRandomPassword(true);
@@ -695,11 +733,11 @@ print '</tr>';
 
 // Authorized key file
 print '<tr>';
-print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
+print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey'] ? $langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel') : $langs->trans("No")).'</span>';
 if ($object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 }
-print ($object->array_options['options_fileauthorizekey']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
+print($object->array_options['options_fileauthorizekey'] ? ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delauthorizedkey&token='.newToken().'">'.$langs->trans("Delete").'</a>)' : '');
 print '</td>';
 print '<td></td><td>';
 if (! $object->user_id && $user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
@@ -710,33 +748,33 @@ print '</tr>';
 
 // Install.lock file
 print '<tr>';
-print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
+print '<td>'.$langs->trans("LockfileInstalled").'</td><td>'.($object->array_options['options_filelock'] ? $langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_filelock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel') : $langs->trans("No")).'</span>';
 if ($object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstalllock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 }
-print ($object->array_options['options_filelock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
+print($object->array_options['options_filelock'] ? ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstalllock&token='.newToken().'">'.$langs->trans("Delete").'</a>)' : '');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
 
 // Upgrade.unlock file
 print '<tr>';
-print '<td>'.$langs->trans("UnlockfileInstalled").'</td><td>'.($object->array_options['options_fileunlock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileunlock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
+print '<td>'.$langs->trans("UnlockfileInstalled").'</td><td>'.($object->array_options['options_fileunlock'] ? $langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileunlock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel') : $langs->trans("No")).'</span>';
 if ($object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addupgradeunlock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 }
-print ($object->array_options['options_fileunlock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delupgradeunlock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
+print($object->array_options['options_fileunlock'] ? ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delupgradeunlock&token='.newToken().'">'.$langs->trans("Delete").'</a>)' : '');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
 
 // Installmodules.lock file
 print '<tr>';
-print '<td>'.$langs->trans("InstallModulesLockfileInstalled").'</td><td>'.($object->array_options['options_fileinstallmoduleslock']?$langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileinstallmoduleslock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel'):$langs->trans("No")).'</span>';
+print '<td>'.$langs->trans("InstallModulesLockfileInstalled").'</td><td>'.($object->array_options['options_fileinstallmoduleslock'] ? $langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileinstallmoduleslock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel') : $langs->trans("No")).'</span>';
 if ($object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addinstallmoduleslock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 }
-print ($object->array_options['options_fileinstallmoduleslock']?' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstallmoduleslock&token='.newToken().'">'.$langs->trans("Delete").'</a>)':'');
+print($object->array_options['options_fileinstallmoduleslock'] ? ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delinstallmoduleslock&token='.newToken().'">'.$langs->trans("Delete").'</a>)' : '');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';
@@ -744,13 +782,13 @@ print '</tr>';
 // Version
 print '<tr>';
 print '<td>'.$langs->trans("Version").'</td>';
-print '<td colspan="3">'.$stringofversion.'</td>';
+print '<td colspan="3">'.$object->version.'</td>';
 print '</tr>';
 
 // Modules
 print '<tr>';
 print '<td>'.$langs->trans("Modules").'</td>';
-print '<td colspan="3"><span class="small">'.$stringoflistofmodules.'</span></td>';
+print '<td colspan="3"><span class="small">'.$object->modulesenabled.'</span></td>';
 print '</tr>';
 
 print "</table><br>";

@@ -50,7 +50,7 @@ class autoTranslator
 	 * @param   string $_apikey         Api key
 	 * @return void
 	 */
-	function __construct($_destlang, $_refLang, $_langDir, $_limittofile, $_apikey)
+	public function __construct($_destlang, $_refLang, $_langDir, $_limittofile, $_apikey)
 	{
 
 		// Set enviorment variables
@@ -64,7 +64,7 @@ class autoTranslator
 		// Translate
 		//ini_set('default_charset','UTF-8');
 		ini_set('default_charset', $this->_outputpagecode);
-		$this->parse_refLangTranslationFiles();
+		$this->parseRefLangTranslationFiles();
 	}
 
 	/**
@@ -72,13 +72,14 @@ class autoTranslator
 	 *
 	 * 	@return	void
 	 */
-	private function parse_refLangTranslationFiles()
+	private function parseRefLangTranslationFiles()
 	{
-
 		$files = $this->getTranslationFilesArray($this->_refLang);
 		$counter = 1;
 		foreach ($files as $file) {
-			if ($this->_limittofile && $this->_limittofile != $file) continue;
+			if ($this->_limittofile && $this->_limittofile != $file) {
+				continue;
+			}
 			$counter++;
 			$fileContent = null;
 			$refPath = $this->_langDir.$this->_refLang.self::DIR_SEPARATOR.$file;
@@ -93,16 +94,34 @@ class autoTranslator
 				// If we must process all languages
 				$arraytmp=dol_dir_list($this->_langDir, 'directories', 0);
 				foreach ($arraytmp as $dirtmp) {
-					if ($dirtmp['name'] === $this->_refLang) continue;	// We discard source language
+					if ($dirtmp['name'] === $this->_refLang) {
+						continue;
+					}	// We discard source language
 					$tmppart=explode('_', $dirtmp['name']);
-					if (preg_match('/^en/i', $dirtmp['name']))  continue;	// We discard en_* languages
-					if (preg_match('/^fr/i', $dirtmp['name']))  continue;	// We discard fr_* languages
-					if (preg_match('/^es/i', $dirtmp['name']))  continue;	// We discard es_* languages
-					if (preg_match('/ca_ES/i', $dirtmp['name']))  continue;	// We discard es_CA language
-					if (preg_match('/pt_BR/i', $dirtmp['name']))  continue;	// We discard pt_BR language
-					if (preg_match('/nl_BE/i', $dirtmp['name']))  continue;  // We discard nl_BE language
-					if (preg_match('/^\./i', $dirtmp['name']))  continue;	// We discard files .*
-					if (preg_match('/^CVS/i', $dirtmp['name']))  continue;	// We discard CVS
+					if (preg_match('/^en/i', $dirtmp['name'])) {
+						continue;
+					}	// We discard en_* languages
+					if (preg_match('/^fr/i', $dirtmp['name'])) {
+						continue;
+					}	// We discard fr_* languages
+					if (preg_match('/^es/i', $dirtmp['name'])) {
+						continue;
+					}	// We discard es_* languages
+					if (preg_match('/ca_ES/i', $dirtmp['name'])) {
+						continue;
+					}	// We discard es_CA language
+					if (preg_match('/pt_BR/i', $dirtmp['name'])) {
+						continue;
+					}	// We discard pt_BR language
+					if (preg_match('/nl_BE/i', $dirtmp['name'])) {
+						continue;
+					}  // We discard nl_BE language
+					if (preg_match('/^\./i', $dirtmp['name'])) {
+						continue;
+					}	// We discard files .*
+					if (preg_match('/^CVS/i', $dirtmp['name'])) {
+						continue;
+					}	// We discard CVS
 					$targetlangs[]=$dirtmp['name'];
 				}
 				//var_dump($targetlangs);
@@ -205,23 +224,31 @@ class autoTranslator
 			$destValue = $this->getLineValue($line);
 			// If translated return
 			//print "destKey=".$destKey."\n";
-			if ( trim($destKey) == trim($key) ) {	// Found already existing translation (key already exits in dest file)
+			if (trim($destKey) == trim($key)) {	// Found already existing translation (key already exits in dest file)
 				return 0;
 			}
 		}
 
-		if ($key == 'CHARSET') $val=$this->_outputpagecode;
-		elseif (preg_match('/^Format/', $key)) $val=$value;
-		elseif ($value=='-') $val=$value;
-		else {
+		if ($key == 'CHARSET') {
+			$val=$this->_outputpagecode;
+		} elseif (preg_match('/^Format/', $key)) {
+			$val=$value;
+		} elseif ($value=='-') {
+			$val=$value;
+		} else {
 			// If not translated then translate
-			if ($this->_outputpagecode == 'UTF-8') $val=$this->translateTexts(array($value), substr($this->_refLang, 0, 2), substr($my_destlang, 0, 2));
-			else $val=utf8_decode($this->translateTexts(array($value), substr($this->_refLang, 0, 2), substr($my_destlang, 0, 2)));
+			if ($this->_outputpagecode == 'UTF-8') {
+				$val=$this->translateTexts(array($value), substr($this->_refLang, 0, 2), substr($my_destlang, 0, 2));
+			} else {
+				$val=utf8_decode($this->translateTexts(array($value), substr($this->_refLang, 0, 2), substr($my_destlang, 0, 2)));
+			}
 		}
 
 		$val=trim($val);
 
-		if (empty($val)) return 0;
+		if (empty($val)) {
+			return 0;
+		}
 
 		$this->_translatedFiles[$file][] = $key . '=' . $val ;
 		return 1;
@@ -248,7 +275,7 @@ class autoTranslator
 	private function getLineValue($line)
 	{
 		$arraykey = explode('=', $line, 2);
-		return trim(isset($arraykey[1])?$arraykey[1]:'');
+		return trim(isset($arraykey[1]) ? $arraykey[1] : '');
 	}
 
 	/**
@@ -281,9 +308,13 @@ class autoTranslator
 	{
 		// We want to be sure that src_lang and dest_lang are using 2 chars only
 		$tmp=explode('_', $src_lang);
-		if (! empty($tmp[1]) && $tmp[0] == $tmp[1]) $src_lang=$tmp[0];
+		if (! empty($tmp[1]) && $tmp[0] == $tmp[1]) {
+			$src_lang=$tmp[0];
+		}
 		$tmp=explode('_', $dest_lang);
-		if (! empty($tmp[1]) && $tmp[0] == $tmp[1]) $dest_lang=$tmp[0];
+		if (! empty($tmp[1]) && $tmp[0] == $tmp[1]) {
+			$dest_lang=$tmp[0];
+		}
 
 		//setting language pair
 		$lang_pair = $src_lang.'|'.$dest_lang;
@@ -302,8 +333,8 @@ class autoTranslator
 		//print "Url to translate: ".$url."\n";
 
 		if (! function_exists("curl_init")) {
-			  print "Error, your PHP does not support curl functions.\n";
-			  die();
+			print "Error, your PHP does not support curl functions.\n";
+			die();
 		}
 
 		$ch = curl_init();

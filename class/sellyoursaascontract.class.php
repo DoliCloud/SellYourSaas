@@ -43,4 +43,17 @@ class SellYourSaasContract extends Contrat
 	public $deployment_host;
 	public $latestbackup_date_ok;
 	public $backup_frequency;
+
+	public $lastpass;
+	public $lastpass_admin;
+
+	public $date_lastlogin;
+	public $lastlogin;
+	public $lastlogin_admin;
+	public $date_lastcheck;
+	public $lastcheck;
+
+	public $modulesenabled;
+	public $version;
+	public $nbofusers;
 }

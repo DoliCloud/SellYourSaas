@@ -44,12 +44,12 @@ function sellYourSaasBackofficePrepareHead()
 		$head[$h][1] = $langs->trans("DeploymentServers");
 		$head[$h][2] = 'deploymentservers';
 		$h++;
-	}else {
+	} else {
 		$head[$h][0] = '/custom/sellyoursaas/deploymentserver_list.php';
 		$head[$h][0] = dol_buildpath('/sellyoursaas/deploymentserver_list.php', 1);
 		$head[$h][1] = $langs->trans("DeploymentServers");
 		$head[$h][2] = 'deploymentservers';
-		$h++; 
+		$h++;
 	}
 
 	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php', 1);

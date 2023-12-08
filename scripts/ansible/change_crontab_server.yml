@@ -1,0 +1,36 @@
+---
+# Script to change an option=value of an entry into htdocs/conf/conf.php
+#
+# Examples to run the script:
+# ansible-playbook -K change_sellyoursaas_config.yml -i hosts-xxx -e 'target=targethost option=<your_option> value=<new_value>'
+# ansible-playbook -K change_sellyoursaas_config.yml -i hosts-xxx -e 'target=targethost option=<your_option> value=<new_value>' --limit=*.mydomain.com
+#
+
+- name: Change value in crontab
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+    - name: Catch the value of the regex
+      command: "grep 'backup_backups.sh' /var/spool/cron/crontabs/{{username}}"
+      register: line_catch
+
+    - name: Add the value catched before in crontab 
+      lineinfile:
+        path: /var/spool/cron/crontabs/{{username}}
+        line: '#{{line_catch.stdout}}'
+        insertafter: "EOF"
+        state: present 
+        backup: yes
+
+    - name: Find non comment line with regex and change it
+      lineinfile:
+        path: /var/spool/cron/crontabs/{{username}}
+        regexp: '^(?!#)(.*backup_backups).sh(.*)$'
+        line: '\1.php\2'
+        backrefs: yes
+  
+
+

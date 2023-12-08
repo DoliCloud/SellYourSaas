@@ -134,12 +134,17 @@ function getPreviousInstanceInChain($object)
 {
 	global $db;
 
-	if (empty($object->array_options['options_cookieregister_previous_instance'])) return null;
+	if (empty($object->array_options['options_cookieregister_previous_instance'])) {
+		return null;
+	}
 
 	$contract = new Contrat($db);
 	$result = $contract->fetch(0, '', $object->array_options['options_cookieregister_previous_instance']);		// $object->array_options['options_cookieregister_previous_instance'] is ref_customer of previous instance
-	if ($result > 0) return $contract;
-	else return null;
+	if ($result > 0) {
+		return $contract;
+	} else {
+		return null;
+	}
 }
 
 /**
@@ -231,7 +236,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	//if (empty($conf->global->DOLICLOUD_EXT_HOME)) $links='Error: DOLICLOUD_EXT_HOME not defined<br>';
 	$domainforapp=$object->hostname_os;
-	if (preg_match('/^[0-9\.]$/', $domainforapp)) $domainforapp=$object->ref_customer;	// If this is an ip, we use the ref_customer.
+	if (preg_match('/^[0-9\.]$/', $domainforapp)) {
+		$domainforapp=$object->ref_customer;
+	}	// If this is an ip, we use the ref_customer.
 
 	// Application instance url
 	if (empty($lastpassadmin)) {
@@ -254,8 +261,11 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	// Dashboard
 	$url='';
 	$thirdparty = null;
-	if (get_class($object) == 'Societe') $thirdparty = $object;
-	elseif (is_object($object->thirdparty)) $thirdparty = $object->thirdparty;
+	if (get_class($object) == 'Societe') {
+		$thirdparty = $object;
+	} elseif (is_object($object->thirdparty)) {
+		$thirdparty = $object->thirdparty;
+	}
 	if ($user->admin && is_object($thirdparty) && (! empty($thirdparty->array_options['options_dolicloud']))) {
 		$urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
 		if (! empty($thirdparty->array_options['options_domain_registration_page'])
@@ -285,7 +295,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$homestring=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->username_os;
 	$links.='Home dir: ';
 	$links.='<input type="text" name="homestring" id="homestring" value="'.$homestring.'" class="maxwidth250"> ';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('homestring');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('homestring');
+	}
 	//$links.='<br>';
 
 	// BackupDir
@@ -294,7 +306,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links .= ' &nbsp; ';
 	$links.='Backup dir: ';
 	$links.='<input type="text" name="backupstring" id="backupstring" value="'.$backupstring.'" class="maxwidth250"> ';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('backupstring');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('backupstring');
+	}
 	//$links.='<br>';
 
 	// ArchiveDir
@@ -308,17 +322,23 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links .= ' &nbsp; ';
 	$links .= 'Archive dir: ';
 	$links .= '<input type="text" name="archivestring" id="archivestring" value="'.$archivestring.'" class="maxwidth250"><br>';
-	if ($conf->use_javascript_ajax) $links .= ajax_autoselect('archivestring');
+	if ($conf->use_javascript_ajax) {
+		$links .= ajax_autoselect('archivestring');
+	}
 
 	// User and Password
 	$userstring=$object->username_os;
 	$links.=$langs->trans("User").': ';
 	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" class="maxwidth200">';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('userstring');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('userstring');
+	}
 	$links .= ' &nbsp; ';
 	$links .= $langs->trans("Password").': ';
 	$links.='<input type="text" name="sshpassword" id="sshpassword" value="'.dol_escape_htmltag($object->password_os).'" class="maxwidth200">';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sshpassword');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('sshpassword');
+	}
 	$links.='<br>'."\n";
 
 	$links.='<br>'."\n";
@@ -327,11 +347,15 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$sshconnectstring='ssh '.$object->username_os.'@'.$object->hostname_os;
 	$links.='<span class="fa fa-terminal"></span> SSH connect string: ';
 	$links.='<input type="text" name="sshconnectstring" id="sshconnectstring" value="'.dol_escape_htmltag($sshconnectstring).'" class="maxwidth250">';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sshconnectstring');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('sshconnectstring');
+	}
 	$links.=' &nbsp; '.$langs->trans("or").' SU: ';
 	$sustring='su '.$object->username_os;
 	$links.='<input type="text" name="sustring" id="sustring" value="'.$sustring.'" class="maxwidth200">';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sustring');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('sustring');
+	}
 	$links.='<br>';
 	//$links.='<br>';
 
@@ -340,14 +364,18 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$sftpconnectstring='sftp://'.$object->username_os.'@'.$object->hostname_os.'/' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 	$links.='<span class="fa fa-terminal"></span> SFTP connect string: ';
 	$links.='<input type="text" name="sftpconnectstring" id="sftpconnectstring" value="'.dol_escape_htmltag($sftpconnectstring).'"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('sftpconnectstring');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('sftpconnectstring');
+	}
 	//$links.='<br>';
 
 	// MySQL
 	$mysqlconnectstring='mysql -A -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db;
 	$links.='<span class="fa fa-database"></span> Mysql connect string: ';
 	$links.='<input type="text" name="mysqlconnectstring" id="mysqlconnectstring" value="'.dol_escape_htmltag($mysqlconnectstring).'"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('mysqlconnectstring');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('mysqlconnectstring');
+	}
 
 	// MySQL backup
 	/*$mysqlconnectstring='mysqldump -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db;
@@ -359,7 +387,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	//$jdbcconnectstring.=$object->database_db;
 	$links.='<span class="fa fa-database"></span> JDBC connect string: ';
 	$links.='<input type="text" name="jdbcconnectstring" id="jdbcconnectstring" value="'.dol_escape_htmltag($jdbcconnectstring).'"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect('jdbcconnectstring');
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect('jdbcconnectstring');
+	}
 
 	$links.='<br>';
 	$links.='<br>';
@@ -368,14 +398,16 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	$upgradestring=getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/rsync_instance.php '.$dirforexampleforsources.' '.$object->hostname_os;
 
-	$purgestring=DOL_DATA_ROOT.'/../dev/initdata/purge-data.php test (all|option) (all|YYYY-MM-DD) mysqli '.$object->hostname_db.' '.$object->username_db.' '.$object->password_db.' '.$object->database_db.' '.($object->database_port?$object->database_port:3306);
+	$purgestring=DOL_DATA_ROOT.'/../dev/initdata/purge-data.php test (all|option) (all|YYYY-MM-DD) mysqli '.$object->hostname_db.' '.$object->username_db.' '.$object->password_db.' '.$object->database_db.' '.($object->database_port ? $object->database_port : 3306);
 
 	// Mysql Backup database
 	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db.' > ' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql backup database:<br>';
 	$links.='<input type="text" id="mysqlbackupcommand" name="mysqlbackupcommand" value="'.$mysqlbackupcommand.'" class="marginleftonly quatrevingtpercent"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlbackupcommand", 0);
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect("mysqlbackupcommand", 0);
+	}
 	$links.='<br>';
 
 	// Mysql to Restore a dump
@@ -384,7 +416,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql restore database:<br>';
 	$links.='<input type="text" id="mysqlrestorecommand" name="mysqlrestorecommand" value="'.$mysqlresotrecommand.'" class="marginleftonly quatrevingtpercent"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlrestorecommand", 0);
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect("mysqlrestorecommand", 0);
+	}
 	$links.='<br>';
 
 	// Mysql command to block/allow remote ip access
@@ -407,7 +441,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='Rsync to copy/overwrite application dir';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
 	$links.='<input type="text" id="sftprestoreappstring" name="sftprestoreappstring" value="'.$sftprestorestring.'" class="marginleftonly quatrevingtpercent"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("sftprestoreappstring", 0);
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect("sftprestoreappstring", 0);
+	}
 	$links.='<br>';
 
 	// Rsync to Restore Document directory
@@ -416,7 +452,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='Rsync to copy/overwrite document dir';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
 	$links.='<input type="text" id="sftprestorestring" name="sftprestorestring" value="'.$sftprestorestring.'" class="marginleftonly quatrevingtpercent"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("sftprestorestring", 0);
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect("sftprestorestring", 0);
+	}
 	$links.='<br>';
 
 	// Rsync to Deploy module
@@ -425,7 +463,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='Rsync to install or overwrite module';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
 	$links.='<input type="text" id="sftpdeploystring" name="sftpdeploystring" value="'.$sftpdeploystring.'" class="marginleftonly quatrevingtpercent"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("sftpdeploystring", 0);
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect("sftpdeploystring", 0);
+	}
 	$links.='<br>';
 
 	// Upgrade link
@@ -434,7 +474,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='Upgrade version line string';
 	$links.='<span class="opacitymedium"> (remplacer "test" par "confirmunlock" pour exécuter réellement)</span><br>';
 	$links.='<input type="text" id="upgradestring" name="upgradestring" value="'.$upgradestringtoshow.'" class="marginleftonly quatrevingtpercent"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("upgradestring", 0);
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect("upgradestring", 0);
+	}
 	$links.='<br>';
 
 	// Purge data
@@ -443,7 +485,9 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='Purge command line string';
 	$links.='<span class="opacitymedium"> (remplacer "test" par "confirm" pour exécuter réellement)</span><br>';
 	$links.='<input type="text" id="purgestring" name="purgestring" value="'.$purgestringtoshow.'" class="marginleftonly quatrevingtpercent"><br>';
-	if ($conf->use_javascript_ajax) $links.=ajax_autoselect("purgestring", 0);
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect("purgestring", 0);
+	}
 	$links.='<br>';
 
 	// Generate certificate on customer domain name

@@ -24,16 +24,31 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
@@ -56,11 +71,17 @@ $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 $sortfield = GETPOST("sortfield", 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
 $page = GETPOST("page", 'int');
-if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
+if (empty($page) || $page == -1) {
+	$page = 0;
+}     // If $page is not defined, or '' or -1
 $offset = $limit * $page;
-if (! $sortorder) $sortorder='ASC';
-if (! $sortfield) $sortfield='t.date_registration';
-$limit = GETPOST('limit', 'int')?GETPOST('limit', 'int'):$conf->liste_limit;
+if (! $sortorder) {
+	$sortorder='ASC';
+}
+if (! $sortfield) {
+	$sortfield='t.date_registration';
+}
+$limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 
 $pageprev = $page - 1;
 $pagenext = $page + 1;
@@ -72,7 +93,7 @@ $keytodesactivate	= GETPOST('key', 'alpha');
 $value	= GETPOST('value', 'alpha');
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 
 
 /*
@@ -146,7 +167,7 @@ dol_fiche_end();
 print '<br>';
 
 $message='';
-$url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')?urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')):'...').'&mode=test" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')?urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')):'KEYNOTDEFINED').'[&mode=test]</a>';
+$url='<a href="'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY') ? urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')) : '...').'&mode=test" target="_blank">'.dol_buildpath('/sellyoursaas/public/spamreport.php', 3).'?key='.(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY') ? urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')) : 'KEYNOTDEFINED').'[&mode=test]</a>';
 $message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "WebHook SpamReport", '{s1}');
 $message = str_replace('{s1}', $url, $message);
 print $message;

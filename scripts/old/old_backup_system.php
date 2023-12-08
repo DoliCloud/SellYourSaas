@@ -19,7 +19,9 @@
  * BACKUP DATA FROM STRATUS5 TO LOCAL
  */
 
-if (!defined('NOSESSION')) define('NOSESSION', '1');
+if (!defined('NOSESSION')) {
+	define('NOSESSION', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -35,11 +37,11 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 $version='1.0';
 $error=0;
 
-$login=isset($argv[1])?$argv[1]:'';
-$password=isset($argv[2])?$argv[2]:'';
-$loginbase=isset($argv[3])?$argv[3]:'';
-$passwordbase=isset($argv[4])?$argv[4]:'';
-$mode=isset($argv[5])?$argv[5]:'';
+$login=isset($argv[1]) ? $argv[1] : '';
+$password=isset($argv[2]) ? $argv[2] : '';
+$loginbase=isset($argv[3]) ? $argv[3] : '';
+$passwordbase=isset($argv[4]) ? $argv[4] : '';
+$mode=isset($argv[5]) ? $argv[5] : '';
 
 // Include Dolibarr environment
 @set_time_limit(0);							// No timeout for this script
@@ -48,15 +50,30 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+}
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res) die("Include of master fails");
+if (! $res && file_exists("../master.inc.php")) {
+	$res=@include "../master.inc.php";
+}
+if (! $res && file_exists("../../master.inc.php")) {
+	$res=@include "../../master.inc.php";
+}
+if (! $res && file_exists("../../../master.inc.php")) {
+	$res=@include "../../../master.inc.php";
+}
+if (! $res) {
+	die("Include of master fails");
+}
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 
@@ -80,7 +97,7 @@ if (empty($login) || empty($password) || empty($mode)) {
 
 
 $sourcedir='/s5Home/laurent/';
-$targetdir=(empty($conf->global->DOLICLOUD_BACKUP_PATH)?'.':$conf->global->DOLICLOUD_BACKUP_PATH).'/';
+$targetdir=(empty($conf->global->DOLICLOUD_BACKUP_PATH) ? '.' : $conf->global->DOLICLOUD_BACKUP_PATH).'/';
 $server='www.on.dolicloud.com';
 
 print "Backup of database from stratus5 to localhost\n";
@@ -92,7 +109,8 @@ print 'SFTP connect string : '.$sftpconnectstring."\n";
 
 // SFTP connect
 if (! function_exists("ssh2_connect")) {
-	dol_print_error('', 'ssh2_connect function does not exists'); exit(1);
+	dol_print_error('', 'ssh2_connect function does not exists');
+	exit(1);
 }
 
 $server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
@@ -144,7 +162,9 @@ if ($connection) {
 			ssh2_scp_recv($connection, $sourcedir.$filesys2.'.bz2', $targetdir.$filesys2.'.bz2');
 		}*/
 
-		if ($mode == 'confirm' || $mode == 'confirmsaasplex') dol_delete_file($targetdir.$filesys1);
+		if ($mode == 'confirm' || $mode == 'confirmsaasplex') {
+			dol_delete_file($targetdir.$filesys1);
+		}
 		$fullcommand="bzip2 -c -d ".$targetdir.$filesys1.".bz2 | mysql -u".$loginbase." -p".$passwordbase." -D dolicloud_saasplex";
 		print "Load dump with ".$fullcommand."\n";
 		if ($mode == 'confirm' || $mode == 'confirmsaasplex') {
@@ -152,7 +172,9 @@ if ($connection) {
 			$return_var=0;
 			print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 			exec($fullcommand, $output, $return_var);
-			foreach ($output as $line) print $line."\n";
+			foreach ($output as $line) {
+				print $line."\n";
+			}
 		}
 
 		/*if ($mode == 'confirm' || $mode == 'confirmrm') dol_delete_file($targetdir.$filesys2);

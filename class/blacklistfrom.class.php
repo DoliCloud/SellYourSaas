@@ -671,7 +671,9 @@ class Blacklistfrom extends CommonObject
 		}
 
 		$statusType = 'status'.$status;
-		if ($status == self::STATUS_ENABLED) $statusType = 'status4';
+		if ($status == self::STATUS_ENABLED) {
+			$statusType = 'status4';
+		}
 
 		return dolGetStatus($this->labelStatus[$status], $this->labelStatusShort[$status], '', $statusType, $mode);
 	}

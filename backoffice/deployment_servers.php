@@ -24,16 +24,31 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
@@ -56,11 +71,17 @@ $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 $sortfield = GETPOST("sortfield", 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
 $page = GETPOST("page", 'int');
-if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
+if (empty($page) || $page == -1) {
+	$page = 0;
+}     // If $page is not defined, or '' or -1
 $offset = $limit * $page;
-if (! $sortorder) $sortorder='ASC';
-if (! $sortfield) $sortfield='t.date_registration';
-$limit = GETPOST('limit', 'int')?GETPOST('limit', 'int'):$conf->liste_limit;
+if (! $sortorder) {
+	$sortorder='ASC';
+}
+if (! $sortfield) {
+	$sortfield='t.date_registration';
+}
+$limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 
 $pageprev = $page - 1;
 $pagenext = $page + 1;
@@ -77,7 +98,7 @@ if (!GETPOST('cancel', 'alpha')) {
 }
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 $error = 0;
 
 if (GETPOST('addinstance', 'alpha')) {
@@ -325,7 +346,9 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 			$listofipwithinstances[]=$obj->deployment_host;
 		}
 		$db->free($resql);
-	} else dol_print_error($db);
+	} else {
+		dol_print_error($db);
+	}
 
 	print "\n";
 	print "<!-- section of deployment servers -->\n";
@@ -404,8 +427,8 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 		print '<td class="center">';
 		print '<select name="openedclosedinstance" id="openedclosedinstancenew" '.($action == "edit" ? 'disabled' : '').'>';
 		print '<option value="-1"></option>';
-		print '<option '.($statusnew == "0" && $action != "edit" ?'selected=""' : '').' value="0">'.$langs->trans('Closed').'</option>';
-		print '<option '.($statusnew == "1" && $action != "edit" ?'selected=""' : '').' value="1">'.$langs->trans('Opened').'</option>';
+		print '<option '.($statusnew == "0" && $action != "edit" ? 'selected=""' : '').' value="0">'.$langs->trans('Closed').'</option>';
+		print '<option '.($statusnew == "1" && $action != "edit" ? 'selected=""' : '').' value="1">'.$langs->trans('Opened').'</option>';
 		print '</select>';
 		print '</td>';
 		print ajax_combobox("openedclosedinstancenew");

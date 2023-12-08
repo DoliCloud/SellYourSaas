@@ -155,9 +155,15 @@ if ($mythirdpartyaccount->isareseller) {
 	                ';
 if (empty($welcomecid)) {		// If we just created an instance, we don't show warnings yet.
 	$missing = 0;
-	if (empty($mythirdpartyaccount->array_options['options_firstname'])) $missing++;
-	if (empty($mythirdpartyaccount->array_options['options_lastname'])) $missing++;
-	if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra)) $missing++;
+	if (empty($mythirdpartyaccount->array_options['options_firstname'])) {
+		$missing++;
+	}
+	if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
+		$missing++;
+	}
+	if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra)) {
+		$missing++;
+	}
 
 	if (! $missing) {
 		print $langs->trans("ProfileIsComplete");
@@ -211,7 +217,9 @@ foreach ($listofcontractid as $id => $contract) {
 			print '<!--';
 			print dol_escape_htmltag($invoice->ref.'-'.$invoice->total_ht."-".$invoice->type."-status=".$invoice->statut."-paye=".$invoice->paye)."\n";
 			print '-->';
-			if ($invoice->statut == $invoice::STATUS_DRAFT) continue;
+			if ($invoice->statut == $invoice::STATUS_DRAFT) {
+				continue;
+			}
 			if ($invoice->statut == $invoice::STATUS_VALIDATED) {
 				$nbinvoicenotpayed++;
 				$alreadypayed = $invoice->getSommePaiement();
@@ -227,25 +235,39 @@ foreach ($listofcontractid as $id => $contract) {
 				<div class="row">
 				<div class="col-md-9">
 	            ';
-				if ($amountdue > 0 && $atleastonepaymentmode) print $form->textwithpicto($langs->trans("UnpaidInvoices"), $langs->trans("PaymentWillBeProcessedSoon"));
-else print $langs->trans("UnpaidInvoices");
+if ($amountdue > 0 && $atleastonepaymentmode) {
+	print $form->textwithpicto($langs->trans("UnpaidInvoices"), $langs->trans("PaymentWillBeProcessedSoon"));
+} else {
+	print $langs->trans("UnpaidInvoices");
+}
 				print '
                 				</div>
                 				<div class="col-md-3 right"><h2>';
-				if ($nbinvoicenotpayed > 0) print '<font style="color: orange">';
+if ($nbinvoicenotpayed > 0) {
+	print '<font style="color: orange">';
+}
 				print $nbinvoicenotpayed;
-				if ($nbinvoicenotpayed) print '</font>';
+if ($nbinvoicenotpayed) {
+	print '</font>';
+}
 				print '<h2></div>
                 	            </div>
                 				<div class="row">
                 				<div class="col-md-9">';
-				if ($amountdue > 0 && $atleastonepaymentmode) print $form->textwithpicto($langs->trans("RemainderToPay"), $langs->trans("PaymentWillBeProcessedSoon"));
-else print $langs->trans("RemainderToPay");
+if ($amountdue > 0 && $atleastonepaymentmode) {
+	print $form->textwithpicto($langs->trans("RemainderToPay"), $langs->trans("PaymentWillBeProcessedSoon"));
+} else {
+	print $langs->trans("RemainderToPay");
+}
 				print '</div>
                 				<div class="col-md-3 right"><h2>';
-				if ($amountdue > 0) print '<font style="color: orange; white-space: nowrap;">';
+if ($amountdue > 0) {
+	print '<font style="color: orange; white-space: nowrap;">';
+}
 				print price($amountdue, 1, $langs, 0, -1, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency);
-				if ($amountdue > 0) print '</font>';
+if ($amountdue > 0) {
+	print '</font>';
+}
 				print '</h2></div>
 	            </div>
 
@@ -271,10 +293,10 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 }
 
 if (!$sellyoursaassupporturl) {
-			  $nboftickets = 0;
+	$nboftickets = 0;
 	$nbofopentickets = 0;
 
-			print '
+	print '
 				<!-- Box of tickets -->
 				<div class="col-md-6">
 					<div class="portlet light" id="boxOfTickets">
@@ -298,10 +320,14 @@ if (!$sellyoursaassupporturl) {
 								</div>
 								<div class="col-md-3 right">
 									<h2>';
-						if ($nbofopentickets > 0) print '<font style="color: orange;">';
-						print $nbofopentickets;
-						if ($nbofopentickets > 0) print '</font>';
-						print '</h2>
+	if ($nbofopentickets > 0) {
+		print '<font style="color: orange;">';
+	}
+	print $nbofopentickets;
+	if ($nbofopentickets > 0) {
+		print '</font>';
+	}
+	print '</h2>
 								</div>
 							</div> <!-- END ROW -->
 							<div class="row">

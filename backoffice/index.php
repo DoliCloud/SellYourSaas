@@ -24,16 +24,31 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
@@ -56,11 +71,17 @@ $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 $sortfield = GETPOST("sortfield", 'aZ09comma');
 $sortorder = GETPOST('sortorder', 'aZ09comma');
 $page = GETPOST("page", 'int');
-if (empty($page) || $page == -1) { $page = 0; }     // If $page is not defined, or '' or -1
+if (empty($page) || $page == -1) {
+	$page = 0;
+}     // If $page is not defined, or '' or -1
 $offset = $limit * $page;
-if (! $sortorder) $sortorder='ASC';
-if (! $sortfield) $sortfield='t.date_registration';
-$limit = GETPOST('limit', 'int')?GETPOST('limit', 'int'):$conf->liste_limit;
+if (! $sortorder) {
+	$sortorder='ASC';
+}
+if (! $sortfield) {
+	$sortfield='t.date_registration';
+}
+$limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 
 $pageprev = $page - 1;
 $pagenext = $page + 1;
@@ -73,7 +94,7 @@ if ($mode == 'refreshstats') {
 }
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST)?'100':$conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 
 
 /*
@@ -89,12 +110,18 @@ if (GETPOST('saveannounce', 'alpha')) {
 }
 
 if ($action == 'setSELLYOURSAAS_DISABLE_NEW_INSTANCES') {
-	if (GETPOST('value')) dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 1, 'chaine', 0, '', $conf->entity);
-	else dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 0, 'chaine', 0, '', $conf->entity);
+	if (GETPOST('value')) {
+		dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 1, 'chaine', 0, '', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 0, 'chaine', 0, '', $conf->entity);
+	}
 }
 if ($action == 'setSELLYOURSAAS_ANNOUNCE_ON') {
-	if (GETPOST('value')) dolibarr_set_const($db, 'SELLYOURSAAS_ANNOUNCE_ON', 1, 'chaine', 0, '', $conf->entity);
-	else dolibarr_set_const($db, 'SELLYOURSAAS_ANNOUNCE_ON', 0, 'chaine', 0, '', $conf->entity);
+	if (GETPOST('value')) {
+		dolibarr_set_const($db, 'SELLYOURSAAS_ANNOUNCE_ON', 1, 'chaine', 0, '', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'SELLYOURSAAS_ANNOUNCE_ON', 0, 'chaine', 0, '', $conf->entity);
+	}
 }
 
 
@@ -141,7 +168,9 @@ $sql.= ' WHERE c.fk_soc = s.rowid AND s.status = 1 AND c.fk_categorie = '.((int)
 $resql = $db->query($sql);
 if ($resql) {
 	$obj = $db->fetch_object($resql);
-	if ($obj) $totalresellers = $obj->nb;
+	if ($obj) {
+		$totalresellers = $obj->nb;
+	}
 }
 
 if ($mode == 'refreshstats') {
@@ -272,7 +301,9 @@ if ($resql) {
 		$listofipwithinstances[]=$obj->deployment_host;
 	}
 	$db->free($resql);
-} else dol_print_error($db);
+} else {
+	dol_print_error($db);
+}
 
 print "\n";
 
@@ -331,11 +362,16 @@ if (!empty($rep) && is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
 }
 print $form->textwithpicto($langs->trans("NbOfInstancesActivePaying"), $texthelp);
 $texthelp = $langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
-if ($stringlistofinstancespayingwithoutrecinvoice) $texthelp.=' ('.$stringlistofinstancespayingwithoutrecinvoice.')';
+if ($stringlistofinstancespayingwithoutrecinvoice) {
+	$texthelp.=' ('.$stringlistofinstancespayingwithoutrecinvoice.')';
+}
 print ' | '.$form->textwithpicto($langs->trans("NbOfInstancesActivePayingAll"), $texthelp).' | '.$langs->trans("NbOfActiveInstances").' ';
 print '</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstancespayingall.' | '.$totalinstances.'</font>';
-else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+if (! empty($_SESSION['stats_totalusers'])) {
+	print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstancespayingall.' | '.$totalinstances.'</font>';
+} else {
+	print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+}
 print '<!-- List of instances : '."\n";
 if (!empty($rep) && is_array($rep['listofinstancespaying'])) {
 	$rep['listofinstancespaying'] = dol_sort_array($rep['listofinstancespaying'], 'thirdparty_name');
@@ -350,28 +386,38 @@ print $langs->trans("NbOfSuspendedInstances").' '.$langs->trans("payed").' | '.$
 print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) {
 	print '<font size="+2">'.$totalinstancessuspendedpaying.' | '.$totalinstancessuspendedfree.'</font>';
-} else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+} else {
+	print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+}
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
 print $langs->trans("NbOfUsers").' ';
 print '</td><td align="right" class="wordwrap wordbreak">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.$totalusers.'</font>';
-else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+if (! empty($_SESSION['stats_totalusers'])) {
+	print '<font size="+2">'.$totalusers.'</font>';
+} else {
+	print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+}
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("AverageRevenuePerInstance");
 print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) {
 	if ($totalinstancespayingall) {
-		print '<font size="+2"><span class="amount">'.($totalinstancespaying ? price(price2num($total/$totalinstancespayingall, 'MT'), 1, $langs, 1, -1, -1, $conf->currency):'0').'</span></font>';
+		print '<font size="+2"><span class="amount">'.($totalinstancespaying ? price(price2num($total/$totalinstancespayingall, 'MT'), 1, $langs, 1, -1, -1, $conf->currency) : '0').'</span></font>';
 	}
-} else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+} else {
+	print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+}
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("RevenuePerMonth").' ('.$langs->trans("HT").')';
 print '</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2"><span class="amount">'.price($total, 1, $langs, 1, -1, -1, $conf->currency).'</span></font>';
-else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+if (! empty($_SESSION['stats_totalusers'])) {
+	print '<font size="+2"><span class="amount">'.price($total, 1, $langs, 1, -1, -1, $conf->currency).'</span></font>';
+} else {
+	print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+}
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
 print $langs->trans("CommissionPerMonth").' ('.$langs->trans("HT").')';
@@ -388,8 +434,11 @@ print $langs->trans("BenefitDoliCloud");
 print '<br>(';
 print price($total, 1).' - '.($part ? ($part*100).'% - ' : '').price($serverprice, 1).' - '.price($totalcommissions, 1).' = '.price($total * (1 - $part), 1).' - '.price($serverprice, 1).' - '.price($totalcommissions, 1);
 print ')</td><td align="right">';
-if (! empty($_SESSION['stats_totalusers'])) print '<font size="+2">'.price($benefit, 1, $langs, 1, -1, -1, $conf->currency).' </font>';
-else print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+if (! empty($_SESSION['stats_totalusers'])) {
+	print '<font size="+2">'.price($benefit, 1, $langs, 1, -1, -1, $conf->currency).' </font>';
+} else {
+	print '<span class="opacitymedium">'.$langs->trans("ClickToRefresh").'</span>';
+}
 print '</td></tr>';
 print '</table>';
 
@@ -414,8 +463,14 @@ if ($resql) {
 	$absice=array();
 	while ($i < $num) {
 		$obj=$db->fetch_object($resql);
-		if ($obj->x < $startyear."01") { $i++; continue; }
-		if ($obj->x > $endyear."12") { $i++; continue; }
+		if ($obj->x < $startyear."01") {
+			$i++;
+			continue;
+		}
+		if ($obj->x > $endyear."12") {
+			$i++;
+			continue;
+		}
 
 		if ($oldx && $oldx != $obj->x) {
 			// break
@@ -430,8 +485,12 @@ if ($resql) {
 
 		$oldx=$obj->x;
 
-		if ($obj->name == 'total') $absice[1]=$obj->y;
-		if ($obj->name == 'totalcommissions') $absice[2]=$obj->y;
+		if ($obj->name == 'total') {
+			$absice[1]=$obj->y;
+		}
+		if ($obj->name == 'totalcommissions') {
+			$absice[2]=$obj->y;
+		}
 
 		$i++;
 	}
@@ -444,7 +503,9 @@ if ($resql) {
 		ksort($absice);
 		$data1[]=$absice;
 	}
-} else dol_print_error($db);
+} else {
+	dol_print_error($db);
+}
 
 $data2 = array();
 $sql ='SELECT name, x, y FROM '.MAIN_DB_PREFIX.'sellyoursaas_stats';
@@ -460,8 +521,14 @@ if ($resql) {
 	while ($i < $num) {
 		$obj=$db->fetch_object($resql);
 
-		if ($obj->x < $startyear."01") { $i++; continue; }
-		if ($obj->x > $endyear."12") { $i++; continue; }
+		if ($obj->x < $startyear."01") {
+			$i++;
+			continue;
+		}
+		if ($obj->x > $endyear."12") {
+			$i++;
+			continue;
+		}
 
 		if ($oldx && $oldx != $obj->x) {
 			// break
@@ -474,10 +541,18 @@ if ($resql) {
 
 		$oldx=$obj->x;
 
-		if ($obj->name == 'totalinstancespaying') $absice[1]=$obj->y;
-		if ($obj->name == 'totalinstancespayingall') $absice[2]=$obj->y;
-		if ($obj->name == 'totalinstances') $absice[3]=$obj->y;
-		if ($obj->name == 'totalusers') $absice[4]=$obj->y;
+		if ($obj->name == 'totalinstancespaying') {
+			$absice[1]=$obj->y;
+		}
+		if ($obj->name == 'totalinstancespayingall') {
+			$absice[2]=$obj->y;
+		}
+		if ($obj->name == 'totalinstances') {
+			$absice[3]=$obj->y;
+		}
+		if ($obj->name == 'totalusers') {
+			$absice[4]=$obj->y;
+		}
 
 		$i++;
 	}
@@ -488,7 +563,9 @@ if ($resql) {
 		ksort($absice);
 		$data2[]=$absice;
 	}
-} else dol_print_error($db);
+} else {
+	dol_print_error($db);
+}
 
 // array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn))
 $data3 = array();
@@ -504,15 +581,22 @@ if ($resql) {
 	$absice=array();
 	while ($i < $num) {
 		$obj=$db->fetch_object($resql);
-		if ($obj->x < $startyear."01") { $i++; continue; }
-		if ($obj->x > $endyear."12") { $i++; continue; }
+		if ($obj->x < $startyear."01") {
+			$i++;
+			continue;
+		}
+		if ($obj->x > $endyear."12") {
+			$i++;
+			continue;
+		}
 
 		if ($oldx && $oldx != $obj->x) {
 			// break
 			preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
 			$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 			$averagebasket=(empty($absice[2]) ? 0 : price2num($absice[1] / $absice[2], 'MT'));
-			$absice[1]=$averagebasket; unset($absice[2]);
+			$absice[1]=$averagebasket;
+			unset($absice[2]);
 			ksort($absice);
 			$data3[]=$absice;
 			$absice=array();
@@ -520,8 +604,12 @@ if ($resql) {
 
 		$oldx=$obj->x;
 
-		if ($obj->name == 'total') $absice[1]=$obj->y;
-		if ($obj->name == 'totalinstancespayingall') $absice[2]=$obj->y;
+		if ($obj->name == 'total') {
+			$absice[1]=$obj->y;
+		}
+		if ($obj->name == 'totalinstancespayingall') {
+			$absice[2]=$obj->y;
+		}
 
 		$i++;
 	}
@@ -530,12 +618,15 @@ if ($resql) {
 		preg_match('/^([0-9]{4})+([0-9]{2})+$/', $oldx, $regs);
 		$absice[0]=$regs[1].'-'.$regs[2]; // to show yyyy-mm (international format)
 		$averagebasket=(empty($absice[2]) ? 0 : price2num($absice[1] / $absice[2], 'MT'));
-		$absice[1]=$averagebasket; unset($absice[2]);
+		$absice[1]=$averagebasket;
+		unset($absice[2]);
 		ksort($absice);
 		$data3[]=$absice;
 		$absice=array();
 	}
-} else dol_print_error($db);
+} else {
+	dol_print_error($db);
+}
 
 // array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn))
 $data4 = array();
@@ -551,8 +642,14 @@ if ($resql) {
 	$absice=array();
 	while ($i < $num) {
 		$obj=$db->fetch_object($resql);
-		if ($obj->x < $startyear."01") { $i++; continue; }
-		if ($obj->x > $endyear."12") { $i++; continue; }
+		if ($obj->x < $startyear."01") {
+			$i++;
+			continue;
+		}
+		if ($obj->x > $endyear."12") {
+			$i++;
+			continue;
+		}
 
 		if ($oldx && $oldx != $obj->x) {
 			// break
@@ -565,10 +662,18 @@ if ($resql) {
 
 		$oldx=$obj->x;
 
-		if ($obj->name == 'newinstances') $absice[1]=$obj->y;
-		if ($obj->name == 'lostinstances') $absice[2]=$obj->y;
-		if ($obj->name == 'totalnewinstances') $absice[3]=$obj->y;
-		if ($obj->name == 'totallostinstances') $absice[4]=$obj->y;
+		if ($obj->name == 'newinstances') {
+			$absice[1]=$obj->y;
+		}
+		if ($obj->name == 'lostinstances') {
+			$absice[2]=$obj->y;
+		}
+		if ($obj->name == 'totalnewinstances') {
+			$absice[3]=$obj->y;
+		}
+		if ($obj->name == 'totallostinstances') {
+			$absice[4]=$obj->y;
+		}
 
 		$i++;
 	}
@@ -579,7 +684,9 @@ if ($resql) {
 		ksort($absice);
 		$data4[]=$absice;
 	}
-} else dol_print_error($db);
+} else {
+	dol_print_error($db);
+}
 
 
 

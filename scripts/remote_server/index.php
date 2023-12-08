@@ -28,7 +28,7 @@ if ($fp) {
 		if ($tmpline[0] == 'allowed_hosts') {
 			$allowed_hosts_array = explode(",", $tmpline[1]);
 		}
-		if ($tmpline[0] == 'signature_key') {
+		if ($tmpline[0] == 'signature_key') {	// This value must match the signature key defined on the master into setup constant SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION
 			$signature_key = explode(",", $tmpline[1]);
 		}
 		if ($tmpline[0] == 'dnsserver') {
@@ -100,8 +100,11 @@ $signature = empty($tmpparam[47]) ? '' : $tmpparam[47];
 $output='';
 $return_var=0;
 
-if ($DEBUG) fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0].' by '.$_SERVER['REMOTE_ADDR'].' URI='.$_SERVER['REQUEST_URI']."\n");
-else fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0]." by ".$_SERVER['REMOTE_ADDR']."\n");
+if ($DEBUG) {
+	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0].' by '.$_SERVER['REMOTE_ADDR'].' URI='.$_SERVER['REQUEST_URI']."\n");
+} else {
+	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0]." by ".$_SERVER['REMOTE_ADDR']."\n");
+}
 
 fwrite($fh, date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
 fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignature=".$recalculatedsignature."\n");
@@ -116,8 +119,11 @@ if ($signature != $recalculatedsignature) {
 }
 
 if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployall', 'undeployall'))) {
-	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace."\n");
-	else fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' ...'."\n");
+	if ($DEBUG) {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace."\n");
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' ...'."\n");
+	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
@@ -144,8 +150,11 @@ if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployal
 	exit();
 }
 if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'unsuspend'))) {
-	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' '.$paramspace."\n");
-	else fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' ...'."\n");
+	if ($DEBUG) {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' '.$paramspace."\n");
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' ...'."\n");
+	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
@@ -171,8 +180,11 @@ if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'uns
 }
 
 if (in_array($tmparray[0], array('backup'))) {
-	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
-	else fwrite($fh, date('Y-m-d H:i:s').' sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
+	if ($DEBUG) {
+		fwrite($fh, date('Y-m-d H:i:s').' sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s').' sudo -u admin ./backup_instance.php '.$paramarray[2].'.'.$paramarray[3].' '.$backupdir." confirm\n");
+	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
@@ -208,8 +220,11 @@ if (in_array($tmparray[0], array('test'))) {
 }
 
 if (in_array($tmparray[0], array('migrate'))) {
-	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_migrate_instance.sh '.$tmparray[0].' '.$paramspace."\n");
-	else fwrite($fh, date('Y-m-d H:i:s').' ./action_migrate_instance.sh '.$tmparray[0].' ...'."\n");
+	if ($DEBUG) {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_migrate_instance.sh '.$tmparray[0].' '.$paramspace."\n");
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_migrate_instance.sh '.$tmparray[0].' ...'."\n");
+	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
@@ -225,7 +240,7 @@ if (in_array($tmparray[0], array('migrate'))) {
 
 	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
 	if ($return_var == 0) {
-			$httpresponse = 200;
+		$httpresponse = 200;
 	}
 	http_response_code($httpresponse);
 
@@ -235,8 +250,11 @@ if (in_array($tmparray[0], array('migrate'))) {
 }
 
 if (in_array($tmparray[0], array('upgrade'))) {
-	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_upgrade_instance.sh '.$tmparray[0].' '.$paramspace." \n");
-	else fwrite($fh, date('Y-m-d H:i:s').' ./action_upgrade_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	if ($DEBUG) {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_upgrade_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_upgrade_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
@@ -262,8 +280,11 @@ if (in_array($tmparray[0], array('upgrade'))) {
 }
 
 if (in_array($tmparray[0], array('deploywebsite'))) {
-	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_website_instance.sh '.$tmparray[0].' '.$paramspace." \n");
-	else fwrite($fh, date('Y-m-d H:i:s').' ./action_website_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	if ($DEBUG) {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_website_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_website_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts
@@ -288,9 +309,42 @@ if (in_array($tmparray[0], array('deploywebsite'))) {
 	exit();
 }
 
+if (in_array($tmparray[0], array('deploycustomurl'))) {
+	if ($DEBUG) {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	}
+	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
+
+	// Add a security layer on the CLI scripts
+	//$params = array('osusername'=>$osusername, 'dbname'=>$dbname, 'dbusername'=>$dbusername);
+	//checkScriptFile($cliafter, $fh, $params);
+	//checkScriptFile($cliafterpaid, $fh, $params);
+
+	exec('./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
+
+	fwrite($fh, date('Y-m-d H:i:s').' return = '.$return_var."\n");
+	fwrite($fh, date('Y-m-d H:i:s').' '.join("\n", $output)."\n");
+	fclose($fh);
+
+	$httpresponse = 550 + ($return_var < 50 ? $return_var : 0);
+	if ($return_var == 0) {
+		$httpresponse = 200;
+	}
+	http_response_code($httpresponse);
+
+	print 'action_customurl_instance.sh for action '.$tmparray[0].' on '.$paramarray[2].'.'.$paramarray[3].' return '.$return_var.", so remote agent returns http code ".$httpresponse."\n";
+
+	exit();
+}
+
 if (in_array($tmparray[0], array('actionafterpaid'))) {
-	if ($DEBUG) fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspace." \n");
-	else fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	if ($DEBUG) {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	} else {
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
 	// Add a security layer on the CLI scripts

@@ -250,7 +250,9 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		}
 
 		$a = parent::getNbOfRecipients($sql);
-		if ($a < 0) return -1;
+		if ($a < 0) {
+			return -1;
+		}
 		return $a;
 	}
 }

@@ -96,7 +96,9 @@ if ($totalInvoiced == 0) {
 			print ' (';
 			$i = 0;
 			foreach ($amounttopayasfirstinvoicetinstances as $key => $tmpcontracttopay) {
-				if ($i) print ', ';
+				if ($i) {
+					print ', ';
+				}
 				print '<strong>'.$key.'</strong>: '.price($tmpcontracttopay->total_ttc, 0, $langs, 1, -1, -1, $conf->currency);
 				$i++;
 			}
@@ -182,9 +184,10 @@ if ($totalInvoiced == 0) {
 	}
 } else {	// There is already some invoices. This is already a customer.
 	if ($outstandingTotalIncTax) {
-		print '<div class="opacitymedium firstpaymentmessage"><small>'.$langs->trans("ThePaymentModeWillBeUseToPayYourDueAmount", join(', ', $outstandingRefs), price($outstandingTotalIncTax, 0, $langs, 1, -1, -1, $conf->currency));
+		print '<div class="opacitymedium firstpaymentmessage"><small>';
+		print $langs->trans("ThePaymentModeWillBeUseToPayYourDueAmount", join(', ', $outstandingRefs), price($outstandingTotalIncTax, 0, $langs, 1, -1, -1, $conf->currency));
 		print '</small></div>';
-		print '<br>';
+		print '<br><br>';
 	}
 }
 
@@ -344,7 +347,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 			// Code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION set
 
 			// Create a Stripe client.
-			var stripe = Stripe('<?php echo $stripearrayofkeys['publishable_key']; // Defined into config.php ?>');
+			var stripe = Stripe('<?php echo $stripearrayofkeys['publishable_key']; // Defined into config.php?>');
 
 			// Create an instance of Elements
 			var elements = stripe.elements();
@@ -520,7 +523,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 						});
 		<?php
 	}
-	print "
+		print "
     			});
 
 
@@ -642,7 +645,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 				include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 				$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
-				$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT?DOL_URL_ROOT.'/':'').$publicurltodownload;
+				$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT ? DOL_URL_ROOT.'/' : '').$publicurltodownload;
 				//print img_mime('sepa.pdf').'  <a href="'.$urltouse.'" target="_download">'.$langs->trans("DownloadTheSEPAMandate").'</a><br>';
 			}
 

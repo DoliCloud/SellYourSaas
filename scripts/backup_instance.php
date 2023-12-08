@@ -27,9 +27,15 @@
  * remote access to database must be granted for option 'testdatabase' or 'confirmdatabase'.
  */
 
-if (!defined('NOREQUIREDB')) define('NOREQUIREDB', '1');					// Do not create database handler $db
-if (!defined('NOSESSION')) define('NOSESSION', '1');
-if (!defined('NOREQUIREVIRTUALURL')) define('NOREQUIREVIRTUALURL', '1');
+if (!defined('NOREQUIREDB')) {
+	define('NOREQUIREDB', '1');
+}					// Do not create database handler $db
+if (!defined('NOSESSION')) {
+	define('NOSESSION', '1');
+}
+if (!defined('NOREQUIREVIRTUALURL')) {
+	define('NOREQUIREVIRTUALURL', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -55,9 +61,9 @@ $NOSTATS=0;
 $FORCERSYNC=0;
 $FORCEDUMP=0;
 
-$instance=isset($argv[1])?$argv[1]:'';
-$dirroot=isset($argv[2])?$argv[2]:'';
-$mode=isset($argv[3])?$argv[3]:'';
+$instance=isset($argv[1]) ? $argv[1] : '';
+$dirroot=isset($argv[2]) ? $argv[2] : '';
+$mode=isset($argv[3]) ? $argv[3] : '';
 
 $keystocheck = array(4, 5, 6, 7, 8);
 foreach ($keystocheck as $keytocheck) {
@@ -103,19 +109,38 @@ if (empty($dolibarrdir)) {
 // Load Dolibarr environment
 $res=0;
 // Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/master.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/master.inc.php";
+}
 // Try master.inc.php using relative path
-if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
-if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
-if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
-if (! $res && file_exists(__DIR__."/../../../master.inc.php")) $res=@include __DIR__."/../../../master.inc.php";
-if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) $res=@include $dolibarrdir."/htdocs/master.inc.php";
+if (! $res && file_exists("../master.inc.php")) {
+	$res=@include "../master.inc.php";
+}
+if (! $res && file_exists("../../master.inc.php")) {
+	$res=@include "../../master.inc.php";
+}
+if (! $res && file_exists("../../../master.inc.php")) {
+	$res=@include "../../../master.inc.php";
+}
+if (! $res && file_exists(__DIR__."/../../master.inc.php")) {
+	$res=@include __DIR__."/../../../master.inc.php";
+}
+if (! $res && file_exists(__DIR__."/../../../master.inc.php")) {
+	$res=@include __DIR__."/../../../master.inc.php";
+}
+if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
+	$res=@include $dolibarrdir."/htdocs/master.inc.php";
+}
 if (! $res) {
-	print ("Include of master fails");
+	print("Include of master fails");
 	exit(-1);
 }
 
@@ -390,7 +415,9 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 		// Instance is qualified for rsync backup
 		$command="rsync";
 		$param=array();
-		if ($mode != 'confirm' && $mode != 'confirmrsync') $param[]="-n";
+		if ($mode != 'confirm' && $mode != 'confirmrsync') {
+			$param[]="-n";
+		}
 		//$param[]="-a";
 		$param[]="-4";
 		$param[]="--prune-empty-dirs";
@@ -572,16 +599,22 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 		$fullcommand=$command." ".join(" ", $param);
 		if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
-			if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | zstd -z -9 -q > /dev/null';
-			else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst';
+			if ($mode != 'confirm' && $mode != 'confirmdatabase') {
+				$fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | zstd -z -9 -q > /dev/null';
+			} else {
+				$fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | zstd -z -9 -q > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst';
+			}
 			// Delete file with same name and other extensions (if other option was enabled in past)
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.bz2');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.gz');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.bz2');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.gz');
 		} else {
-			if ($mode != 'confirm' && $mode != 'confirmdatabase') $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
-			else $fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS)?'':$conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz';
+			if ($mode != 'confirm' && $mode != 'confirmdatabase') {
+				$fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS) ? '' : $conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > /dev/null';
+			} else {
+				$fullcommand.=' 2>'.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.err | gzip '.(empty($conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS) ? '' : $conf->global->SELLYOURSAAS_DUMP_DATABASE_GZIP_OPTIONS).' > '.$dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz';
+			}
 			// Delete file with same name and other extensions (if other option was enabled in past)
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.bz2');
 			dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.zst');
@@ -717,9 +750,15 @@ if (empty($return_varother) && empty($return_var) && empty($return_varmysql) && 
 		}
 	}
 } else {
-	if (! empty($return_varother)) print "ERROR into backup process init: ".$return_varother."\n";
-	if (! empty($return_var))      print "ERROR into backup process of rsync: ".$return_var."\n";
-	if (! empty($return_varmysql) || ! empty($return_outputmysql)) print "ERROR into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
+	if (! empty($return_varother)) {
+		print "ERROR into backup process init: ".$return_varother."\n";
+	}
+	if (! empty($return_var)) {
+		print "ERROR into backup process of rsync: ".$return_var."\n";
+	}
+	if (! empty($return_varmysql) || ! empty($return_outputmysql)) {
+		print "ERROR into backup process of mysqldump: ".$return_varmysql." + ".$return_outputmysql."\n";
+	}
 
 	if ($mode == 'confirm' || $mode == 'disabled') {
 		// Update database

@@ -24,16 +24,31 @@
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
-if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) $res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
+	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
+}
 // Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
-while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
-if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
-if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) $res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
+	$i--;
+	$j--;
+}
+if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/main.inc.php")) {
+	$res=@include substr($tmp, 0, ($i+1))."/main.inc.php";
+}
+if (! $res && $i > 0 && file_exists(dirname(substr($tmp, 0, ($i+1)))."/main.inc.php")) {
+	$res=@include dirname(substr($tmp, 0, ($i+1)))."/main.inc.php";
+}
 // Try main.inc.php using relative path
-if (! $res && file_exists("../../main.inc.php")) $res=@include "../../main.inc.php";
-if (! $res && file_exists("../../../main.inc.php")) $res=@include "../../../main.inc.php";
-if (! $res) die("Include of main fails");
+if (! $res && file_exists("../../main.inc.php")) {
+	$res=@include "../../main.inc.php";
+}
+if (! $res && file_exists("../../../main.inc.php")) {
+	$res=@include "../../../main.inc.php";
+}
+if (! $res) {
+	die("Include of main fails");
+}
 
 require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
 require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
@@ -73,7 +88,7 @@ if ($action != 'create') {
 }
 
 // Initialize array of search criterias
-$search_all = GETPOST('search_all', 'alphanohtml');
+$search_all = trim(GETPOST('search_all', 'alphanohtml'));
 $search = array();
 $arrayoffields = array('rowid', 'login', 'firstname', 'lastname', 'admin', 'email');
 foreach ($arrayoffields as $key) {
@@ -146,7 +161,15 @@ foreach ($object->lines as $keyline => $line) {
  *	Actions
  */
 
-$parameters=array('id'=>$id);
+if (GETPOST('cancel', 'alpha')) {
+	$action = 'list';
+	$massaction = '';
+}
+if (!GETPOST('confirmmassaction', 'alpha') && $massaction != 'presend' && $massaction != 'confirm_presend') {
+	$massaction = '';
+}
+
+$parameters = array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
@@ -210,7 +233,9 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
-					if ($obj) $conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+					if ($obj) {
+						$conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+					}
 				} else {
 					setEventMessages("Failed to get remote MAIN_SECURITY_HASH_ALGO", null, 'warnings');
 				}
@@ -218,7 +243,9 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
-					if ($obj) $conf->global->MAIN_SECURITY_SALT = $obj->value;
+					if ($obj) {
+						$conf->global->MAIN_SECURITY_SALT = $obj->value;
+					}
 				} else {
 					setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
 				}
@@ -250,8 +277,11 @@ if (empty($reshook)) {
 				$sql .= " '".$newdb->escape(dolEncrypt($password, '', '', 'dolibarr'))."')";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
-					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
-					else setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+						dol_print_error($newdb);
+					} else {
+						setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+					}
 				}
 
 				$idofcreateduser = $newdb->last_insert_id($prefix_db.'user');
@@ -267,8 +297,11 @@ if (empty($reshook)) {
 				$sql .= ")";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
-					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') dol_print_error($newdb);
-					else setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+						dol_print_error($newdb);
+					} else {
+						setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
+					}
 				} else {
 					$insertedid = $newdb->last_insert_id('glpi_users', 'id');
 					if ($insertedid > 0) {
@@ -311,19 +344,27 @@ if (empty($reshook)) {
 			if ($fordolibarr) {
 				$sql="DELETE FROM ".$prefix_db."user_rights where fk_user IN (SELECT rowid FROM ".$prefix_db."user WHERE login = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."')";
 				$resql=$newdb->query($sql);
-				if (! $resql) dol_print_error($newdb);
+				if (! $resql) {
+					dol_print_error($newdb);
+				}
 
 				$sql="DELETE FROM ".$prefix_db."user WHERE login = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
 				$resql=$newdb->query($sql);
-				if (! $resql) dol_print_error($newdb);
+				if (! $resql) {
+					dol_print_error($newdb);
+				}
 			} elseif ($forglpi) {
 				$sql="DELETE FROM glpi_profiles_users WHERE users_id = (SELECT id FROM glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."')";
 				$resql=$newdb->query($sql);
-				if (! $resql) dol_print_error($newdb);
+				if (! $resql) {
+					dol_print_error($newdb);
+				}
 
 				$sql="DELETE FROM glpi_users WHERE name = '".$newdb->escape($conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT)."'";
 				$resql=$newdb->query($sql);
-				if (! $resql) dol_print_error($newdb);
+				if (! $resql) {
+					dol_print_error($newdb);
+				}
 			}
 		}
 	}
@@ -345,8 +386,11 @@ if (empty($reshook)) {
 			}
 
 			$resql=$newdb->query($sql);
-			if (! $resql) dol_print_error($newdb);
-			else setEventMessages("UserDisabled", null, 'mesgs');
+			if (! $resql) {
+				dol_print_error($newdb);
+			} else {
+				setEventMessages("UserDisabled", null, 'mesgs');
+			}
 		}
 	}
 	if ($action == "enableuser") {
@@ -366,8 +410,11 @@ if (empty($reshook)) {
 			}
 
 			$resql=$newdb->query($sql);
-			if (! $resql) dol_print_error($newdb);
-			else setEventMessages("UserEnabled", null, 'mesgs');
+			if (! $resql) {
+				dol_print_error($newdb);
+			} else {
+				setEventMessages("UserEnabled", null, 'mesgs');
+			}
 		}
 	}
 
@@ -393,7 +440,9 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
-					if ($obj) $conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+					if ($obj) {
+						$conf->global->MAIN_SECURITY_HASH_ALGO = $obj->value;
+					}
 				} else {
 					setEventMessages("Failed to get remote MAIN_SECURITY_HASH_ALGO", null, 'warnings');
 				}
@@ -401,7 +450,9 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if ($resql) {
 					$obj = $newdb->fetch_object($resql);
-					if ($obj) $conf->global->MAIN_SECURITY_SALT = $obj->value;
+					if ($obj) {
+						$conf->global->MAIN_SECURITY_SALT = $obj->value;
+					}
 				} else {
 					setEventMessages("Failed to get remote MAIN_SECURITY_SALT", null, 'warnings');
 				}
@@ -456,14 +507,21 @@ $formcompany = new FormCompany($db);
 
 $title = $langs->trans("Users");
 $help_url='';
+
+// Output page
+// --------------------------------------------------------------------
+
 llxHeader('', $title, $help_url);
 
 $param = '';
-/*if (!empty($mode)) {
+if (!empty($mode)) {
 	$param .= '&mode='.urlencode($mode);
-}*/
+}
 if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
 	$param .= '&contextpage='.urlencode($contextpage);
+}
+if ($id > 0) {
+	$param .= '&id='.((int) $id);
 }
 /*if ($limit > 0 && $limit != $conf->liste_limit) {
 	$param .= '&limit='.((int) $limit);
@@ -554,7 +612,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	// Contract card
 
-	$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/list.php?restore_lastsearch_values=1'.(! empty($socid)?'&socid='.$socid:'').'">'.$langs->trans("BackToList").'</a>';
+	$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/list.php?restore_lastsearch_values=1'.(! empty($socid) ? '&socid='.$socid : '').'">'.$langs->trans("BackToList").'</a>';
 
 	$morehtmlref = '<div class="refidno">';
 	// Ref customer
@@ -705,18 +763,18 @@ $db->close();
  */
 function print_user_table($newdb, $object)
 {
-	global $db, $langs, $form;
+	global $db, $langs, $form, $hookmanager;
 	global $search, $id, $contextpage, $param;
 
 	$sortfield = GETPOST('sortfield', 'aZ09comma');
 	$sortorder = GETPOST('sortorder', 'aZ09comma');
 
 	$arrayfields = array(
-		'rowid'=>array('label'=>"ID", 'checked'=>1, 'position'=>10),
+		'rowid'=>array('label'=>"ID", 'checked'=>1, 'position'=>10, 'csslist'=>'maxwidth50'),
 		'login'=>array('label'=>"Login", 'checked'=>1, 'position'=>15),
 		'lastname'=>array('label'=>"Lastname", 'checked'=>1, 'position'=>20, 'csslist'=>'tdoverflowmax150'),
 		'firstname'=>array('label'=>"Firstname", 'checked'=>1, 'position'=>50, 'csslist'=>'tdoverflowmax150'),
-		'admin'=>array('label'=>"Admin", 'checked'=>1, 'position'=>22),
+		'admin'=>array('label'=>"Admin", 'checked'=>1, 'position'=>22, 'csslist'=>'nowraponall'),
 		'email'=>array('label'=>"Email", 'checked'=>1, 'position'=>25),
 		'pass'=>array('label'=>"Pass", 'checked'=>-1, 'position'=>27),
 		'datec'=>array('label'=>"DateCreation", 'checked'=>1, 'position'=>31),
@@ -736,18 +794,24 @@ function print_user_table($newdb, $object)
 		$sortorder = "ASC";
 	}
 
+	$arrayofmassactions = array();
+	$moreforfilter = '';
+
 	$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
 
 	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
-	$selectedfields = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage); // This also change content of $arrayfields
+	$selectedfields = ($mode != 'kanban' ? $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN', '')) : ''); // This also change content of $arrayfields
+	$selectedfields .= (count($arrayofmassactions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
 
-	print '<div class="div-table-responsive">';
-	print '<table class="noborder centpercent">';
+	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
+	print '<table class="tagtable nobottomiftotal liste'.($moreforfilter ? " listwithfilterbefore" : "").'">'."\n";
+
 
 	$cssforfield = '';
 
-	// Filters line
-	print '<tr class="liste_titre">';
+	// Fields title search
+	// --------------------------------------------------------------------
+	print '<tr class="liste_titre_filter">';
 	// Action column
 	if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 		print '<td class="liste_titre center maxwidthsearch">';
@@ -755,7 +819,8 @@ function print_user_table($newdb, $object)
 		print $searchpicto;
 		print '</td>';
 	}
-	print '<td>#</td>';
+	// Num
+	print '<td></td>';
 	foreach ($arrayfields as $key => $value) {
 		if ($key == 'statut') {
 			$cssforfield = ($cssforfield ? ' ' : '').'center';
@@ -763,8 +828,12 @@ function print_user_table($newdb, $object)
 			$cssforfield = (empty($value['csslist']) ? '' : $value['csslist']);
 		}
 		if (!empty($arrayfields[$key]['checked'])) {
-			if (in_array($key, array('rowid', 'login', 'lastname', 'firstname', 'admin', 'email'))) {
-				//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+			if (in_array($key, array('rowid', 'admin'))) {
+				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
+				print '<input type="text" class="flat maxwidth50" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+				print '</td>';
+			} elseif (in_array($key, array('login', 'lastname', 'firstname', 'email'))) {
+				//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''),      $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
 				print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
 				print '</td>';
@@ -773,37 +842,73 @@ function print_user_table($newdb, $object)
 			}
 		}
 	}
+	// Extra fields
+	//include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_input.tpl.php';
+
+	// Fields from hook
+	$parameters = array('arrayfields'=>$arrayfields);
+	$reshook = $hookmanager->executeHooks('printFieldListOption', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+	print $hookmanager->resPrint;
+	/*if (!empty($arrayfields['anotherfield']['checked'])) {
+	 print '<td class="liste_titre"></td>';
+	 }*/
 	// Action column
 	if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
 		print '<td class="liste_titre center maxwidthsearch">';
-		$searchpicto = $form->showFilterButtons('left');
+		$searchpicto = $form->showFilterButtons();
 		print $searchpicto;
 		print '</td>';
 	}
-	print '</tr>';
+	print '</tr>'."\n";
 
-	// Fitled title line
+	$totalarray = array();
+	$totalarray['nbfield'] = 0;
+
+	// Fields title label
+	// --------------------------------------------------------------------
 	print '<tr class="liste_titre">';
 	// Action column
 	if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-		print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";
+		print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ')."\n";
+		$totalarray['nbfield']++;
 	}
+	// Numero
 	print '<td>#</td>';
+	$totalarray['nbfield']++;
 	foreach ($arrayfields as $key => $value) {
+		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 		if ($key == 'statut') {
-			$cssforfield = ($cssforfield ? ' ' : '').'center';
-		} else {
-			$cssforfield = (empty($value['csslist']) ? '' : $value['csslist']);
+			$cssforfield .= ($cssforfield ? ' ' : '').'center';
+		} elseif (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'center';
+		} elseif (in_array($val['type'], array('timestamp'))) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
+		} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('id', 'rowid', 'ref', 'status')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+			$cssforfield .= ($cssforfield ? ' ' : '').'right';
 		}
+		$cssforfield = preg_replace('/small\s*/', '', $cssforfield);	// the 'small' css must not be used for the title label
 		if (!empty($arrayfields[$key]['checked'])) {
-			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id.$param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
+			print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', $param, ($cssforfield ? 'class="'.$cssforfield.'"' : ''), $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''), 0, (empty($val['helplist']) ? '' : $val['helplist']))."\n";
+			$totalarray['nbfield']++;
 		}
 	}
+	// Extra fields
+	//include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_title.tpl.php';
+	// Hook fields
+	$parameters = array('arrayfields'=>$arrayfields, 'param'=>$param, 'sortfield'=>$sortfield, 'sortorder'=>$sortorder, 'totalarray'=>&$totalarray);
+	$reshook = $hookmanager->executeHooks('printFieldListTitle', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+	print $hookmanager->resPrint;
+	/*if (!empty($arrayfields['anotherfield']['checked'])) {
+	 print '<th class="liste_titre right">'.$langs->trans("AnotherField").'</th>';
+	 $totalarray['nbfield']++;
+	 }*/
 	// Action column
 	if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-		print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', "", "", 'center maxwidthsearch ')."\n";
+		print getTitleFieldOfList($selectedfields, 0, $_SERVER["PHP_SELF"], '', '', '', '', $sortfield, $sortorder, 'center maxwidthsearch ')."\n";
+		$totalarray['nbfield']++;
 	}
-	print '</tr>';
+	print '</tr>'."\n";
+
 
 	if (is_object($newdb) && $newdb->connected) {
 		$fordolibarr = 1;
@@ -848,23 +953,37 @@ function print_user_table($newdb, $object)
 			$resql=$newdb->query($sql);
 			if (empty($resql)) {	// Alternative for Dolibarr 3.7-
 				$sql = "SELECT rowid, login, lastname as lastname, firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-				$sql .= " FROM ".$prefix_db."user";
+				$sql .= " FROM ".$prefix_db."user as t ";
 				$sql .= $newdb->order($sortfield, $sortorder);
 				$resql = $newdb->query($sql);
 				if (empty($resql)) {	// Alternative for Dolibarr 3.3-
 					$sql = "SELECT rowid, login, nom as lastname, prenom as firstname, admin, email, pass, pass_crypted, datec, tms as datem, datelastlogin, fk_societe, fk_socpeople, fk_member, entity, statut";
-					$sql .= " FROM ".$prefix_db."user";
+					$sql .= " FROM ".$prefix_db."user as t";
 					$sql .= $newdb->order($sortfield, $sortorder);
+					$resql = $newdb->query($sql);
 				}
 			}
 		} elseif ($forglpi) {
-			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0, 0, 0, gu.entities_id as entity, gu.is_active as statut,";
-			$sql .= " glpi_useremails.email as email";
+			$sql .= "SELECT gu.id AS rowid, gu.name as login, gu.realname as lastname, gu.firstname,";
+			$sql .= " GROUP_CONCAT(DISTINCT IF(gp.name = 'central', 'central', NULL)) AS admin,";
+			$sql .= " GROUP_CONCAT(DISTINCT gue.email) AS email,";
+			$sql .= " '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login AS datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
+			$sql .= " FROM glpi_users as gu LEFT JOIN glpi_profiles_users AS gpu ON gu.id = gpu.users_id";
+			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id LEFT JOIN glpi_useremails AS gue ON gue.users_id = gu.id";
+			$sql .= " WHERE gu.is_deleted = 0 AND gu.name NOT IN ('supportcloud')";
+			//$sql .= " GROUP BY rowid, login, realname, firstname, pass, pass_crypted, datec, datem, datelastlogin, nu1, nu2, nu3, entity, statut, admin;";
+			/*
+			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname,";
+			$sql .= " gp.interface as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
+			//$sql = "SELECT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname, CONCAT(gp.interface, ' (', gp.name,')') as admin, '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login as datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
+			//$sql .= ", glpi_useremails.email as email";
+			$sql .= ", GROUP_CONCAT(glpi_useremails.email) as email";
 			$sql .= " FROM glpi_users as gu";
-			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
 			$sql .= " LEFT JOIN glpi_profiles_users as gpu ON gpu.users_id = gu.id";
+			$sql .= " LEFT JOIN glpi_useremails ON glpi_useremails.users_id = gu.id";
 			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id AND gp.interface = 'central'";
 			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.is_deleted = 1)";
+			*/
 			$key = 'rowid';
 			if ($search[$key]) {
 				$sql .= natural_search($key, $search[$key], 1);
@@ -883,12 +1002,15 @@ function print_user_table($newdb, $object)
 			}
 			$key = 'admin';
 			if ($search[$key]) {
+				//$sql .= natural_search('gp.interface', $search[$key], 0);
 				$sql .= natural_search('gp.interface', $search[$key], 0);
 			}
 			$key = 'email';
 			if ($search[$key]) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
+			//$sql .= " GROUP BY gu.id, gu.name, gu.realname, gu.firstname, admin, gp.interface, pass, gu.password, gu.date_creation, gu.date_mod, gu.last_login, nu1, nu2, nu3, gu.entities_id, gu.is_active";
+			$sql .= " GROUP BY rowid, login, realname, firstname, pass, pass_crypted, datec, datem, datelastlogin, nu1, nu2, nu3, entity, statut";
 
 			$sql .= $newdb->order($sortfield, $sortorder);
 		} else {
@@ -904,7 +1026,7 @@ function print_user_table($newdb, $object)
 				$obj = $newdb->fetch_object($resql);
 
 				global $object;
-				$url='https://'.$object->ref_customer.'?username='.$obj->login.'&amp;password='.$obj->pass;
+				$url='https://'.$object->ref_customer.'?username='.urlencode($obj->login).'&amp;password='.urlencode($obj->pass);
 				print '<tr class="oddeven">';
 				// Action column
 				if (getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
@@ -913,7 +1035,7 @@ function print_user_table($newdb, $object)
 					print '</td>';
 				}
 				print '<td>';
-				print ($i+1);
+				print($i+1);
 				print '</td>';
 				foreach ($arrayfields as $key => $value) {
 					$cssforfield = (empty($value['csslist']) ? '' : $value['csslist']);
@@ -930,7 +1052,7 @@ function print_user_table($newdb, $object)
 								print '</td>';
 							}
 						} elseif ($key == 'pass') {
-							$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted?$obj->pass_crypted:'NA').($obj->pass ? ')' : '');
+							$valtoshow = ($obj->pass ? $obj->pass.' (' : '').($obj->pass_crypted ? $obj->pass_crypted : 'NA').($obj->pass ? ')' : '');
 							print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($valtoshow).'">'.dol_escape_htmltag($valtoshow).'</td>';
 						} elseif ($key == 'login') {
 							print '<td class="nowraponall tdoverflowmax150" title="'.dol_escape_htmltag($obj->$key).'">';
@@ -938,7 +1060,18 @@ function print_user_table($newdb, $object)
 							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 							print '</td>';
 						} elseif ($key == 'email') {
-							print '<td class="tdoverflowma150" title="'.dol_escape_htmltag($obj->$key).'">'.dol_print_email($obj->$key, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1).'</td>';
+							$tmparray = explode(',', $obj->$key);
+							print '<td class="tdoverflowmax200" title="'.dol_escape_htmltag(join(', ', array_unique($tmparray))).'">';
+							$tmparray = explode(',', $obj->$key);
+							$cacheforthisline = array();
+							foreach ($tmparray as $tmpemail) {
+								if (!empty($cacheforthisline[$tmpemail])) {
+									continue;
+								}
+								$cacheforthisline[$tmpemail] = 1;
+								print dol_print_email($tmpemail, (empty($obj->fk_socpeople) ? 0 : $obj->fk_socpeople), (empty($obj->fk_soc) ? 0 : $obj->fk_soc), 1)." ";
+							}
+							print '</td>';
 						} elseif ($key == 'datec' || $key == 'datem' || $key == 'datelastlogin') {
 							print '<td class="nowraponall">'.dol_print_date($newdb->jdate($obj->$key), 'dayhour', 'tzuserrel').'</td>';
 						} else {

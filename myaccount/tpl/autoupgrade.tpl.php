@@ -33,7 +33,7 @@ dol_include_once('sellyoursaas/class/sellyoursaascontract.class.php');
 
 
 $upload_dir = $conf->sellyoursaas->dir_temp."/autoupgrade_".$mythirdpartyaccount->id.'.tmp';
-$backtopagesupport = GETPOST("backtopagesupport", 'alpha') ? GETPOST("backtopagesupport", 'alpha') : $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautoupgrade=backfromautoupgrade&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?GETPOST('ticketcategory_child_id', 'alpha'):'').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?GETPOST('ticketcategory', 'alpha'):'').'&subject='.(GETPOST('subject_back', 'alpha')?GETPOST('subject', 'alpha'):'').'#supportform';
+$backtopagesupport = GETPOST("backtopagesupport", 'alpha') ? GETPOST("backtopagesupport", 'alpha') : $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautoupgrade=backfromautoupgrade&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha') ? GETPOST('ticketcategory_child_id', 'alpha') : '').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha') ? GETPOST('ticketcategory', 'alpha') : '').'&subject='.(GETPOST('subject_back', 'alpha') ? GETPOST('subject', 'alpha') : '').'#supportform';
 $arraybacktopage=explode("&", $backtopagesupport);
 $ticketcategory_child_id = "";
 $ticketcategory = "";
@@ -277,7 +277,7 @@ print '
         <div class="page-head">
         <!-- BEGIN PAGE TITLE -->
             <div class="page-title">
-            <h1>'.$langs->trans("Autoupgrade").' <small>'.$langs->trans("AutoupgradeDesc", (!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR"))?"(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")":"")).'</small></h1>
+            <h1>'.$langs->trans("Autoupgrade").' <small>'.$langs->trans("AutoupgradeDesc", (!empty(getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR")) ? "(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")" : "")).'</small></h1>
             </div>
         <!-- END PAGE TITLE -->
         </div>
@@ -427,8 +427,8 @@ if ($action == "instanceverification") {
 				'.$langs->trans("AutoupgradeStep1Text").'...<br><br>
 				</div>
 				<div class="center" style="padding-top:10px">';
-				print '<select id="instanceselect" name="instanceselect" class="minwidth600 maxwidth700" required="required">';
-				print '<option value="">&nbsp;</option>';
+	print '<select id="instanceselect" name="instanceselect" class="minwidth600 maxwidth700" required="required">';
+	print '<option value="">&nbsp;</option>';
 	if (count($listofcontractid) == 0) {
 		// Should not happen
 	} else {
@@ -436,27 +436,29 @@ if ($action == "instanceverification") {
 		$atleastonefound=0;
 
 		foreach ($listofcontractid as $id => $contract) {
-							$planref = $contract->array_options['options_plan'];
-							$statuslabel = $contract->array_options['options_deployment_status'];
-							$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
-							$dbprefix = $contract->array_options['options_prefix_db'];
-							if (empty($dbprefix)) $dbprefix = 'llx_';
+			$planref = $contract->array_options['options_plan'];
+			$statuslabel = $contract->array_options['options_deployment_status'];
+			$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
+			$dbprefix = $contract->array_options['options_prefix_db'];
+			if (empty($dbprefix)) {
+				$dbprefix = 'llx_';
+			}
 
 			if ($statuslabel == 'undeployed') {
 				continue;
 			}
 
-							// Get info about PLAN of Contract
+			// Get info about PLAN of Contract
 							$planlabel = $planref;		// By default but we will take ref and label of service of type 'app' later
 
 							$planid = 0;
-							$freeperioddays = 0;
-							$directaccess = 0;
+			$freeperioddays = 0;
+			$directaccess = 0;
 
-							$tmpproduct = new Product($db);
+			$tmpproduct = new Product($db);
 			foreach ($contract->lines as $keyline => $line) {
 				if ($line->statut == 5 && $contract->array_options['options_deployment_status'] != 'undeployed') {
-									$statuslabel = 'suspended';
+					$statuslabel = 'suspended';
 				}
 
 				if ($line->fk_product > 0) {
@@ -476,10 +478,18 @@ if ($action == "instanceverification") {
 			$ispaid = sellyoursaasIsPaidInstance($contract);
 
 			$color = "green";
-			if ($statuslabel == 'processing') { $color = 'orange'; }
-			if ($statuslabel == 'suspended') { $color = 'orange'; }
-			if ($statuslabel == 'undeployed') { $color = 'grey'; }
-			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
+			if ($statuslabel == 'processing') {
+				$color = 'orange';
+			}
+			if ($statuslabel == 'suspended') {
+				$color = 'orange';
+			}
+			if ($statuslabel == 'undeployed') {
+				$color = 'grey';
+			}
+			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				$color = 'lightgrey';
+			}
 
 			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 				if (! $ispaid) {	// non paid instances
@@ -507,7 +517,7 @@ if ($action == "instanceverification") {
 				$labeltoshow .= ' - ';
 				$labeltoshow .= $prioritylabel;
 
-				print '<option value="'.$optionid.'"'.(GETPOST('instanceselect', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
+				print '<option value="'.$optionid.'"'.(GETPOST('instanceselect', 'alpha') == $optionid ? ' selected="selected"' : '').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
 				print dol_escape_htmltag($labeltoshow);
 				print '</option>';
 				print ajax_combobox('instanceselect', array(), 0, 0, 'resolve');
@@ -518,7 +528,7 @@ if ($action == "instanceverification") {
 	}
 	print'</select><br><br>';
 	print'</div>
-			<div class="center divstep1upgrade"'.(!GETPOST('instanceselect', 'alpha') ?' style="display:none;"':'').'>
+			<div class="center divstep1upgrade"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
 			<h4><div class="note note-warning">
 			'.$langs->trans("AutoupgradeStep1Warning").'
 			</div></h4>
@@ -526,7 +536,7 @@ if ($action == "instanceverification") {
 			'.$langs->trans("AutoupgradeStep1Note").'
 			</div>
 			</div><br>
-			<div id="buttonstep1upgrade" class="containerflexautomigration"'.(!GETPOST('instanceselect', 'alpha') ?' style="display:none;"':'').'>
+			<div id="buttonstep1upgrade" class="containerflexautomigration"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
 					<div class="right containerflexautomigrationitem paddingright paddingleft">
 						<button id="buttonstep_2" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 					</div>

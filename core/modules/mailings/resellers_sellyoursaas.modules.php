@@ -127,11 +127,15 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		$sql .= ", ".MAIN_DB_PREFIX."categorie_fournisseur as cs";
 		$sql .= " WHERE email IS NOT NULL AND email <> ''";
 		$sql .= " AND cs.fk_soc = s.rowid AND cs.fk_categorie = ".((int) $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG);
-		if ( GETPOST('status_reseller', 'int') >= 0) {
+		if (GETPOST('status_reseller', 'int') >= 0) {
 			$sql .= " AND s.status = ".((int) GETPOST('status_reseller', 'int'));
 		}
-		if (GETPOST('lang_id_reseller') && GETPOST('lang_id_reseller') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('lang_id_reseller', 'array')), 3);
-		if (GETPOST('not_lang_id_reseller') && GETPOST('not_lang_id_reseller') != 'none') $sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id_reseller', 'array')), -3);
+		if (GETPOST('lang_id_reseller') && GETPOST('lang_id_reseller') != 'none') {
+			$sql.= natural_search('default_lang', join(',', GETPOST('lang_id_reseller', 'array')), 3);
+		}
+		if (GETPOST('not_lang_id_reseller') && GETPOST('not_lang_id_reseller') != 'none') {
+			$sql.= natural_search('default_lang', join(',', GETPOST('not_lang_id_reseller', 'array')), -3);
+		}
 		if (GETPOST('country_id_reseller') && GETPOST('country_id_reseller') != 'none' && GETPOST('country_id_reseller') != '-1') {
 			$sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id_reseller', 'intcomma'), 1)."')";
 		}
@@ -230,7 +234,9 @@ class mailing_resellers_sellyoursaas extends MailingTargets
 		}
 
 		$a = parent::getNbOfRecipients($sql);
-		if ($a < 0) return -1;
+		if ($a < 0) {
+			return -1;
+		}
 		return $a;
 	}
 }

@@ -62,7 +62,9 @@ if (! empty($conf->global->SELLYOURSAAS_DOLICLOUD_ON) && $mythirdpartyaccount->a
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) $sellyoursaasemail = $conf->global->$newnamekey;
+		if (! empty($conf->global->$newnamekey)) {
+			$sellyoursaasemail = $conf->global->$newnamekey;
+		}
 	}
 
 	print $langs->trans('InvoiceBeforeAreAvailableOnDemandAt', dol_print_date($mythirdpartyaccount->array_options['options_date_registration'], 'day'), $sellyoursaasemail);
@@ -79,11 +81,17 @@ if (count($listofcontractid) > 0) {
 		$planlabel = $planref;
 
 		$color = "green";
-		if ($statuslabel == 'processing') $color = 'orange';
-		if ($statuslabel == 'suspended') $color = 'orange';
+		if ($statuslabel == 'processing') {
+			$color = 'orange';
+		}
+		if ($statuslabel == 'suspended') {
+			$color = 'orange';
+		}
 
 		$dbprefix = $contract->array_options['options_prefix_db'];
-		if (empty($dbprefix)) $dbprefix = 'llx_';
+		if (empty($dbprefix)) {
+			$dbprefix = 'llx_';
+		}
 
 		print '
 				<br>
@@ -117,7 +125,9 @@ if (count($listofcontractid) > 0) {
 			//var_dump($contract->linkedObjects['facture']);
 			//dol_sort_array($contract->linkedObjects['facture'], 'date');
 			foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
-				if ($invoice->statut == Facture::STATUS_DRAFT) continue;
+				if ($invoice->statut == Facture::STATUS_DRAFT) {
+					continue;
+				}
 
 				print '
 					            <div class="row" style="margin-top:20px">
@@ -270,7 +280,9 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 
 		$i = 0;
 		foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
-			if ($i > 0) print '<tr><td colspan="3"><br></td></tr>';
+			if ($i > 0) {
+				print '<tr><td colspan="3"><br></td></tr>';
+			}
 			if ($companypaymentmodetemp->type == 'card') {
 				print '<tr>';
 				print '<td colspan="3" class="wordbreak">';
@@ -333,14 +345,16 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 			} elseif ($companypaymentmodetemp->type == 'ban') {
 				print '<tr>';
 				print '<td colspan="3" class="wordbreak">';
-				print img_picto('', 'bank', '',  false, 0, 0, '', 'fa-2x');
+				print img_picto('', 'bank', '', false, 0, 0, '', 'fa-2x');
 				print $langs->trans("PaymentTypeShortPRE");
 				print '</td>';
 				print '</tr>';
 
 				print '<tr><td colspan="3">';
 				print $langs->trans("IBAN").': <span class="small">'.$companypaymentmodetemp->iban_prefix.'</span><br>';
-				if ($companypaymentmodetemp->rum) print $langs->trans("RUM").': <span class="small">'.$companypaymentmodetemp->rum.'</span>';
+				if ($companypaymentmodetemp->rum) {
+					print $langs->trans("RUM").': <span class="small">'.$companypaymentmodetemp->rum.'</span>';
+				}
 				print '</td></tr>';
 			} else {
 				print '<tr>';
@@ -369,8 +383,11 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 	print '
 	                <br><br>
 	                <center><a href="'.$urltoenterpaymentmode.'" class="wordbreak btn default green-stripe">';
-	if ($nbpaymentmodeok) print $langs->trans("ModifyPaymentMode").'...';
-	else print $langs->trans("AddAPaymentMode").'...';
+	if ($nbpaymentmodeok) {
+		print $langs->trans("ModifyPaymentMode").'...';
+	} else {
+		print $langs->trans("AddAPaymentMode").'...';
+	}
 	print '</a></center>
 
 	            </p>

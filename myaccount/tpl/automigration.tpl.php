@@ -36,7 +36,7 @@ $upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$idcontract.'.tmp'
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
-$backtopagesupport = $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautomigration=backfromautomigration&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha')?GETPOST('ticketcategory_child_id', 'alpha'):'').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha')?GETPOST('ticketcategory', 'alpha'):'').'&subject'.(GETPOST('subject_back', 'alpha')?GETPOST('subject', 'alpha'):'').'#supportform';
+$backtopagesupport = $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautomigration=backfromautomigration&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha') ? GETPOST('ticketcategory_child_id', 'alpha') : '').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha') ? GETPOST('ticketcategory', 'alpha') : '').'&subject'.(GETPOST('subject_back', 'alpha') ? GETPOST('subject', 'alpha') : '').'#supportform';
 
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormbacksupport">';
 	print '<input type="hidden" name="action" value="presend">';
@@ -44,9 +44,9 @@ print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormba
 	print '<input type="hidden" name="contractid" value="'.GETPOST('contractid', 'alpha').'">';
 	print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
 	print '<input type="hidden" name="backfromautomigration" value="backfromautomigration">';
-	print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'">';
-	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
-	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
+	print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha') ?: GETPOST('ticketcategory_child_id', 'alpha')).'">';
+	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha') ?: GETPOST('ticketcategory', 'alpha')).'">';
+	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha') ?: GETPOST('subject', 'alpha')).'">';
 print '</form>';
 
 if (!empty($_POST['addfile']) && empty($_POST['flowjsprocess'])) {
@@ -71,7 +71,7 @@ if ($action == 'fileverification') {
 	$filetoverify = array();
 	foreach ($filenames as $key => $filename) {
 		$pathinfo = pathinfo($upload_dir.'/'.$filename);
-		if ( $types[$key] == 'application/gzip') {
+		if ($types[$key] == 'application/gzip') {
 			if (pathinfo($pathinfo['filename'])['extension'] == "sql") {
 				$contents=file_get_contents($upload_dir.'/'.$filename);
 				$uncompressed = gzuncompress($contents);
@@ -89,7 +89,7 @@ if ($action == 'fileverification') {
 				$phar->extractTo($upload_dir.'/', null, true);
 				$filetoverify["dir"] = $filename;
 			}
-		} elseif ( $types[$key] == 'application/x-bzip') {
+		} elseif ($types[$key] == 'application/x-bzip') {
 			$extensionfile = pathinfo($pathinfo['filename'])['extension'];
 			if ($extensionfile == "sql") {
 				$contents = file_get_contents($upload_dir.'/'.$filename);
@@ -108,7 +108,7 @@ if ($action == 'fileverification') {
 				$phar->extractTo($upload_dir.'/', null, true);
 				$filetoverify["dir"] = $filename;
 			}
-		} elseif ( $types[$key] == 'application/zip') {
+		} elseif ($types[$key] == 'application/zip') {
 			$result = dol_uncompress($upload_dir.'/'.$filename, $upload_dir);
 			if (!empty($result)) {
 				$error = array("error"=>array("errorcode" => $result));
@@ -353,7 +353,7 @@ if ($action == 'fileverification') {
 			print '<ul style="list-style-type:\'-\';">';
 			foreach ($fileverification[$i]['error'] as $key => $errorcode) {
 				print '<li>';
-				print $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"", !empty($errorcode["errorfilename"])?$errorcode["errorfilename"]:"");
+				print $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"]) ? $errorcode["errorextension"] : "", !empty($errorcode["errorfilename"]) ? $errorcode["errorfilename"] : "");
 				print '</li>';
 			}
 			print '</ul>';
@@ -393,11 +393,11 @@ if ($action == 'fileverification') {
 		$migrationerrormessage .= "\nTimestamp: ".dol_print_date(dol_now(), "%d/%m/%Y %H:%M:%S");
 		$migrationerrormessage .= "\nErrorsSql: ";
 		foreach ($fileverification[0]['error'] as $key => $errorcode) {
-			$migrationerrormessage .= $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"", !empty($errorcode["errorfilename"])?$errorcode["errorfilename"]:"")." ";
+			$migrationerrormessage .= $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"]) ? $errorcode["errorextension"] : "", !empty($errorcode["errorfilename"]) ? $errorcode["errorfilename"] : "")." ";
 		}
 		$migrationerrormessage .= "\nErrorsDocument: ";
 		foreach ($fileverification[1]['error'] as $key => $errorcode) {
-			$migrationerrormessage .= $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"])?$errorcode["errorextension"]:"", !empty($errorcode["errorfilename"])?$errorcode["errorfilename"]:"")." ";
+			$migrationerrormessage .= $langs->trans($errorcode["errorcode"], !empty($errorcode["errorextension"]) ? $errorcode["errorextension"] : "", !empty($errorcode["errorfilename"]) ? $errorcode["errorfilename"] : "")." ";
 		}
 		print '<form action="'.$_SERVER["PHP_SELF"].'" method="GET">';
 		print '<input type="hidden" name="action" value="presend">';
@@ -456,7 +456,7 @@ if ($action == 'view') {
         </div>
         <!-- END STEP1-->';
 
-		print '<!-- BEGIN STEP2-->
+	print '<!-- BEGIN STEP2-->
 		<div id="Step2"></div>
         <div class="portlet light divstep topmarginstep" id="step2">
                 <h2>'.$langs->trans("Step", 2).' - '.$langs->trans("BackupOldDocument").'</h2><br>
@@ -481,15 +481,15 @@ if ($action == 'view') {
         </div>
         <!-- END STEP2-->';
 
-		print '<!-- BEGIN STEP3-->
+	print '<!-- BEGIN STEP3-->
         <div class="portlet light divstep topmarginstep" id="step3">
                 <h2 id="Step3">'.$langs->trans("Step", 3).' - '.$langs->trans("InstanceConfirmation").'</h2><br>
                 <div style="padding-left:25px">
                 '.$langs->trans("AutomigrationStep3Text").'<br><br>
                 </div>
                 <div class="center" style="padding-top:10px">';
-				print '<select id="instanceselect" name="instanceselect" class="minwidth600" required="required">';
-				print '<option value="">&nbsp;</option>';
+	print '<select id="instanceselect" name="instanceselect" class="minwidth600" required="required">';
+	print '<option value="">&nbsp;</option>';
 	if (count($listofcontractid) == 0) {
 		// Should not happen
 	} else {
@@ -502,7 +502,9 @@ if ($action == 'view') {
 			$instancename = preg_replace('/\..*$/', '', $contract->ref_customer);
 
 			$dbprefix = $contract->array_options['options_prefix_db'];
-			if (empty($dbprefix)) $dbprefix = 'llx_';
+			if (empty($dbprefix)) {
+				$dbprefix = 'llx_';
+			}
 
 			if ($statuslabel == 'undeployed') {
 				continue;
@@ -537,10 +539,18 @@ if ($action == 'view') {
 			$ispaid = sellyoursaasIsPaidInstance($contract);
 
 			$color = "green";
-			if ($statuslabel == 'processing') { $color = 'orange'; }
-			if ($statuslabel == 'suspended') { $color = 'orange'; }
-			if ($statuslabel == 'undeployed') { $color = 'grey'; }
-			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) { $color = 'lightgrey'; }
+			if ($statuslabel == 'processing') {
+				$color = 'orange';
+			}
+			if ($statuslabel == 'suspended') {
+				$color = 'orange';
+			}
+			if ($statuslabel == 'undeployed') {
+				$color = 'grey';
+			}
+			if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				$color = 'lightgrey';
+			}
 
 			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 				if (! $ispaid) {	// non paid instances
@@ -568,7 +578,7 @@ if ($action == 'view') {
 				$labeltoshow .= ' - ';
 				$labeltoshow .= $prioritylabel;
 
-				print '<option value="'.$optionid.'"'.(GETPOST('instanceselect', 'alpha') == $optionid ? ' selected="selected"':'').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
+				print '<option value="'.$optionid.'"'.(GETPOST('instanceselect', 'alpha') == $optionid ? ' selected="selected"' : '').'" data-html="'.dol_escape_htmltag($labeltoshow).'">';
 				print dol_escape_htmltag($labeltoshow);
 				print '</option>';
 				print ajax_combobox('instanceselect', array(), 0, 0, 'off');
@@ -577,14 +587,14 @@ if ($action == 'view') {
 			}
 		}
 	}
-		print'</select><br><br>';
-		print'</div>
+	print'</select><br><br>';
+	print'</div>
             <div class="center">
             <h4><div class="note note-warning">
 			'.$langs->trans("AutomigrationStep3Warning").'
 			</div></h4>
             </div><br>
-			<div id="buttonstep4migration" class="containerflexautomigration" '.(!GETPOST('instanceselect', 'alpha') ?'style="display:none;"':'').'>
+			<div id="buttonstep4migration" class="containerflexautomigration" '.(!GETPOST('instanceselect', 'alpha') ? 'style="display:none;"' : '').'>
 				<div class="right" style="margin-right:10px">
 					<button id="buttonstep_4" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 				</div>
@@ -595,10 +605,10 @@ if ($action == 'view') {
         </div>
         <!-- END STEP3-->';
 
-		// @TODO LMR Replace the upload of file with a simple form with
-		// flow.js + a PHP file called flowjs-server.php (to add inside Dolibarr) inspired from https://github.com/flowjs/flow.js/blob/master/samples/Backend%20on%20PHP.md (not the flow-php-server that is too heavy for our need)
-		// So we an upload very large files and stay on main page.
-		print '<!-- BEGIN STEP4-->
+	// @TODO LMR Replace the upload of file with a simple form with
+	// flow.js + a PHP file called flowjs-server.php (to add inside Dolibarr) inspired from https://github.com/flowjs/flow.js/blob/master/samples/Backend%20on%20PHP.md (not the flow-php-server that is too heavy for our need)
+	// So we an upload very large files and stay on main page.
+	print '<!-- BEGIN STEP4-->
         <div class="portlet light divstep topmarginstep" id="step4">
             <h2 id="Step4">'.$langs->trans("Step", 4).' - '.$langs->trans("FileUpload").'</small></h1><br>
             <div class="grid-wrapper-automigration">
@@ -606,37 +616,37 @@ if ($action == 'view') {
                 	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDatabaseDumpFile").' ('.$langs->trans('FileEndingWith').' .sql, .sql.bz2 '.$langs->trans("or").' .sql.gz):</span>
                 </div>
                 <div class="grid-boxes-automigration">';
-				/*$maxfilesizearray = getMaxFileSizeArray();
-				$maxmin = $maxfilesizearray['maxmin'];
+	/*$maxfilesizearray = getMaxFileSizeArray();
+	$maxmin = $maxfilesizearray['maxmin'];
 	if ($maxmin > 0) {
 		print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
 	}*/
-				print '<input type="file" class="nobrowserflowjssupport" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">';
-				print '<span class="browserflowjssupport"><button type="button" data-inputfile="sqldumpfile" class="browsefileinput" id="browseButtonsqldump">Browse...</button>';
-				print '&nbsp;<span id="sqldumpfilespan">No file selected.</span>';
-				print '<input type="hidden" id="sqldumpfilename" name="sqldumpfilename">';
-				print '<input type="hidden" id="sqldumpfiletype" name="sqldumpfiletype">';
-				print '<br><div class="progress-bar sqldumpfilepgbar taligncenter" role="progressbar" style="width:1%;display:none"><span class="small valigntop">0%</span></div>';
-				print '<button type="button" style="display:none;" data-inputfile="sqldumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="cancelsqldumpfile">Cancel</button>';
-				print '</span>';
-				print '</div>
+	print '<input type="file" class="nobrowserflowjssupport" id="databasedumpfile" name="addedfile[]" accept=".sql,.sql.bz2,.sql.gz">';
+	print '<span class="browserflowjssupport"><button type="button" data-inputfile="sqldumpfile" class="browsefileinput" id="browseButtonsqldump">Browse...</button>';
+	print '&nbsp;<span id="sqldumpfilespan">No file selected.</span>';
+	print '<input type="hidden" id="sqldumpfilename" name="sqldumpfilename">';
+	print '<input type="hidden" id="sqldumpfiletype" name="sqldumpfiletype">';
+	print '<br><div class="progress-bar sqldumpfilepgbar taligncenter" role="progressbar" style="width:1%;display:none"><span class="small valigntop">0%</span></div>';
+	print '<button type="button" style="display:none;" data-inputfile="sqldumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="cancelsqldumpfile">Cancel</button>';
+	print '</span>';
+	print '</div>
                 <div class="grid-boxes-automigration-left valignmiddle">
                 	<span class="opacitymedium nobold">'.$langs->trans("UploadYourDocumentArchiveFile").' ('.$langs->trans('FileEndingWith').' .zip, .tar.gz '.$langs->trans("or").' .tar.bz2):</span>
                 </div>
                 <div class="grid-boxes-automigration">';
-				/*$maxmin = $maxfilesizearray['maxmin'];
+	/*$maxmin = $maxfilesizearray['maxmin'];
 	if ($maxmin > 0) {
 		print '<input type="hidden" name="MAX_FILE_SIZE" value="'.($maxmin * 1024).'">';	// MAX_FILE_SIZE must precede the field type=file
 	}*/
-				print '<input type="file" class="nobrowserflowjssupport" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">';
-				print '<span class="browserflowjssupport"><button type="button" data-inputfile="documentdumpfile" class="browsefileinput" id="browseButtondocument">Browse...</button>';
-				print '&nbsp;<span id="documentdumpfilespan">No file selected.</span>';
-				print '<input type="hidden" id="documentdumpfilename" name="documentdumpfilename">';
-				print '<input type="hidden" id="documentdumpfiletype" name="documentdumpfiletype">';
-				print '<br><div class="progress-bar documentdumpfilepgbar taligncenter" role="progressbar" style="width:1%;display:none"><span class="small valigntop">0%</span></div>';
-				print '<button type="button" style="display:none;" data-inputfile="documentdumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="canceldocumentdumpfile">Cancel</button>';
-				print '</span>';
-				print '</div>
+	print '<input type="file" class="nobrowserflowjssupport" id="documentdumpfile" name="addedfile[]" accept=".zip,.tar.gz,.tar.bz2">';
+	print '<span class="browserflowjssupport"><button type="button" data-inputfile="documentdumpfile" class="browsefileinput" id="browseButtondocument">Browse...</button>';
+	print '&nbsp;<span id="documentdumpfilespan">No file selected.</span>';
+	print '<input type="hidden" id="documentdumpfilename" name="documentdumpfilename">';
+	print '<input type="hidden" id="documentdumpfiletype" name="documentdumpfiletype">';
+	print '<br><div class="progress-bar documentdumpfilepgbar taligncenter" role="progressbar" style="width:1%;display:none"><span class="small valigntop">0%</span></div>';
+	print '<button type="button" style="display:none;" data-inputfile="documentdumpfile" data-fileidentifier="" class="btn green-haze btn-circle cancelfileinput" id="canceldocumentdumpfile">Cancel</button>';
+	print '</span>';
+	print '</div>
             </div><br>
 			<input type="hidden" class="flowjsprocess" id="flowjsprocess" name="flowjsprocess" value="true">
 
@@ -653,9 +663,9 @@ if ($action == 'view') {
 	print '<input type="hidden" name="contractid" value="'.GETPOST('contractid', 'alpha').'">';
 	print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
 	print '<input type="hidden" name="backfromautomigration" value="backfromautomigration">';
-	print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'">';
-	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
-	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha')?:GETPOST('subject', 'alpha')).'">';
+	print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha') ?: GETPOST('ticketcategory_child_id', 'alpha')).'">';
+	print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha') ?: GETPOST('ticketcategory', 'alpha')).'">';
+	print '<input type="hidden" name="subject" value="'.(GETPOST('subject_back', 'alpha') ?: GETPOST('subject', 'alpha')).'">';
 	print'</form>';
 
 	print '
@@ -825,7 +835,7 @@ if ($action == "automigration") {
 		$migrationerrormessage .= "\nMysqldump: ".$sqlfiletomigrate;
 		$migrationerrormessage .= "\nDocumentDump: ".$dirfiletomigrate;
 		$migrationerrormessage .= "\nTimestamp: ".dol_print_date(dol_now(), "standard", 'gmt').' UTC';
-		$migrationerrormessage .= "\nErrors: ".(!empty($result["output"])?$result["output"]:$result["result"]);
+		$migrationerrormessage .= "\nErrors: ".(!empty($result["output"]) ? $result["output"] : $result["result"]);
 		print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormbacksupport">';
 		print '<input type="submit" class="btn green-haze btn-circle" value="'.$langs->trans("BackToSupport").'">';
 		print '<input type="hidden" name="action" value="presend">';
@@ -833,8 +843,8 @@ if ($action == "automigration") {
 		print '<input type="hidden" name="contractid" value="'.$object->id.'">';
 		print '<input type="hidden" name="supportchannel" value="'.GETPOST('instanceselect', 'alpha').'">';
 		print '<input type="hidden" name="backfromautomigration" value="backfromautomigration">';
-		print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha')?:GETPOST('ticketcategory_child_id', 'alpha')).'">';
-		print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha')?:GETPOST('ticketcategory', 'alpha')).'">';
+		print '<input type="hidden" name="ticketcategory_child_id" value="'.(GETPOST('ticketcategory_child_id_back', 'alpha') ?: GETPOST('ticketcategory_child_id', 'alpha')).'">';
+		print '<input type="hidden" name="ticketcategory" value="'.(GETPOST('ticketcategory_back', 'alpha') ?: GETPOST('ticketcategory', 'alpha')).'">';
 		print '<input type="hidden" name="subject" value="'.$langs->trans("MigrationErrorSubject").'">';
 		print '<input type="hidden" name="content" value="'.$migrationerrormessage.'">';
 		print '</form>';
