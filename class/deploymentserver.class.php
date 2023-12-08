@@ -201,7 +201,7 @@ class Deploymentserver extends CommonObject
 		}
 
 		// Example to show how to set values of fields definition dynamically
-		/*if ($user->hasRights->('sellyoursaas', 'deploymentserver', 'read')) {
+		/*if ($user->hasRight('sellyoursaas', 'deploymentserver', 'read')) {
 			$this->fields['myfield']['visible'] = 1;
 			$this->fields['myfield']['noteditable'] = 0;
 		}*/
