@@ -166,7 +166,7 @@ if (count($listofcontractid) > 0) {
 					              </div>
 
 								  <!-- Payment mode -->
-								  <div class="col-md-2" title="'.dol_escape_htmltag($invoice->mode_reglement).'">
+								  <div class="col-md-2 tdoverflowmax150" title="'.dol_escape_htmltag($invoice->mode_reglement).'">
 									'.dol_escape_htmltag($invoice->mode_reglement).'
 					              </div>
 
