@@ -355,8 +355,6 @@ AllowUsers myunixlogin
 AllowUsers otherunixlogin
 ---------------
 
-Please note: replace *myunixlogin* and *otherunixlogin* with the correct value before taking changes into account.
-
 
 Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rules into the custom file)
 
@@ -384,6 +382,8 @@ sshd -T -C user=mylogin -C host=clienthost -C addr=clientaddr
 
 Then reload ssh 
 
+Please note: check you have replaced *myunixlogin* with the correct values before taking changes into account.
+
 [source, conf]
 ---------------
 /etc/init.d/ssh reload
@@ -403,8 +403,9 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 ---------------
 myunixlogin ALL=(ALL) ALL
 # You can also add this lines to avoid users to re-enter a password when switching to 'admin' or 'osu*'
-#myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
-#myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
+# This allows to switch to admin or osu* with "sudo su - admin" or "sudo su - osu..."
+#myunixlogin ALL=(ALL) /usr/bin/su - admin
+#myunixlogin ALL=(ALL) /usr/bin/su - osu*
 ---------------
 
 This allows you to switch to *admin* or *osu...* without typing your password too:
@@ -414,6 +415,8 @@ This allows you to switch to *admin* or *osu...* without typing your password to
 sudo su - admin
 sudo su - osu...
 ---------------
+
+Please note: check you have replaced *myunixlogin* with the correct values before taking changes into account.
 
 
 And set the *root*.*root* and the permissions *r--r-----*

@@ -74,7 +74,7 @@
       - userpublickey is defined
       - userpublickey|length > 0
 
-  - name: Add line for root access into file /etc/sudoers.d/{{login}}
+  - name: Process line for root access into file /etc/sudoers.d/{{login}}
     lineinfile:
       path: /etc/sudoers.d/{{ login }}
       line: "{{ login }} ALL=(ALL) ALL"
@@ -85,10 +85,38 @@
     when:
       - userpublickey is defined
       - userpublickey|length > 0
-      - userroot is defined > 0
+      - userroot is defined
       - userroot|length > 0
 
-  - name: Add first line into file /etc/sudoers.d/{{login}}
+  - name: Process line into file /etc/sudoers.d/{{login}} for su admin
+    lineinfile:
+      path: /etc/sudoers.d/{{ login }}
+      line: "{{ login }} ALL=(ALL) /usr/bin/su - admin"
+      owner: root
+      group: root
+      mode: '0440'
+      create: yes
+      state: present
+    when:
+      - userpublickey is defined
+      - userpublickey|length > 0
+      - userroot is not defined
+
+  - name: Process line into file /etc/sudoers.d/{{login}} for su osu
+    lineinfile:
+      path: /etc/sudoers.d/{{ login }}
+      line: "{{ login }} ALL=(ALL) /usr/bin/su - osu*"
+      owner: root
+      group: root
+      mode: '0440'
+      create: yes
+      state: present
+    when:
+      - userpublickey is defined
+      - userpublickey|length > 0
+      - userroot is not defined
+
+  - name: Remove deprecated line into file /etc/sudoers.d/{{login}} for su admin
     lineinfile:
       path: /etc/sudoers.d/{{ login }}
       line: "{{ login }} ALL=(ALL) NOPASSWD:/bin/su - admin"
@@ -96,11 +124,12 @@
       group: root
       mode: '0440'
       create: yes
+      state: absent
     when:
       - userpublickey is defined
       - userpublickey|length > 0
 
-  - name: Add second line into file /etc/sudoers.d/{{login}}
+  - name: Remove deprecated line into file /etc/sudoers.d/{{login}} for su osu
     lineinfile:
       path: /etc/sudoers.d/{{ login }}
       line: "{{ login }} ALL=(ALL) NOPASSWD:/bin/su - osu*"
@@ -108,6 +137,7 @@
       group: root
       mode: '0440'
       create: yes
+      state: absent
     when:
       - userpublickey is defined
       - userpublickey|length > 0
