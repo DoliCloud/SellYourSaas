@@ -99,7 +99,7 @@ if (count($listofcontractid) > 0) {
 
 		            <div class="row" style="border-bottom: 1px solid #ddd;">
 
-		              <div class="col-md-6">
+		              <div class="col-md-4">
 				          <a href="https://'.$contract->ref_customer.'" class="caption-subject bold uppercase font-green-sharp" title="'.$langs->trans("Contract").' '.$contract->ref.'" target="_blankinstance">'.$instancename.img_picto('', 'globe', 'class="paddingleft"').'</a><br>
 						  <span class="opacitymedium small">'.$langs->trans("ID").' : </span><span class="font-green-sharp small">'.$contract->ref.'</span>
 				          <span class="caption-helper"><!-- - '.$planlabel.'--></span>	<!-- This is service -->
@@ -166,8 +166,8 @@ if (count($listofcontractid) > 0) {
 					              </div>
 
 								  <!-- Payment mode -->
-								  <div class="col-md-2">
-									'.$invoice->mode_reglement.'
+								  <div class="col-md-2" title="'.dol_escape_htmltag($invoice->mode_reglement).'">
+									'.dol_escape_htmltag($invoice->mode_reglement).'
 					              </div>
 
 					              <div class="col-md-2 nowrap">
