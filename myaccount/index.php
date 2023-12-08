@@ -3086,8 +3086,8 @@ if ($mythirdpartyaccount->isareseller) {
 $arrayofcompanypaymentmode = array();
 $sql = 'SELECT rowid, default_rib FROM '.MAIN_DB_PREFIX."societe_rib";
 $sql.= " WHERE type in ('ban', 'card', 'paypal')";
-$sql.= " AND fk_soc = ".$mythirdpartyaccount->id;
-$sql.= " AND (type = 'ban' OR (type = 'card' AND status = ".$servicestatusstripe.") OR (type = 'paypal' AND status = ".$servicestatuspaypal."))";
+$sql.= " AND fk_soc = ".((int) $mythirdpartyaccount->id);
+$sql.= " AND (type = 'ban' OR (type = 'card' AND status = ".((int) $servicestatusstripe).") OR (type = 'paypal' AND status = ".((int) $servicestatuspaypal)."))";
 $sql.= " ORDER BY default_rib DESC, tms DESC";
 
 $resql = $db->query($sql);

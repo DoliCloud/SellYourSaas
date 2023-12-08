@@ -57,7 +57,7 @@ print '
 	          </div>
 ';
 
-if (! empty($conf->global->SELLYOURSAAS_DOLICLOUD_ON) && $mythirdpartyaccount->array_options['options_source'] == 'MIGRATIONV1') {
+if (getDolGlobalString('SELLYOURSAAS_DOLICLOUD_ON') && $mythirdpartyaccount->array_options['options_source'] == 'MIGRATIONV1') {
 	$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
@@ -111,6 +111,9 @@ if (count($listofcontractid) > 0) {
 		                '.$langs->trans("Amount").'
 		              </div>
 		              <div class="col-md-2 hideonsmartphone">
+
+		              </div>
+		              <div class="col-md-2 hideonsmartphone">
 		                '.$langs->trans("Status").'
 		              </div>
 		            </div> <!-- END ROW -->
@@ -125,6 +128,7 @@ if (count($listofcontractid) > 0) {
 			//var_dump($contract->linkedObjects['facture']);
 			//dol_sort_array($contract->linkedObjects['facture'], 'date');
 			foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
+				/* @var Facture $invoice */
 				if ($invoice->statut == Facture::STATUS_DRAFT) {
 					continue;
 				}
@@ -132,7 +136,7 @@ if (count($listofcontractid) > 0) {
 				print '
 					            <div class="row" style="margin-top:20px">
 
-					              <div class="col-md-6 nowraponall">
+					              <div class="col-md-4 nowraponall">
 									';
 
 				// Execute hook getLastMainDocLink
@@ -150,12 +154,22 @@ if (count($listofcontractid) > 0) {
 				}
 
 				print '</div>
+
+								  <!-- Date -->
 					              <div class="col-md-2">
 									'.dol_print_date($invoice->date, 'dayrfc', $langs).'
 					              </div>
+
+								  <!-- Price -->
 					              <div class="col-md-2">
 									'.price(price2num($invoice->total_ttc), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
 					              </div>
+
+								  <!-- Payment mode -->
+								  <div class="col-md-2">
+									'.$invoice->mode_reglement.'
+					              </div>
+
 					              <div class="col-md-2 nowrap">
 									';
 				$alreadypayed = $invoice->getSommePaiement();
