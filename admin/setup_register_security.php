@@ -380,14 +380,14 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SSH2_HOSTKEYALGO").
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SSH2_HOSTKEYALGO" value="'.getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO').'">';
 print '</td>';
-print '<td><span class="opacitymedium small">Example: ssh-rsa, rsa-sha2-256, rsa-sha2-512, ...</span></td>';
+print '<td><span class="opacitymedium small">Example: ssh-rsa, ssh-dss, ...</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SSH2_KEXALGO").'</td>';
 print '<td>';
 print '<input type="text" name="SELLYOURSAAS_SSH2_KEXALGO" value="'.getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO').'">';
 print '</td>';
-print '<td><span class="opacitymedium small">Example: , ...</span></td>';
+print '<td><span class="opacitymedium small">Example: diffie-hellman-group1-sha1, diffie-hellman-group14-sha1, diffie-hellman-group-exchange-sha1, ...</span></td>';
 print '</tr>';
 
 print '</table>';
