@@ -162,6 +162,9 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", 'alpha'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", GETPOST("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", 'alpha'), 'chaine', 0, '', $conf->entity);
+
+		dolibarr_set_const($db, "SELLYOURSAAS_SSH2_HOSTKEYALGO", GETPOST("SELLYOURSAAS_SSH2_HOSTKEYALGO", 'alpha'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_SSH2_KEXALGO", GETPOST("SELLYOURSAAS_SSH2_KEXALGO", 'alpha'), 'chaine', 0, '', $conf->entity);
 	}
 	if (! $error) {
 		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
