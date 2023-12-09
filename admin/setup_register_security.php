@@ -378,7 +378,7 @@ print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SSH2_HOSTKEYALGO").'</td>';
 print '<td>';
-print '<input type="text" name="SELLYOURSAAS_SSH2_HOSTKEY" value="'.getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO').'">';
+print '<input type="text" name="SELLYOURSAAS_SSH2_HOSTKEYALGO" value="'.getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO').'">';
 print '</td>';
 print '<td><span class="opacitymedium small">Example: ssh-rsa, rsa-sha2-256, rsa-sha2-512, ...</span></td>';
 print '</tr>';
