@@ -13,3 +13,9 @@ error_reporting(E_ALL);
 $connection = ssh2_connect('myinstance.withX.mysellyoursaasdomain.com', 22, array('hostkey' => 'ecdsa-sha2-nistp256'));
 
 var_dump($connection);
+
+$methods = ssh2_methods_negotiated($connection);
+
+echo "Encryption keys were negotiated using: {$methods['kex']}\n";
+echo "Server identified using an {$methods['hostkey']} with ";
+echo "fingerprint: " . ssh2_fingerprint($connection) . "\n";

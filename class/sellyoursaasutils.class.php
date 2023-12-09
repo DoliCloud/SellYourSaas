@@ -3558,6 +3558,11 @@ class SellYourSaasUtils
 					$connection = ssh2_connect($server, $server_port);
 				}
 
+				/*
+				$methods = ssh2_methods_negotiated($connection);
+				var_dump($methods);
+				*/
+
 				ini_set('default_socket_timeout', $originalConnectionTimeout);
 
 				if ($connection) {
