@@ -623,7 +623,7 @@ if (count($listofcontractidreseller) == 0) {
 		print '</p>';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
-			$ssh_server_port = ($contract->array_options['options_port_os'] ? $contract->array_options['options_port_os'] : (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22));
+			$ssh_server_port = ($contract->array_options['options_port_os'] ? $contract->array_options['options_port_os'] : getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22));
 			print '
 
                                 <form class="form-horizontal" role="form">

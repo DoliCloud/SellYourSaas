@@ -113,8 +113,21 @@ if (! function_exists("ssh2_connect")) {
 	exit(1);
 }
 
-$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-$connection = ssh2_connect($server, $server_port);
+$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
+
+$methods = array();
+if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+	$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+}
+if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+	$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+}
+if (!empty($methods)) {
+	$connection = ssh2_connect($server, $server_port, $methods);
+} else {
+	$connection = ssh2_connect($server, $server_port);
+}
+
 if ($connection) {
 	if (! @ssh2_auth_password($connection, $login, $password)) {
 		dol_syslog("Could not authenticate with username ".$login." . and password ".preg_replace('/./', '*', $password), LOG_ERR);

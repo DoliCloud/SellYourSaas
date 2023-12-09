@@ -28,12 +28,22 @@ if ($action == 'addauthorizedkey') {
 	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$server=$hostname_os;
-
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+	$server = $hostname_os;
+	$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
 
 	dol_syslog("ssh2_connect $server $server_port");
-	$connection = ssh2_connect($server, $server_port);
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
 
 	if ($connection) {
 		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
@@ -107,10 +117,22 @@ if ($action == 'addauthorizedkey') {
 	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$server=$hostname_os;
+	$server = $hostname_os;
+	$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
 
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-	$connection = ssh2_connect($server, $server_port);
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
+
 	if ($connection) {
 		//print $instance." ".$username_os." ".$password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
@@ -168,10 +190,22 @@ if ($action == 'addauthorizedkey') {
 	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$server=$hostname_os;
+	$server = $hostname_os;
+	$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
 
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-	$connection = ssh2_connect($server, $server_port);
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
+
 	if ($connection) {
 		//print $instance." ".$username_os." ".$password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
@@ -228,10 +262,22 @@ if ($action == 'addauthorizedkey') {
 	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$server=$hostname_os;
+	$server = $hostname_os;
+	$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
 
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-	$connection = ssh2_connect($server, $server_port);
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
+
 	if ($connection) {
 		//print $instance." ".$username_os." ".$password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
@@ -289,9 +335,22 @@ if ($action == 'addauthorizedkey') {
 	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$server=$hostname_os;
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-	$connection = ssh2_connect($server, $server_port);
+	$server = $hostname_os;
+	$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
+
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
+
 	if ($connection) {
 		//print $instance." ".$username_os." ".$password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
@@ -338,9 +397,22 @@ if ($action == 'addauthorizedkey') {
 	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$server=$hostname_os;
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-	$connection = ssh2_connect($server, $server_port);
+	$server = $hostname_os;
+	$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
+
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
+
 	if ($connection) {
 		//print $object->instance." ".$username_os." ".$password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
@@ -388,9 +460,22 @@ if ($action == 'addauthorizedkey') {
 	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$server=$hostname_os;
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-	$connection = ssh2_connect($server, $server_port);
+	$server = $hostname_os;
+	$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
+
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
+
 	if ($connection) {
 		//print $object->instance." ".$username_os." ".$password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {
@@ -438,9 +523,22 @@ if ($action == 'addauthorizedkey') {
 	$password_os = $object->array_options['options_password_os'];
 	$hostname_os = $object->array_options['options_hostname_os'];
 
-	$server=$hostname_os;
-	$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-	$connection = ssh2_connect($server, $server_port);
+	$server = $hostname_os;
+	$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
+
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
+
 	if ($connection) {
 		//print $object->instance." ".$username_os." ".$password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $username_os, $password_os)) {

@@ -3543,9 +3543,20 @@ class SellYourSaasUtils
 				$server=$object->array_options['options_hostname_os'];
 				dol_syslog("Try to ssh2_connect to ".$server." with timeout of ".$TIMEOUTSSH." instead of ".$originalConnectionTimeout);
 
-				$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+				$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
 
-				$connection = ssh2_connect($server, $server_port);
+				$methods = array();
+				if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+					$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+				}
+				if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+					$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+				}
+				if (!empty($methods)) {
+					$connection = ssh2_connect($server, $server_port, $methods);
+				} else {
+					$connection = ssh2_connect($server, $server_port);
+				}
 
 				ini_set('default_socket_timeout', $originalConnectionTimeout);
 
@@ -4096,7 +4107,7 @@ class SellYourSaasUtils
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
-				$commandurl.= '&'.md5($commandurl.getDolGlobalString('SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION'));
+				$commandurl.= '&'.md5($commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY'));
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action
 
@@ -4382,10 +4393,22 @@ class SellYourSaasUtils
 
 						// SFTP refresh
 						if (function_exists("ssh2_connect")) {
-							$server=$contract->array_options['options_hostname_os'];
+							$server = $contract->array_options['options_hostname_os'];
+							$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
 
-							$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
-							$connection = @ssh2_connect($server, $server_port);
+							$methods = array();
+							if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+								$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+							}
+							if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+								$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+							}
+							if (!empty($methods)) {
+								$connection = ssh2_connect($server, $server_port, $methods);
+							} else {
+								$connection = ssh2_connect($server, $server_port);
+							}
+
 							if ($connection) {
 								dol_syslog("Get resource BASH ".$bashformula);
 

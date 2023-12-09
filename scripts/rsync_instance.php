@@ -228,7 +228,7 @@ $password = $object->password_os;
 
 $targetdir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$login.'/'.$dirdb;
 $server = $object->array_options['options_hostname_os'];
-$server_port = (empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? 22 : $conf->global->SELLYOURSAAS_SSH_SERVER_PORT);
+$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
 
 if (empty($login) || empty($dirdb)) {
 	print "Error: properties for instance ".$instance." are not registered completely (missing at least login or database name).\n";
@@ -315,7 +315,19 @@ if ($mode == 'confirmunlock') {
 		exit(1);
 	}
 
-	$connection = ssh2_connect($server, $server_port);
+	$methods = array();
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+		$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+	}
+	if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+		$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+	}
+	if (!empty($methods)) {
+		$connection = ssh2_connect($server, $server_port, $methods);
+	} else {
+		$connection = ssh2_connect($server, $server_port);
+	}
+
 	if ($connection) {
 		//print $object->instance." ".$object->username_os." ".$object->password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $object->username_os, $object->password_os)) {

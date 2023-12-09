@@ -28,7 +28,7 @@ if ($fp) {
 		if ($tmpline[0] == 'allowed_hosts') {
 			$allowed_hosts_array = explode(",", $tmpline[1]);
 		}
-		if ($tmpline[0] == 'signature_key') {	// This value must match the signature key defined on the master into setup constant SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION
+		if ($tmpline[0] == 'signature_key') {	// This value must match the signature key defined on the master into setup constant SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY
 			$signature_key = explode(",", $tmpline[1]);
 		}
 		if ($tmpline[0] == 'dnsserver') {

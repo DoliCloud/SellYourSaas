@@ -8,6 +8,8 @@ error_reporting(E_ALL);
 // hostkey can be:
 // - ssh-rsa (old)
 // - ecdsa-sha2-nistp256
+// - rsa-sha2-256
+// - rsa-sha2-512
 $connection = ssh2_connect('myinstance.withX.mysellyoursaasdomain.com', 22, array('hostkey' => 'ecdsa-sha2-nistp256'));
 
 var_dump($connection);

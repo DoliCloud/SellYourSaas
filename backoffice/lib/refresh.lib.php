@@ -58,17 +58,29 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 		$database_db = $object->array_options['options_database_db'];
 	}
 
-	$server=$instance;
+	$server = $instance;
 
 	// SFTP refresh
 	if (function_exists("ssh2_connect")) {
-		$server_port = (! empty($conf->global->SELLYOURSAAS_SSH_SERVER_PORT) ? $conf->global->SELLYOURSAAS_SSH_SERVER_PORT : 22);
+		$server_port = getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22);
 
 		if ($printoutput) {
 			print "ssh2_connect ".$server." ".$server_port." ".$username_os." ".$password_os."\n";
 		}
 
-		$connection = ssh2_connect($server, $server_port);
+		$methods = array();
+		if (getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO')) {
+			$methods['hostkey'] = getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO');
+		}
+		if (getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO')) {
+			$methods['kex'] = getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO');
+		}
+		if (!empty($methods)) {
+			$connection = ssh2_connect($server, $server_port, $methods);
+		} else {
+			$connection = ssh2_connect($server, $server_port);
+		}
+
 		if ($connection) {
 			if ($printoutput) {
 				print $instance." ".$username_os." ".$password_os."\n";

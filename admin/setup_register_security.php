@@ -161,7 +161,7 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_HASHALGOFORPASSWORD", GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", 'alpha'), 'chaine', 0, '', $conf->entity);
 
-		dolibarr_set_const($db, "SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION", GETPOST("SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION", 'alpha'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", GETPOST("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", 'alpha'), 'chaine', 0, '', $conf->entity);
 	}
 	if (! $error) {
 		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
@@ -366,11 +366,25 @@ if (empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) || $conf->global->SEL
 	print '</tr>';
 }
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION").'</td>';
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY").'</td>';
 print '<td>';
-print '<input type="text" name="SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION" value="'.getDolGlobalString('SELLYOURSAAS_SIGNATURE_KEY_FOR_REMOTEACTION').'">';
+print '<input type="text" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
 print '</td>';
 print '<td><span class="opacitymedium small">Define a value to add a security signature of messages. This key must also be added into all deployment servers into file /etc/sellyoursaas.conf on key "signature_key=..."</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SSH2_HOSTKEYALGO").'</td>';
+print '<td>';
+print '<input type="text" name="SELLYOURSAAS_SSH2_HOSTKEY" value="'.getDolGlobalString('SELLYOURSAAS_SSH2_HOSTKEYALGO').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">Example: ssh-rsa, rsa-sha2-256, rsa-sha2-512, ...</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SSH2_KEXALGO").'</td>';
+print '<td>';
+print '<input type="text" name="SELLYOURSAAS_SSH2_KEXALGO" value="'.getDolGlobalString('SELLYOURSAAS_SSH2_KEXALGO').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">Example: , ...</span></td>';
 print '</tr>';
 
 print '</table>';
