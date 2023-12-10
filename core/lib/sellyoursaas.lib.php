@@ -502,7 +502,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-certificate"></span> ';
 	$links.='Generate SSL certificate for the custom domain '.$object->array_options['options_custom_url'];
 	$links.='<span class="opacitymedium"> (to run on the deployment server)</span>';
-	$links.='<textarea name="generatecertifstring" id="generatecertifstring" class="centpercent" rows="'.ROWS_4.'">';
+	$links.='<textarea name="generatecertifstring" id="generatecertifstring" class="centpercent marginleftonly" rows="'.ROWS_4.'">';
 	//$links.='<input type="text" id="generatecertifstring" name="generatecertifstring" value="'.$generatecertif.'" class="marginleftonly quatrevingtpercent"><br>';
 	$links.=$generatecertif;
 	$links.='</textarea>';
