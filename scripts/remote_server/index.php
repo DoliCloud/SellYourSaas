@@ -149,7 +149,7 @@ if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployal
 
 	exit();
 }
-if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'unsuspend'))) {
+if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'unsuspend'))) {
 	if ($DEBUG) {
 		fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' '.$paramspace."\n");
 	} else {
