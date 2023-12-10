@@ -1010,7 +1010,9 @@ fi
 
 if [[ "$mode" == "suspendredirect" ]]; then
 
-	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** If IP in DNS files has changed and is not $REMOTEIP, we must also change the DNS entry."
+	export ZONE="$domainname.hosts" 
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** If IP for $instancename in DNS files /etc/bind/${ZONE} has changed and is not $REMOTEIP, we must also change the DNS entry."
 
 	# TODO
 	#$REMOTEIP
