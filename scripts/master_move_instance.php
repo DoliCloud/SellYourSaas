@@ -188,10 +188,10 @@ $utils = new Utils($db);
 print "***** ".$script_file." ".$version." *****\n";
 
 if (empty($newinstance) || empty($mode)) {
-	print "Move an existing instance from an old server to a new server.\n";
+	print "Move an existing instance from an old server to a new server (with target instance not existing yet).\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmredirect|confirmmaintenance) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect) [MYPRODUCTREF]\n";
 	print "Mode is test for a test mode.\n";
 	print "        confirm for real mode.\n";
 	print "        confirmmaintenance for real mode and replace old instance with a message 'Instance off after a move'.\n";
