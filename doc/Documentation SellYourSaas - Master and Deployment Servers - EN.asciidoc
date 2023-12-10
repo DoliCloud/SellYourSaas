@@ -519,6 +519,13 @@ ip -6 route add 2002:41d0:1234:1000::1 dev eth0
 ip -6 route add default via 2002:41d0:1234:1000::1 dev eth0
 ---------------
 
+Note: To remove it manually
+
+[source, bash]
+---------------
+ip -6 addr flush eth0
+---------------
+
 - For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
 
 Example for an IPv6 2002:41d0:1234:1000::1234 with as gateway 2002:41d0:1234:1000::1
@@ -6065,7 +6072,7 @@ init_config:
 ---------------
 
 
-==== Error HTTP_DATA_ERROR, CertPathValidatorException when using DoliDroid
+==== Error HTTP_DATA_ERROR, CertPathValdatorException when using DoliDroid
 
 If you see this king of log into a DoliDroid session:
 
@@ -6099,4 +6106,26 @@ See https://developer.android.com/privacy-and-security/security-ssl#MissingCa
 
 Fix this by setting correctly your SSLxxx variable in your apache virtual host.
 
+
+==== do-release-upgrade hangs with no answer
+
+This may happen if you fails to connect to the remote ubuntu or mirror server.
+
+Open the file */etc/update-manager/meta-release* and get the URL of the server. Try it with a wget.
+You will see if you can reach the URL.
+If you get something like
+
+[source,bash]
+---------------
+--2023-12-10 11:20:31--  https://changelogs.ubuntu.com/meta-release-lts
+Resolving changelogs.ubuntu.com (changelogs.ubuntu.com)... 2620:2d:4000:1::2b, 2620:2d:4000:1::2a, 185.125.190.17, ...
+Connecting to changelogs.ubuntu.com (changelogs.ubuntu.com)|2620:2d:4000:1::2b|:443...
+---------------
+
+It may mean that you IPv6 connection is wrong. Disable the firewall, and try to disable the IPv6 interface
+
+[source,bash]
+---------------
+ip -6 addr flush eth0
+---------------
 

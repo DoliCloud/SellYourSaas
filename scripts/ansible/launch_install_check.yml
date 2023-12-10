@@ -1038,6 +1038,12 @@
         regexp: '^PrivateTmp='
         line: 'PrivateTmp=false'
         
+    - name: Update policy.xml
+      lineinfile:
+        path: /etc/ImageMagick-6/policy.xml
+        regexp: '^\s*<policy domain="coder" rights="none" pattern="PDF" />'
+        line: '<!-- <policy domain="coder" rights="none" pattern="PDF" /> -->'
+        
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
       ansible.builtin.template:
         src: ../../etc/datadog-agent/conf.d/disk.d/conf.yaml
