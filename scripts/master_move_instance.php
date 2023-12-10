@@ -914,7 +914,7 @@ if ($mode != 'confirmredirect' && $mode != 'confirmmaintenance') {
 		$suspendmessage = 'https://'.$newinstance;
 		$newip = $newobject->array_options['options_deployment_host'];
 		$comment = 'Move instance keeping a redirect to '.$suspendmessage.', we also set the new IP '.$newip.' into the old DNS file.';
-		print '--- Switch old instance in redirect maintenance mode (redirect to '.$suspendmessage.", new ip to '.$newip.')\n";
+		print '--- Switch old instance in redirect maintenance mode (redirect to '.$suspendmessage.', new ip to '.$newip.")\n";
 
 		$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendredirect', $oldobject, 'admin', '', '', '0', $comment, 300, $newip);
 		if ($result <= 0) {
