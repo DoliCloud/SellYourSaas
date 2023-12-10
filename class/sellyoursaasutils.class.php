@@ -3477,7 +3477,7 @@ class SellYourSaasUtils
 	 * 																		'deploy/undeploy'=create/delete all except user,
 	 * 																		'deployoption'=create/delete files+cli,
 	 * 																		'rename'=change apache virtual host file,
-	 * 																		'suspend/suspendmaintenance/unsuspend'=change apache virtual host file,
+	 * 																		'suspend/suspendmaintenance/suspendredirect/unsuspend'=change apache virtual host file (with DNS if suspendredirect),
 	 * 																		'refresh'=update status of install.lock+installmodules.lock+authorized key + loop on each line and read remote data and update qty of metrics
 	 * 																		'refreshfilesonly'=update status of install.lock+installmodules.lock+authorized key
 	 * 																		'refreshmetrics'=loop on each line of contract and read remote data and update qty of metrics
@@ -3487,14 +3487,15 @@ class SellYourSaasUtils
 	 * @param	string										$appusername	App login. Used for replacement of __APPUSERNAME__
 	 * @param	string										$email			Initial email. Used for replacement of __APPEMAIL__
 	 * @param	string										$password		Initial password. Used for replacement of __APPPASSWORD__
-	 * @param	string										$forceaddevent	'1'=Force to add the event "Remote action executed". '-1'=Never add. If '0', add of event is done only for
-	 * 																		remoteaction = 'backup','deploy','deployall','deployoption','rename','suspend','suspendmaintenance','unsuspend','undeploy','undeployall'
+	 * @param	string										$forceaddevent	'1'=Force to add the event "Remote action executed". '-1'=Never add. If '0', add of event is done only for remoteaction =
+	 * 																		'backup','deploy','deployall','deployoption','rename','suspend','suspendmaintenance','suspendredirect','unsuspend','undeploy','undeployall'
 	 * 																		or if qty is modified with 'refresh' or 'refreshmetrics'
-	 * @param	string										$comment		Comment
+	 * @param	string										$comment		Comment/Description to use in the agenda event record
 	 * @param   int                     					$timeout        Time out in seconds
+	 * @param   string                     					$newip			New IP to update the DNS zone
 	 * @return	int															<0 if KO (-1 = generic error, -2 = failed to connect), >0 if OK
 	 */
-	public function sellyoursaasRemoteAction($remoteaction, $object, $appusername = 'admin', $email = '', $password = '', $forceaddevent = '0', $comment = '', $timeout = 90)
+	public function sellyoursaasRemoteAction($remoteaction, $object, $appusername = 'admin', $email = '', $password = '', $forceaddevent = '0', $comment = '', $timeout = 90, $newip = '')
 	{
 		global $conf, $langs, $user;
 
@@ -3816,7 +3817,7 @@ class SellYourSaasUtils
 			// Note remote action 'undeployall' is used to undeploy test instances
 			// Note remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'actionafterpaid')) &&
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'actionafterpaid')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 				$doremoteaction = 1;
 			}
@@ -3827,7 +3828,7 @@ class SellYourSaasUtils
 			}
 			// 'refresh' and 'refreshmetrics' are processed later.
 
-			// remoteaction = 'deploy','deployall','deployoption',...
+			// remoteaction = 'deploy','deployall','deployoption','suspend','suspendmaintenance','suspendredirect',...
 			if ($doremoteaction) {
 				dol_syslog("Enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 
@@ -4082,8 +4083,8 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->datafile1);
 				$commandurl.= '&'.$tmppackage->srcfile1.'&'.$tmppackage->targetsrcfile1.'&'.$tmppackage->srcfile2.'&'.$tmppackage->targetsrcfile2.'&'.$tmppackage->srcfile3.'&'.$tmppackage->targetsrcfile3;
 				$commandurl.= '&'.$tmppackage->srccronfile.'&'.$tmppackage->srccliafter.'&'.$targetdir;
-				$commandurl.= '&'.getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL');		// Param 22 in .sh
-				$commandurl.= '&'.$serverdeployment;
+				$commandurl.= '&'.getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL');	// Param 22 in .sh
+				$commandurl.= '&'.(in_array($remoteaction, array('suspendredirect', 'unsuspend')) ? $newip : $serverdeployment);	// Param 23 in .sh
 				$commandurl.= '&'.$urlforsellyoursaasaccount;			            	// Param 24 in .sh
 				$commandurl.= '&'.$sldAndSubdomainold;
 				$commandurl.= '&'.$domainnameold;
@@ -4102,13 +4103,13 @@ class SellYourSaasUtils
 				$commandurl.= '&'.$sshaccesstype;       // Param 39 in .sh
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostdir);       	// Param 40 in .sh: Will replace __IncludeFromContract__ in virtual host
 				$commandurl.= '&'.str_replace(' ', '£', $automigrationtmpdir);			// Param 41 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $automigrationdocumentarchivename); //Param 42 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $dirforexampleforsources); //Param 43 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $laststableupgradeversion); //Param 44 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $lastversiondolibarrinstance); //Param 45 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $domainnamewebsite); //Param 46 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $websitenamedeploy); //Param 47 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srccliafterpaid); //Param 48 in .sh src for cli after paid
+				$commandurl.= '&'.str_replace(' ', '£', $automigrationdocumentarchivename); // Param 42 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $dirforexampleforsources); 		// Param 43 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $laststableupgradeversion); 	// Param 44 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $lastversiondolibarrinstance); 	// Param 45 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $domainnamewebsite); 			// Param 46 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $websitenamedeploy); 			// Param 47 in .sh
+				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srccliafterpaid); 	// Param 48 in .sh src for cli after paid
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message

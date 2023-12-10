@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * This page can be called when a virtual host has been set into a maintenance
- * mode.
+ * This page can be called when a virtual host has been set into a maintenance mode.
+ * If the maintenance message stat with http... then do a redirect instead of showing the maintenance message.
  */
 
 if (! defined('NOREQUIREUSER')) {

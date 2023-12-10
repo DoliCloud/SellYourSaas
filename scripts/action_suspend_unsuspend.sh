@@ -506,12 +506,18 @@ fi
 
 
 # Suspend
+# 'suspend' = change virtual host with a page with a message 'Suspended' and disable cron
+# 'suspendmaintenance' = change virtual host with a page with a message 'Offline' and keep cron alive
+# 'suspendredirect' = change virtual host with a page with a message 'Offline', will alos update the DNS entry
 
-if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" ]]; then
+if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspendredirect" ]]; then
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Suspend instance in $targetdir/$osusername/$dbname"
 
+	# Will use the virtual host template file vhostHttps-sellyoursaas-suspended.template
 	export vhostfiletouse=$vhostfilesuspended;
-	if [[ $mode == "suspendmaintenance" ]]; then
+	if [[ $mode == "suspendmaintenance" || $mode == "suspendredirect" ]]; then
+		# Will use the virtual host template file vhostHttps-sellyoursaas-maintenance.template that call the page maintenance.php
+		# This page will make a redirect instea dof showing a maintenance message if the message start with http...
 		export vhostfiletouse=$vhostfilemaintenance;
 	fi	
 	
@@ -978,7 +984,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 	chmod 600 /var/spool/cron/crontabs/$osusername
 fi
 
-if [[ "$mode" == "suspend" ]]; then
+
+if [[ "$mode" == "suspend" || "$mode" == "suspendredirect" ]]; then
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Remove cron file /var/spool/cron/crontabs/$osusername"
 	if [ -s /var/spool/cron/crontabs/$osusername ]; then
@@ -998,6 +1005,15 @@ if [[ "$mode" == "suspend" ]]; then
 		echo cron file /var/spool/cron/crontabs/$osusername already removed or empty
 	fi 
 
+fi
+
+
+if [[ "$mode" == "suspendredirect" ]]; then
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** If IP in DNS files has changed and is not $REMOTEIP, we must also change the DNS entry."
+
+	# TODO
+	#$REMOTEIP
 fi
 
 

@@ -194,8 +194,8 @@ if (empty($newinstance) || empty($mode)) {
 	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmredirect|confirmmaintenance) [MYPRODUCTREF]\n";
 	print "Mode is test for a test mode.\n";
 	print "        confirm for real mode.\n";
-	print "        confirmredirect for real mode and set old instance as a redirect instance.\n";
-	print "        confirmmaintenance for real mode and set old instance into maintenance mode before the move.\n";
+	print "        confirmmaintenance for real mode and replace old instance with a message 'Instance off after a move'.\n";
+	print "        confirmredirect for real mode and make old instance a redirect instance.\n";
 	print "MYPRODUCTREF can be set to force a new hosting application service.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	print "\n";
@@ -474,8 +474,9 @@ if (empty($newpass)) {
 }
 
 $command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
+$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
 $command.=" ".escapeshellarg($oldinstance);
-echo $command."\n";
+echo $commandnopass."\n";
 
 $return_val = 0;
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
@@ -577,7 +578,8 @@ $newsftpconnectstring=$newlogin.'@'.$newserver.':' . getDolGlobalString('DOLICLO
 
 $createthirdandinstance=1;
 
-// Now sync files
+
+// Now we will sync files from source to target in 2 steps
 
 $tmptargetdir='/tmp/'.$newlogin.'/'.$newdatabasedb;
 $countdeleted = 0;
@@ -589,6 +591,8 @@ print '--- Synchro of files '.$oldsftpconnectstring.' to '.$tmptargetdir."\n";
 print 'SFTP connect string : '.$oldsftpconnectstring."\n";
 //print 'SFTP old password '.$oldospass."\n";
 
+
+// First we get the files of the source to move
 $command="rsync";
 $param=array();
 //if (! in_array($mode, array('confirm', 'confirmredirect', 'confirmmaintenance'))) $param[]="-n";
@@ -645,8 +649,9 @@ if ($return_var) {
 print $content_grabbed."\n";
 
 
-$sourcedir=$tmptargetdir;
-$targetdir=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$newlogin.'/'.$newdatabasedb;
+// Now we copy files on the target directory
+$sourcedir = $tmptargetdir;
+$targetdir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$newlogin.'/'.$newdatabasedb;
 
 print '--- Synchro of files '.$sourcedir.' to '.$newsftpconnectstring."\n";
 print 'SFTP connect string : '.$newsftpconnectstring."\n";
@@ -711,8 +716,12 @@ print "\n";
 print $content_grabbed."\n";
 
 
+// Now we copy database from source to target
+
 print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 
+
+// First we backup the source database
 $command="mysqldump";
 $param=array();
 $param[]=$olddbname;
@@ -755,19 +764,9 @@ if ($return_var) {
 }
 
 
-$sqla = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$newobject->ref.' '.$newobject->ref_customer)."'";
-$sqla .= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
-$sqla .= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
-
-$sqlb = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
-$sqlb.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
-
-$sqlc = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $newobject->id);
-$sqlc.= ' WHERE fk_target = '.((int) $oldobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
-
-
+// We load the backup on target database
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
-//print "If the load fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
+//print "If the mysql fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
 $fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
@@ -824,6 +823,18 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 
 	print $content_grabbed."\n";
 }
+
+
+// Prepare SQL commands to execute after the load
+$sqla = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$newobject->ref.' '.$newobject->ref_customer)."'";
+$sqla .= ' WHERE rowid = (SELECT fk_target FROM '.MAIN_DB_PREFIX.'element_element';
+$sqla .= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND targettype = 'facturerec')";
+
+$sqlb = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_source = '.((int) $newobject->id);
+$sqlb.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat' AND (targettype = 'facturerec' OR targettype = 'facture')";
+
+$sqlc = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $newobject->id);
+$sqlc.= ' WHERE fk_target = '.((int) $oldobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
 
 if ($return_var) {
 	print "-> Error during mysql load of instance ".$newobject->ref_customer."\n";
@@ -889,7 +900,7 @@ print $sql."\n";
 print "\n";
 
 
-
+$dnschangedone = 0;
 if ($mode != 'confirmredirect' && $mode != 'confirmmaintenance') {
 	print "DON'T FORGET TO REDIRECT INSTANCE ON OLD SYSTEM BY SETTING THE MAINTENANCE MODE WITH THE MESSAGE\n";
 	print "https://".$newobject->ref_customer."\n";
@@ -900,17 +911,21 @@ if ($mode != 'confirmredirect' && $mode != 'confirmmaintenance') {
 		dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 		$sellyoursaasutils = new SellYourSaasUtils($db);
 
-		$comment = 'https://'.$newinstance;
-		print '--- Switch old instance in redirect maintenance mode (redirect to '.$comment.")\n";
+		$suspendmessage = 'https://'.$newinstance;
+		$newip = $newobject->array_options['options_deployment_host'];
+		$comment = 'Move instance keeping a redirect to '.$suspendmessage.', we also set the new IP '.$newip.' into the old DNS file.';
+		print '--- Switch old instance in redirect maintenance mode (redirect to '.$suspendmessage.", new ip to '.$newip.')\n";
 
-		$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendmaintenance', $oldobject, 'admin', '', '', '0', $comment, 300);
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendredirect', $oldobject, 'admin', '', '', '0', $comment, 300, $newip);
 		if ($result <= 0) {
 			print "Error calling sellyoursaasRemoteAction: ".$sellyoursaasutils->error."\n";
 			print "\n";
 			exit(-1);
+		} else {
+			$dnschangedone = 1;
 		}
 
-		$oldobject->array_options['options_suspendmaintenance_message'] = $comment;
+		$oldobject->array_options['options_suspendmaintenance_message'] = $suspendmessage;
 		$result = $oldobject->update($user);
 		if ($result < 0) {
 			print "Error updating contract with redirect url: ".$oldobject->error."\n";
@@ -918,14 +933,6 @@ if ($mode != 'confirmredirect' && $mode != 'confirmmaintenance') {
 			exit(-1);
 		}
 	}
-}
-
-$dnschangedone = 0;
-if ($mode == 'confirmredirect' && $mode == 'confirmmaintenance') {
-	// Change the DNS on deployment server
-	// TODO
-
-	//$dnschangedone = 1;
 }
 
 if (!$dnschangedone) {
