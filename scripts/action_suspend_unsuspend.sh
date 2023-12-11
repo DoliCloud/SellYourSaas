@@ -1020,12 +1020,13 @@ if [[ "$mode" == "suspendredirect" ]]; then
 	echo notfound=$notfound
 
 	if [[ $notfound == 0 ]]; then
-		echo "entry $instancename already found into host /etc/bind/${ZONE}"
+		echo "Entry $instancename already found into host /etc/bind/${ZONE}"
 		# TODO Replace line   $instancename A x.y.z.x   with  $instancename A $REMOTEIP
 		#$REMOTEIP
+		echo "TODO TODO TODO...."
 
 	else
-		echo "entry $instancename not found into host /etc/bind/${ZONE}, we must add it"
+		echo "Entry $instancename not found into host /etc/bind/${ZONE}, we must add it"
 	
 		echo "cat /etc/bind/${ZONE} | grep -v '^$instancename ' > /tmp/${ZONE}.$PID"
 		cat /etc/bind/${ZONE} | grep -v "^$instancename " > /tmp/${ZONE}.$PID
