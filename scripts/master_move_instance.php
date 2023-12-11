@@ -543,7 +543,9 @@ if (! empty($oldobject->array_options['options_custom_url'])) {
 
 // Set the date of end of period with same value than the source
 $dateendperiod = 0;
+$oldpricesperproduct = array();
 foreach ($oldobject->lines as $line) {
+	$oldpricesperproduct[$line->fk_product] = array('price_ht' => $line->price_ht, 'discount' => $line->remise_percent, 'qty' => $line->qty);
 	if ($line->date_end && (empty($dateendperiod) || $line->date_end < $dateendperiod)) {
 		$dateendperiod = $line->date_end;
 	}
@@ -571,6 +573,38 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 		print 'Failed to set end date of trial period'."\n";
 		exit(-1);
 	}
+}
+
+if (empty($productref)) {
+	print "Update price, discount and qty of the new contract lines to match the one on the source.\n";
+
+	foreach ($oldpricesperproduct as $productid => $pricesperproduct) {
+		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX."contratdet";
+		$sql .= " WHERE fk_contrat = ".((int) $newobject->id);
+		$sql .= " AND fk_product = ".((int) $productid);
+		print $sql."\n";
+		$resqlselect = $db->query($sql);
+		$objselect = $db->fetch_object($resqlselect);
+		if ($objselect && $objselect->rowid > 0) {
+			$contractline = new ContratLigne($db);
+			$contractline->fetch($objselect->rowid);
+
+			$contractline->qty = $pricesperproduct['qty'];
+			$contractline->remise_percent = $pricesperproduct['discount'];
+			$contractline->price_ht = $pricesperproduct['price_ht'];
+
+			print "We update line ".$objselect->rowid." with price_ht = ".$pricesperproduct['price_ht']." discount = ".$pricesperproduct['discount']."\n";
+			if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+				$result = $contractline->update($user);
+				if ($result < 0) {
+					print 'Failed to set same prices, discount and qty than original contract'."\n";
+					exit(-1);
+				}
+			}
+		}
+	}
+} else {
+	print "A new product ref was forced, so we do not align prices on old contract.\n";
 }
 
 

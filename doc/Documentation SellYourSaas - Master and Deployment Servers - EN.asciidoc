@@ -1008,7 +1008,7 @@ mount -a
 
 ==== On deployment servers
 
-On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access osu... user accounts). Set the right permissions.
+On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access osu... user accounts by admin). Set the right permissions.
 
 [source, bash]
 ---------------
