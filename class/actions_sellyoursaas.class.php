@@ -184,13 +184,13 @@ class ActionsSellyoursaas
 				$objref = $parameters['objref'];
 				$url = 'https://'.$parameters['objref'];
 
-				$this->results['objref'] = $objref.' <a href="'.$url.'" target="_blank">'.img_picto($url, 'object_globe').'</a>';
+				$this->results['objref'] = '<a href="'.$url.'" target="_blank">'.img_picto($url, 'object_globe').'</a> '.$objref;
 
 				// Add also link to custom url
 				if (! empty($object->array_options['options_custom_url'])) {
 					$objref = $object->array_options['options_custom_url'];
 					$url = 'https://'.$object->array_options['options_custom_url'];
-					$this->results['objref'] .= ' <a href="'.$url.'" target="_blank" class="opacitymedium">'.img_picto($url, 'object_globe').'</a>';
+					$this->results['objref'] = '<a href="'.$url.'" target="_blank" class="opacitymedium">'.img_picto($url, 'object_globe').'</a> '.$this->results['objref'];
 				}
 
 				if ($parameters['currentcontext'] == 'contractcard') {
@@ -199,11 +199,11 @@ class ActionsSellyoursaas
 						$this->results['objref'] .= ' &nbsp; <a href="/aa">'.$langs->trans("SeeChain").'</a>';
 					}*/
 					if (!empty($object->array_options['options_spammer'])) {
-						$this->results['objref'] .= ' '.img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"');
+						$this->results['objref'] = img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"').' '.$this->results['objref'];
 					}
 
 					if (!empty($object->array_options['options_spammer']) && $object->array_options['options_deployment_status'] == 'done') {
-						$this->results['objref'] .= ' '.img_warning($langs->trans('ActiveInstanceOfASpammer'));
+						$this->results['objref'] = img_warning($langs->trans('ActiveInstanceOfASpammer')).' '.$this->results['objref'];
 					}
 				}
 
@@ -706,7 +706,7 @@ class ActionsSellyoursaas
 	 */
 	public function formConfirm($parameters, &$object, &$action)
 	{
-		global $db, $langs, $conf, $user, $form;
+		global $langs, $conf, $user, $form;
 
 		dol_syslog(get_class($this).'::doActions action='.$action);
 		$langs->load("sellyoursaas@sellyoursaas");
@@ -793,7 +793,7 @@ class ActionsSellyoursaas
 	 */
 	public function moreHtmlStatus($parameters, $object = null, $action = '')
 	{
-		global $conf, $langs, $user;
+		global $conf, $langs;
 		global $object;
 
 		if ($parameters['currentcontext'] == 'contractcard') {
@@ -943,7 +943,7 @@ class ActionsSellyoursaas
 	 */
 	public function ODTSubstitution($parameters)
 	{
-		global $conf, $langs;
+		global $langs;
 		global $object;
 
 		$langs->load("sellyoursaas@sellyoursaas");
