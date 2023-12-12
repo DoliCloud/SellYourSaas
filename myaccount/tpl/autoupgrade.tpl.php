@@ -346,7 +346,7 @@ if ($action == "instanceverification") {
 	print '<!-- BEGIN STEP4-->';
 	print '<div class="portlet light divstep " id="Step4">';
 	if ($errors) {
-		$upgradeerrormessage = $langs->trans("UpgradeErrorContent");
+		$upgradeerrormessage = $langs->transnoentitiesnoconv("UpgradeErrorContent");
 		$upgradeerrormessage .= "\n";
 		$upgradeerrormessage .= "\n-------------------";
 		$upgradeerrormessage .= "\nTimestamp: ".dol_print_date(dol_now(), "standard", 'gmt').' UTC';
@@ -368,7 +368,7 @@ if ($action == "instanceverification") {
 		print '<input type="hidden" name="backfromautomigration" value="backfromautomigration">';
 		print '<input type="hidden" name="ticketcategory_child_id" value="'.(!empty($ticketcategory_child_id) ? $ticketcategory_child_id : GETPOST('ticketcategory_child_id', 'alpha')).'">';
 		print '<input type="hidden" name="ticketcategory" value="'.(!empty($ticketcategory) ? $ticketcategory : GETPOST('ticketcategory', 'alpha')).'">';
-		print '<input type="hidden" name="subject" value="'.$langs->trans("UpgradeErrorSubject").'">';
+		print '<input type="hidden" name="subject" value="'.$langs->transnoentitiesnoconv("UpgradeErrorSubject").'">';
 		print '<input type="hidden" name="content" value="'.$upgradeerrormessage.'">';
 		print '</form>';
 		print '</div>';
