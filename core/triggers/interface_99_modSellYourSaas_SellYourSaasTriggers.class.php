@@ -260,6 +260,8 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					dol_syslog("We found a change in date of end of trial (old=".dol_print_date($object->oldcopy->array_options['options_date_endfreeperiod'], 'standard').", new=".dol_print_date($object->array_options['options_date_endfreeperiod'], 'standard').", so we check if we can and, if yes, we make the update of contract");
 
 					if ($object->oldcopy->array_options['options_date_endfreeperiod'] && ($object->oldcopy->array_options['options_date_endfreeperiod'] < $object->array_options['options_date_endfreeperiod'])) {
+						dol_syslog("The old date is older than the new one");
+
 						// Check there is no recurring invoice. If yes, we refuse to increase value.
 						$object->fetchObjectLinked();
 						//var_dump($object->linkedObjects);
@@ -272,6 +274,9 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					}
 
 					foreach ($object->lines as $line) {
+						/** var ContratLigne $line */
+						dol_syslog("Loop on the date of line id ".$line->id." (".dol_print_date($line->date_end, 'standard').") to compare with new date (".dol_print_date($object->array_options['options_date_endfreeperiod'], 'standard').")");
+
 						if ($line->date_end < $object->array_options['options_date_endfreeperiod']) {
 							$line->oldcopy = dol_clone($line);
 
