@@ -210,8 +210,10 @@ echo "instancedir = $instancedir"
 
 testorconfirm="confirm"
 
-
-
+# Create/Disable Apache virtual host
+if [[ "$mode" == "deploycustomurl" ]]; then
+	cat $vhostfile
+fi
 
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished"
