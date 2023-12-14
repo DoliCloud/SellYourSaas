@@ -224,9 +224,9 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 	echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's/__webSSLCertificateCRT__/$webCustomSSLCertificateCRT/g' | \
-                  sed -e 's/__webSSLCertificateKEY__/$webCustomSSLCertificateKEY/g' | \
-                  sed -e 's/__webSSLCertificateIntermediate__/$webCustomSSLCertificateIntermediate/g' | \
+                  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+                  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+                  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -242,9 +242,9 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s/__webSSLCertificateCRT__/$webCustomSSLCertificateCRT/g" | \
-                  sed -e "s/__webSSLCertificateKEY__/$webCustomSSLCertificateKEY/g" | \
-                  sed -e "s/__webSSLCertificateIntermediate__/$webCustomSSLCertificateIntermediate/g" | \
+                  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+                  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+                  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -257,8 +257,22 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
-		echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online 
-		ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+	export vhostko=$?
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
+
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online 
+	ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+	
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new virtual host working"
+	service apache2 reload
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running service apache2 reload
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi
 fi
 
 
