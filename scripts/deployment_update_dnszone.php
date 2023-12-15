@@ -240,6 +240,8 @@ $fqn = $entry.".".$dnszonefile;
 $NEEDLE="serial";
 $DATE=dol_print_date(dol_now("gmt"), "%y%m%d%H", "gmt");	// YYMMDDHH
 
+$found = 0;
+
 $handle = fopen($fullpathdnszonefile, 'r');
 if ($handle) {
 	if ($mode == 'set') {
@@ -291,6 +293,7 @@ if ($handle) {
 			$reg = array();
 			if (preg_match('/^('.preg_quote($entry).')\s+A\s+(.*)$/', $s, $reg)) {
 				if ($reg[1] == $entry) {
+					$found = 1;
 					if (!$quiet) {
 						print "IP for ".$entry." is modified from ".$reg[2]." to ".$ip."\n";
 					}
@@ -306,10 +309,18 @@ if ($handle) {
 				fwrite($handlenew, $s);
 			}
 		}
+
 		$arrayoflines[] = $s;
 	}
 
 	if ($mode == 'set' && $handlenew) {
+		if (!$found) {
+			if (!$quiet) {
+				print "Record for ".$entry." was not found, so we add the line: ".$entry." A ".$ip."\n";
+			}
+			fwrite($handlenew, $entry." A ".$ip."\n");
+		}
+
 		fclose($handlenew);
 	}
 	fclose($handle);
