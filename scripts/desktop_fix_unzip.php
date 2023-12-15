@@ -20,9 +20,9 @@
  */
 
 /**
- *  \file       sellyoursaas/scripts/unzip_dir.php
+ *  \file       sellyoursaas/scripts/desktop_fix_unzip.php
  *  \ingroup    sellyoursaas
- *  \brief      Script to fix bad zips
+ *  \brief      Script to fix the directory structure of badly unzipped zips.
  */
 
 
