@@ -40,7 +40,6 @@ This is a list of some features supported by this project:
 You may find asciidoc documentation here:
 
 * <a href="https://github.com/eldy/sellyoursaas/blob/master/doc/Documentation%20SellYourSaas%20-%20Master%20and%20Deployment%20Servers%20-%20EN.asciidoc">English version</a>
-* <a href="https://github.com/eldy/sellyoursaas/blob/master/doc/Documentation%20SellYourSaas%20-%20Master%20and%20Deployment%20Servers%20-%20FR.asciidoc">French version</a>
 
 
 ## Licenses
