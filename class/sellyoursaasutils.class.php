@@ -283,8 +283,8 @@ class SellYourSaasUtils
 												// We will update the end of date of contrat
 												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc'));
 
-												$label = 'Increase end date of services for contract '.$contract->ref;
-												$comment = 'Increase end date of services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices().';
+												$label = 'Increase end date of services for contract '.$contract->ref.' (payment mode '.$invoice->mode_reglement_code.')';
+												$comment = 'Increase end date of services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices() to give more time to make payment.';
 
 												// First launch update of resources if it is not a redirect contract:
 												// We should not have to do that because the batch SellYourSaasRefreshContracts is called 2 days before
