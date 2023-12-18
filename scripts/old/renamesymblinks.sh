@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Chemin du fichier cible
-target_file="/etc/letsencrypt/archive/with.novafirstcloud.com/cert.pem"
+target_file="/etc/letsencrypt/live/with.novafirstcloud.com/cert.pem"
 
 # Vérifier si le fichier cible existe
 if [ ! -f "$target_file" ]; then
