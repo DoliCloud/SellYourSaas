@@ -145,19 +145,10 @@ export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
 
-# possibility to change the ssl certificates name
-# export webSSLCustomCertificateCRT=`grep '^webSSLCustomCertificateCRT=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-# if [[ "x$webSSLCustomCertificateCRT" == "x" ]]; then
-# 	export webSSLCustomCertificateCRT=with.sellyoursaas.com.crt
-# fi
-# export webSSLCustomCertificateKEY=`grep '^webSSLCustomCertificateKEY=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-# if [[ "x$webSSLCustomCertificateKEY" == "x" ]]; then
-# 	export webSSLCustomCertificateKEY=with.sellyoursaas.com.key
-# fi
-# export webSSLCustomCertificateIntermediate=`grep '^webSSLCustomCertificateIntermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-# if [[ "x$webSSLCustomCertificateIntermediate" == "x" ]]; then
-# 	export webSSLCustomCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
-# fi
+# Define custom certificate filename
+export webSSLCustomCertificateCRT="$customurl.crt"
+export webSSLCustomCertificateKEY="$customurl.key"
+export webSSLCustomCertificateIntermediate="$customurl-intermediate.crt"
 
 
 export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
