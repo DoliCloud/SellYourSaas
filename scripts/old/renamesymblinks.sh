@@ -1,26 +1,21 @@
 #!/bin/bash
 
-# Chemin du répertoire d'archive
-archive_path="/etc/letsencrypt/archive"
+# Chemin du fichier cible
+target_file="/etc/letsencrypt/archive/with.novafirstcloud.com/cert.pem"
 
-# Chemin du répertoire live
-live_path="/etc/letsencrypt/live"
+# Vérifier si le fichier cible existe
+if [ ! -f "$target_file" ]; then
+    echo "Le fichier cible $target_file n'existe pas."
+    exit 1
+fi
 
-# Parcourir les liens symboliques dans le répertoire d'archive
-for link in $(find $archive_path -type l); do
-    # Extraire le nom du lien symbolique
-    link_name=$(basename $link)
+# Parcourir tous les liens symboliques se terminant par ".with.novafirstcloud.com.crt"
+find /etc/apache2 -type l -name "*.with.novafirstcloud.com.crt" 2>/dev/null | while read -r symlink; do
+    # Supprimer le lien symbolique existant
+    echo "Efface ancien lien $symlink"
+    rm "$symlink"
 
-    # Vérifier si le lien correspondant existe dans le répertoire live
-    if [ -d "$live_path/$link_name" ]; then
-        # Supprimer le lien symbolique existant
-        echo "Delete link: $link"
-#        rm $link
-
-        # Créer un nouveau lien symbolique pointant vers le répertoire live
-        echo "Reconstruit le lien avec: $ln -s $live_path/$link_name $link"
-#        ln -s $live_path/$link_name $link
-    else
-        echo "Aucun répertoire correspondant trouvé pour: $link_name"
-    fi
+    # Créer un nouveau lien symbolique pointant vers le fichier cible
+    echo "Lien symbolique recréé par: ln -s $target_file $symlink"
+    ln -s "$target_file" "$symlink"
 done
