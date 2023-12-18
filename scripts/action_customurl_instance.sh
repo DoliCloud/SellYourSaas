@@ -146,18 +146,33 @@ export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
 
 # possibility to change the ssl certificates name
-export webSSLCustomCertificateCRT=`grep '^webSSLCustomCertificateCRT=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$webSSLCustomCertificateCRT" == "x" ]]; then
-	export webSSLCustomCertificateCRT=with.sellyoursaas.com.crt
+# export webSSLCustomCertificateCRT=`grep '^webSSLCustomCertificateCRT=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+# if [[ "x$webSSLCustomCertificateCRT" == "x" ]]; then
+# 	export webSSLCustomCertificateCRT=with.sellyoursaas.com.crt
+# fi
+# export webSSLCustomCertificateKEY=`grep '^webSSLCustomCertificateKEY=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+# if [[ "x$webSSLCustomCertificateKEY" == "x" ]]; then
+# 	export webSSLCustomCertificateKEY=with.sellyoursaas.com.key
+# fi
+# export webSSLCustomCertificateIntermediate=`grep '^webSSLCustomCertificateIntermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+# if [[ "x$webSSLCustomCertificateIntermediate" == "x" ]]; then
+# 	export webSSLCustomCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
+# fi
+
+
+export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateCRT" == "x" ]]; then
+	export webSSLCertificateCRT=with.sellyoursaas.com.crt
 fi
-export webSSLCustomCertificateKEY=`grep '^webSSLCustomCertificateKEY=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$webSSLCustomCertificateKEY" == "x" ]]; then
-	export webSSLCustomCertificateKEY=with.sellyoursaas.com.key
+export webSSLCertificateKEY=`grep '^websslcertificatekey=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateKEY" == "x" ]]; then
+	export webSSLCertificateKEY=with.sellyoursaas.com.key
 fi
-export webSSLCustomCertificateIntermediate=`grep '^webSSLCustomCertificateIntermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$webSSLCustomCertificateIntermediate" == "x" ]]; then
-	export webSSLCustomCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
+export webSSLCertificateIntermediate=`grep '^websslcertificateintermediate=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
+	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
+
 
 # possibility to change the path of sellyoursass directory
 olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -221,9 +236,18 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		rm -f $apacheconf
 	fi
 
+	if [[ -s $apacheconf ]]
+	then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		rm -f $apacheconf
+	fi
+
 	echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
+				  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+            	  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+            	  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
                   sed -e 's/__webSSLCustomCertificateCRT__/$webSSLCustomCertificateCRT/g' | \
                   sed -e 's/__webSSLCustomCertificateKEY__/$webSSLCustomCertificateKEY/g' | \
                   sed -e 's/__webSSLCustomCertificateIntermediate__/$webSSLCustomCertificateIntermediate/g' | \
@@ -242,6 +266,9 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
+				  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+            	  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+            	  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
                   sed -e "s/__webSSLCustomCertificateCRT__/$webSSLCustomCertificateCRT/g" | \
                   sed -e "s/__webSSLCustomCertificateKEY__/$webSSLCustomCertificateKEY/g" | \
                   sed -e "s/__webSSLCustomCertificateIntermediate__/$webSSLCustomCertificateIntermediate/g" | \
