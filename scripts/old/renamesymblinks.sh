@@ -6,8 +6,8 @@ target_file2="/etc/letsencrypt/live/with.novafirstcloud.com/chain.pem"
 target_file3="/etc/letsencrypt/live/with.novafirstcloud.com/privkey.pem"
 
 # Vérifier si le fichier cible existe
-if [ ! -f "$target_file" ]; then
-    echo "Le fichier cible $target_file n'existe pas."
+if [ ! -f "$target_file1" ]; then
+    echo "Le fichier cible $target_file1 n'existe pas."
     exit 1
 fi
 if [ ! -f "$target_file2" ]; then
