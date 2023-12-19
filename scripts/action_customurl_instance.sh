@@ -292,7 +292,7 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		sleep 3
 	fi
 
-	export customcrtfolder = "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+	export customcrtfolder="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 
 	if [[ ! -d $customcrtfolder ]]; then
 		echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
