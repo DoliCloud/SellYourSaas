@@ -301,8 +301,8 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"
 
-	echo certbot certonly --webroot -w $instancedir -d www.$customurl
-	certbot certonly --webroot -w $instancedir -d www.$customurl
+	echo certbot certonly --webroot -w $instancedir/website/ -d www.$customurl
+	certbot certonly --webroot -w $instancedir/website/ -d www.$customurl
 	export certko=$?
 	
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file for custom url = $certko"
