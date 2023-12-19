@@ -146,9 +146,9 @@ export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
 
 # Define custom certificate filename
-export webSSLCustomCertificateCRT="$customurl.crt"
-export webSSLCustomCertificateKEY="$customurl.key"
-export webSSLCustomCertificateIntermediate="$customurl-intermediate.crt"
+export webSSLCustomCertificateCRT="$fqn-$customurl.crt"
+export webSSLCustomCertificateKEY="$fqn-$customurl.key"
+export webSSLCustomCertificateIntermediate="$fqn-$customurl-intermediate.crt"
 
 
 export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -291,6 +291,42 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 	else
 		sleep 3
 	fi
+
+	export customcrtfolder = "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+
+	if [[ ! -d $customcrtfolder ]]; then
+		echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
+		mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
+	fi
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"
+
+	echo certbot certonly --webroot -w $instancedir -d www.$customurl
+	certbot certonly --webroot -w $instancedir -d www.$customurl
+	export certko=$?
+	
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file for custom url = $certko"
+
+	echo "Link certificate for virtualhost with
+		ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
+		ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
+		ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+	"
+	ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
+	ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
+	ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate beeing loaded"
+	service apache2 reload
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running service apache2 reload
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi	
 fi
 
 
