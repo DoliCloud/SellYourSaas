@@ -965,7 +965,7 @@ function print_user_table($newdb, $object)
 			}
 		} elseif ($forglpi) {
 			$sql .= "SELECT gu.id AS rowid, gu.name as login, gu.realname as lastname, gu.firstname,";
-			$sql .= " GROUP_CONCAT(DISTINCT IF(gp.name = 'central', 'central', NULL)) AS admin,";
+			$sql .= " GROUP_CONCAT(DISTINCT IF(gp.interface = 'central', 'central', NULL)) AS admin,";
 			$sql .= " GROUP_CONCAT(DISTINCT gue.email) AS email,";
 			$sql .= " '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login AS datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
 			$sql .= " FROM glpi_users as gu LEFT JOIN glpi_profiles_users AS gpu ON gu.id = gpu.users_id";
