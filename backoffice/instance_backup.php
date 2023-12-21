@@ -524,7 +524,7 @@ if ($restorestringfrombackupshort) {
 if ($moveinstancestringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run on master server)</span><br>';
-	print '<textarea name="moveinstancestring" id="moveinstancestring" class="centpercent" rows="'.ROWS_3.'">';
+	print '<textarea name="moveinstancestring" id="moveinstancestring" class="centpercent" rows="'.ROWS_8.'">';
 	print $moveinstancestringtoshow;
 	print '</textarea>';
 
