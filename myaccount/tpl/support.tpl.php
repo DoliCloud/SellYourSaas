@@ -113,6 +113,7 @@ if ($sellyoursaassupporturl) {
 	print '<form class="inline-block centpercent" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="mode" value="support">';
+	print '<input type="hidden" name="page_y" value="">';
 	print '<input type="hidden" name="action" value="presend">';
 
 	print '<span class="supportemailfield bold">'.$langs->trans("SupportChannel").'</span>'."\n";

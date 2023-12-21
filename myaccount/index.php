@@ -1037,10 +1037,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$sellyoursaasemail = $conf->global->$newnamekey;
 		}
 	}
+	//dol_syslog($cmailfile->subject);exit;
 
-	$emailto = GETPOST('to', 'alpha');
-	$replyto = GETPOST('from', 'alpha');
-	$topic = GETPOST('subject', 'restricthtml');
+	$emailto = GETPOST('to', 'alphanohtml');
+	$replyto = GETPOST('from', 'alphanohtml');
+	$topic = GETPOST('subject', 'alphanohtml');
 	$content = GETPOST('content', 'restricthtml');
 	$groupticket=GETPOST('ticketcategory', 'aZ09');
 
@@ -1160,6 +1161,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		// Send email
 		$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, $arr_file, $arr_mime, $arr_name, '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
+
 		$result = $cmailfile->sendfile();
 
 		if ($result) {
