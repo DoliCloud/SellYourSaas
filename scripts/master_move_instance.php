@@ -953,6 +953,7 @@ if ($mode != 'confirmredirect' && $mode != 'confirmmaintenance') {
 		$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendredirect', $oldobject, 'admin', '', '', '0', $comment, 300, $newip);
 		if ($result <= 0) {
 			print "Error calling sellyoursaasRemoteAction: ".$sellyoursaasutils->error."\n";
+			print "Try to call the service manually then update the instance to set the redirect to ".$suspendmessage."\n";
 			print "\n";
 			exit(-1);
 		} else {

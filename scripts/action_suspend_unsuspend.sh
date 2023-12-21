@@ -1017,7 +1017,7 @@ if [[ "$mode" == "suspendredirect" ]]; then
 
 	echo "Entry $instancename not found into host /etc/bind/${ZONE}, we must add it with: /home/admin/wwwroot/dolibarr/scripts/deployment_update_dnszone.php set ${ZONE} $instancename $REMOTEIP"
 
-	/home/admin/wwwroot/dolibarr/scripts/deployment_update_dnszone.php set "${ZONE}" "$instancename" "$REMOTEIP"
+	/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_update_dnszone.php set "$domainname" "$instancename" "$REMOTEIP"
 
 	if [[ "$?x" != "0x" ]]; then
 		echo error: Failed to update the DNS file.
