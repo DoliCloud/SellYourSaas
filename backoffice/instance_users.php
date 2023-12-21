@@ -1056,8 +1056,8 @@ function print_user_table($newdb, $object)
 							print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($valtoshow).'">'.dol_escape_htmltag($valtoshow).'</td>';
 						} elseif ($key == 'login') {
 							print '<td class="nowraponall tdoverflowmax150" title="'.dol_escape_htmltag($obj->$key).'">';
+							print '<a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a> ';
 							print $obj->$key;
-							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 							print '</td>';
 						} elseif ($key == 'email') {
 							$tmparray = explode(',', $obj->$key);
