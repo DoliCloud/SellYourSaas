@@ -10,7 +10,6 @@
 
 
 # The user admin must be into the group www-data (group of the SSL certificate so apache can read them)
-# TODO Remove the group www-data for the user admin ?
 # TODO Remove sshkey to user ubuntu
 - name: Check/Fix OS unix accounts
   hosts: '{{target}}'
@@ -18,11 +17,11 @@
   become_method: sudo
   become_user: root
   tasks:
-  - name: Add user admin to the www-data group
+  - name: Remove user admin from any group (no more need to be in extra groups).
     user: 
       name: "admin"
-      groups: www-data
-      append: yes     
+      groups: ''
+      append: false   
 #  - name: Check/create file /home/admin/.ssh/authorized_keys.toallowmaster
 #    ansible.builtin.file:
 #      path: /home/ubuntu/.ssh/authorized_keys
