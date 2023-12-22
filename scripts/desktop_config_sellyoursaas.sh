@@ -9,7 +9,7 @@
 
 source /etc/lsb-release
 
-if [ "x$3" == "x" ]; then
+if [ "x$3" == "x" -o "x$4" == "x" ]; then
 	echo "***** desktop_config_sellyoursaas.sh *****"	
 	echo "This script allows to update or fix the SellYourSaas config file /etc/sellyoursaas[-public].conf"
 	echo
@@ -29,9 +29,6 @@ param=$3
 value=$4
 nameofconf=$5
 
-if [ "x$target" == "x" ]; then
-	target="master"
-fi
 if [ "x$nameofconf" == "x" ]; then
 	nameofconf="sellyoursaas"
 fi
