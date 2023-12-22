@@ -4113,6 +4113,7 @@ class SellYourSaasUtils
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
+				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymetric signature.
 				$commandurl.= '&'.md5($commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY'));
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action
