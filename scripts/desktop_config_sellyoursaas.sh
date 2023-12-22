@@ -13,20 +13,20 @@ if [ "x$3" == "x" ]; then
 	echo "***** desktop_config_sellyoursaas.sh *****"	
 	echo "This script allows to update or fix the SellYourSaas config file /etc/sellyoursaas[-public].conf"
 	echo
-	echo "Usage:   $0  hostsfile  param  value  [hostgrouporname]  [sellyoursaas|sellyoursaas-public]"
+	echo "Usage:   $0  hostsfile  hostgrouporname  param  value  [sellyoursaas|sellyoursaas-public]"
 	echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
 	echo "         [sellyoursaasfile] can be 'sellyoursaas' (default) or 'sellyoursaas-public'"
 	echo
-	echo "Example: $0  myhostsfile  usecompressformatforarchive  zstd  master,deployment"
-	echo "Example: $0  myhostsfile  remotebackupserverport  22  master,deployment"
-	echo "Example: $0  myhostsfile  maxemailperday  500  withX.mysellyoursaasdomain.com  sellyoursaas-public"
+	echo "Example: $0  myhostsfile  master,deployment  usecompressformatforarchive  zstd"
+	echo "Example: $0  myhostsfile  master,deployment  remotebackupserverport  22"
+	echo "Example: $0  myhostsfile  withX.mysellyoursaasdomain.com  maxemailperday  500  sellyoursaas-public"
 	echo
 	exit 1
 fi
 
-param=$2
-value=$3
-target=$4
+target=$2
+param=$3
+value=$4
 nameofconf=$5
 
 if [ "x$target" == "x" ]; then
