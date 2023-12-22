@@ -371,7 +371,13 @@ if (empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) || $conf->global->SEL
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY").'</td>';
 print '<td>';
-print '<input type="text" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
+print '<input type="text" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" id="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
+if (!empty($conf->use_javascript_ajax)) {
+	print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token" class="linkobject"');
+	// Add button to autosuggest a key
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+	print dolJSToSetRandomPassword("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", "generate_token");
+}
 print '</td>';
 print '<td><span class="opacitymedium small">Define a value to add a security signature of messages. This key must also be added into all deployment servers into file /etc/sellyoursaas.conf on key "signature_key=..."</span></td>';
 print '</tr>';
