@@ -2137,7 +2137,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 						$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name, 90);
 						$messageofevent = ' - '.$langs->trans("IPAddress").' '.getUserRemoteIP()."\n";
-						$messageofevent.= $langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name.' - ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
+						$messageofevent.= $langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name.' - ['.$langs->trans("SeeOnBackoffice").']('.preg_replace('/https:\/\/myaccount\./', 'https://admin.', $urlwithouturlroot).'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
 						$messageofevent.= 'Lost after suspension of instance + recurring invoice after a destroy request.';
 
 						// See https://docs.datadoghq.com/api/?lang=python#post-an-event
