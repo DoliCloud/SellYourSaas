@@ -826,7 +826,7 @@ StartWebsiteDeployment=Start website deployment
 ErrorDeployWebsite=Error while website deployment
 DeploymentWebsiteDone=Website deployed successfully
 IWantToTest=I want to test
-OptionCondition=Condition to see option
+OptionCondition=Condition to see the option
 HelpOnOptionCondition=Enter the condition to have the option visible into customer dashboard. Example: 1=always visible. 0=Never visible
 NewEmailToConfirm=New email to confirm
 UnitPriceOfLine=Unit price of line
