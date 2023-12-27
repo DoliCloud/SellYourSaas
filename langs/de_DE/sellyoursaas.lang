@@ -826,7 +826,7 @@ StartWebsiteDeployment=Starten Sie die Website-Bereitstellung
 ErrorDeployWebsite=Fehler bei der Website-Bereitstellung
 DeploymentWebsiteDone=Website erfolgreich bereitgestellt
 IWantToTest=Ich möchte testen
-OptionCondition=Bedingung, Option zu sehen
+OptionCondition=Bedingung, um die Option anzuzeigen
 HelpOnOptionCondition=Geben Sie die Bedingung ein, damit die Option im Kunden-Dashboard sichtbar ist. Beispiel: 1=immer sichtbar. 0=Nie sichtbar
 NewEmailToConfirm=Neue E-Mail zur Bestätigung
 UnitPriceOfLine=Stückpreis der Position
@@ -857,3 +857,4 @@ CommandToRedeployInstanceOnADeploymentServer=Befehl zum erneuten Bereitstellen a
 InstanceVersion=Instanzversion
 InvoicePDFNotYetAvailable=Rechnungs-PDF noch nicht verfügbar
 InstancesToBackupWithoutRedirectionInstances=Zu sichernde Instanzen (kostenpflichtig oder bestätigt). Umleitungsinstanzen sind nicht enthalten.
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Geben Sie den Master-Schlüssel ein, um Remote-Aktionsnachrichten zu signieren

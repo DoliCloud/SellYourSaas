@@ -826,7 +826,7 @@ StartWebsiteDeployment=Розпочніть розгортання веб-сай
 ErrorDeployWebsite=Помилка під час розгортання веб-сайту
 DeploymentWebsiteDone=Веб-сайт успішно розгорнуто
 IWantToTest=Хочу перевірити
-OptionCondition=Умова для перегляду варіанту
+OptionCondition=Умова побачити варіант
 HelpOnOptionCondition=Введіть умову, щоб опцію було видно на інформаційній панелі клієнта. Приклад: 1=завжди видимий. 0=Ніколи не видно
 NewEmailToConfirm=Нова електронна адреса для підтвердження
 UnitPriceOfLine=Ціна за одиницю лінії
@@ -857,3 +857,4 @@ CommandToRedeployInstanceOnADeploymentServer=Команда повторного
 InstanceVersion=Версія екземпляра
 InvoicePDFNotYetAvailable=Рахунок у форматі PDF ще не доступний
 InstancesToBackupWithoutRedirectionInstances=Примірники для резервного копіювання (оплачені або підтверджені). Екземпляри перенаправлення не включені.
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Ключ на головному для підпису повідомлень віддаленої дії

@@ -826,7 +826,7 @@ StartWebsiteDeployment=Démarrer le déploiement du site Web
 ErrorDeployWebsite=Erreur lors du déploiement du site Web
 DeploymentWebsiteDone=Site Web déployé avec succès
 IWantToTest=Je veux tester
-OptionCondition=Condition à voir option
+OptionCondition=Condition pour voir l'option
 HelpOnOptionCondition=Entrez la condition pour que l'option soit visible dans le tableau de bord client. Exemple : 1=toujours visible. 0=Jamais visible
 NewEmailToConfirm=Nouvel e-mail pour confirmer
 UnitPriceOfLine=Prix unitaire de la ligne
@@ -857,3 +857,4 @@ CommandToRedeployInstanceOnADeploymentServer=Commande pour redéployer toutes le
 InstanceVersion=Version d'instance
 InvoicePDFNotYetAvailable=Facture PDF pas encore disponible
 InstancesToBackupWithoutRedirectionInstances=Instances à sauvegarder (payantes ou confirmées). Les instances de redirection ne sont pas incluses.
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Clé sur le maître pour signer les messages d'action à distance

@@ -857,3 +857,4 @@ CommandToRedeployInstanceOnADeploymentServer=Comando per ridistribuire tutte le 
 InstanceVersion=Versione di istanza
 InvoicePDFNotYetAvailable=PDF della fattura non ancora disponibile
 InstancesToBackupWithoutRedirectionInstances=Istanze di backup (pagate o confermate). Le istanze di reindirizzamento non sono incluse.
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Digitare sul master per firmare messaggi di azioni remote

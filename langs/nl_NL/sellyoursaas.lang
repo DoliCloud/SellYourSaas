@@ -826,7 +826,7 @@ StartWebsiteDeployment=Start de implementatie van de website
 ErrorDeployWebsite=Fout tijdens het implementeren van de website
 DeploymentWebsiteDone=Website succesvol geïmplementeerd
 IWantToTest=Ik wil testen
-OptionCondition=Voorwaarde om optie te zien
+OptionCondition=Voorwaarde om de optie te zien
 HelpOnOptionCondition=Voer de voorwaarde in om de optie zichtbaar te maken in het klantendashboard. Voorbeeld: 1=altijd zichtbaar. 0=Nooit zichtbaar
 NewEmailToConfirm=Nieuwe e-mail om te bevestigen
 UnitPriceOfLine=Eenheidsprijs van de lijn
@@ -857,3 +857,4 @@ CommandToRedeployInstanceOnADeploymentServer=Opdracht om alle exemplaren opnieuw
 InstanceVersion=Instantieversie
 InvoicePDFNotYetAvailable=Factuur-PDF nog niet beschikbaar
 InstancesToBackupWithoutRedirectionInstances=Instanties waarvan een back-up moet worden gemaakt (betaald of bevestigd). Omleidingsinstanties zijn niet inbegrepen.
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Toets op de master om actieberichten op afstand te ondertekenen
