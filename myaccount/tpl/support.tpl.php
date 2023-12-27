@@ -568,7 +568,7 @@ if ($sellyoursaassupporturl) {
 			';
 }
 
-if (empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
+if (isModEnabled("ticket") && empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
 	print '
     				<!-- BEGIN PAGE HEADER-->
     				<!-- BEGIN PAGE HEAD -->

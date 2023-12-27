@@ -145,7 +145,12 @@ export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
 
-# possibility to change the ssl certificates name
+# Define custom certificate filename
+export webSSLCustomCertificateCRT="$fqn-$customurl.crt"
+export webSSLCustomCertificateKEY="$fqn-$customurl.key"
+export webSSLCustomCertificateIntermediate="$fqn-$customurl-intermediate.crt"
+
+
 export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateCRT" == "x" ]]; then
 	export webSSLCertificateCRT=with.sellyoursaas.com.crt
@@ -158,6 +163,7 @@ export webSSLCertificateIntermediate=`grep '^websslcertificateintermediate=' /et
 if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 	export webSSLCertificateIntermediate=with.sellyoursaas.com-intermediate.crt
 fi
+
 
 # possibility to change the path of sellyoursass directory
 olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -210,8 +216,118 @@ echo "instancedir = $instancedir"
 
 testorconfirm="confirm"
 
+# Create/Disable Apache virtual host
+if [[ "$mode" == "deploycustomurl" ]]; then
+
+	# Delete old custom conf file
+	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
+	if [[ -s $apacheconf ]]
+	then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		rm -f $apacheconf
+	fi
+
+	if [[ -s $apacheconf ]]
+	then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		rm -f $apacheconf
+	fi
+
+	echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
+				  sed -e 's/__webAppAliases__/$customurl/g' | \
+				  sed -e 's/__webAppLogName__/$instancename/g' | \
+				  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+            	  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+            	  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+                  sed -e 's/__webSSLCustomCertificateCRT__/$webSSLCustomCertificateCRT/g' | \
+                  sed -e 's/__webSSLCustomCertificateKEY__/$webSSLCustomCertificateKEY/g' | \
+                  sed -e 's/__webSSLCustomCertificateIntermediate__/$webSSLCustomCertificateIntermediate/g' | \
+				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+				  sed -e 's/__osUsername__/$osusername/g' | \
+				  sed -e 's/__osGroupname__/$osusername/g' | \
+				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
+				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
+				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
+				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
+				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
+		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
+				  sed -e "s/__webAppAliases__/$customurl/g" | \
+				  sed -e "s/__webAppLogName__/$instancename/g" | \
+				  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+            	  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+            	  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+                  sed -e "s/__webSSLCustomCertificateCRT__/$webSSLCustomCertificateCRT/g" | \
+                  sed -e "s/__webSSLCustomCertificateKEY__/$webSSLCustomCertificateKEY/g" | \
+                  sed -e "s/__webSSLCustomCertificateIntermediate__/$webSSLCustomCertificateIntermediate/g" | \
+				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+				  sed -e "s/__osUsername__/$osusername/g" | \
+				  sed -e "s/__osGroupname__/$osusername/g" | \
+				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
+				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
+				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
+				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
+				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
+	export vhostko=$?
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
+
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online 
+	ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
+	
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new virtual host working"
+	service apache2 reload
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running service apache2 reload
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi
+
+	export customcrtfolder="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+
+	if [[ ! -d $customcrtfolder ]]; then
+		echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
+		mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
+	fi
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"
+
+	echo certbot certonly --webroot -w $instancedir/documents/website/ -d www.$customurl
+	certbot certonly --webroot -w $instancedir/documents/website/ -d www.$customurl
+	export certko=$?
+	
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file for custom url = $certko"
+
+	echo "Link certificate for virtualhost with
+		ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
+		ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
+		ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+	"
+	ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
+	ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
+	ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
 
 
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate beeing loaded"
+	service apache2 reload
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running service apache2 reload
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi	
+fi
 
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" Process of action $mode of $instancename.$domainname for user $osusername finished"

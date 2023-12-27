@@ -817,6 +817,7 @@ OptionYourCustomDomainNameStep2=Ajoutez une entrée dans la configuration de vot
 OptionWebsite=Site Web
 OptionYourWebsite=Activer un site Web
 OptionYourWebsiteDesc=Vous pouvez activer ici un site public construit à l'aide du CMS du site Dolibarr
+OptionYourWebsitePrerequisites=Prérequis : Vous devez posséder un site web actif dans le module sites web de votre instance pour installer cette option
 OptionYourWebsiteStep1=Choisissez le site à publier sur internet et cliquez sur <b> %s </b>
 OptionYourWebsiteNoEnabled=Le module Site Web n'est pas activé sur cette instance. <br> Pour vous abonner à ce service, veuillez d'abord l'activer.
 ErrorInvalidField = Le champ "%s" a une valeur invalide

@@ -817,6 +817,7 @@ OptionYourCustomDomainNameStep2=Add an entry in your DNS provider setup with typ
 OptionWebsite=Website
 OptionYourWebsite=Enable a website
 OptionYourWebsiteDesc=You can activate here a public website built using the Dolibarr website CMS
+OptionYourWebsitePrerequisites=Prérequis : You must have an active website in the websites module of your instance to install this option
 OptionYourWebsiteStep1=Choose the website to publish on internet and click on <b>%s</b> 
 OptionYourWebsiteNoEnabled=The module website isn't enabled on this instance.<br>To subscribe to this service please enable it first.
 ErrorInvalidField = The field "%s" has an invalid value

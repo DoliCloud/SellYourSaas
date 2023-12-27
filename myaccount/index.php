@@ -2328,7 +2328,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		exit();
 	}
-} elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOM_URL') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0) {
+} elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0) {
 	// TODO
 	$error = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
@@ -2385,6 +2385,10 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
 		$descriptionlines = "Websiteref = ".$website->ref;
 		$foundlinecontract = 0;
+
+		$object->array_options['options_custom_url'] = urlencode($custom_url);
+		$object->update($user);
+
 		foreach ($object->lines as $key => $line) {
 			if ($line->description == $descriptionlines && $line->fk_product == $productid) {
 				$foundlinecontract ++;
@@ -2430,9 +2434,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			}
 		}
 		if (!$error) {
-			$object->context["options_websitename"] = $website->ref;
-			$object->context["options_domainnamewebsite"] = $domainnamewebsite;
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction("customurl", $object);
+			//$object->context["options_websitename"] = $website->ref;
+			$object->array_options['options_custom_url'] = urlencode($custom_url);
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction("deploycustomurl", $object);
 			if ($result <= 0) {
 				$error++;
 			}
