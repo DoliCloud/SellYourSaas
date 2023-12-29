@@ -1067,7 +1067,31 @@
         group: dd-agent
         mode: '0644'
 
-  ##### Set permissions, create some dirs and files by calling perms.ksh
+
+##### Check the secureBash shell
+- name: Check the secureBash shell
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+    - name: Get checksum for /bin/dash
+      stat:
+        path: /bin/dash
+      register: file1_stat
+
+    - name: Get checksum for /bin/secureBash
+      stat:
+        path: /bin/secureBash
+      register: file2_stat
+
+    - name: Compare file checksums
+      fail:
+        msg: "The files secureBash and dash are not the same"
+      when: file1_stat.stat.checksum != file2_stat.stat.checksum
+
+
+##### Set permissions, create some dirs and files by calling perms.ksh
 - name: Call perms.ksh to set permissions, create some dirs and files
   hosts: '{{target}}'
   become: yes
