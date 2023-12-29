@@ -712,7 +712,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</div>';
 				print '</div>';
 
-				print '<div class="tagtd center minwidth100">';
+				print '<div class="tagtd center minwidth100 width100">';
 				// TODO Use same frequency than into the template invoice ?
 				$nbmonth = 1;
 				print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
@@ -781,9 +781,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<span class="small">';
 					print $langs->trans("OptionYourWebsiteDesc").'<br>';
 					print '</span>';
-					print '<div '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').' id="installwebsite1">';
 					print '<span class="opacitymedium small hideonsmartphone">'.$langs->trans("OptionYourWebsitePrerequisites").'<br></span><br>';
-					print $langs->trans("Step", 1).' : '. $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
+					print '<div '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').' id="installwebsite1">';
+					print $langs->trans("Step", 1).' : '. $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Continue")).'<br>';
 					print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 					print '<input type="hidden" name="token" value="'.newToken().'">';
 					print '<input type="hidden" name="action" value="deploywebsite">';
@@ -811,14 +811,14 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<input type="button" class="btn btn-primary wordbreak" id="choosewebsiteidoption" name="chooseoption" value="'.$langs->trans("Continue").'">';
 					print '</div>';
 
-					print '<br><div id="domainnamewebsite" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'">';
+					print '<div id="domainnamewebsite" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'"><br>';
 					print $langs->trans("Step", 2).' : '.$langs->trans("PurshaseDomainName").'&nbsp;';
 					print '<br><span class="bold">'.$langs->trans("Domain").'&nbsp;</span>';
 					print '<input name="domainnamewebsite" id="domainnamewebsiteinput" value="'.GETPOST("domainnamewebsite", "alpha").'">&nbsp;';
 					print '<input type="button" class="btn btn-primary wordbreak" id="choosedomainnamewebsite" name="chooseoption" value="'.$langs->trans("Continue").'">';
 					print '</div>';
 
-					print '<br><div id="choosewebsiteoption" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'>';
+					print '<div id="choosewebsiteoption" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'><br>';
 					print $langs->trans("Step", 3).' : '.$langs->trans("AddInstructionToDns", $contract->ref_customer, $contract->ref_customer);
 					print '<br><input class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" type="submit" name="startwebsitedeploy" value="'.$langs->trans("StartWebsiteDeployment").'">';
 					print '</div>';
@@ -828,7 +828,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 				print '</div>';
 
-				print '<div class="tagtd center minwidth100">';
+				print '<div class="tagtd center minwidth100 width100">';
 				// TODO Use same frequency than into the template invoice ?
 				$nbmonth = 1;
 				print '<span class="font-green-sharp">'.(6 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
