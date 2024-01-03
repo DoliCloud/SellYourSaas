@@ -713,9 +713,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</div>';
 
 				print '<div class="tagtd center minwidth100 width100">';
-				// TODO Use same frequency than into the template invoice ?
+				$tmpproduct = new Product($db);
+				$tmpproduct->fetch(getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL"));
+				$priceoption = $tmpproduct->price;
 				$nbmonth = 1;
-				print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
+				// TODO Use same frequency than into the template invoice ?
+				print '<span class="font-green-sharp">'.($priceoption * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 				//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
 				print '<input type="button" class="btn btn-primary wordbreak" id="chooseoptioncustomurl" name="chooseoption" value="'.$langs->trans("Install").'">';
 				print '</div>';
