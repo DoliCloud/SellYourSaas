@@ -3178,7 +3178,7 @@ Complete also the parameter *disable_functions* for the *apache* and *fpm* file 
 
 [source,bash]
 ---------------
-passthru,shell_exec,system,proc_open,popen
+passthru,shell_exec,system,proc_open,popen,dl,apache_note,apache_setenv,show_source,virtual
 ---------------
 
 Warning: Do not add "exec".
