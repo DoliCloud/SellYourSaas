@@ -12,7 +12,8 @@ currently being supported with security updates.
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+Use the following link to report a vulnerability:
+[https:](https://github.com/DoliCloud/SellYourSaas/settings/security_analysis)
 
 Tell them where to go, how often they can expect to get an update on a
 reported vulnerability, what to expect if the vulnerability is accepted or
