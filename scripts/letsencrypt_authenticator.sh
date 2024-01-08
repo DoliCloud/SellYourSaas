@@ -7,6 +7,8 @@ verbose=true
 echo ----- letsencrypt_authenticator.sh -----
 echo "CERTBOT_DOMAIN=$CERTBOT_DOMAIN"
 echo "CERTBOT_ALL_DOMAINS=$CERTBOT_ALL_DOMAINS"
+echo "CERTBOT_VALIDATION=$CERTBOT_VALIDATION"
+echo "CERTBOT_REMAINING_CHALLENGES=$CERTBOT_REMAINING_CHALLENGES"
 export subdomain=$CERTBOT_DOMAIN
 if [[ "x$subdomain" == "x" ]]; then
 	export subdomain=`grep '^subdomain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -23,10 +25,10 @@ echo "zone_file=$zone_file"
 #LET'S ENCRYPT VARIABLES
 #
 #CERTBOT_DOMAIN: The domain being authenticated
+#CERTBOT_ALL_DOMAINS: A comma-separated list of all domains challenged for the current certificate
 #CERTBOT_VALIDATION: The validation string
 #CERTBOT_TOKEN: Resource name part of the HTTP-01 challenge (HTTP-01 only)
 #CERTBOT_REMAINING_CHALLENGES: Number of challenges remaining after the current challenge
-#CERTBOT_ALL_DOMAINS: A comma-separated list of all domains challenged for the current certificate
 
 if [ -z "$CERTBOT_DOMAIN" ] || [ -z "$CERTBOT_VALIDATION" ]
 then
@@ -52,9 +54,19 @@ $verbose && echo "old serial : $old_serial"
 $verbose && echo "new serial : $new_serial"
 $verbose && echo "old challenge : $old_challenge"
 $verbose && echo "new challenge : $new_challenge"
-sed -i.auto.bck -e "s/$old_challenge/$new_challenge/" $zone_file
-sed -i.auto.bck2 -e "s/$old_serial/$new_serial/" $zone_file
-systemctl stop bind9
-sleep 5
-systemctl start bind9
-sleep 10
+
+if [ "x$CERTBOT_REMAINING_CHALLENGES" == "x1" ]
+then
+	cp -f $zone_file $zone_file.auto.bck3
+	awk '{ if ($0 ~ /^_acme-challenge\s+IN\s+TXT/) { if ($0 ~ /'$old_challenge'/) { print; print "_acme-challenge IN TXT \"'$CERTBOT_VALIDATION'\""; next} else {next} } {print} }' $zone_file.auto.bck3 > $zone_file;
+	sed -i.auto.bck4 -e "s/$old_serial/$new_serial/" $zone_file
+
+	systemctl restart bind9
+	sleep 10
+else
+	sed -i.auto.bck -e "s/$old_challenge/$new_challenge/" $zone_file
+	sed -i.auto.bck2 -e "s/$old_serial/$new_serial/" $zone_file
+
+	systemctl restart bind9
+	sleep 15
+fi

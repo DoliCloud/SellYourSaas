@@ -3435,15 +3435,18 @@ Note: Reports are into */var/crash*
 sudo apt remove cerbot; sudo apt install snapd;
 sudo snap install --classic certbot;
 sudo ln -fs /snap/bin/certbot /usr/bin/certbot
+certbot --version
 ---------------
 
 And to list certbot cron job:
 
 [source,bash]
 ---------------
-systemctl list-timers
+systemctl list-units | grep certbot
 systemctl status snap.certbot.renew.timer
 ---------------
+
+The complete logs of certbot are into /var/log/letsencrypt/...
 
 
 [[creation_certificat_ssl]]
@@ -3537,9 +3540,9 @@ systemctl status snap.certbot.renew.timer
 
 [source,bash]
 ---------------
-certbot renew
+certbot renew -v [--dry-run]
 or
-certbot renew --force-renewal 
+certbot renew --force-renewal
 or 
 certbot renew --cert-name admin.mysellyoursaasdomain.com --dry-run
 ---------------
@@ -3550,7 +3553,11 @@ You can use the same command as used originally (with --dry-run option first if 
 
 [source,bash]
 ---------------
-certbot certonly -n --manual-public-ip-logging-ok --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
+certbot renew -v [--dry-run]
+or
+certbot renew --force-renewal
+or
+certbot certonly -n [--manual-public-ip-logging-ok] --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
 ---------------
 
 Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file 
