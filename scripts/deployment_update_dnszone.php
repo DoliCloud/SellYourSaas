@@ -263,6 +263,15 @@ if ($handle) {
 					break;
 				}
 			}
+			if (preg_match('/^('.preg_quote($entry).')\s+IN\s+TXT\s+(.*)$/', $s, $reg)) {
+				if ($reg[1] == $entry) {
+					print $reg[2];
+					if (!$quiet) {
+						print "\n";
+					}
+					break;
+				}
+			}
 		}
 		if ($mode == 'set') {
 			// If line serial is detected
