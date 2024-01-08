@@ -5,6 +5,7 @@
 
 * NEW Add support for a signature key of remote action messages. 
 * FIX Redirection instances must not appear in the count of backuped instances.
+* FIX letsencrypt for wildcard are now using 2 pass and need 2 TXT.
 
 
 ## 2.1
