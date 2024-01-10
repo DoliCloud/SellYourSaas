@@ -859,3 +859,4 @@ InstanceVersion=Instance version
 InvoicePDFNotYetAvailable=Invoice PDF not yet available
 InstancesToBackupWithoutRedirectionInstances=Instances to backup (paid or confirmed). Redirection instances are not included.
 SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Key on master to sign remote action messages
+ALUMNI_ENABLE_SURVEY=Enable the survey in the web site Alumni
