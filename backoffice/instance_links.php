@@ -306,8 +306,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$password_web = $object->thirdparty->array_options['options_password'];
 
 	$tmp = explode('.', $object->ref_customer, 2);
-	$object->instance = $tmp[0];
 
+	$object->instance = $tmp[0];
 	$object->hostname_db  = $hostname_db;
 	$object->username_db  = $username_db;
 	$object->password_db  = $password_db;
@@ -324,6 +324,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 	$newdb->prefix_db = $prefix_db;
 
+	$savetodo = 0;
 	$stringofversion = '';
 	$stringoflistofmodules = '';
 
@@ -427,7 +428,11 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 				}
 
 				$object->version = $stringofversion;
-				$object->array_options['options_instanceversion'] = $stringofversion;
+
+				if ($stringofversion != $object->array_options['options_instanceversion']) {
+					$savetodo = 1;
+					$object->array_options['options_instanceversion'] = $stringofversion;	// To save
+				}
 			} else {
 				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
 				$error++;
@@ -438,7 +443,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			$confinstance = new Conf();
 			$confinstance->setValues($newdb);
 			// Define $stringoflistofmodules
-			// TODO Put the defintion in a sql into package
+			// TODO Put the defintion in a sql into package and stor it into an extrafield
 			$i=0;
 			foreach ($confinstance->global as $key => $val) {
 				if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && ! empty($val)) {
@@ -454,6 +459,10 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		}
 	}
 
+	// We have value that has changed, we saved them
+	if ($savetodo) {
+		$object->update($user, 1);
+	}
 
 	/*if (is_object($object->db2)) {
 		$savdb=$object->db;
@@ -513,7 +522,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 
 	if (is_object($object->db2)) {
-		$object->db=$savdb;
+		$object->db = $savdb;
 	}
 
 	print '<div class="fichecenter">';
@@ -524,20 +533,6 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$login = $username_web;
 	$password = $password_web;
 	$server = $object->ref_customer;
-
-	// Barre d'actions
-	/*  if (! $user->societe_id)
-	{
-		print '<div class="tabsAction">';
-
-		if ($user->rights->sellyoursaas->write)
-		{
-			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=upgrade&token='.newToken().'">'.$langs->trans('Upgrade').'</a>';
-		}
-
-		print "</div><br>";
-	}
-	*/
 
 	print '</div>';
 }
