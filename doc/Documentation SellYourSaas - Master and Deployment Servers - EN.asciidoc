@@ -331,6 +331,16 @@ ln -fs /bin/bash /bin/sh
 ---------------
 
 
+==== Min for password
+
+Edit the file /etc/pam.d/common-password to set a minimal password length by adding minlength=16 at end of line
+
+[source, bash]
+---------------
+password        [success=1 default=ignore]      pam_unix.so obscure sha512 minlength=16
+---------------
+
+
 ==== SSH setup
 
 Fix permission on */etc/ssh/sshd_config* so only root has read and write access:

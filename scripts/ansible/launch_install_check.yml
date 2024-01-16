@@ -37,6 +37,19 @@
 #      state: absent
 
 
+- name: Update PAM password policy
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+    - name: Ensure minlength is set to 16 in /etc/pam.d/common-password
+      lineinfile:
+        path: /etc/pam.d/common-password
+        regexp: '^password\s+.*\s+pam_unix.so obscure'
+        line: 'password        [success=1 default=ignore]      pam_unix.so obscure sha512 minlength=14'
+        backrefs: yes
+        
 - name: Apt install packages
   hosts: '{{target}}'
   become: yes

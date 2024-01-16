@@ -1035,11 +1035,11 @@ if ($reusecontractid) {
 	// Generate credentials
 
 	$generatedunixlogin = strtolower('osu'.substr(getRandomPassword(true, array('I')), 0, 9));		// Must be lowercase as it can be used for default email
-	$generatedunixpassword = substr(getRandomPassword(true, array('I')), 0, 10);
+	$generatedunixpassword = substr(getRandomPassword(true, array('I')), 0, 14);
 
-	$generateddbname = 'dbn'.substr(getRandomPassword(true, array('I')), 0, 8);
+	$generateddbname = 'dbn'.substr(getRandomPassword(true, array('I')), 0, 9);
 	$generateddbusername = 'dbu'.substr(getRandomPassword(true, array('I')), 0, 9);
-	$generateddbpassword = substr(getRandomPassword(true, array('I')), 0, 10);
+	$generateddbpassword = substr(getRandomPassword(true, array('I')), 0, 14);
 	$generateddbhostname = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $sldAndSubdomain.'.'.$domainname);
 	$generateddbport = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT : 3306);
 	$generatedunixhostname = $sldAndSubdomain.'.'.$domainname;
