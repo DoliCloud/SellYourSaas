@@ -798,12 +798,33 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<span class="bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
 					print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
 					print '<option value="">&nbsp;</option>';
+					$contractlines = $contract->lines;
+					$arraywebsitesenabled = array();
+					foreach ($contractlines as $line) {
+						if ($line->fk_product == getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT")) {
+							$desc = $line->description;
+							$tmpdesc = explode(", ", $desc);
+							$websiteref = explode("WebsiteRef=", $tmpdesc[0])[1];
+							$websitecustomurl = explode("WebsiteDomainName=", $tmpdesc[1])[1];
+							$arraywebsitesenabled[$websiteref] = $websitecustomurl;
+						}
+					}
 					foreach ($listofwebsitestoactivate as $website) {
+						$isalreadyactivated = 0;
+						if (isset($arraywebsitesenabled[$website->ref])) {
+							$isalreadyactivated = 1;
+						}
 						print '<option value="'.$website->id.'" '.(GETPOST("websiteidoption", "int") == $website->id ? "selected" : "");
+						if ($isalreadyactivated) {
+							print " disabled";
+						}
 						if ($website->status != $websitestatic::STATUS_VALIDATED) {
 							print " disabled";
 						}
 						print '>'.$website->ref;
+						if ($isalreadyactivated) {
+							print ' - '.$arraywebsitesenabled[$website->ref];
+						}
 						if ($website->status != $websitestatic::STATUS_VALIDATED) {
 							print ' - '.$langs->trans("Disabled");
 						}
