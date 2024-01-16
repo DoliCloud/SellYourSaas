@@ -2263,7 +2263,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$duration_unit = $tmparray['duration_unit'];
 		$date_start = dol_now();
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
-		$descriptionlines = "Websiteref = ".$website->ref;
+		$descriptionlines = "WebsiteRef=".$website->ref.", ";
+		$descriptionlines .= "WebsiteDomainName=".$domainnamewebsite;
 		$foundlinecontract = 0;
 		foreach ($object->lines as $key => $line) {
 			if ($line->description == $descriptionlines && $line->fk_product == $productid) {
