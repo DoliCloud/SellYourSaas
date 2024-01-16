@@ -1098,7 +1098,7 @@
         path: /bin/secureBash
       register: file2_stat
 
-    - name: Compare file checksums
+    - name: Compare file checksums of /bin/dash and /bin/secureBash
       fail:
         msg: "The files secureBash and dash are not the same"
       when: file1_stat.stat.checksum != file2_stat.stat.checksum
