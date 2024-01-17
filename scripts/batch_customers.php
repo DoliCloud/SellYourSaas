@@ -104,7 +104,7 @@ include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// 
 // Global variables
 $FORCE=0;
 $NOSTATS=0;
-$keystocheck = array(3, 3, 4);
+$keystocheck = array(2, 3, 4);
 foreach ($keystocheck as $keytocheck) {
 	if (isset($argv[$keytocheck])) {
 		if ($argv[$keytocheck] == '--force') {
@@ -210,7 +210,7 @@ if (empty($db)) {
 }
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = getDolGlobalInt('SELLYOURSAAS_INFRA_COST', 100);
 
 //$langs->setDefaultLang('en_US'); 	// To change default language of $langs
 $langs->load("main");				// To load language file for default language
@@ -275,7 +275,7 @@ $instancesbackupsuccess=array();
 $instancesbackupsuccessdiscarded=array();
 
 
-$instancefilter=(isset($argv[2]) ? $argv[2] : '');
+$instancefilter=((isset($argv[2]) && !in_array($argv[2], array('--force', '--nostats'))) ? $argv[2] : '');
 $instancefiltercomplete=$instancefilter;
 
 // Forge complete name of instance
@@ -506,12 +506,12 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 				if (! $error) {
 					$nbofok++;
 					$instancesbackupsuccess[$instance] = array('date' => dol_now('gmt'));
-					print '-> Backup process success for '.$instance."\n";
+					print '-> Backup process success for '.$instance."\n\n";
 					sleep(2);	// On success, we wait 2 seconds
 				} else {
 					$nboferrors++;
 					$instancesbackuperror[$instance] = array('date' => dol_now('gmt'));
-					print '-> Backup process fails for '.$instance."\n";
+					print '-> Backup process fails for '.$instance."\n\n";
 					sleep(5);	// On error, we wait 5 seconds
 				}
 			}
