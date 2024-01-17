@@ -858,7 +858,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 							// Protection to avoid to validate contract with several 'app' products.
 							$nbofproductapp++;
 							if ($nbofproductapp > 1) {
-								dol_syslog("Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
+								dol_syslog("index.php Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
 								$error++;
 								break;
 							}
