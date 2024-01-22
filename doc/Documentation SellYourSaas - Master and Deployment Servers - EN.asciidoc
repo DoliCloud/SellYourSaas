@@ -3815,7 +3815,7 @@ certbot
 
 * Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php* in the cron of user *admin*.
 
-* Activate the "Stripe" module and set it. On Stripe side, you must enable the WebHooks for a least the message *payment_intent.succeeded*
+* Activate the "Stripe" module and set it. On Stripe side, you must enable the WebHooks for a least the message *payment_intent.succeeded* and *payment_intent.payment_failed*
 
 
 On *Deployment servers*:
