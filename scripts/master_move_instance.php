@@ -593,7 +593,8 @@ if (empty($forceproductref)) {
 
 			$contractline->qty = $pricesperproduct['qty'];
 			$contractline->remise_percent = $pricesperproduct['discount'];
-			$contractline->price_ht = $pricesperproduct['price_ht'];
+			$contractline->subprice = $pricesperproduct['price_ht'];
+			$contractline->price_ht = $pricesperproduct['price_ht'];	// deprecated
 
 			print "We update line ".$objselect->rowid." with price_ht = ".$pricesperproduct['price_ht']." discount = ".$pricesperproduct['discount']."\n";
 			if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
