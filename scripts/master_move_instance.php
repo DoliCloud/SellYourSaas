@@ -287,8 +287,10 @@ if ($db2->error)
 }*/
 
 $productref = '';
+$forceproductref = '';
 if (isset($argv[4])) {
 	$productref = $argv[4];
+	$forceproductref = $argv[4];
 }
 if (empty($productref)) {
 	// Get tmppackage
@@ -575,7 +577,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 	}
 }
 
-if (empty($productref)) {
+if (empty($forceproductref)) {
 	print "Update price, discount and qty of the new contract lines to match the one on the source.\n";
 
 	foreach ($oldpricesperproduct as $productid => $pricesperproduct) {
