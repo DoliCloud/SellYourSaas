@@ -381,10 +381,10 @@ if ($mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 
 
 // Share certificate of old instance by copying them into the common crt dir (they should already be into this directory)
-// TODO If the certificate of the source instance are not into crt directory, we must copy them into the crt directory with read permission to admin user.
+// TODO If the certificate of the source instance are not into crt directory, we must copy them into the sellyoursaas master crt directory with read permission to admin user.
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
-	print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) of instance (generic and custom) into the crt directory (to reuse them on the new instance for backward compatibility).'."\n";
+	print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) of instance (generic and custom) into the sellyoursaas master crt directory (to reuse them on the new instance for backward compatibility).'."\n";
 	foreach (array('', '-custom') as $ext) {
 		foreach (array('.key', '.crt', '-intermediate.crt') as $ext2) {
 			$srcfile = '/etc/apache2/with.sellyoursaas.com'.$ext.$ext2;
@@ -462,7 +462,7 @@ if ($CERTIFFORCUSTOMDOMAIN) {
 }
 
 
-print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) for websites into the crt directory (to reuse them on the new instance for backward compatibility).'."\n";
+print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) for websites into the sellyoursaas master crt directory (to reuse them on the new instance for backward compatibility).'."\n";
 // TODO
 
 

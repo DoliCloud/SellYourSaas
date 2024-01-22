@@ -634,7 +634,7 @@ if (! function_exists('dol_getprefix')) {
 	 */
 	function dol_getprefix($mode = '')
 	{
-		// If prefix is for email (we need to have $conf alreayd loaded for this case)
+		// If prefix is for email (we need to have $conf already loaded for this case)
 		if ($mode == 'email') {
 			global $conf;
 
