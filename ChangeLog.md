@@ -3,7 +3,8 @@
 
 ## Unreleased
 
-* NEW Add support for a signature key of remote action messages. 
+* NEW Add support for a signature key of remote action messages.
+* NEW Length of database and user name is now 12 and password 14 min.
 * FIX Redirection instances must not appear in the count of backuped instances.
 * FIX letsencrypt for wildcard are now using 2 passes and needs 2 TXT entry in DNS.
 * FIX Debug master_move_instance.php - Price of old instance is kept/reused.
