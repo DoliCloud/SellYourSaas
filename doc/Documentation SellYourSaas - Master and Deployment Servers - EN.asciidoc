@@ -512,6 +512,7 @@ Add at the end of */etc/bash.bashrc*:
 [source, bash]
 ---------------
 alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,context,cmd'
+HISTIGNORE='-*'
 ---------------
 
 

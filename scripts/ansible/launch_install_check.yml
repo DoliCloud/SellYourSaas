@@ -17,10 +17,14 @@
   become_method: sudo
   become_user: root
   tasks:
-  - name: Remove user admin from any group (no more need to be in extra groups).
+#  - name: Get list of all groups for user admin
+#    shell: groups admin | sed 's/^.*: //'
+#    register: groups  
+  - name: Remove user admin from any group except www-data (no need to be in extra groups).
     user: 
       name: "admin"
-      groups: ''
+      #groups: ''
+      groups: 'www-data'
       append: false   
 #  - name: Check/create file /home/admin/.ssh/authorized_keys.toallowmaster
 #    ansible.builtin.file:
@@ -35,7 +39,6 @@
 #    ansible.builtin.file:
 #      path: /home/ubuntu/.ssh/authorized_keys
 #      state: absent
-
 
 - name: Update PAM password policy
   hosts: '{{target}}'

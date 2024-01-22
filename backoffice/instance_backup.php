@@ -198,15 +198,17 @@ if ($ispaid) {
 
 $tmparray = explode('.', $object->ref_customer);
 
-$moveinstancestringtoshow .= "# check that the master server can connect with ssh and user admin on the source instance server with\n";
-$moveinstancestringtoshow .= "# ssh admin@".getDomainFromURL($object->ref_customer, 2)."\n";
-$moveinstancestringtoshow .= "# If not, do this on ".getDomainFromURL($object->ref_customer, 2).":\n";
+$moveinstancestringtoshow .= "# First, check that the master server can connect with ssh and user admin on the source instance server with:\n";
+$moveinstancestringtoshow .= "# ssh admin@".getDomainFromURL($object->ref_customer, 2)." wc /etc/apache2/with.sellyoursaas.com*.*\n";
+$moveinstancestringtoshow .= "# If ssh connect fails, do this on ".getDomainFromURL($object->ref_customer, 2).":\n";
 $moveinstancestringtoshow .= "# cp /etc/skel/.ssh/authorized_keys_support /home/admin/.ssh/authorized_keys_support; chown admin.admin /home/admin/.ssh/authorized_keys_support\n";
+//$moveinstancestringtoshow .= "# - If some cert files read is denied, do this on ".getDomainFromURL($object->ref_customer, 2).":\n";
+//$moveinstancestringtoshow .= "#   gpasswd -a admin www-data\n";
 $moveinstancestringtoshow .= "su - admin\n";
 $moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/master_move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm|confirmredirect|confirmmaintenance)'."\n";
 // Remove read in certif file.
-$moveinstancestringtoshow .= "chmod o-r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
-
+//$moveinstancestringtoshow .= "chmod o-r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
+$moveinstancestringtoshow .= "gpasswd -d admin www-data\n";
 
 // Increase limit of time. Works only if we are not in safe mode
 $ExecTimeLimit = 1800; // 30mn
