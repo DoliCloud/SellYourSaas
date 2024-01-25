@@ -126,6 +126,7 @@ ProductForUsers=Product for users
 FrequencyMultiple=Nb of standard periods in invoice (/ period of product)
 DiscountOnInvoice=Discount (on invoice only)
 BackupInstance=Backup
+RestoreInstance=Restore
 RefsUrl=Url of a web server host pointing to %s
 LiveRefsInstances=Online refs instances
 ActionsOnPackages=Actions on packages

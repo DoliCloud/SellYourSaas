@@ -44,7 +44,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 	$langs->load("sellyoursaas@sellyoursaas");
 
 	if (isset($parameters['needforkey'])) {
-		$substitutionarray['BackupInstanceTabTitle'] = $langs->trans('BackupInstance');
+		$substitutionarray['BackupInstanceTabTitle'] = $langs->trans('BackupInstance').' | '.$langs->trans("RestoreInstance");
 		if (!empty($object->array_options['options_latestbackup_status']) && $object->array_options['options_latestbackup_status'] == 'KO') {
 			$substitutionarray['BackupInstanceTabTitle'] = $substitutionarray['BackupInstanceTabTitle'].img_warning($langs->trans("BackupError"));
 		}

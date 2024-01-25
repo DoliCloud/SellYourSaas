@@ -125,6 +125,8 @@ if ($ispaid) {
 
 		$restorestringfromarchiveshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
 		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+
+		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/.snapshots/diskbackup-xxx/'. getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].' autoscan';
 	} else {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "cd " . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os']."\n";
@@ -143,11 +145,13 @@ if ($ispaid) {
 
 		$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
-		$restorestringfrombackupshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('DOLICLOUD_BACKUP_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
-		$restorestringfrombackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('DOLICLOUD_BACKUP_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+		$restorestringfrombackupshort = 'Not possible. Redeploy the instance first.';
+		$restorestringfrombackup = 'Not possible. Redeploy the instance first.';
 
-		$restorestringfromarchiveshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
-		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+		$restorestringfromarchiveshort = 'Not possible. Redeploy the instance first.';
+		$restorestringfromarchive = 'Not possible. Redeploy the instance first.';
+
+		$restorestringfromremotebackup = 'Not possible. Redeploy the instance first.';
 	}
 } else {
 	if ($object->array_options['options_deployment_status'] != 'undeployed') {
@@ -172,6 +176,8 @@ if ($ispaid) {
 
 		$restorestringfromarchiveshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
 		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+
+		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/.snapshots/diskbackup-xxx/'. getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].' autoscan';
 	} else {
 		$restorestringpretoshow .= "cd " . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
@@ -191,8 +197,13 @@ if ($ispaid) {
 
 		$restorestringposttoshow .= "# Then restore the conf .undeployed file into new conf file.\n";
 
-		$restorestringfromarchiveshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
-		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
+		//$restorestringfrombackupshort = 'Not possible. Redeploy the instance first. Also backup may not have been done as it was not a validated/paid instance.';
+		//$restorestringfrombackup = 'Not possible. Redeploy the instance first. Also backup may not have been done as it was not a validated/paid instance.';
+
+		$restorestringfromarchiveshort = 'Not possible. Redeploy the instance first.';
+		$restorestringfromarchive = 'Not possible. Redeploy the instance first.';
+
+		$restorestringfromremotebackup = 'Not possible. Redeploy the instance first.';
 	}
 }
 
@@ -478,7 +489,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 // Backup command line
 $backupstringtoshow=$backupstring.' confirm --nostats --forcersync --forcedump';
 $backupstringtoshow2=$backupstring.' confirm';
-print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-file paddingright"></span> Backup command line string <span class="opacitymedium">(to run on the server where to store the backup)</span><br>';
+print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-file paddingright"></span> Backup command line string <span class="opacitymedium">(to run by root from the server where to store the backup)</span><br>';
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent"><br>';
 print ajax_autoselect('backupstring');
 
@@ -487,9 +498,19 @@ print '<br>';
 // Restore command line from backup
 if ($restorestringfrombackup) {
 	$restorestringtoshow=$restorestringfrombackup.' (test|confirm)';
-	print '<span class="fa fa-file paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from Backup <span class="opacitymedium">(to run from the server hosting the backup)</span><br>';
+	print '<span class="fa fa-file paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from local Backup <span class="opacitymedium">(to run by admin from the server hosting the backup)</span><br>';
 	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
 	print ajax_autoselect('restorestring');
+
+	print '<br>';
+}
+
+// Restore commands from remote backup
+if ($restorestringfromremotebackup) {
+	$restorestringtoshow=$restorestringfromremotebackup.' (test|confirm)';
+	print '<span class="fa fa-file paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from remote Backup <span class="opacitymedium">(to run by root from the deployment server)</span><br>';
+	print '<input type="text" name="restorestringfromremotebackup" id="restorestringfromremotebackup" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
+	print ajax_autoselect('restorestringfromremotebackup');
 
 	print '<br>';
 }
@@ -497,7 +518,7 @@ if ($restorestringfrombackup) {
 // Restore commands from archive
 if ($restorestringfromarchive) {
 	$restorestringtoshow=$restorestringfromarchive.' (test|confirm)';
-	print '<span class="fa fa-file-archive paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from Archive <span class="opacitymedium">(to run from the server hosting the archives)</span><br>';
+	print '<span class="fa fa-file-archive paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from local Archive <span class="opacitymedium">(to run by admin from the server hosting the archives)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_9.'">';
 	print $restorestringpretoshow."\n";
 	print $restorestringtoshow."\n";
@@ -509,10 +530,11 @@ if ($restorestringfromarchive) {
 	print '<br>';
 }
 
+
 // Duplicate an instance into another instance (already existing instance)
 if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
-	print '<span class="fa fa-database secondary"></span><span class="fa fa-database"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(can be run on master, source OR taget server. recommended: source server)</span><br>';
+	print '<span class="fa fa-database secondary"></span><span class="fa fa-database"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(can be run by admin on master, source OR taget server. recommended: source server)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
 	print $backupstringtoshow."\n";
 	print $restorestringtoshow;
@@ -525,7 +547,7 @@ if ($restorestringfrombackupshort) {
 // Move instance into another server (non existing target instance)
 if ($moveinstancestringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
-	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run on master server)</span><br>';
+	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run by admin on master server)</span><br>';
 	print '<textarea name="moveinstancestring" id="moveinstancestring" class="centpercent" rows="'.ROWS_8.'">';
 	print $moveinstancestringtoshow;
 	print '</textarea>';
