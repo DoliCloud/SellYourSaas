@@ -78,6 +78,8 @@ ufw allow out 110/tcp
 # IMAP
 ufw allow out 143/tcp
 ufw allow out 993/tcp
+# Printers (ESC/POS port)
+ufw allow out 9100/tcp
 # DCC (anti spam public services)
 #ufw allow out 6277/tcp
 #ufw allow out 6277/udpvi
