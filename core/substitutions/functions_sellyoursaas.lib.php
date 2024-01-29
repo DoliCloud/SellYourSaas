@@ -111,7 +111,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 
 	// Force some values to another services
 	// $tmpobject is now a thirdparty
-	dol_syslog("sellyoursaas_completesubstitutionarray() tmpobject->array_options['options_domain_registration_page'] = ".(isset($tmpobject->array_options['options_domain_registration_page']) ? $tmpobject->array_options['options_domain_registration_page'] : '')." conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME = ".(empty($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) ? '' : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME));
+	dol_syslog("sellyoursaas_completesubstitutionarray: tmpobject->array_options['options_domain_registration_page'] = ".(isset($tmpobject->array_options['options_domain_registration_page']) ? $tmpobject->array_options['options_domain_registration_page'] : '')." conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME = ".(empty($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) ? '' : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME));
 	if (is_object($tmpobject) && ! empty($tmpobject->array_options['options_domain_registration_page'])) {
 		global $savconf;
 
@@ -121,7 +121,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 			$savconf = dol_clone($conf);
 		}
 
-		dol_syslog("savconf has currently savconf->global->SELLYOURSAAS_NAME = ".$savconf->global->SELLYOURSAAS_NAME." savconf->global->SELLYOURSAAS_MAIN_EMAIL = ".$savconf->global->SELLYOURSAAS_MAIN_EMAIL);
+		dol_syslog("sellyoursaas_completesubstitutionarray: savconf has currently savconf->global->SELLYOURSAAS_NAME = ".$savconf->global->SELLYOURSAAS_NAME." savconf->global->SELLYOURSAAS_MAIN_EMAIL = ".$savconf->global->SELLYOURSAAS_MAIN_EMAIL);
 
 		// Force value to original conf in database
 		$conf->global->SELLYOURSAAS_NAME = $savconf->global->SELLYOURSAAS_NAME;
@@ -179,6 +179,6 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		dol_syslog("newsubstiturl = ".$newsubstiturl);
 		$substitutionarray['__ONLINE_PAYMENT_URL__'] = $newsubstiturl;
 
-		dol_syslog("savconf has now savconf->global->SELLYOURSAAS_NAME = ".$savconf->global->SELLYOURSAAS_NAME." savconf->global->SELLYOURSAAS_MAIN_EMAIL = ".$savconf->global->SELLYOURSAAS_MAIN_EMAIL);
+		dol_syslog("sellyoursaas_completesubstitutionarray: savconf has now savconf->global->SELLYOURSAAS_NAME = ".$savconf->global->SELLYOURSAAS_NAME." savconf->global->SELLYOURSAAS_MAIN_EMAIL = ".$savconf->global->SELLYOURSAAS_MAIN_EMAIL);
 	}
 }
