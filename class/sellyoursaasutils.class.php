@@ -1490,13 +1490,13 @@ class SellYourSaasUtils
 
 									$paymentTypeId = 0;
 									if ($paymentmethod == 'paybox') {
-										$paymentTypeId = $conf->global->PAYBOX_PAYMENT_MODE_FOR_PAYMENTS;
+										$paymentTypeId = getDolGlobalInt('PAYBOX_PAYMENT_MODE_FOR_PAYMENTS');
 									}
 									if ($paymentmethod == 'paypal') {
-										$paymentTypeId = $conf->global->PAYPAL_PAYMENT_MODE_FOR_PAYMENTS;
+										$paymentTypeId = getDolGlobalInt('PAYPAL_PAYMENT_MODE_FOR_PAYMENTS');
 									}
 									if ($paymentmethod == 'stripe') {
-										$paymentTypeId = $conf->global->STRIPE_PAYMENT_MODE_FOR_PAYMENTS;
+										$paymentTypeId = getDolGlobalInt('STRIPE_PAYMENT_MODE_FOR_PAYMENTS');
 									}
 									if (empty($paymentTypeId)) {
 										$paymentType = $_SESSION["paymentType"];
