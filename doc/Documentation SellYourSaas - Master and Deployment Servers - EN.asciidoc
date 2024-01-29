@@ -5248,25 +5248,47 @@ Into field *sql after*
 
 [source,bash]
 ---------------
-UPDATE llx_user set pass_crypted = '__APPPASSWORD0__', email = '__APPEMAIL__' where login = 'admin' AND (pass = 'admin' OR pass_crypted = 'value_of_hashed_password_encrypted_with_password_hash');
+UPDATE llx_user set lastname='__(Administrator)__', datec = NOW(), pass_crypted = '__APPPASSWORD0SALTED__', email = '__APPEMAIL__', datelastlogin = NULL, datepreviouslogin = NULL WHERE login = 'admin' AND (pass = 'admin' OR pass_crypted = '25edccd81ce2def41eae1317392fd106d8152a5b');
 REPLACE INTO llx_const (name, entity, value, type, visible) values('CRON_KEY', 0, '__OSUSERNAME__', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('CRON_DISABLE_KEY_CHANGE', 0, '1', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SOCIETE_NOM', 1, '__APPORGNAME__', 'chaine', 0);
 --REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SOCIETE_COUNTRY', 1, '__APPCOUNTRYIDCODELABEL__', 'chaine', 0);
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAIN_MAIL_EMAIL_FROM';
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAILING_EMAIL_FROM';
-UPDATE llx_const set value = '10.0.0' where name = 'MAIN_VERSION_LAST_UPGRADE';
-REPLACE INTO llx_const (name, entity, value, type, visible) values ('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'deployment-server-1.ip, deployment-server-2.ip, [deployment-server-1.ipv6-between-actual-brackets], ...', 'chaine', 0);
+UPDATE llx_const set value = '18.0.0' where name = 'MAIN_VERSION_LAST_UPGRADE';
+DELETE FROM llx_const where name IN ('MAIN_EXTERNAL_SMTP_SPF_STRING_TO_ADD', 'MAILING_NO_USING_PHPMAIL', 'MAIN_FILECHECK_LOCAL_SUFFIX');
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'deployment-server-1.ip, deployment-server-2.ip, [deployment-server-1.ipv6-between-actual-brackets], ...', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_EXTERNAL_MAIL_SPF_STRING_TO_ADD', 0, 'include:sendgrid.net', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_MAIL_SENDMODE_password', 0, 'mail', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_HIDE_WARNING_TO_ENCOURAGE_SMTP_SETUP', 0, '0', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_NO_USING_PHPMAIL', 0, '1', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_LIMIT_SENDBYDAY', 0, '250', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_LIMIT_SENDBYCLI', 0, '250', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_DELAY', 0, '0.2', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_FILECHECK_LOCAL_SUFFIX', 0, '-sellyoursaas', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_FILECHECK_LOCAL_EXT', 0, '.zip', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_UPLOAD_DOC', 0, '8000', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_HELP_DISABLELINK', 0, '1', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIL_PREFIX_FOR_EMAIL_ID', 0, 'SERVER_NAME', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_NO_UPGRADE_REDIRECT_ON_LEVEL_3_CHANGE', 0, '1', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_FEATURES_LEVEL', 0, '0', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_MAIL_DEBUG', 0, '0', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_MESSAGE_INSTALL_MODULES_DISABLED_CONTACT_US', 0, '1', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_UMASK', 0, '0660', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_HELPCENTER_DISABLELINK', 0, '1', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGIN', 1, '1', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGIN_FAILED', 1, '1', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGOUT', 1, '1', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, '1', 'password_hash', 1);
 ---------------
 
-Change the value 10.0.0 with version of the image you will build to deploy.
+Change the value 18.0.0 with version of the image you will build to deploy.
 
 Into field *sql to reset password*
 
 [source,bash]
 ---------------
-UPDATE llx_user set pass='__NEWUSERPASSWORD__', pass_crypted = '__NEWUSERPASSWORDCRYPTED__' where rowid = __INSTANCEID__;
+UPDATE llx_user set pass='__NEWUSERPASSWORD__', pass_crypted = '__NEWUSERPASSWORDCRYPTED__' where rowid = __REMOTEUSERID__;
 ---------------
 
 === Setup of Services
