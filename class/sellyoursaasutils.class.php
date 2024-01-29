@@ -1389,11 +1389,11 @@ class SellYourSaasUtils
 									$paymentintent = $stripe->getPaymentIntent($amounttopay, $currency, $FULLTAG, $description, $invoice, $customer->id, $stripeacc, $servicestatus, 0, 'automatic', $confirmnow, $stripecard->id, 1);
 
 									$charge = new stdClass();
-									if ($paymentintent->status === 'succeeded' || $paymentintent->status === 'processing') {
+									if (!empty($paymentintent->status) && $paymentintent->status === 'succeeded' || $paymentintent->status === 'processing') {
 										$charge->status = 'ok';
 										$charge->id = $paymentintent->id;
 										$charge->customer = $customer->id;
-									} elseif ($paymentintent->status === 'requires_action') {
+									} elseif (!empty($paymentintent->status) && $paymentintent->status === 'requires_action') {
 										//paymentintent->status may be => 'requires_action' (no error in such a case)
 										dol_syslog("paymentintent = ".var_export($paymentintent, true), LOG_DEBUG);
 
