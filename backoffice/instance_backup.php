@@ -218,8 +218,7 @@ $moveinstancestringtoshow .= "# cp /etc/skel/.ssh/authorized_keys_support /home/
 $moveinstancestringtoshow .= "su - admin\n";
 $moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/master_move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm|confirmredirect|confirmmaintenance)'."\n";
 // Remove read in certif file.
-//$moveinstancestringtoshow .= "chmod o-r /etc/apache2/".getDomainFromURL($object->ref_customer, 2).".key\n";
-$moveinstancestringtoshow .= "gpasswd -d admin www-data\n";
+//$moveinstancestringtoshow .= "# On src server: gpasswd -d admin www-data\n";
 
 // Increase limit of time. Works only if we are not in safe mode
 $ExecTimeLimit = 1800; // 30mn
