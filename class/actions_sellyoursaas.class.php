@@ -450,6 +450,7 @@ class ActionsSellyoursaas
 			if ($action == 'confirm_undeploy') {
 				$db->begin();
 
+
 				// SAME CODE THAN INTO MYACCOUNT INDEX.PHP
 
 				// Disable template invoice
@@ -510,6 +511,7 @@ class ActionsSellyoursaas
 					$object->array_options['options_deployment_status'] = 'undeployed';
 					$object->array_options['options_undeployment_date'] = dol_now();
 					$object->array_options['options_undeployment_ip'] = $_SERVER['REMOTE_ADDR'];
+					$object->array_options['options_suspendmaintenance_message'] = '';
 
 					$result = $object->update($user);
 					if ($result < 0) {
