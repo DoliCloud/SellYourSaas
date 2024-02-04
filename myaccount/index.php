@@ -2075,6 +2075,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 					$contract->array_options['options_deployment_status'] = 'undeployed';
 					$contract->array_options['options_undeployment_date'] = dol_now('tzserver');
 					$contract->array_options['options_undeployment_ip'] = $_SERVER['REMOTE_ADDR'];
+					$contract->array_options['options_suspendmaintenance_message'] = '';
 
 					$result = $contract->update($user);
 					if ($result < 0) {
