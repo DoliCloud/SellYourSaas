@@ -526,9 +526,9 @@ $newdatabasedb=$newobject->array_options['options_database_db'];
 
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
-	print "Error: Failed to find instance '".$newinstance."'";
+	print "Error: Failed to find taget instance '".$newinstance."'";
 	if ($mode == 'test') {
-		print " (it should have been created before but, in test mode, the instance can't be created).\n";
+		print " (it should have been created by this script but, in test mode, the instance can't be created).\n";
 	}
 	print "\n";
 	exit(-1);
