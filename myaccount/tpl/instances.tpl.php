@@ -701,7 +701,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'</span><br>';
 				print '<span class="opacitymedium small hideonsmartphone">'.$langs->trans("OptionYourCustomDomainNamePrerequisites").'<br></span>';
 
-				print '<div class="installcertif margintop hidden" id="customurlparam">';
+				print '<div class="installcertif margintop hidden" id="customurlparam_'.$id.'">';
 				print '<br>';
 				print $langs->trans("Step", 1).' : '.$langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
 				print '<br>';
@@ -720,7 +720,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				// TODO Use same frequency than into the template invoice ?
 				print '<span class="font-green-sharp">'.($priceoption * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 				//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-				print '<input type="button" class="btn btn-primary wordbreak" id="chooseoptioncustomurl" name="chooseoption" value="'.$langs->trans("Install").'">';
+				print '<input type="button" class="btn btn-primary wordbreak chooseoptioncustomurl" id="chooseoptioncustomurl_'.$id.'" name="chooseoption" value="'.$langs->trans("Install").'">';
 				print '</div>';
 
 				print '</form>';
@@ -785,7 +785,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print $langs->trans("OptionYourWebsiteDesc").'<br>';
 					print '</span>';
 					print '<span class="opacitymedium small hideonsmartphone">'.$langs->trans("OptionYourWebsitePrerequisites").'<br></span><br>';
-					print '<div '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').' id="installwebsite1">';
+					print '<div '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').' id="installwebsite_'.$id.'">';
 					print $langs->trans("Step", 1).' : '. $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Continue")).'<br>';
 					print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 					print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -855,11 +855,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<div class="tagtd center minwidth100 width100">';
 				// TODO Use same frequency than into the template invoice ?
 				$nbmonth = 1;
-				print '<span class="font-green-sharp">'.(6 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
-				//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-				print '<input type="button" class="btn btn-primary wordbreak" id="chooseoptionwebsite" name="chooseoption" value="'.$langs->trans("Install").'">';
+				if (!empty($websitemodenabled)) {
+					print '<span class="font-green-sharp">'.(6 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
+					//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
+					print '<input type="button" class="btn btn-primary wordbreak chooseoptionwebsite" id="chooseoptionwebsite_'.$id.'" name="chooseoption" value="'.$langs->trans("Install").'">';
+				}
 				print '</div>';
-
 				print '</div></div>';	// end tr, end table
 
 				print '<hr>';
@@ -1525,14 +1526,26 @@ if ($action == "confirmundeploy") {
 				return false;
 			});
 
-			jQuery("#chooseoptioncustomurl").click(function() {
+			$(".chooseoptioncustomurl").click(function() {
 				console.log("We click on button Activate custom urls");
-				jQuery("#customurlparam").removeClass("hidden");
+				var id = parseInt($(this).attr("id").match(/[0-9]+$/g));
+				if ($("#customurlparam_" + id + ":hidden").length){
+					$("#customurlparam_" + id).removeClass("hidden");
+				} else {
+					$("#customurlparam_" + id).addClass("hidden");
+				}
+				return false;
 			});
 
-			$("#chooseoptionwebsite").on("click",function(){
+			$(".chooseoptionwebsite").on("click",function(){
 				console.log("We click on button Activate website");
-				$("#installwebsite1").removeClass("hidden");
+				var id = parseInt($(this).attr("id").match(/[0-9]+$/g));
+				if ($("#installwebsite_" + id + ":hidden").length){
+					$("#installwebsite_" + id).removeClass("hidden");
+				} else {
+					$("#installwebsite_" + id).addClass("hidden");
+				}
+				return false;
 			})
 			$("#choosewebsiteidoption").on("click", function(){
 				if($("#websiteidoption").val() != ""){
