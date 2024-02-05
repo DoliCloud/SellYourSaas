@@ -507,7 +507,7 @@ printf '[client]\nprotocol=tcp' >> /etc/skel/.my.cnf
 
 === Add alias
 
-Add at the end of */etc/bash.bashrc*:
+Add at the end of */etc/bash.bashrc*, add alias to get a fast ps result and exclude some commands from the history:
 
 [source, bash]
 ---------------

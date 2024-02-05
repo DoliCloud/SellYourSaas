@@ -172,7 +172,7 @@ Edit the macro file *~/.xbindkeysrc* to add your macro instruction
 #keystate_capslock = enable
 
 # Macro 1 to ouptu string to show then Enter
-"xte 'usleep 300000' 'str string to show' 'key Return'"
+"xte 'usleep 300000' 'str stringtoshow' 'key Return'"
     m:0x11 + c:61
     Shift+Mod2 + exclam + Release
 
@@ -180,7 +180,9 @@ Edit the macro file *~/.xbindkeysrc* to add your macro instruction
 # End of xbindkeys configuration
 ---------------
 
-Note: You can also edit the macro file using xbindkeys-config
+Replace the "stringtoshow" with your sentence to ouput.
+
+Note: Because, the stringtoshow must be entered in Qwerty, it is easier to have it recorded by editing the macro file with xbindkeys-config
 
 
 To test the macro file, run:
@@ -192,6 +194,17 @@ xbindkeys -n
 
 and type the command key onto another terminal.
 If it's ok, you can launch at startup the command *xbindkeys*.
+
+
+=== Add alias
+
+Add at the end of */etc/bash.bashrc*, add alias to get a fast ps result and exclude some commands from the history:
+
+[source, bash]
+---------------
+alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time:6,utime,time,context,cmd'
+HISTIGNORE='-*'
+---------------
 
 
 === Installation of the sound output switcher ===
