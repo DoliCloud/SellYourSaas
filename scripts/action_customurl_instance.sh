@@ -115,7 +115,7 @@ if [ "x$customurl" == "x-" ]; then
 fi
 export contractlineid=${28}
 export EMAILFROM=${29}
-export CERTIFFORCUSTOMDOMAIN=${30}
+#export CERTIFFORCUSTOMDOMAIN=${30}			# Not used yet. We will use a forged path to know how the custom cert file is named
 export archivedir=${31}
 export SSLON=${32}
 export apachereload=${33}
@@ -131,11 +131,6 @@ export ispaidinstance=${36}
 export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
 export sshaccesstype=${39}
-
-# The value from the virtualhost of website (with of without www., we remove it)
-export CUSTOMDOMAIN=${46/www./}
-# The website name in document dir
-export WEBSITENAME=${47}
 
 
 
@@ -195,7 +190,6 @@ echo "domainnameold = $domainnameold"
 echo "customurl = $customurl"
 echo "contractlineid = $contractlineid" 
 echo "EMAILFROM = $EMAILFROM"
-echo "CERTIFFORCUSTOMDOMAIN = $CERTIFFORCUSTOMDOMAIN"
 echo "archivedir = $archivedir"
 echo "SSLON = $SSLON"
 echo "apachereload = $apachereload"
@@ -205,8 +199,6 @@ echo "ispaidinstance = $ispaidinstance"
 echo "SELLYOURSAAS_LOGIN_FOR_SUPPORT = $SELLYOURSAAS_LOGIN_FOR_SUPPORT"
 echo "directaccess = $directaccess"
 echo "sshaccesstype = $sshaccesstype"
-echo "CUSTOMDOMAIN = $CUSTOMDOMAIN"
-echo "WEBSITENAME = $WEBSITENAME"
 echo "ErrorLog = $ErrorLog"
 
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
@@ -236,12 +228,9 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 	echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-				  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
-            	  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
-            	  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
-                  sed -e 's/__webSSLCustomCertificateCRT__/$webSSLCustomCertificateCRT/g' | \
-                  sed -e 's/__webSSLCustomCertificateKEY__/$webSSLCustomCertificateKEY/g' | \
-                  sed -e 's/__webSSLCustomCertificateIntermediate__/$webSSLCustomCertificateIntermediate/g' | \
+				  sed -e 's/__webSSLCertificateCRT__/$webSSLCustomCertificateCRT/g' | \
+            	  sed -e 's/__webSSLCertificateKEY__/$webSSLCustomCertificateKEY/g' | \
+            	  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCustomCertificateIntermediate/g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -256,12 +245,9 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-				  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
-            	  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
-            	  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
-                  sed -e "s/__webSSLCustomCertificateCRT__/$webSSLCustomCertificateCRT/g" | \
-                  sed -e "s/__webSSLCustomCertificateKEY__/$webSSLCustomCertificateKEY/g" | \
-                  sed -e "s/__webSSLCustomCertificateIntermediate__/$webSSLCustomCertificateIntermediate/g" | \
+				  sed -e "s/__webSSLCertificateCRT__/$webSSLCustomCertificateCRT/g" | \
+            	  sed -e "s/__webSSLCertificateKEY__/$webSSLCustomCertificateKEY/g" | \
+            	  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCustomCertificateIntermediate/g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
