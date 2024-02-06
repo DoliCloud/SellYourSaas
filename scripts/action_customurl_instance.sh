@@ -298,34 +298,55 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		mkdir $customcrtfolder; chown admin.admin $customcrtfolder;
 	fi
 
-	#echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"
 
-	#echo certbot certonly --webroot -w $instancedir/htdocs/.well-known -d www.$customurl
-	#certbot certonly --webroot -w $instancedir/htdocs/.well-known -d www.$customurl
-	#export certko=$?
+	echo certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
+	certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
+	export certko=$?
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file for custom url = $certko"
 	
-	#echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file for custom url = $certko"
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
+		echo "Failed to generate custom certificate www.$customurl for virtualhost $apacheconf: certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in custom certificate generation" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi
 
-	#echo "Link certificate for virtualhost with
-	#	ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
-	#	ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
-	#	ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
-	#"
-	#ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
-	#ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
-	#ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Link of generated cert file for custom url"
+	echo "Link certificate for virtualhost with
+		ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
+		ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
+		ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+	"
+	ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
+	export certkeyko=$?
+	ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
+	export certcrtko=$?
+	ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+	export certinterko=$?
+
+	if [[ "x$certkeyko" != "x0" ]] || [[ "x$certcrtko" != "x0" ]] || [[ "x$certinterko" != "x0" ]]; then
+		echo Error when linking certificate with error certkeyko=$certkeyko , certcrtko=$certcrtko and certinterko=$certinterko
+		echo "Failed to linking certificate www.$customurl for virtualhost $apacheconf: certkeyko=$certkeyko , certcrtko=$certcrtko and certinterko=$certinterko" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in custom certificate linking" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi
 
 
-	#echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate beeing loaded"
-	#service apache2 reload
-	#if [[ "x$?" != "x0" ]]; then
-	#	echo Error when running service apache2 reload
-	#	echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
-	#	sleep 1
-	#	exit 20
-	#else
-	#	sleep 3
-	#fi	
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate beeing loaded"
+	service apache2 reload
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running service apache2 reload
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi	
 fi
 
 
