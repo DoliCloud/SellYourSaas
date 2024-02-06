@@ -252,8 +252,7 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
-				  sed -e 's;__webAppPath__;$instancedir;g' | \
-				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
+				  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -273,8 +272,7 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
-				  sed -e "s;__webAppPath__;$instancedir;g" | \
-				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
+				  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 	export vhostko=$?
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
 
@@ -295,26 +293,47 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 	export customcrtfolder="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 
 	if [[ ! -d $customcrtfolder ]]; then
-		echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
-		mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
+		echo "Create cert directory with mkdir $customcrtfolder; chown admin.admin $customcrtfolder;"
+		mkdir $customcrtfolder; chown admin.admin $customcrtfolder;
 	fi
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"
 
-	echo certbot certonly --webroot -w $instancedir/documents/website/ -d www.$customurl
-	certbot certonly --webroot -w $instancedir/documents/website/ -d www.$customurl
+	echo certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
+	certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
 	export certko=$?
-	
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file for custom url = $certko"
+	
+	if [[ "x$?" != "x0" ]]; then
+		echo Error when running certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
+		echo "Failed to generate custom certificate www.$customurl for virtualhost $apacheconf: certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in custom certificate generation" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi
 
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Link of generated cert file for custom url"
 	echo "Link certificate for virtualhost with
 		ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
 		ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
 		ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
 	"
 	ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
+	export certkeyko=$?
 	ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
+	export certcrtko=$?
 	ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+	export certinterko=$?
+
+	if [[ "x$certkeyko" != "x0" ]] || [[ "x$certcrtko" != "x0" ]] || [[ "x$certinterko" != "x0" ]]; then
+		echo Error when linking certificate with error certkeyko=$certkeyko , certcrtko=$certcrtko and certinterko=$certinterko
+		echo "Failed to linking certificate www.$customurl for virtualhost $apacheconf: certkeyko=$certkeyko , certcrtko=$certcrtko and certinterko=$certinterko" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in custom certificate linking" $EMAILTO 
+		sleep 1
+		exit 20
+	else
+		sleep 3
+	fi
 
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate beeing loaded"
