@@ -229,7 +229,7 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "rename" ]]; then
 
-	if [[ "$fqnold" !="-.-" ]] && [[ "$fqn" != "$fqnold" ]]; then
+	if [[ "$fqnold" != "-.-" ]] && [[ "$fqn" != "$fqnold" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, check if new virtual host $fqn exists"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqn.conf"
@@ -484,7 +484,7 @@ if [[ "$mode" == "rename" ]]; then
 
 
 	# If we rename instance
-	if [[ "$fqnold" !="-.-" ]] && [[ "$fqn" != "$fqnold" ]]; then
+	if [[ "$fqnold" != "-.-" ]] && [[ "$fqn" != "$fqnold" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, delete old virtual name $fqnold"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqnold.conf"
