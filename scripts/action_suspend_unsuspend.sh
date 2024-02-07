@@ -229,7 +229,7 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "rename" ]]; then
 
-	if [[ "$fqn" != "$fqnold" ]]; then
+	if [[ "$fqnold" !="-.-" ]] && [[ "$fqn" != "$fqnold" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, check if new virtual host $fqn exists"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqn.conf"
@@ -356,14 +356,25 @@ if [[ "$mode" == "rename" ]]; then
 				# because we added a custom url 
 				
 				# Generate the letsencrypt certificate
-				# @TODO
-				
-                # certbot certonly --webroot -w $instancedir -d $customurl 
-                # create links                                  
+                echo "certbot certonly --webroot -w $instancedir -d $customurl"
+                certbot certonly --webroot -w $instancedir -d $customurl
+
+                # create links
+				if [[ -e /etc/letsencrypt/live/$customurl/cert.pem ]]; then
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Link of generated cert file for custom url"
+					echo "Link certificate for virtualhost with
+						ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.key
+						ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt
+						ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl-intermediate.crt
+					"
+					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.key
+					ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt
+					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl-intermediate.crt
+				fi
 			fi
 			
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
 				export webCustomSSLCertificateKEY=$webSSLCertificateKEY
 				export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
@@ -473,7 +484,7 @@ if [[ "$mode" == "rename" ]]; then
 
 
 	# If we rename instance
-	if [[ "$fqn" != "$fqnold" ]]; then
+	if [[ "$fqnold" !="-.-" ]] && [[ "$fqn" != "$fqnold" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, delete old virtual name $fqnold"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqnold.conf"
