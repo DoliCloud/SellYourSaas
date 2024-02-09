@@ -353,11 +353,25 @@ if [[ "$mode" == "rename" ]]; then
 			# We must create it using letsencrypt if not yet created
 			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				# When we rename, it may be because we change abc.with... into def.with..., or
-				# because we added a custom url 
-				
+				# because we added a custom url
+
+				if [[ ! -d $instancedir/htdocs/.well-known ]]; then
+                	echo "mkdir $instancedir/htdocs/.well-known"
+                	mkdir $instancedir/htdocs/.well-known
+                	echo "chown $osusername:$osusername $instancedir/htdocs/.well-known"
+					chown $osusername:$osusername $instancedir/htdocs/.well-known
+				fi
+
+				if [[ ! -d $instancedir/htdocs/.well-known/acme-challenge ]]; then
+                	echo "mkdir $instancedir/htdocs/.well-known/acme-challenge"
+                	mkdir $instancedir/htdocs/.well-known/acme-challenge
+                	echo "chown $osusername:$osusername $instancedir/htdocs/.well-known/acme-challenge"
+					chown $osusername:$osusername $instancedir/htdocs/.well-known/acme-challenge
+				fi
+
 				# Generate the letsencrypt certificate
-                echo "certbot certonly --webroot -w $instancedir -d $customurl"
-                certbot certonly --webroot -w $instancedir -d $customurl
+                echo "certbot certonly --webroot -w $instancedir/htdocs -d $customurl"
+                certbot certonly --webroot -w $instancedir/htdocs -d $customurl
 
                 # create links
 				if [[ -e /etc/letsencrypt/live/$customurl/cert.pem ]]; then
