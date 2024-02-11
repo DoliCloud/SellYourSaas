@@ -229,7 +229,7 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "rename" ]]; then
 
-	if [[ "$fqn" != "$fqnold" ]]; then
+	if [[ "$fqnold" != "-.-" ]] && [[ "$fqn" != "$fqnold" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, check if new virtual host $fqn exists"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqn.conf"
@@ -353,17 +353,42 @@ if [[ "$mode" == "rename" ]]; then
 			# We must create it using letsencrypt if not yet created
 			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				# When we rename, it may be because we change abc.with... into def.with..., or
-				# because we added a custom url 
-				
+				# because we added a custom url
+
+				if [[ ! -d $instancedir/htdocs/.well-known ]]; then
+                	echo "mkdir $instancedir/htdocs/.well-known"
+                	mkdir $instancedir/htdocs/.well-known
+                	echo "chown $osusername:$osusername $instancedir/htdocs/.well-known"
+					chown $osusername:$osusername $instancedir/htdocs/.well-known
+				fi
+
+				if [[ ! -d $instancedir/htdocs/.well-known/acme-challenge ]]; then
+                	echo "mkdir $instancedir/htdocs/.well-known/acme-challenge"
+                	mkdir $instancedir/htdocs/.well-known/acme-challenge
+                	echo "chown $osusername:$osusername $instancedir/htdocs/.well-known/acme-challenge"
+					chown $osusername:$osusername $instancedir/htdocs/.well-known/acme-challenge
+				fi
+
 				# Generate the letsencrypt certificate
-				# @TODO
-				
-                # certbot certonly --webroot -w $instancedir -d $customurl 
-                # create links                                  
+                echo "certbot certonly --webroot -w $instancedir/htdocs -d $customurl"
+                certbot certonly --webroot -w $instancedir/htdocs -d $customurl
+
+                # create links
+				if [[ -e /etc/letsencrypt/live/$customurl/cert.pem ]]; then
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Link of generated cert file for custom url"
+					echo "Link certificate for virtualhost with
+						ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.key
+						ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt
+						ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl-intermediate.crt
+					"
+					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.key
+					ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt
+					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl-intermediate.crt
+				fi
 			fi
 			
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
 				export webCustomSSLCertificateKEY=$webSSLCertificateKEY
 				export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
@@ -473,7 +498,7 @@ if [[ "$mode" == "rename" ]]; then
 
 
 	# If we rename instance
-	if [[ "$fqn" != "$fqnold" ]]; then
+	if [[ "$fqnold" != "-.-" ]] && [[ "$fqn" != "$fqnold" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, delete old virtual name $fqnold"
 
 		export apacheconf="/etc/apache2/sellyoursaas-online/$fqnold.conf"
