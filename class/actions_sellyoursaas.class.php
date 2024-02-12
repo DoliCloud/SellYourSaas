@@ -1315,11 +1315,11 @@ class ActionsSellyoursaas
 		$this->results['head'] = $head;
 
 		$arrayoftypes = array(
-			'packages' => array('label' => 'Packages', 'picto'=>'label', 'ObjectClassName' => 'Packages', 'enabled' => $conf->sellyoursaas->enabled, 'ClassPath' => "/sellyoursaas/class/packages.class.php", 'langs'=>'sellyousaas@sellyoursaas')
+			'packages' => array('label' => 'Packages', 'picto'=>'label', 'ObjectClassName' => 'Packages', 'enabled' => isModEnabled('sellyoursaas'), 'ClassPath' => "/sellyoursaas/class/packages.class.php", 'langs'=>'sellyousaas@sellyoursaas')
 		);
 		$this->results['arrayoftype'] = $arrayoftypes;
 
-		return 1;
+		return 0;
 	}
 
 	/**
