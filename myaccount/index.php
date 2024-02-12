@@ -2438,7 +2438,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		if (!$error) {
 			//$object->context["options_websitename"] = $website->ref;
 			$object->array_options['options_custom_url'] = urlencode($custom_url);
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction("deploycustomurl", $object);
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction("rename", $object);
 			if ($result <= 0) {
 				$error++;
 			}
