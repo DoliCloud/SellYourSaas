@@ -2792,7 +2792,13 @@ Sometimes, a reboot of server may be required to take into account any change on
 
 All the disabled profiles are visible into */etc/apparmor.d/disable*
 
-The log are visible into */var/log/kern.log* or */var/log/audit/audit.log*. You can use *aa-logprof* to know the log file used and convert its content into real rules into existing profiles.
+The log are visible into */var/log/kern.log* or */var/log/audit/audit.log*. 
+To solve a problem of permission, you can use 
+[source,bash]
+---------------
+aa-logprof
+---------------
+Then execut the failed command or access and answer S to update the profile.
 
 
 * Note: From Ubuntu 20.04+, to unload ALL apparmor profiles and reload them:
