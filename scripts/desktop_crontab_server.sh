@@ -1,6 +1,6 @@
 #!/bin/bash
 #----------------------------------------------------------------
-# This script allows to edit crontab on remote servers
+# This script allows to edit crontab on remote servers using the change_crontab_server.yml playbook.
 #----------------------------------------------------------------
 
 
@@ -10,7 +10,7 @@ source /etc/lsb-release
 
 if [ "x$2" == "x" ]; then
    echo "***** Edit of crontab on remote servers *****"
-   echo "Usage:   $0  hostfile  [hostgrouporname]  (reboot)"
+   echo "Usage:   $0  hostfile  [hostgrouporname]"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  myhostfile  master,deployment"
    echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com  reboot"
@@ -36,8 +36,6 @@ cd $currentpath/ansible
 echo "Execute ansible for host group $1 and targets $target"
 pwd
 
-
-#command="ansible-playbook -K launch_apt_upgrade.yml -i hosts-$1 -e 'target="$target"' --limit=*.mydomain.com"
 
 command='ansible-playbook -K change_crontab_server.yml -i hosts-'$1' -e "target='$target' username='$username'"' 
 

@@ -1,0 +1,20 @@
+---
+# Script to change an option=value of an entry into htdocs/conf/conf.php
+#
+# Examples to run the script:
+# ansible-playbook -K bannedip.yml -i hosts-xxx -e 'target=targethost option=<your_option> value=<new_value>'
+# ansible-playbook -K bannedip.yml -i hosts-xxx -e 'target=targethost option=<your_option> value=<new_value>' --limit=*.mydomain.com
+#
+
+- name: Get banned IP by Fail2Ban
+  hosts: '{{target}}'
+  become: yes
+  
+  tasks:
+    - name: Obtenir la liste des IP bannies par Fail2Ban
+      ansible.builtin.shell: fail2ban-client status | grep "Jail list:" | sed 's/.*Jail list://' | tr -d '[:space:]' | tr ',' '\n' | xargs -I {} sh -c 'echo "{}:"; fail2ban-client status {} | grep "Banned IP list"' 
+      register: banned_ips
+
+    - name: Afficher les IPs bannies
+      ansible.builtin.debug:
+        msg: "{{ banned_ips.stdout_lines }}"
