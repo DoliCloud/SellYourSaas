@@ -351,7 +351,7 @@ if [[ "$mode" == "rename" ]]; then
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
 			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
 			# We must create it using letsencrypt if not yet created
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt ]]; then
 				# When we rename, it may be because we change abc.with... into def.with..., or
 				# because we added a custom url
 
@@ -388,16 +388,16 @@ if [[ "$mode" == "rename" ]]; then
 			fi
 			
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt ]]; then
 				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
 				export webCustomSSLCertificateKEY=$webSSLCertificateKEY
 				export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
-				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
-				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
-				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.key
-				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
+				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt
+				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.key
+				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl-intermediate.key
+				export CERTIFFORCUSTOMDOMAIN="$fqn-$customurl"
 			fi
 		fi
 		
