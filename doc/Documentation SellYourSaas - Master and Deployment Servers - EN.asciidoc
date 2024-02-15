@@ -6074,6 +6074,7 @@ Please make sure that the snapd.apparmor service is enabled and started
 ---------------
 
 It means the package snapd is not install. Launch "apt install snapd" to fix this.
+If package was already installed, try "service snapd.apparmor restart"
 
 
 ==== Error DataDog Unable to get disk metrics
