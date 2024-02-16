@@ -4289,9 +4289,11 @@ so the old URL will still works (temporarily until the old instance is closed)
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly*
 
 
-=== Increase size of disk
+=== Increase/extend size of disk
 
 * Take a snapshot of the disk to resize for backup. Create a new disk from this snapshot and attach it to another server (see chapter <<adding_a_disk>>) to ensure it is readable and you have backup files handy.
+
+If this is not a file system:
 
 * Unmount the filesystem:
 
@@ -4322,7 +4324,7 @@ Y		  (the num of the part)
 q
 ---------------
 
-* Remount the disk for acknowledgement and resizing without erasing data.
+* If the partition has the good size, remount the disk for acknowledgement and resize the filesystem (this should not erase data).
 
 [source,bash]
 ---------------
