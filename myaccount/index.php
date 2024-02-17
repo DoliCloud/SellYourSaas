@@ -172,7 +172,7 @@ $MAXINSTANCEVIGNETTE = 4;
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : ($mode == 'instance' ? $MAXINSTANCEVIGNETTE : 20);
 $sortfield = GETPOST('sortfield', 'alphanohtml');
-$sortorder = GETPOST('sortorder', 'alphanohtml');
+$sortorder = GETPOST('sortorder', 'aZ09');
 $page = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
 if (empty($page) || $page == -1) {
 	$page = 0;
