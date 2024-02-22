@@ -1060,6 +1060,7 @@
         line: '<!-- <policy domain="coder" rights="none" pattern="PDF" /> -->'
         
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
+      ignore_errors: true
       ansible.builtin.template:
         src: ../../etc/datadog-agent/conf.d/disk.d/conf.yaml
         dest: /etc/datadog-agent/conf.d/disk.d/conf.yaml
@@ -1068,6 +1069,7 @@
         mode: '0644'
 
     - name: Set datadog config files /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+      ignore_errors: true
       ansible.builtin.template:
         src: ../../etc/datadog-agent/conf.d/mcache.d/conf.yaml
         dest: /etc/datadog-agent/conf.d/mcache.d/conf.yaml
@@ -1076,6 +1078,7 @@
         mode: '0644'
 
     - name: Set datadog config files /etc/datadog-agent/conf.d/postfix.d/conf.yaml
+      ignore_errors: true
       ansible.builtin.template:
         src: ../../etc/datadog-agent/conf.d/postfix.d/conf.yaml
         dest: /etc/datadog-agent/conf.d/postfix.d/conf.yaml
