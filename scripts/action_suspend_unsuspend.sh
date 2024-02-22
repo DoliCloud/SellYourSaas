@@ -377,27 +377,27 @@ if [[ "$mode" == "rename" ]]; then
 				if [[ -e /etc/letsencrypt/live/$customurl/cert.pem ]]; then
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Link of generated cert file for custom url"
 					echo "Link certificate for virtualhost with
-						ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.key
-						ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt
-						ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl-intermediate.crt
+						ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
+						ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
+						ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
 					"
-					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.key
-					ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt
-					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl-intermediate.crt
+					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
+					ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
+					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
 				fi
 			fi
 			
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt ]]; then
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
 				export webCustomSSLCertificateKEY=$webSSLCertificateKEY
 				export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
-				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt
-				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.key
-				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl-intermediate.key
-				export CERTIFFORCUSTOMDOMAIN="$fqn-$customurl"
+				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
+				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
+				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.key
+				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
 			fi
 		fi
 		
