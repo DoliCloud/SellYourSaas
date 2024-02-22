@@ -130,6 +130,7 @@ class Deploymentserver extends CommonObject
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModification', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
+		'note' => array('type' => 'text', 'label' => 'Note', 'enabled' => '1', 'position' => 167, 'notnull' => 0, 'visible' => '1',),
 	);
 
 	/**
@@ -158,6 +159,7 @@ class Deploymentserver extends CommonObject
 	public $servercustomerannouncestatus;
 	public $servercustomerannounce;
 	public $fk_user_modif;
+	public $note;
 	// END MODULEBUILDER PROPERTIES
 
 

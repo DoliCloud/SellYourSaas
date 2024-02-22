@@ -157,4 +157,5 @@ ALTER TABLE llx_sellyoursaas_whitelistip ADD UNIQUE INDEX uk_sellyoursaas_whitel
 ALTER TABLE llx_dolicloud_stats RENAME TO llx_sellyoursaas_stats;
 
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN fk_user_modif integer;
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN note text;
 
