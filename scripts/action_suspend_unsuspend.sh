@@ -351,7 +351,7 @@ if [[ "$mode" == "rename" ]]; then
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
 			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
 			# We must create it using letsencrypt if not yet created
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-$customurl.crt ]]; then
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				# When we rename, it may be because we change abc.with... into def.with..., or
 				# because we added a custom url
 
