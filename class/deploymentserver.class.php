@@ -149,6 +149,7 @@ class Deploymentserver extends CommonObject
 	public $entity;
 
 	public $note_private;
+	public $note_public;
 	public $date_creation;
 	public $date_modification;
 	public $status;
@@ -159,7 +160,6 @@ class Deploymentserver extends CommonObject
 	public $servercustomerannouncestatus;
 	public $servercustomerannounce;
 	public $fk_user_modif;
-	public $note;
 	// END MODULEBUILDER PROPERTIES
 
 
