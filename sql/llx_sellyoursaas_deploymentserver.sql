@@ -29,6 +29,6 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	servercountries text,
 	servercustomerannouncestatus integer,
 	servercustomerannounce text,
-	note text
+	note_public text
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
