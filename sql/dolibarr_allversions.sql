@@ -117,6 +117,7 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	ref varchar(128) NOT NULL,
 	entity integer DEFAULT 1 NOT NULL,  -- multi company id
 	note_private text, 
+	note_public text, 
 	date_creation datetime NOT NULL,
 	date_modification timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	status integer DEFAULT 0 NOT NULL,
@@ -157,5 +158,5 @@ ALTER TABLE llx_sellyoursaas_whitelistip ADD UNIQUE INDEX uk_sellyoursaas_whitel
 ALTER TABLE llx_dolicloud_stats RENAME TO llx_sellyoursaas_stats;
 
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN fk_user_modif integer;
-ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN note text;
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN note_public text;
 
