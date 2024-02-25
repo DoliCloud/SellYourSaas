@@ -1260,7 +1260,7 @@ class ActionsSellyoursaas
 	 */
 	public function loadDataForCustomReports($parameters, &$action, $hookmanager)
 	{
-		global $conf, $user, $langs;
+		global $user, $langs;
 
 		$langs->load("sellyoursaas@sellyoursaas");
 
@@ -1298,12 +1298,12 @@ class ActionsSellyoursaas
 			$this->results['picto'] = 'sellyoursaas@sellyoursaas';
 		}
 
-		//if ($parameters['tabfamily'] == 'sellyoursaas') {
-		$head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily']) ? '' : '&tabfamily='.$parameters['tabfamily']);
-		$head[$h][1] = $langs->trans("CustomReports");
-		$head[$h][2] = 'customreports';
-		$h++;
-		//}
+		if ($parameters['tabfamily'] == 'sellyoursaas') {
+			$head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily']) ? '' : '&tabfamily='.$parameters['tabfamily']);
+			$head[$h][1] = $langs->trans("CustomReports");
+			$head[$h][2] = 'customreports';
+			$h++;
+		}
 
 		if ($parameters['tabfamily'] == 'sellyoursaas') {
 			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
