@@ -20,6 +20,7 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	ref varchar(128) NOT NULL,
 	entity integer DEFAULT 1 NOT NULL,  -- multi company id
 	note_private text, 
+	note_public text,
 	date_creation datetime NOT NULL,
 	date_modification timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	status integer NOT NULL,
@@ -28,7 +29,6 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	ipaddress varchar(128) NOT NULL,
 	servercountries text,
 	servercustomerannouncestatus integer,
-	servercustomerannounce text,
-	note_public text
+	servercustomerannounce text
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
