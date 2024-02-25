@@ -405,6 +405,7 @@ Add the following line in the */etc/sudoers* file to reposition the HOME accordi
 [source, conf]
 ---------------
 Defaults set_home
+Defaults use_pty
 ---------------
 
 Create a file */etc/sudoers.d/myunixlogin* with the content
@@ -4317,10 +4318,10 @@ lsof | grep "/mnt/disk"
 ---------------
 fdisk -l
 parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
-print all
+print all free
 resizepart 
 Y		  (the num of the part)
-999GB    (Don't input the default value but the max value of disk size found on line "Disk...:" that was shown by "print all")
+999GB    (Don't input the default value but the max value of disk size found on line "Disk...:" that was shown by "print all free")
 q
 ---------------
 
@@ -4825,30 +4826,103 @@ openstack server create --flavor FLAVOR_ID --image BACKUP_IMAGE_ID --nic net-id=
 See chapter <<Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_server>>
 
 
-=== Booting a server in rescue mode / Restoring a root access or a server blocked by a firewall
+=== Reducing a filesystem/partition
+
+To reduce the filesystem partition, you must unmount it.
+So if you need to resize a boot filesystem, you need to boot in rescue mode. 
+
+Warning: Reducing size of a filesystem does not work on OVH Public Cloud boot systems, only on added hard disks. 
+  
+
+*Reboot in rescue mode With OVH Public Cloud*
+
+* Click on the instance where you want to reset the password. 
+
+* Click on the "Reboot in rescue mode" entry and validate.
+
+When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
+or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
+
+Find attached disks to identify the system partition disk.
+
+[source,bash]
+---------------
+lsblk -a / lsblk -f
+of 
+fdisk -l
+---------------
+
+To reduce the Filesystem size (for example to 20Gb), launch:
+
+[source,bash]
+---------------
+sudo resize2fs -f /dev/sdX9 20G
+ou
+sudo brfs_growfs TODO for a btrfs filesystem
+---------------
+
+You can remount the partition and check with df the new size. Unmount the filesystem.
+
+Lancer *dumpe2fs -h /dev/sdb1|grep Block* pour récupérer le nombre est taille de bloc puis *parted /dev/sdX unit b print free* pour récupérer l'octet de début
+de la partition et calculer le secteur de fin:
+
+[source,bash]
+---------------
+dumpe2fs -h /dev/sdX9 | grep Block
+parted /dev/sdX unit b print free
+echo $$((NbreDeBloc * TailleDeBloc + StartSector - 1));
+---------------
+
+Now resize the partition
+
+[source,bash]
+---------------
+sudo parted /dev/sdX unit b rm 1 mkpart primary StartSector NewEndSector
+---------------
+
+Check the filesystem. If you have error, may be you set a bad size on partition, try to resize if with good values.
+
+[source,bash]
+---------------
+e2fsck -f /dev/sdX9
+---------------
+
+If the partition was not named using the label into the */etc/fstab*, run blkid to get the LABEL or UUID and update the */etc/fstab* file.
+
+---------------
+blkid
+mount /dev/sdX9 /mnt
+vi /mnt/etc/fstab
+---------------
+
+ 
+
+
+
+=== Restoring a root access or a server blocked by a firewall
 
 To restore a root access, first you need to reboot your server in boot rescue mode.
 Use the Cloud service interface to switch to rescue mode. The server will be rebooted and a link to log in will be provided.
 
 *Reboot in rescue mode With OVH Public Cloud*
 
-* Click on the instance where you want  to reset the password. 
+* Click on the instance where you want to reset the password. 
 
 * Click on the "Reboot in rescue mode" entry and validate.
 
 When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
-or the root password for the resuce mode will be shown).
+or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
 
 Find attached disks to identify the system partition disk.
 
 [source,bash]
 ---------------
-lsblk
+lsblk -a / lsblk -f
 of 
 fdisk -l
 ---------------
 
-Example when using lsblk:
+Example when using lsblk -a:
 
 [source,bash]
 ---------------
@@ -6171,7 +6245,7 @@ Resolving changelogs.ubuntu.com (changelogs.ubuntu.com)... 2620:2d:4000:1::2b, 2
 Connecting to changelogs.ubuntu.com (changelogs.ubuntu.com)|2620:2d:4000:1::2b|:443...
 ---------------
 
-It may mean that you IPv6 connection is wrong. Disable the firewall, and try to disable the IPv6 interface
+It may mean that your IPv6 connection is wrong. Disable the firewall, and try to disable the IPv6 interface
 
 [source,bash]
 ---------------
