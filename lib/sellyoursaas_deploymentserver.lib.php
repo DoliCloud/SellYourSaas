@@ -34,7 +34,7 @@ function deploymentserverPrepareHead($object)
 	$langs->load("sellyoursaas@sellyoursaas");
 
 	$showtabofpagecontact = 0;
-	$showtabofpagenote = 0;
+	$showtabofpagenote = 1;
 	$showtabofpagedocument = 0;
 	$showtabofpageagenda = 0;
 
