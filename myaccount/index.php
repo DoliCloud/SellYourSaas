@@ -2717,7 +2717,7 @@ if ($welcomecid > 0) {
 		'.$langs->trans("YouCanAccessYourInstance", $productlabel).'&nbsp:
 		</p>
 		<p class="well">
-		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank" rel="noopener">'.$contract->ref_customer.'</a>';
+		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank" rel="noopener">https://'.$contract->ref_customer.'</a>';
 
 		print '<br> '.$langs->trans("Username").' : '.($_SESSION['initialapplogin'] ? '<strong>'.$_SESSION['initialapplogin'].'</strong>' : 'NA').'
 		<br> '.$langs->trans("Password").' : ';
