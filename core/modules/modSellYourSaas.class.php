@@ -893,7 +893,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('ippublicmain', "IPPublicMain", 'varchar', 105, '255', 'user', 0, 0, '', '', 1, '', 1, 'IPPublicMainDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
 		// Routine to transform SUB_DOMAIN_NAMES and SUB_DOMAIN_IP constants into object
-		if ($resultx > 0 && !getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
+		if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 			$errors = 0;
 			$now = dol_now();
 			$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
