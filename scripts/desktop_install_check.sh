@@ -1,6 +1,6 @@
 #!/bin/bash
 #----------------------------------------------------------------
-# This script allows to launch an apt update / upgrade on remote servers
+# This script checks and fix sellyoursaas setup on remote servers. It can also fix or update apache or php version and setup.
 #----------------------------------------------------------------
 
 
