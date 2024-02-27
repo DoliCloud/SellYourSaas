@@ -120,7 +120,7 @@ if ($action == 'set') {
 	$reg = array();
 
 	if (! $error) {
-		$valueforkey = GETPOST("SELLYOURSAAS_PUBLIC_KEY", 'none');
+		$valueforkey = GETPOST("SELLYOURSAAS_PUBLIC_KEY", 'alphanohtml');
 		if (preg_match('/pub$/m', $valueforkey)) {
 			setEventMessages($langs->trans("ErrorFieldForSSHKeyMustContainsTheKeyStringNotTheNameOfFile"), null, 'errors');
 			$error++;
