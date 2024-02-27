@@ -351,7 +351,7 @@ print '</tr>';
 */
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("DefaultCategoryForSaaSServices").'</td>';
-print '<td>';
+print '<td class="width200">';	// We force width so the picto+combo can calculate width and the combo size can be adjusted according to size of cell
 $defaultproductcategid=getDolGlobalString('SELLYOURSAAS_DEFAULT_PRODUCT_CATEG');
 print img_picto('', 'category', 'class="pictofixedwidth"');
 print $formother->select_categories(Categorie::TYPE_PRODUCT, $defaultproductcategid, 'SELLYOURSAAS_DEFAULT_PRODUCT_CATEG', 0, 1, 'minwidth100 maxwidth400 widthcentpercentminusx');
@@ -360,10 +360,10 @@ print '<td><span class="opacitymedium small">SaaS Products</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("DefaultCategoryForSaaSCustomers").'</td>';
-print '<td>';
+print '<td class="width200">';	// We force width so the picto+combo can calculate width and the combo size can be adjusted according to size of cell
 $defaultcustomercategid=getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG');
 print img_picto('', 'category', 'class="pictofixedwidth"');
-print $formother->select_categories(Categorie::TYPE_CUSTOMER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG', 0, 1, 'minwidth100 maxwidth400 widthcentpercentminus');
+print $formother->select_categories(Categorie::TYPE_CUSTOMER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG', 0, 1, 'minwidth100 maxwidth400 widthcentpercentminusx');
 print '</td>';
 print '<td><span class="opacitymedium small">SaaS Customers</span></td>';
 print '</tr>';
