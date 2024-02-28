@@ -717,37 +717,46 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 /**
  * Function to get nb of users for a certain contract
  *
+ * @param	string		$contractref	Id of contract for user count
  * @param	int			$userproductid	Id of product for user count
  * @return 	int							<0 if error or Number of users for contract
  */
-function sellyoursaasGetNbUsersContract($userproductid = 0) {
-	global $db, $object;
+function sellyoursaasGetNbUsersContract($contractref = '', $userproductid = 0) {
+	global $db;
 
-	$dbprefix = $object->array_options['options_prefix_db'];
+	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+	$contract = new Contrat($db);
+	$result = $contract->fetch(0, $contractref);
+	if ($result <= 0) {
+		setEventMessages($contract->error, $contract->errors, 'errors');
+		return -1;
+	}
+
+	$dbprefix = $contract->array_options['options_prefix_db'];
 	if (empty($dbprefix)) {
 		$dbprefix = MAIN_DB_PREFIX;
 	}
 	$loginforsupport  = getDolGlobalString("SELLYOURSAAS_LOGIN_FOR_SUPPORT");
 
-	$server = $object->ref_customer;
+	$server = $contract->ref_customer;
 	if (empty($hostname_db)) {
-		$hostname_db = $object->array_options['options_hostname_db'];
+		$hostname_db = $contract->array_options['options_hostname_db'];
 	}
-	$port_db = $object->port_db;
+	$port_db = $contract->port_db;
 	if (empty($port_db)) {
-		$port_db = (! empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+		$port_db = (! empty($contract->array_options['options_port_db']) ? $contract->array_options['options_port_db'] : 3306);
 	}
-	$username_db = $object->username_db;
+	$username_db = $contract->username_db;
 	if (empty($username_db)) {
-		$username_db = $object->array_options['options_username_db'];
+		$username_db = $contract->array_options['options_username_db'];
 	}
-	$password_db = $object->password_db;
+	$password_db = $contract->password_db;
 	if (empty($password_db)) {
-		$password_db = $object->array_options['options_password_db'];
+		$password_db = $contract->array_options['options_password_db'];
 	}
-	$database_db = $object->database_db;
+	$database_db = $contract->database_db;
 	if (empty($database_db)) {
-		$database_db = $object->array_options['options_database_db'];
+		$database_db = $contract->array_options['options_database_db'];
 	}
 
 	$newdb = getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
@@ -773,7 +782,7 @@ function sellyoursaasGetNbUsersContract($userproductid = 0) {
 		dol_print_error($db);
 	}
 
-	$contractlines = $object->lines;
+	$contractlines = $contract->lines;
 
 	foreach ($contractlines as $contractline) {
 		if (empty($userproductid) || $contractline->fk_product == $userproductid) {
