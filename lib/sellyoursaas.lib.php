@@ -782,6 +782,10 @@ function sellyoursaasGetNbUsersContract($contractref = '', $userproductid = 0) {
 		dol_print_error($db);
 	}
 
+	if (is_object($newdb) && $newdb->connected) {
+		$newdb->close();
+	}
+
 	$contractlines = $contract->lines;
 
 	foreach ($contractlines as $contractline) {
