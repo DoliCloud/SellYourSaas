@@ -25,6 +25,9 @@ if (!defined('NOSESSION')) {
 if (!defined('NOREQUIREDB')) {
 	define('NOREQUIREDB', '1');
 }				// Do not create database handler $db
+if (!defined('NOREQUIREVIRTUALURL')) {
+	define('NOREQUIREVIRTUALURL', '1');
+}
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -252,6 +255,15 @@ if ($handle) {
 		if ($mode == 'get') {
 			$reg = array();
 			if (preg_match('/^('.preg_quote($entry).')\s+A\s+(.*)$/', $s, $reg)) {
+				if ($reg[1] == $entry) {
+					print $reg[2];
+					if (!$quiet) {
+						print "\n";
+					}
+					break;
+				}
+			}
+			if (preg_match('/^('.preg_quote($entry).')\s+IN\s+TXT\s+(.*)$/', $s, $reg)) {
 				if ($reg[1] == $entry) {
 					print $reg[2];
 					if (!$quiet) {

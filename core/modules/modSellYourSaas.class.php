@@ -732,7 +732,11 @@ class modSellYourSaas extends DolibarrModules
 	 */
 	public function init($options = '')
 	{
-		$result=$this->_load_tables('/sellyoursaas/sql/');
+		$result = $this->_load_tables('/sellyoursaas/sql/');
+		if ($result <= 0) {
+			$this->error = 'Error in loading sql files';
+			return 0;
+		}
 
 		// Create extrafields
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
@@ -849,6 +853,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('fileinstallmoduleslock', "DateFileInstallmoduleslock", 'datetime', 152, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('latestresupdate_date', "LatestResUpdateDate", 'datetime', 155, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('instanceversion', "InstanceVersion", 'varchar', 156, '128', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		//$resultx=$extrafields->addExtraField('instancemodules', "InstanceModules", 'text', 157, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
 		$resultx=$extrafields->addExtraField('latestbackup_date', "LatestBackupDate", 'datetime', 159, '', 'contrat', 0, 0, '', '', 1, '', -5, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('latestbackup_date_ok', "LatestBackupDateOK", 'datetime', 160, '', 'contrat', 0, 0, '', '', 1, '', -5, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
@@ -888,7 +893,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('ippublicmain', "IPPublicMain", 'varchar', 105, '255', 'user', 0, 0, '', '', 1, '', 1, 'IPPublicMainDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
 		// Routine to transform SUB_DOMAIN_NAMES and SUB_DOMAIN_IP constants into object
-		if ($result > 0 && (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')))) {
+		if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 			$errors = 0;
 			$now = dol_now();
 			$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));

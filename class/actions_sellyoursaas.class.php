@@ -450,6 +450,7 @@ class ActionsSellyoursaas
 			if ($action == 'confirm_undeploy') {
 				$db->begin();
 
+
 				// SAME CODE THAN INTO MYACCOUNT INDEX.PHP
 
 				// Disable template invoice
@@ -510,6 +511,7 @@ class ActionsSellyoursaas
 					$object->array_options['options_deployment_status'] = 'undeployed';
 					$object->array_options['options_undeployment_date'] = dol_now();
 					$object->array_options['options_undeployment_ip'] = $_SERVER['REMOTE_ADDR'];
+					$object->array_options['options_suspendmaintenance_message'] = '';
 
 					$result = $object->update($user);
 					if ($result < 0) {
@@ -1258,7 +1260,7 @@ class ActionsSellyoursaas
 	 */
 	public function loadDataForCustomReports($parameters, &$action, $hookmanager)
 	{
-		global $conf, $user, $langs;
+		global $user, $langs;
 
 		$langs->load("sellyoursaas@sellyoursaas");
 
@@ -1296,12 +1298,12 @@ class ActionsSellyoursaas
 			$this->results['picto'] = 'sellyoursaas@sellyoursaas';
 		}
 
-		//if ($parameters['tabfamily'] == 'sellyoursaas') {
-		$head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily']) ? '' : '&tabfamily='.$parameters['tabfamily']);
-		$head[$h][1] = $langs->trans("CustomReports");
-		$head[$h][2] = 'customreports';
-		$h++;
-		//}
+		if ($parameters['tabfamily'] == 'sellyoursaas') {
+			$head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily']) ? '' : '&tabfamily='.$parameters['tabfamily']);
+			$head[$h][1] = $langs->trans("CustomReports");
+			$head[$h][2] = 'customreports';
+			$h++;
+		}
 
 		if ($parameters['tabfamily'] == 'sellyoursaas') {
 			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
@@ -1313,11 +1315,11 @@ class ActionsSellyoursaas
 		$this->results['head'] = $head;
 
 		$arrayoftypes = array(
-			'packages' => array('label' => 'Packages', 'picto'=>'label', 'ObjectClassName' => 'Packages', 'enabled' => $conf->sellyoursaas->enabled, 'ClassPath' => "/sellyoursaas/class/packages.class.php", 'langs'=>'sellyousaas@sellyoursaas')
+			'packages@sellyoursaas' => array('label' => 'Packages', 'picto'=>'label', 'ObjectClassName' => 'Packages', 'enabled' => isModEnabled('sellyoursaas'), 'ClassPath' => "/sellyoursaas/class/packages.class.php", 'langs'=>'sellyousaas@sellyoursaas')
 		);
 		$this->results['arrayoftype'] = $arrayoftypes;
 
-		return 1;
+		return 0;
 	}
 
 	/**

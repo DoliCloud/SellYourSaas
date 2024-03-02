@@ -63,7 +63,7 @@
     user:
       name: '{{ login }}'
       shell: /bin/bash
-      comment: "User created from desktop_admin_users.php"
+      comment: "User created or modified from desktop_admin_users.php"
 
   - name: Set public key of user
     authorized_key:
@@ -179,7 +179,7 @@
     user:
       name: '{{ login }}'
       shell: /bin/bash
-      comment: "User created from desktop_admin_users.php"
+      comment: "User created or modified from desktop_admin_users.php"
       password: '{{ userpassword }}'
       update_password: always
     when: 

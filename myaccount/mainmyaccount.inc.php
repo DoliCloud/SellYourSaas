@@ -250,7 +250,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		}
 
 		print '<title>';
-		if ($title && !empty($conf->global->MAIN_HTML_TITLE) && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) {
+		if ($title && getDolGlobalString('MAIN_HTML_TITLE') && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) {
 			print dol_htmlentities($title);
 		} elseif ($title) {
 			print dol_htmlentities($appli.' - '.$title);
@@ -634,7 +634,7 @@ if (! function_exists('dol_getprefix')) {
 	 */
 	function dol_getprefix($mode = '')
 	{
-		// If prefix is for email (we need to have $conf alreayd loaded for this case)
+		// If prefix is for email (we need to have $conf already loaded for this case)
 		if ($mode == 'email') {
 			global $conf;
 

@@ -857,3 +857,4 @@ CommandToRedeployInstanceOnADeploymentServer=Polecenie ponownego wdrożenia wszy
 InstanceVersion=Wersja instancji
 InvoicePDFNotYetAvailable=Faktura w formacie PDF nie jest jeszcze dostępna
 InstancesToBackupWithoutRedirectionInstances=Instancje do tworzenia kopii zapasowych (płatne lub potwierdzone). Instancje przekierowań nie są uwzględniane.
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Klucz na urządzeniu głównym, aby podpisywać komunikaty o działaniach zdalnych

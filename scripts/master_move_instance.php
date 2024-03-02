@@ -287,8 +287,10 @@ if ($db2->error)
 }*/
 
 $productref = '';
+$forceproductref = '';
 if (isset($argv[4])) {
 	$productref = $argv[4];
+	$forceproductref = $argv[4];
 }
 if (empty($productref)) {
 	// Get tmppackage
@@ -381,10 +383,10 @@ if ($mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 
 
 // Share certificate of old instance by copying them into the common crt dir (they should already be into this directory)
-// TODO If the certificate of the source instance are not into crt directory, we must copy them into the crt directory with read permission to admin user.
+// TODO If the certificate of the source instance are not into crt directory, we must copy them into the sellyoursaas master crt directory with read permission to admin user.
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
-	print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) of instance (generic and custom) into the crt directory (to reuse them on the new instance for backward compatibility).'."\n";
+	print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) of instance (generic and custom) into the sellyoursaas master crt directory (to reuse them on the new instance for backward compatibility).'."\n";
 	foreach (array('', '-custom') as $ext) {
 		foreach (array('.key', '.crt', '-intermediate.crt') as $ext2) {
 			$srcfile = '/etc/apache2/with.sellyoursaas.com'.$ext.$ext2;
@@ -462,7 +464,7 @@ if ($CERTIFFORCUSTOMDOMAIN) {
 }
 
 
-print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) for websites into the crt directory (to reuse them on the new instance for backward compatibility).'."\n";
+print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) for websites into the sellyoursaas master crt directory (to reuse them on the new instance for backward compatibility).'."\n";
 // TODO
 
 
@@ -524,9 +526,9 @@ $newdatabasedb=$newobject->array_options['options_database_db'];
 
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
-	print "Error: Failed to find instance '".$newinstance."'";
+	print "Error: Failed to find target instance '".$newinstance."'";
 	if ($mode == 'test') {
-		print " (it should have been created before but, in test mode, the instance can't be created).\n";
+		print " (it should have been created by this script but, in test mode, the instance can't be created).\n";
 	}
 	print "\n";
 	exit(-1);
@@ -575,7 +577,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 	}
 }
 
-if (empty($productref)) {
+if (empty($forceproductref)) {
 	print "Update price, discount and qty of the new contract lines to match the one on the source.\n";
 
 	foreach ($oldpricesperproduct as $productid => $pricesperproduct) {
@@ -591,7 +593,8 @@ if (empty($productref)) {
 
 			$contractline->qty = $pricesperproduct['qty'];
 			$contractline->remise_percent = $pricesperproduct['discount'];
-			$contractline->price_ht = $pricesperproduct['price_ht'];
+			$contractline->subprice = $pricesperproduct['price_ht'];
+			$contractline->price_ht = $pricesperproduct['price_ht'];	// deprecated
 
 			print "We update line ".$objselect->rowid." with price_ht = ".$pricesperproduct['price_ht']." discount = ".$pricesperproduct['discount']."\n";
 			if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
@@ -948,7 +951,7 @@ if ($mode != 'confirmredirect' && $mode != 'confirmmaintenance') {
 		$suspendmessage = 'https://'.$newinstance;
 		$newip = $newobject->array_options['options_deployment_host'];
 		$comment = 'Move instance keeping a redirect to '.$suspendmessage.', we also set the new IP '.$newip.' into the old DNS file.';
-		print '--- Switch old instance in redirect maintenance mode (redirect to '.$suspendmessage.', new ip to '.$newip.")\n";
+		print '--- Switch old instance in redirect maintenance mode by calling remote action suspendredirect on the old server (set redirect to '.$suspendmessage.', and set the new ip to '.$newip." in DNS)\n";
 
 		$result = $sellyoursaasutils->sellyoursaasRemoteAction('suspendredirect', $oldobject, 'admin', '', '', '0', $comment, 300, $newip);
 		if ($result <= 0) {

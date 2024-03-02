@@ -115,7 +115,7 @@ class Sellyoursaasapi extends DolibarrApi
 	 */
 	public function get($id)
 	{
-		if (!DolibarrApiAccess::$user->rights->sellyoursaas->read) {
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'read')) {
 			throw new RestException(401);
 		}
 
@@ -155,7 +155,7 @@ class Sellyoursaasapi extends DolibarrApi
 		$obj_ret = array();
 		$tmpobject = new Packages($this->db);
 
-		if (!DolibarrApiAccess::$user->rights->sellyoursaas->read) {
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'read')) {
 			throw new RestException(401);
 		}
 
@@ -165,17 +165,17 @@ class Sellyoursaasapi extends DolibarrApi
 
 		// If the internal user must only see his customers, force searching by him
 		$search_sale = 0;
-		/*if ($restrictonsocid && !DolibarrApiAccess::$user->rights->societe->client->voir && !$socid) {
+		/*if ($restrictonsocid && !DolibarrApiAccess::$user->hasRight('societe', 'client', 'voir') && !$socid) {
 			$search_sale = DolibarrApiAccess::$user->id;
 		}*/
 
 		$sql = "SELECT t.rowid";
-		if ($restrictonsocid && (!DolibarrApiAccess::$user->rights->societe->client->voir && !$socid) || $search_sale > 0) {
+		if ($restrictonsocid && (!DolibarrApiAccess::$user->hasRight('societe', 'client', 'voir') && !$socid) || $search_sale > 0) {
 			$sql .= ", sc.fk_soc, sc.fk_user"; // We need these fields in order to filter by sale (including the case where the user can only see his prospects)
 		}
 		$sql .= " FROM ".MAIN_DB_PREFIX.$tmpobject->table_element." as t";
 
-		if ($restrictonsocid && (!DolibarrApiAccess::$user->rights->societe->client->voir && !$socid) || $search_sale > 0) {
+		if ($restrictonsocid && (!DolibarrApiAccess::$user->hasRight('societe', 'client', 'voir') && !$socid) || $search_sale > 0) {
 			$sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc"; // We need this table joined to the select in order to filter by sale
 		}
 		$sql .= " WHERE 1 = 1";
@@ -187,7 +187,7 @@ class Sellyoursaasapi extends DolibarrApi
 		if ($tmpobject->ismultientitymanaged) {
 			$sql .= ' AND t.entity IN ('.getEntity($tmpobject->element).')';
 		}
-		if ($restrictonsocid && (!DolibarrApiAccess::$user->rights->societe->client->voir && !$socid) || $search_sale > 0) {
+		if ($restrictonsocid && (!DolibarrApiAccess::$user->hasRight('societe', 'client', 'voir') && !$socid) || $search_sale > 0) {
 			$sql .= " AND t.fk_soc = sc.fk_soc";
 		}
 		if ($restrictonsocid && $socid) {
@@ -252,8 +252,8 @@ class Sellyoursaasapi extends DolibarrApi
 	 */
 	public function post($request_data = null)
 	{
-		if (!DolibarrApiAccess::$user->rights->sellyoursaas->write) {
-			throw new RestException(401);
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'write')) {
+			throw new RestException(403);
 		}
 		// Check mandatory fields
 		$result = $this->_validate($request_data);
@@ -280,8 +280,8 @@ class Sellyoursaasapi extends DolibarrApi
 	 */
 	public function put($id, $request_data = null)
 	{
-		if (!DolibarrApiAccess::$user->rights->sellyoursaas->write) {
-			throw new RestException(401);
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'write')) {
+			throw new RestException(403);
 		}
 
 		$result = $this->packages->fetch($id);
@@ -319,8 +319,8 @@ class Sellyoursaasapi extends DolibarrApi
 	 */
 	public function delete($id)
 	{
-		if (!DolibarrApiAccess::$user->rights->sellyoursaas->delete) {
-			throw new RestException(401);
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'delete')) {
+			throw new RestException(403);
 		}
 		$result = $this->packages->fetch($id);
 		if (!$result) {
@@ -362,7 +362,7 @@ class Sellyoursaasapi extends DolibarrApi
 
 		$result = array();
 
-		if (!DolibarrApiAccess::$user->rights->sellyoursaas->read) {
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'read')) {
 			throw new RestException(401);
 		}
 

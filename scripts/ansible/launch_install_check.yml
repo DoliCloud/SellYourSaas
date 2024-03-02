@@ -10,7 +10,6 @@
 
 
 # The user admin must be into the group www-data (group of the SSL certificate so apache can read them)
-# TODO Remove the group www-data for the user admin ?
 # TODO Remove sshkey to user ubuntu
 - name: Check/Fix OS unix accounts
   hosts: '{{target}}'
@@ -18,11 +17,15 @@
   become_method: sudo
   become_user: root
   tasks:
-  - name: Add user admin to the www-data group
+#  - name: Get list of all groups for user admin
+#    shell: groups admin | sed 's/^.*: //'
+#    register: groups  
+  - name: Remove user admin from any group except www-data (no need to be in extra groups).
     user: 
       name: "admin"
-      groups: www-data
-      append: yes     
+      #groups: ''
+      groups: 'www-data'
+      append: false   
 #  - name: Check/create file /home/admin/.ssh/authorized_keys.toallowmaster
 #    ansible.builtin.file:
 #      path: /home/ubuntu/.ssh/authorized_keys
@@ -37,7 +40,19 @@
 #      path: /home/ubuntu/.ssh/authorized_keys
 #      state: absent
 
-
+- name: Update PAM password policy
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+    - name: Ensure minlength is set to 14 in /etc/pam.d/common-password
+      lineinfile:
+        path: /etc/pam.d/common-password
+        regexp: '^password\s+.*\s+pam_unix.so obscure'
+        line: 'password        [success=1 default=ignore]      pam_unix.so obscure sha512 minlength=14'
+        backrefs: yes
+        
 - name: Apt install packages
   hosts: '{{target}}'
   become: yes
@@ -291,7 +306,7 @@
       path: /etc/php/7.0/apache2/php.ini
       section: PHP
       option: disable_functions
-      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen"
+      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen,,dl,apache_note,apache_setenv,show_source,virtual"
     when: 
       - php70 is defined
 
@@ -465,7 +480,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: PHP
       option: disable_functions
-      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen"
+      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen,dl,apache_note,apache_setenv,show_source,virtual"
     when: 
       - php74 is defined
 
@@ -639,7 +654,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: PHP
       option: disable_functions
-      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen"
+      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen,dl,apache_note,apache_setenv,show_source,virtual"
     when: 
       - php80 is defined
 
@@ -826,7 +841,7 @@
       path: /etc/php/8.1/apache2/php.ini
       section: PHP
       option: disable_functions
-      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen"
+      value: "pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen,dl,apache_note,apache_setenv,show_source,virtual"
     when: 
       - php81 is defined
 
@@ -1045,6 +1060,7 @@
         line: '<!-- <policy domain="coder" rights="none" pattern="PDF" /> -->'
         
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
+      ignore_errors: true
       ansible.builtin.template:
         src: ../../etc/datadog-agent/conf.d/disk.d/conf.yaml
         dest: /etc/datadog-agent/conf.d/disk.d/conf.yaml
@@ -1053,6 +1069,7 @@
         mode: '0644'
 
     - name: Set datadog config files /etc/datadog-agent/conf.d/mcache.d/conf.yaml
+      ignore_errors: true
       ansible.builtin.template:
         src: ../../etc/datadog-agent/conf.d/mcache.d/conf.yaml
         dest: /etc/datadog-agent/conf.d/mcache.d/conf.yaml
@@ -1061,6 +1078,7 @@
         mode: '0644'
 
     - name: Set datadog config files /etc/datadog-agent/conf.d/postfix.d/conf.yaml
+      ignore_errors: true
       ansible.builtin.template:
         src: ../../etc/datadog-agent/conf.d/postfix.d/conf.yaml
         dest: /etc/datadog-agent/conf.d/postfix.d/conf.yaml
@@ -1068,7 +1086,31 @@
         group: dd-agent
         mode: '0644'
 
-  ##### Set permissions, create some dirs and files by calling perms.ksh
+
+##### Check the secureBash shell
+- name: Check the secureBash shell
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: root
+  tasks:
+    - name: Get checksum for /bin/dash
+      stat:
+        path: /bin/dash
+      register: file1_stat
+
+    - name: Get checksum for /bin/secureBash
+      stat:
+        path: /bin/secureBash
+      register: file2_stat
+
+    - name: Compare file checksums of /bin/dash and /bin/secureBash
+      fail:
+        msg: "The files secureBash and dash are not the same"
+      when: file1_stat.stat.checksum != file2_stat.stat.checksum
+
+
+##### Set permissions, create some dirs and files by calling perms.ksh
 - name: Call perms.ksh to set permissions, create some dirs and files
   hosts: '{{target}}'
   become: yes

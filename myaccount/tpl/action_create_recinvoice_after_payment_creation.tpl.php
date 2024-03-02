@@ -376,6 +376,9 @@ if (! $error) {
 				$savperm1 = $user->hasRight('facture', 'creer');
 				$savperm2 = $user->hasRight('facture', 'invoice_advance', 'validate');
 
+				if (!isset($user->rights->facture)) {
+					$user->rights->facture = new stdClass();
+				}
 				$user->rights->facture->creer = 1;	// Force permission to user to validate invoices because code may be executed by anonymous user
 				if (!$user->hasRight('facture', 'invoice_advance')) {
 					$user->rights->facture->invoice_advance = new stdClass();
@@ -527,7 +530,7 @@ if (! $error) {
 
 				$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langscompany->trans("NewCustomer").': '.$mythirdpartyaccount->name, 90);
 				$messageofevent = ' - '.$langscompany->trans("PaymentModeAddedFrom").' '.getUserRemoteIP()."\n";
-				$messageofevent.= $langscompany->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langscompany->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n".$langscompany->trans("SourceURLOfEvent").": ".$url;
+				$messageofevent.= $langscompany->trans("Customer").': '.$mythirdpartyaccount->name.' ['.$langscompany->trans("SeeOnBackoffice").']('.preg_replace('/https:\/\/myaccount\./', 'https://admin.', $urlwithouturlroot).'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n".$langscompany->trans("SourceURLOfEvent").": ".$url;
 
 				// See https://docs.datadoghq.com/api/?lang=python#post-an-event
 				$statsd->event(

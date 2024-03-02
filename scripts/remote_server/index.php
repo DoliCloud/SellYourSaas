@@ -29,7 +29,7 @@ if ($fp) {
 			$allowed_hosts_array = explode(",", $tmpline[1]);
 		}
 		if ($tmpline[0] == 'signature_key') {	// This value must match the signature key defined on the master into setup constant SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY
-			$signature_key = explode(",", $tmpline[1]);
+			$signature_key = $tmpline[1];
 		}
 		if ($tmpline[0] == 'dnsserver') {
 			$dnsserver = $tmpline[1];
@@ -88,6 +88,7 @@ $cliafter = $tmpparam[18];
 $cliafterpaid = $tmpparam[46];
 
 // Recalculate the signature with message received
+// TODO Replace with hash('sha256', $contentsigned.$signature_key); or use asymetric signature.
 $recalculatedsignature = md5($contentsigned.$signature_key);
 // Extract the signature received
 $signature = empty($tmpparam[47]) ? '' : $tmpparam[47];
@@ -107,14 +108,16 @@ if ($DEBUG) {
 }
 
 fwrite($fh, date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
+//fwrite($fh, date('Y-m-d H:i:s').' contentsigned='.$contentsigned."\n");
+//fwrite($fh, date('Y-m-d H:i:s').' signature_key='.$signature_key."\n");
 fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignature=".$recalculatedsignature."\n");
 
 // Compare signature and recalculatedsignature
 if ($signature != $recalculatedsignature) {
-	fwrite($fh, date('Y-m-d H:i:s')." The provided signature does not match the signature recalculated from parameters and the signature key (instance server ".$instanceserver."\n");
+	fwrite($fh, date('Y-m-d H:i:s')." The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into 'signature_key' in the /etc/sellyoursaas.conf file (instance server=".$instanceserver."\n");
 
 	http_response_code(598);
-	print 'The provided signature does not match the signature recalculated from parameters and the signature key (instance server '.$instanceserver.')'."\n";
+	print 'The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into "signature_key" in the /etc/sellyoursaas.conf file (instance server='.$instanceserver.')'."\n";
 	exit();
 }
 

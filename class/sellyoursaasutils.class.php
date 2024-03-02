@@ -1389,11 +1389,11 @@ class SellYourSaasUtils
 									$paymentintent = $stripe->getPaymentIntent($amounttopay, $currency, $FULLTAG, $description, $invoice, $customer->id, $stripeacc, $servicestatus, 0, 'automatic', $confirmnow, $stripecard->id, 1);
 
 									$charge = new stdClass();
-									if ($paymentintent->status === 'succeeded' || $paymentintent->status === 'processing') {
+									if (!empty($paymentintent->status) && $paymentintent->status === 'succeeded' || $paymentintent->status === 'processing') {
 										$charge->status = 'ok';
 										$charge->id = $paymentintent->id;
 										$charge->customer = $customer->id;
-									} elseif ($paymentintent->status === 'requires_action') {
+									} elseif (!empty($paymentintent->status) && $paymentintent->status === 'requires_action') {
 										//paymentintent->status may be => 'requires_action' (no error in such a case)
 										dol_syslog("paymentintent = ".var_export($paymentintent, true), LOG_DEBUG);
 
@@ -1490,13 +1490,13 @@ class SellYourSaasUtils
 
 									$paymentTypeId = 0;
 									if ($paymentmethod == 'paybox') {
-										$paymentTypeId = $conf->global->PAYBOX_PAYMENT_MODE_FOR_PAYMENTS;
+										$paymentTypeId = getDolGlobalInt('PAYBOX_PAYMENT_MODE_FOR_PAYMENTS');
 									}
 									if ($paymentmethod == 'paypal') {
-										$paymentTypeId = $conf->global->PAYPAL_PAYMENT_MODE_FOR_PAYMENTS;
+										$paymentTypeId = getDolGlobalInt('PAYPAL_PAYMENT_MODE_FOR_PAYMENTS');
 									}
 									if ($paymentmethod == 'stripe') {
-										$paymentTypeId = $conf->global->STRIPE_PAYMENT_MODE_FOR_PAYMENTS;
+										$paymentTypeId = getDolGlobalInt('STRIPE_PAYMENT_MODE_FOR_PAYMENTS');
 									}
 									if (empty($paymentTypeId)) {
 										$paymentType = $_SESSION["paymentType"];
@@ -1935,7 +1935,7 @@ class SellYourSaasUtils
 						continue;
 					}
 
-					dol_syslog("Loop on invoices, loop cursor no ".$i.", this->transaction_opened = ".$this->transaction_opened);
+					dol_syslog("Loop on invoices, loop cursor no ".$i.", this->db->transaction_opened = ".$this->db->transaction_opened);
 
 					$this->db->begin();
 
@@ -4113,6 +4113,7 @@ class SellYourSaasUtils
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
+				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymetric signature.
 				$commandurl.= '&'.md5($commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY'));
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action

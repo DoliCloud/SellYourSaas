@@ -965,7 +965,7 @@ function print_user_table($newdb, $object)
 			}
 		} elseif ($forglpi) {
 			$sql .= "SELECT gu.id AS rowid, gu.name as login, gu.realname as lastname, gu.firstname,";
-			$sql .= " GROUP_CONCAT(DISTINCT IF(gp.name = 'central', 'central', NULL)) AS admin,";
+			$sql .= " GROUP_CONCAT(DISTINCT IF(gp.interface = 'central', 'central', NULL)) AS admin,";
 			$sql .= " GROUP_CONCAT(DISTINCT gue.email) AS email,";
 			$sql .= " '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login AS datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
 			$sql .= " FROM glpi_users as gu LEFT JOIN glpi_profiles_users AS gpu ON gu.id = gpu.users_id";
@@ -1056,8 +1056,8 @@ function print_user_table($newdb, $object)
 							print '<td class="tdoverflowmax100" title="'.dol_escape_htmltag($valtoshow).'">'.dol_escape_htmltag($valtoshow).'</td>';
 						} elseif ($key == 'login') {
 							print '<td class="nowraponall tdoverflowmax150" title="'.dol_escape_htmltag($obj->$key).'">';
+							print '<a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a> ';
 							print $obj->$key;
-							print ' <a target="_customerinstance" href="'.$url.'">'.img_object('', 'globe').'</a>';
 							print '</td>';
 						} elseif ($key == 'email') {
 							$tmparray = explode(',', $obj->$key);
@@ -1083,7 +1083,7 @@ function print_user_table($newdb, $object)
 				}
 				// Action column
 				if (!getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN')) {
-					print '<td align="center">';
+					print '<td class="center">';
 					print '<a href="'.$_SERVER["PHP_SELF"].'?action=resetpassword&token='.newToken().'&remoteid='.((int) $obj->rowid).'&id='.((int) $id).'">'.img_picto($langs->trans('ResetPassword'), 'object_technic').'</a>';
 					print '</td>';
 				}
@@ -1094,7 +1094,7 @@ function print_user_table($newdb, $object)
 			dol_print_error($newdb);
 		}
 	} else {
-		print '<tr><td class="opacitymedium" colspan="15">'.$langs->trans("FailedToConnectMayBeOldInstance").'</td></tr>';
+		print '<tr><td colspan="15"><span class="opacitymedium">'.$langs->trans("FailedToConnectMayBeOldInstance").'</span></td></tr>';
 	}
 
 	print "</table>";

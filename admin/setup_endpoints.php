@@ -160,7 +160,13 @@ print "</tr>\n";
 
 print '<tr class="oddeven"><td>'.$langs->trans("SecurityKeyForPublicPages").' <span class="opacitymedium">(To protect the URL for Spam reporting webhooks)</spam></td>';
 print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SECURITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_SECURITY_KEY').'">';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SECURITY_KEY" id="SELLYOURSAAS_SECURITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_SECURITY_KEY').'">';
+if (!empty($conf->use_javascript_ajax)) {
+	print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token" class="linkobject"');
+	// Add button to autosuggest a key
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+	print dolJSToSetRandomPassword("SELLYOURSAAS_SECURITY_KEY", "generate_token");
+}
 print '</td>';
 print '<td><span class="opacitymedium small">123456abcdef</span></td>';
 print '</tr>';

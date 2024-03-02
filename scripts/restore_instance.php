@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2012-2023 Laurent Destailleur	<eldy@users.sourceforge.net>
+/* Copyright (C) 2012-2024 Laurent Destailleur	<eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * or see http://www.gnu.org/
  *
- * FEATURE
+ * FEATURE of restore_instance.php
  *
  * Restore a backup of files (rsync) or database (mysqdump) of a deployed instance.
  * There is no report/tracking done into any database. This must be done by a parent script.
@@ -129,8 +129,6 @@ $databasepass='';
 $usecompressformatforarchive='gzip';
 $emailfrom='';
 $emailsupervision='';
-$backupignoretables='';
-$backupcompressionalgorithms='';	// can be '' or 'zstd'
 $backuprsyncdayfrequency=1;	// Default value is an rsync every 1 day.
 $backupdumpdayfrequency=1;	// Default value is a sql dump every 1 day.
 $master_unique_id = '';
@@ -166,12 +164,6 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = $tmpline[1];
-		}
-		if ($tmpline[0] == 'backupignoretables') {
-			$backupignoretables = $tmpline[1];
-		}
-		if ($tmpline[0] == 'backupcompressionalgorithms') {
-			$backupcompressionalgorithms = preg_replace('/[^a-z]/', '', $tmpline[1]);
 		}
 		if ($tmpline[0] == 'backuprsyncdayfrequency') {
 			$backuprsyncdayfrequency = $tmpline[1];
@@ -224,9 +216,31 @@ if (empty($backupdumpdayfrequency)) {
 
 print "***** ".$script_file." (".$version.") - mode = ".$mode." - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 
-if (0 == posix_getuid()) {
-	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
-	exit(-1);
+if (preg_match('/:/', $dirroot)) {
+	// Restore from a remote server
+	if (0 != posix_getuid()) {
+		echo "Script must be ran with root.\n";
+		exit(-1);
+	}
+
+	// TODO Rsync to get backup into /tmp
+	dol_delete_dir_recursive('/tmp/restore_instance');
+	dol_mkdir('/tmp/restore_instance');
+
+
+
+	print 'TODO...';
+
+	// Now show message to say we must run the restore script with 'admin'
+	print "You must now run the script with 'admin': ".$script_file/" /tmp/restore_instance autoscan ".$instance." ".$mode."\n";
+
+	exit(0);
+} else {
+	// Restore from a local backup or local archive
+	if (0 == posix_getuid()) {
+		echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
+		exit(-1);
+	}
 }
 
 $dbmaster=getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
@@ -242,10 +256,11 @@ if (empty($db)) {
 }
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
-	print "This script must be ran as 'admin' user.\n";
-	print "Usage:   $script_file backup_dir  autoscan|mysqldump_dbn...sql.zst|dayofmysqldump instance [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
-	print "Example: $script_file " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  myinstance  31  testrsync\n";
-	print "Note:    ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted user to have testrsync and confirmrsync working.\n";
+	print "This script must be ran as 'admin' for a local restoration, as 'root' for a restoration from a remotebackup.\n";
+	print "Usage:   $script_file [remotebackup:]backup_dir  autoscan|mysqldump_dbn...sql.zst|dayofmonth instance [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
+	print "Example: $script_file " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  autoscan  myinstance  testrsync\n";
+	print "Example: $script_file remotebackup:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_servername/osu123456/dbn789012  autoscan  myinstance  testrsync\n";
+	print "Note:    the ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted osu user to have testrsync and confirmrsync working.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }

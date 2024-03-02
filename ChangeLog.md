@@ -3,8 +3,13 @@
 
 ## Unreleased
 
-* NEW Add support for a signature key of remote action messages. 
+* NEW Add tool to check ban and unban
+* NEW Add support for a signature key of remote action messages.
+* NEW Length of database and user name is now 12 and password 14 min.
+* NEW Update the Stripe IPN service to be compatible with last Stripe API version (2023-10-16)
 * FIX Redirection instances must not appear in the count of backuped instances.
+* FIX letsencrypt for wildcard are now using 2 passes and needs 2 TXT entry in DNS.
+* FIX Debug master_move_instance.php - Price of old instance is kept/reused.
 
 
 ## 2.1

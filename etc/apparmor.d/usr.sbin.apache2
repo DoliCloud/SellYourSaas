@@ -1,0 +1,30 @@
+# Last Modified: Wed Feb 14 17:45:54 2024
+#include <tunables/global>
+
+# Author: Marc Deslauriers <marc.deslauriers@ubuntu.com>
+
+
+profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+  #include <apache2.d>
+  #include <local/usr.sbin.apache2>
+
+  capability chown,
+  capability dac_override,
+  capability dac_read_search,
+  capability kill,
+  capability net_bind_service,
+  capability setgid,
+  capability setuid,
+  capability sys_admin,
+  capability sys_tty_config,
+
+  signal send peer=@{profile_name}//*,
+  signal send set=term peer=unconfined,
+  signal send set=usr1 peer=unconfined,
+
+  / rw,
+  /** mrwlkix,
+
+}

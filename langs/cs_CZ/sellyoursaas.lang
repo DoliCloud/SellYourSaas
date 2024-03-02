@@ -826,7 +826,7 @@ StartWebsiteDeployment=Spusťte nasazení webu
 ErrorDeployWebsite=Chyba při nasazování webu
 DeploymentWebsiteDone=Web byl úspěšně nasazen
 IWantToTest=chci otestovat
-OptionCondition=Možnost vidět podmínka
+OptionCondition=Podmínka vidět možnost
 HelpOnOptionCondition=Zadejte podmínku, aby byla možnost viditelná na zákaznickém panelu. Příklad: 1=vždy viditelné. 0=Nikdy neviditelné
 NewEmailToConfirm=Nový e-mail pro potvrzení
 UnitPriceOfLine=Jednotková cena linky
@@ -857,3 +857,4 @@ CommandToRedeployInstanceOnADeploymentServer=Příkaz k opětovnému nasazení v
 InstanceVersion=Verze instance
 InvoicePDFNotYetAvailable=Faktura ve formátu PDF zatím není k dispozici
 InstancesToBackupWithoutRedirectionInstances=Instance k zálohování (placené nebo potvrzené). Instance přesměrování nejsou zahrnuty.
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Chcete-li podepsat zprávy o vzdálených akcích, zadejte klíč na hlavním zařízení

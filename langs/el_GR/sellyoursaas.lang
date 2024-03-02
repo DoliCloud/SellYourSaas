@@ -857,3 +857,4 @@ CommandToRedeployInstanceOnADeploymentServer=Εντολή για αναδιάτ�
 InstanceVersion=Έκδοση για παράδειγμα
 InvoicePDFNotYetAvailable=Το PDF τιμολογίου δεν είναι ακόμη διαθέσιμο
 InstancesToBackupWithoutRedirectionInstances=Παρουσίες για δημιουργία αντιγράφων ασφαλείας (με πληρωμή ή επιβεβαίωση). Οι περιπτώσεις ανακατεύθυνσης δεν περιλαμβάνονται.
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Πληκτρολογήστε τον κύριο για να υπογράψετε μηνύματα απομακρυσμένων ενεργειών

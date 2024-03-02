@@ -701,7 +701,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print $langs->trans("OptionYourCustomDomainNameDesc", $contract->ref_customer).'</span><br>';
 				print '<span class="opacitymedium small hideonsmartphone">'.$langs->trans("OptionYourCustomDomainNamePrerequisites").'<br></span>';
 
-				print '<div class="installcertif margintop hidden" id="customurlparam">';
+				print '<div class="installcertif margintop hidden" id="customurlparam_'.$id.'">';
 				print '<br>';
 				print $langs->trans("Step", 1).' : '.$langs->trans("OptionYourCustomDomainNameStep2", $contract->ref_customer).'<br>';
 				print '<br>';
@@ -712,12 +712,15 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</div>';
 				print '</div>';
 
-				print '<div class="tagtd center minwidth100">';
-				// TODO Use same frequency than into the template invoice ?
+				print '<div class="tagtd center minwidth100 width100">';
+				$tmpproduct = new Product($db);
+				$tmpproduct->fetch(getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL"));
+				$priceoption = $tmpproduct->price;
 				$nbmonth = 1;
-				print '<span class="font-green-sharp">'.(2 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
+				// TODO Use same frequency than into the template invoice ?
+				print '<span class="font-green-sharp">'.($priceoption * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
 				//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-				print '<input type="button" class="btn btn-primary wordbreak" id="chooseoptioncustomurl" name="chooseoption" value="'.$langs->trans("Install").'">';
+				print '<input type="button" class="btn btn-primary wordbreak chooseoptioncustomurl" id="chooseoptioncustomurl_'.$id.'" name="chooseoption" value="'.$langs->trans("Install").'">';
 				print '</div>';
 
 				print '</form>';
@@ -780,8 +783,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					//$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0);
 					print '<span class="small">';
 					print $langs->trans("OptionYourWebsiteDesc").'<br>';
-					print $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Enable")).'<br>';
-					print '</span><br>';
+					print '</span>';
+					print '<span class="opacitymedium small hideonsmartphone">'.$langs->trans("OptionYourWebsitePrerequisites").'<br></span><br>';
+					print '<div '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').' id="installwebsite_'.$id.'">';
+					print $langs->trans("Step", 1).' : '. $langs->trans("OptionYourWebsiteStep1", $langs->transnoentitiesnoconv("Continue")).'<br>';
 					print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 					print '<input type="hidden" name="token" value="'.newToken().'">';
 					print '<input type="hidden" name="action" value="deploywebsite">';
@@ -793,12 +798,33 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<span class="bold">'.$langs->trans("OptionWebsite").'&nbsp;</span>';
 					print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
 					print '<option value="">&nbsp;</option>';
+					$contractlines = $contract->lines;
+					$arraywebsitesenabled = array();
+					foreach ($contractlines as $line) {
+						if ($line->fk_product == getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT")) {
+							$desc = $line->description;
+							$tmpdesc = explode(", ", $desc);
+							$websiteref = explode("WebsiteRef=", $tmpdesc[0])[1];
+							$websitecustomurl = explode("WebsiteDomainName=", $tmpdesc[1])[1];
+							$arraywebsitesenabled[$websiteref] = $websitecustomurl;
+						}
+					}
 					foreach ($listofwebsitestoactivate as $website) {
+						$isalreadyactivated = 0;
+						if (isset($arraywebsitesenabled[$website->ref])) {
+							$isalreadyactivated = 1;
+						}
 						print '<option value="'.$website->id.'" '.(GETPOST("websiteidoption", "int") == $website->id ? "selected" : "");
+						if ($isalreadyactivated) {
+							print " disabled";
+						}
 						if ($website->status != $websitestatic::STATUS_VALIDATED) {
 							print " disabled";
 						}
 						print '>'.$website->ref;
+						if ($isalreadyactivated) {
+							print ' - '.$arraywebsitesenabled[$website->ref];
+						}
 						if ($website->status != $websitestatic::STATUS_VALIDATED) {
 							print ' - '.$langs->trans("Disabled");
 						}
@@ -806,41 +832,35 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					}
 					print '</select>';
 					print ajax_combobox("websiteidoption");
-					print '<div id="domainnamewebsite" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'">';
-					print '<br><span>'.$langs->trans("PurshaseDomainName").'&nbsp;</span>';
+					print '<input type="button" class="btn btn-primary wordbreak" id="choosewebsiteidoption" name="chooseoption" value="'.$langs->trans("Continue").'">';
+					print '</div>';
+
+					print '<div id="domainnamewebsite" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'"><br>';
+					print $langs->trans("Step", 2).' : '.$langs->trans("PurshaseDomainName").'&nbsp;';
 					print '<br><span class="bold">'.$langs->trans("Domain").'&nbsp;</span>';
 					print '<input name="domainnamewebsite" id="domainnamewebsiteinput" value="'.GETPOST("domainnamewebsite", "alpha").'">&nbsp;';
-					print '<div id="choosewebsiteoption" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'>';
-					print '<br><span>'.$langs->trans("AddInstructionToDns", $contract->ref_customer, $contract->ref_customer).'</span>';
-					print '<br><input class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" type="submit" name="startwebsitedeploy" value="'.$langs->trans("StartWebsiteDeployment").'">';
+					print '<input type="button" class="btn btn-primary wordbreak" id="choosedomainnamewebsite" name="chooseoption" value="'.$langs->trans("Continue").'">';
 					print '</div>';
+
+					print '<div id="choosewebsiteoption" '.(GETPOST("websiteidoption", "int") == "" ? 'class="hidden"' : '').'><br>';
+					print $langs->trans("Step", 3).' : '.$langs->trans("AddInstructionToDns", $contract->ref_customer, $contract->ref_customer);
+					print '<br><input class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" type="submit" name="startwebsitedeploy" value="'.$langs->trans("StartWebsiteDeployment").'">';
 					print '</div>';
 					print '</form>';
 					print '<script>
-					$("#websiteidoption").on("change", function(){
-						if($("#websiteidoption").val() != "" || $("#domainnamewebsite:hidden").length){
-							$("#domainnamewebsite").removeClass("hidden");
-						} else {
-							$("#domainnamewebsite").addClass("hidden");
-						}
-					})
-					$("#domainnamewebsiteinput").on("change", function(){
-						if($("#choosewebsiteoption").val() != "" || $("#choosewebsiteoption:hidden").length ){
-							$("#choosewebsiteoption").removeClass("hidden");
-							$("#choosewebsiteoption").prop("disabled", false);
-						} else {
-							$("#choosewebsiteoption").addClass("hidden");
-							$("#choosewebsiteoption").prop("disabled", true);
-						}
-					})
 					</script>';
 				}
 				print '</div>';
 
-				print '<div class="tagtd minwidth100 right">';
-				print '<span class="opacitymedium">'.$langs->trans("NotYetAvailable").'</span>';
+				print '<div class="tagtd center minwidth100 width100">';
+				// TODO Use same frequency than into the template invoice ?
+				$nbmonth = 1;
+				if (!empty($websitemodenabled)) {
+					print '<span class="font-green-sharp">'.(6 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
+					//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
+					print '<input type="button" class="btn btn-primary wordbreak chooseoptionwebsite" id="chooseoptionwebsite_'.$id.'" name="chooseoption" value="'.$langs->trans("Install").'">';
+				}
 				print '</div>';
-
 				print '</div></div>';	// end tr, end table
 
 				print '<hr>';
@@ -1506,10 +1526,40 @@ if ($action == "confirmundeploy") {
 				return false;
 			});
 
-			jQuery("#chooseoptioncustomurl").click(function() {
+			$(".chooseoptioncustomurl").click(function() {
 				console.log("We click on button Activate custom urls");
-				jQuery("#customurlparam").removeClass("hidden");
+				var id = parseInt($(this).attr("id").match(/[0-9]+$/g));
+				if ($("#customurlparam_" + id + ":hidden").length){
+					$("#customurlparam_" + id).removeClass("hidden");
+				} else {
+					$("#customurlparam_" + id).addClass("hidden");
+				}
+				return false;
 			});
+
+			$(".chooseoptionwebsite").on("click",function(){
+				console.log("We click on button Activate website");
+				var id = parseInt($(this).attr("id").match(/[0-9]+$/g));
+				if ($("#installwebsite_" + id + ":hidden").length){
+					$("#installwebsite_" + id).removeClass("hidden");
+				} else {
+					$("#installwebsite_" + id).addClass("hidden");
+				}
+				return false;
+			})
+			$("#choosewebsiteidoption").on("click", function(){
+				if($("#websiteidoption").val() != ""){
+					console.log("We click on button Continue website Step1");
+					$("#domainnamewebsite").removeClass("hidden");
+				}
+			})
+			$("#choosedomainnamewebsite").on("click", function(){
+				if($("#domainnamewebsiteinput").val() != ""){
+					console.log("We click on button Continue website Step2");
+					$("#choosewebsiteoption").removeClass("hidden");
+					$("#choosewebsiteoption").prop("disabled", false);
+				}
+			})
 
             /* Apply constraints if sldAndSubdomain field is change */
             jQuery("#formaddanotherinstance").on("change keyup", "#sldAndSubdomain", function() {

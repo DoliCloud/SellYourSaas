@@ -172,7 +172,7 @@ $MAXINSTANCEVIGNETTE = 4;
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : ($mode == 'instance' ? $MAXINSTANCEVIGNETTE : 20);
 $sortfield = GETPOST('sortfield', 'alphanohtml');
-$sortorder = GETPOST('sortorder', 'alphanohtml');
+$sortorder = GETPOST('sortorder', 'aZ09');
 $page = GETPOSTISSET('pageplusone') ? (GETPOST('pageplusone') - 1) : GETPOST("page", 'int');
 if (empty($page) || $page == -1) {
 	$page = 0;
@@ -858,7 +858,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 							// Protection to avoid to validate contract with several 'app' products.
 							$nbofproductapp++;
 							if ($nbofproductapp > 1) {
-								dol_syslog("Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
+								dol_syslog("index.php Error: Bad definition of contract. There is more than 1 service with type 'app'", LOG_ERR);
 								$error++;
 								break;
 							}
@@ -1037,10 +1037,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$sellyoursaasemail = $conf->global->$newnamekey;
 		}
 	}
+	//dol_syslog($cmailfile->subject);exit;
 
-	$emailto = GETPOST('to', 'alpha');
-	$replyto = GETPOST('from', 'alpha');
-	$topic = GETPOST('subject', 'restricthtml');
+	$emailto = GETPOST('to', 'alphanohtml');
+	$replyto = GETPOST('from', 'alphanohtml');
+	$topic = GETPOST('subject', 'alphanohtml');
 	$content = GETPOST('content', 'restricthtml');
 	$groupticket=GETPOST('ticketcategory', 'aZ09');
 
@@ -1160,6 +1161,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		// Send email
 		$cmailfile = new CMailFile($topic, $emailto, $emailfrom, $content, $arr_file, $arr_mime, $arr_name, '', '', 0, 1, '', '', $trackid, '', 'standard', $replyto);
+
 		$result = $cmailfile->sendfile();
 
 		if ($result) {
@@ -2073,6 +2075,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 					$contract->array_options['options_deployment_status'] = 'undeployed';
 					$contract->array_options['options_undeployment_date'] = dol_now('tzserver');
 					$contract->array_options['options_undeployment_ip'] = $_SERVER['REMOTE_ADDR'];
+					$contract->array_options['options_suspendmaintenance_message'] = '';
 
 					$result = $contract->update($user);
 					if ($result < 0) {
@@ -2135,7 +2138,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 						$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name, 90);
 						$messageofevent = ' - '.$langs->trans("IPAddress").' '.getUserRemoteIP()."\n";
-						$messageofevent.= $langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name.' - ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
+						$messageofevent.= $langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name.' - ['.$langs->trans("SeeOnBackoffice").']('.preg_replace('/https:\/\/myaccount\./', 'https://admin.', $urlwithouturlroot).'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
 						$messageofevent.= 'Lost after suspension of instance + recurring invoice after a destroy request.';
 
 						// See https://docs.datadoghq.com/api/?lang=python#post-an-event
@@ -2261,7 +2264,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$duration_unit = $tmparray['duration_unit'];
 		$date_start = dol_now();
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
-		$descriptionlines = "Websiteref = ".$website->ref;
+		$descriptionlines = "WebsiteRef=".$website->ref.", ";
+		$descriptionlines .= "WebsiteDomainName=".$domainnamewebsite;
 		$foundlinecontract = 0;
 		foreach ($object->lines as $key => $line) {
 			if ($line->description == $descriptionlines && $line->fk_product == $productid) {
@@ -2326,7 +2330,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		exit();
 	}
-} elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOM_URL') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0) {
+} elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0) {
 	// TODO
 	$error = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
@@ -2383,6 +2387,10 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
 		$descriptionlines = "Websiteref = ".$website->ref;
 		$foundlinecontract = 0;
+
+		$object->array_options['options_custom_url'] = urlencode($custom_url);
+		$object->update($user);
+
 		foreach ($object->lines as $key => $line) {
 			if ($line->description == $descriptionlines && $line->fk_product == $productid) {
 				$foundlinecontract ++;
@@ -2428,9 +2436,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			}
 		}
 		if (!$error) {
-			$object->context["options_websitename"] = $website->ref;
-			$object->context["options_domainnamewebsite"] = $domainnamewebsite;
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction("customurl", $object);
+			//$object->context["options_websitename"] = $website->ref;
+			$object->array_options['options_custom_url'] = urlencode($custom_url);
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction("rename", $object);
 			if ($result <= 0) {
 				$error++;
 			}
@@ -2709,7 +2717,7 @@ if ($welcomecid > 0) {
 		'.$langs->trans("YouCanAccessYourInstance", $productlabel).'&nbsp:
 		</p>
 		<p class="well">
-		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank" rel="noopener">'.$contract->ref_customer.'</a>';
+		'.$langs->trans("URL").' : <a href="https://'.$contract->ref_customer.'" target="_blank" rel="noopener">https://'.$contract->ref_customer.'</a>';
 
 		print '<br> '.$langs->trans("Username").' : '.($_SESSION['initialapplogin'] ? '<strong>'.$_SESSION['initialapplogin'].'</strong>' : 'NA').'
 		<br> '.$langs->trans("Password").' : ';
