@@ -864,33 +864,33 @@ while ($i < $imaxinloop) {
 			print '<td class="small tdoverflowmax125">';
 			$html = '<span class="smal">'.$langs->trans("CommandForDeploymentServer").':</span><br>';
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToManageRemoteDeploymentAgent").' <span class="opacitymedium">(on deployment server)</span>:<br>';
+			$html .= $langs->trans("CommandToManageRemoteDeploymentAgent").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/remote_server_launcher.sh start|status|stop';
 			$html .= '">';
 			$html .= '</div>';
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToPutInstancesOnOffline").' <span class="opacitymedium">(on deployment server)</span>:<br>';
+			$html .= $langs->trans("CommandToPutInstancesOnOffline").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offline.sh '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/offline.php test|offline|online';
 			$html .= '">';
 			$html .= '</div>';
 			if (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR")) {
 				$html .= '<br>';
-				$html .= $langs->trans("CommandToSwithInstanceInReadOnlyMode").' <span class="opacitymedium">(on deployment server)</span>:<br>';
+				$html .= $langs->trans("CommandToSwithInstanceInReadOnlyMode").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 				$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 				$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_readonly.php '.$object->ref.' (on|off) (test|confirm)';
 				$html .= '">';
 				$html .= '</div>';
 			}
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToSqlToReGenerateDb").' <span class="opacitymedium">(to run from master server)</span>:<br>';
+			$html .= $langs->trans("CommandToSqlToReGenerateDb").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_build_sql_for_instances.php '.$object->ref.' dbcreate|usercreate|userresetpass';
 			$html .= '">';
 			$html .= '</div>';
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run from master server)</span>:<br>';
+			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_redeploy_instances.php '.$object->ref.' test|confirm';
 			$html .= '">';
