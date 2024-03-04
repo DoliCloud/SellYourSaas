@@ -717,11 +717,13 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 /**
  * Function to get nb of users for a certain contract
  *
- * @param	string		$contractref	Id of contract for user count
- * @param	int			$userproductid	Id of product for user count
- * @return 	int							<0 if error or Number of users for contract
+ * @param	string		$sqltoexecute			SQL to execute to get nb of users in customer instance
+ * @param	string		$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
+ * @param	string		$contractref			Ref of contract for user count
+ * @param	int			$userproductid			Id of product for user count
+ * @return 	int									<0 if error or Number of users for contract
  */
-function sellyoursaasGetNbUsersContract($contractref = '', $userproductid = 0) {
+function sellyoursaasGetNbUsersContract($sqltoexecute, $codeextrafieldqtymin, $contractref, $userproductid = 0) {
 	global $db;
 
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
@@ -731,12 +733,6 @@ function sellyoursaasGetNbUsersContract($contractref = '', $userproductid = 0) {
 		setEventMessages($contract->error, $contract->errors, 'errors');
 		return -1;
 	}
-
-	$dbprefix = $contract->array_options['options_prefix_db'];
-	if (empty($dbprefix)) {
-		$dbprefix = MAIN_DB_PREFIX;
-	}
-	$loginforsupport  = getDolGlobalString("SELLYOURSAAS_LOGIN_FOR_SUPPORT");
 
 	$server = $contract->ref_customer;
 	if (empty($hostname_db)) {
@@ -769,12 +765,11 @@ function sellyoursaasGetNbUsersContract($contractref = '', $userproductid = 0) {
 	$nbuserextrafield = 0;
 	$qtyuserline = 0;
 
-	$sql = "SELECT count(rowid) as nb";
-	$sql .= " FROM ".$dbprefix."user";
-	$sql .= " WHERE statut = 1";
-	$sql .= " AND login != '".$loginforsupport."'";
-	$sql .= " AND (fk_socpeople IS NULL OR fk_socpeople = 0)";
-	$resql=$newdb->query($sql);
+	$sqltoexecute = trim($sqltoexecute);
+
+	dol_syslog("Execute sql=".$sqltoexecute);
+
+	$resql=$newdb->query($sqltoexecute);
 	if ($resql) {
 		$obj = $newdb->fetch_object($resql);
 		$nbusersql = $obj->nb;
@@ -791,9 +786,9 @@ function sellyoursaasGetNbUsersContract($contractref = '', $userproductid = 0) {
 	foreach ($contractlines as $contractline) {
 		if (empty($userproductid) || $contractline->fk_product == $userproductid) {
 			$contractline->fetch_optionals();
-			if (!empty($contractline->array_options["options_qtymin"])) {
+			if (!empty($contractline->array_options["options_".$codeextrafieldqtymin])) {
 				$qtyuserline = $contractline->qty; //Get qty of user contract line
-				$nbuserextrafield = $contractline->array_options["options_qtymin"]; //Get qty min of user contract line
+				$nbuserextrafield = $contractline->array_options["options_".$codeextrafieldqtymin]; //Get qty min of user contract line
 			}
 		}
 	}
