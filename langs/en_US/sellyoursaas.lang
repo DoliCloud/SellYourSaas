@@ -352,6 +352,7 @@ AnnounceMinorOutage=We are currently experiencing minor technical troubles impac
 AnnounceMaintenanceInProgress=A technical maintenance is on progress.<br>Your instance will be back in a few minutes ...
 CommandToManageRemoteDeploymentAgent=Command to start/stop the remote deployment agent
 CommandToPutInstancesOnOffline=Command to put all instances online/offline
+CommandToMoveInstanceOnAnotherDeploymentServer=Command to move several or all instances into another deployment server
 InstanceWasDeployed=Instance has been deployed
 YourPaymentModeWillExpireFixItSoon=Your payment mode is about to expire. Please <a href="%s">update your payment mode</a> to avoid any interruption of service.
 YouAreAReseller=You are a reseller

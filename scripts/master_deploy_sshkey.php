@@ -20,9 +20,10 @@
 /**
  *      \file       sellyoursaas/scripts/master_deploy_sshkey.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to run from master server to redeploy the public keys (found into setup) to the authorized_keys_support file of all customers
- *                  on deployment servers. Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of accounts).
+ *      \brief      Script to run from master server to redeploy the public keys (found into setup SELLYOURSAAS_PUBLIC_KEY) to the authorized_keys_support file of all customers
+ *                  on deployment servers. Deployment is done from master using the dolicloud_files_refresh() method (so using login/pass of each accounts).
  *                  This script erases the old version of authorized_keys_support files.
+ *                  It can be used when a change is done into the list of public keys used by administrators or by the master admin account.
  */
 
 if (!defined('NOSESSION')) {
