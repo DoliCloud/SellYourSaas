@@ -875,7 +875,8 @@ while ($i < $imaxinloop) {
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offline.sh '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/offline.php test|offline|online';
 			$html .= '">';
 			$html .= '</div>';
-			if (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR")) {
+
+			if (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR")) {	// Specific to Dolibarr app
 				$html .= '<br>';
 				$html .= $langs->trans("CommandToSwithInstanceInReadOnlyMode").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 				$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
@@ -883,14 +884,23 @@ while ($i < $imaxinloop) {
 				$html .= '">';
 				$html .= '</div>';
 			}
+
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToSqlToReGenerateDb").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_build_sql_for_instances.php '.$object->ref.' dbcreate|usercreate|userresetpass';
 			$html .= '">';
 			$html .= '</div>';
+
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_redeploy_instances.php '.$object->ref.' test|confirm';
+			$html .= '">';
+			$html .= '</div>';
+
+			$html .= '<br>';
+			$html .= $langs->trans("CommandToMoveInstanceOnAnotherDeploymentServer").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_redeploy_instances.php '.$object->ref.' test|confirm';
 			$html .= '">';
