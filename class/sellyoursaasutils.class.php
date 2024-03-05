@@ -1523,7 +1523,7 @@ class SellYourSaasUtils
 									} else {
 										$paiement->multicurrency_amounts = array($invoice->id => $amounttopay);   // Array with all payments dispatching
 
-										$postactionmessages[] = 'Payment was done in a different currency than currency expected of company';
+										$postactionmessages[] = 'Payment was done in a currency ('.$currencyCodeType.') other than the expected currency of company ('.$conf->currency.')';
 										$ispostactionok = -1;
 										// Not yet supported, so error
 										$error++;
