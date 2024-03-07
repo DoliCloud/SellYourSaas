@@ -59,7 +59,7 @@ Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and ht
 * Instance subscription quota systems.
 * Tools facilitating maintenance, customer support, application updates.
 * Management of a reseller network. Dedicated reseller area (invoicing, customer account).
-* Infrastructure cost per instance <30 cents (Cost observed on the DoliCloud sales department providing Dolibarr ERP CRM).
+* Infrastructure cost per instance <50 cents (Cost observed on the DoliCloud sales department providing Dolibarr ERP CRM).
 * ...
      
 
@@ -4273,8 +4273,8 @@ section "Duplicate an instance into another instance (already existing instance)
 Then go on the file of instance X in the backoffice, tab "Backups" and use the command lines into 
 section "Move an instance into another server (non existing target instance)".
 
-The option "confirm" will move the instance and close the old one.
-The option "confirmredirect" will move the instance and the old one will be flagged as a "redirect to the new one"
+The option "*confirm*" will move the instance and close the old one.
+The option "*confirmredirect*" will move the instance and the old one will be flagged as a "redirect to the new one"
 so the old URL will still works (temporarily until the old instance is closed)
 
 
@@ -4626,18 +4626,26 @@ In addition, if other applications were active on the cloned server:
 
 === Upgrade OS
 
+Upgrading the OS is a risky operation. It is better to move instance from one server to a new
+one with a new OS.
+
+You can create a clone of an instance (and its attached hard disk) if you
+want to test first that this operation works correctly. Update your file */etc/hosts* to be able
+to test an instance on the new server. 
+
 To update Ubuntu to a higher LTS version on a SellYourSaas server:
 
 [source,sql]
 ---------------
-apt dist-upgrade
+apt dist-upgrade or do-release-upgrade
 
-# if you move from 16.04 to 18.04, you must also run
+# if you move from 16.04 to 18.04, you must also delete old repository of ondrej/php and and reinstall it with
 apt install php-mysql
 a2enmod php7.2
 apt remove php-fpm php7-fpm
 
-# if you move from 18.04 to 20.04, you must also run
+# if you move from 18.04 to 20.04, you must also delete old repository of ondrej/php and and reinstall it with
+sudo add-apt-repository ppa:ondrej/php
 apt install php-mysql
 a2enmod php7.4
 apt remove php-fpm php7-fpm
@@ -6230,7 +6238,7 @@ See https://developer.android.com/privacy-and-security/security-ssl#MissingCa
 Fix this by setting correctly your SSLxxx variable in your apache virtual host.
 
 
-==== do-release-upgrade hangs with no answer
+==== do-release-upgrade or apt dist-upgrade hangs with no answer
 
 This may happen if you fails to connect to the remote ubuntu or mirror server.
 

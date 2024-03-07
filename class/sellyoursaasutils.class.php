@@ -4290,7 +4290,7 @@ class SellYourSaasUtils
 						'__APPDOMAIN__'=>$sldAndSubdomain.'.'.$domainname,
 						'__ALLOWOVERRIDE__'=>'',
 						'__VIRTUALHOSTHEAD__'=>$customvirtualhostline,
-						'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT,
+						'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT'),
 						'__CONTRACTREF__'=>$contract->ref,
 					);
 
@@ -4465,9 +4465,12 @@ class SellYourSaasUtils
 							dol_syslog($this->error, LOG_ERR);
 						}
 					} elseif ($tmparray[0] === 'PHPMETHOD') {
-						// keyword : PHPMETHOD then function name to call, then args (use ':' as sep.)
+						// Keyword PHPMETHOD then : then function name to call ; args seaprated with ;
 						// ex: PHPMETHOD:caprelCountDoliSCANUsers;__CONTRACTREF__;__INSTANCEDBPREFIX__;
+						// ex: PHPMETHOD:sellyoursaasGetNbUsersContract;__CONTRACTREF__;name of extrafield;SELECT to count
 						$arguments = make_substitutions($tmparray[1], $substitarray);
+						// TODO @LMR Replace param __OBJECTREF__ with $object contract instead of __CONTRACTREF__.
+						// TODO @LMR Replace param name of extrafield with $tmpobject->options['options_'.name_of_extrafield].
 						$argsArray = explode(';', $arguments);
 						$customFunctionToCall = array_shift($argsArray);
 
