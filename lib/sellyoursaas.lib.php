@@ -700,8 +700,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 	// Block for some IPs if VPN proba is higher that a threshold
 	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN')) {
-		if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalInt('SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST', 1)) {
-			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
+		if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalString('SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST', 1)) {
+			$arrayofblacklistips = explode(',', getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN'));
 			foreach ($arrayofblacklistips as $blacklistip) {
 				if ($remoteip == $blacklistip) {
 					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
@@ -718,15 +718,15 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
  * Function to get nb of users for a certain contract
  *
  * @param	string		$contractref			Ref of contract for user count
- * @param	string		$prefix					SQL prefix of user database (to replace __INSTANCEDBPREFIX__)
  * @param	string		$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
  * @param	string		$sqltoexecute			SQL to execute to get nb of users in customer instance
  * @param	int			$userproductid			Id of product for user count
  * @return 	int									<0 if error or Number of users for contract
  */
-function sellyoursaasGetNbUsersContract($contractref, $prefix, $codeextrafieldqtymin, $sqltoexecute, $userproductid) {
+function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sqltoexecute, $userproductid = 0) {
 	global $db;
 
+	// @TODO LMR Get the object contract as parameter
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
 	$contract = new Contrat($db);
 	$result = $contract->fetch(0, $contractref);
@@ -766,6 +766,7 @@ function sellyoursaasGetNbUsersContract($contractref, $prefix, $codeextrafieldqt
 	$nbuserextrafield = 0;
 	$qtyuserline = 0;
 
+	// TODO @LMR Replace the table prefix with $contract->array_options['options_prefix_db'];
 	$sqltoexecute = trim($sqltoexecute);
 
 	dol_syslog("Execute sql=".$sqltoexecute);
@@ -775,7 +776,7 @@ function sellyoursaasGetNbUsersContract($contractref, $prefix, $codeextrafieldqt
 		$obj = $newdb->fetch_object($resql);
 		$nbusersql = $obj->nb;
 	} else {
-		dol_print_error($db);
+		$nbusersql = -1;	// Error
 	}
 
 	if (is_object($newdb) && $newdb->connected) {
@@ -786,14 +787,13 @@ function sellyoursaasGetNbUsersContract($contractref, $prefix, $codeextrafieldqt
 
 	foreach ($contractlines as $contractline) {
 		if (empty($userproductid) || $contractline->fk_product == $userproductid) {
-			$contractline->fetch_optionals();
+			$contractline->fetch_optionals();	// @TODO LMR Not alreayd done ?
 			if (!empty($contractline->array_options["options_".$codeextrafieldqtymin])) {
-				$qtyuserline = $contractline->qty; //Get qty of user contract line
-				$nbuserextrafield = $contractline->array_options["options_".$codeextrafieldqtymin]; //Get qty min of user contract line
+				$nbuserextrafield = $contractline->array_options["options_".$codeextrafieldqtymin]; // Get qty min of user contract line
 			}
 		}
 	}
 
 	// Return the max qty off all the qty get
-	return max($nbusersql, $nbuserextrafield, $qtyuserline);
+	return max($nbusersql, $nbuserextrafield);
 }
