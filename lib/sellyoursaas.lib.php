@@ -699,8 +699,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	}
 
 	// Block for some IPs if VPN proba is higher that a threshold
-	if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
-		if (is_numeric($vpnproba) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : (float) $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
+	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN')) {
+		if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalInt('SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST', 1)) {
 			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
 			foreach ($arrayofblacklistips as $blacklistip) {
 				if ($remoteip == $blacklistip) {
@@ -717,13 +717,14 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 /**
  * Function to get nb of users for a certain contract
  *
- * @param	string		$sqltoexecute			SQL to execute to get nb of users in customer instance
- * @param	string		$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
  * @param	string		$contractref			Ref of contract for user count
+ * @param	string		$prefix					SQL prefix of user database (to replace __INSTANCEDBPREFIX__)
+ * @param	string		$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
+ * @param	string		$sqltoexecute			SQL to execute to get nb of users in customer instance
  * @param	int			$userproductid			Id of product for user count
  * @return 	int									<0 if error or Number of users for contract
  */
-function sellyoursaasGetNbUsersContract($sqltoexecute, $codeextrafieldqtymin, $contractref, $userproductid = 0) {
+function sellyoursaasGetNbUsersContract($contractref, $prefix, $codeextrafieldqtymin, $sqltoexecute, $userproductid) {
 	global $db;
 
 	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
