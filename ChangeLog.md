@@ -3,7 +3,8 @@
 
 ## Unreleased
 
-* NEW Add tool to check ban and unban
+* NEW Add public/private notes.
+* NEW Add tool desktop_bannedip.sh to check ban and unban
 * NEW Add support for a signature key of remote action messages.
 * NEW Length of database and user name is now 12 and password 14 min.
 * NEW Update the Stripe IPN service to be compatible with last Stripe API version (2023-10-16)
