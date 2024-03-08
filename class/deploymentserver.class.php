@@ -1106,11 +1106,11 @@ class Deploymentserver extends CommonObject
 	 * @param  string      $sortfield    Sort field
 	 * @param  int         $limit        limit
 	 * @param  int         $offset       Offset
-	 * @param  array       $filter       Filter array. Example array('field'=>'valueforlike', 'customurl'=>...)
+	 * @param  string      $filter       UFS filter.
 	 * @param  string      $filtermode   Filter mode (AND or OR)
 	 * @return array                	 array of domainnames
 	 */
-	public function fetchAllDomains($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, array $filter = array(), $filtermode = 'AND')
+	public function fetchAllDomains($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, $filter = '', $filtermode = 'AND')
 	{
 		$reflist = array();
 		$objectlist = $this->fetchAll($sortorder, $sortfield, $limit, $offset, $filter, $filtermode);
