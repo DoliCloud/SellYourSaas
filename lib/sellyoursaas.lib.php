@@ -699,9 +699,9 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	}
 
 	// Block for some IPs if VPN proba is higher that a threshold
-	if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
-		if (is_numeric($vpnproba) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : (float) $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
-			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
+	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN')) {
+		if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalString('SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST', 1)) {
+			$arrayofblacklistips = explode(',', getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN'));
 			foreach ($arrayofblacklistips as $blacklistip) {
 				if ($remoteip == $blacklistip) {
 					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
@@ -712,4 +712,88 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	}
 
 	return array('ipquality'=>$ipquality, 'emailquality'=>$emailquality, 'vpnproba'=>$vpnproba, 'abusetest'=>$abusetest, 'fraudscoreip'=>$fraudscoreip, 'fraudscoreemail'=>$fraudscoreemail);
+}
+
+/**
+ * Function to get nb of users for a certain contract
+ *
+ * @param	string		$contractref			Ref of contract for user count
+ * @param	string		$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
+ * @param	string		$sqltoexecute			SQL to execute to get nb of users in customer instance
+ * @param	int			$userproductid			Id of product for user count
+ * @return 	int									<0 if error or Number of users for contract
+ */
+function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sqltoexecute, $userproductid = 0) {
+	global $db;
+
+	// @TODO LMR Get the object contract as parameter
+	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+	$contract = new Contrat($db);
+	$result = $contract->fetch(0, $contractref);
+	if ($result <= 0) {
+		setEventMessages($contract->error, $contract->errors, 'errors');
+		return -1;
+	}
+
+	$server = $contract->ref_customer;
+	if (empty($hostname_db)) {
+		$hostname_db = $contract->array_options['options_hostname_db'];
+	}
+	$port_db = $contract->port_db;
+	if (empty($port_db)) {
+		$port_db = (! empty($contract->array_options['options_port_db']) ? $contract->array_options['options_port_db'] : 3306);
+	}
+	$username_db = $contract->username_db;
+	if (empty($username_db)) {
+		$username_db = $contract->array_options['options_username_db'];
+	}
+	$password_db = $contract->password_db;
+	if (empty($password_db)) {
+		$password_db = $contract->array_options['options_password_db'];
+	}
+	$database_db = $contract->database_db;
+	if (empty($database_db)) {
+		$database_db = $contract->array_options['options_database_db'];
+	}
+
+	$newdb = getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
+	if (!$newdb->connected) {
+		dol_print_error($newdb);
+		return -1;
+	}
+
+	$nbusersql = 0;
+	$nbuserextrafield = 0;
+	$qtyuserline = 0;
+
+	// TODO @LMR Replace the table prefix with $contract->array_options['options_prefix_db'];
+	$sqltoexecute = trim($sqltoexecute);
+
+	dol_syslog("Execute sql=".$sqltoexecute);
+
+	$resql=$newdb->query($sqltoexecute);
+	if ($resql) {
+		$obj = $newdb->fetch_object($resql);
+		$nbusersql = $obj->nb;
+	} else {
+		$nbusersql = -1;	// Error
+	}
+
+	if (is_object($newdb) && $newdb->connected) {
+		$newdb->close();
+	}
+
+	$contractlines = $contract->lines;
+
+	foreach ($contractlines as $contractline) {
+		if (empty($userproductid) || $contractline->fk_product == $userproductid) {
+			$contractline->fetch_optionals();	// @TODO LMR Not alreayd done ?
+			if (!empty($contractline->array_options["options_".$codeextrafieldqtymin])) {
+				$nbuserextrafield = $contractline->array_options["options_".$codeextrafieldqtymin]; // Get qty min of user contract line
+			}
+		}
+	}
+
+	// Return the max qty off all the qty get
+	return max($nbusersql, $nbuserextrafield);
 }
