@@ -970,7 +970,7 @@ function print_user_table($newdb, $object)
 			$sql .= " '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login AS datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
 			$sql .= " FROM glpi_users as gu LEFT JOIN glpi_profiles_users AS gpu ON gu.id = gpu.users_id";
 			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id LEFT JOIN glpi_useremails AS gue ON gue.users_id = gu.id";
-			$sql .= " WHERE gu.is_deleted = 0 AND gu.name NOT IN ('supportcloud')";
+			$sql .= " WHERE gu.is_deleted = 0";
 			//$sql .= " GROUP BY rowid, login, realname, firstname, pass, pass_crypted, datec, datem, datelastlogin, nu1, nu2, nu3, entity, statut, admin;";
 			/*
 			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname,";
