@@ -71,6 +71,9 @@ if (! preg_match('/\.(png|jpg)$/', $favicon)) {
 if (! empty($conf->global->MAIN_FAVICON_URL)) {
 	$favicon=$conf->global->MAIN_FAVICON_URL;
 }
+if (empty($head)) {
+	$head = '';
+}
 if ($favicon) {
 	$href = 'img/'.$favicon;
 	if (preg_match('/^http/i', $favicon)) {
@@ -309,7 +312,7 @@ if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 <br>
 <br>
 
-<!-- authentication mode = <?php echo $main_authentication ?> -->
+<!-- authentication mode = <?php echo $conf->file->main_authentication ?> -->
 <!-- cookie name used for this session = <?php echo empty($session_name) ? '' : $session_name ?> -->
 <!-- urlfrom in this session = <?php echo isset($_SESSION["urlfrom"]) ? $_SESSION["urlfrom"] : ''; ?> -->
 
