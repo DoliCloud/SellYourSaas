@@ -4504,7 +4504,7 @@ class SellYourSaasUtils
 								// Test if there is template invoice linked
 								$contract->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 'facturerec');
 
-								if (is_array($contract->linkedObjects['facturerec']) && count($contract->linkedObjects['facturerec']) > 0) {
+								if (!empty($contract->linkedObjects['facturerec']) && is_array($contract->linkedObjects['facturerec']) && count($contract->linkedObjects['facturerec']) > 0) {
 									//dol_sort_array($contract->linkedObjects['facture'], 'date');
 									$sometemplateinvoice=0;
 									$lasttemplateinvoice=null;
