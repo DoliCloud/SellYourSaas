@@ -638,13 +638,13 @@ if (empty($remoteip)) {
 }
 
 $tmpblacklistip = new Blacklistip($db);
-$tmparrayblacklist = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
+$tmparrayblacklist = $tmpblacklistip->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparrayblacklist) && $tmparrayblacklist < 0) {
 	echo "Erreur: failed to get blacklistip elements.\n";
 	exit(-61);
 }
 $tmpwhitelistip = new Whitelistip($db);
-$tmparraywhitelist = $tmpwhitelistip->fetchAll('', '', 1000, 0, array('status'=>1));
+$tmparraywhitelist = $tmpwhitelistip->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparraywhitelist) && $tmparraywhitelist < 0) {
 	echo "Erreur: failed to get whitelistip elements.\n";
 	exit(-61);

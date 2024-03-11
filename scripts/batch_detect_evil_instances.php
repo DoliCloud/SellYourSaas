@@ -300,7 +300,7 @@ dol_mkdir($pathtospamdir);
 print "----- Init - Generate file blacklistip\n";
 
 $tmpblacklistip = new Blacklistip($db);
-$tmparrayblacklistip = $tmpblacklistip->fetchAll('', '', 1000, 0, array('status'=>1));
+$tmparrayblacklistip = $tmpblacklistip->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparrayblacklistip) && $tmparrayblacklistip < 0) {
 	echo "Erreur: failed to get blacklistip elements.\n";
 }
@@ -325,7 +325,7 @@ if (!empty($tmparrayblacklistip)) {
 print "----- Init - Generate file blacklistfrom\n";
 
 $tmpblacklistfrom = new Blacklistfrom($db);
-$tmparrayblacklistfrom = $tmpblacklistfrom->fetchAll('', '', 1000, 0, array('status'=>1));
+$tmparrayblacklistfrom = $tmpblacklistfrom->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparrayblacklistfrom) && $tmparrayblacklistfrom < 0) {
 	echo "Erreur: failed to get blacklistfrom elements.\n";
 }
@@ -349,7 +349,7 @@ if (!empty($tmparrayblacklistfrom)) {
 print "----- Init - Generate file blacklistto\n";
 
 $tmpblacklistto = new Blacklistto($db);
-$tmparrayblacklistto = $tmpblacklistto->fetchAll('', '', 1000, 0, array('status'=>1));
+$tmparrayblacklistto = $tmpblacklistto->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparrayblacklistto) && $tmparrayblacklistto < 0) {
 	echo "Erreur: failed to get blacklistto elements.\n";
 }
@@ -372,7 +372,7 @@ if (!empty($tmparrayblacklistto)) {
 print "----- Init - Generate file blacklistcontent\n";
 
 $tmpblacklistcontent = new Blacklistcontent($db);
-$tmparrayblacklistcontent = $tmpblacklistcontent->fetchAll('', '', 1000, 0, array('status'=>1));
+$tmparrayblacklistcontent = $tmpblacklistcontent->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparrayblacklistcontent) && $tmparrayblacklistcontent < 0) {
 	echo "Erreur: failed to get blacklistcontent elements.\n";
 }
@@ -393,7 +393,7 @@ if (!empty($tmparrayblacklistcontent)) {
 
 
 $tmpblacklistdir = new Blacklistdir($db);
-$tmparrayblacklistdir = $tmpblacklistdir->fetchAll('', '', 1000, 0, array('status'=>1));
+$tmparrayblacklistdir = $tmpblacklistdir->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparrayblacklistdir) && $tmparrayblacklistdir < 0) {
 	echo "Erreur: failed to get blacklistdir elements.\n";
 }
