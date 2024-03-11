@@ -3897,18 +3897,18 @@ class SellYourSaasUtils
 				$generatedunixlogin    = $contract->array_options['options_username_os'];
 				$generatedunixpassword = $contract->array_options['options_password_os'];
 				$generateddbname       = $contract->array_options['options_database_db'];
-				$generateddbport       = ($contract->array_options['options_port_db'] ? $contract->array_options['options_port_db'] : 3306);
+				$generateddbport       = (empty($contract->array_options['options_port_db']) ? 3306 : $contract->array_options['options_port_db']);
 				$generateddbusername   = $contract->array_options['options_username_db'];
 				$generateddbpassword   = $contract->array_options['options_password_db'];
-				$generateddbprefix     = ($contract->array_options['options_prefix_db'] ? $contract->array_options['options_prefix_db'] : 'llx_');
+				$generateddbprefix     = (empty($contract->array_options['options_prefix_db']) ? 'llx_' : $contract->array_options['options_prefix_db']);
 				$generatedunixhostname = $contract->array_options['options_hostname_os'];
 				$generateddbhostname   = $contract->array_options['options_hostname_db'];
 				$generateduniquekey    = getRandomPassword(true);
 
 				$sshaccesstype         = (empty($contract->array_options['options_sshaccesstype']) ? 0 : $contract->array_options['options_sshaccesstype']);
-				$customurl             = $contract->array_options['options_custom_url'];
-				$customvirtualhostline = $contract->array_options['options_custom_virtualhostline'];   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
-				$customvirtualhostdir  = $contract->array_options['options_custom_virtualhostdir'];
+				$customurl             = (empty($contract->array_options['options_custom_url']) ? '' : $contract->array_options['options_custom_url']);
+				$customvirtualhostline = (empty($contract->array_options['options_custom_virtualhostline']) ? '' : $contract->array_options['options_custom_virtualhostline']);   // Set with value 'php_value date.timezone "'.$_POST["tz_string"].'"'; into file register_instance.php
+				$customvirtualhostdir  = (empty($contract->array_options['options_custom_virtualhostdir']) ? '' : $contract->array_options['options_custom_virtualhostdir']);
 
 				$SSLON='On';	// Is SSL enabled on the custom url virtual host ?
 
