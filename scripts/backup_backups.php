@@ -615,6 +615,12 @@ foreach ($SERVERDESTIARRAY as $servername) {
 //Delete temporary emptydir
 dol_delete_dir($homedir."/emptydir");
 
+
+// Force sending email using mail method because $dbmaster and $conf come from the master server and
+// the setup may ask to use a relay no allowed for deployment servers.
+$conf->global->MAIN_MAIL_SENDMODE = 'mail';
+
+
 // Send email if there is one error
 if ($atleastoneerror != 0) {
 	$subject = '[Warning] Error(s) in backups of backups to remote server(s) - '.gethostname().' - '.dol_print_date(dol_now(), 'dayrfc');
