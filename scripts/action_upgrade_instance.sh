@@ -304,7 +304,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 				if [ $? -eq 0 ]
 				then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output.html"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
 					php step5.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
 					echo >> "$instancedir/documents/admin/temp/output.html"
 
