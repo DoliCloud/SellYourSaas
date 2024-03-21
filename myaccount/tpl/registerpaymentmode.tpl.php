@@ -541,7 +541,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
     			  var hiddenInput2 = document.createElement('input');
     			  hiddenInput2.setAttribute('type', 'hidden');
     			  hiddenInput2.setAttribute('name', 'token');
-                  hiddenInput2.setAttribute('value', '".$_SESSION["newtoken"]."');
+                  hiddenInput2.setAttribute('value', '".newToken()."');
     			  form.appendChild(hiddenInput2);
 
     		      // Submit the form
@@ -566,7 +566,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
     			  var hiddenInput2 = document.createElement('input');
     			  hiddenInput2.setAttribute('type', 'hidden');
     			  hiddenInput2.setAttribute('name', 'token');
-                  hiddenInput2.setAttribute('value', '".$_SESSION["newtoken"]."');
+                  hiddenInput2.setAttribute('value', '".newToken()."');
     			  form.appendChild(hiddenInput2);
 
     			  // Submit the form
