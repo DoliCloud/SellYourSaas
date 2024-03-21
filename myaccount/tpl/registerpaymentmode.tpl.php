@@ -191,6 +191,44 @@ if ($totalInvoiced == 0) {
 	}
 }
 
+$arraycontacttransfer = array();
+
+$sql = "SELECT *";
+$sql .= " FROM ".MAIN_DB_PREFIX."facture_rec as fr";
+$sql .= " WHERE fr.fk_mode_reglement = 2";
+$sql .= " AND fr.entity = ".((int) $conf->entity);
+$resql=$db->query($sql);
+if ($resql) {
+	$num_rows = $db->num_rows($resql);
+	$i = 0;
+	while ($i < $num_rows) {
+		$obj = $db->fetch_object($resql);
+		if ($obj) {
+			$facturerec=new FactureRec($db);
+			$facturerec->fetch($obj->rowid);					// This load also lines
+			$facturerec->fetchObjectLinked();
+			$tmp = $facturerec->linkedObjects["contrat"];
+			foreach ($tmp as $key => $value) {
+				$arraycontacttransfer[] = $value;
+			}
+		}
+		$i++;
+	}
+} else {
+	dol_print_error($db);
+}
+
+if (!empty($arraycontacttransfer)) {
+	$listcontract = "";
+	foreach ($arraycontacttransfer as $key => $obj) {
+		$listcontact .= ($key > 0) ? ', '.$obj->ref_customer : $obj->ref_customer;
+	}
+
+	print '<div class="note note-warning">';
+	print $langs->trans("AddPaymentMethodInvoiceTransfer", $listcontact);
+	print '</div>';
+}
+
 print '
 		<div class="radio-list">
 		<label class="radio-inline" style="margin-right: 0px" id="linkcard">
