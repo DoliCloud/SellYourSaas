@@ -197,6 +197,7 @@ $sql = "SELECT *";
 $sql .= " FROM ".MAIN_DB_PREFIX."facture_rec as fr";
 $sql .= " WHERE fr.fk_mode_reglement = 2";
 $sql .= " AND fr.entity = ".((int) $conf->entity);
+$sql .= " AND fr.fk_soc = ".((int) $mythirdpartyaccount->id);
 $resql=$db->query($sql);
 if ($resql) {
 	$num_rows = $db->num_rows($resql);
