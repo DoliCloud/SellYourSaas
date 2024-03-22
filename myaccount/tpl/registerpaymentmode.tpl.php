@@ -193,7 +193,7 @@ if ($totalInvoiced == 0) {
 
 $arraycontacttransfer = array();
 
-$sql = "SELECT *";
+$sql = "SELECT fr.rowid";
 $sql .= " FROM ".MAIN_DB_PREFIX."facture_rec as fr";
 $sql .= " WHERE fr.fk_mode_reglement = 2";
 $sql .= " AND fr.entity = ".((int) $conf->entity);
