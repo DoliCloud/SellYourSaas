@@ -8,12 +8,12 @@
 
 source /etc/lsb-release
 
-if [ "x$2" == "x" ]; then
-   echo "***** Edit of crontab on remote servers *****"
-   echo "Usage:   $0  hostfile  [hostgrouporname]"
-   echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
-   echo "Example: $0  myhostfile  master,deployment"
-   echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com"
+if [ "x$3" == "x" ]; then
+   echo "***** Edit the crontab of remote servers*****"
+   echo "Usage:   $0  hostfile  hostgrouporname  (root|osusername)"
+   echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment'"
+   echo "Example: $0  myhostfile  master  root"
+   echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com  osu123"
    exit 1
 fi
 
