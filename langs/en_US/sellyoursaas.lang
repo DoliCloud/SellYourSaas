@@ -862,3 +862,4 @@ InvoicePDFNotYetAvailable=Invoice PDF not yet available
 InstancesToBackupWithoutRedirectionInstances=Instances to backup (paid or confirmed). Redirection instances are not included.
 SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Key on master to sign remote action messages
 ALUMNI_ENABLE_SURVEY=Enable the survey in the web site Alumni
+AddPaymentMethodInvoiceTransfer=WARNING: Please note that you are about to enter an automated recurring card/Sepa direct debit payment method for your instance(s), but you already have a payment method set to "Transfer by you" for instance(s) %s.<br>This will be replaced by an automated card/Sepa direct debit, so please ensure that you have cancelled any internal bank transfer payment processes in your company, to avoid double payments, before saving your new direct debit method.
