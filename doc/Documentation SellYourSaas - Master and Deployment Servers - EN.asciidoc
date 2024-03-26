@@ -1754,7 +1754,7 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
 ---------------
 
-Then place sellyoursaas conf rules to enable that are supplied with the project in *etc/fail2ban/jail.d* inside the directory of the same name */etc/fail2ban/jail.d* by creating links:
+Then place sellyoursaas enabling rules that are supplied with the project in *etc/fail2ban/jail.d* inside the directory of the same name */etc/fail2ban/jail.d* by creating links:
 
 *For all servers:*
 
