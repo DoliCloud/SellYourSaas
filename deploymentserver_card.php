@@ -300,6 +300,14 @@ if ($action == 'create') {
 	print '</td></tr>';
 	*/
 
+	// ServerSignatureKey
+	$value = GETPOSTISSET('serversignaturekey') ? GETPOST('serversignaturekey') : $object->serversignaturekey;
+	print '<tr><td>'.$langs->trans("ServerSignatureKey").'</td><td><input class="minwidth300 maxwidth400 widthcentpercentminusx" maxlength="128" type="text" id="serversignaturekey" name="serversignaturekey" value="'.dol_escape_htmltag($value).'" autocomplete="new-serversignaturekey">';
+	if (!empty($conf->use_javascript_ajax)) {
+		print img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token" class="linkobject paddingleft"');
+	}
+	print '</td></tr>';
+
 	// Other attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_add.tpl.php';
 
@@ -345,6 +353,14 @@ if (($id || $ref) && $action == 'edit') {
 	}
 	print '</td></tr>';
 	*/
+
+	// ServerSignatureKey
+	$value = GETPOSTISSET('serversignaturekey') ? GETPOST('serversignaturekey') : $object->serversignaturekey;
+	print '<tr><td>'.$langs->trans("ServerSignatureKey").'</td><td><input class="minwidth300 maxwidth400 widthcentpercentminusx" maxlength="128" type="text" id="serversignaturekey" name="serversignaturekey" value="'.dol_escape_htmltag($value).'" autocomplete="new-serversignaturekey">';
+	if (!empty($conf->use_javascript_ajax)) {
+		print img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token" class="linkobject paddingleft"');
+	}
+	print '</td></tr>';
 
 	// Other attributes
 	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_edit.tpl.php';
@@ -691,6 +707,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 	include DOL_DOCUMENT_ROOT.'/core/tpl/card_presend.tpl.php';
 }
+
+// Add button to autosuggest a key
+include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+print dolJSToSetRandomPassword('serversignaturekey');
 
 // End of page
 llxFooter();
