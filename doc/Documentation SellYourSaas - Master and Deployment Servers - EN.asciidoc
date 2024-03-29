@@ -2582,7 +2582,9 @@ FLUSH PRIVILEGES;
 ---------------
 
 --TODO Reduce permissions of this database user sellyoursaas
+
 This is used by:
+
 * the root batch *clean.sh* to SELECT contracts and to list dbn databases with SHOW DATABASES.
 * the root batch *batch_detect_evil_instances.php* to SELECT contracts
 * the admin batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm 
@@ -3763,7 +3765,7 @@ You must have inside the cron of user *admin*:
 
 ==== Check that launching of cron is ok
 
-Reprendre du fichier */etc/crontab*, les commandes pour tester le lancement de crontab journalière, hebdo et mensuelles et tester en lançant en manuel. Par exemple par:
+Take from */etc/crontab* the commands for testing daily, weekly and monthly crontab launches and test by launching manually. For example, with:
 
 [source,bash]
 ---------------
