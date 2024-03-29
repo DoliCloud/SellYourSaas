@@ -1441,7 +1441,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	Q2a=""
 	Q2b=""
 	
-	# Obsolete since MariaDB 10.4
+	# Replaced with SET PASSWORD done later. Obsolete since MariaDB 10.4
 	#Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
 	#Q3a=""
 	#Q3b=""
