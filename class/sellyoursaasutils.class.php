@@ -4853,39 +4853,34 @@ class SellYourSaasUtils
 	 * Return signature key of server, from it's short host name
 	 * 
 	 * @param 	string 		$domainname 	Domain name to select remote ip to deploy to (example: 'home.lan', 'withX.mysellyoursaasdomain.com', ...)
-	 * @param	int			$onlyifopen		0 by default, If 1 and server is closed
 	 * @return	string						'' if No Signature, Signature key if OK
 	 */
-	public function getRemoteServerSignatureKey($domainname, $onlyifopen = 0)
+	public function getRemoteServerSignatureKey($domainname)
 	{
 		$error = 0;
 
 		$serversignaturekey = getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY');
 
-		if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION') && !empty($domainname)) {
-			dol_include_once('sellyoursaas/class/deploymentserver.class.php');
-			$deployementserver = new Deploymentserver($this->db);
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$deployementserver = new Deploymentserver($this->db);
 
-			$res = $deployementserver->fetch(null, $domainname);
+		$res = $deployementserver->fetch(null, $domainname);
 
-			if ($res < 0) {
-				$this->error = $deployementserver->error;
-				$this->errors[] = $deployementserver->errors;
-				$error++;
-			} elseif ($res == 0) {
-				dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
-				$this->error = "Failed to find server domain '".$domainname."' into database";
-				$this->errors[] = "Failed to find server domain '".$domainname."' into database";
-				$error++;
-			}
-
-			if (empty($error) && ($deployementserver->status != $deployementserver::STATUS_DISABLED || !$onlyifopen)) {
-				if (!empty($deployementserver->serversignaturekey)) {
-					$serversignaturekey = $deployementserver->serversignaturekey;
-				}
-			}
+		if ($res < 0) {
+			$this->error = $deployementserver->error;
+			$this->errors[] = $deployementserver->errors;
+			$error++;
+		} elseif ($res == 0) {
+			dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
+			$this->error = "Failed to find server domain '".$domainname."' into database";
+			$this->errors[] = "Failed to find server domain '".$domainname."' into database";
+			$error++;
 		}
 
+		if (!empty($deployementserver->serversignaturekey)) {
+			$serversignaturekey = $deployementserver->serversignaturekey;
+		}
+		
 		return $serversignaturekey;
 	}
 }
