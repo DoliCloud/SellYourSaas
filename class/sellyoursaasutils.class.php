@@ -4113,8 +4113,9 @@ class SellYourSaasUtils
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
+				$signaturekey = $this->getRemoteServerSignatureKey($domainname);
 				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymetric signature.
-				$commandurl.= '&'.md5($commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY'));
+				$commandurl.= '&'.md5($commandurl.$signaturekey);
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action
 
@@ -4846,5 +4847,40 @@ class SellYourSaasUtils
 			return '';
 		}
 		return $REMOTEIPTODEPLOYTO;
+	}
+
+	/**
+	 * Return signature key of server, from it's short host name
+	 * 
+	 * @param 	string 		$domainname 	Domain name to select remote ip to deploy to (example: 'home.lan', 'withX.mysellyoursaasdomain.com', ...)
+	 * @return	string						'' if No Signature, Signature key if OK
+	 */
+	public function getRemoteServerSignatureKey($domainname)
+	{
+		$error = 0;
+
+		$serversignaturekey = getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY');
+
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$deployementserver = new Deploymentserver($this->db);
+
+		$res = $deployementserver->fetch(null, $domainname);
+
+		if ($res < 0) {
+			$this->error = $deployementserver->error;
+			$this->errors[] = $deployementserver->errors;
+			$error++;
+		} elseif ($res == 0) {
+			dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
+			$this->error = "Failed to find server domain '".$domainname."' into database";
+			$this->errors[] = "Failed to find server domain '".$domainname."' into database";
+			$error++;
+		}
+
+		if (!empty($deployementserver->serversignaturekey)) {
+			$serversignaturekey = $deployementserver->serversignaturekey;
+		}
+		
+		return $serversignaturekey;
 	}
 }
