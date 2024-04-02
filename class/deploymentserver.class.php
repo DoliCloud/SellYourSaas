@@ -130,6 +130,7 @@ class Deploymentserver extends CommonObject
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>-1, 'cssview'=>'wordbreak', 'csslist'=>'small', 'validate'=>'1',),
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
+		'serversignaturekey' => array('type'=>'varchar(128)', 'label'=>'ServerSignatureKey', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>5),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModification', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
 	);
 
