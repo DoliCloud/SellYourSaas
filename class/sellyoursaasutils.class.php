@@ -3518,10 +3518,12 @@ class SellYourSaasUtils
 
 		dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." initial email=".$email.(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref : '')." timeout=".$timeout.")", LOG_DEBUG, 1);
 
-		// Load parent contract of the processed contract line $tmpobject
+		// Load the contract of the processed contract line $object
 		if (in_array(get_class($object), array('Contrat', 'SellYourSaasContract'))) {
+			// $object is already the contract
 			$contract = $object;
 		} else {
+			// $object is a contact line
 			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 			$contract = new Contrat($this->db);
 			$contract->fetch($object->fk_contrat);
@@ -3822,17 +3824,17 @@ class SellYourSaasUtils
 			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'actionafterpaid')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 				$doremoteaction = 1;
-				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => 1, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => $doremoteaction, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
 			if (in_array($remoteaction, array('deploy', 'deployall', 'deployoption')) &&
 				($producttmp->array_options['options_app_or_option'] == 'option') && $tmppackage->id > 0) {
 				$doremoteaction = 1;
 				$newremoteaction = 'deployoption';		// force on deployoption for options services
-				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 20, 'doremoteaction' => 1, 'remoteaction' => $newremoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 20, 'doremoteaction' => $doremoteaction, 'remoteaction' => $newremoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
 			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
 				$doremoteaction = 2;
-				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => 1, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => $doremoteaction, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
 		}
 
