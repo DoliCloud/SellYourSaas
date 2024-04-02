@@ -114,10 +114,11 @@ fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignatur
 
 // Compare signature and recalculatedsignature
 if ($signature != $recalculatedsignature) {
-	fwrite($fh, date('Y-m-d H:i:s')." The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into 'signature_key' in the /etc/sellyoursaas.conf file (instance server=".$instanceserver."\n");
+	fwrite($fh, date('Y-m-d H:i:s')." The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into 'signature_key' in the /etc/sellyoursaas.conf file (instance server=".$instanceserver.")\n");
 
 	http_response_code(598);
 	print 'The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into "signature_key" in the /etc/sellyoursaas.conf file (instance server='.$instanceserver.')'."\n";
+	//print "signature_key=".$signature_key;
 	exit();
 }
 
@@ -428,10 +429,10 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown( -R)? __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^chown( -R)? __OSUSERNAME__\.__OSUSERNAME__ __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown root.root __INSTANCEDIR__/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
+		if (preg_match('/^chown root.root __INSTANCEDIR__\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__$/i', $newline)) {

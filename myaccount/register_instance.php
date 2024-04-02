@@ -443,6 +443,9 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		$newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 	}
 
+	$_SESSION['tmppassinform'] = dolEncrypt($password);
+	$_SESSION['tmppassinform2'] = dolEncrypt($password2);
+
 	$parameters = array('tldid' => $tldid, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
 	$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 	if ($reshook < 0) {
@@ -547,8 +550,8 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 
 			// Check in API Block Disposable E-mail database
 			if ($disposable === false) {
-				$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', $conf->global->MAIN_INFO_SOCIETE_MAIL);
-				$apikey = $conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY;
+				$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
+				$apikey = getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY');
 
 				// Check if API account and credit are ok
 				$request = "https://status.block-disposable-email.com/status/?apikey=".$apikey;
@@ -1087,6 +1090,11 @@ if ($reusecontractid) {
 			$tmpthirdparty->parent = ((int) $reg[1]);		// Add link to parent/reseller id with the id of first source in all web site
 		}
 	}
+
+
+	// No error, we can remove some data saved in session.
+	unset($_SESSION['tmppassinform']);
+	unset($_SESSION['tmppassinform2']);
 
 
 	// Start transaction

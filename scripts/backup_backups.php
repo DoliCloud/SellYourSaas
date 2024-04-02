@@ -287,7 +287,7 @@ if ($testorconfirm != "confirm") {
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." (".$testorconfirm.") *****\n";
 if (empty($argv[1])) {
-	echo "Usage: ${0} (test|confirm) [month|week|none] [osuX] [--delete]\n";
+	echo "Usage: ".$argv[0]." (test|confirm) [month|week|none] [osuX] [--delete]\n";
 	echo "With  month (default) is to keep 1 month of backup using --backup option of rsync\n";
 	echo "      week is to keep 1 week of backup using --backup option of rsync\n";
 	echo "      none is to not archive old versions using the --backup option of rsync. For example when you already do it using snapshots on backup server (recommended).\n";

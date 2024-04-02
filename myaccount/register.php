@@ -551,7 +551,19 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register', '', 
 				<?php
 			}
 			if (empty($reusecontractid)) {
-				$langs->load("sellyoursaas@sellyoursaas"); ?>
+				$langs->load("sellyoursaas@sellyoursaas");
+
+				$tmppassinform = '';
+				$tmppassinform2 = '';
+				if (!empty($_SESSION['tmppassinform'])) {
+					$tmppassinform = dolDecrypt($_SESSION['tmppassinform']);
+					unset($_SESSION['tmppassinform']);
+				}
+				if (!empty($_SESSION['tmppassinform2'])) {
+					$tmppassinform2 = dolDecrypt($_SESSION['tmppassinform2']);
+					unset($_SESSION['tmppassinform2']);
+				}
+				?>
 			<div class="group">
 				<div class="horizontal-fld">
 
@@ -559,7 +571,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register', '', 
 					<label class="control-label" for="password" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("Password") ?></label>
 					<div class="controls">
 
-						<input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" />
+						<input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform; ?>" />
 
 					</div>
 				</div>
@@ -569,7 +581,7 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register', '', 
 				  <div class="control-group required">
 					<label class="control-label" for="password2" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("PasswordRetype") ?></label>
 					<div class="controls">
-					  <input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" name="password2" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" />
+					  <input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" name="password2" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform2; ?>" />
 					</div>
 				  </div>
 				</div>
