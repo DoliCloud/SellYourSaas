@@ -2266,9 +2266,14 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output = count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were refreshed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '')."\n".$this->output;
-		//$this->output .= "\n".count($contractignored).' contract(s) not qualified.';
-		$this->output .= "\n".count($contractcanceled).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were qualified for refresh but there is at least 1 invoice(s) unpayed so we cancel refresh : ';
+		$this->output = count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were refreshed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '.')."\n".$this->output;
+
+		$this->output .= "\n".count($contractcanceled).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were qualified for refresh but there is at least 1 invoice(s) unpayed so we cancel refresh';
+		if (count($contractcanceled)) {
+			$this->output .= ' : ';
+		} else {
+			$this->output .= '.';
+		}
 		$i = 0;
 		foreach ($contractcanceled as $tmpval) {
 			if ($i) {
