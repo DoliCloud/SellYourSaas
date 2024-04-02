@@ -1462,7 +1462,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	# For all mysql and mariadb
 	Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
 	Q3a="SET PASSWORD FOR '$dbusername'@'localhost' = PASSWORD('$dbpassword'); "
-	Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword');
+	Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword'); "
 	
 	Q4="FLUSH PRIVILEGES; "
 	SQL="${Q1}${Q2}${Q2a}${Q2b}${Q3}${Q3a}${Q3b}${Q4}"
