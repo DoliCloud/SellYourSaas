@@ -1734,6 +1734,7 @@ class SellYourSaasUtils
 								$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
 								$substitutionarray['__REFCLIENT__']=$contract->ref_customer;	// For backward compatibility
 								$substitutionarray['__REF_CLIENT__']=$contract->ref_customer;
+								$substitutionarray['__REF_CUSTOMER__']=$contract->ref_customer;
 								$foundcontract = $contract;
 								break;
 							}
@@ -3826,8 +3827,8 @@ class SellYourSaasUtils
 			if (in_array($remoteaction, array('deploy', 'deployall', 'deployoption')) &&
 				($producttmp->array_options['options_app_or_option'] == 'option') && $tmppackage->id > 0) {
 				$doremoteaction = 1;
-				$remoteaction = 'deployoption';		// force on deployoption for options services
-				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 20, 'doremoteaction' => 1, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
+				$newremoteaction = 'deployoption';		// force on deployoption for options services
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 20, 'doremoteaction' => 1, 'remoteaction' => $newremoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
 			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
 				$doremoteaction = 2;
@@ -3835,7 +3836,7 @@ class SellYourSaasUtils
 			}
 		}
 
-		dol_sort_array($listoflinesqualified, 'position', 'asc');
+		$listoflinesqualified = dol_sort_array($listoflinesqualified, 'position', 'asc');
 
 		// Now loop on each lines qualified for action
 		foreach ($listoflinesqualified as $tmparrayoflinesqualified) {
@@ -3844,8 +3845,9 @@ class SellYourSaasUtils
 			$remoteaction = $tmparrayoflinesqualified['remoteaction'];
 			$producttmp = $tmparrayoflinesqualified['producttmp'];
 			$tmppackage = $tmparrayoflinesqualified['tmppackage'];
+			$position = $tmparrayoflinesqualified['position'];
 
-			dol_syslog("** Process contract line id=".$tmpobject->id." with doremoteaction = ".$doremoteaction.", remoteaction = ".$remoteaction);
+			dol_syslog("** Process contract line id=".$tmpobject->id." with doremoteaction = ".$doremoteaction.", remoteaction = ".$remoteaction.", position=".$position);
 
 			// remoteaction = 'deploy','deployall','deployoption','suspend','suspendmaintenance','suspendredirect',...
 			if ($doremoteaction == 1) {
