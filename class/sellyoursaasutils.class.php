@@ -3796,12 +3796,13 @@ class SellYourSaasUtils
 
 		// Loop on each line of contract ($tmpobject is a ContractLine): It sets (or not) $doremoteaction to say if an action must be done for
 		//  the line, then does it by calling the remote agent, or by making the action for qty calculation (ssh2 connect, sql execution, ...)
+		$listoflinesqualified = array();
 		foreach ($listoflines as $tmpobject) {
 			if (empty($tmpobject)) {
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
 				continue;
 			}
-			dol_syslog("** Process contract line id=".$tmpobject->id);
+			dol_syslog("** Process contract line id=".$tmpobject->id." to know which action to do");
 
 			$producttmp = new Product($this->db);
 			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
@@ -3814,22 +3815,40 @@ class SellYourSaasUtils
 			}
 
 			// Set or not doremoteaction
-			// Note remote action 'undeployall' is used to undeploy test instances
-			// Note remote action 'undeploy' is used to undeploy paying instances
+			// Note: remote action 'undeployall' is used to undeploy test instances
+			// Note: remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
 			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'actionafterpaid')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 				$doremoteaction = 1;
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => 1, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
 			if (in_array($remoteaction, array('deploy', 'deployall', 'deployoption')) &&
 				($producttmp->array_options['options_app_or_option'] == 'option') && $tmppackage->id > 0) {
 				$doremoteaction = 1;
 				$remoteaction = 'deployoption';		// force on deployoption for options services
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 20, 'doremoteaction' => 1, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
-			// 'refresh' and 'refreshmetrics' are processed later.
+			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
+				$doremoteaction = 2;
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => 1, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
+			}
+		}
+
+		dol_sort_array($listoflinesqualified, 'position', 'asc');
+
+		// Now loop on each lines qualified for action
+		foreach ($listoflinesqualified as $tmparrayoflinesqualified) {
+			$tmpobject = $tmparrayoflinesqualified['tmpobject'];
+			$doremoteaction = $tmparrayoflinesqualified['doremoteaction'];
+			$remoteaction = $tmparrayoflinesqualified['remoteaction'];
+			$producttmp = $tmparrayoflinesqualified['producttmp'];
+			$tmppackage = $tmparrayoflinesqualified['tmppackage'];
+
+			dol_syslog("** Process contract line id=".$tmpobject->id." with doremoteaction = ".$doremoteaction.", remoteaction = ".$remoteaction);
 
 			// remoteaction = 'deploy','deployall','deployoption','suspend','suspendmaintenance','suspendredirect',...
-			if ($doremoteaction) {
+			if ($doremoteaction == 1) {
 				dol_syslog("Enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 
 				// We are in a case of $remoteaction that need to add an event when forceaddevent = 0, to force to add an event at end of remote action.
