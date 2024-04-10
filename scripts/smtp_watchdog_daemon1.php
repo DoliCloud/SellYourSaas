@@ -236,7 +236,7 @@ while (!feof($handle)) {
 
 	if (preg_match('/\sUID=/', $line)) {
 		$processownerid=preg_replace('/\s.*/', '', preg_replace('/.*\sUID=/', '', $line));
-		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processownerid=${processownerid} from iptable log ".$WDLOGFILE."\n", FILE_APPEND);
+		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processownerid=".$processownerid." from iptable log ".$WDLOGFILE."\n", FILE_APPEND);
 	}
 
 
@@ -280,7 +280,7 @@ while (!feof($handle)) {
 				$processid = $reg[2];
 			}
 
-			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processid=${processid}, processownerid=${processownerid} from log or ss command\n", FILE_APPEND);
+			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " We got processid=".$processid.", processownerid=".$processownerid." from log or ss command\n", FILE_APPEND);
 		} else {
 			file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " ERROR ".$result['error']." ".$result['output']."\n", FILE_APPEND);
 		}

@@ -1044,6 +1044,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$topic = GETPOST('subject', 'alphanohtml');
 	$content = GETPOST('content', 'restricthtml');
 	$groupticket=GETPOST('ticketcategory', 'aZ09');
+	$ipaddress = getUserRemoteIP();
 
 	if (empty($replyto)) {
 		$error++;
@@ -1112,6 +1113,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 
 		// Sender
+		$content .= 'User IP: '.$ipaddress."<br>\n";
 		if (is_object($tmpcontract) && is_object($tmpcontract->thirdparty)) {
 			$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
 			$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
@@ -2493,7 +2495,6 @@ if (! empty($conf->global->MAIN_FAVICON_URL)) {
 $arrayofcss = array();
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
 $arrayofjs=array(
-	'/includes/jstz/jstz.min.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION)),
 	'/core/js/dst.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION))
 );
 

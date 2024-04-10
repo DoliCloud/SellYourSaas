@@ -1734,6 +1734,7 @@ class SellYourSaasUtils
 								$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
 								$substitutionarray['__REFCLIENT__']=$contract->ref_customer;	// For backward compatibility
 								$substitutionarray['__REF_CLIENT__']=$contract->ref_customer;
+								$substitutionarray['__REF_CUSTOMER__']=$contract->ref_customer;
 								$foundcontract = $contract;
 								break;
 							}
@@ -2265,9 +2266,14 @@ class SellYourSaasUtils
 			$this->error = $this->db->lasterror();
 		}
 
-		$this->output = count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were refreshed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '')."\n".$this->output;
-		//$this->output .= "\n".count($contractignored).' contract(s) not qualified.';
-		$this->output .= "\n".count($contractcanceled).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were qualified for refresh but there is at least 1 invoice(s) unpayed so we cancel refresh : ';
+		$this->output = count($contractprocessed).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were refreshed'.(count($contractprocessed)>0 ? ' : '.join(',', $contractprocessed) : '.')."\n".$this->output;
+
+		$this->output .= "\n".count($contractcanceled).' paying contract(s) with end date before '.dol_print_date($enddatetoscan, 'day').' were qualified for refresh but there is at least 1 invoice(s) unpayed so we cancel refresh';
+		if (count($contractcanceled)) {
+			$this->output .= ' : ';
+		} else {
+			$this->output .= '.';
+		}
 		$i = 0;
 		foreach ($contractcanceled as $tmpval) {
 			if ($i) {
@@ -3517,10 +3523,12 @@ class SellYourSaasUtils
 
 		dol_syslog("* sellyoursaasRemoteAction START (remoteaction=".$remoteaction." initial email=".$email.(get_class($object) == 'Contrat' ? ' contractid='.$object->id.' contractref='.$object->ref : '')." timeout=".$timeout.")", LOG_DEBUG, 1);
 
-		// Load parent contract of the processed contract line $tmpobject
+		// Load the contract of the processed contract line $object
 		if (in_array(get_class($object), array('Contrat', 'SellYourSaasContract'))) {
+			// $object is already the contract
 			$contract = $object;
 		} else {
+			// $object is a contact line
 			include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 			$contract = new Contrat($this->db);
 			$contract->fetch($object->fk_contrat);
@@ -3796,12 +3804,13 @@ class SellYourSaasUtils
 
 		// Loop on each line of contract ($tmpobject is a ContractLine): It sets (or not) $doremoteaction to say if an action must be done for
 		//  the line, then does it by calling the remote agent, or by making the action for qty calculation (ssh2 connect, sql execution, ...)
+		$listoflinesqualified = array();
 		foreach ($listoflines as $tmpobject) {
 			if (empty($tmpobject)) {
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
 				continue;
 			}
-			dol_syslog("** Process contract line id=".$tmpobject->id);
+			dol_syslog("** Process contract line id=".$tmpobject->id." to know which action to do");
 
 			$producttmp = new Product($this->db);
 			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
@@ -3814,22 +3823,41 @@ class SellYourSaasUtils
 			}
 
 			// Set or not doremoteaction
-			// Note remote action 'undeployall' is used to undeploy test instances
-			// Note remote action 'undeploy' is used to undeploy paying instances
+			// Note: remote action 'undeployall' is used to undeploy test instances
+			// Note: remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
 			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'actionafterpaid')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 				$doremoteaction = 1;
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => $doremoteaction, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
 			if (in_array($remoteaction, array('deploy', 'deployall', 'deployoption')) &&
 				($producttmp->array_options['options_app_or_option'] == 'option') && $tmppackage->id > 0) {
 				$doremoteaction = 1;
-				$remoteaction = 'deployoption';		// force on deployoption for options services
+				$newremoteaction = 'deployoption';		// force on deployoption for options services
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 20, 'doremoteaction' => $doremoteaction, 'remoteaction' => $newremoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
-			// 'refresh' and 'refreshmetrics' are processed later.
+			if ($remoteaction == 'refresh' || $remoteaction == 'refreshmetrics') {
+				$doremoteaction = 2;
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => $doremoteaction, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
+			}
+		}
+
+		$listoflinesqualified = dol_sort_array($listoflinesqualified, 'position', 'asc');
+
+		// Now loop on each lines qualified for action
+		foreach ($listoflinesqualified as $tmparrayoflinesqualified) {
+			$tmpobject = $tmparrayoflinesqualified['tmpobject'];
+			$doremoteaction = $tmparrayoflinesqualified['doremoteaction'];
+			$remoteaction = $tmparrayoflinesqualified['remoteaction'];
+			$producttmp = $tmparrayoflinesqualified['producttmp'];
+			$tmppackage = $tmparrayoflinesqualified['tmppackage'];
+			$position = $tmparrayoflinesqualified['position'];
+
+			dol_syslog("** Process contract line id=".$tmpobject->id." with doremoteaction = ".$doremoteaction.", remoteaction = ".$remoteaction.", position=".$position);
 
 			// remoteaction = 'deploy','deployall','deployoption','suspend','suspendmaintenance','suspendredirect',...
-			if ($doremoteaction) {
+			if ($doremoteaction == 1) {
 				dol_syslog("Enter into doremoteaction code for contract line id=".$tmpobject->id." app_or_option=".$producttmp->array_options['options_app_or_option']);
 
 				// We are in a case of $remoteaction that need to add an event when forceaddevent = 0, to force to add an event at end of remote action.
@@ -4113,8 +4141,9 @@ class SellYourSaasUtils
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
+				$signaturekey = $this->getRemoteServerSignatureKey($domainname);
 				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymetric signature.
-				$commandurl.= '&'.md5($commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY'));
+				$commandurl.= '&'.md5($commandurl.$signaturekey);
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action
 
@@ -4846,5 +4875,40 @@ class SellYourSaasUtils
 			return '';
 		}
 		return $REMOTEIPTODEPLOYTO;
+	}
+
+	/**
+	 * Return signature key of server, from it's short host name
+	 *
+	 * @param 	string 		$domainname 	Domain name to select remote ip to deploy to (example: 'home.lan', 'withX.mysellyoursaasdomain.com', ...)
+	 * @return	string						'' if No Signature, Signature key if OK
+	 */
+	public function getRemoteServerSignatureKey($domainname)
+	{
+		$error = 0;
+
+		$serversignaturekey = getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY');
+
+		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
+		$deployementserver = new Deploymentserver($this->db);
+
+		$res = $deployementserver->fetch(null, $domainname);
+
+		if ($res < 0) {
+			$this->error = $deployementserver->error;
+			$this->errors[] = $deployementserver->errors;
+			$error++;
+		} elseif ($res == 0) {
+			dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
+			$this->error = "Failed to find server domain '".$domainname."' into database";
+			$this->errors[] = "Failed to find server domain '".$domainname."' into database";
+			$error++;
+		}
+
+		if (!empty($deployementserver->serversignaturekey)) {
+			$serversignaturekey = $deployementserver->serversignaturekey;
+		}
+
+		return $serversignaturekey;
 	}
 }

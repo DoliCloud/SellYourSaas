@@ -1060,7 +1060,22 @@
         path: /etc/ImageMagick-6/policy.xml
         regexp: '^\s*<policy domain="coder" rights="none" pattern="PDF" />'
         line: '<!-- <policy domain="coder" rights="none" pattern="PDF" /> -->'
-        
+
+
+    - name: Search all fail2ban rules into filter.d directory
+      ansible.builtin.find:
+        paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d
+        patterns: '*.conf'
+      register: dolibarr_fail2ban_files
+
+    - name: Create links to fail2ban rules files
+      ansible.builtin.file:
+        src: "{{ item.path }}"
+        dest: "/etc/fail2ban/filter.d/{{ item.path | basename }}"  
+        state: link
+      loop: "{{ dolibarr_fail2ban_files.files }}"      
+
+
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
       ignore_errors: true
       ansible.builtin.template:

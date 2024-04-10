@@ -256,9 +256,9 @@ if ($action == "autoupgrade") {
 
 	if (!$errors) {
 		// This also add an action in agenda "Remote action upgrade..." success or error
-		$comment = 'Call of sellyoursaasRemoteAction(upgrade) on contract ref='.$object->ref;
 		$notused = '';
-		$timeoutupgrade = 240;
+		$timeoutupgrade = 300;
+		$comment = 'Call of sellyoursaasRemoteAction(upgrade) on contract ref='.$object->ref.' with a timeout of '.$timeoutupgrade;
 		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object, 'admin', $notused, $notused, 1, $comment, $timeoutupgrade);
 		if ($exitcode < 0) {
 			$errors++;

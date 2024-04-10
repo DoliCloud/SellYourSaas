@@ -1440,9 +1440,12 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	Q2="GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON $dbname.* TO '$dbusername'@'%'; "
 	Q2a=""
 	Q2b=""
-	Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
-	Q3a=""
-	Q3b=""
+	
+	# Replaced with SET PASSWORD done later. Obsolete since MariaDB 10.4
+	#Q3="UPDATE mysql.user SET Password=PASSWORD('$dbpassword') WHERE User='$dbusername'; "
+	#Q3a=""
+	#Q3b=""
+	
 	# If we use mysql and not mariadb, we set password differently
 	dpkg -l | grep mariadb > /dev/null
 	if [[ $? == "1" || $dbforcesetpassword == "1" ]]; then
@@ -1451,10 +1454,15 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		Q2b="GRANT FLUSH_TABLES ON *.* TO '$dbusername'@'%'; "
 
 		# For all mysql
-		Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
-		Q3a="SET PASSWORD FOR '$dbusername'@'localhost' = PASSWORD('$dbpassword'); "
-		Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword'); "
+		#Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+		#Q3a="SET PASSWORD FOR '$dbusername'@'localhost' = PASSWORD('$dbpassword'); "
+		#Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword'); "
 	fi
+	
+	# For all mysql and mariadb
+	Q3="SET PASSWORD FOR '$dbusername' = PASSWORD('$dbpassword'); "
+	Q3a="SET PASSWORD FOR '$dbusername'@'localhost' = PASSWORD('$dbpassword'); "
+	Q3b="SET PASSWORD FOR '$dbusername'@'%' = PASSWORD('$dbpassword'); "
 	
 	Q4="FLUSH PRIVILEGES; "
 	SQL="${Q1}${Q2}${Q2a}${Q2b}${Q3}${Q3a}${Q3b}${Q4}"
