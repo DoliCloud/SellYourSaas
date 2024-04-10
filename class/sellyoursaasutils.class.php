@@ -4496,16 +4496,15 @@ class SellYourSaasUtils
 					} elseif ($tmparray[0] === 'PHPMETHOD') {
 						// Keyword PHPMETHOD then : then function name to call ; args seaprated with ;
 						// ex: PHPMETHOD:caprelCountDoliSCANUsers;__CONTRACTREF__;__INSTANCEDBPREFIX__;
-						// ex: PHPMETHOD:sellyoursaasGetNbUsersContract;__CONTRACTREF__;name of extrafield;SELECT to count
+						// ex: PHPMETHOD:sellyoursaasGetNbUsersContract;__CONTRACT__;name of extrafield;SELECT to count
 						$arguments = make_substitutions($tmparray[1], $substitarray);
 						// TODO @LMR Replace param name of extrafield with $tmpobject->options['options_'.name_of_extrafield].
 						$argsArray = explode(';', $arguments);
-						if (preg_match('/sellyoursaasGetNbUsersContract/', $argsArray[0])) {
-							foreach ($argsArray as $key => $arg) {
-								if ($arg == '__OBJECTREF__') {
-									$argsArray[$key] = $object;
-									continue;
-								}
+						// Replace __CONTRACT__ string with the object contract.
+						foreach ($argsArray as $key => $arg) {
+							if ($arg === '__CONTRACT__') {
+								$argsArray[$key] = $object;
+								continue;
 							}
 						}
 						$customFunctionToCall = array_shift($argsArray);
