@@ -219,16 +219,6 @@ if ($resql) {
 	dol_print_error($db);
 }
 
-if (!empty($arraycontacttransfer)) {
-	$listcontract = "";
-	foreach ($arraycontacttransfer as $key => $obj) {
-		$listcontact .= ($key > 0) ? ', '.$obj->ref_customer : $obj->ref_customer;
-	}
-
-	print '<div class="note note-warning">';
-	print $langs->trans("AddPaymentMethodInvoiceTransfer", $listcontact);
-	print '</div>';
-}
 
 print '
 		<div class="radio-list">
@@ -251,7 +241,18 @@ print '
 		</div>
 
 		<br>
+';
+if (!empty($arraycontacttransfer)) {
+	$listcontract = "";
+	foreach ($arraycontacttransfer as $key => $obj) {
+		$listcontact .= ($key > 0) ? ', '.$obj->ref_customer : $obj->ref_customer;
+	}
 
+	print '<div class="note note-warning">';
+	print $langs->trans("AddPaymentMethodInvoiceTransfer", $listcontact);
+	print '</div>';
+}
+print '
 		<div class="linkcard">';
 
 
