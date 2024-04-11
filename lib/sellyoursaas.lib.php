@@ -717,23 +717,26 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 /**
  * Function to get nb of users for a certain contract
  *
- * @param	string		$contractref			Ref of contract for user count
- * @param	string		$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
- * @param	string		$sqltoexecute			SQL to execute to get nb of users in customer instance
- * @param	int			$userproductid			Id of product for user count
- * @return 	int									<0 if error or Number of users for contract
+ * @param	string|Contrat		$contractref			Ref of contract for user count or contract
+ * @param	string				$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
+ * @param	string				$sqltoexecute			SQL to execute to get nb of users in customer instance
+ * @param	int					$userproductid			Id of product for user count
+ * @return 	int											<0 if error or Number of users for contract
  */
 function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sqltoexecute, $userproductid = 0)
 {
 	global $db;
 
-	// @TODO LMR Get the object contract as parameter
-	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
-	$contract = new Contrat($db);
-	$result = $contract->fetch(0, $contractref);
-	if ($result <= 0) {
-		setEventMessages($contract->error, $contract->errors, 'errors');
-		return -1;
+	if (is_object($contractref)) {
+		$contract = $contractref;
+	} else {
+		require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+		$contract = new Contrat($db);
+		$result = $contract->fetch(0, $contractref);
+		if ($result <= 0) {
+			setEventMessages($contract->error, $contract->errors, 'errors');
+			return -1;
+		}
 	}
 
 	$server = $contract->ref_customer;
@@ -788,7 +791,6 @@ function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sq
 
 	foreach ($contractlines as $contractline) {
 		if (empty($userproductid) || $contractline->fk_product == $userproductid) {
-			$contractline->fetch_optionals();	// @TODO LMR Not alreayd done ?
 			if (!empty($contractline->array_options["options_".$codeextrafieldqtymin])) {
 				$nbuserextrafield = $contractline->array_options["options_".$codeextrafieldqtymin]; // Get qty min of user contract line
 			}
