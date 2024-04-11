@@ -242,14 +242,17 @@ print '
 
 		<br>
 ';
-if (!empty($arraycontacttransfer)) {
+if (!empty($arraycontracttransfer)) {
 	$listcontract = "";
-	foreach ($arraycontacttransfer as $key => $obj) {
-		$listcontact .= ($key > 0) ? ', '.$obj->ref_customer : $obj->ref_customer;
+	foreach ($arraycontracttransfer as $key => $obj) {
+		$listcontract .= ($key > 0) ? ', '.$obj->ref_customer : $obj->ref_customer;
 	}
 
-	print '<div class="note note-warning">';
-	print $langs->trans("AddPaymentMethodInvoiceTransfer", $listcontact);
+	print '<div class="note note-warning linkcard">';
+	print $langs->trans("AddPaymentMethodForCardWarningIfTransfer", $listcontract);
+	print '</div>';
+	print '<div class="note note-warning linksepa" style="display: none;">';
+	print $langs->trans("AddPaymentMethodForSEPAWarningIfTransfer", $listcontract);
 	print '</div>';
 }
 print '
