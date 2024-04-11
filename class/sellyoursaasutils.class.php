@@ -4498,8 +4498,8 @@ class SellYourSaasUtils
 						// ex: PHPMETHOD:caprelCountDoliSCANUsers;__CONTRACTREF__;__INSTANCEDBPREFIX__;
 						// ex: PHPMETHOD:sellyoursaasGetNbUsersContract;__CONTRACTREF__;name of extrafield;SELECT to count
 						$arguments = make_substitutions($tmparray[1], $substitarray);
-						// TODO @LMR Replace param __OBJECTREF__ with $object contract instead of __CONTRACTREF__.
-						// TODO @LMR Replace param name of extrafield with $tmpobject->options['options_'.name_of_extrafield].
+						// @TODO LMR Replace param __OBJECTREF__ with $object contract instead of __CONTRACTREF__.
+						// @TODO LMR Replace param name of extrafield with $tmpobject->options['options_'.name_of_extrafield].
 						$argsArray = explode(';', $arguments);
 						$customFunctionToCall = array_shift($argsArray);
 

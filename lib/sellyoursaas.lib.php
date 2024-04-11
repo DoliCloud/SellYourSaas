@@ -767,7 +767,7 @@ function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sq
 	$nbuserextrafield = 0;
 	$qtyuserline = 0;
 
-	// TODO @LMR Replace the table prefix with $contract->array_options['options_prefix_db'];
+	// @TODO LMR Replace the table prefix with $contract->array_options['options_prefix_db'];
 	$sqltoexecute = trim($sqltoexecute);
 
 	dol_syslog("Execute sql=".$sqltoexecute);
