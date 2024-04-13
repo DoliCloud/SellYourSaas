@@ -5938,7 +5938,7 @@ Then change the [default_sect] section with the followin
 ==== Some remote action generates a PHP coredump or return a page "No answer received"
 
 This occurs on some distributions due to a bug in PHP method ssh2_disconnect().
-You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1
+You can disable the call to *ssh2_disconnect()* by setting constant SELLYOURSAAS_SSH2_DISCONNECT_DISABLED to 1 into Dolibarr, menu *Home - Setup - Other*.
 
 
 ==== Failed to start ssh server, message "sshd: no hostkeys available -- exiting"
