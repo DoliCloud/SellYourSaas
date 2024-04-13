@@ -270,10 +270,13 @@ if (empty($EMAILTO)) {
 }
 
 $OPTIONS = "-4 --prune-empty-dirs --stats -rlt --chmod=u=rwX";
-if ($DISTRIB_RELEASE == "20.04" || $DISTRIB_RELEASE == "22.04") {
-	$OPTIONS = $OPTIONS;
-} else {
+
+if (`rsync --help | grep -- --open-noatime`) {
+	$OPTIONS = $OPTIONS.' --open-noatime';
+} elseif (`rsync --help | grep -- --noatime`) {
 	$OPTIONS = $OPTIONS." --noatime";
+} else {
+	// no evidence rsync supports --noatime => we don't use the option at all
 }
 
 if ($RSYNCDELETE == 1) {
