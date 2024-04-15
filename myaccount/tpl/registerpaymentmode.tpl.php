@@ -191,11 +191,13 @@ if ($totalInvoiced == 0) {
 	}
 }
 
-$arraycontacttransfer = array();
-
+$arraycontracttransfer = array();
 $sql = "SELECT fr.rowid";
 $sql .= " FROM ".MAIN_DB_PREFIX."facture_rec as fr";
-$sql .= " WHERE fr.fk_mode_reglement = 2";
+$sql .= " JOIN ".MAIN_DB_PREFIX."c_paiement as cp";
+$sql .= " ON  fr.fk_mode_reglement = cp.id";
+$sql .= " WHERE cp.code = 'VIR'";
+$sql .= " AND fr.suspended = 0";
 $sql .= " AND fr.entity = ".((int) $conf->entity);
 $sql .= " AND fr.fk_soc = ".((int) $mythirdpartyaccount->id);
 $resql=$db->query($sql);
@@ -210,7 +212,7 @@ if ($resql) {
 			$facturerec->fetchObjectLinked();
 			$tmp = $facturerec->linkedObjects["contrat"];
 			foreach ($tmp as $key => $value) {
-				$arraycontacttransfer[] = $value;
+				$arraycontracttransfer[] = $value;
 			}
 		}
 		$i++;
