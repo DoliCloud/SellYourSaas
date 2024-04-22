@@ -250,10 +250,10 @@ if (!empty($arraycontracttransfer)) {
 		$listcontract .= ($key > 0) ? ', '.$obj->ref_customer : $obj->ref_customer;
 	}
 
-	print '<div class="note note-warning linkcard">';
+	print '<div class="note note-warning linkcard justify">';
 	print $langs->trans("AddPaymentMethodForCardWarningIfTransfer", $listcontract);
 	print '</div>';
-	print '<div class="note note-warning linksepa" style="display: none;">';
+	print '<div class="note note-warning linksepa justify" style="display: none;">';
 	print $langs->trans("AddPaymentMethodForSEPAWarningIfTransfer", $listcontract);
 	print '</div>';
 }
