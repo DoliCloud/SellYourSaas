@@ -1261,7 +1261,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	$country_id = dol_getIdFromCode($db, $country_code, 'c_country', 'code', 'rowid');
 
-	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount, 0);
 
 	$mythirdpartyaccount->name = $orgname;
 	$mythirdpartyaccount->address = $address;
@@ -1338,7 +1338,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	if (! $error) {
 		$db->begin();	// Start transaction
 
-		$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+		$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount, 0);
 
 		$mythirdpartyaccount->phone = $phone;
 		$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
@@ -1385,7 +1385,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	$db->begin();	// Start transaction
 
-	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount, 0);
 
 	$mythirdpartyaccount->array_options['options_password'] = $password;
 	$mythirdpartyaccount->array_options['flagdelsessionsbefore'] = dol_now() - 5;

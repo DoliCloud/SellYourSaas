@@ -1050,7 +1050,7 @@ if ($reusecontractid) {
 
 	// Create the new thirdparty
 
-	$tmpthirdparty->oldcopy = dol_clone($tmpthirdparty);
+	$tmpthirdparty->oldcopy = dol_clone($tmpthirdparty, 0);
 
 	$password_encoding = 'password_hash';
 	$password_crypted = dol_hash($password);
