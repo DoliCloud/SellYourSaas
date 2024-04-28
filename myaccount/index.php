@@ -1491,7 +1491,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		// Then create record on Stripe side
 		if (!$error && isModEnabled('stripe')) {
-			$companybankaccount->fetch(GETPOST('bankid'));
+			$companybankaccount->fetch(GETPOSTINT('bankid'));
 			$service = 'StripeTest';
 			$servicestatus = 0;
 			if (!empty($conf->global->STRIPE_LIVE) && !GETPOST('forcesandbox', 'alpha')) {
