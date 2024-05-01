@@ -145,6 +145,7 @@
   /usr/bin/python2.7 rix,
   /usr/bin/rsync rix,
   /usr/bin/scp rix,
+  /usr/bin/secureBash mrix,
   /usr/bin/tail rix,
   /usr/bin/unzip rix,
   /usr/bin/vim.basic rix,
@@ -218,6 +219,7 @@
   profile sub_crontab {
 		# Warning: this comments are interpreted
 		#include <abstractions/base>
+		#include <abstractions/consoles>
 		#include <abstractions/nameservice> 
 		/usr/bin/crontab rix,
 		/etc/crontab r,
