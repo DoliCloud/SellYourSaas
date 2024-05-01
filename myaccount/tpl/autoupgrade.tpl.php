@@ -126,10 +126,17 @@ if ($action == "instanceverification") {
 						$arraycoremodules[] = strtoupper($namemodule[1]);
 					}
 				}
+
+				// List of module that should not block installation
+				$arrayofexternalmodulesallowed = array('MEMCACHED');
+
 				foreach ($confinstance->global as $key => $val) {
-					if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && !empty($val)) {
+					if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && !empty($val)) {	// This is a constant of a module
 						$moduletotest=preg_replace('/MAIN_MODULE_/', "", $key);
 						if (!in_array($moduletotest, $arraycoremodules)) {
+							if (in_array($moduletotest, $arrayofexternalmodulesallowed)) {
+								continue;
+							}
 							if ($nbexternalmodules != 0) {
 								$modulestodesactivate .= ",";
 							}
