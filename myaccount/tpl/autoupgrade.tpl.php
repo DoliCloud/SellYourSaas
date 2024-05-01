@@ -535,11 +535,11 @@ if ($action == "instanceverification") {
 	}
 	print'</select><br><br>';
 	print'</div>
-			<div class="center divstep1upgrade"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
+			<div class="center divstep1upgrade"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'><br>
 			'.$langs->trans("AutoupgradeInfo").'
-			</div><br><br>
 			</div><br>
-			<div id="buttonstep1upgrade" class="containerflexautomigration"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
+
+			<div id="buttonstep1upgrade" class="containerflexautomigration margintop paddingtop"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
 					<div class="right containerflexautomigrationitem paddingright paddingleft">
 						<button id="buttonstep_2" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 					</div>
