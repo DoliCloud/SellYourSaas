@@ -536,12 +536,8 @@ if ($action == "instanceverification") {
 	print'</select><br><br>';
 	print'</div>
 			<div class="center divstep1upgrade"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
-			<h4><div class="note note-warning">
-			'.$langs->trans("AutoupgradeStep1Warning").'
-			</div></h4>
-			<div class="bold">
-			'.$langs->trans("AutoupgradeStep1Note").'
-			</div>
+			'.$langs->trans("AutoupgradeInfo").'
+			</div><br><br>
 			</div><br>
 			<div id="buttonstep1upgrade" class="containerflexautomigration"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
 					<div class="right containerflexautomigrationitem paddingright paddingleft">
@@ -559,10 +555,15 @@ if ($action == "instanceverification") {
 			<div '.($stepautoupgrade <= 1 ? 'style="display:none;"' : '').'class="portlet light divstep" id="step2">
 					<h2>'.$langs->trans("Step", 2).' - '.$langs->trans("VersionConfirmation").'</small></h1><br>
 					<div>';
-
 	print $langs->trans("AutoupgradeStep2Text", $newversion).'
 					</div>
 					<br>
+	<h4><div class="note note-warning">
+	'.$langs->trans("AutoupgradeStep1Warning").' '.$langs->trans("AutoupgradeStep1Note").'
+				</div></h4>';
+
+	print '<br>
+
 					<div class="center">
 					<div class="containerflexautomigration">
 						<div class="right containerflexautomigrationitem paddingright paddingleft">

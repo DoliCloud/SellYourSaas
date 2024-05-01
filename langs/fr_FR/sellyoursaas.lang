@@ -649,6 +649,7 @@ AutomigrationStep1Text=La première étape consiste à sauvegarder votre base de
 AutomigrationStep1Note=Remarque pour les utilisateurs avancés : si vous rencontrez des problèmes lors de l'exécution de cette commande (par exemple, parce que votre ancien hébergeur ne permet pas d'exécuter vous-même la commande de sauvegarde), vous pouvez générer le fichier de sauvegarde de la base de données à partir de tout autre ordinateur sur lequel un logiciel client MySql est installé. Pour cela, exécutez la commande suivante :
 AutomigrationStep1Note2=Ouvrez le fichier de vidage/sauvegarde généré (le nom doit ressembler à mysqldump_A.B.C_YYYYMMDDHHMMSS.sql) pour voir si le fichier est complet : Le fichier doit se terminer par une telle ligne :
 AutoupgradeStep1Text=Veuillez choisir l'instance que vous souhaitez mettre à niveau
+AutoupgradeInfo=La montée de version génèrera une indisponibilité de service de quelques minutes...
 AutoupgradeStep1Warning=Attention, si votre instance dispose d'un ou plusieurs modules externes, sachez que lors d'une mise à jour, ce ou ces modules risquent de ne plus fonctionner.
 AutoupgradeStep1Note=Veuillez vérifier auprès des auteurs des modules que vos modules externes (si vous en avez installés) sont compatibles avec la nouvelle version, et si ce n'est pas le cas, veuillez les désactiver avant de continuer
 DownloadThisFile=Téléchargez ce fichier en cliquant dessus

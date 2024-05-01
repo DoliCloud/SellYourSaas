@@ -649,6 +649,7 @@ AutomigrationStep1Text=First step is to backup your database: For this, go on yo
 AutomigrationStep1Note=Note for advanced users: If you experience problem running this command (for example because your old hosting provider does not allow to run the backup command yourself), you can generate the database backup file from any other computer where a MySql client software is installed. For this, run the following command:
 AutomigrationStep1Note2=Open the generated dump/backup file (name should looks like mysqldump_A.B.C_YYYYMMDDHHMMSS.sql) to see if file is complete: File should end with such a line:
 AutoupgradeStep1Text=Please choose the instance you want to upgrade
+AutoupgradeInfo=The version upgrade will generate service unavailability of a few minutes...
 AutoupgradeStep1Warning=Be careful, if your instance has one or more external modules, you should know that when upgrading, this or these modules are likely to no longer work.
 AutoupgradeStep1Note=Please check with the module authors that your external modules (if you installed some) are compatible with the new version, and if not, please deactivate them before continuing
 DownloadThisFile=Download this file by clicking on it
