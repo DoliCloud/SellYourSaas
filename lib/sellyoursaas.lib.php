@@ -820,14 +820,11 @@ function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextraf
 				$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
 			} else {
 				$error++;
-				dol_syslog('sellyoursaasRemoteAction: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula);
+				dol_syslog('sellyoursaasGetNbUsersContract: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula);
 				//$this->error = 'sellyoursaasRemoteAction: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
 				//$this->errors[] = $this->error;
 			}
 		}
-
-		$obj = $newdb->fetch_object($resql);
-		$nbusersql = $obj->nb;
 	} else {
 		$nbusersql = -1;	// Error
 	}
@@ -844,6 +841,9 @@ function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextraf
 		return -1;
 	}
 
-	// Return the max qty off all the qty get
-	return max($nbusersql, $nbuserextrafield);
+	// Return the max qty of all the qty get
+	$ret = max($nbusersql, $nbuserextrafield);
+	dol_syslog("sellyoursaasGetNbUsersContract ret=".$ret);
+
+	return $ret;
 }
