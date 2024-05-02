@@ -718,12 +718,12 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
  * Function to get nb of users for a certain contract
  *
  * @param	string|Contrat		$contractref			Ref of contract for user count or contract
+ * @param	ContratLigne		$contractline			Contract line
  * @param	string				$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
  * @param	string				$sqltoexecute			SQL to execute to get nb of users in customer instance
- * @param	int					$userproductid			Id of product for user count
  * @return 	int											<0 if error or Number of users for contract
  */
-function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sqltoexecute, $userproductid = 0)
+function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextrafieldqtymin, $sqltoexecute)
 {
 	global $db;
 
@@ -740,8 +740,8 @@ function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sq
 	}
 
 	$server = $contract->ref_customer;
-	if (empty($hostname_db)) {
-		$hostname_db = $contract->array_options['options_hostname_db'];
+	if (empty($server)) {
+		$server = $contract->array_options['options_hostname_db'];
 	}
 	$port_db = $contract->port_db;
 	if (empty($port_db)) {
@@ -773,10 +773,59 @@ function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sq
 	// Note: this sql request should contains the correct SQL with the correct prefix on table
 	$sqltoexecute = trim($sqltoexecute);
 
+	// Set vars so we can use same code than into sellyoursaasutils.class.php
+	$sqlformula = $sqltoexecute;
+	$dbinstance = $newdb;
+	$newqty = null;	// If $newqty remains null, we won't change/record value.
+	$newcommentonqty = '';
+	$error = 0;
+
 	dol_syslog("Execute sql=".$sqltoexecute);
 
 	$resql=$newdb->query($sqltoexecute);
 	if ($resql) {
+		if (preg_match('/^select count/i', $sqlformula)) {
+			// If request is a simple SELECT COUNT
+			$objsql = $dbinstance->fetch_object($resql);
+			if ($objsql) {
+				$newqty = $objsql->nb;
+				$newcommentonqty .= '';
+			} else {
+				$error++;
+				dol_syslog('sellyoursaasGetNbUsersContract: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula);
+				//$this->error = 'sellyoursaasRemoteAction: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
+				//$this->errors[] = $this->error;
+			}
+		} else {
+			// If request is a SELECT nb, fieldlogin as comment
+			$num = $dbinstance->num_rows($resql);
+			if ($num > 0) {
+				$itmp = 0;
+				$arrayofcomment = array();
+				while ($itmp < $num) {
+					// If request is a list to count
+					$objsql = $dbinstance->fetch_object($resql);
+					if ($objsql) {
+						if (empty($newqty)) {
+							$newqty = 0;	// To have $newqty not null and allow addition just after
+						}
+						$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
+						if (isset($objsql->comment)) {
+							$arrayofcomment[] = $objsql->comment;
+						}
+					}
+					$itmp++;
+				}
+				//$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+				$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
+			} else {
+				$error++;
+				dol_syslog('sellyoursaasRemoteAction: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula);
+				//$this->error = 'sellyoursaasRemoteAction: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
+				//$this->errors[] = $this->error;
+			}
+		}
+
 		$obj = $newdb->fetch_object($resql);
 		$nbusersql = $obj->nb;
 	} else {
@@ -787,14 +836,12 @@ function sellyoursaasGetNbUsersContract($contractref, $codeextrafieldqtymin, $sq
 		$newdb->close();
 	}
 
-	$contractlines = $contract->lines;
+	if (!empty($contractline->array_options["options_".$codeextrafieldqtymin])) {
+		$nbuserextrafield = $contractline->array_options["options_".$codeextrafieldqtymin]; // Get qty min of user contract line
+	}
 
-	foreach ($contractlines as $contractline) {
-		if (empty($userproductid) || $contractline->fk_product == $userproductid) {
-			if (!empty($contractline->array_options["options_".$codeextrafieldqtymin])) {
-				$nbuserextrafield = $contractline->array_options["options_".$codeextrafieldqtymin]; // Get qty min of user contract line
-			}
-		}
+	if ($error) {
+		return -1;
 	}
 
 	// Return the max qty off all the qty get

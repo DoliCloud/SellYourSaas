@@ -4496,14 +4496,17 @@ class SellYourSaasUtils
 					} elseif ($tmparray[0] === 'PHPMETHOD') {
 						// Keyword PHPMETHOD then : then function name to call ; args seaprated with ;
 						// ex: PHPMETHOD:caprelCountDoliSCANUsers;__CONTRACTREF__;__INSTANCEDBPREFIX__;
-						// ex: PHPMETHOD:sellyoursaasGetNbUsersContract;__CONTRACT__;name of extrafield;SELECT to count
+						// ex: PHPMETHOD:sellyoursaasGetNbUsersContract;__CONTRACT__;__CONTRACTLINE__;name of extrafield;SELECT to count
 						$arguments = make_substitutions($tmparray[1], $substitarray);
-						// @TODO LMR Replace param name of extrafield with __CONTRACTLINE__.
 						$argsArray = explode(';', $arguments);
-						// Replace __CONTRACT__ string with the object contract.
+						// Replace __CONTRACT__ string with the object contract and __CONTRACTLINE__ string with the object contract line
 						foreach ($argsArray as $key => $arg) {
 							if ($arg === '__CONTRACT__') {
 								$argsArray[$key] = $object;
+								continue;
+							}
+							if ($arg === '__CONTRACTLINE__') {
+								$argsArray[$key] = $tmpobject;
 								continue;
 							}
 						}
@@ -4511,6 +4514,11 @@ class SellYourSaasUtils
 
 						if (is_callable($customFunctionToCall)) {
 							$newqty = call_user_func_array($customFunctionToCall, $argsArray);
+						}
+
+						if ($newqty < 0) {
+							$error++;
+							$this->error = 'Error in calculating the new value with PHPMETHOD';
 						}
 					} elseif (is_numeric($tmparray[0]) && ((int) $tmparray[0]) > 0) {		// If value is just a number
 						$newqty = ((int) $tmparray[0]);
