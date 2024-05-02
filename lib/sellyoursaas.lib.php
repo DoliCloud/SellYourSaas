@@ -824,6 +824,9 @@ function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextraf
 				//$this->error = 'sellyoursaasRemoteAction: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
 				//$this->errors[] = $this->error;
 			}
+			if ($newqty) {
+				$nbusersql = $newqty;
+			}
 		}
 	} else {
 		$nbusersql = -1;	// Error
