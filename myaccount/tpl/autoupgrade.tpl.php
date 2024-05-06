@@ -18,7 +18,7 @@
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
-	exit;
+	exit(1);
 }
 
 require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
@@ -126,10 +126,17 @@ if ($action == "instanceverification") {
 						$arraycoremodules[] = strtoupper($namemodule[1]);
 					}
 				}
+
+				// List of module that should not block installation
+				$arrayofexternalmodulesallowed = array('MEMCACHED');
+
 				foreach ($confinstance->global as $key => $val) {
-					if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && !empty($val)) {
+					if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && !empty($val)) {	// This is a constant of a module
 						$moduletotest=preg_replace('/MAIN_MODULE_/', "", $key);
 						if (!in_array($moduletotest, $arraycoremodules)) {
+							if (in_array($moduletotest, $arrayofexternalmodulesallowed)) {
+								continue;
+							}
 							if ($nbexternalmodules != 0) {
 								$modulestodesactivate .= ",";
 							}
@@ -256,9 +263,9 @@ if ($action == "autoupgrade") {
 
 	if (!$errors) {
 		// This also add an action in agenda "Remote action upgrade..." success or error
-		$comment = 'Call of sellyoursaasRemoteAction(upgrade) on contract ref='.$object->ref;
 		$notused = '';
-		$timeoutupgrade = 240;
+		$timeoutupgrade = 300;
+		$comment = 'Call of sellyoursaasRemoteAction(upgrade) on contract ref='.$object->ref.' with a timeout of '.$timeoutupgrade;
 		$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("upgrade", $object, 'admin', $notused, $notused, 1, $comment, $timeoutupgrade);
 		if ($exitcode < 0) {
 			$errors++;
@@ -528,15 +535,11 @@ if ($action == "instanceverification") {
 	}
 	print'</select><br><br>';
 	print'</div>
-			<div class="center divstep1upgrade"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
-			<h4><div class="note note-warning">
-			'.$langs->trans("AutoupgradeStep1Warning").'
-			</div></h4>
-			<div class="bold">
-			'.$langs->trans("AutoupgradeStep1Note").'
-			</div>
+			<div class="center divstep1upgrade"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'><br>
+			'.$langs->trans("AutoupgradeInfo").'
 			</div><br>
-			<div id="buttonstep1upgrade" class="containerflexautomigration"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
+
+			<div id="buttonstep1upgrade" class="containerflexautomigration margintop paddingtop"'.(!GETPOST('instanceselect', 'alpha') ? ' style="display:none;"' : '').'>
 					<div class="right containerflexautomigrationitem paddingright paddingleft">
 						<button id="buttonstep_2" type="submit" class="btn green-haze btn-circle btnstep">'.$langs->trans("NextStep").'</button>
 					</div>
@@ -552,10 +555,15 @@ if ($action == "instanceverification") {
 			<div '.($stepautoupgrade <= 1 ? 'style="display:none;"' : '').'class="portlet light divstep" id="step2">
 					<h2>'.$langs->trans("Step", 2).' - '.$langs->trans("VersionConfirmation").'</small></h1><br>
 					<div>';
-
 	print $langs->trans("AutoupgradeStep2Text", $newversion).'
 					</div>
 					<br>
+	<h4><div class="note note-warning">
+	'.$langs->trans("AutoupgradeStep1Warning").' '.$langs->trans("AutoupgradeStep1Note").'
+				</div></h4>';
+
+	print '<br>
+
 					<div class="center">
 					<div class="containerflexautomigration">
 						<div class="right containerflexautomigrationitem paddingright paddingleft">

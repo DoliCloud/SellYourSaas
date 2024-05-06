@@ -699,9 +699,9 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	}
 
 	// Block for some IPs if VPN proba is higher that a threshold
-	if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN)) {
-		if (is_numeric($vpnproba) && $vpnproba >= (empty($conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST) ? 1 : (float) $conf->global->SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST)) {
-			$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN);
+	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN')) {
+		if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalString('SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST', 1)) {
+			$arrayofblacklistips = explode(',', getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN'));
 			foreach ($arrayofblacklistips as $blacklistip) {
 				if ($remoteip == $blacklistip) {
 					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
@@ -712,4 +712,141 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	}
 
 	return array('ipquality'=>$ipquality, 'emailquality'=>$emailquality, 'vpnproba'=>$vpnproba, 'abusetest'=>$abusetest, 'fraudscoreip'=>$fraudscoreip, 'fraudscoreemail'=>$fraudscoreemail);
+}
+
+/**
+ * Function to get nb of users for a certain contract
+ *
+ * @param	string|Contrat		$contractref			Ref of contract for user count or contract
+ * @param	ContratLigne		$contractline			Contract line
+ * @param	string				$codeextrafieldqtymin	Code of extrafield to find minimum qty of users
+ * @param	string				$sqltoexecute			SQL to execute to get nb of users in customer instance
+ * @return 	int											<0 if error or Number of users for contract
+ */
+function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextrafieldqtymin, $sqltoexecute)
+{
+	global $db;
+
+	if (is_object($contractref)) {
+		$contract = $contractref;
+	} else {
+		require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+		$contract = new Contrat($db);
+		$result = $contract->fetch(0, $contractref);
+		if ($result <= 0) {
+			setEventMessages($contract->error, $contract->errors, 'errors');
+			return -1;
+		}
+	}
+
+	$server = $contract->ref_customer;
+	if (empty($server)) {
+		$server = $contract->array_options['options_hostname_db'];
+	}
+	$port_db = $contract->port_db;
+	if (empty($port_db)) {
+		$port_db = (! empty($contract->array_options['options_port_db']) ? $contract->array_options['options_port_db'] : 3306);
+	}
+	$username_db = $contract->username_db;
+	if (empty($username_db)) {
+		$username_db = $contract->array_options['options_username_db'];
+	}
+	$password_db = $contract->password_db;
+	if (empty($password_db)) {
+		$password_db = $contract->array_options['options_password_db'];
+	}
+	$database_db = $contract->database_db;
+	if (empty($database_db)) {
+		$database_db = $contract->array_options['options_database_db'];
+	}
+
+	$newdb = getDoliDBInstance('mysqli', $server, $username_db, $password_db, $database_db, $port_db);
+	if (!$newdb->connected) {
+		dol_print_error($newdb);
+		return -1;
+	}
+
+	$nbusersql = 0;
+	$nbuserextrafield = 0;
+	$qtyuserline = 0;
+
+	// Note: this sql request should contains the correct SQL with the correct prefix on table
+	$sqltoexecute = trim($sqltoexecute);
+
+	// Set vars so we can use same code than into sellyoursaasutils.class.php
+	$sqlformula = $sqltoexecute;
+	$dbinstance = $newdb;
+	$newqty = null;	// If $newqty remains null, we won't change/record value.
+	$newcommentonqty = '';
+	$error = 0;
+
+	dol_syslog("Execute sql=".$sqltoexecute);
+
+	$resql=$newdb->query($sqltoexecute);
+	if ($resql) {
+		if (preg_match('/^select count/i', $sqlformula)) {
+			// If request is a simple SELECT COUNT
+			$objsql = $dbinstance->fetch_object($resql);
+			if ($objsql) {
+				$newqty = $objsql->nb;
+				$newcommentonqty .= '';
+			} else {
+				$error++;
+				dol_syslog('sellyoursaasGetNbUsersContract: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula);
+				//$this->error = 'sellyoursaasRemoteAction: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
+				//$this->errors[] = $this->error;
+			}
+		} else {
+			// If request is a SELECT nb, fieldlogin as comment
+			$num = $dbinstance->num_rows($resql);
+			if ($num > 0) {
+				$itmp = 0;
+				$arrayofcomment = array();
+				while ($itmp < $num) {
+					// If request is a list to count
+					$objsql = $dbinstance->fetch_object($resql);
+					if ($objsql) {
+						if (empty($newqty)) {
+							$newqty = 0;	// To have $newqty not null and allow addition just after
+						}
+						$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
+						if (isset($objsql->comment)) {
+							$arrayofcomment[] = $objsql->comment;
+						}
+					}
+					$itmp++;
+				}
+				//$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
+				$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
+			} else {
+				$error++;
+				dol_syslog('sellyoursaasGetNbUsersContract: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula);
+				//$this->error = 'sellyoursaasRemoteAction: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
+				//$this->errors[] = $this->error;
+			}
+			if ($newqty) {
+				$nbusersql = $newqty;
+			}
+		}
+	} else {
+		$nbusersql = -1;	// Error
+	}
+
+	if (is_object($newdb) && $newdb->connected) {
+		$newdb->close();
+	}
+
+	if (!empty($contractline->array_options["options_".$codeextrafieldqtymin])) {
+		$nbuserextrafield = $contractline->array_options["options_".$codeextrafieldqtymin]; // Get qty min of user contract line
+	}
+
+	if ($error) {
+		return -1;
+	}
+
+	// Return the max qty of all the qty get
+	$ret = max($nbusersql, $nbuserextrafield);
+	dol_syslog("sellyoursaasGetNbUsersContract ret=".$ret);
+
+	return $ret;
 }

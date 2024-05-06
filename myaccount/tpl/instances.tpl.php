@@ -20,7 +20,7 @@
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
-	exit;
+	exit(1);
 }
 
 ?>
@@ -779,7 +779,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				} else {
 					include_once DOL_DOCUMENT_ROOT."/website/class/website.class.php";
 					$websitestatic = new Website($newdb);
-					$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0, array('t.status'=>$websitestatic::STATUS_VALIDATED));
+					$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0, '(t.status:=:'.$websitestatic::STATUS_VALIDATED.')');
 					//$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0);
 					print '<span class="small">';
 					print $langs->trans("OptionYourWebsiteDesc").'<br>';

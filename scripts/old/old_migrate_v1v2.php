@@ -307,7 +307,7 @@ if ($result <= 0 || $newobject->statut == 0) {
 
 	$db->begin();	// Start transaction
 
-	$tmpthirdparty->oldcopy = dol_clone($tmpthirdparty);
+	$tmpthirdparty->oldcopy = dol_clone($tmpthirdparty, 2);
 
 	$password_encoding = 'password_hash';
 	$password_crypted = dol_hash($password);

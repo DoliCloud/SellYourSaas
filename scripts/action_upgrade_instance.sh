@@ -243,7 +243,7 @@ testorconfirm="confirm"
 # Upgrade
 
 if [[ "$mode" == "upgrade" ]];then
-	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** upgrade dolibarr instance"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** upgrade instance"
 	if [ $lastversiondolibarrinstance -lt 4 ]
 	then
 		echo "Version too old."
@@ -251,14 +251,19 @@ if [[ "$mode" == "upgrade" ]];then
 	fi
 	if [ -d "$dirforexampleforsources" ]
 	then
+		# TODO LMR Replace this rsync with a untar from the tgz file, something like this:
+		# tar -I zstd -xf sourcefile.tar.zst --directory $targetdirwithsources1/
+		# First try with sourcefile.tar.zst that is into tmp cache dir /tmp/cache/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git/xxx.tar.zst 
+		# If cache file does not exists, use the archive file into NFS dir $dirforexampleforsources/
+		# If archive file not found, do the rsync.		 
 		echo "rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom"
 		rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom
 
 		if [ $? -eq 0 ]
 		then
-			echo "Successfully copied dolibarr folder"
+			echo "Successfully copied files of new version"
 		else
-			echo "Error on copying dolibarr folder"
+			echo "Error on copying files of new version"
 			exit 221
 		fi
 
@@ -304,7 +309,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 				if [ $? -eq 0 ]
 				then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/admin/temp/output.html"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
 					php step5.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
 					echo >> "$instancedir/documents/admin/temp/output.html"
 

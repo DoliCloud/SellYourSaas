@@ -270,10 +270,13 @@ if (empty($EMAILTO)) {
 }
 
 $OPTIONS = "-4 --prune-empty-dirs --stats -rlt --chmod=u=rwX";
-if ($DISTRIB_RELEASE == "20.04" || $DISTRIB_RELEASE == "22.04") {
-	$OPTIONS = $OPTIONS;
-} else {
+
+if (`rsync --help | grep -- --open-noatime`) {
+	$OPTIONS = $OPTIONS.' --open-noatime';
+} elseif (`rsync --help | grep -- --noatime`) {
 	$OPTIONS = $OPTIONS." --noatime";
+} else {
+	// no evidence rsync supports --noatime => we don't use the option at all
 }
 
 if ($RSYNCDELETE == 1) {
@@ -287,7 +290,7 @@ if ($testorconfirm != "confirm") {
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." (".$testorconfirm.") *****\n";
 if (empty($argv[1])) {
-	echo "Usage: ${0} (test|confirm) [month|week|none] [osuX] [--delete]\n";
+	echo "Usage: ".$argv[0]." (test|confirm) [month|week|none] [osuX] [--delete]\n";
 	echo "With  month (default) is to keep 1 month of backup using --backup option of rsync\n";
 	echo "      week is to keep 1 week of backup using --backup option of rsync\n";
 	echo "      none is to not archive old versions using the --backup option of rsync. For example when you already do it using snapshots on backup server (recommended).\n";
@@ -382,9 +385,9 @@ foreach ($SERVERDESTIARRAY as $servername) {
 	print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S').' Do rsync of '.$DIRSOURCE1.' to remote '.$USER.'@'.$servername.':'.$DIRDESTI1."...\n";
 
 	if (empty($HISTODIR)) {
-		$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
+		$command = "rsync ".$TESTN." -e 'ssh -p ".$SERVPORTDESTI."' -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
 	} else {
-		$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI1."/backupold_".$HISTODIR." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
+		$command = "rsync ".$TESTN." -e 'ssh -p ".$SERVPORTDESTI."' -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI1."/backupold_".$HISTODIR." ".$DIRSOURCE1."/* ".$USER."@".$servername.":".$DIRDESTI1;
 	}
 	print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
 	$output = array();
@@ -518,9 +521,9 @@ if (!empty($instanceserver)) {
 						// Loop on each target server to make backup of backup of instance
 						foreach ($SERVERDESTIARRAY as $servername) {
 							if (empty($HISTODIR)) {
-								$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
+								$command = "rsync ".$TESTN." -e 'ssh -p ".$SERVPORTDESTI."' -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
 							} else {
-								$command = "rsync ".$TESTN." -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
+								$command = "rsync ".$TESTN." -e 'ssh -p ".$SERVPORTDESTI."' -x --exclude-from=".$path."backup_backups.exclude ".$OPTIONS." --backup --backup-dir=".$DIRDESTI2."/backupold_".$HISTODIR." ".$DIRSOURCE2."/".$obj->osu." ".$USER."@".$servername.":".$DIRDESTI2;
 							}
 							print dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S')." ".$command."\n";
 							$output = array();
@@ -614,6 +617,12 @@ foreach ($SERVERDESTIARRAY as $servername) {
 
 //Delete temporary emptydir
 dol_delete_dir($homedir."/emptydir");
+
+
+// Force sending email using mail method because $dbmaster and $conf come from the master server and
+// the setup may ask to use a relay no allowed for deployment servers.
+$conf->global->MAIN_MAIL_SENDMODE = 'mail';
+
 
 // Send email if there is one error
 if ($atleastoneerror != 0) {

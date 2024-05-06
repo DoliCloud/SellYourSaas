@@ -1713,7 +1713,7 @@ You must have inside the cron of user *root*
 #47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
-40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm none --delete >/home/admin/logs/backup_backups.log 2>&1
+40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1
 00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.ksh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
@@ -1985,7 +1985,7 @@ The script will read the file */etc/sellyoursaas.conf* to find the list of the n
 
 - An external backup must be done to another server by a cron task of *root* :
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.sh confirm none --delete >/home/admin/logs/backup_backups.log 2>&1*
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1*
 
 See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter). 
 

@@ -123,7 +123,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 						if (empty($reseller->array_options['options_password'])) {
 							$password = dol_string_nospecial(dol_string_unaccent(strtolower($reseller->name)));
 
-							$reseller->oldcopy = dol_clone($reseller);
+							$reseller->oldcopy = dol_clone($reseller, 0);
 
 							$reseller->array_options['options_password']=dol_hash($password);
 
@@ -278,7 +278,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 						dol_syslog("Loop on the date of line id ".$line->id." (".dol_print_date($line->date_end, 'standard').") to compare with new date (".dol_print_date($object->array_options['options_date_endfreeperiod'], 'standard').")");
 
 						if ($line->date_end < $object->array_options['options_date_endfreeperiod']) {
-							$line->oldcopy = dol_clone($line);
+							$line->oldcopy = dol_clone($line, 0);
 
 							$line->date_end = $object->array_options['options_date_endfreeperiod'];
 							$line->date_fin_validite = $object->array_options['options_date_endfreeperiod'];	// deprecated

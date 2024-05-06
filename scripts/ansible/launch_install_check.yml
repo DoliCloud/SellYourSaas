@@ -218,7 +218,6 @@
   - debug:
       var: command_output.stdout_lines
 
-     
       
   ##### For PHP 8.1
   - name: Launch apt for php 8.1 packages
@@ -227,7 +226,7 @@
       - php8.1 
       - php8.1-cli 
       - libapache2-mod-php8.1 
-      #- php8.0-fpm 
+      #- php8.1-fpm 
       - php8.1-gd 
       - php8.1-imap 
       - php8.1-ldap 
@@ -263,7 +262,7 @@
       var: command_output.stdout_lines
       
       
-  ##### apache2/php.ini
+  ##### PHP 7.0 apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
       path: /etc/php/7.0/apache2/php.ini
@@ -437,7 +436,7 @@
       - php70 is defined
       
       
-  ##### apache2/php.ini
+  ##### PHP 7.4 apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
       path: /etc/php/7.4/apache2/php.ini
@@ -611,7 +610,7 @@
       - php74 is defined
 
       
-  ##### apache2/php.ini
+  ##### PHP 8.0 apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
       path: /etc/php/8.0/apache2/php.ini
@@ -797,8 +796,11 @@
     when: 
       - php80 is defined
 
+  - debug:
+      var: phpversionmodified.changed
 
-  ##### apache2/php.ini
+
+  ##### PHP 8.1 apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
       path: /etc/php/8.1/apache2/php.ini
@@ -984,9 +986,9 @@
     when: 
       - php81 is defined
 
-
   - debug:
       var: phpversionmodified.changed
+
 
   #- name: Reload Apache configs if pyapp or Apache - files are changed
   #  service: name=httpd state=reloaded
@@ -1058,7 +1060,22 @@
         path: /etc/ImageMagick-6/policy.xml
         regexp: '^\s*<policy domain="coder" rights="none" pattern="PDF" />'
         line: '<!-- <policy domain="coder" rights="none" pattern="PDF" /> -->'
-        
+
+
+    - name: Search all fail2ban rules into filter.d directory
+      ansible.builtin.find:
+        paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d
+        patterns: '*.conf'
+      register: dolibarr_fail2ban_files
+
+    - name: Create links to fail2ban rules files
+      ansible.builtin.file:
+        src: "{{ item.path }}"
+        dest: "/etc/fail2ban/filter.d/{{ item.path | basename }}"  
+        state: link
+      loop: "{{ dolibarr_fail2ban_files.files }}"      
+
+
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
       ignore_errors: true
       ansible.builtin.template:

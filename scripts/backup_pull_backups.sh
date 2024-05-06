@@ -2,7 +2,12 @@
 # Catch backups from a remote backup server into a local computer, like a NAS.
 #
 # Put the following entry into the cron of a user that can rsync to the remote server with its public key.
-# /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backup_backups.sh (test|confirm) [remotebackupserversrc localdirtarget] >/.../backup_backup_backups.log
+# /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backup_backups.php  remotelogin  (test|confirm)  [remotebackupserversrc]  [localdirtarget]  >/.../backup_backup_backups.log
+#
+# On a NAS (Synology, ...), the file can be stored into
+# ~/backup_pull_backups.sh
+#
+
 
 #set -e
 
@@ -278,11 +283,18 @@ else
 fi
 
 
+# Now we can also clean very old data
+echo "Delete very old directories (older than 2 years with no change)"
+cd $backupdir
+#find "$backupdir/" -maxdepth 2 -path "*backup_*/osu*" -type d -mtime +730
+find "$backupdir/" -maxdepth 2 -path "*backup_*/osu*" -type d -mtime +730 -print0 | xargs -0 rm -rf
+
+
 if [ "x$ret1" != "x0" ]; then
 	echo "Send email to $EMAILTO to inform about backup error ret1=$ret1"
 	
 	#echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
-	
+
 	export body="Backup pulled from a backup by "`hostname`" failed - End ret1=$ret1<br>$errstring"
 	export subject="[Warning] Backup pulled from a backup - "`hostname`" failed" 
 	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8'; 
@@ -313,5 +325,6 @@ else
 	
 	echo
 fi
+
 
 exit 0

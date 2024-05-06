@@ -1,13 +1,16 @@
 # Dolibarr language file - Source file is en_US - sellyoursaas
+RestoreInstance=Restaurar
 ConversionContent=Conteúdo do rodapé na "página de conversão" (apenas uma vez registrado um primeiro modo de pagamento)
 AccountAlreadyExistsForEmail=Já existe uma conta para este email. Se você já é um usuário registrado e deseja criar outra instância para sua conta, faça logon no <a href="%s" target="_myaccount">painel do cliente</a> para criar outra instância.
 XDaysBeforeEndOfTrialNoteForFreeMode=Observação: ao final do teste (um lembrete será enviado por e-mail 7 dias antes do término), ou você confirma seu desejo de continuar usando a instância, e o aplicativo permanecerá gratuito até o cancelamento, ou você não confirma , e neste caso, a instância e seus dados serão destruídos.
 OldTickets=Ingressos antigos
 OldTicketsDesc=Lista de seus antigos tickets fechados ou abertos
+CancelInstance=Fechar instância
 DeploymentDate=Data de implantação
 SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT=Número máximo de instâncias por padrão para novo cliente em potencial ou cliente
 PleaseReadFAQFirst=Antes de enviar qualquer ticket de suporte, verifique se a resposta ainda não está disponível aqui: <br> <br> <center> <a href="%s" target="_faq"> FAQs (Perguntas Frequentes) </a> </center>
 RecreateAuthorizedKey=Criar arquivo allowed_keys
+CommandToMoveInstanceOnAnotherDeploymentServer=Comando para mover várias ou todas as instâncias para outro servidor de implantação
 DeploymentIPQuality=Índice de qualidade de IP
 DeploymentIPQualityDesc=Quando um cadastro é feito, é feita uma verificação no IP do assinante para: <br> - http://check.getipintel.net/check.php?ip=IP&contact=&flag=f <br> e/ou <br> - https://www. ipqualityscore.com
 CustomUrlDesc=Ter um URL personalizado adicionará um segundo arquivo virtualhost para a instância, mas terminando com .custom.conf.<br>Exemplo: /etc/apache2/sellyoursaas-available/seunome.withX.domainname .com.custom.conf<br>Se alguns arquivos de certificado SSL forem encontrados (no master em /home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt), eles serão usados. Caso contrário, eles podem ser gerados pelo letsencrypt. Em caso de erro, os arquivos de certificado curinga para *.withX.domainname.com serão usados.
@@ -37,3 +40,9 @@ MigrationSuccessNote=Aviso: Para acessar sua instância, você precisa usar o lo
 UpgradeErrorContent=Ocorreu um erro ao tentar atualizar automaticamente:\n&#60;adicione sua mensagem aqui&#62;
 ErrorListSupport=lista de erros
 SELLYOURSAAS_AUTOUPGRADE_CODE=Grupo de tickets para sugerir atualização automática
+SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID=Lista de ID de clientes com pagamento SEPA habilitado
+OptionYourWebsitePrerequisites=Pré-requisitos : Você deve ter um site ativo no módulo de sites da sua instância para instalar esta opção
+SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Chave no mestre para assinar mensagens de ação remota (o valor padrão não é definido no nível do servidor de implementação)
+AddPaymentMethodForCardWarningIfTransfer=AVISO: você está prestes a inserir uma forma de pagamento por débito direto com CARTÃO recorrente e automatizado para suas instâncias, mas já tem uma forma de pagamento definida como "Transferência de crédito" para as instâncias <b>%s</b>.<br>Isso será substituído por um automatizado pagamento com cartão de débito ou crédito, portanto, certifique-se de ter cancelado quaisquer processos internos de pagamento por transferência bancária em sua empresa, para evitar pagamentos duplos, antes de salvar seu novo método de débito direto.
+AddPaymentMethodForSEPAWarningIfTransfer=AVISO: você está prestes a inserir uma forma de pagamento por débito direto SEPA recorrente automatizado para suas instâncias, mas já tem uma forma de pagamento definida como "Transferência de crédito" para as instâncias <b>%s</b>.<br>Isso será substituído por um automatizado Pagamento por débito direto Sepa, portanto, certifique-se de ter cancelado quaisquer processos de pagamento por transferência bancária interna em sua empresa, para evitar pagamentos duplos, antes de salvar seu novo método de débito direto.
+ServerSignatureKey=Chave de assinatura do servidor

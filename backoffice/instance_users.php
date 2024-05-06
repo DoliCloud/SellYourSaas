@@ -770,7 +770,7 @@ function print_user_table($newdb, $object)
 	$sortorder = GETPOST('sortorder', 'aZ09comma');
 
 	$arrayfields = array(
-		'rowid'=>array('label'=>"ID", 'checked'=>1, 'position'=>10, 'csslist'=>'maxwidth50'),
+		'rowid'=>array('type'=>'int', 'label'=>"ID", 'checked'=>1, 'position'=>10, 'csslist'=>'maxwidth50'),
 		'login'=>array('label'=>"Login", 'checked'=>1, 'position'=>15),
 		'lastname'=>array('label'=>"Lastname", 'checked'=>1, 'position'=>20, 'csslist'=>'tdoverflowmax150'),
 		'firstname'=>array('label'=>"Firstname", 'checked'=>1, 'position'=>50, 'csslist'=>'tdoverflowmax150'),
@@ -800,7 +800,8 @@ function print_user_table($newdb, $object)
 	$prefix_db   = (empty($object->array_options['options_prefix_db']) ? 'llx_' : $object->array_options['options_prefix_db']);
 
 	$varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
-	$selectedfields = ($mode != 'kanban' ? $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN', '')) : ''); // This also change content of $arrayfields
+	$htmlofselectarray = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN'));  // This also change content of $arrayfields with user setup
+	$selectedfields = ($mode != 'kanban' ? $htmlofselectarray : '');
 	$selectedfields .= (count($arrayofmassactions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
 
 	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
@@ -879,11 +880,11 @@ function print_user_table($newdb, $object)
 		$cssforfield = (empty($val['csslist']) ? (empty($val['css']) ? '' : $val['css']) : $val['csslist']);
 		if ($key == 'statut') {
 			$cssforfield .= ($cssforfield ? ' ' : '').'center';
-		} elseif (in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
+		} elseif (!empty($val['type']) && in_array($val['type'], array('date', 'datetime', 'timestamp'))) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'center';
-		} elseif (in_array($val['type'], array('timestamp'))) {
+		} elseif (!empty($val['type']) && in_array($val['type'], array('timestamp'))) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'nowrap';
-		} elseif (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('id', 'rowid', 'ref', 'status')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
+		} elseif (!empty($val['type']) && in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('id', 'rowid', 'ref', 'status')) && $val['label'] != 'TechnicalID' && empty($val['arrayofkeyval'])) {
 			$cssforfield .= ($cssforfield ? ' ' : '').'right';
 		}
 		$cssforfield = preg_replace('/small\s*/', '', $cssforfield);	// the 'small' css must not be used for the title label
@@ -970,7 +971,7 @@ function print_user_table($newdb, $object)
 			$sql .= " '' as pass, gu.password as pass_crypted, gu.date_creation as datec, gu.date_mod as datem, gu.last_login AS datelastlogin, 0 as nu1, 0 as nu2, 0 as nu3, gu.entities_id as entity, gu.is_active as statut";
 			$sql .= " FROM glpi_users as gu LEFT JOIN glpi_profiles_users AS gpu ON gu.id = gpu.users_id";
 			$sql .= " LEFT JOIN glpi_profiles as gp ON gpu.profiles_id = gp.id LEFT JOIN glpi_useremails AS gue ON gue.users_id = gu.id";
-			$sql .= " WHERE gu.is_deleted = 0 AND gu.name NOT IN ('supportcloud')";
+			$sql .= " WHERE gu.is_deleted = 0";
 			//$sql .= " GROUP BY rowid, login, realname, firstname, pass, pass_crypted, datec, datem, datelastlogin, nu1, nu2, nu3, entity, statut, admin;";
 			/*
 			$sql = "SELECT DISTINCT gu.id as rowid, gu.name as login, gu.realname as lastname, gu.firstname,";
@@ -985,28 +986,28 @@ function print_user_table($newdb, $object)
 			$sql .= " WHERE gu.id not in (select gu2.id from glpi_users as gu2 where gu2.is_deleted = 1)";
 			*/
 			$key = 'rowid';
-			if ($search[$key]) {
+			if (isset($search[$key])) {
 				$sql .= natural_search($key, $search[$key], 1);
 			}
 			$key = 'login';
-			if ($search[$key]) {
+			if (isset($search[$key])) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
 			$key = 'lastname';
-			if ($search[$key]) {
+			if (isset($search[$key])) {
 				$sql .= natural_search('realname', $search[$key], 0);
 			}
 			$key = 'firstname';
-			if ($search[$key]) {
+			if (isset($search[$key])) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
 			$key = 'admin';
-			if ($search[$key]) {
+			if (isset($search[$key])) {
 				//$sql .= natural_search('gp.interface', $search[$key], 0);
 				$sql .= natural_search('gp.interface', $search[$key], 0);
 			}
 			$key = 'email';
-			if ($search[$key]) {
+			if (isset($search[$key])) {
 				$sql .= natural_search($key, $search[$key], 0);
 			}
 			//$sql .= " GROUP BY gu.id, gu.name, gu.realname, gu.firstname, admin, gp.interface, pass, gu.password, gu.date_creation, gu.date_mod, gu.last_login, nu1, nu2, nu3, gu.entities_id, gu.is_active";

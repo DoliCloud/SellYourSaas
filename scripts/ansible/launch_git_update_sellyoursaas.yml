@@ -17,3 +17,16 @@
 
   - debug:
       var: command_output.stdout_lines
+
+  - name: Add upgrade.unlock
+    ansible.builtin.file:
+      path: "/home/admin/wwwroot/dolibarr_documents/upgrade.unlock"
+      state: touch
+      owner: "admin"
+      group: "www-data"
+      mode: "0660"
+    register: command_output
+    when: 
+      - unlock is defined
+      - "'master' in group_names"
+      

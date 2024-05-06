@@ -1044,6 +1044,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$topic = GETPOST('subject', 'alphanohtml');
 	$content = GETPOST('content', 'restricthtml');
 	$groupticket=GETPOST('ticketcategory', 'aZ09');
+	$ipaddress = getUserRemoteIP();
 
 	if (empty($replyto)) {
 		$error++;
@@ -1112,6 +1113,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 
 		// Sender
+		$content .= 'User IP: '.$ipaddress."<br>\n";
 		if (is_object($tmpcontract) && is_object($tmpcontract->thirdparty)) {
 			$content .= 'Organization: '.$tmpcontract->thirdparty->name."<br>\n";
 			$content .= 'Email: '.$tmpcontract->thirdparty->email."<br>\n";
@@ -1259,7 +1261,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	$country_id = dol_getIdFromCode($db, $country_code, 'c_country', 'code', 'rowid');
 
-	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount, 0);
 
 	$mythirdpartyaccount->name = $orgname;
 	$mythirdpartyaccount->address = $address;
@@ -1336,7 +1338,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	if (! $error) {
 		$db->begin();	// Start transaction
 
-		$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+		$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount, 0);
 
 		$mythirdpartyaccount->phone = $phone;
 		$mythirdpartyaccount->array_options['options_firstname'] = $firstname;
@@ -1383,7 +1385,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	$db->begin();	// Start transaction
 
-	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount);
+	$mythirdpartyaccount->oldcopy = dol_clone($mythirdpartyaccount, 0);
 
 	$mythirdpartyaccount->array_options['options_password'] = $password;
 	$mythirdpartyaccount->array_options['flagdelsessionsbefore'] = dol_now() - 5;
@@ -1489,7 +1491,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		// Then create record on Stripe side
 		if (!$error && isModEnabled('stripe')) {
-			$companybankaccount->fetch(GETPOST('bankid'));
+			$companybankaccount->fetch(GETPOSTINT('bankid'));
 			$service = 'StripeTest';
 			$servicestatus = 0;
 			if (!empty($conf->global->STRIPE_LIVE) && !GETPOST('forcesandbox', 'alpha')) {
@@ -2493,7 +2495,6 @@ if (! empty($conf->global->MAIN_FAVICON_URL)) {
 $arrayofcss = array();
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
 $arrayofjs=array(
-	'/includes/jstz/jstz.min.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION)),
 	'/core/js/dst.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION))
 );
 

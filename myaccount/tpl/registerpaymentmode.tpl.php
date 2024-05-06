@@ -18,7 +18,7 @@
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
-	exit;
+	exit(1);
 }
 
 $langs->load("banks");
@@ -191,6 +191,37 @@ if ($totalInvoiced == 0) {
 	}
 }
 
+$arraycontracttransfer = array();
+$sql = "SELECT fr.rowid";
+$sql .= " FROM ".MAIN_DB_PREFIX."facture_rec as fr";
+$sql .= " JOIN ".MAIN_DB_PREFIX."c_paiement as cp";
+$sql .= " ON  fr.fk_mode_reglement = cp.id";
+$sql .= " WHERE cp.code = 'VIR'";
+$sql .= " AND fr.suspended = 0";
+$sql .= " AND fr.entity = ".((int) $conf->entity);
+$sql .= " AND fr.fk_soc = ".((int) $mythirdpartyaccount->id);
+$resql=$db->query($sql);
+if ($resql) {
+	$num_rows = $db->num_rows($resql);
+	$i = 0;
+	while ($i < $num_rows) {
+		$obj = $db->fetch_object($resql);
+		if ($obj) {
+			$facturerec=new FactureRec($db);
+			$facturerec->fetch($obj->rowid);					// This load also lines
+			$facturerec->fetchObjectLinked();
+			$tmp = $facturerec->linkedObjects["contrat"];
+			foreach ($tmp as $key => $value) {
+				$arraycontracttransfer[] = $value;
+			}
+		}
+		$i++;
+	}
+} else {
+	dol_print_error($db);
+}
+
+
 print '
 		<div class="radio-list">
 		<label class="radio-inline" style="margin-right: 0px" id="linkcard">
@@ -212,7 +243,21 @@ print '
 		</div>
 
 		<br>
+';
+if (!empty($arraycontracttransfer)) {
+	$listcontract = "";
+	foreach ($arraycontracttransfer as $key => $obj) {
+		$listcontract .= ($key > 0) ? ', '.$obj->ref_customer : $obj->ref_customer;
+	}
 
+	print '<div class="note note-warning linkcard justify">';
+	print $langs->trans("AddPaymentMethodForCardWarningIfTransfer", $listcontract);
+	print '</div>';
+	print '<div class="note note-warning linksepa justify" style="display: none;">';
+	print $langs->trans("AddPaymentMethodForSEPAWarningIfTransfer", $listcontract);
+	print '</div>';
+}
+print '
 		<div class="linkcard">';
 
 
@@ -541,7 +586,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
     			  var hiddenInput2 = document.createElement('input');
     			  hiddenInput2.setAttribute('type', 'hidden');
     			  hiddenInput2.setAttribute('name', 'token');
-                  hiddenInput2.setAttribute('value', '".$_SESSION["newtoken"]."');
+                  hiddenInput2.setAttribute('value', '".newToken()."');
     			  form.appendChild(hiddenInput2);
 
     		      // Submit the form
@@ -566,7 +611,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
     			  var hiddenInput2 = document.createElement('input');
     			  hiddenInput2.setAttribute('type', 'hidden');
     			  hiddenInput2.setAttribute('name', 'token');
-                  hiddenInput2.setAttribute('value', '".$_SESSION["newtoken"]."');
+                  hiddenInput2.setAttribute('value', '".newToken()."');
     			  form.appendChild(hiddenInput2);
 
     			  // Submit the form

@@ -558,7 +558,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $object);
 			if ($result <= 0) {
-				$errors[] = 'Failed to do sellyoursaasRemoteAction(refresh) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors) ? ' '.join(',', $sellyoursaasutils->errors) : '');
+				$errors[] = 'Failed to do sellyoursaasRemoteAction(refreshmetrics) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors) ? ' '.join(',', $sellyoursaasutils->errors) : '');
 			}
 
 			if (count($errors) == 0) {

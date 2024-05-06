@@ -543,7 +543,8 @@ if (!empty($moreforfilter)) {
 }
 
 $varpage = empty($contextpage) ? $_SERVER["PHP_SELF"] : $contextpage;
-$selectedfields = ($mode != 'kanban' ? $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN', '')) : ''); // This also change content of $arrayfields
+$htmlofselectarray = $form->multiSelectArrayWithCheckbox('selectedfields', $arrayfields, $varpage, getDolGlobalString('MAIN_CHECKBOX_LEFT_COLUMN'));  // This also change content of $arrayfields with user setup
+$selectedfields = ($mode != 'kanban' ? $htmlofselectarray : '');
 $selectedfields .= (count($arrayofmassactions) ? $form->showCheckAddButtons('checkforselect', 1) : '');
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
@@ -810,13 +811,14 @@ while ($i < $imaxinloop) {
 				$cssforfield .= ($cssforfield ? ' ' : '').'nowraponall';
 			}
 
-			if (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('rowid', 'status')) && empty($val['arrayofkeyval'])) {
+			if (in_array($val['type'], array('double(24,8)', 'double(6,3)', 'integer', 'real', 'price')) && !in_array($key, array('id', 'rowid', 'ref', 'status')) && empty($val['arrayofkeyval'])) {
 				$cssforfield .= ($cssforfield ? ' ' : '').'right';
 			}
+
 			if (!empty($arrayfields['t.'.$key]['checked'])) {
-				print '<td'.($cssforfield ? ' class="'.$cssforfield.((preg_match('/tdoverflow/', $cssforfield) && $key != 'ref') ? ' classfortooltip' : '').'"' : '');
-				if (preg_match('/tdoverflow/', $cssforfield) && !in_array($val['type'], array('ip', 'url')) && !is_numeric($object->$key)) {
-					print ' title="'.dol_htmlwithnojs(dol_string_onlythesehtmltags(dol_htmlentitiesbr($object->$key), 1, 1, 1)).'"';
+				print '<td'.($cssforfield ? ' class="'.$cssforfield.((preg_match('/tdoverflow/', $cssforfield) && !in_array($key, array('ref')) && !in_array($val['type'], array('ip', 'url')) && !is_numeric($object->$key)) ? ' classfortooltip' : '').'"' : '');
+				if (preg_match('/tdoverflow/', $cssforfield) && !in_array($key, array('ref')) && !in_array($val['type'], array('ip', 'url')) && !is_numeric($object->$key)) {
+					print ' title="'.dol_escape_htmltag($object->$key).'"';
 				}
 				print '>';
 				if ($key == 'servercustomerannounce') {
@@ -864,35 +866,45 @@ while ($i < $imaxinloop) {
 			print '<td class="small tdoverflowmax125">';
 			$html = '<span class="smal">'.$langs->trans("CommandForDeploymentServer").':</span><br>';
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToManageRemoteDeploymentAgent").' <span class="opacitymedium">(on deployment server)</span>:<br>';
+			$html .= $langs->trans("CommandToManageRemoteDeploymentAgent").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/remote_server_launcher.sh start|status|stop';
 			$html .= '">';
 			$html .= '</div>';
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToPutInstancesOnOffline").' <span class="opacitymedium">(on deployment server)</span>:<br>';
+			$html .= $langs->trans("CommandToPutInstancesOnOffline").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offline.sh '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/offline.php test|offline|online';
 			$html .= '">';
 			$html .= '</div>';
-			if (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR")) {
+
+			if (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR")) {	// Specific to Dolibarr app
 				$html .= '<br>';
-				$html .= $langs->trans("CommandToSwithInstanceInReadOnlyMode").' <span class="opacitymedium">(on deployment server)</span>:<br>';
+				$html .= $langs->trans("CommandToSwithInstanceInReadOnlyMode").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 				$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 				$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_readonly.php '.$object->ref.' (on|off) (test|confirm)';
 				$html .= '">';
 				$html .= '</div>';
 			}
+
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToSqlToReGenerateDb").' <span class="opacitymedium">(to run from master server)</span>:<br>';
+			$html .= $langs->trans("CommandToSqlToReGenerateDb").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_build_sql_for_instances.php '.$object->ref.' dbcreate|usercreate|userresetpass';
 			$html .= '">';
 			$html .= '</div>';
+
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run from master server)</span>:<br>';
+			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_redeploy_instances.php '.$object->ref.' test|confirm';
+			$html .= '">';
+			$html .= '</div>';
+
+			$html .= '<br>';
+			$html .= $langs->trans("CommandToMoveInstanceOnAnotherDeploymentServer").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_move_several_instances.php '.$object->ref.' newserver test|confirm';
 			$html .= '">';
 			$html .= '</div>';
 

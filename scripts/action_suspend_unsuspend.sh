@@ -301,13 +301,12 @@ if [[ "$mode" == "rename" ]]; then
 	rm -f /etc/apache2/sellyoursaas-available/$fqn.custom.conf
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 	if [[ "x$customurl" != "x" ]]; then
-	
-		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, we will create a new custom virtual name $fqn.custom"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and more=rename, we will create a new custom virtual name $fqn.custom"
 
 		export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
 		export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 	
-		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists and create them if not"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists and create them if not (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
 			# If a name for a custom CERTIF stored on master was forced, we use this one as SSL certiticate
 			export webCustomSSLCertificateCRT=$CERTIFFORCUSTOMDOMAIN.crt
@@ -609,12 +608,12 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 	
 	# We create the virtual host for the custom url
 	if [[ "x$customurl" != "x" ]]; then
-		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, we will create a new custom virtual name $fqn.custom"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and more=suspend..., we will create a new custom virtual name $fqn.custom"
 
         export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
         export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 
-		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists to reuse them"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists to reuse them (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 
         if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
                 # If a name for a custom CERTIF stored on master was forced, we use this one as SSL certiticate
@@ -661,8 +660,8 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 
 			# When we suspend, there is no need to generate the cert for the custom URL. Cert should already exists if a custom url has been defined.
 
-            # But if custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+            # If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 	            export webCustomSSLCertificateCRT=$webSSLCertificateCRT
     	        export webCustomSSLCertificateKEY=$webSSLCertificateKEY
         	    export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
@@ -830,12 +829,12 @@ if [[ "$mode" == "unsuspend" ]]; then
 	
 	# We create the virtual host for the custom url
 	if [[ "x$customurl" != "x" ]]; then
-		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname, we will create a new custom virtual name $fqn.custom"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and mode=unsuspend, we will create a new custom virtual name $fqn.custom"
 
         export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
         export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 
-		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists to reuse them"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists to reuse them (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 	
         if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
                 # If a name for a custom CERTIF stored on master was forced, we use this one as SSL certiticate
@@ -883,7 +882,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 			# When we unsuspend, there is no need to generate the cert for the custom URL. Cert should already exists if a custom url has been defined.
 
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 	            export webCustomSSLCertificateCRT=$webSSLCertificateCRT
     	        export webCustomSSLCertificateKEY=$webSSLCertificateKEY
         	    export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate

@@ -18,7 +18,7 @@
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
-	exit;
+	exit(1);
 }
 
 // $listofcontractid must be defined
@@ -376,6 +376,9 @@ if (! $error) {
 				$savperm1 = $user->hasRight('facture', 'creer');
 				$savperm2 = $user->hasRight('facture', 'invoice_advance', 'validate');
 
+				if (!isset($user->rights->facture)) {
+					$user->rights->facture = new stdClass();
+				}
 				$user->rights->facture->creer = 1;	// Force permission to user to validate invoices because code may be executed by anonymous user
 				if (!$user->hasRight('facture', 'invoice_advance')) {
 					$user->rights->facture->invoice_advance = new stdClass();

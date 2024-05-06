@@ -118,7 +118,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		dol_syslog("savconf isset = ".isset($savconf));
 
 		if (! isset($savconf)) {
-			$savconf = dol_clone($conf);
+			$savconf = dol_clone($conf, 0);
 		}
 
 		dol_syslog("sellyoursaas_completesubstitutionarray: savconf has currently savconf->global->SELLYOURSAAS_NAME = ".$savconf->global->SELLYOURSAAS_NAME." savconf->global->SELLYOURSAAS_MAIN_EMAIL = ".$savconf->global->SELLYOURSAAS_MAIN_EMAIL);
@@ -135,8 +135,8 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		// This erase value of setup permanently
 		$constforaltname = $tmpobject->array_options['options_domain_registration_page'];
 		$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
-		if (! empty($conf->global->$newnamekey)) {
-			$conf->global->SELLYOURSAAS_NAME = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$conf->global->SELLYOURSAAS_NAME = getDolGlobalString($newnamekey);
 		}
 
 		$urlmyaccount = $savconf->global->SELLYOURSAAS_ACCOUNT_URL;
@@ -144,8 +144,8 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 			&& $tmpobject->array_options['options_domain_registration_page'] != $savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 			$constforaltname = $tmpobject->array_options['options_domain_registration_page'];
 			$newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
-			if (! empty($conf->global->$newurlkey)) {
-				$urlmyaccount = $conf->global->$newurlkey;
+			if (getDolGlobalString($newurlkey)) {
+				$urlmyaccount = getDolGlobalString($newurlkey);
 			} else {
 				$urlmyaccount = preg_replace('/'.$savconf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/', $tmpobject->array_options['options_domain_registration_page'], $urlmyaccount);
 			}
