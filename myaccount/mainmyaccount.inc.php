@@ -250,7 +250,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		}
 
 		print '<title>';
-		if ($title && getDolGlobalString('MAIN_HTML_TITLE') && preg_match('/noapp/', $conf->global->MAIN_HTML_TITLE)) {
+		if ($title && getDolGlobalString('MAIN_HTML_TITLE') && preg_match('/noapp/', getDolGlobalString('MAIN_HTML_TITLE'))) {
 			print dol_htmlentities($title);
 		} elseif ($title) {
 			print dol_htmlentities($appli.' - '.$title);
