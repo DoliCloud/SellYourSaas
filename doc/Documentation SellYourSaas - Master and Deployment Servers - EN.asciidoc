@@ -473,7 +473,7 @@ In order not to give information to users doing SSH, on the deployment servers:
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/00-header /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
 rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
