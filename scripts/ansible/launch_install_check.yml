@@ -1065,10 +1065,6 @@
       file:
         path: /etc/update-motd.d/00-header
         state: absent
-    - name: Delete file /etc/update-motd.d/10-help-text
-      file:
-        path: /etc/update-motd.d/10-help-text
-        state: absent
     - name: Delete file /etc/update-motd.d/20-runabove
       file:
         path: /etc/update-motd.d/20-runabove
