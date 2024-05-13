@@ -215,7 +215,7 @@ if (empty($reshook)) {
 			if ($result <= 0) {
 				usleep(50000);	// Wait 50ms to have a similar delay when user not found and found
 				$message = $messagegenericresult;
-				$username='';
+				$username = '';
 			} else {
 				include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 				$hashreset = getRandomPassword(true, array('I'));
@@ -262,7 +262,7 @@ if (empty($reshook)) {
 
 					if ($newemail->sendfile() > 0) {
 						$message = $messagegenericresult;
-						$username='';
+						$username = '';
 					} else {
 						$message.= '<div class="error">'.$newemail->error.'</div>';
 					}

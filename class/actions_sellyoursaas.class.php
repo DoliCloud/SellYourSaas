@@ -113,7 +113,7 @@ class ActionsSellyoursaas
 					}
 
 					$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH').$object->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash to login is sha256 and is valid one day
-					$url=$urlmyaccount.'?mode=logout_dashboard&action=login&token='.newToken().'&actionlogin=login&username='.urlencode(empty($object->email) ? '' : $object->email).'&password=&login_hash='.$dol_login_hash;
+					$url=$urlmyaccount.'?mode=logout_dashboard&action=login&token='.newToken().'&actionlogin=login&username='.urlencode(empty($object->email) ? '' : $object->email).'&password=&login_hash='.urlencode($dol_login_hash);
 				}
 
 				if ($url) {
