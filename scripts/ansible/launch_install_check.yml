@@ -1061,39 +1061,37 @@
         regexp: '^\s*<policy domain="coder" rights="none" pattern="PDF" />'
         line: '<!-- <policy domain="coder" rights="none" pattern="PDF" /> -->'
 
-    - name: Delete motd files
-      tasks:
-        - name: Delete file /etc/update-motd.d/00-header
-          file:
-            path: /etc/update-motd.d/00-header
-            state: absent
-        - name: Delete file /etc/update-motd.d/10-help-text
-          file:
-            path: /etc/update-motd.d/10-help-text
-            state: absent
-        - name: Delete file /etc/update-motd.d/20-runabove
-          file:
-            path: /etc/update-motd.d/20-runabove
-            state: absent
-        - name: Delete file /etc/update-motd.d/50-landscape-sysinfo
-          file:
-            path: /etc/update-motd.d/50-landscape-sysinfo
-            state: absent
-        - name: Find files /etc/update-motd.d/9*-update*-available
-          find:
-            paths: /etc/update-motd.d/
-            patterns: "9*-update*-available"
-            file_type: file
-            register: fichiers_9
-        - name: Delete files /etc/update-motd.d/9*-update*-available
-          file:
-            path: "{{ item.path }}"
-            state: absent
-          with_items: "{{ fichiers_9.files }}"
-        - name: Delete file 92-unattended-upgrades
-          file:
-            path: /etc/update-motd.d/92-unattended-upgrades
-            state: absent
+    - name: Delete file /etc/update-motd.d/00-header
+      file:
+        path: /etc/update-motd.d/00-header
+        state: absent
+    - name: Delete file /etc/update-motd.d/10-help-text
+      file:
+        path: /etc/update-motd.d/10-help-text
+        state: absent
+    - name: Delete file /etc/update-motd.d/20-runabove
+      file:
+        path: /etc/update-motd.d/20-runabove
+        state: absent
+    - name: Delete file /etc/update-motd.d/50-landscape-sysinfo
+      file:
+        path: /etc/update-motd.d/50-landscape-sysinfo
+        state: absent
+    - name: Find files /etc/update-motd.d/9*-update*-available
+      find:
+        paths: /etc/update-motd.d/
+        patterns: "9*-update*-available"
+        file_type: file
+      register: fichiers_9
+    - name: Delete files /etc/update-motd.d/9*-update*-available
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      with_items: "{{ fichiers_9.files }}"
+    - name: Delete file 92-unattended-upgrades
+      file:
+        path: /etc/update-motd.d/92-unattended-upgrades
+        state: absent
       
     - name: Search all fail2ban rules into filter.d directory
       ansible.builtin.find:
