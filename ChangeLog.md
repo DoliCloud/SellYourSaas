@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* SEC When using ssh, a user can't see the OS and package information.
 * NEW Support emails with + inside
 * NEW Accept emojis in email templates
 * NEW No need to reenter the 2 passwords when an instance creation failed.
