@@ -4717,16 +4717,16 @@ kill ...
 
 
 
-=== Follow files modified (using Afick)
+=== Follow files modified - Analysing changes in system files (using Afick)
 
-To update the list of modified files since afick run last:
+To compare the list of modified files since the last afick run:
 
 [source,bash]
 ---------------
 afick.pl -k
 ---------------
 
-See the history of changes:
+See a summary of history of daily changes:
 
 [source,bash]
 ---------------
@@ -5009,14 +5009,6 @@ iptables -L
 ---------------
 
 When all this is done you can reboot your server by using the button Exit rescue mode in the dashboard.
-
-
-=== Analysing changes in system files
-
-This can be done using afick.pl
-
-@TODO
-
 
 
 === Move the database (var/lib/mysql into /mnt/diskhome/mysql/)
