@@ -6151,6 +6151,18 @@ You may have updated the apparmor profile of apache but apache was not restarted
 Try to stop and kill all apache process not stopped. Restart apache.
 
 
+==== Error apparmor on ntpd
+
+If you have such an error:
+
+[source,bash]
+---------------
+apparmor="DENIED" operation="open" profile="/usr/sbin/ntpd" name="/snap/bin/" pid=3516308 comm="ntpd" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+---------------
+
+You must remove the ntpd package and use instead the package *systemd-timesyncd* with sudo apt install systemd-timesyncd
+
+
 ==== Error missing profile snap.certbot.certbot
 
 If you have such an error:
