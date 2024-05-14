@@ -3,7 +3,9 @@
 
 ## Unreleased
 
-* NEW No new to reenter the 2 passwords when an instance creation failed.
+* NEW Support emails with + inside
+* NEW Accept emojis in email templates
+* NEW No need to reenter the 2 passwords when an instance creation failed.
 * NEW Add public/private notes.
 * NEW Add tool desktop_bannedip.sh to check ban and unban
 * NEW Add support for a signature key of remote action messages.
