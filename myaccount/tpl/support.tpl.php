@@ -94,6 +94,7 @@ if ($sellyoursaassupporturl) {
 	$sellyoursaassupporturl = str_replace('__FIRSTNAME__', urlencode($mythirdpartyaccount->array_options['options_firstname']), $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__LASTNAME__', urlencode($mythirdpartyaccount->array_options['options_lastname']), $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__FULLNAME__', urlencode(dolGetFirstLastname($mythirdpartyaccount->array_options['options_firstname'], $mythirdpartyaccount->array_options['options_lastname'])), $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__PHONE__', urlencode($mythirdpartyaccount->phone), $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__SUPPORTKEY__', urlencode($supportkey), $sellyoursaassupporturl);
 
 	print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';

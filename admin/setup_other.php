@@ -644,6 +644,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	$htmltext .= '__FISTNAME__<br>';
 	$htmltext .= '__LASTNAME__<br>';
 	$htmltext .= '__FULLNAME__<br>';
+	$htmltext .= '__PHONE__<br>';
 	$htmltext .= '__SUPPORTKEY__<br>';
 	print $form->textwithpicto('', $htmltext);
 	print '</span>';
