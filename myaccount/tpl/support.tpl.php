@@ -87,7 +87,7 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 }
 
 if ($sellyoursaassupporturl) {
-	$supportkey = dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5);
+	$supportkey = dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5, 'right', 'UTF-8', 1);
 	$sellyoursaassupporturlorigin = $sellyoursaassupporturl;
 
 	$sellyoursaassupporturl = str_replace('__EMAIL__', urlencode($mythirdpartyaccount->email), $sellyoursaassupporturl);
