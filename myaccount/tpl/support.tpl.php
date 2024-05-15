@@ -87,7 +87,7 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 }
 
 if ($sellyoursaassupporturl) {
-	$supportkey = dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5, 'right', 'UTF-8', 1);
+	$supportkey = strtoupper(dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5, 'right', 'UTF-8', 1));
 	$sellyoursaassupporturlorigin = $sellyoursaassupporturl;
 
 	$sellyoursaassupporturl = str_replace('__EMAIL__', urlencode($mythirdpartyaccount->email), $sellyoursaassupporturl);
@@ -101,7 +101,7 @@ if ($sellyoursaassupporturl) {
 	print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br>'."\n";
 
 	if (preg_match('/__SUPPORTKEY__/', $sellyoursaassupporturlorigin)) {	// A __SUPPORTKEY__ is defined so we show it
-		print '<br>'.$langs->trans("SupportKey").': <b>'.showValueWithClipboardCPButton(strtoupper($supportkey), 0).'</b><br>';
+		print '<br>'.$langs->trans("SupportKey").': <b>'.showValueWithClipboardCPButton($supportkey, 0).'</b><br>';
 	}
 
 	print '</div></div></div>';
