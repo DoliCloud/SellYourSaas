@@ -87,11 +87,11 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 }
 
 if ($sellyoursaassupporturl) {
-	$sellyoursaassupporturl = str_replace('__EMAIL__', $mythirdpartyaccount->email, $sellyoursaassupporturl);
-	$sellyoursaassupporturl = str_replace('__FIRSTNAME__', $mythirdpartyaccount->array_options['options_firstname'], $sellyoursaassupporturl);
-	$sellyoursaassupporturl = str_replace('__LASTNAME__', $mythirdpartyaccount->array_options['options_lastname'], $sellyoursaassupporturl);
-	$sellyoursaassupporturl = str_replace('__FULLNAME__', dolGetFirstLastname($mythirdpartyaccount->array_options['options_firstname'], $mythirdpartyaccount->array_options['options_lastname']), $sellyoursaassupporturl);
-	$sellyoursaassupporturl = str_replace('__SUPPORTKEY__', dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5), $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__EMAIL__', urlencode($mythirdpartyaccount->email), $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__FIRSTNAME__', urencode($mythirdpartyaccount->array_options['options_firstname']), $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__LASTNAME__', urlencode($mythirdpartyaccount->array_options['options_lastname']), $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__FULLNAME__', urlencode(dolGetFirstLastname($mythirdpartyaccount->array_options['options_firstname'], $mythirdpartyaccount->array_options['options_lastname'])), $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__SUPPORTKEY__', urlencode(dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5)), $sellyoursaassupporturl);
 
 	print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';
 	print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br>'."\n";
