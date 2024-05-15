@@ -91,7 +91,7 @@ if ($sellyoursaassupporturl) {
 	$sellyoursaassupporturl = str_replace('__FIRSTNAME__', $mythirdpartyaccount->array_options['options_firstname'], $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__LASTNAME__', $mythirdpartyaccount->array_options['options_lastname'], $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__FULLNAME__', dolGetFirstLastname($mythirdpartyaccount->array_options['options_firstname'], $mythirdpartyaccount->array_options['options_lastname']), $sellyoursaassupporturl);
-	$sellyoursaassupporturl = str_replace('__SUPPORTKEY__', dol_trunc(5, dol_hash($mythirdpartyaccount->email, 'md5')), $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__SUPPORTKEY__', dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5), $sellyoursaassupporturl);
 
 	print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';
 	print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br>'."\n";
