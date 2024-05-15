@@ -326,7 +326,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myc
 	$sql.= ' '.MAIN_DB_PREFIX.'contratdet as d, '.MAIN_DB_PREFIX.'societe as s';
 	$sql.= " WHERE c.fk_soc = s.rowid AND s.parent = ".$mythirdpartyaccount->id;
 	$sql.= " AND d.fk_contrat = c.rowid";
-	$sql.= " AND c.entity = ".$conf->entity;
+	$sql.= " AND c.entity = ".((int) $conf->entity);
 	$sql.= " AND ce.deployment_status IN ('processing', 'done', 'undeployed')";
 	if ($search_instance_name) {
 		$sql.=natural_search(array('c.ref_customer'), $search_instance_name);
@@ -336,11 +336,12 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myc
 	}
 	$resql=$db->query($sql);
 	$num_rows = $db->num_rows($resql);
-	$i=0;
+	$i = 0;
 	while ($i < $num_rows) {
+		$obj = $db->fetch_object($resql);
 		$nbtotalofrecords++;
-		$listofcontractidresellerall[$obj->rowid]=$obj->fk_soc;
-		$listofcustomeridreseller[$obj->fk_soc]=1;
+		$listofcontractidresellerall[$obj->rowid] = $obj->fk_soc;
+		$listofcustomeridreseller[$obj->fk_soc] = 1;
 		$i++;
 	}
 
@@ -2989,7 +2990,7 @@ if ($mythirdpartyaccount->isareseller) {
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 		print '<div class="div-table-responsive">';
 		print '<table class="noborder small centpercent background-white padding">';
-		print '<tr class="field_'.$key.' liste_titre"><th>';
+		print '<tr class="liste_titre"><th>';
 		print $langs->trans("Label");
 		print '</th>';
 		print '<th>';

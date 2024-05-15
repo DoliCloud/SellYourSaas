@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Show substitutions keys for helpdesk url
 * SEC When using ssh, a user can't see the OS and package information.
 * NEW Support emails with + inside
 * NEW Accept emojis in email templates

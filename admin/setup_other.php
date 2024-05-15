@@ -335,9 +335,10 @@ print '</tr>';
 print '<tr class="oddeven"><td>';
 print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
 print '</td>';
-print '<td colspan="2">';
+print '<td>';
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL').'">';
 print '</td>';
+print '<td></td>';
 print '</tr>';
 
 // SELLYOURSAAS_EXTCSS
@@ -488,7 +489,8 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'</td>';
 	print '<td>';
-	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL");
+	print img_picto('', 'product', 'class="pictofixedwidth"');
+	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", '', 0, 0, '', 1, 2, 0, 0, 1, 0, 'maxwidth500 widthcentpercentminusx');
 	print '</td>';
 	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
@@ -524,7 +526,8 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT").'</td>';
 	print '<td>';
-	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT");
+	print img_picto('', 'product', 'class="pictofixedwidth"');
+	print $form->select_produits_list(getDolGlobalInt('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", '', 0, 0, '', 1, 2, 0, 0, 1, 0, 'maxwidth500 widthcentpercentminusx');
 	print '</td>';
 	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
@@ -605,19 +608,28 @@ print '</td>';
 print '<td><span class="opacitymedium small">45fdf4sds54fdf</span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOMIGRATION_CODE").'</td>';
-print '<td class="nowraponall">';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ASK_DESTROY_REASON").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ASK_DESTROY_REASON', array(), null, 0, 0, 0);
+} else {
+	if (empty($conf->global->SELLYOURSAAS_ASK_DESTROY_REASON)) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ASK_DESTROY_REASON">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ASK_DESTROY_REASON">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
 print '</td>';
-print '<td></td>';
+print '<td><span class="opacitymedium small"></span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOUPGRADE_CODE").'</td>';
-print '<td class="nowraponall">';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
-print '</td>';
+
+// Support features
+
+print '<tr class="liste_titre">';
+print '<td>'.$langs->trans("SupportFeatures").'</td><td></td>';
 print '<td></td>';
-print '</tr>';
+print "</tr>\n";
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<tr class="oddeven"><td>';
@@ -626,7 +638,15 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<input type="text" name="SELLYOURSAAS_SUPPORT_URL'.$suffix.'" class="quatrevingtpercent" value="'.getDolGlobalString('SELLYOURSAAS_SUPPORT_URL'.$suffix).'">';
 	print '</td>';
 	print '<td>';
-	print '<span class="opacitymedium small">'.$langs->trans("FillOnlyToUseAnExternalTicketSystem").'</span>';
+	print '<span class="opacitymedium small">'.$langs->trans("FillOnlyToUseAnExternalTicketSystem");
+	$htmltext = $langs->trans("AvailableVariables").':<br>';
+	$htmltext .= '__EMAIL__<br>';
+	$htmltext .= '__FISTNAME__<br>';
+	$htmltext .= '__LASTNAME__<br>';
+	$htmltext .= '__FULLNAME__<br>';
+	$htmltext .= '__SUPPORTKEY__<br>';
+	print $form->textwithpicto('', $htmltext);
+	print '</span>';
 	print '</td>';
 	print '</tr>';
 
@@ -642,19 +662,18 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	}
 }
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ASK_DESTROY_REASON").'</td>';
-print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ASK_DESTROY_REASON', array(), null, 0, 0, 0);
-} else {
-	if (empty($conf->global->SELLYOURSAAS_ASK_DESTROY_REASON)) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ASK_DESTROY_REASON">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ASK_DESTROY_REASON">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOMIGRATION_CODE").'</td>';
+print '<td class="nowraponall">';
+print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
 print '</td>';
-print '<td><span class="opacitymedium small"></span></td>';
+print '<td></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOUPGRADE_CODE").'</td>';
+print '<td class="nowraponall">';
+print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
+print '</td>';
+print '<td></td>';
 print '</tr>';
 
 print '</table>';

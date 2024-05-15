@@ -79,10 +79,10 @@ print '
 
 	$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 	$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
-	if (! empty($conf->global->$newnamekey)) {
-		$sellyoursaassupporturl = $conf->global->$newnamekey;
+	if (getDolGlobalString($newnamekey)) {
+		$sellyoursaassupporturl = getDolGlobalString($newnamekey);
 	}
 }
 
@@ -90,9 +90,11 @@ if ($sellyoursaassupporturl) {
 	$sellyoursaassupporturl = str_replace('__EMAIL__', $mythirdpartyaccount->email, $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__FIRSTNAME__', $mythirdpartyaccount->array_options['options_firstname'], $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__LASTNAME__', $mythirdpartyaccount->array_options['options_lastname'], $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__FULLNAME__', dolGetFirstLastname($mythirdpartyaccount->array_options['options_firstname'], $mythirdpartyaccount->array_options['options_lastname']), $sellyoursaassupporturl);
+	$sellyoursaassupporturl = str_replace('__SUPPORTKEY__', dol_trunc(5, dol_hash($mythirdpartyaccount->email, 'md5')), $sellyoursaassupporturl);
 
 	print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';
-	print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br />'."\n";
+	print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br>'."\n";
 	print '</div></div></div>';
 } else {
 	print '
