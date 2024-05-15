@@ -100,7 +100,7 @@ if ($sellyoursaassupporturl) {
 	print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br>'."\n";
 
 	if (preg_match('/__SUPPORTKEY__/', $sellyoursaassupporturlorigin)) {	// A __SUPPORTKEY__ is defined so we show it
-		print '<br>'.$langs->trans("SupportKey").': <b>'.showValueWithClipboardCPButton(strtoupper($supportkey), 0, 'none').'</b><br>';
+		print '<br>'.$langs->trans("SupportKey").': <b>'.showValueWithClipboardCPButton(strtoupper($supportkey), 0).'</b><br>';
 	}
 
 	print '</div></div></div>';
