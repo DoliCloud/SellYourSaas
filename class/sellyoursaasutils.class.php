@@ -952,7 +952,7 @@ class SellYourSaasUtils
 						continue;
 					}
 
-					dol_syslog("Loop on invoices, loop cursor no ".$i.", this->transaction_opened = ".$this->transaction_opened);
+					dol_syslog("Loop on invoices, loop cursor no ".$i.", this->db->transaction_opened = ".$this->db->transaction_opened);
 
 					$this->db->begin();
 
