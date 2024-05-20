@@ -1228,7 +1228,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	$mythirdpartyaccount->array_options['options_date_apply_for_reseller'] = dol_now();
 	$mythirdpartyaccount->note_private = dol_concatdesc($mythirdpartyaccount->note_private, GETPOST('content', 'restricthtml'));
-	$result = $mythirdpartyaccount->update(0);
+	$result = $mythirdpartyaccount->update(0, $user);
 
 	if ($result) {
 		setEventMessages($langs->trans("TicketSent"), null, 'warnings');
