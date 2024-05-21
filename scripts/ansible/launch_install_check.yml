@@ -1172,7 +1172,7 @@
   - name: Launch perms.ksh to set permissions, create some dirs and files
     command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh confirm"
     register: command_output
-    #changed_when: false
+    changed_when: false
 
   - debug:
       var: command_output.stdout_lines  
