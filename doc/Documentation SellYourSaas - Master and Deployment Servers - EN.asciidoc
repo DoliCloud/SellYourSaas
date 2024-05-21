@@ -1060,7 +1060,7 @@ sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-soap
 sudo apt install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
-sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit acct
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamdscan clamav-daemon
 sudo apt install -y fail2ban
@@ -1967,13 +1967,8 @@ exclude_suffix := tmp old bak
 
 [source,bash]
 ---------------
-############################################
-# to allow easier upgrade, my advice is too separate
-# the default configuration file (above) from your
-# local configuration (below).
-# default configuration will be upgraded
-# local configuration will be kept
-########## put your local config below ####################
+/snap/bin all
+
 ! /var/log/mysql
 ! /var/log/letsencrypt
 ! /var/log/datadog
@@ -1997,7 +1992,6 @@ exclude_suffix := tmp old bak
 
 /home MyRule
 /home/admin/logs Logs
-/var/log/datadog Logs2
 !/home/admin/backup
 !/home/jail/home
 !/home/admin/wwwroot/dolibarr_documents
@@ -3418,7 +3412,7 @@ journalctl --vacuum-size=1G
 journalctl --vacuum-time=1d
 ---------------
 
-To read journal:
+To get information about journal files:
 
 [source,bash]
 ---------------
@@ -4716,34 +4710,6 @@ kill ...
 ---------------
 
 
-
-=== Follow files modified - Analysing changes in system files (using Afick)
-
-To compare the list of modified files since the last afick run:
-
-[source,bash]
----------------
-afick.pl -k
----------------
-
-See a summary of history of daily changes:
-
-[source,bash]
----------------
-vi /var/lib/afick/history
----------------
-
-See details of changes for a specific day:
-
-[source,bash]
----------------
-vi /var/lib/afick/archive/afick.YYYMMDD*
----------------
-
-Check out *afick.pl* documentation for more options.
-
-
-
 === Restore a lost config file of a package
 
 Launch this command to find the package that provide the file:
@@ -4906,109 +4872,6 @@ blkid
 mount /dev/sdX9 /mnt
 vi /mnt/etc/fstab
 ---------------
-
- 
-
-
-
-=== Restoring a root access or a server blocked by a firewall
-
-To restore a root access, first you need to reboot your server in boot rescue mode.
-Use the Cloud service interface to switch to rescue mode. The server will be rebooted and a link to log in will be provided.
-
-*Reboot in rescue mode With OVH Public Cloud*
-
-* Click on the instance where you want to reset the password. 
-
-* Click on the "Reboot in rescue mode" entry and validate.
-
-When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
-or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
-
-Find attached disks to identify the system partition disk.
-
-[source,bash]
----------------
-lsblk -a / lsblk -f
-of 
-fdisk -l
----------------
-
-Example when using lsblk -a:
-
-[source,bash]
----------------
-NAME    MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
-sda       8:0    0   2.5G  0 disk 
-└─sda1    8:1    0   2.5G  0 part /
-sdb       8:16   0   200G  0 disk 
-├─sdb1    8:17   0 199.9G  0 part 
-├─sdb14   8:30   0     4M  0 part 
-└─sdb15   8:31   0   106M  0 part 
----------------
-
-In this exemple, the system partition /dev/sda1 it the rescue partition, the oroginal partition is /dev/sdb1. Note : if your server is in RAID configuration the system partition is the raid volume partition.
-
-* Once the system partition is identified, you need to mount it.
-
-[source,bash]
----------------
-mount /dev/sdXY /mnt    #(with X=a, b, c, etc and Y the partition number, 1, 2, 3, etc)
----------------
-
-The disk is then accessible and writable in /mnt
-
-
-* Now we need to change root directory, you can use this command:
-
-[source,bash]
----------------
-chroot /mnt
----------------
-
-* Finnaly, to change the password, use this command:
-
-[source,bash]
----------------
-passwd root
----------------
-
-* You can also edit the */mnt/etc/ssh/sshd_config.d/sellyoursaas.conf* to allow direct SSH access to root using SSH (should not be used, good practice is to ssh using key to a user then doing a sudo using user password)
-
-[source,ini]
----------------
-PermitRootLogin yes
-PasswordAuthentication yes
----------------
-
-Then
-
-[source,bash]
----------------
-/etc/init.d/ssh restart
----------------
-
-
-* If you have also doubt on the firewall, to disable firewall rules, use this command:
-
-[source,bash]
----------------
-# Accept all traffic first to avoid ssh lockdown  via iptables firewall rules #
-iptables -P INPUT ACCEPT
-iptables -P FORWARD ACCEPT
-iptables -P OUTPUT ACCEPT
- 
-# Flush All Iptables Chains/Firewall rules #
-iptables -F
- 
-# Delete all Iptables Chains #
-iptables -X
-
-# To list rules
-iptables -L
----------------
-
-When all this is done you can reboot your server by using the button Exit rescue mode in the dashboard.
 
 
 === Move the database (var/lib/mysql into /mnt/diskhome/mysql/)
@@ -5194,6 +5057,159 @@ Launch the script:
 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
+
+=== Forensic tools - analysis
+
+Before any forensic anaylisis, you can:
+- block any network access from the Public Cloud service.
+- use the Public Cloud tool to make an image of the instance. 
+
+
+==== Restoring a lost root access or a server blocked by a firewall
+
+To restore a root access, first you need to reboot your server in boot rescue mode.
+Use the Cloud service interface to switch to rescue mode. The server will be rebooted and a link to log in will be provided.
+
+*Reboot in rescue mode fomr the Public Cloud console*
+
+* Click on the instance where you want to reset the password. 
+
+* Click on the "Reboot in rescue mode" entry and validate.
+
+When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
+or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
+
+Find attached disks to identify the system partition disk.
+
+[source,bash]
+---------------
+lsblk -a / lsblk -f
+of 
+fdisk -l
+---------------
+
+Example when using lsblk -a:
+
+[source,bash]
+---------------
+NAME    MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda       8:0    0   2.5G  0 disk 
+└─sda1    8:1    0   2.5G  0 part /
+sdb       8:16   0   200G  0 disk 
+├─sdb1    8:17   0 199.9G  0 part 
+├─sdb14   8:30   0     4M  0 part 
+└─sdb15   8:31   0   106M  0 part 
+---------------
+
+In this exemple, the system partition /dev/sda1 it the rescue partition, the oroginal partition is /dev/sdb1. Note : if your server is in RAID configuration the system partition is the raid volume partition.
+
+* Once the system partition is identified, you need to mount it.
+
+[source,bash]
+---------------
+mount /dev/sdXY /mnt    #(with X=a, b, c, etc and Y the partition number, 1, 2, 3, etc)
+---------------
+
+The disk is then accessible and writable in /mnt
+
+
+* Now we need to change root directory, you can use this command:
+
+[source,bash]
+---------------
+chroot /mnt
+---------------
+
+* Finnaly, to change the password, use this command:
+
+[source,bash]
+---------------
+passwd root
+---------------
+
+* You can also edit the */mnt/etc/ssh/sshd_config.d/sellyoursaas.conf* to allow direct SSH access to root using SSH (should not be used, good practice is to ssh using key to a user then doing a sudo using user password)
+
+[source,ini]
+---------------
+PermitRootLogin yes
+PasswordAuthentication yes
+---------------
+
+Then
+
+[source,bash]
+---------------
+/etc/init.d/ssh restart
+---------------
+
+
+* If you have also doubt on the firewall, to disable firewall rules, use this command:
+
+[source,bash]
+---------------
+# Accept all traffic first to avoid ssh lockdown  via iptables firewall rules #
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+ 
+# Flush All Iptables Chains/Firewall rules #
+iptables -F
+ 
+# Delete all Iptables Chains #
+iptables -X
+
+# To list rules
+iptables -L
+---------------
+
+When all this is done you can reboot your server by using the button Exit rescue mode in the dashboard.
+
+
+==== Follow files modified - Analysing changes in system files (using Afick)
+
+To compare the list of modified files since the last afick run:
+
+[source,bash]
+---------------
+afick.pl -k			# Compare current files with last database
+afick.pl -u			# Compare current files with last database and update database
+---------------
+
+See a summary of history of daily changes:
+
+[source,bash]
+---------------
+vi /var/lib/afick/history
+---------------
+
+See details of changes for a specific day:
+
+[source,bash]
+---------------
+cd /var/lib/afick/archive/
+vi /var/lib/afick/archive/afick.YYYMMDD*
+---------------
+
+Check out *afick.pl* documentation for more options.
+
+
+==== Follow shell activities
+
+You can use the following tools to follow shell activities, tracked by the kernel:
+
+[source,bash]
+---------------
+ac -d -p					# Statistics about linux user connections
+sa -m						# Statistics about linux user commands run
+lastcomm --user unixlogin	# last command of a user
+---------------
+
+You can also use the journal to track logs:
+
+[source,bash]
+---------------
+journalctl --since="YYYY-MM-DD HH:MM:SS" _UID=1001
+---------------
 
 
 <<<<

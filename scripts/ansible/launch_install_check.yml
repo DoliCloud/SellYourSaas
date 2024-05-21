@@ -1104,6 +1104,13 @@
       loop: "{{ dolibarr_fail2ban_files.files }}"      
 
 
+    - name: Update /etc/afick.conf to remove /var/log/datadog Logs* 
+      lineinfile:
+        path: /etc/afick.conf
+        regexp: '^/var/log/datadog Logs'
+        state: absent
+
+
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
       ignore_errors: true
       ansible.builtin.template:
