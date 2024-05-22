@@ -275,15 +275,15 @@ if [[ "$mode" == "upgrade" ]];then
 							tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
 						else
 							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources1."
-							$archivenotfounddirwithsources=1
+							archivenotfounddirwithsources=1
 						fi
 					fi
 				fi
 			else
-				$archivenotfounddirwithsources=1
+				archivenotfounddirwithsources=1
 			fi
 		else
-			$archivenotfounddirwithsources=1
+			archivenotfounddirwithsources=1
 		fi
 
 		if [ ! $archivenotfounddirwithsources -eq 1 ] && [ -d $dirwithsources2 ]; then
@@ -303,12 +303,12 @@ if [[ "$mode" == "upgrade" ]];then
 							tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
 						else
 							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources2."
-							$archivenotfounddirwithsources=1
+							archivenotfounddirwithsources=1
 						fi
 					fi
 				fi
 			else
-				$archivenotfounddirwithsources=1
+				archivenotfounddirwithsources=1
 			fi
 		fi
 
@@ -329,12 +329,12 @@ if [[ "$mode" == "upgrade" ]];then
 							tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
 						else
 							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources3."
-							$archivenotfounddirwithsources=1
+							archivenotfounddirwithsources=1
 						fi
 					fi
 				fi
 			else
-				$archivenotfounddirwithsources=1
+				archivenotfounddirwithsources=1
 			fi
 		fi
 
@@ -343,11 +343,11 @@ if [[ "$mode" == "upgrade" ]];then
 			echo "We try with $dirforexampleforsources with : rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom"
 			rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom
 			if [ $? -eq 0 ];then
-				$archivenotfounddirwithsources=0
+				archivenotfounddirwithsources=0
 			fi
 		fi
 
-		if [ $archivenotfounddirwithsources -eq 0 ]
+		if [ archivenotfounddirwithsources -eq 0 ]
 		then
 			echo "Successfully copied files of new version"
 		else
