@@ -347,7 +347,7 @@ if [[ "$mode" == "upgrade" ]];then
 			fi
 		fi
 
-		if [ archivenotfounddirwithsources -eq 0 ]
+		if [ $archivenotfounddirwithsources -eq 0 ]
 		then
 			echo "Successfully copied files of new version"
 		else
