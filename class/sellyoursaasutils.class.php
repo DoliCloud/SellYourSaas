@@ -428,6 +428,7 @@ class SellYourSaasUtils
 		$sql.= ' WHERE cd.fk_contrat = c.rowid AND ce.fk_object = c.rowid';
 		$sql.= " AND ce.deployment_status = 'done'";
 		$sql.= " AND ce.date_softalert_endfreeperiod IS NULL";
+		$sql.= " AND ce.date_hardalert_endfreeperiod IS NULL";
 		$sql.= " AND cd.date_fin_validite <= '".$this->db->idate($date_limit_expiration)."'";      // Expired contracts
 		$sql.= " AND cd.date_fin_validite >= '".$this->db->idate($date_limit_expiration - 7 * 24 * 3600)."'";	// Protection: We dont' go higher than 7 days late to avoid to resend too much warnings when update of date_softalert_endfreeperiod has failed
 		$sql.= " AND cd.statut = 4";	// 4 = ContratLigne::STATUS_OPEN
@@ -556,6 +557,199 @@ class SellYourSaasUtils
 		$this->output = count($contractprocessed).' contract(s) qualified (search done on contracts of SellYourSaas prospects/customers only).';
 		if (count($contractpayingupdated)>0) {
 			$this->output .= ' '.count($contractpayingupdated).' contract(s) seems paying so we updated date_softalert_endfreeperiod to date_endfreeperiod for '.join(',', $contractpayingupdated).'.';
+		}
+		if (count($contractok)>0) {
+			$this->output .= ' '.count($contractok).' email(s) sent for '.join(',', $contractok).'.';
+		}
+		if (count($contractko)>0) {
+			$this->output .= ' '.count($contractko).' email(s) in error for '.join(',', $contractko).'.';
+		}
+
+		$this->db->commit();
+
+		dol_syslog(__METHOD__." ".$this->output, LOG_DEBUG, -1);
+
+		$conf->global->SYSLOG_FILE = $savlog;
+
+		return ($error ? 1 : 0);
+	}
+
+	/**
+	 * Action executed by scheduler for job SellYourSaasAlertHardEndTrial
+	 * Search contracts of sellyoursaas customers that are deployed + with open lines + about to expired (= date between (end date - SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT) and (end date - SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT + 7)) + not yet already warned (date_softalert_endfreeperiod is null), then send email remind
+	 * CAN BE A CRON TASK
+	 *
+	 * @return	int			0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
+	 */
+	public function doAlertHardEndTrial()
+	{
+		global $conf, $langs, $user;
+
+		$langs->load("agenda");
+
+		$mode = 'test';
+
+		$savlog = $conf->global->SYSLOG_FILE;
+		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doAlertHardEndTrial.log';
+
+		$contractprocessed = array();
+		$contractok = array();
+		$contractko = array();
+		$contractpayingupdated = array();
+
+		$now = dol_now();
+
+		$error = 0;
+		$this->output = '';
+		$this->error='';
+
+		$delayindaysshort = $conf->global->SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT;
+		$delayindayshard = $conf->global->SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT;
+		if ($delayindaysshort <= 0 || $delayindayshard <= 0) {
+			$this->error='BadValueForDelayBeforeTrialEndForAlert';
+
+			$conf->global->SYSLOG_FILE = $savlog;
+
+			return -1;
+		}
+		dol_syslog(__METHOD__." we send email warning on contract that will expire in ".$delayindayshard." days or before and not yet reminded", LOG_DEBUG, 1);
+
+		$this->db->begin();
+
+		$date_limit_expiration = dol_time_plus_duree($now, abs($delayindayshard), 'd');
+
+		$sql = 'SELECT DISTINCT c.rowid, c.ref_customer';
+		$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c, '.MAIN_DB_PREFIX.'contratdet as cd, '.MAIN_DB_PREFIX.'contrat_extrafields as ce,';
+		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
+		$sql.= ' WHERE cd.fk_contrat = c.rowid AND ce.fk_object = c.rowid';
+		$sql.= " AND ce.deployment_status = 'done'";
+        $sql.= " AND ce.date_softalert_endfreeperiod IS NOT NULL"; // we don't send a hard alert unless a soft alert has already been sent
+		$sql.= " AND ce.date_hardalert_endfreeperiod IS NULL";
+		$sql.= " AND cd.date_fin_validite <= '".$this->db->idate($date_limit_expiration)."'";      // Expired contracts
+		$sql.= " AND cd.date_fin_validite >= '".$this->db->idate($date_limit_expiration - 7 * 24 * 3600)."'";	// Protection: We dont' go higher than 7 days late to avoid to resend too much warnings when update of date_hardalert_endfreeperiod has failed
+		$sql.= " AND cd.statut = 4";	// 4 = ContratLigne::STATUS_OPEN
+		$sql.= " AND se.fk_object = c.fk_soc AND se.dolicloud = 'yesv2'";
+		$sql.= " ORDER BY c.rowid DESC";
+		//print $sql;
+
+		$resql = $this->db->query($sql);
+		if ($resql) {
+			$num = $this->db->num_rows($resql);
+
+			include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+			include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+			$formmail=new FormMail($this->db);
+
+			$MAXPERCALL=10;
+			$nbsending = 0;
+
+			$i=0;
+			while ($i < $num) {
+				$obj = $this->db->fetch_object($resql);
+				if ($obj) {
+					if (! empty($contractprocessed[$obj->rowid])) {
+						continue;
+					}
+
+					if ($nbsending >= $MAXPERCALL) {
+						dol_syslog("We reach the limit of ".$MAXPERCALL." contract processed per batch, so we quit loop for the batch doAlertHardTrial to avoid to reach email quota.", LOG_WARNING);
+						break;
+					}
+
+					// Test if this is a paid or not instance
+					$object = new Contrat($this->db);
+					$result = $object->fetch($obj->rowid);
+					if ($result <= 0) {
+						$error++;
+						$this->errors[] = 'Failed to load contract with id='.$obj->rowid;
+						continue;
+					}
+
+					dol_syslog("* Process contract id=".$object->id." ref=".$object->ref." ref_customer=".$object->ref_customer);
+
+					dol_syslog('Call sellyoursaasIsPaidInstance start', LOG_DEBUG, 1);
+					$isAPayingContract = sellyoursaasIsPaidInstance($object);
+					dol_syslog('Call sellyoursaasIsPaidInstance end', LOG_DEBUG, -1);
+					if ($mode == 'test' && $isAPayingContract) {          // Discard if this is a paid instance when we are in test mode
+						$contractpayingupdated[$object->id]=$object->ref;
+
+						$sqlupdatedate = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields SET date_hardalert_endfreeperiod = date_endfreeperiod WHERE fk_object = ".$object->id;
+						$resqlupdatedate = $this->db->query($sqlupdatedate);
+						if (! $resqlupdatedate) {
+							dol_syslog('Failed to update date_hardalert_endfreeperiod with date_endfreeperiod for object id = '.$object->id, LOG_ERR);
+						}
+						continue;
+					}
+					//if ($mode == 'paid' && ! $isAPayingContract) continue;										// Discard if this is a test instance when we are in paid mode
+
+					// Suspend instance
+					dol_syslog('Call sellyoursaasGetExpirationDate start', LOG_DEBUG, 1);
+					$tmparray = sellyoursaasGetExpirationDate($object);
+					dol_syslog('Call sellyoursaasGetExpirationDate end', LOG_DEBUG, -1);
+					$expirationdate = $tmparray['expirationdate'];
+
+					if ($expirationdate && $expirationdate < $date_limit_expiration) {
+						$nbsending++;
+
+						// Load third party
+						$object->fetch_thirdparty();
+
+						$outputlangs = new Translate('', $conf);
+						$outputlangs->setDefaultLang($object->thirdparty->default_lang);
+						$outputlangs->loadLangs(array('main'));
+
+						// @TODO Save in cache $arraydefaultmessage for each $object->thirdparty->default_lang and reuse it to avoid getEMailTemplate called each time
+						dol_syslog("We will call getEMailTemplate for type 'contract', label 'HardTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
+                        $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminder');
+
+						$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
+						$substitutionarray['__SELLYOURSAAS_EXPIRY_DATE__']=dol_print_date($expirationdate, 'day', 'tzserver', $outputlangs);
+						$substitutionarray['__SELLYOURSAAS_NB_DAYS_BEFORE_EXPIRY_DATE__']=num_between_day(dol_now(),$expirationdate);
+						complete_substitutions_array($substitutionarray, $outputlangs, $object);
+
+						$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray);
+						$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray);
+
+						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+						$to = $object->thirdparty->email;
+						$trackid = 'thi'.$object->thirdparty->id;
+						$moreinheader = 'X-Dolibarr-Info: doAlertHardEndTrial'."\r\n";
+
+						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1, '', '', $trackid, $moreinheader);
+						$result = $cmail->sendfile();
+						if (! $result) {
+							$error++;
+							$this->error = $cmail->error;
+							$this->errors = $cmail->errors;
+							dol_syslog("Failed to send email to ".$to." ".$this->error, LOG_WARNING);
+							$contractko[$object->id]=$object->ref;
+						} else {
+							dol_syslog("Email sent to ".$to, LOG_DEBUG);
+							$contractok[$object->id]=$object->ref;
+
+							$sqlupdatedate = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields SET date_hardalert_endfreeperiod = '".$this->db->idate($now)."' WHERE fk_object = ".$object->id;
+							$resqlupdatedate = $this->db->query($sqlupdatedate);
+							if (! $resqlupdatedate) {
+								dol_syslog("Failed to update date_hardalert_endfreeperiod with '".$this->db->idate($now)."' for object id = ".$object->id, LOG_ERR);
+							}
+						}
+
+						// TODO Add an event in agenda for contract/thirdparty
+
+						$contractprocessed[$object->id]=$object->ref;
+					} else {
+					}
+				}
+				$i++;
+			}
+		} else {
+			$error++;
+			$this->error = $this->db->lasterror();
+		}
+
+		$this->output = count($contractprocessed).' contract(s) qualified (search done on contracts of SellYourSaas prospects/customers only).';
+		if (count($contractpayingupdated)>0) {
+			$this->output .= ' '.count($contractpayingupdated).' contract(s) seems paying so we updated date_hardalert_endfreeperiod to date_endfreeperiod for '.join(',', $contractpayingupdated).'.';
 		}
 		if (count($contractok)>0) {
 			$this->output .= ' '.count($contractok).' email(s) sent for '.join(',', $contractok).'.';
