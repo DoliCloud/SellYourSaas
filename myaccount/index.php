@@ -1088,7 +1088,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				$error++;
 			}
 		} else {
-			$topic = '[Ticket '.getDolGlobalString('MAIN_INFO_SOCIETE_NOM').'- '.$mythirdpartyaccount->name.'] '.$topic;
+			$topic = '[Ticket '.getDolGlobalString('MAIN_INFO_SOCIETE_NOM').' - '.$mythirdpartyaccount->name.'] '.$topic;
 		}
 
 		// Set $content
