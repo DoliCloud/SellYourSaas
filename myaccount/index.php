@@ -1079,7 +1079,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		// Set $topic + check thirdparty validity
 		if (is_object($tmpcontract)) {
-			$topic = '[Ticket '.getDolGlobalString('MAIN_INFO_SOCIETE_NOM').' - '.$tmpcontract->ref_customer.'] '.$topic;
+			$topic = '[Ticket '.getDolGlobalString('SELLYOURSAAS_NAME').' - '.$tmpcontract->ref_customer.'] '.$topic;
 
 			$tmpcontract->fetch_thirdparty();	// Note: It should match $mythirdpartyaccount
 			if (!is_object($tmpcontract->thirdparty) || $tmpcontract->thirdparty->id != $mythirdpartyaccount->id) {
@@ -1088,7 +1088,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				$error++;
 			}
 		} else {
-			$topic = '[Ticket '.getDolGlobalString('MAIN_INFO_SOCIETE_NOM').' - '.$mythirdpartyaccount->name.'] '.$topic;
+			$topic = '[Ticket '.getDolGlobalString('SELLYOURSAAS_NAME').' - '.$mythirdpartyaccount->name.'] '.$topic;
 		}
 
 		// Set $content
