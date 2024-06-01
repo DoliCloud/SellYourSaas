@@ -1918,7 +1918,7 @@ dpkg -i afick.deb
 
 ou pour Ubuntu 22.04
 
-wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0.tgz/download
+wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick-3.7.0.tgz/download
 tar -xvf afick-3.7.0.tgz; 
 cd afick-3.7.0; perl Makefile.pl; make install; ln -fs /opt/afick/etc/afick.conf /etc/afick.conf; ln -fs /opt/afick/bin/afick.pl /usr/bin/afick.pl;
 mv /etc/cron.daily/afick_cron.dpkg-new /etc/cron.daily/afick_cron
