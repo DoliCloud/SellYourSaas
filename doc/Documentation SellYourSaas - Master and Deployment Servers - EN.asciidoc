@@ -3722,9 +3722,11 @@ You must have inside the cron of user *admin*:
 # m h  dom mon dow   command
 # cron master admin
 */10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> anonymousbatch >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log 2>&1
-5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
+5 5 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
+# cron master and deployment admin
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
+5 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
 
