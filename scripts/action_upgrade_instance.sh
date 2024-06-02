@@ -356,8 +356,8 @@ if [[ "$mode" == "upgrade" ]];then
 		fi
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Force permissions and owner on $targetdir/$osusername/$dbname"
-		echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername.$osusername $targetdir/$osusername/$dbname"
 		chown $osusername.$osusername $targetdir/$osusername
+		echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername.$osusername $targetdir/$osusername/$dbname"
 		chown -R $osusername.$osusername $targetdir/$osusername/$dbname
 		echo `date +'%Y-%m-%d %H:%M:%S'`" chmod -R go-rwxs $targetdir/$osusername/$dbname"
 		chmod -R go-rwxs $targetdir/$osusername/$dbname
