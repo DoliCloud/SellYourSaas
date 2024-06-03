@@ -445,6 +445,7 @@ ClickToCheckAgain=Click here to check again
 BadValueForDomainInEmail=Wrong email: Bad value for the domain part in email (%s). If you are sure your email is correct, please send us a notice at %s.
 LogIn=Log In
 DateSoftAlertEndTrial=Date last soft alert for end trial
+DateHardAlertEndTrial=Date last hard alert for end trial
 DateEndTrial=Date end trial
 ErrorBadHashInLinkToResetPassword=Error, this link to reset password is not valid or was already used
 DeletePackages=Delete package
