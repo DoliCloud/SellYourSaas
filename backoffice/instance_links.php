@@ -592,6 +592,7 @@ if (empty($object->nbofusers)) {
 					/*'__PACKAGEREF__'=> $tmppackage->ref,
 					'__PACKAGENAME__'=> $tmppackage->label,
 					'__APPUSERNAME__'=>$appusername,
+					'__APPUSERNAME_URLENCODED__'=>urlencode($appusername),
 					'__APPEMAIL__'=>$email,
 					'__APPPASSWORD__'=>$password,
 					'__APPPASSWORD0__'=>$password0,

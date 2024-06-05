@@ -26,7 +26,7 @@
 
 /**
  *	\file       htdocs/core/modules/facture/doc/pdf_sellyoursaas.modules.php
- *	\ingroup    facture
+ *	\ingroup    invoice
  *	\brief      File of class to generate customers invoices from crabe model
  */
 

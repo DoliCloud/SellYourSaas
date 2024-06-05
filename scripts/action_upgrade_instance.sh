@@ -189,6 +189,8 @@ if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
 	cliafter=${cliafter/$olddoldataroot/$newdoldataroot}
 fi
 
+export archivenotfounddirwithsources=0
+
 # For debug
 echo `date +'%Y-%m-%d %H:%M:%S'`" input params for $0:"
 echo "mode = $mode"
@@ -255,17 +257,110 @@ if [[ "$mode" == "upgrade" ]];then
 		# tar -I zstd -xf sourcefile.tar.zst --directory $targetdirwithsources1/
 		# First try with sourcefile.tar.zst that is into tmp cache dir /tmp/cache/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git/xxx.tar.zst 
 		# If cache file does not exists, use the archive file into NFS dir $dirforexampleforsources/
-		# If archive file not found, do the rsync.		 
-		echo "rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom"
-		rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom
+		# If archive file not found, do the rsync.
+		if [ -d $dirwithsources1 ]; then
+			if [[ "x$targetdirwithsources1" != "x" ]]; then
+				mkdir -p $targetdirwithsources1
+				if [[ -f /tmp/cache$dirwithsources1.tar.zst ]]; then
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
+					tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/
+				else
+					if [ -f /tmp/cache$dirwithsources1.tgz ]; then
+						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
+						tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/
+					else
+						# If local cache does not exists
+						if [ -f $dirwithsources1.tgz ]; then
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
+							tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
+						else
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources1."
+							archivenotfounddirwithsources=1
+						fi
+					fi
+				fi
+			else
+				archivenotfounddirwithsources=1
+			fi
+		else
+			archivenotfounddirwithsources=1
+		fi
 
-		if [ $? -eq 0 ]
+		if [ ! $archivenotfounddirwithsources -eq 1 ] && [ -d $dirwithsources2 ]; then
+			if [[ "x$targetdirwithsources2" != "x" ]]; then
+				mkdir -p $targetdirwithsources2
+				if [[ -f /tmp/cache$dirwithsources2.tar.zst ]]; then
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+					tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/
+				else
+					if [ -f /tmp/cache$dirwithsources2.tgz ]; then
+						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
+						tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/
+					else
+						# If local cache does not exists
+						if [ -f $dirwithsources2.tgz ]; then
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
+							tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
+						else
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources2."
+							archivenotfounddirwithsources=1
+						fi
+					fi
+				fi
+			else
+				archivenotfounddirwithsources=1
+			fi
+		fi
+
+		if [ ! $archivenotfounddirwithsources -eq 1 ] && [ -d $dirwithsources3 ]; then
+			if [[ "x$targetdirwithsources3" != "x" ]]; then
+				mkdir -p $targetdirwithsources3
+				if [[ -f /tmp/cache$dirwithsources3.tar.zst ]]; then
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+					tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/
+				else
+					if [ -f /tmp/cache$dirwithsources3.tgz ]; then
+						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
+						tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/
+					else
+						# If local cache does not exists
+						if [ -f $dirwithsources3.tgz ]; then
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
+							tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
+						else
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources3."
+							archivenotfounddirwithsources=1
+						fi
+					fi
+				fi
+			else
+				archivenotfounddirwithsources=1
+			fi
+		fi
+
+		if [ $archivenotfounddirwithsources -eq 1 ]; then
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache and remote archive not found for at least 1 dirwithsource."
+			echo "We try with $dirforexampleforsources with : rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom"
+			rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom
+			if [ $? -eq 0 ];then
+				archivenotfounddirwithsources=0
+			fi
+		fi
+
+		if [ $archivenotfounddirwithsources -eq 0 ]
 		then
 			echo "Successfully copied files of new version"
 		else
 			echo "Error on copying files of new version"
 			exit 221
 		fi
+
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Force permissions and owner on $targetdir/$osusername/$dbname"
+		chown $osusername.$osusername $targetdir/$osusername
+		echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername.$osusername $targetdir/$osusername/$dbname"
+		chown -R $osusername.$osusername $targetdir/$osusername/$dbname
+		echo `date +'%Y-%m-%d %H:%M:%S'`" chmod -R go-rwxs $targetdir/$osusername/$dbname"
+		chmod -R go-rwxs $targetdir/$osusername/$dbname
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/"
         cd $instancedir/

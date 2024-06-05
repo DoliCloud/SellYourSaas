@@ -88,6 +88,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 						$tmppackage->fetch($tmppackageid);
 
 						$substitutionarray['__APPUSERNAME__'] = $initialapplogin;
+						$substitutionarray['__APPUSERNAME_URLENCODED__'] = urlencode($initialapplogin);
 						$substitutionarray['__PACKAGELABEL__'] = $tmppackage->label;
 						$substitutionarray['__APPPASSWORD__']='';
 

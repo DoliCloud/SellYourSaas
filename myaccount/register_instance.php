@@ -1543,6 +1543,7 @@ if (! $error) {
 		$substitutionarray['__PACKAGEEMAILHEADER__'] = property_exists($tmppackage, 'header') ? $tmppackage->header : '';	// TODO
 		$substitutionarray['__PACKAGEEMAILFOOTER__'] = property_exists($tmppackage, 'footer') ? $tmppackage->footer : '';	// TODO
 		$substitutionarray['__APPUSERNAME__'] = $_SESSION['initialapplogin'];
+		$substitutionarray['__APPUSERNAME_URLENCODED__'] = urlencode($_SESSION['initialapplogin']);
 		$substitutionarray['__APPPASSWORD__'] = $password;
 
 		// TODO Replace this with $tmppackage->header and $tmppackage->footer

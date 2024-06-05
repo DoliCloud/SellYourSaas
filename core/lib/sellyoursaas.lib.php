@@ -243,14 +243,14 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	// Application instance url
 	if (empty($lastpassadmin)) {
 		if (! empty($object->array_options['options_deployment_init_adminpass'])) {
-			$url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$object->array_options['options_deployment_init_adminpass'];
+			$url='https://'.$object->ref_customer.'?username='.urlencode($lastloginadmin).'&amp;password='.urlencode($object->array_options['options_deployment_init_adminpass']);
 			$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application (initial install pass)<br><div class="urllink">';
 		} else {
-			$url='https://'.$object->ref_customer.'?username='.$lastloginadmin;
+			$url='https://'.$object->ref_customer.'?username='.urlencode($lastloginadmin);
 			$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application<br><div class="urllink">';
 		}
 	} else {
-		$url='https://'.$object->ref_customer.'?username='.$lastloginadmin.'&amp;password='.$lastpassadmin;
+		$url='https://'.$object->ref_customer.'?username='.urlencode($lastloginadmin).'&amp;password='.urlencode($lastpassadmin);
 		$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application (last logged admin)<br><div class="urllink">';
 	}
 	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
@@ -279,7 +279,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 			}
 		}
 		$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $thirdparty->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
-		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.$thirdparty->email.'&login_hash='.$dol_login_hash;	// Note that password may have change and not being the one of dolibarr admin user
+		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.urlencode($thirdparty->email).'&login_hash='.urlencode($dol_login_hash);	// Note that password may have change and not being the one of dolibarr admin user
 	}
 
 	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';

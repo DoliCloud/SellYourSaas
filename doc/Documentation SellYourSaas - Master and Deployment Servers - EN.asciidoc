@@ -473,7 +473,7 @@ In order not to give information to users doing SSH, on the deployment servers:
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/00-header /etc/update-motd.d/20-runabove 
 rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
@@ -1060,7 +1060,7 @@ sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-soap
 sudo apt install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
-sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit acct
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamdscan clamav-daemon
 sudo apt install -y fail2ban
@@ -1918,7 +1918,7 @@ dpkg -i afick.deb
 
 ou pour Ubuntu 22.04
 
-wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0.tgz/download
+wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick-3.7.0.tgz/download
 tar -xvf afick-3.7.0.tgz; 
 cd afick-3.7.0; perl Makefile.pl; make install; ln -fs /opt/afick/etc/afick.conf /etc/afick.conf; ln -fs /opt/afick/bin/afick.pl /usr/bin/afick.pl;
 mv /etc/cron.daily/afick_cron.dpkg-new /etc/cron.daily/afick_cron
@@ -1967,13 +1967,8 @@ exclude_suffix := tmp old bak
 
 [source,bash]
 ---------------
-############################################
-# to allow easier upgrade, my advice is too separate
-# the default configuration file (above) from your
-# local configuration (below).
-# default configuration will be upgraded
-# local configuration will be kept
-########## put your local config below ####################
+/snap/bin all
+
 ! /var/log/mysql
 ! /var/log/letsencrypt
 ! /var/log/datadog
@@ -1997,7 +1992,6 @@ exclude_suffix := tmp old bak
 
 /home MyRule
 /home/admin/logs Logs
-/var/log/datadog Logs2
 !/home/admin/backup
 !/home/jail/home
 !/home/admin/wwwroot/dolibarr_documents
@@ -3418,7 +3412,7 @@ journalctl --vacuum-size=1G
 journalctl --vacuum-time=1d
 ---------------
 
-To read journal:
+To get information about journal files:
 
 [source,bash]
 ---------------
@@ -3728,9 +3722,11 @@ You must have inside the cron of user *admin*:
 # m h  dom mon dow   command
 # cron master admin
 */10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> anonymousbatch >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log 2>&1
-5 5 * * 0 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
+5 5 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
+# cron master and deployment admin
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
+5 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
 
@@ -4716,34 +4712,6 @@ kill ...
 ---------------
 
 
-
-=== Follow files modified (using Afick)
-
-To update the list of modified files since afick run last:
-
-[source,bash]
----------------
-afick.pl -k
----------------
-
-See the history of changes:
-
-[source,bash]
----------------
-vi /var/lib/afick/history
----------------
-
-See details of changes for a specific day:
-
-[source,bash]
----------------
-vi /var/lib/afick/archive/afick.YYYMMDD*
----------------
-
-Check out *afick.pl* documentation for more options.
-
-
-
 === Restore a lost config file of a package
 
 Launch this command to find the package that provide the file:
@@ -4906,117 +4874,6 @@ blkid
 mount /dev/sdX9 /mnt
 vi /mnt/etc/fstab
 ---------------
-
- 
-
-
-
-=== Restoring a root access or a server blocked by a firewall
-
-To restore a root access, first you need to reboot your server in boot rescue mode.
-Use the Cloud service interface to switch to rescue mode. The server will be rebooted and a link to log in will be provided.
-
-*Reboot in rescue mode With OVH Public Cloud*
-
-* Click on the instance where you want to reset the password. 
-
-* Click on the "Reboot in rescue mode" entry and validate.
-
-When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
-or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
-
-Find attached disks to identify the system partition disk.
-
-[source,bash]
----------------
-lsblk -a / lsblk -f
-of 
-fdisk -l
----------------
-
-Example when using lsblk -a:
-
-[source,bash]
----------------
-NAME    MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
-sda       8:0    0   2.5G  0 disk 
-└─sda1    8:1    0   2.5G  0 part /
-sdb       8:16   0   200G  0 disk 
-├─sdb1    8:17   0 199.9G  0 part 
-├─sdb14   8:30   0     4M  0 part 
-└─sdb15   8:31   0   106M  0 part 
----------------
-
-In this exemple, the system partition /dev/sda1 it the rescue partition, the oroginal partition is /dev/sdb1. Note : if your server is in RAID configuration the system partition is the raid volume partition.
-
-* Once the system partition is identified, you need to mount it.
-
-[source,bash]
----------------
-mount /dev/sdXY /mnt    #(with X=a, b, c, etc and Y the partition number, 1, 2, 3, etc)
----------------
-
-The disk is then accessible and writable in /mnt
-
-
-* Now we need to change root directory, you can use this command:
-
-[source,bash]
----------------
-chroot /mnt
----------------
-
-* Finnaly, to change the password, use this command:
-
-[source,bash]
----------------
-passwd root
----------------
-
-* You can also edit the */mnt/etc/ssh/sshd_config.d/sellyoursaas.conf* to allow direct SSH access to root using SSH (should not be used, good practice is to ssh using key to a user then doing a sudo using user password)
-
-[source,ini]
----------------
-PermitRootLogin yes
-PasswordAuthentication yes
----------------
-
-Then
-
-[source,bash]
----------------
-/etc/init.d/ssh restart
----------------
-
-
-* If you have also doubt on the firewall, to disable firewall rules, use this command:
-
-[source,bash]
----------------
-# Accept all traffic first to avoid ssh lockdown  via iptables firewall rules #
-iptables -P INPUT ACCEPT
-iptables -P FORWARD ACCEPT
-iptables -P OUTPUT ACCEPT
- 
-# Flush All Iptables Chains/Firewall rules #
-iptables -F
- 
-# Delete all Iptables Chains #
-iptables -X
-
-# To list rules
-iptables -L
----------------
-
-When all this is done you can reboot your server by using the button Exit rescue mode in the dashboard.
-
-
-=== Analysing changes in system files
-
-This can be done using afick.pl
-
-@TODO
-
 
 
 === Move the database (var/lib/mysql into /mnt/diskhome/mysql/)
@@ -5202,6 +5059,159 @@ Launch the script:
 /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
+
+=== Forensic tools - analysis
+
+Before any forensic anaylisis, you can:
+- block any network access from the Public Cloud service.
+- use the Public Cloud tool to make an image of the instance. 
+
+
+==== Restoring a lost root access or a server blocked by a firewall
+
+To restore a root access, first you need to reboot your server in boot rescue mode.
+Use the Cloud service interface to switch to rescue mode. The server will be rebooted and a link to log in will be provided.
+
+*Reboot in rescue mode fomr the Public Cloud console*
+
+* Click on the instance where you want to reset the password. 
+
+* Click on the "Reboot in rescue mode" entry and validate.
+
+When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
+or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
+
+Find attached disks to identify the system partition disk.
+
+[source,bash]
+---------------
+lsblk -a / lsblk -f
+of 
+fdisk -l
+---------------
+
+Example when using lsblk -a:
+
+[source,bash]
+---------------
+NAME    MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda       8:0    0   2.5G  0 disk 
+└─sda1    8:1    0   2.5G  0 part /
+sdb       8:16   0   200G  0 disk 
+├─sdb1    8:17   0 199.9G  0 part 
+├─sdb14   8:30   0     4M  0 part 
+└─sdb15   8:31   0   106M  0 part 
+---------------
+
+In this exemple, the system partition /dev/sda1 it the rescue partition, the oroginal partition is /dev/sdb1. Note : if your server is in RAID configuration the system partition is the raid volume partition.
+
+* Once the system partition is identified, you need to mount it.
+
+[source,bash]
+---------------
+mount /dev/sdXY /mnt    #(with X=a, b, c, etc and Y the partition number, 1, 2, 3, etc)
+---------------
+
+The disk is then accessible and writable in /mnt
+
+
+* Now we need to change root directory, you can use this command:
+
+[source,bash]
+---------------
+chroot /mnt
+---------------
+
+* Finnaly, to change the password, use this command:
+
+[source,bash]
+---------------
+passwd root
+---------------
+
+* You can also edit the */mnt/etc/ssh/sshd_config.d/sellyoursaas.conf* to allow direct SSH access to root using SSH (should not be used, good practice is to ssh using key to a user then doing a sudo using user password)
+
+[source,ini]
+---------------
+PermitRootLogin yes
+PasswordAuthentication yes
+---------------
+
+Then
+
+[source,bash]
+---------------
+/etc/init.d/ssh restart
+---------------
+
+
+* If you have also doubt on the firewall, to disable firewall rules, use this command:
+
+[source,bash]
+---------------
+# Accept all traffic first to avoid ssh lockdown  via iptables firewall rules #
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+ 
+# Flush All Iptables Chains/Firewall rules #
+iptables -F
+ 
+# Delete all Iptables Chains #
+iptables -X
+
+# To list rules
+iptables -L
+---------------
+
+When all this is done you can reboot your server by using the button Exit rescue mode in the dashboard.
+
+
+==== Follow files modified - Analysing changes in system files (using Afick)
+
+To compare the list of modified files since the last afick run:
+
+[source,bash]
+---------------
+afick.pl -k			# Compare current files with last database
+afick.pl -u			# Compare current files with last database and update database
+---------------
+
+See a summary of history of daily changes:
+
+[source,bash]
+---------------
+vi /var/lib/afick/history
+---------------
+
+See details of changes for a specific day:
+
+[source,bash]
+---------------
+cd /var/lib/afick/archive/
+vi /var/lib/afick/archive/afick.YYYMMDD*
+---------------
+
+Check out *afick.pl* documentation for more options.
+
+
+==== Follow shell activities
+
+You can use the following tools to follow shell activities, tracked by the kernel:
+
+[source,bash]
+---------------
+ac -d -p					# Statistics about linux user connections
+sa -m						# Statistics about linux user commands run
+lastcomm --user unixlogin	# last command of a user
+---------------
+
+You can also use the journal to track logs:
+
+[source,bash]
+---------------
+journalctl --since="YYYY-MM-DD HH:MM:SS" _UID=1001
+---------------
 
 
 <<<<
@@ -5817,17 +5827,6 @@ aa-disable usr.sbin.mysqld
 Then reboot server.
 
 
-==== Extracting a zip file with file paths or names including backslash \
-
-The problem is into the zip file (may be generated by the bugged Powershell). To solve this, try to unzip from command line with 
-
-	unzip  file.zip
-
-If it fails, you can fix path of extracted files with this command:
-
-	for file in *\\*; do target="${file//\\//}"; mkdir -p "${target%/*}"; mv -v "$file" "$target"; done
-
-
 ==== Error Cannot open datafile during start of mysql
 
 Example of logs:
@@ -5839,6 +5838,114 @@ Example of logs:
 
 The directory of a database may have been removed when the databases was not dropped.
 Try to restart mysql. Once logged, do a CREATE DATABASE thedatabase; DROP DATABASE thedatabase;
+
+
+
+==== Error when doing mysqldump (need PROCESS privileges)
+
+mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
+
+Try to add the parameter --no-tablespaces into the mysqldump command.
+
+
+==== Error when doing mysqldump (max execution time exceeded)
+
+mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
+
+Try to read the *max_execution_time* of your database with:  
+
+[source,sql]
+---------------
+show variables like '%max_execution_time%';
+---------------
+
+Then try to increase it with:  
+
+[source,sql]
+---------------
+SET global max_execution_time = ...;    with millisecond 
+---------------
+
+Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf.d/mysqld.cnf*
+
+See also chapter <<check_database_used>> to analyze the size of database. A table may be abnormaly large.
+
+
+==== Error mysql when connecting to database
+
+When logged with a customer linux account osu..., you get this error:
+mysql -A -C -u dbu... -p'...' -h localhost -D dbn...
+ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (13)
+
+Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with "127.0.0.1" or add the parameter *--protocol tcp*.
+
+
+==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
+
+Try to read the *max_allowed_packet* of your database with:  
+
+[source,sql]
+---------------
+show variables like '%max_allowed_packet%';
+---------------
+
+You can change this in live from mysql command tool:
+
+[source,bash]
+---------------
+set global net_buffer_length=100000;
+set global max_allowed_packet=100000000;
+---------------
+
+You can edit the section [mysqld] of the file *mysql.cnf* to increase this limits permanently
+
+[source,bash]
+---------------
+# increase net_buffer_length to 100K and max_allowed_packet to 100M to 
+# avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
+net_buffer_length=100000 
+max_allowed_packet=100000000
+---------------
+
+==== Error mysql connect pb with caching_sha2_password
+
+Error can be: Client does not support authentication protocol requested by server; consider upgrading MySQL client
+
+The client may be the mariadb mysql client and the user on server may be encrypted with *caching_sha2_password* instead of *mysql_native_password*.
+If this is the case, you must modify the encryption of user password with the *mysql_native_password*. For this you can run
+
+[source,bash]
+---------------
+ALTER USER dbu... IDENTIFIED WITH mysql_native_password BY 'userpassword';
+---------------
+
+You can also run the script to generate a SQL file to update all passwords of the deployment server in one script.
+
+[source,bash]
+---------------
+sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_build_sql_for_instances.php withX.mysaasdomain.com userresetpass
+---------------
+
+
+==== A lot of warnings  Error mysql connect pb with caching_sha2_password
+
+There is a lot of warning into /var/log/mysql/error.log like this one 
+Aborted connection 594 to db: 'unconnected' user: 'datadog' host: 'localhost' (CLOSE_CONNECTION)
+
+The warning appear into log file when we disconnect, even if we disconnect correctly.
+
+To avoid this, check that the *log_warning = 2* (default value of mysql and mariadb) instead of a higher value.
+
+
+==== Extracting a zip file with file paths or names including backslash \
+
+The problem is into the zip file (may be generated by the bugged Powershell). To solve this, try to unzip from command line with 
+
+	unzip  file.zip
+
+If it fails, you can fix path of extracted files with this command:
+
+	for file in *\\*; do target="${file//\\//}"; mkdir -p "${target%/*}"; mv -v "$file" "$target"; done
 
 
 ==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
@@ -5961,105 +6068,9 @@ ssh-keygen -A
 then restart the server.
 
 
-==== On a deployment server, the user root can read files into /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+==== On a deployment server, the user root can't read files into /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 
 Check that on the master server, the option *no_root_squash* is present into the file */var/exports*
-
-
-==== Error when doing mysqldump (need PROCESS privileges)
-
-mysqldump: Error: 'Access denied; you need (at least one of) the PROCESS privilege(s) for this operation' when trying to dump tablespaces
-
-Try to add the parameter --no-tablespaces into the mysqldump command.
-
-
-==== Error when doing mysqldump (max execution time exceeded)
-
-mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
-
-Try to read the *max_execution_time* of your database with:  
-
-[source,sql]
----------------
-show variables like '%max_execution_time%';
----------------
-
-Then try to increase it with:  
-
-[source,sql]
----------------
-SET global max_execution_time = ...;    with millisecond 
----------------
-
-Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf.d/mysqld.cnf*
-
-See also chapter <<check_database_used>> to analyze the size of database. A table may be abnormaly large.
-
-
-==== Error mysql when connecting to database
-
-When logged with a customer linux account osu..., you get this error:
-mysql -A -C -u dbu... -p'...' -h localhost -D dbn...
-ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (13)
-
-Mariadb may try to use socket mode to connect to the database instead of IP. Try to replace "localhost" with "127.0.0.1" or add the parameter *--protocol tcp*.
-
-
-==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
-
-Try to read the *max_allowed_packet* of your database with:  
-
-[source,sql]
----------------
-show variables like '%max_allowed_packet%';
----------------
-
-You can change this in live from mysql command tool:
-
-[source,bash]
----------------
-set global net_buffer_length=100000;
-set global max_allowed_packet=100000000;
----------------
-
-You can edit the section [mysqld] of the file *mysql.cnf* to increase this limits permanently
-
-[source,bash]
----------------
-# increase net_buffer_length to 100K and max_allowed_packet to 100M to 
-# avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
-net_buffer_length=100000 
-max_allowed_packet=100000000
----------------
-
-==== Error mysql connect pb with caching_sha2_password
-
-Error can be: Client does not support authentication protocol requested by server; consider upgrading MySQL client
-
-The client may be the mariadb mysql client and the user on server may be encrypted with *caching_sha2_password* instead of *mysql_native_password*.
-If this is the case, you must modify the encryption of user password with the *mysql_native_password*. For this you can run
-
-[source,bash]
----------------
-ALTER USER dbu... IDENTIFIED WITH mysql_native_password BY 'userpassword';
----------------
-
-You can also run the script to generate a SQL file to update all passwords of the deployment server in one script.
-
-[source,bash]
----------------
-sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_build_sql_for_instances.php withX.mysaasdomain.com userresetpass
----------------
-
-
-==== A lot of warnings  Error mysql connect pb with caching_sha2_password
-
-There is a lot of warning into /var/log/mysql/error.log like this one 
-Aborted connection 594 to db: 'unconnected' user: 'datadog' host: 'localhost' (CLOSE_CONNECTION)
-
-The warning appear into log file when we disconnect, even if we disconnect correctly.
-
-To avoid this, check that the *log_warning = 2* (default value of mysql and mariadb) instead of a higher value.
 
 
 ==== Error on apt on shim-signed of grub-efi-amd64-signed package
@@ -6149,6 +6160,18 @@ Aug 27 10:50:00 xxxxx kernel: [9800813.155984] audit: type=1400 audit(1661597400
 
 You may have updated the apparmor profile of apache but apache was not restarted completely.
 Try to stop and kill all apache process not stopped. Restart apache.
+
+
+==== Error apparmor on ntpd
+
+If you have such an error:
+
+[source,bash]
+---------------
+apparmor="DENIED" operation="open" profile="/usr/sbin/ntpd" name="/snap/bin/" pid=3516308 comm="ntpd" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+---------------
+
+You must remove the ntpd package and use instead the package *systemd-timesyncd* with sudo apt install systemd-timesyncd
 
 
 ==== Error missing profile snap.certbot.certbot
@@ -6263,4 +6286,30 @@ It may mean that your IPv6 connection is wrong. Disable the firewall, and try to
 ---------------
 ip -6 addr flush eth0
 ---------------
+
+==== Web site blocked by an antivirus. Error is reported as PR_CONNECT_RESET_ERROR. 
+
+An antivirus return a false positive saying myaccount.mysellyoursaas.com is blacklisted.
+For example, Avast will report message: "URL:blacklist"
+
+First, check that the URL is ok using https://www.virustotal.com/ 
+
+Then if this is a deployment server, check malicious files by running:
+
+[source,bash]
+---------------
+/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_detect_evil_instances.php test 86400
+---------------
+
+You can then check files with:
+
+[source,bash]
+---------------
+clamdscan --fdpass -v /home/jail/home/osu*/dbn...
+---------------
+
+TODO Add command for local antivirus
+
+If you confirm, this is a false positive, you can report it to the Antivirus provider.
+For example for AVAST: https://www.avast.com/report-false-positive#pc (need the report ID)
 
