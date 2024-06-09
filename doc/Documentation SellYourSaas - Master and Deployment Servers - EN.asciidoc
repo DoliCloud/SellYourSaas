@@ -3756,7 +3756,7 @@ You must have inside the cron of user *admin*:
 # m h  dom mon dow   command
 # cron master and deployment root
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
-20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
+20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
 ==== Check that launching of cron is ok
