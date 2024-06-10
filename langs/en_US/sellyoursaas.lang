@@ -96,6 +96,7 @@ NewPackage=New package
 NewCustomer=New customer
 NewReseller=New reseller
 NewInstance=New instance
+NonRedirectContractWithInvoiceRecCreateDuringMonth=Non redirect contracts with a recuring invoices created during month
 NewCustomerInstance=New customer or instance
 UsefulLinks=Useful links
 NoThirdPartyFoundForThisEmailOrInstance=No thirdparty found for this instance or email, will be created...
