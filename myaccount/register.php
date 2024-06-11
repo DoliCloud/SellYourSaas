@@ -214,7 +214,7 @@ if ($partner) {
 if ($reusecontractid) {
 	$contract = new Contrat($db);
 	$contract->fetch($reusecontractid);
-	$socid = $contract->fk_soc;
+	$socid = ($contract->socid > 0 ? $contract->socid : $contract->fk_soc);
 	$tmparray=explode('.', $contract->ref_customer, 2);
 	$sldAndSubdomain=strtolower($tmparray[0]);
 	$tldid='.'.$tmparray[1];
