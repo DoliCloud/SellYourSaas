@@ -329,7 +329,7 @@ High=Hoog
 YourText=Vul hier uw tekst in...
 TicketSent=Uw kaartje is ontvangen. We gaan er zo snel mogelijk mee aan de slag.
 FailedToSentTicketPleaseTryLater=Het is niet gelukt om uw ticket in te dienen. Probeer het later alstublieft...
-SupportURLExternal=Volg de instructies op <a href="%s" target="_support"> deze pagina </a> om een ondersteuningsticket te openen.
+SupportURLExternal=Volg de instructies via <a href="%s" target="_support"> deze link </a> om een ondersteuningsticket te openen.
 FailedToCreateCardRecord=Kan uw kaart niet valideren.
 AlreadyHaveAnAccount=Heb je al een account?
 LoginAction=Log in

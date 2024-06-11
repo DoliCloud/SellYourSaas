@@ -1350,7 +1350,7 @@ if ($reusecontractid) {
 
 		$productidtocreate = $tmpproduct->id;
 		$desc = '';
-		if (empty($conf->global->SELLYOURSAAS_NO_PRODUCT_DESCRIPTION_IN_CONTRACT)) {
+		if (!getDolGlobalString('SELLYOURSAAS_NO_PRODUCT_DESCRIPTION_IN_CONTRACT')) {
 			$desc = $tmpproduct->description;
 		}
 

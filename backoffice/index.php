@@ -161,7 +161,7 @@ $totalresellers=0;
 $newinstances=0;
 $lostinstances=0;
 
-$suppliercateg = empty($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG) ? '0' : $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG;
+$suppliercateg = getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG');
 
 $sql = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'societe as s, '.MAIN_DB_PREFIX.'categorie_fournisseur as c';
 $sql.= ' WHERE c.fk_soc = s.rowid AND s.status = 1 AND c.fk_categorie = '.((int) $suppliercateg);
@@ -224,7 +224,7 @@ if ($mode == 'refreshstats') {
 
 $total = price2num($total, 'MT');
 $totalcommissions = price2num($totalcommissions, 'MT');
-$part = (empty($conf->global->SELLYOURSAAS_PERCENTAGE_FEE) ? 0 : $conf->global->SELLYOURSAAS_PERCENTAGE_FEE);
+$part = (float) getDolGlobalString('SELLYOURSAAS_PERCENTAGE_FEE', '0');
 $benefit=price2num(($total * (1 - $part) - $serverprice - $totalcommissions), 'MT');
 
 
@@ -246,7 +246,7 @@ print $langs->trans('Website').' & '.$langs->trans('CustomerAccountArea');
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
 $enabledisablehtml='';
-if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 	// Button off, click to enable
 	$enabledisablehtml .= '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_NEW_INSTANCES&token='.newToken().'&value=0'.$param.'">';
 	$enabledisablehtml .= img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
@@ -260,7 +260,7 @@ if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 print $enabledisablehtml;
 print $langs->trans("EnableNewInstance");
 
-if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 	if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')) {
 		print '<br><span class="opacitymedium">'.$langs->trans("AllowedToIP").': '.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP').'</span>';
 	}
@@ -272,7 +272,7 @@ if (! empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
 $enabledisableannounce='';
-if (empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON)) {
+if (!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON')) {
 	// Button off, click to enable
 	$enabledisableannounce.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&token='.newToken().'&value=1'.$param.'">';
 	$enabledisableannounce.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
@@ -298,7 +298,7 @@ $sql="SELECT DISTINCT deployment_host FROM ".MAIN_DB_PREFIX."contrat_extrafields
 $resql=$db->query($sql);
 if ($resql) {
 	while ($obj = $db->fetch_object($resql)) {
-		$listofipwithinstances[]=$obj->deployment_host;
+		$listofipwithinstances[] = $obj->deployment_host;
 	}
 	$db->free($resql);
 } else {
@@ -319,7 +319,7 @@ print '<a href="'.$_SERVER["PHP_SELF"].'?mode=refreshstats">'.img_picto('', 'ref
 print '</td>';
 print '</tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
-print $langs->trans("NewInstances");
+print $form->textwithpicto($langs->trans("NewInstances"), $langs->trans("NonRedirectContractWithInvoiceRecCreateDuringMonth"));
 print '</td><td align="right">';
 print '<font size="+2">'.$newinstances.' | <span class="amount">'.price($totalnewinstances, 1, $langs, 1, -1, 'MT', $conf->currency).'</span><span class="opacitymedium">'.($newinstances ? ' | '.price(price2num($totalnewinstances/$newinstances, 'MT'), 1, $langs, 1, -1, -1, $conf->currency).' / '.$langs->trans("instances") : '').'</span></font>';
 print '</td></tr>';

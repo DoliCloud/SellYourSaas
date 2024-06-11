@@ -1811,11 +1811,18 @@ echo "2021-06-12 01:05:51 123.123.123.123 sellyoursaas rules ok ( <10 : 1 0 0 - 
 Note: To test a rule file on an existing log file:
 fail2ban-regex /var/log/phpsendmail.log /etc/fail2ban/filter.d/email-dolibarr-rulesall.conf
 
-Note: To ban an IP
+Note: To ban an IP, run this on the server:
 fail2ban-client set nameofjail banip IP.to.unban
 
-Note: To unban an IP
+Note: To unban an IP, run this on the server:
 fail2ban-client unban IP.to.unban
+
+or use the script:
+
+[source,bash]
+---------------
+desktop_bannedip.sh
+---------------
 
 === Test spamassassin ===
 
@@ -3756,7 +3763,7 @@ You must have inside the cron of user *admin*:
 # m h  dom mon dow   command
 # cron master and deployment root
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
-20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backup >> /home/admin/logs/batch_customers-backup.log 2>&1
+20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
 ==== Check that launching of cron is ok
@@ -4278,7 +4285,7 @@ The option "*confirmredirect*" will move the instance and the old one will be fl
 so the old URL will still works (temporarily until the old instance is closed)
 
 
-=== Update images of application to deploy
+=== Update the image of the application to deploy
 
 - A cron script on the *Master* does the git pull to update the images of the packages to deploy.
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git*
@@ -4387,7 +4394,7 @@ vi /etc/hosts
 Restart the server.
 
 
-==== Disable cron
+==== Disable cron to avoid duplicated tasks
 
 - Once the server is ready: connect to it to deactivate the crons tasks (coming from the cloned server). You can do this by disabling the cron process itself with :
 
@@ -4653,7 +4660,9 @@ apt remove php-fpm php7-fpm
 
 
 [[check_database_used]]
-=== Follow space used by database
+=== Follow space used
+
+==== By database
 
 The following request gives the "real" space taken by databases (without the "padding")
 
@@ -4695,6 +4704,15 @@ SUM(data_length+index_length) TSize FROM information_schema.tables
 WHERE table_schema NOT IN ('mysql','information_schema','performance_schema')
 AND engine IS NOT NULL GROUP BY engine WITH ROLLUP) B,
 (SELECT 3 pw) A ORDER BY TSize;
+---------------
+
+==== By instances on disk
+
+On the deployment server, run:
+
+[source,bash]
+---------------
+scripts/disk_used_per_instance.sh
 ---------------
 
 
