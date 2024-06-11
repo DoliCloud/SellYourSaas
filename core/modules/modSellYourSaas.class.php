@@ -787,7 +787,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('source_utm', "SourceUtm", 'varchar', 104, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
 		$resultx=$extrafields->addExtraField('firstname', "FirstName", 'varchar', 105, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('lastname', "LastName", 'varchar', 106, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$param=array('options'=>array('dolcrypt'=>null));
+		$param=array('options'=>array('auto'=>null));	// Must use a non reversible password.
 		$resultx=$extrafields->addExtraField('password', "DashboardPassword", 'password', 150, '128', 'thirdparty', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('oldpassword', "OldDashboardPassword", 'password', 151, '128', 'thirdparty', 0, 0, '', $param, 0, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('pass_temp', "HashForPasswordReset", 'varchar', 152, '128', 'thirdparty', 0, 0, '', '', 1, '', 0, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
@@ -812,7 +812,7 @@ class modSellYourSaas extends DolibarrModules
 		$param=array('options'=>array(1=>1));
 		$resultx=$extrafields->addExtraField('separatorcontract', "SELLYOURSAAS_NAME", 'separate', 100, '', 'contrat', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('plan', "Plan", 'varchar', 102, '64', 'contrat', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
-		$param=array('options'=>array('dolcrypt'=>null));
+		$param=array('options'=>array('dolcrypt'=>null));	// Must be reversible to be reused if install failed.
 		$resultx=$extrafields->addExtraField('deployment_init_adminpass', "DeploymentInitPassword", 'password', 103, '64', 'contrat', 0, 0, '', $param, 1, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed'));
 		$resultx=$extrafields->addExtraField('deployment_status', "DeploymentStatus", 'select', 104, '', 'contrat', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax100'));
