@@ -2,7 +2,7 @@
 #---------------------------------------------------------
 # Script to run remotely the git_update_sellyour_saas.sh
 #
-# /pathto/git_update_sellyoursaas_remote.sh hostfile [hostgrouporname]
+# /pathto/desktop_update_sellyoursaas_remote.sh hostfile [hostgrouporname]
 #---------------------------------------------------------
 
 source /etc/lsb-release
