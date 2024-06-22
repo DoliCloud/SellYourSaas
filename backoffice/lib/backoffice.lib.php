@@ -39,7 +39,7 @@ function sellYourSaasBackofficePrepareHead()
 	$head[$h][2] = 'home';
 	$h++;
 
-	if (empty(getDolGlobalString("SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION"))) {
+	if (!getDolGlobalString("SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION")) {
 		$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
 		$head[$h][1] = $langs->trans("DeploymentServers");
 		$head[$h][2] = 'deploymentservers';

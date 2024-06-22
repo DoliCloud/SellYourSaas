@@ -84,7 +84,7 @@ $hookmanager->initHooks(array('sellyoursaas-setup'));
 
 $tmpservices=array();
 $staticdeploymentserver = new Deploymentserver($db);
-if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 } else {
 	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
@@ -276,7 +276,7 @@ print '</td>';
 print '<td><span class="opacitymedium small">mysaasdomainname.com</span></td>';
 print '</tr>';
 
-if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 	print '<tr class="oddeven"><td class="fieldrequired">'.$form->textwithpicto($langs->trans("SellYourSaasSubDomains"), $langs->trans("SellYourSaasSubDomainsHelp")).'</td>';
 	print '<td>';
 	print '<input type="text" name="SELLYOURSAAS_SUB_DOMAIN_NAMES" value="'.getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES').'" class="minwidth300">';

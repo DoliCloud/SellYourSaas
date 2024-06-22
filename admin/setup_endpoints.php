@@ -84,7 +84,7 @@ $hookmanager->initHooks(array('sellyoursaas-setup'));
 
 $tmpservices=array();
 $staticdeploymentserver = new Deploymentserver($db);
-if (empty(getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION'))) {
+if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 } else {
 	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
