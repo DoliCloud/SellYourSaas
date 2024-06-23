@@ -261,7 +261,8 @@ if (empty($reshook)) {
 
 			// Set language to use for notes on the user we will create.
 			$newlangs = new Translate('', $conf);
-			$newlangs->setDefaultLang('en_US');		// TODO Best is to used the language of customer.
+			$object->fetch_thirdparty();
+			$newlangs->setDefaultLang($object->thirdparty->default_lang);
 			$newlangs->load("sellyoursaas@sellyoursaas");
 
 			$private_note = $newlangs->trans("NoteForSupportUser");
@@ -269,12 +270,12 @@ if (empty($reshook)) {
 			$signature = '--<br>Support team';
 
 			if ($fordolibarr) {
-				$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, email, signature, api_key)";
+				$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, email, signature, api_key, note_private)";
 				$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
 				$sql .= " null,";
 				$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
 				$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
-				$sql .= " '".$newdb->escape(dolEncrypt($password, '', '', 'dolibarr'))."')";
+				$sql .= " '".$newdb->escape(dolEncrypt($password, '', '', 'dolibarr'))."', '".$newdb->escape($private_note)."')";
 				$resql=$newdb->query($sql);
 				if (! $resql) {
 					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') {
