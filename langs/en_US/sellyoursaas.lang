@@ -804,6 +804,7 @@ NonProfitOrganizationAndSmall=Non-profit and small organization (<50 members wit
 ConfirmInstanceValidation=Permanently validate your instance
 ConfirmInstanceValidationToRestoreInstance=Permanently validate your instance to reactivate it
 ConfirmInstanceValidationToAvoidSuspensionAfterTrial=Permanently validate your instance (avoid suspension at end of trial)
+InstanceValidated=Your instance has been validated
 SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP=List of IPs allowed to register even when registrations are closed (globaly or for the server)
 AllowedToIP=IPs always allowed
 ServedCountriesServer=Only these countries
