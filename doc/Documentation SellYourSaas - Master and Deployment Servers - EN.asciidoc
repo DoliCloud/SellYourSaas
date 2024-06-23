@@ -5403,7 +5403,7 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_HELPCEN
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGIN', 1, '1', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGIN_FAILED', 1, '1', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGOUT', 1, '1', 'chaine', 0);
-REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, '1', 'password_hash', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, 'password_hash', 'chaine', 1);
 ---------------
 
 Change the value 18.0.0 with version of the image you will build to deploy.
