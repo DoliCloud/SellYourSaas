@@ -3805,15 +3805,22 @@ class SellYourSaasUtils
 								//var_dump(dateinstallmoduleslockfile);
 								//var_dump($fileauthorizedkeys2);
 
-								// TODO Run the update only if one of the 3 properties has been modified
+								// Run the update only if one of the 3 properties has been modified
+								$doupdate = 0;
+								if ($object->array_options['options_filelock'] != $datelockfile 
+								|| $object->array_options['options_fileinstallmoduleslock'] != $dateinstallmoduleslockfile 
+								|| $object->array_options['options_fileauthorizekey'] != $dateauthorizedkeysfile) {
+									$object->array_options['options_filelock'] = $datelockfile;
+									$object->array_options['options_fileinstallmoduleslock'] = $dateinstallmoduleslockfile;
+									$object->array_options['options_fileauthorizekey'] = $dateauthorizedkeysfile;
+									$doupdate = 1;
+								}
+								
+								if ($doupdate) {
+									$object->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to modify the date of files lock, install and authorized keys during a refresh';
 
-								$object->array_options['options_filelock'] = $datelockfile;
-								$object->array_options['options_fileinstallmoduleslock'] = $dateinstallmoduleslockfile;
-								$object->array_options['options_fileauthorizekey'] = $dateauthorizedkeysfile;
-
-								$object->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to modify the date of files lock, install and authorized keys during a refresh';
-
-								$object->update($user);
+									$object->update($user);
+								}
 							}
 						} elseif ($remoteaction == 'recreateauthorizedkeys') {
 							$sftp = ssh2_sftp($connection);
