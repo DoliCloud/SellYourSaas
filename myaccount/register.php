@@ -303,7 +303,25 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register', '', 
 
 <?php
 
-$parameters = array('tmpproduct' => $tmpproduct);
+$parameters = array(
+	'partner' => $partner,
+	'partnerkey' => $partnerkey,
+	'plan' => $plan,
+	'sldAndSubdom' => $sldAndSubdomain,
+	'tldid' => $tldid,
+	'origin' => $origin,
+	'reusecontractid' => $reusecontractid,
+	'reusesocid' => $reusesocid,
+	'fromsocid' => $fromsocid,
+	'disablecusto' => $disablecustomeremail,
+	'extcss' => $extcss,
+	'domainname' => $domainname,
+	'productid' => $productid,
+	'productref' => $productref,
+	'tmppackage' => $tmppackage,
+	'mythirdparty' => $mythirdparty,
+	'tmpproduct' => $tmpproduct
+);
 // return values of this hook:
 // 0 = resPrint appended to the content of the page
 // 1 = page contents replaced with resPrint
