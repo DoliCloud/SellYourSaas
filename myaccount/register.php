@@ -301,8 +301,17 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register', '', 
 	<img id="waitMaskImg" width="100px" src="<?php echo 'ajax-loader.gif'; ?>" alt="Loading" />
 </div>
 
+<?php
 
-<div class="large">
+$parameters = array('tmpproduct' => $tmpproduct);
+// return values of this hook:
+// 0 = resPrint appended to the content of the page
+// 1 = page contents replaced with resPrint
+$reshook = $hookmanager->executeHooks('getRegisterPageForm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$hookGetRegisterPageFormResPrint = $hookmanager->resPrint;
+if ($reshook == 0) {
+?>
+	<div class="large">
 		<?php
 		$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
 		$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
@@ -879,6 +888,12 @@ llxHeader($head, $title, '', '', 0, 0, $arrayofjs, array(), '', 'register', '', 
 </div>
 
 
+<?php
+}
+if ($reshook >= 0) {
+	print $hookGetRegisterPageFormResPrint;
+}
+?>
 
 
 <script type="text/javascript" language="javascript">
