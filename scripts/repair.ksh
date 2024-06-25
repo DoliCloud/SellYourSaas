@@ -8,7 +8,9 @@
 
 if [ "x$1" == "x" ]
 then
-        echo "Usage: repair.ksh param"
+        echo "Usage:  repair.ksh param"
+        echo "Exmple: repair.ksh -3"
+        echo "Exmple: repair.ksh 12"
         exit 1
 fi
 
