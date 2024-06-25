@@ -1055,6 +1055,12 @@
         path: /etc/systemd/system/multi-user.target.wants/apache2.service
         regexp: '^PrivateTmp='
         line: 'PrivateTmp=false'
+
+    #- name: Update Restart property into /etc/systemd/system/multi-user.target.wants/apache2.service to avoid automatic restart of apache
+    #  lineinfile:
+    #    path: /etc/systemd/system/multi-user.target.wants/apache2.service
+    #    regexp: '^Restart='
+    #    line: 'Restart=no'
         
     - name: Update policy.xml
       lineinfile:
