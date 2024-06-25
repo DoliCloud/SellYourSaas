@@ -234,6 +234,7 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 	// TODO
 	print 'chgrp -R admin /tmp/restore_instance'."\n";
 
+	// TODO
 	print 'chmod -R g+rx /tmp/restore_instance'."\n";
 
 
