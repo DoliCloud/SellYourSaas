@@ -40,7 +40,6 @@ export urlwhenoffline=$1
 if [[ $urlwhenoffline != http* ]]; then
 	export urlwhenoffline="https://myaccount.$domainmyaccount/$1"
 fi
-echo "Url to use for __webMyAccount__ is $urlwhenoffline"
 
 
 export scriptdir=$(dirname $(realpath ${0}))
@@ -54,6 +53,8 @@ else
 fi
 
 if [ "x$2" != "xonline" ]; then
+	echo "Url to use for __webMyAccount__ is $urlwhenoffline"
+
 	echo "Loop on each enabled virtual host of customer instances, create a new one and switch it"
 	if [[ "x$templatesdir" != "x" ]]; then
 		echo "Path for template is $templatesdir"
