@@ -325,7 +325,7 @@ $parameters = array(
 // return values of this hook:
 // 0 = resPrint appended to the content of the page
 // 1 = page contents replaced with resPrint
-$reshook = $hookmanager->executeHooks('getRegisterPageForm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
+$reshook = $hookmanager->executeHooks('sellyoursaasGetRegisterPageForm', $parameters, $object, $action); // Note that $action and $object may have been modified by hook
 $hookGetRegisterPageFormResPrint = $hookmanager->resPrint;
 if ($reshook == 0) {
 ?>
