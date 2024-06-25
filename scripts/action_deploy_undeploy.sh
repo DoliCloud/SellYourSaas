@@ -876,9 +876,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 	fi
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Force permissions and owner on $targetdir/$osusername/$dbname"
-	echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername.$osusername $targetdir/$osusername/$dbname"
-	chown $osusername.$osusername $targetdir/$osusername
-	chown -R $osusername.$osusername $targetdir/$osusername/$dbname
+	echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername:$osusername $targetdir/$osusername/$dbname"
+	chown $osusername:$osusername $targetdir/$osusername
+	chown -R $osusername:$osusername $targetdir/$osusername/$dbname
 	echo `date +'%Y-%m-%d %H:%M:%S'`" chmod -R go-rwxs $targetdir/$osusername/$dbname"
 	chmod -R go-rwxs $targetdir/$osusername/$dbname
 fi
@@ -1020,7 +1020,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				cp $fileforconfig1 $targetfileforconfig1
 			fi
 		fi
-		chown -R $osusername.$osusername $targetfileforconfig1
+		chown -R $osusername:$osusername $targetfileforconfig1
 		chmod -R go-rwx $targetfileforconfig1
 		chmod -R g-s $targetfileforconfig1
 		chmod -R a-wx $targetfileforconfig1
@@ -1143,8 +1143,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				fi
 			fi
 			
-			echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R admin.www-data $pathforcertiflocal/"
-			chown -R admin.www-data $pathforcertiflocal/
+			echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R admin:www-data $pathforcertiflocal/"
+			chown -R admin:www-data $pathforcertiflocal/
 
 			# Create also the link in /etc/apache2 for the case we use old virtual host using this file
 			if [ -e $pathforcertiflocal/$webCustomSSLCertificateCRT -a ! -e /etc/apache2/$webCustomSSLCertificateCRT ]; then
@@ -1384,7 +1384,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			cp $cronfile /var/spool/cron/crontabs/$osusername
 		fi
 	
-		chown $osusername.$osusername /var/spool/cron/crontabs/$osusername
+		chown $osusername:$osusername /var/spool/cron/crontabs/$osusername
 		chmod 600 /var/spool/cron/crontabs/$osusername
 	else
 		echo There is no cron file to install

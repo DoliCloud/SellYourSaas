@@ -356,9 +356,9 @@ if [[ "$mode" == "upgrade" ]];then
 		fi
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Force permissions and owner on $targetdir/$osusername/$dbname"
-		chown $osusername.$osusername $targetdir/$osusername
-		echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername.$osusername $targetdir/$osusername/$dbname"
-		chown -R $osusername.$osusername $targetdir/$osusername/$dbname
+		chown $osusername:$osusername $targetdir/$osusername
+		echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername:$osusername $targetdir/$osusername/$dbname"
+		chown -R $osusername:$osusername $targetdir/$osusername/$dbname
 		echo `date +'%Y-%m-%d %H:%M:%S'`" chmod -R go-rwxs $targetdir/$osusername/$dbname"
 		chmod -R go-rwxs $targetdir/$osusername/$dbname
 
@@ -369,7 +369,7 @@ if [[ "$mode" == "upgrade" ]];then
 		then
 			echo "mkdir -p $instancedir/documents/admin/temp"
 			mkdir -p "$instancedir/documents/admin/temp"
-			chown -R $osusername.$osusername "$instancedir/documents/admin/temp"
+			chown -R $osusername:$osusername "$instancedir/documents/admin/temp"
 		fi
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/htdocs/install/"
@@ -377,7 +377,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" clean the output file $instancedir/documents/admin/temp/output.html"
 		> "$instancedir/documents/admin/temp/output.html"
-		chown $osusername.$osusername "$instancedir/documents/admin/temp/output.html"
+		chown $osusername:$osusername "$instancedir/documents/admin/temp/output.html"
 
 
 		versionfrom=$lastversiondolibarrinstance
@@ -436,14 +436,14 @@ if [[ "$mode" == "upgrade" ]];then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Recreate the lock file documents/install.lock"
 			touch documents/install.lock
 			chmod o-w documents/install.lock
-			chown $osusername.$osusername documents/install.lock 
+			chown $osusername:$osusername documents/install.lock 
 		fi
 		
 		# Restore user owner on all files into documents
 		# because the upgrade/upgrade2/step5 may have created new files owned by root (because they were run with root).
 		# This may be very long (from 1s to 10mn) so we execute it in background
-		echo `date +'%Y-%m-%d %H:%M:%S'`" find $instancedir/documents ! -user $osusername -exec chown $osusername.$osusername {} \;"
-		find "$instancedir/documents" ! -user $osusername -exec chown $osusername.$osusername {} \; &
+		echo `date +'%Y-%m-%d %H:%M:%S'`" find $instancedir/documents ! -user $osusername -exec chown $osusername:$osusername {} \;"
+		find "$instancedir/documents" ! -user $osusername -exec chown $osusername:$osusername {} \; &
 	fi
 fi
 

@@ -47,9 +47,9 @@ Create the user account *admin*. It will be used to install and administer the s
 [source, bash]
 ---------------
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin
-mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
-mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
-mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
+mkdir /home/admin/logs; chown root:adm /home/admin/logs; chmod 770 /home/admin/logs;
+mkdir /mnt/diskbackup; chown admin:admin /mnt/diskbackup
+mkdir /home/admin/wwwroot; chown admin:admin /home/admin/wwwroot
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -413,7 +413,7 @@ apt install git
 ---------------
 cd /home/admin/wwwroot
 git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
-chown -R admin.admin /home/admin/wwwroot/dolibarr
+chown -R admin:admin /home/admin/wwwroot/dolibarr
 ---------------
 
 * Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
@@ -432,7 +432,7 @@ git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 [source,bash]
 ---------------
 vi /etc/sellyoursaas.conf
-chown root.admin /etc/sellyoursaas.conf
+chown root:admin /etc/sellyoursaas.conf
 chmod g-wx /etc/sellyoursaas.conf
 chmod o-rwx /etc/sellyoursaas.conf
 ---------------
@@ -1752,7 +1752,7 @@ cd / && run-parts --report /etc/cron.daily
 ---------------
 cd /home/admin/wwwroot
 git clone https://github.com/Dolibarr/dolibarr dolibarr
-chown -R admin.admin /home/admin/wwwroot/dolibarr
+chown -R admin:admin /home/admin/wwwroot/dolibarr
 ---------------
 
 * Install an Apache virtual host, for example: https://adminweb.mysaasdomainname.com (therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*).

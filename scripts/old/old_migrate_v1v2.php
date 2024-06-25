@@ -1004,7 +1004,7 @@ print "\n";
 
 
 
-print "--- Set permissions with chown -R ".$newlogin.".".$newlogin." " . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.$newdirdb."\n";
+print "--- Set permissions with chown -R ".$newlogin.":".$newlogin." " . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.$newdirdb."\n";
 $output=array();
 $return_varchmod=0;
 if ($mode == 'confirm') {
@@ -1012,7 +1012,7 @@ if ($mode == 'confirm') {
 		print 'Bad value for data. We stop to avoid drama';
 		exit(-7);
 	}
-	exec("chown -R ".$newlogin.".".$newlogin." " . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.$newdirdb, $output, $return_varchmod);
+	exec("chown -R ".$newlogin.":".$newlogin." " . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.$newdirdb, $output, $return_varchmod);
 }
 
 // Output result

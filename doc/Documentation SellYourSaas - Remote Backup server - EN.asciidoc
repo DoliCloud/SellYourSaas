@@ -83,7 +83,7 @@ UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0 (d
 
 [source, bash]
 ---------------
-mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
+mkdir /mnt/diskbackup; chown admin:admin /mnt/diskbackup
 mount /dev/vdxZ /mnt/diskbackup
 
 blkid
@@ -144,8 +144,8 @@ Create the user account *admin*. It will be used to install and administer the s
 [source, bash]
 ---------------
 groupadd admin; useradd -m -g admin admin; usermod -a -G adm admin;
-mkdir /home/admin/logs; chown root.adm /home/admin/logs; chmod 770 /home/admin/logs;
-chown admin.admin /mnt/diskbackup
+mkdir /home/admin/logs; chown root:adm /home/admin/logs; chmod 770 /home/admin/logs;
+chown admin:admin /mnt/diskbackup
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
@@ -939,7 +939,7 @@ To create a subvolume for a server
 [source,bash]
 ---------------
 btrfs subvolume create /mnt/diskbackup/xxx   # with xxx = home_serverX or backup_serverX
-chown admin.admin /mnt/diskbackup/xxx
+chown admin:admin /mnt/diskbackup/xxx
 chmod -R o-rw /mnt/diskbackup/xxx
 cp -ax --reflink=always src/. dest
 ---------------

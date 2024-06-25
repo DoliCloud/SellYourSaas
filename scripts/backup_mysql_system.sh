@@ -87,7 +87,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	echo "$now Do a tar of config files in conffiles.tar.zst"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | zstd -z -9 -q > $targetdir2/conffiles.tar.zst
-	chown root.admin $targetdir2/conffiles.tar.zst
+	chown root:admin $targetdir2/conffiles.tar.zst
 	chmod o-rwx $targetdir2/conffiles.tar.zst
 	rm -f $targetdir2/conffiles.tar.gz
 	rm -f $targetdir2/conffiles.tar.bz2
@@ -101,7 +101,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
 	fi
-	chown root.admin $targetdir/${dbname}.sql.zst
+	chown root:admin $targetdir/${dbname}.sql.zst
 	chmod o-rwx $targetdir/${dbname}.sql.zst
 	rm -f $targetdir/${dbname}.sql.gz
 	rm -f $targetdir/${dbname}.sql.bz2
@@ -127,7 +127,7 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.zst"
 		echo "$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst"
 		$MYSQLDUMP --no-tablespaces $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst
-		chown root.admin $targetdir/${dbname}.sql.zst
+		chown root:admin $targetdir/${dbname}.sql.zst
 		chmod o-rwx $targetdir/${dbname}.sql.zst
 		rm -f $targetdir/${dbname}.sql.gz
 		rm -f $targetdir/${dbname}.sql.bz2
@@ -139,7 +139,7 @@ else
 	echo "$now Do a tar of config files in conffiles.tar.gz"
 	echo "tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz"
 	tar -cv /home/*/.ssh /etc /var/spool/cron/crontabs | gzip > $targetdir2/conffiles.tar.gz
-	chown root.admin $targetdir2/conffiles.tar.gz
+	chown root:admin $targetdir2/conffiles.tar.gz
 	chmod o-rwx $targetdir2/conffiles.tar.gz
 	rm -f $targetdir2/conffiles.tar.bz2
 	
@@ -154,7 +154,7 @@ else
 	if (( "$FILESIZE" < 50 )); then
 		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
 	fi
-	chown root.admin $targetdir/${dbname}.sql.gz
+	chown root:admin $targetdir/${dbname}.sql.gz
 	chmod o-rwx $targetdir/${dbname}.sql.gz
 	rm -f $targetdir/${dbname}.sql.bz2
 	rm -f $targetdir/${dbname}.sql.zst
@@ -183,7 +183,7 @@ else
 		echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
 		echo "$now $MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz"
 		$MYSQLDUMP --no-tablespaces $dbname | gzip > $targetdir/${dbname}.sql.gz
-		chown root.admin $targetdir/${dbname}.sql.gz
+		chown root:admin $targetdir/${dbname}.sql.gz
 		chmod o-rwx $targetdir/${dbname}.sql.gz
 		rm -f $targetdir/${dbname}.sql.bz2
 		rm -f $targetdir/${dbname}.sql.zst

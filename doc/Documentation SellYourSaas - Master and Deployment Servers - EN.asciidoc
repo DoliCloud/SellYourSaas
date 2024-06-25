@@ -279,7 +279,7 @@ rsync --info=progress2 -au sourceServer:/mnt/sourceDisk /mnt/targetDisk
 Example:
 cd /mnt/diskSource
 rsync --info=progress2 --exclude 'dbn*' -au -e 'ssh' . loginuser@myserverdest.mydomain.com:/var/lib/mysql
-chown -R mysql.mysql /var/lib/mysql
+chown -R mysql:mysql /var/lib/mysql
 After launching mysql, you can test all databases with
 mysqlcheck --all-databases
 ---------------
@@ -295,12 +295,12 @@ Create the user account *admin*. It will be used to install and administer the s
 [source, bash]
 ---------------
 groupadd admin; useradd -m -s bash -g admin admin;
-mkdir /home/admin/logs; chown root.admin /home/admin/logs; chmod 770 /home/admin/logs;
-mkdir /mnt/diskbackup; chown admin.admin /mnt/diskbackup
-mkdir /home/admin/backup; chown admin.admin /home/admin/backup;
-mkdir /home/admin/backup/conf; chown admin.admin /home/admin/backup/conf;
-mkdir /home/admin/backup/mysql; chown admin.admin /home/admin/backup/mysql;
-mkdir /home/admin/wwwroot; chown admin.admin /home/admin/wwwroot
+mkdir /home/admin/logs; chown root:admin /home/admin/logs; chmod 770 /home/admin/logs;
+mkdir /mnt/diskbackup; chown admin:admin /mnt/diskbackup
+mkdir /home/admin/backup; chown admin:admin /home/admin/backup;
+mkdir /home/admin/backup/conf; chown admin:admin /home/admin/backup/conf;
+mkdir /home/admin/backup/mysql; chown admin:admin /home/admin/backup/mysql;
+mkdir /home/admin/wwwroot; chown admin:admin /home/admin/wwwroot
 ---------------
 
 Check in /etc/passwd that the id of this user *admin* is greater than or equal to 1000.
@@ -710,7 +710,7 @@ mkdir /home/jail; mkdir /mnt/diskhome/home;
 
 mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
 mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
-chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
+chown admin:root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskhome/home /home/jail/home
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
 ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
@@ -735,7 +735,7 @@ apt install git
 ---------------
 cd /home/admin/wwwroot
 git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
-chown -R admin.admin /home/admin/wwwroot/dolibarr
+chown -R admin:admin /home/admin/wwwroot/dolibarr
 ---------------
 
 * Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
@@ -754,7 +754,7 @@ git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 [source,bash]
 ---------------
 vi /etc/sellyoursaas.conf
-chown root.admin /etc/sellyoursaas.conf
+chown root:admin /etc/sellyoursaas.conf
 chmod g-wx /etc/sellyoursaas.conf
 chmod o-rwx /etc/sellyoursaas.conf
 ---------------
@@ -872,7 +872,7 @@ Do not forget to set a value for *databasepass*. We will reuse this value later.
 [source,bash]
 ---------------
 vi /etc/sellyoursaas-public.conf
-chown root.admin /etc/sellyoursaas-public.conf
+chown root:admin /etc/sellyoursaas-public.conf
 chmod a+r /etc/sellyoursaas-public.conf
 chmod a-wx /etc/sellyoursaas-public.conf
 ---------------
@@ -3270,7 +3270,7 @@ Create the files *phpmail.log* and *phpsendmail.log*:
 ---------------
 echo >> /var/log/phpmail.log
 echo >> /var/log/phpsendmail.log
-chown syslog.adm /var/log/phpmail.log /var/log/phpsendmail.log
+chown syslog:adm /var/log/phpmail.log /var/log/phpsendmail.log
 chmod a+rw /var/log/phpmail.log /var/log/phpsendmail.log
 ---------------
 
@@ -3279,7 +3279,7 @@ Create a directory for blacklist files used by *phpsendmail.php*
 [source,bash]
 ---------------
 mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
-chown admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+chown admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
 chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
 ---------------
 
@@ -4616,7 +4616,7 @@ mysql -uroot < /tmp/dbntodelete.sql
 [source,bash]
 ---------------
 mkdir /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
-chown admin.root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
+chown admin:root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid;
 ---------------
 
 - Acquire or generate the SSL certificates of the new subdomain *withX.mydomain.com*, upload them to the server and create the symbolic links. (see <<ssl_certificate_creation>>).
@@ -5362,7 +5362,7 @@ Into field *shell after*
 [source,bash]
 ---------------
 touch __INSTANCEDIR__/documents/install.lock;
-chown __OSUSERNAME__.__OSUSERNAME__ __INSTANCEDIR__/documents/install.lock
+chown __OSUSERNAME__:__OSUSERNAME__ __INSTANCEDIR__/documents/install.lock
 chmod -R a-w __INSTANCEDIR__/htdocs
 chmod -R u+w __INSTANCEDIR__/htdocs/custom
 ---------------

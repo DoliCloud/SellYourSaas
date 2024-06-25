@@ -1013,7 +1013,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 		cp $cronfile /var/spool/cron/crontabs/$osusername
 	fi
 
-	chown $osusername.$osusername /var/spool/cron/crontabs/$osusername
+	chown $osusername:$osusername /var/spool/cron/crontabs/$osusername
 	chmod 600 /var/spool/cron/crontabs/$osusername
 fi
 

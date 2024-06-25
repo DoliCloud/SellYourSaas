@@ -46,37 +46,37 @@ echo "Set owner and permission on logs and backup directory"
 [ -d /home/admin/backup/conf ] || mkdir /home/admin/backup/conf;
 [ -d /home/admin/backup/mysql ] || mkdir /home/admin/backup/mysql;
 [ -d /home/admin/wwwroot ] || mkdir /home/admin/wwwroot;
-chown root.admin /home/admin/logs; chmod 770 /home/admin/logs; 
-chown admin.admin /mnt/diskbackup; 
-chown admin.admin /home/admin/backup; chown admin.admin /home/admin/backup/conf; chown admin.admin /home/admin/backup/mysql; 
-chown admin.admin /home/admin/wwwroot
+chown root:admin /home/admin/logs; chmod 770 /home/admin/logs; 
+chown admin:admin /mnt/diskbackup; 
+chown admin:admin /home/admin/backup; chown admin:admin /home/admin/backup/conf; chown admin:admin /home/admin/backup/mysql; 
+chown admin:admin /home/admin/wwwroot
 
 # Permissions on SSH config and private key files
 echo "Set owner and permission on admin ssh files"
-[ -s /home/admin/.ssh/config ] && chmod go-rwx /home/admin/.ssh/config && chown admin.admin /home/admin/.ssh/config
-[ -s /home/admin/.ssh/id_rsa ] && chmod go-rwx /home/admin/.ssh/id_rsa && chown admin.admin /home/admin/.ssh/id_rsa
-[ -s /home/admin/.ssh/id_rsa.pub ] && chmod go-wx /home/admin/.ssh/id_rsa.pub && chown admin.admin /home/admin/.ssh/id_rsa.pub
-[ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas && chown admin.admin /home/admin/.ssh/id_rsa_sellyoursaas 
-[ -s /home/admin/.ssh/id_rsa_sellyoursaas.pub ] && chmod go-wx /home/admin/.ssh/id_rsa_sellyoursaas.pub && chown admin.admin /home/admin/.ssh/id_rsa_sellyoursaas.pub 
+[ -s /home/admin/.ssh/config ] && chmod go-rwx /home/admin/.ssh/config && chown admin:admin /home/admin/.ssh/config
+[ -s /home/admin/.ssh/id_rsa ] && chmod go-rwx /home/admin/.ssh/id_rsa && chown admin:admin /home/admin/.ssh/id_rsa
+[ -s /home/admin/.ssh/id_rsa.pub ] && chmod go-wx /home/admin/.ssh/id_rsa.pub && chown admin:admin /home/admin/.ssh/id_rsa.pub
+[ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas && chown admin:admin /home/admin/.ssh/id_rsa_sellyoursaas 
+[ -s /home/admin/.ssh/id_rsa_sellyoursaas.pub ] && chmod go-wx /home/admin/.ssh/id_rsa_sellyoursaas.pub && chown admin:admin /home/admin/.ssh/id_rsa_sellyoursaas.pub 
 
 
 echo "Set owner and permission on /home/admin/wwwroot/dolibarr_documents/ (except sellyoursaas)"
 chmod g+ws /home/admin/wwwroot/dolibarr_documents/
-chown admin.www-data /home/admin/wwwroot/dolibarr_documents
+chown admin:www-data /home/admin/wwwroot/dolibarr_documents
 for fic in `ls /home/admin/wwwroot/dolibarr_documents | grep -v sellyoursaas`; 
 do 
-	chown -R admin.www-data "/home/admin/wwwroot/dolibarr_documents/$fic"
+	chown -R admin:www-data "/home/admin/wwwroot/dolibarr_documents/$fic"
 	chmod -R ug+rw "/home/admin/wwwroot/dolibarr_documents/$fic"
 	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d -exec chmod u+wx {} \;
 	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d -exec chmod g+ws {} \;
 done
 if [ -d /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf ]; then
-	chown www-data.www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
+	chown www-data:www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
 fi
 
 if [[ "x$masterserver" == "x1" ]]; then
 	echo We are on a master server, Set owner and permission on /home/admin/wwwroot/dolibarr_documents/sellyoursaas
-	chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+	chown -R admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git
 	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/packages
 	chmod -R ug+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp
@@ -87,7 +87,7 @@ echo Set owner and permission on /etc/sellyoursaas.conf
 if [ ! -s /etc/sellyoursaas.conf ]; then
 	echo > /etc/sellyoursaas.conf
 fi
-chown -R root.admin /etc/sellyoursaas.conf
+chown -R root:admin /etc/sellyoursaas.conf
 chmod g-wx /etc/sellyoursaas.conf
 chmod o-rwx /etc/sellyoursaas.conf
 
@@ -95,12 +95,12 @@ echo Set owner and permission on /etc/sellyoursaas-pubic.conf
 if [ ! -s /etc/sellyoursaas-public.conf ]; then
 	echo > /etc/sellyoursaas-public.conf
 fi
-chown -R root.admin /etc/sellyoursaas-public.conf
+chown -R root:admin /etc/sellyoursaas-public.conf
 chmod a+r /etc/sellyoursaas-public.conf
 chmod a-wx /etc/sellyoursaas-public.conf
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr
-chown -R admin.admin /home/admin/wwwroot/dolibarr
+chown -R admin:admin /home/admin/wwwroot/dolibarr
 chmod -R a-w /home/admin/wwwroot/dolibarr
 chmod -R u+w /home/admin/wwwroot/dolibarr/.git
 
@@ -118,14 +118,14 @@ fi
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
-	chown www-data.admin /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+	chown www-data:admin /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 	chmod o-rwx /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
 fi
 
 echo Set owner and permission on SSL certificates /etc/apache2/*.key and /etc/lestencrypt
 for fic in `ls /etc/apache2/ | grep '.key$'`; 
 do 
-	chown root.www-data /etc/apache2/$fic
+	chown root:www-data /etc/apache2/$fic
 	chmod ug+r /etc/apache2/$fic
 	chmod o-rwx /etc/apache2/$fic
 done
@@ -152,7 +152,7 @@ echo "Check files for antispam system and create them if not found"
 [ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
 [ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
 chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
-chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+chown -R admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
 
 [ -d $pathtospamdir ] || mkdir $pathtospamdir;
 [ -s $pathtospamdir/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail $pathtospamdir/;
@@ -160,7 +160,7 @@ chown -R admin.www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_loca
 [ -s $pathtospamdir/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom $pathtospamdir/;
 [ -s $pathtospamdir/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent $pathtospamdir/;
 chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/*
-chown admin.www-data $pathtospamdir/*
+chown admin:www-data $pathtospamdir/*
 
 
 # Special actions...
@@ -193,10 +193,10 @@ fi
 
 # TODO Try to change permission on this files to remove this ?
 touch /var/log/phpmail.log
-chown syslog.adm /var/log/phpmail.log
+chown syslog:adm /var/log/phpmail.log
 chmod a+rw /var/log/phpmail.log
 touch /var/log/phpsendmail.log
-chown syslog.adm /var/log/phpsendmail.log
+chown syslog:adm /var/log/phpsendmail.log
 chmod a+rw /var/log/phpsendmail.log
 
 # Fix crontabs owners and permissions

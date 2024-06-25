@@ -559,7 +559,7 @@ if (!empty($instanceserver)) {
 											$output = array();
 											$return_var = 0;
 											exec($command, $output, $return_var);
-											$command = "chown ".$obj->osu.".".$obj->osu." ".$homedir."/".$obj->osu."/.duc.db";
+											$command = "chown ".$obj->osu.":".$obj->osu." ".$homedir."/".$obj->osu."/.duc.db";
 											exec($command, $output, $return_var);
 											$nbdu ++;
 										} else {

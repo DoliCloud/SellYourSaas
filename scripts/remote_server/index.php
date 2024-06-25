@@ -432,7 +432,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^chown( -R)? __OSUSERNAME__\.__OSUSERNAME__ __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown root.root __INSTANCEDIR__\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
+		if (preg_match('/^chown root:root __INSTANCEDIR__\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__$/i', $newline)) {
@@ -454,7 +454,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^chown( -R)? osu[a-z0-9]+\.osu[a-z0-9]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown root.root \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
+		if (preg_match('/^chown root:root \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^\/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/cloud\/init.sh \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {

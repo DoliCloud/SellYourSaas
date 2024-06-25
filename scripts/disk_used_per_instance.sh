@@ -100,7 +100,7 @@ for fic in `ls -A`; do
 	if [ "x$1" == "xupdate" ]; then
 		echo Update duc for $homedir/$fic
 		duc index $homedir/$fic -x -m 3 -d "$homedir/$fic/.duc.db"
-		chown $fic.$fic "$homedir/$fic/.duc.db"
+		chown $fic:$fic "$homedir/$fic/.duc.db"
 	fi 
 	if [ "x$1" == "xdelete" ]; then
 		rm "$fic/.duc.db"

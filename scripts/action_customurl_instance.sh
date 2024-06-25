@@ -279,8 +279,8 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 	export customcrtfolder="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 
 	if [[ ! -d $customcrtfolder ]]; then
-		echo "Create cert directory with mkdir $customcrtfolder; chown admin.admin $customcrtfolder;"
-		mkdir $customcrtfolder; chown admin.admin $customcrtfolder;
+		echo "Create cert directory with mkdir $customcrtfolder; chown admin:admin $customcrtfolder;"
+		mkdir $customcrtfolder; chown admin:admin $customcrtfolder;
 	fi
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"

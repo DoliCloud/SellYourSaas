@@ -285,8 +285,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	fi
 
 
-	echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
-	mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin.admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
+	echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin:admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
+	mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin:admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
 
 	if [[ ${46} == www.* ]]; then
 		echo certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
