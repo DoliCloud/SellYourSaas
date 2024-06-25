@@ -126,7 +126,9 @@ if ($ispaid) {
 		$restorestringfromarchiveshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
 		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
-		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/.snapshots/diskbackup-xxx/'. getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].' autoscan';
+		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_yyy/'.$object->array_options['options_username_os'].' autoscan';
+		$restorestringfromremotebackup = "\n".$langs->trans("or")."\n";
+		$restorestringfromremotebackup .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/backup_yyy/'.$object->array_options['options_username_os'].' autoscan';
 	} else {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
 		$restorestringpretoshow .= "cd " . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os']."\n";
@@ -177,7 +179,9 @@ if ($ispaid) {
 		$restorestringfromarchiveshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
 		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
-		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/.snapshots/diskbackup-xxx/'. getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].' autoscan';
+		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_yyy/'.$object->array_options['options_username_os'].' autoscan';
+		$restorestringfromremotebackup = "\n".$langs->trans("or")."\n";
+		$restorestringfromremotebackup .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/backup_yyy/'.$object->array_options['options_username_os'].' autoscan';
 	} else {
 		$restorestringpretoshow .= "cd " . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os']."\n";
 		// If there is an old dir used by a previous extract, we remove it
