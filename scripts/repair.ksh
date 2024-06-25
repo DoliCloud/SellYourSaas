@@ -80,10 +80,15 @@ cat /proc/meminfo > /var/log/repair09_meminfo$$.log
 touch /var/log/repair.lock
 
 # Return 0 to avoid reboot
+# $1 is 253 or -3 if load too high => default action on linux is reboot 
+# $1 is 252 or -4 if too hot => default action on linux is power off
+# $1 is 12 if memory too low => default action on linux is reboot
+# $1 is 24 if too many open files => default action on linux is reboot
 if [ "x$1" == "x12" ]
 then
-        exit 0
+	# no reboot is done
+    exit 0
 else
-        exit $1
-        #exit 0
+    #exit $1
+    exit 0
 fi
