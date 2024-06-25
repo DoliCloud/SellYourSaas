@@ -216,23 +216,25 @@ if (empty($backupdumpdayfrequency)) {
 
 print "***** ".$script_file." (".$version.") - mode = ".$mode." - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 
-if (preg_match('/:/', $dirroot)) {
+if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/backup_servername/osu...'
 	// Restore from a remote server
 	if (0 != posix_getuid()) {
 		echo "Script must be ran with root.\n";
 		exit(-1);
 	}
 
-	// TODO Rsync to get backup into /tmp
+	// Rsync to get backup into /tmp/restore_instance
 	dol_delete_dir_recursive('/tmp/restore_instance');
 	dol_mkdir('/tmp/restore_instance');
 
-
-
-	print 'TODO...';
+	// TODO
+	print 'TODO Run the resync...';
+	print 'rsync -r admin@'.$dirroot.' /tmp/restore_instance'."\n";
 
 	// Now show message to say we must run the restore script with 'admin'
-	print "You must now run the script with 'admin': ".$script_file/" /tmp/restore_instance autoscan ".$instance." ".$mode."\n";
+	print "Data have been retreived from the backup server int /tmp/restore_instance.\n";
+	print "You must now run the script with 'admin':\n";
+	print $script_file." /tmp/restore_instance autoscan ".$instance." ".$mode."\n";
 
 	exit(0);
 } else {
@@ -259,6 +261,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' for a local restoration, as 'root' for a restoration from a remotebackup.\n";
 	print "Usage:   $script_file [remotebackup:]backup_dir  autoscan|mysqldump_dbn...sql.zst|dayofmonth instance [testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm]\n";
 	print "Example: $script_file " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  autoscan  myinstance  testrsync\n";
+	print "Example: $script_file remotebackup:/mnt/diskbackup/backup_servername/osu123456/dbn789012  autoscan  myinstance  testrsync\n";
 	print "Example: $script_file remotebackup:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_servername/osu123456/dbn789012  autoscan  myinstance  testrsync\n";
 	print "Note:    the ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted osu user to have testrsync and confirmrsync working.\n";
 	print "Return code: 0 if success, <>0 if error\n";
