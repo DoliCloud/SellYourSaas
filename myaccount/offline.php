@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
  *
- * This page can be called when virtual host make a redirect due to not a
- * virtual host that has been set to offline.
+ * This page can be called when virtual host has been set as offline.
+ * Will show the announce message if it has been enabled, or the generic message SELLYOURSAAS_ANNOUNCE if announce set to on.
  */
 
 //if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER','1');
@@ -123,7 +123,7 @@ if (empty($messageonly)) {
 }
 
 // Show global announce
-if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE)) {
+if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') && getDolGlobalString('SELLYOURSAAS_ANNOUNCE')) {
 	$sql = "SELECT tms from ".MAIN_DB_PREFIX."const where name = 'SELLYOURSAAS_ANNOUNCE'";
 	$resql=$db->query($sql);
 	if ($resql) {
@@ -133,10 +133,10 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 		print '<div class="note note-warning">';
 		print '<b>'.dol_print_date($datemessage, 'dayhour').'</b> : ';
 		$reg=array();
-		if (preg_match('/^\((.*)\)$/', $conf->global->SELLYOURSAAS_ANNOUNCE, $reg)) {
+		if (preg_match('/^\((.*)\)$/', getDolGlobalString('SELLYOURSAAS_ANNOUNCE'), $reg)) {
 			$texttoshow = $langs->trans($reg[1]);
 		} else {
-			$texttoshow = $conf->global->SELLYOURSAAS_ANNOUNCE;
+			$texttoshow = getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
 		}
 		print '<h4 class="block">'.$texttoshow.'</h4></div>';
 	} else {
