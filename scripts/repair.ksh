@@ -27,7 +27,7 @@ export databaseuser=`grep '^databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -
 uptime > /var/log/repair02_uptime$$.log
 cat /proc/meminfo > /var/log/repair02_meminfo$$.log
 /usr/bin/mysqladmin -h localhost --verbose processlist > /var/log/repair02_mysqlprocesslist$$.log 2>&1
-iostat -P -x > /var/log/repair02_iostat$$.log
+iostat -p -x > /var/log/repair02_iostat$$.log
 iotop -P -b -n 2 > /var/log/repair02_iotop$$.log
 ps fauxww > /var/log/repair02_ps$$.log
 
