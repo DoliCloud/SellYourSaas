@@ -451,7 +451,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown( -R)? osu[a-z0-9]+\.osu[a-z0-9]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^chown( -R)? osu[a-z0-9]+[:\.]osu[a-z0-9]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^chown root:root \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
