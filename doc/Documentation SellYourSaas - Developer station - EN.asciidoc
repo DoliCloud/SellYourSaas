@@ -473,3 +473,22 @@ sudo apt install -y boot-repair
 sudo boot-repair
 ---------------
 
+
+==== Error when running ansible
+
+If you got this error:
+ModuleNotFoundError: No module named 'ansible.module_utils.six.moves'
+
+It probably means you try to execute a remote ansible rule on a new version of ansible with an old version of ansible.
+See compatible version on this page: https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix
+
+Check ansible version:
+ansible --version
+
+Try to instal last version:
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+apt update
+apt upgrade
+apt install ansible -y
+ansible --version
+

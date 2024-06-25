@@ -1238,7 +1238,7 @@ Choose a password. You will need to give this couple login/password to anyone wh
 
         KeepAlive On
         KeepAliveTimeout 5
-        MaxKeepAliveRequests 20
+        MaxKeepAliveRequests 100
 
         <Directory /home/admin/wwwroot/dolibarr/htdocs/>
         AuthType Basic
@@ -1387,7 +1387,7 @@ apparmor_hat = sellyoursaas
 
 === Timeout of server launches
 
-On Ubuntu 18.04+ when MariaDb has been migrated from a MySql:
+On Ubuntu 18.04+ and when MariaDb has been migrated from a MySql:
 
 Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. 
 To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
