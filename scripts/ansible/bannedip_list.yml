@@ -11,6 +11,14 @@
   become: yes
   
   tasks:
+    - name: Get whitlisted IP
+      ansible.builtin.shell: grep -r "^ignoreip" "/etc/fail2ban/"
+      register: whitelist_ips
+
+    - name: Show whitelisted IP
+      ansible.builtin.debug:
+        msg: "{{ whitelist_ips.stdout_lines }}"
+
     - name: Get IP banned by Fail2Ban
       ansible.builtin.shell: fail2ban-client status | grep "Jail list:" | sed 's/.*Jail list://' | tr -d '[:space:]' | tr ',' '\n' | xargs -I {} sh -c 'echo "{}:"; fail2ban-client status {} | grep "Banned IP list"' 
       register: banned_ips
@@ -18,3 +26,4 @@
     - name: Show banned IP
       ansible.builtin.debug:
         msg: "{{ banned_ips.stdout_lines }}"
+        
