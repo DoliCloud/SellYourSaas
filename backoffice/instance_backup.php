@@ -406,7 +406,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	print '<div class="fichecenter">';
 
-	$backupdir = $conf->global->DOLICLOUD_BACKUP_PATH;
+	$backupdir = getDolGlobalString('DOLICLOUD_BACKUP_PATH');
+	$backupdirremote = '/mnt/diskbackup/backup_yyy';
+	$backupdirremote2 = '/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_yyy';
 
 	$login = $username_os;
 	$password = $password_os;
@@ -482,8 +484,14 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	print '<tr class="liste_titre">';
 	print '<td>'.$langs->trans("RemoteBackup").'</td>';
-	print '<td>';
+	print '<td></td>';
 	print '</td>';
+	print '</tr>';
+
+	// Backup dir
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("BackupDir").'</td>';
+	print '<td>'.$backupdirremote.'/'.$login.' or '.$backupdirremote2.'/'.$login.'</td>';
 	print '</tr>';
 
 	// Last remote backup date try
