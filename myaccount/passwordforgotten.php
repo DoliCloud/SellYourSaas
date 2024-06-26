@@ -224,7 +224,9 @@ if (empty($reshook)) {
 				if ($result < 0) {
 					// Failed
 					$message = '<div class="error">'.$langs->trans("ErrorFailedToSetTemporaryHash");
-					$message .= join(', ', $thirdparty->errors);
+					if (is_array($thirdparty->errors) && count($thirdparty->errors)) {
+						$message .= '<br>'.join(', ', $thirdparty->errors);
+					}
 					$message .= '</div>';
 				} else {
 					// Success
