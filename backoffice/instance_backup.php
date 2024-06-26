@@ -127,7 +127,7 @@ if ($ispaid) {
 		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
 		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_yyy/'.$object->array_options['options_username_os'].' autoscan';
-		$restorestringfromremotebackup = "\n".$langs->trans("or")."\n";
+		$restorestringfromremotebackup .= "\n".$langs->trans("or")."\n";
 		$restorestringfromremotebackup .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/backup_yyy/'.$object->array_options['options_username_os'].' autoscan';
 	} else {
 		//$restorestringpretoshow = 'sudo chown -R admin '.$conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH.'/'.$object->array_options['options_username_os']."\n";
@@ -180,7 +180,7 @@ if ($ispaid) {
 		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer;
 
 		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_yyy/'.$object->array_options['options_username_os'].' autoscan';
-		$restorestringfromremotebackup = "\n".$langs->trans("or")."\n";
+		$restorestringfromremotebackup .= "\n".$langs->trans("or")."\n";
 		$restorestringfromremotebackup .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remoteserver:/mnt/diskbackup/backup_yyy/'.$object->array_options['options_username_os'].' autoscan';
 	} else {
 		$restorestringpretoshow .= "cd " . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os']."\n";
@@ -426,6 +426,14 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	print '<td>'.$object->array_options['options_deployment_host'].'</td>';
 	print '</tr>';
 
+	// ----- Backup result
+
+	print '<tr class="liste_titre">';
+	print '<td>'.$langs->trans("LocalBackup").'</td>';
+	print '<td>';
+	print '</td>';
+	print '</tr>';
+
 	// Backup dir
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("BackupDir").'</td>';
@@ -452,7 +460,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	print '</td>';
 	print '</tr>';
 
-	// Current backup status
+	// Latest backup status
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("CurrentBackupStatus").'</td>';
 	print '<td>';
@@ -462,13 +470,52 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	print '</td>';
 	print '</tr>';
 
-	// Current backup status
+	// Latest backup message
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("LatestBackupMessage").'</td>';
 	print '<td class="classfortooltip" title="'.dolPrintHTMLForAttribute($object->array_options['options_latestbackup_message']).'">';
 	print dolGetFirstLineOfText(dolPrintHTML($object->array_options['options_latestbackup_message']), 5);
 	print '</td>';
 	print '</tr>';
+
+	// ----- Remote backup
+
+	print '<tr class="liste_titre">';
+	print '<td>'.$langs->trans("RemoteBackup").'</td>';
+	print '<td>';
+	print '</td>';
+	print '</tr>';
+
+	// Last remote backup date try
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("LatestBackupRemoteDate").'</td>';
+	print '<td>';
+	if ($object->array_options['options_latestbackupremote_date']) {
+		print dol_print_date($object->array_options['options_latestbackupremote_date'], 'dayhour', 'tzuser');
+	}
+	print '</td>';
+	print '</tr>';
+
+	// Last remote backup date success
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("LatestBackupRemoteDateOK").'</td>';
+	print '<td>';
+	if ($object->array_options['options_latestbackupremote_date_ok']) {
+		print dol_print_date($object->array_options['options_latestbackupremote_date_ok'], 'dayhour', 'tzuser');
+	}
+	print '</td>';
+	print '</tr>';
+
+	// Latest remote backup status
+	print '<tr class="oddeven">';
+	print '<td>'.$langs->trans("LatestBackupRemoteStatus").'</td>';
+	print '<td>';
+	print($object->array_options['options_latestbackupremote_status'] == 'KO' ? '<span class="error">' : '');
+	print $object->array_options['options_latestbackupremote_status'];
+	print($object->array_options['options_latestbackupremote_status'] == 'KO' ? '</span>' : '');
+	print '</td>';
+	print '</tr>';
+
 
 	print "</table>";
 	print '</div>';
@@ -512,7 +559,10 @@ if ($restorestringfrombackup) {
 if ($restorestringfromremotebackup) {
 	$restorestringtoshow=$restorestringfromremotebackup.' (test|confirm)';
 	print '<span class="fa fa-file paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from remote Backup <span class="opacitymedium">(to run by root from the deployment server)</span><br>';
-	print '<input type="text" name="restorestringfromremotebackup" id="restorestringfromremotebackup" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
+	print '<textarea name="restorestringfromremotebackup" id="restorestringfromremotebackup" class="quatrevingtpercent" rows="'.ROWS_3.'">';
+	print $restorestringtoshow;
+	print '</textarea>';
+	print '<br>';
 	print ajax_autoselect('restorestringfromremotebackup');
 
 	print '<br>';
