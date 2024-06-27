@@ -214,6 +214,8 @@ if (empty($backupdumpdayfrequency)) {
  *	Main
  */
 
+$return_var=0;
+
 print "***** ".$script_file." (".$version.") - mode = ".$mode." - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 
 if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/backup_servername/osu...'
@@ -227,16 +229,55 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 	dol_delete_dir_recursive('/tmp/restore_instance');
 	dol_mkdir('/tmp/restore_instance');
 
-	// TODO
-	print 'TODO Run the resync...';
+
 	print 'rsync -r admin@'.$dirroot.' /tmp/restore_instance'."\n";
+	$command="rsync";
+	$param=array();
+	if ($mode != 'confirm' && $mode != 'confirmrsync') {
+		$param[]="-n";
+	}
+	//$param[]="-a";
+	$param[]="-rltz";
+	//$param[]="-vv";
+	$param[]="-v";
+	$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
 
-	// TODO
-	print 'chgrp -R admin /tmp/restore_instance'."\n";
+	//var_dump($param);
+	//print "- Backup documents dir ".$dirroot."/".$instance."\n";
+	$param[]='admin@/'.$dirroot;
+	$param[]=' /tmp/restore_instance';
+	$fullcommand=$command." ".join(" ", $param);
+	$output=array();
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
+	exec($fullcommand, $output, $return_var);
 
-	// TODO
-	print 'chmod -R g+rx /tmp/restore_instance'."\n";
+	if ($return_var > 0) {
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync failed'."\n";
+	} else {
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync done'."\n";
+	}
 
+	// Output result
+	foreach ($output as $outputline) {
+		print $outputline."\n";
+	}
+
+	// Change user and permission
+	/*
+	$command = 'chgrp -R admin /tmp/restore_instance';
+	$fullcommand=$command." ".join(" ", $param);
+
+	$output=array();
+	exec($fullcommand, $output, $return_var);
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql load done (return='.$return_var.')'."\n";
+
+	$command = 'chmod -R g+rx /tmp/restore_instance';
+	$fullcommand=$command." ".join(" ", $param);
+
+	$output=array();
+	exec($fullcommand, $output, $return_var);
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql load done (return='.$return_var.')'."\n";
+	*/
 
 	// Now show message to say we must run the restore script with 'admin'
 	print "Data have been retreived from the backup server int /tmp/restore_instance.\n";
@@ -397,7 +438,6 @@ if ($dayofmysqldump == 'autoscan') {
 }
 
 // Restore rsynced files
-$return_var=0;
 if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode == 'confirm') {
 	if (! is_dir($dirroot)) {
 		print "ERROR failed to find source dir ".$dirroot."\n";
