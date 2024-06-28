@@ -13,24 +13,16 @@
   become_user: root
 
   tasks:
-    - name: Catch the value of the regex
-      command: "grep 'backup_backups.sh' /var/spool/cron/crontabs/{{username}}"
-      register: line_catch
-
-    - name: Add the value catched before in crontab 
-      lineinfile:
+    - name: Find backup_backup.sh line and change it if found
+      replace:
         path: /var/spool/cron/crontabs/{{username}}
-        line: '#{{line_catch.stdout}}'
-        insertafter: "EOF"
-        state: present 
-        backup: yes
-
-    - name: Find non comment line with regex and change it
-      lineinfile:
-        path: /var/spool/cron/crontabs/{{username}}
-        regexp: '^(?!#)(.*backup_backups).sh(.*)$'
-        line: '\1.php\2'
-        backrefs: yes
+        regexp: 'backup_backup.sh'
+        replace: 'backup_backup.sh'
   
+    - name: Find perms.ksh line and change it into perms.sh if found
+      replace:
+        path: /var/spool/cron/crontabs/{{username}}
+        regexp: 'perms.ksh'
+        replace: 'perms.sh'
 
 
