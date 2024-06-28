@@ -84,31 +84,40 @@ $hookmanager->initHooks(array('sellyoursaas-setup'));
 
 $tmpservices=array();
 $staticdeploymentserver = new Deploymentserver($db);
+// Build array $tmpservicessub
+// array('0' => 'mysaasdomain.com', 'with2.mysaasdomainalt.com' => 'mysaasdomainalt.com', , 'with3.mysaasdomainalt.com' => 'mysaasdomainalt.com', ...)
 if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
-	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+	$tmpservicessub = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));	// old way to get list of domain names
 } else {
-	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();
+	$tmpservicessub = $staticdeploymentserver->fetchAllDomains();	// Get list of domain names foun dinto table sellyoursaas_deploymentserver
 }
 foreach ($tmpservicessub as $key => $tmpservicesub) {
 	$tmpservicesub = preg_replace('/:.*$/', '', $tmpservicesub);
 	if ($key > 0) {
-		$tmpservices[$tmpservicesub]=getDomainFromURL($tmpservicesub, 1);
+		$tmpdomain = getDomainFromURL($tmpservicesub, 1);
+		$tmpservices[$tmpservicesub] = $tmpdomain;
 	} else {
-		$tmpservices['0']=getDomainFromURL($tmpservicesub, 1);
+		$tmpservices['0'] = getDomainFromURL($tmpservicesub, 1);
 	}
 }
+// Now we duplicate domain to keep first one and alternative one that differs
 $arrayofsuffixfound = array();
 foreach ($tmpservices as $key => $tmpservice) {
 	$suffix = '';
 	if ($key != '0') {
+		if ($tmpservice == $tmpservices['0']) {
+			continue;
+		}
 		$suffix='_'.strtoupper(str_replace('.', '_', $tmpservice));
 	}
-
 	if (in_array($suffix, $arrayofsuffixfound)) {
 		continue;
 	}
 	$arrayofsuffixfound[$tmpservice] = $suffix;
 }
+// $arrayofsuffixfound should be now array('mysaasdomain'=>'', mysaasdomainalt'=>'_MYSAASDOMAINALT_COM', ...)
+//var_dump($arrayofsuffixfound);
+
 
 
 /*
@@ -375,7 +384,7 @@ print '</tr>';
 
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
-	print '<!-- suffix = '.$suffix.' -->'."\n";
+	print '<!-- Edit SELLYOURSAAS_LOGO[|_SMALL|MINI] suffix = '.$suffix.' -->'."\n";
 
 	// Logo
 	print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoWhiteBackground").' (png,jpg)</label></td><td>';

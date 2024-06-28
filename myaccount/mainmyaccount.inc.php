@@ -783,13 +783,13 @@ function dol_loginfunction($langs, $conf, $mysoc)
 
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 
-	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-	$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
+	$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
+	$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');
 
 	$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 	$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
 
-	if (! empty($conf->global->$constforaltname)) {
+	if (getDolGlobalString($constforaltname)) {
 		$sellyoursaasdomain = $domainname;
 		$sellyoursaasname = $conf->global->$constforaltname;
 		$constlogo.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
@@ -798,14 +798,14 @@ function dol_loginfunction($langs, $conf, $mysoc)
 
 	$homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
 
-	if (empty($urllogo) && ! empty($conf->global->$constlogosmall)) {
-		if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall)) {
-			$urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.$conf->global->$constlogosmall);
+	if (empty($urllogo) && getDolGlobalString($constlogosmall)) {
+		if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constlogosmall))) {
+			$urllogo = DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/thumbs/'.getDolGlobalString($constlogosmall));
 		}
-	} elseif (empty($urllogo) && ! empty($conf->global->$constlogo)) {
-		if (is_readable($conf->mycompany->dir_output.'/logos/'.$conf->global->$constlogo)) {
-			$urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/'.$conf->global->$constlogo);
-			$width=128;
+	} elseif (empty($urllogo) && getDolGlobalString($constlogo)) {
+		if (is_readable($conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constlogo))) {
+			$urllogo = DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=mycompany&amp;file='.urlencode('logos/'.getDolGlobalString($constlogo));
+			$width = 128;
 		}
 	} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png')) {
 		$urllogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
