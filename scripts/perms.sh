@@ -3,6 +3,14 @@
 # Script to force permission on expected default values
 #--------------------------------------------------------#
 
+#source /etc/lsb-release
+
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export BLUE='\033[0;34m'
+export YELLOW='\033[0;33m'
+
+
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
 	exit 100
@@ -137,11 +145,11 @@ if [[ "x$masterserver" == "x1" ]]; then
 	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +2 -delete
 fi
 
-echo "Nettoyage vieux fichiers log"
+echo "Clean old log files in /home/admin/wwwroot/dolibarr_documents"
 echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
 find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
 
-echo "Nettoyage vieux /tmp"
+echo "Clean old files in /tmp"
 echo find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 
@@ -166,13 +174,12 @@ chown admin:www-data $pathtospamdir/*
 # Special actions...
 
 # Clean some files
-echo "Clean some files"
 if [ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]; then
 	IFS=$(echo -en "\n\b")
 	echo We are on a deployment server, so we clean log files 
-	echo "Clean web server _error logs"
+	echo "Clean web server logs $targetdir/osu*/dbn*/*_error.log"
 	for fic in `ls -Adp $targetdir/osu*/dbn*/*_error.log 2>/dev/null | grep -v '/$'`; do > "$fic"; done
-	echo "Clean applicative log files"
+	echo "Clean applicative log files in $targetdir/osu*/dbn*/..."
 	for fic in `ls -Adp $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null | grep -v '/$'`; do > "$fic"; done
 	for fic in `ls -Adp $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null | grep -v '/$'`; do > "$fic"; done
 	for fic in `ls -Adp $targetdir/osu*/dbn*/htdocs/files/_tmp/* 2>/dev/null | grep -v '/$'`; do rm "$fic"; done

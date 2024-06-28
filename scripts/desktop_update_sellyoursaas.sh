@@ -7,6 +7,12 @@
 
 source /etc/lsb-release
 
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export BLUE='\033[0;34m'
+export YELLOW='\033[0;33m'
+
+
 if [ "x$1" == "x" ]; then
    echo "Usage:   $0  hostfile  [hostgrouporname]  [unlock]"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"

@@ -1168,15 +1168,15 @@
       when: file1_stat.stat.checksum != file2_stat.stat.checksum
 
 
-##### Set permissions, create some dirs and files by calling perms.ksh
-- name: Call perms.ksh to set permissions, create some dirs and files
+##### Set permissions, create some dirs and files by calling perms.sh
+- name: Call perms.sh to set permissions, create some dirs and files
   hosts: '{{target}}'
   become: yes
   become_method: sudo
   become_user: root
   tasks:
-  - name: Launch perms.ksh to set permissions, create some dirs and files
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.ksh confirm"
+  - name: Launch perms.sh to set permissions, create some dirs and files
+    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.sh confirm"
     register: command_output
     changed_when: false
 

@@ -8,6 +8,12 @@
 
 source /etc/lsb-release
 
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export BLUE='\033[0;34m'
+export YELLOW='\033[0;33m'
+
+
 if [ "x$1" == "x" ]; then
    echo "Usage:   $0  dir_of_git_repositories_of_app"
    echo "Example: $0  /home/admin/wwwroot"

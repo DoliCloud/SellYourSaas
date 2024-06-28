@@ -8,7 +8,13 @@
 
 source /etc/lsb-release
 
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export BLUE='\033[0;34m'
+export YELLOW='\033[0;33m'
+
 export now=`date +'%Y-%m-%d %H:%M:%S'`
+
 
 echo
 echo "**** ${0}"

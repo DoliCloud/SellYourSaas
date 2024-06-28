@@ -3,6 +3,16 @@
 # This script allows you to enable/disable IP v6 on your desktop
 #----------------------------------------------------------------
 
+#set -e
+
+source /etc/lsb-release
+
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export BLUE='\033[0;34m'
+export YELLOW='\033[0;33m'
+
+
 if [ "x$1" = "xdisable" ] ;
 then
 echo Disable IPV6

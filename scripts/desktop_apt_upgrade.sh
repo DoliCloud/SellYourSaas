@@ -8,6 +8,12 @@
 
 source /etc/lsb-release
 
+export RED='\033[0;31m'
+export GREEN='\033[0;32m'
+export BLUE='\033[0;34m'
+export YELLOW='\033[0;33m'
+
+
 if [ "x$2" == "x" ]; then
    echo "***** Execute an apt upgrade on remote servers. This switch all instances in maintenancemode. *****"
    echo "Usage:   $0  hostfile  [hostgrouporname]  (reboot)"
