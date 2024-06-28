@@ -293,9 +293,9 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 	// Now show message to say we must run the restore script with 'admin'
 	print "Data have been retreived from the backup server int /tmp/restore_instance.\n";
 	if ($mode == 'test') {
-		print "You must now run the script from user 'admin' with this parameters:\n";
-	} else {
 		print "You must now re-run the script in 'confirm' mode...\n";
+	} else {
+		print "You must now run the script from user 'admin' with this parameters:\n";
 	}
 	print __FILE__." /tmp/restore_instance autoscan ".$instance." ".$mode."\n";
 
