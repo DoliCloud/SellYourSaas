@@ -330,7 +330,7 @@ if (empty($object->instance) && empty($object->username_os) && empty($object->pa
 	print "Error: properties for instance ".$instance." was not registered into database.\n";
 	exit(-3);
 }
-if (! is_dir($dirroot)) {
+if (!preg_match('/:/', $dirroot) && ! is_dir($dirroot)) {
 	print "Error: Source directory ".$dirroot." where backup is stored does not exist.\n";
 	exit(-4);
 }
@@ -349,6 +349,7 @@ if (empty($login) || empty($dirdb)) {
 
 if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/backup_servername/osu...'
 	// Rsync to get backup into /tmp/restore_instance
+	print "Recreate /tmp/restore_instance directory\n";
 	dol_delete_dir_recursive('/tmp/restore_instance');
 	dol_mkdir('/tmp/restore_instance');
 
@@ -404,13 +405,16 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 
 	// Now show message to say we must run the restore script with 'admin'
 	if ($mode == 'test') {
+		print "\n";
 		print "Simulation has finished to copy files from the backup server in local /tmp/restore_instance.\n";
-		print "You must now re-run the script in 'confirm' mode...\n";
+		print "You must now re-run this same script in 'confirm' mode...\n";
 	} else {
+		print "\n";
 		print "Data have been copied from the backup server in local /tmp/restore_instance.\n";
 		print "You must now run the script from user 'admin' with this parameters:\n";
+
+		print __FILE__." /tmp/restore_instance/".$object->username_os."/".$object->database_db." autoscan ".$instance." ".$mode."\n";
 	}
-	print __FILE__." /tmp/restore_instance/".$object->username_os."/".$object->database_db." autoscan ".$instance." ".$mode."\n";
 	print "\n";
 
 	exit(0);
