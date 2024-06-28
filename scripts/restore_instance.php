@@ -244,7 +244,7 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 
 	//var_dump($param);
 	//print "- Backup documents dir ".$dirroot."/".$instance."\n";
-	$param[]='admin@/'.$dirroot;
+	$param[]='admin@'.$dirroot;
 	$param[]=' /tmp/restore_instance';
 	$fullcommand=$command." ".join(" ", $param);
 	$output=array();
