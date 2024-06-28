@@ -252,7 +252,7 @@ if ($sellyoursaassupporturl) {
 	print '</form>';
 
 
-	if (($action == 'presend' && GETPOST('supportchannel', 'alpha')) || getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
+	if ($action == 'presend' && GETPOST('supportchannel', 'alpha')) {
 		$trackid = '';
 		dol_init_file_process($upload_dir, $trackid);
 
