@@ -567,7 +567,7 @@ if ($restorestringfrombackup) {
 if ($restorestringfromremotebackup) {
 	$restorestringtoshow=$restorestringfromremotebackup;
 	print '<span class="fa fa-file paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from remote Backup <span class="opacitymedium">(to run by root from the deployment server)</span><br>';
-	print '<textarea name="restorestringfromremotebackup" id="restorestringfromremotebackup" class="quatrevingtpercent" rows="'.ROWS_3.'">';
+	print '<textarea name="restorestringfromremotebackup" id="restorestringfromremotebackup" class="quatrevingtpercent" spellcheck="none" rows="'.ROWS_3.'">';
 	print $restorestringtoshow;
 	print '</textarea>';
 	print '<br>';
@@ -580,7 +580,7 @@ if ($restorestringfromremotebackup) {
 if ($restorestringfromarchive) {
 	$restorestringtoshow=$restorestringfromarchive;
 	print '<span class="fa fa-file-archive paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from local Archive <span class="opacitymedium">(to run by admin from the server hosting the archives)</span><br>';
-	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_9.'">';
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" spellcheck="none" rows="'.ROWS_9.'">';
 	print $restorestringpretoshow."\n";
 	print $restorestringtoshow."\n";
 	print $restorestringposttoshow;
@@ -596,7 +596,7 @@ if ($restorestringfromarchive) {
 if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span><span class="fa fa-database"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(to run by admin on master server)</span><br>';
-	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" rows="'.ROWS_2.'">';
+	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" spellcheck="none" rows="'.ROWS_2.'">';
 	print $backupstringtoshow."\n";
 	print $restorestringtoshow;
 	print '</textarea>';
@@ -609,7 +609,7 @@ if ($restorestringfrombackupshort) {
 if ($moveinstancestringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run by admin on master server)</span><br>';
-	print '<textarea name="moveinstancestring" id="moveinstancestring" class="centpercent" rows="'.ROWS_8.'">';
+	print '<textarea name="moveinstancestring" id="moveinstancestring" class="centpercent" spellcheck="none" rows="'.ROWS_8.'">';
 	print $moveinstancestringtoshow;
 	print '</textarea>';
 
