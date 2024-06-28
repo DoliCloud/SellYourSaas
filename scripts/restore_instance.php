@@ -221,7 +221,7 @@ print "***** ".$script_file." (".$version.") - mode=".$mode." - ".dol_print_date
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "This script must be ran as 'admin' for a local restoration, as 'root' for a restoration from a remotebackup.\n";
 	print "Usage:   $script_file [remotebackup:]backup_dir  autoscan|mysqldump_dbn...sql.zst|dayofmonth instance [test|testrsync|testdatabase|confirm|confirmrsync|confirmdatabase]\n";
-	print "Example: $script_file " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  autoscan  myinstance  test\n";
+	print "Example: $script_file ".getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  autoscan  myinstance  test\n";
 	print "Example: $script_file remotebackup:/mnt/diskbackup/backup_servername/osu123456/dbn789012  autoscan  myinstance  test\n";
 	print "Example: $script_file remotebackup:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_servername/osu123456/dbn789012  autoscan  myinstance  test\n";
 	print "Note:    the ssh public key of user admin must be authorized in the .ssh/authorized_keys_support of the targeted osu user to have rsync working.\n";
@@ -235,71 +235,6 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 		echo "Script must be ran with root.\n";
 		exit(-1);
 	}
-
-	// Rsync to get backup into /tmp/restore_instance
-	dol_delete_dir_recursive('/tmp/restore_instance');
-	dol_mkdir('/tmp/restore_instance');
-
-
-	print 'rsync -r admin@'.$dirroot.' /tmp/restore_instance'."\n";
-	$command="rsync";
-	$param=array();
-	if ($mode != 'confirm' && $mode != 'confirmrsync') {
-		$param[]="-n";
-	}
-	//$param[]="-a";
-	$param[]="-rltz";
-	//$param[]="-vv";
-	$param[]="-v";
-	$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
-
-	//var_dump($param);
-	//print "- Backup documents dir ".$dirroot."/".$instance."\n";
-	$param[]='admin@'.$dirroot;
-	$param[]=' /tmp/restore_instance';
-	$fullcommand=$command." ".join(" ", $param);
-	$output=array();
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
-	exec($fullcommand, $output, $return_var);
-
-	if ($return_var > 0) {
-		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync failed'."\n";
-	} else {
-		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync done'."\n";
-	}
-
-	// Output result
-	foreach ($output as $outputline) {
-		print $outputline."\n";
-	}
-
-	// Change user and permission
-	/*
-	$command = 'chgrp -R admin /tmp/restore_instance';
-	$fullcommand=$command." ".join(" ", $param);
-
-	$output=array();
-	exec($fullcommand, $output, $return_var);
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql load done (return='.$return_var.')'."\n";
-
-	$command = 'chmod -R g+rx /tmp/restore_instance';
-	$fullcommand=$command." ".join(" ", $param);
-
-	$output=array();
-	exec($fullcommand, $output, $return_var);
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql load done (return='.$return_var.')'."\n";
-	*/
-
-	// Now show message to say we must run the restore script with 'admin'
-	print "Data have been retreived from the backup server int /tmp/restore_instance.\n";
-	if ($mode == 'test') {
-		print "You must now re-run the script in 'confirm' mode...\n";
-	} else {
-		print "You must now run the script from user 'admin' with this parameters:\n";
-	}
-	print __FILE__." /tmp/restore_instance autoscan ".$instance." ".$mode."\n";
-
-	exit(0);
 } else {
 	// Restore from a local backup or local archive
 	if (0 == posix_getuid()) {
@@ -409,6 +344,76 @@ $server=($object->deployment_host ? $object->deployment_host : $object->array_op
 if (empty($login) || empty($dirdb)) {
 	print "Error: properties for instance ".$instance." are not registered completely (missing at least login or database name).\n";
 	exit(-5);
+}
+
+
+if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/backup_servername/osu...'
+	// Rsync to get backup into /tmp/restore_instance
+	dol_delete_dir_recursive('/tmp/restore_instance');
+	dol_mkdir('/tmp/restore_instance');
+
+
+	print 'rsync -r admin@'.$dirroot.' /tmp/restore_instance'."\n";
+	$command="rsync";
+	$param=array();
+	if ($mode != 'confirm' && $mode != 'confirmrsync') {
+		$param[]="-n";
+	}
+	//$param[]="-a";
+	$param[]="-rltz";
+	//$param[]="-vv";
+	$param[]="-v";
+	$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
+
+	//var_dump($param);
+	//print "- Backup documents dir ".$dirroot."/".$instance."\n";
+	$param[]='admin@'.$dirroot;
+	$param[]=' /tmp/restore_instance';
+	$fullcommand=$command." ".join(" ", $param);
+	$output=array();
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
+	exec($fullcommand, $output, $return_var);
+
+	if ($return_var > 0) {
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync failed'."\n";
+	} else {
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' rsync done'."\n";
+	}
+
+	// Output result
+	foreach ($output as $outputline) {
+		print $outputline."\n";
+	}
+
+	// Change user and permission
+	/*
+	 $command = 'chgrp -R admin /tmp/restore_instance';
+	 $fullcommand=$command." ".join(" ", $param);
+
+	 $output=array();
+	 exec($fullcommand, $output, $return_var);
+	 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql load done (return='.$return_var.')'."\n";
+
+	 $command = 'chmod -R g+rx /tmp/restore_instance';
+	 $fullcommand=$command." ".join(" ", $param);
+
+	 $output=array();
+	 exec($fullcommand, $output, $return_var);
+	 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql load done (return='.$return_var.')'."\n";
+	 */
+
+	// Now show message to say we must run the restore script with 'admin'
+	if ($mode == 'test') {
+		print "Simulation has finished to copy files from the backup server in local /tmp/restore_instance.\n";
+		print "You must now re-run the script in 'confirm' mode...\n";
+	} else {
+		print "Data have been copied from the backup server in local /tmp/restore_instance.\n";
+		print "You must now run the script from user 'admin' with this parameters:\n";
+	}
+	print __FILE__." /tmp/restore_instance/".$object->username_os."/".$object->database_db." autoscan ".$instance." ".$mode."\n";
+	print "\n";
+
+	exit(0);
 }
 
 print 'Restore from '.$dirroot." to ".$targetdir.' into instance '.$instance."\n";
