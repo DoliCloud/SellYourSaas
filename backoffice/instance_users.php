@@ -279,7 +279,19 @@ if (empty($reshook)) {
 				$resql=$newdb->query($sql);
 				if (! $resql) {
 					if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') {
-						dol_print_error($newdb);
+						// On old dolibarr version, note_private did not exist
+						$sql = "INSERT INTO ".$prefix_db."user(login, lastname, admin, pass, pass_crypted, entity, datec, email, signature, api_key)";
+						$sql .= " VALUES('".$newdb->escape($loginforsupport)."', '".$newdb->escape($loginforsupport)."', 1,";
+						$sql .= " null,";
+						$sql .= " '".$newdb->escape($password_crypted_for_remote)."', ";
+						$sql .= " 0, '".$newdb->idate(dol_now())."', '".$newdb->escape($emailsupport)."', '".$newdb->escape($signature)."', ";
+						$sql .= " '".$newdb->escape(dolEncrypt($password, '', '', 'dolibarr'))."')";
+						$resql=$newdb->query($sql);
+						if (! $resql) {
+							if ($newdb->lasterrno() != 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+								dol_print_error($newdb);
+							}
+						}
 					} else {
 						setEventMessages("ErrorRecordAlreadyExists", null, 'errors');
 					}
