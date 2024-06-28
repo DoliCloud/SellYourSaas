@@ -138,7 +138,7 @@ $(document).ready(function () {
 
 <?php
 // Show global announce
-if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE)) {
+if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') && getDolGlobalString('SELLYOURSAAS_ANNOUNCE')) {
 	$sql = "SELECT tms from ".MAIN_DB_PREFIX."const where name = 'SELLYOURSAAS_ANNOUNCE'";
 	$resql=$db->query($sql);
 	if ($resql) {
@@ -149,10 +149,10 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
     		<div class="containermessage"><br><div class="note note-warning">';
 		print '<b>'.dol_print_date($datemessage, 'dayhour').'</b> : ';
 		$reg=array();
-		if (preg_match('/^\((.*)\)$/', $conf->global->SELLYOURSAAS_ANNOUNCE, $reg)) {
+		if (preg_match('/^\((.*)\)$/', getDolGlobalString('SELLYOURSAAS_ANNOUNCE'), $reg)) {
 			$texttoshow = $langs->trans($reg[1]);
 		} else {
-			$texttoshow = $conf->global->SELLYOURSAAS_ANNOUNCE;
+			$texttoshow = getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
 		}
 		print '<h5 class="block">'.$texttoshow.'</h5>
     		</div></div>
@@ -182,7 +182,7 @@ if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->S
 <tr>
 <td class="nowrap center valignmiddle">
 <?php
-if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) {
 	?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php
 }
 if (GETPOST('usernamebis', 'alpha')) {
@@ -198,9 +198,9 @@ if (GETPOST('usernamebis', 'alpha')) {
 <tr>
 <td class="nowrap center valignmiddle">
 <br>
-<?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="password" class="hidden"><?php echo $langs->trans("Password"); ?></label><?php } ?>
+<?php if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) { ?><label for="password" class="hidden"><?php echo $langs->trans("Password"); ?></label><?php } ?>
 <span class="span-icon-password fa fa-lock">
-<input type="password" id="password" maxlength="128" placeholder="<?php echo $langs->trans("Password"); ?>" name="password" class="flat input-field input-icon-password" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="<?php echo empty($conf->global->MAIN_LOGIN_ENABLE_PASSWORD_AUTOCOMPLETE) ? 'off' : 'on'; ?>" />
+<input type="password" id="password" maxlength="128" placeholder="<?php echo $langs->trans("Password"); ?>" name="password" class="flat input-field input-icon-password" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="<?php echo getDolGlobalString('MAIN_LOGIN_ENABLE_PASSWORD_AUTOCOMPLETE') ? 'on' : 'off'; ?>" />
 </span>
 <br>
 </td></tr>

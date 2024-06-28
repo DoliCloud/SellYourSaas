@@ -2416,7 +2416,7 @@ if ($welcomecid > 0) {
 
 $showannouncefordomain = array();
 // Detect global announce
-if (! empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) && ! empty($conf->global->SELLYOURSAAS_ANNOUNCE)) {
+if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') && getDolGlobalString('SELLYOURSAAS_ANNOUNCE')) {
 	$showannouncefordomain['_global_'] = 'SELLYOURSAAS_ANNOUNCE';
 }
 // Detect local announce (per server)
