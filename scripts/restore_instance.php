@@ -216,7 +216,18 @@ if (empty($backupdumpdayfrequency)) {
 
 $return_var=0;
 
-print "***** ".$script_file." (".$version.") - mode = ".$mode." - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
+print "***** ".$script_file." (".$version.") - mode=".$mode." - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
+
+if (empty($dirroot) || empty($instance) || empty($mode)) {
+	print "This script must be ran as 'admin' for a local restoration, as 'root' for a restoration from a remotebackup.\n";
+	print "Usage:   $script_file [remotebackup:]backup_dir  autoscan|mysqldump_dbn...sql.zst|dayofmonth instance [test|testrsync|testdatabase|confirm|confirmrsync|confirmdatabase]\n";
+	print "Example: $script_file " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  autoscan  myinstance  test\n";
+	print "Example: $script_file remotebackup:/mnt/diskbackup/backup_servername/osu123456/dbn789012  autoscan  myinstance  test\n";
+	print "Example: $script_file remotebackup:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_servername/osu123456/dbn789012  autoscan  myinstance  test\n";
+	print "Note:    the ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted osu user to have testrsync and confirmrsync working.\n";
+	print "Return code: 0 if success, <>0 if error\n";
+	exit(-1);
+}
 
 if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/backup_servername/osu...'
 	// Restore from a remote server
@@ -308,18 +319,6 @@ if ($dbmaster) {
 if (empty($db)) {
 	$db=$dbmaster;
 }
-
-if (empty($dirroot) || empty($instance) || empty($mode)) {
-	print "This script must be ran as 'admin' for a local restoration, as 'root' for a restoration from a remotebackup.\n";
-	print "Usage:   $script_file [remotebackup:]backup_dir  autoscan|mysqldump_dbn...sql.zst|dayofmonth instance [test|testrsync|testdatabase|confirm|confirmrsync|confirmdatabase]\n";
-	print "Example: $script_file " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  autoscan  myinstance  test\n";
-	print "Example: $script_file remotebackup:/mnt/diskbackup/backup_servername/osu123456/dbn789012  autoscan  myinstance  test\n";
-	print "Example: $script_file remotebackup:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_servername/osu123456/dbn789012  autoscan  myinstance  test\n";
-	print "Note:    the ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted osu user to have testrsync and confirmrsync working.\n";
-	print "Return code: 0 if success, <>0 if error\n";
-	exit(-1);
-}
-
 
 // Forge complete name of instance
 if (! empty($instance) && ! preg_match('/\./', $instance) && ! preg_match('/\.home\.lan$/', $instance)) {
