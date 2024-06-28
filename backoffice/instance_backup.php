@@ -548,7 +548,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 $backupstringtoshow=$backupstring.' confirm --nostats --forcersync --forcedump';
 $backupstringtoshow2=$backupstring.' confirm';
 print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-file paddingright"></span> Backup command line string <span class="opacitymedium">(to run by admin from the deployment server where to store the backup, or from root from the master server)</span><br>';
-print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent"><br>';
+print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 print ajax_autoselect('backupstring');
 
 print '<br>';
@@ -557,7 +557,7 @@ print '<br>';
 if ($restorestringfrombackup) {
 	$restorestringtoshow=$restorestringfrombackup;
 	print '<span class="fa fa-file paddingright"></span> -> <span class="fa fa-database secondary paddingright"></span> Restore command line string from local Backup <span class="opacitymedium">(to run by admin from the server hosting the backup)</span><br>';
-	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingtpercent"><br>';
+	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	print ajax_autoselect('restorestring');
 
 	print '<br>';
