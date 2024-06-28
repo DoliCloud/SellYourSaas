@@ -387,21 +387,26 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 	}
 
 	// Change user and permission
+	$command = 'chown admin /tmp/restore_instance/';
+	$fullcommand=$command." ".join(" ", $param);
+	$output=array();
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
+	exec($fullcommand, $output, $return_var);
+
+	$command = 'chown -R admin /tmp/restore_instance/'.$object->username_os;
+	$fullcommand=$command." ".join(" ", $param);
+	$output=array();
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
+	exec($fullcommand, $output, $return_var);
+
 	/*
-	 $command = 'chgrp -R admin /tmp/restore_instance';
-	 $fullcommand=$command." ".join(" ", $param);
-
-	 $output=array();
-	 exec($fullcommand, $output, $return_var);
-	 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql load done (return='.$return_var.')'."\n";
-
 	 $command = 'chmod -R g+rx /tmp/restore_instance';
 	 $fullcommand=$command." ".join(" ", $param);
 
 	 $output=array();
 	 exec($fullcommand, $output, $return_var);
 	 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' mysql load done (return='.$return_var.')'."\n";
-	 */
+	*/
 
 	// Now show message to say we must run the restore script with 'admin'
 	if ($mode == 'test') {
