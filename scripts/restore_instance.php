@@ -224,7 +224,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "Example: $script_file " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."/osu123456/dbn789012  autoscan  myinstance  test\n";
 	print "Example: $script_file remotebackup:/mnt/diskbackup/backup_servername/osu123456/dbn789012  autoscan  myinstance  test\n";
 	print "Example: $script_file remotebackup:/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_servername/osu123456/dbn789012  autoscan  myinstance  test\n";
-	print "Note:    the ssh public key of admin must be authorized in the .ssh/authorized_keys_support of targeted osu user to have testrsync and confirmrsync working.\n";
+	print "Note:    the ssh public key of user admin must be authorized in the .ssh/authorized_keys_support of the targeted osu user to have rsync working.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
