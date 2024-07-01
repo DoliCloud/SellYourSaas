@@ -126,7 +126,7 @@ $(document).ready(function () {
 		<header class="inverse">
 		  <h1><?php echo dol_escape_htmltag($title); ?></h1>
 
-<div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo empty($conf->global->MAIN_LOGIN_BACKGROUND) ? '' : ' backgroundsemitransparent'; ?>">
+<div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo getDolGlobalString('MAIN_LOGIN_BACKGROUND') ? ' backgroundsemitransparent' : ''; ?>">
 <?php if ($mode == 'dolibarr' || ! $disabled) { ?>
 	<span class="passwordmessagedesc opacitymedium">
 	<?php
@@ -158,7 +158,7 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 <!-- Login -->
 <tr>
 <td class="nowrap valignmiddle" style="text-align: center;">
-	<?php if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) { ?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php } ?>
+	<?php if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) { ?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php } ?>
 <span class="span-icon-user fa fa-user"></span>
 	<?php
 	if (empty($asknewpass)) {
