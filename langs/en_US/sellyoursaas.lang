@@ -577,7 +577,7 @@ BackupOK=Backup successfull
 ArchiveInstanceDesc=Directory where instance will be archived when it is destroyed. 
 ArchiveTestInstanceDesc=WARNING: Check that the feature is enabled by having the entry archivetestinstance=1 into sellyoursaas.conf file
 ToCreateDBUserManualy=To create a db user manually on SELECT only, you can do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;
-ToUpdateDBPassword=To update password of a db user, you can do<br>SET PASSWORD FOR 'dbname'@'%%' = PASSWORD('newpassword'); SET PASSWORD FOR 'dbname'@'localhost' = PASSWORD('newpassword'); FLUSH PRIVILEGES;
+ToUpdateDBPassword=To update password of a db user, you can do<br>SET PASSWORD FOR 'dbu...'@'%%' = PASSWORD('newpassword'); SET PASSWORD FOR 'dbu...'@'localhost' = PASSWORD('newpassword'); FLUSH PRIVILEGES;
 LatestBackupMessage=Latest backup message
 SELLYOURSAAS_ACCEPT_DISCOUNTCODE=Accept discount code when entering payment mode
 SELLYOURSAAS_ENABLE_OPTINMESSAGES=Add an optin checkbox "Accept commercial offers" (on registration and customer dashboard)

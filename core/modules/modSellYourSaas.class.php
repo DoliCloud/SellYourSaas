@@ -845,10 +845,10 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('port_db', "Port DB", 'varchar', 132, '8', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('username_db', "Username DB", 'varchar', 133, '32', 'contrat', 1, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('dolcrypt'=>null));
-		$resultx=$extrafields->addExtraField('password_db', "Password DB", 'password', 134, '64', 'contrat', 0, 0, '', $param, 1, '', -1, 'ToUpdateDBPassword', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('username_ro_db', "Read-only Username DB", 'varchar', 135, '32', 'contrat', 1, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('password_db', "Password DB", 'password', 134, '64', 'contrat', 0, 0, '', $param, 1, '', -1, 'ToUpdateDBPassword:password_db', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('username_ro_db', "Read-only Username DB", 'varchar', 135, '32', 'contrat', 1, 0, '', '', 1, '', -1, 'ToCreateDBUserManualy:username_ro_db', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('dolcrypt'=>null));
-		$resultx=$extrafields->addExtraField('password_ro_db', "Read-only Password DB", 'password', 136, '64', 'contrat', 0, 0, '', $param, 1, '', -1, 'ToCreateDBUserManualy', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('password_ro_db', "Read-only Password DB", 'password', 136, '64', 'contrat', 0, 0, '', $param, 1, '', -1, 'ToUpdateDBPassword:password_ro_db', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('prefix_db', "Special table prefix DB", 'varchar', 140, '64', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('timezone', "TimeZone", 'varchar', 141, '64', 'contrat', 0, 0, '', '', 1, '', -1, 'SellYourSaasTimeZoneDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
 		$resultx=$extrafields->addExtraField('fileauthorizekey', "DateFileauthorizekey", 'datetime', 150, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
