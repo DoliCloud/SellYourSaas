@@ -8,3 +8,4 @@
 .travis.yml
 .tx
 phpstan.neon
+conf.php
