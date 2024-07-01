@@ -733,6 +733,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 				#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
 
 				if [[ -f $dirwithsources1.tar.zst ]]; then
+					# Archive file available into the NFS remote directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git, so we copy it locally into /tmp/... 
 					echo "cp $dirwithsources1.tar.zst  /tmp/cache$dirwithsources1.tar.zst"
 					cp $dirwithsources1.tar.zst  /tmp/cache$dirwithsources1.tar.zst
 				else
@@ -788,6 +789,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 				#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
 
 				if [[ -f $dirwithsources2.tar.zst ]]; then
+					# Archive file available into the NFS remote directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git, so we copy it locally into /tmp/... 
 					echo "cp $dirwithsources2.tar.zst  /tmp/cache$dirwithsources2.tar.zst"
 					cp $dirwithsources2.tar.zst  /tmp/cache$dirwithsources2.tar.zst
 				else
@@ -843,6 +845,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 				#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
 
 				if [[ -f $dirwithsources3.tar.zst ]]; then
+					# Archive file available into the NFS remote directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git, so we copy it locally into /tmp/... 
 					echo "cp $dirwithsources3.tar.zst  /tmp/cache$dirwithsources3.tar.zst"
 					cp $dirwithsources3.tar.zst  /tmp/cache$dirwithsources3.tar.zst
 				else
