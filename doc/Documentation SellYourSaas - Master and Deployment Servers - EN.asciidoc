@@ -3674,6 +3674,8 @@ touch /etc/apache2/sites-available/000-default-ssl.conf
 				    Deny from env=bad_bots
 				    Allow from all
 				    Require local
+				    # To allow and amdin desktop to see status, you can uncomment this with the correct IP
+				    #Require ip 1.2.3.4
 				</Location>
 				
         </VirtualHost>
