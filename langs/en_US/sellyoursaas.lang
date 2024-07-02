@@ -872,3 +872,4 @@ AddPaymentMethodForSEPAWarningIfTransfer=WARNING: You are about to enter an auto
 ServerSignatureKey=Server signature key
 SupportFeatures=Support features
 SupportKey=Support key
+CommunicateIdentifiersToOnlyTrusted=Please note, only communicate these identifiers to people you trust. You cannot modify them yourself, a support ticket is required for this

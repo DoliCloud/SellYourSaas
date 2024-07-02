@@ -1197,6 +1197,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
     				                </form>
                                     ';
+			print'					<div class="note note-warning">
+									'.$langs->trans("CommunicateIdentifiersToOnlyTrusted").'
+									</div>
+									';
 		} elseif ($directaccess == 4) {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';
@@ -1295,6 +1299,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
     				                </form>
                                     ';
+			print'					<div class="note note-warning">
+									'.$langs->trans("CommunicateIdentifiersToOnlyTrusted").'
+									</div>
+									';
 		} elseif ($directaccess == 4) {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';
