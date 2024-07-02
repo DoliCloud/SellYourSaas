@@ -1,5 +1,5 @@
 ---
-# Script to run apt upgrade command on servers
+# Script to run apt update and upgrade command on servers
 #
 # To run the script:
 # ansible-playbook -K launch_apt_upgrade.yml -i hosts-xxx -e 'target=targethost'
@@ -12,7 +12,7 @@
   become_method: sudo
   become_user: root
   tasks:
-  - name: Switch to maintenance mode
+  - name: Switch instances in maintenance mode
     command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/make_instances_offline.sh maintenance.php offline
     register: command_output
 
