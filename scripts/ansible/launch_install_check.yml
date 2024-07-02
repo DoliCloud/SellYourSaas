@@ -1120,12 +1120,14 @@
     - name: Set an Apache config file to hide the version
       ignore_errors: true
       ansible.builtin.template:
-        src: ../../etc/apache2/conf-available/custom-server-token.conf
-        dest: /etc/apache2/conf-available/custom-server-token.conf
+        src: ../../etc/apache2/conf-available/custom-server-tokens.conf
+        dest: /etc/apache2/conf-available/custom-server-tokens.conf
         owner: root
         group: root
         mode: '0644'
 
+    - name: Activates config file Apache
+      command: a2enconf custom-server-tokens
 
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
       ignore_errors: true
