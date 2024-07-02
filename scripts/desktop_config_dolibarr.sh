@@ -1,7 +1,9 @@
 #!/bin/bash
 #----------------------------------------------------------------
-# This script allows to update or fix the Dolibarr config file
+# This script allows to update or fix the Dolibarr config file saved as:
 # /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
+#
+# It does not support config files of deployed instances.
 #----------------------------------------------------------------
 
 

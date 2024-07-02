@@ -1,6 +1,6 @@
 #!/bin/bash
 #----------------------------------------------------------------
-# This script allows to update or fix the SellYourSaas config files
+# This script allows to update or fix the SellYourSaas config files saved as:
 # /etc/sellyoursaas.conf OR the /etc/sellyoursaas-public.conf
 #----------------------------------------------------------------
 
