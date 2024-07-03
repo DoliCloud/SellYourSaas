@@ -623,7 +623,7 @@ class SellYourSaasUtils
 		$sql.= ' '.MAIN_DB_PREFIX.'societe_extrafields as se';
 		$sql.= ' WHERE cd.fk_contrat = c.rowid AND ce.fk_object = c.rowid';
 		$sql.= " AND ce.deployment_status = 'done'";
-        $sql.= " AND ce.date_softalert_endfreeperiod IS NOT NULL"; // we don't send a hard alert unless a soft alert has already been sent
+		$sql.= " AND ce.date_softalert_endfreeperiod IS NOT NULL"; // we don't send a hard alert unless a soft alert has already been sent
 		$sql.= " AND ce.date_hardalert_endfreeperiod IS NULL";
 		$sql.= " AND cd.date_fin_validite <= '".$this->db->idate($date_limit_expiration)."'";      // Expired contracts
 		$sql.= " AND cd.date_fin_validite >= '".$this->db->idate($date_limit_expiration - 7 * 24 * 3600)."'";	// Protection: We dont' go higher than 7 days late to avoid to resend too much warnings when update of date_hardalert_endfreeperiod has failed
@@ -700,11 +700,11 @@ class SellYourSaasUtils
 
 						// @TODO Save in cache $arraydefaultmessage for each $object->thirdparty->default_lang and reuse it to avoid getEMailTemplate called each time
 						dol_syslog("We will call getEMailTemplate for type 'contract', label 'HardTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
-                        $arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminder');
+						$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminder');
 
 						$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
 						$substitutionarray['__SELLYOURSAAS_EXPIRY_DATE__']=dol_print_date($expirationdate, 'day', 'tzserver', $outputlangs);
-						$substitutionarray['__SELLYOURSAAS_NB_DAYS_BEFORE_EXPIRY_DATE__']=num_between_day(dol_now(),$expirationdate);
+						$substitutionarray['__SELLYOURSAAS_NB_DAYS_BEFORE_EXPIRY_DATE__']=num_between_day(dol_now(), $expirationdate);
 						complete_substitutions_array($substitutionarray, $outputlangs, $object);
 
 						$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray);
@@ -3807,15 +3807,15 @@ class SellYourSaasUtils
 
 								// Run the update only if one of the 3 properties has been modified
 								$doupdate = 0;
-								if ($object->array_options['options_filelock'] != $datelockfile 
-								|| $object->array_options['options_fileinstallmoduleslock'] != $dateinstallmoduleslockfile 
+								if ($object->array_options['options_filelock'] != $datelockfile
+								|| $object->array_options['options_fileinstallmoduleslock'] != $dateinstallmoduleslockfile
 								|| $object->array_options['options_fileauthorizekey'] != $dateauthorizedkeysfile) {
 									$object->array_options['options_filelock'] = $datelockfile;
 									$object->array_options['options_fileinstallmoduleslock'] = $dateinstallmoduleslockfile;
 									$object->array_options['options_fileauthorizekey'] = $dateauthorizedkeysfile;
 									$doupdate = 1;
 								}
-								
+
 								if ($doupdate) {
 									$object->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to modify the date of files lock, install and authorized keys during a refresh';
 

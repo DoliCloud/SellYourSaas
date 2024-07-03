@@ -489,7 +489,7 @@ if (getDolGlobalString('STRIPE_USE_NEW_CHECKOUT')) {
 				}
 			});
 
-<?php
+	<?php
 } else { // Old method (not SCA ready)
 	print "
             	// Old code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION off and STRIPE_USE_NEW_CHECKOUT off
@@ -552,7 +552,7 @@ if (getDolGlobalString('STRIPE_USE_NEW_CHECKOUT')) {
 							  stripeTokenHandler(result.token);
 							}
 						});
-<?php
+		<?php
 	} else { // Ask credit card with 3DS test
 		?>
 						/* Use 3DS source */
@@ -566,7 +566,7 @@ if (getDolGlobalString('STRIPE_USE_NEW_CHECKOUT')) {
 							  stripeSourceHandler(result.source);
 							}
 						});
-<?php
+		<?php
 	}
 		print "
     			});
