@@ -263,8 +263,8 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) {
 	$favicon.='.png';
 }
-if (! empty($conf->global->MAIN_FAVICON_URL)) {
-	$favicon=$conf->global->MAIN_FAVICON_URL;
+if (getDolGlobalString('MAIN_FAVICON_URL')) {
+	$favicon=getDolGlobalString('MAIN_FAVICON_URL');
 }
 
 $head = '';
@@ -331,19 +331,19 @@ if ($reshook == 0) {
 	?>
 	<div class="large">
 		<?php
-		$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
-		$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+		$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');
+		$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 
 		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 		$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
 		if (! empty($conf->global->$constforaltname)) {
 			$sellyoursaasdomain = $domainname;
-			$sellyoursaasname = $conf->global->$constforaltname;
+			$sellyoursaasname = getDolGlobalString($constforaltname);
 			//var_dump($constforaltname.' '.$sellyoursaasdomain.' '.$sellyoursaasname);   // Example: 'SELLYOURSAAS_NAME_FORDOMAIN-glpi-network.cloud glpi-network.cloud GLPI-Network'
 		}
 
 		$linklogo = '';
-		$homepage = 'https://'.(empty($conf->global->SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME) ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
+		$homepage = 'https://'.(!getDolGlobalString('SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME') ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
 		if (isset($partnerthirdparty) && $partnerthirdparty->id > 0) {     // Show logo of partner
 			require_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
 			$ecmfile=new EcmFiles($db);
@@ -378,12 +378,12 @@ if ($reshook == 0) {
 			}
 
 			if (empty($linklogo) && ! empty($conf->global->$constlogosmall)) {
-				if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall)) {
-					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/'.$conf->global->$constlogosmall);
+				if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constlogosmall))) {
+					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/' . getDolGlobalString($constlogosmall));
 				}
 			} elseif (empty($urllogo) && ! empty($conf->global->$constlogo)) {
-				if (is_readable($conf->mycompany->dir_output.'/logos/'.$conf->global->$constlogo)) {
-					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/'.$conf->global->$constlogo);
+				if (is_readable($conf->mycompany->dir_output.'/logos/' . getDolGlobalString($constlogo))) {
+					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/' . getDolGlobalString($constlogo));
 				}
 			} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png')) {
 				$linklogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
@@ -667,7 +667,7 @@ if ($reshook == 0) {
 						$domainstosuggest = array();
 						$domainstosuggestcountryfilter = array();
 						if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
-							$listofdomain = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);   // This is list of all sub domains to show into combo list
+							$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));   // This is list of all sub domains to show into combo list
 						} else {
 							$staticdeploymentserver = new Deploymentserver($db);
 							$listofdomain = $staticdeploymentserver->fetchAllDomains();
@@ -763,7 +763,7 @@ if ($reshook == 0) {
 							$randomselect = $domainstosuggest[$randomindex];
 						}
 						// Force selection with no way to change value if SELLYOURSAAS_FORCE_RANDOM_SELECTION is set
-						if (!empty($conf->global->SELLYOURSAAS_FORCE_RANDOM_SELECTION) && !empty($randomselect)) {
+						if (getDolGlobalString('SELLYOURSAAS_FORCE_RANDOM_SELECTION') && !empty($randomselect)) {
 							$domainstosuggest = array();
 							$domainstosuggest[] = $randomselect;
 						}
@@ -849,13 +849,13 @@ if ($reshook == 0) {
 			<?php
 			// TODO Remove this, we should be able to use SELLYOURSAAS_TERMSANDCONDITIONS instead
 			$urlfortermofuse = '';
-			if ($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME == 'dolicloud.com') {
-				$urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/en-terms-and-conditions.php';
+			if (getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME') == 'dolicloud.com') {
+				$urlfortermofuse = 'https://www.' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/en-terms-and-conditions.php';
 				if (preg_match('/^fr/i', $langs->defaultlang)) {
-					$urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/fr-conditions-utilisations.php';
+					$urlfortermofuse = 'https://www.' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/fr-conditions-utilisations.php';
 				}
 				if (preg_match('/^es/i', $langs->defaultlang)) {
-					$urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/es-terminos-y-condiciones.php';
+					$urlfortermofuse = 'https://www.' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/es-terminos-y-condiciones.php';
 				}
 			}
 			if ($urlfortermofuse) {

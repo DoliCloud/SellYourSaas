@@ -98,7 +98,7 @@ if (!GETPOST('cancel', 'alpha')) {
 }
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = !getDolGlobalString('SELLYOURSAAS_INFRA_COST') ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 $error = 0;
 
 if (GETPOST('addinstance', 'alpha')) {
@@ -116,7 +116,7 @@ if (GETPOST('editinstance', 'alpha')) {
  */
 
 if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
-	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 	// move the x part in domain:x into domain:closed:x
 	$tmpdomainkey = explode(':', $listofdomains[$keyforaction]);
 	if ($value == 0) {
@@ -184,8 +184,8 @@ if ($action == 'addinstance') {
 		}
 
 		if (!$error) {
-			$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-			$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+			$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+			$listofips = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'));
 			$tmpdomainkey = array();
 			$res = 0;
 
@@ -235,10 +235,10 @@ if ($action == 'editinstance') {
 		}
 
 		if (!$error) {
-			$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+			$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 			$tmpdomainkey = explode(':', $listofdomains[$keyforaction]);
 			$tmpdomainnew = explode(':', $domainnamenew);
-			$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+			$listofips = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'));
 			$res = 0;
 
 			if ($statusnew == 0) {
@@ -286,8 +286,8 @@ if ($action == 'editinstance') {
 
 if ($action == 'confirm_delete') {
 	if ($user->hasRight("sellyoursaas", "delete")) {
-		$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
-		$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+		$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+		$listofips = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'));
 		unset($listofdomains[$keyforaction]);
 		unset($listofips[$keyforaction]);
 		$listofdomains = implode(',', $listofdomains);
@@ -323,7 +323,7 @@ $datelastday=dol_get_last_day($endyear, $endmonth, 1);
 $startyear=$endyear-2;
 
 
-if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
+if (!getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP')) {
 	$langs->load("errors");
 	print $langs->trans("ErrorModuleSetupNotComplete", "SellYourSaas");
 } else {
@@ -365,8 +365,8 @@ if (empty($conf->global->SELLYOURSAAS_SUB_DOMAIN_IP)) {
 	print "</table>";
 	print '</div>';
 
-	$listofips = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
-	$listofdomains = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+	$listofips = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'));
+	$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 	$helptooltip = 'SELLYOURSAAS_SUB_DOMAIN_NAMES = '.join(', ', $listofdomains).'<br><br>SELLYOURSAAS_SUB_DOMAIN_IP = '.join(', ', $listofips);
 
 	print_fiche_titre($form->textwithpicto($langs->trans('SellYourSaasSubDomainsIP'), $helptooltip)).'<br>';

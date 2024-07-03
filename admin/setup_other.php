@@ -372,7 +372,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_OPTINMESSAGES', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_OPTINMESSAGES')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -432,7 +432,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ACCEPT_DISCOUNTCODE', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ACCEPT_DISCOUNTCODE')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -448,7 +448,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_SEPA', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_SEPA)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -474,7 +474,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_CUSTOMURL', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_CUSTOMURL)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -511,7 +511,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -548,7 +548,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -570,7 +570,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
+	if (!getDolGlobalString('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -622,7 +622,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ASK_DESTROY_REASON', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ASK_DESTROY_REASON)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ASK_DESTROY_REASON')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ASK_DESTROY_REASON">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ASK_DESTROY_REASON">'.img_picto($langs->trans("Enabled"), 'on').'</a>';

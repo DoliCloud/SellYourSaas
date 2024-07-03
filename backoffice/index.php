@@ -94,7 +94,7 @@ if ($mode == 'refreshstats') {
 }
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = !getDolGlobalString('SELLYOURSAAS_INFRA_COST') ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 
 
 /*
@@ -286,7 +286,7 @@ if (!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON')) {
 print $enabledisableannounce;
 print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
 print '<br>';
-print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_5.'"'.(empty($conf->global->SELLYOURSAAS_ANNOUNCE_ON) ? ' disabled="disabled"' : '').'>';
+print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_5.'"'.(!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') ? ' disabled="disabled"' : '').'>';
 print getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
 print '</textarea>';
 print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'"></div>';

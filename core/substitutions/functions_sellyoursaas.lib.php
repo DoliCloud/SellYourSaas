@@ -112,7 +112,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 
 	// Force some values to another services
 	// $tmpobject is now a thirdparty
-	dol_syslog("sellyoursaas_completesubstitutionarray: tmpobject->array_options['options_domain_registration_page'] = ".(isset($tmpobject->array_options['options_domain_registration_page']) ? $tmpobject->array_options['options_domain_registration_page'] : '')." conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME = ".(empty($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) ? '' : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME));
+	dol_syslog("sellyoursaas_completesubstitutionarray: tmpobject->array_options['options_domain_registration_page'] = ".(isset($tmpobject->array_options['options_domain_registration_page']) ? $tmpobject->array_options['options_domain_registration_page'] : '')." conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME = ".(!getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME') ? '' : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME));
 	if (is_object($tmpobject) && ! empty($tmpobject->array_options['options_domain_registration_page'])) {
 		global $savconf;
 

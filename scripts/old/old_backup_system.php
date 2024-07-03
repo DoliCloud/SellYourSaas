@@ -97,7 +97,7 @@ if (empty($login) || empty($password) || empty($mode)) {
 
 
 $sourcedir='/s5Home/laurent/';
-$targetdir=(empty($conf->global->DOLICLOUD_BACKUP_PATH) ? '.' : $conf->global->DOLICLOUD_BACKUP_PATH).'/';
+$targetdir=(!getDolGlobalString('DOLICLOUD_BACKUP_PATH') ? '.' : $conf->global->DOLICLOUD_BACKUP_PATH).'/';
 $server='www.on.dolicloud.com';
 
 print "Backup of database from stratus5 to localhost\n";

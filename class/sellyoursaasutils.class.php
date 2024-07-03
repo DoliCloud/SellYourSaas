@@ -76,7 +76,7 @@ class SellYourSaasUtils
 		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 		$invoice = new Facture($this->db);
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doValidateDraftInvoices.log';
 
 		$now = dol_now();
@@ -166,17 +166,17 @@ class SellYourSaasUtils
 									//$user->rights->facture->creer = 1;		// Force permission to user to validate invoices
 									//$user->rights->facture->invoice_advance->validate = 1;
 
-									if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
+									if (getDolGlobalString('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION')) {
 										$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
 									}
 
 									// Define output language
 									$outputlangs = $langs;
 									$newlang = '';
-									if (!empty($conf->global->MAIN_MULTILANGS) && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
+									if (getDolGlobalString('MAIN_MULTILANGS') && empty($newlang) && GETPOST('lang_id', 'aZ09')) {
 										$newlang = GETPOST('lang_id', 'aZ09');
 									}
-									if (!empty($conf->global->MAIN_MULTILANGS) && empty($newlang)) {
+									if (getDolGlobalString('MAIN_MULTILANGS') && empty($newlang)) {
 										$newlang = $invoice->thirdparty->default_lang;
 									}
 									if (!empty($newlang)) {
@@ -231,9 +231,9 @@ class SellYourSaasUtils
 										$draftinvoiceprocessed[$invoice->id] = $invoice->ref;
 
 										// Now we build the PDF invoice
-										$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0));
-										$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0));
-										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0));
+										$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0));
+										$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0));
+										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0));
 
 										$model_pdf = $invoice->model_pdf;
 										$ret = $invoice->fetch($invoice->id); // Reload to get new records
@@ -393,7 +393,7 @@ class SellYourSaasUtils
 
 		$mode = 'test';
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doAlertSoftEndTrial.log';
 
 		$contractprocessed = array();
@@ -407,8 +407,8 @@ class SellYourSaasUtils
 		$this->output = '';
 		$this->error='';
 
-		$delayindaysshort = $conf->global->SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT;
-		$delayindayshard = $conf->global->SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT;
+		$delayindaysshort = getDolGlobalString('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT');
+		$delayindayshard = getDolGlobalString('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT');
 		if ($delayindaysshort <= 0 || $delayindayshard <= 0) {
 			$this->error='BadValueForDelayBeforeTrialEndForAlert';
 
@@ -517,7 +517,7 @@ class SellYourSaasUtils
 						$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray);
 						$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray);
 
-						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+						$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 						$to = $object->thirdparty->email;
 						$trackid = 'thi'.$object->thirdparty->id;
 						$moreinheader = 'X-Dolibarr-Info: doAlertSoftEndTrial'."\r\n";
@@ -589,7 +589,7 @@ class SellYourSaasUtils
 
 		$mode = 'test';
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doAlertHardEndTrial.log';
 
 		$contractprocessed = array();
@@ -603,8 +603,8 @@ class SellYourSaasUtils
 		$this->output = '';
 		$this->error='';
 
-		$delayindaysshort = $conf->global->SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT;
-		$delayindayshard = $conf->global->SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT;
+		$delayindaysshort = getDolGlobalString('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT');
+		$delayindayshard = getDolGlobalString('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_HARD_ALERT');
 		if ($delayindaysshort <= 0 || $delayindayshard <= 0) {
 			$this->error='BadValueForDelayBeforeTrialEndForAlert';
 
@@ -710,7 +710,7 @@ class SellYourSaasUtils
 						$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray);
 						$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray);
 
-						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+						$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 						$to = $object->thirdparty->email;
 						$trackid = 'thi'.$object->thirdparty->id;
 						$moreinheader = 'X-Dolibarr-Info: doAlertHardEndTrial'."\r\n";
@@ -783,7 +783,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doAlertCreditCardExpiration.log';
 
 		$now = dol_now();
@@ -807,7 +807,7 @@ class SellYourSaasUtils
 		if (! empty($conf->stripe->enabled)) {
 			$service = 'StripeTest';
 			$servicestatus = 0;
-			if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+			if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 				$service = 'StripeLive';
 				$servicestatus = 1;
 			}
@@ -880,7 +880,7 @@ class SellYourSaasUtils
 
 						$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langstouse);
 						$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langstouse);
-						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+						$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 						$trackid = 'thi'.$thirdparty->id;
 						$to = $thirdparty->email;
@@ -934,7 +934,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doAlertPaypalExpiration.log';
 
 		$now = dol_now();
@@ -958,7 +958,7 @@ class SellYourSaasUtils
 		if (! empty($conf->paypal->enabled)) {
 			//$service = 'PaypalTest';
 			$servicestatus = 0;
-			if (! empty($conf->global->PAYPAL_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_PAYPAL_TEST)) {
+			if (getDolGlobalString('PAYPAL_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
 				//$service = 'PaypalLive';
 				$servicestatus = 1;
 			}
@@ -1029,7 +1029,7 @@ class SellYourSaasUtils
 
 							$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langstouse);
 							$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langstouse);
-							$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+							$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 							$trackid = 'thi'.$thirdparty->id;
 							$to = $thirdparty->email;
@@ -1084,7 +1084,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doTakePaymentStripe.log';
 
 		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
@@ -1108,7 +1108,7 @@ class SellYourSaasUtils
 
 		$service = 'StripeTest';
 		$servicestatus = 0;
-		if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+		if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 			$service = 'StripeLive';
 			$servicestatus = 1;
 		}
@@ -1281,12 +1281,12 @@ class SellYourSaasUtils
 								}
 								$user->rights->facture->invoice_advance->validate = 1;
 
-								if (! empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
+								if (getDolGlobalString('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION')) {
 									$conf->global->FAC_FORCE_DATE_VALIDATION = 1;
 								}
 
 								// Check amount
-								if (!empty($conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE)) {
+								if (getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')) {
 									$amountofinvoice = $invoice->total_ht;
 									$monthfactor = 1;
 									if ($invoice->fk_fac_rec_source > 0) {
@@ -1480,8 +1480,8 @@ class SellYourSaasUtils
 						}*/
 					}
 
-					$nbhoursbetweentries    = (empty($conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES) ? 49 : $conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES);				// Must have more that 48 hours + 1 between each try (so 1 try every 3 daily batch)
-					$nbdaysbeforeendoftries = (empty($conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES) ? 35 : $conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES);
+					$nbhoursbetweentries    = (!getDolGlobalString('SELLYOURSAAS_NBHOURSBETWEENTRIES') ? 49 : $conf->global->SELLYOURSAAS_NBHOURSBETWEENTRIES);				// Must have more that 48 hours + 1 between each try (so 1 try every 3 daily batch)
+					$nbdaysbeforeendoftries = (!getDolGlobalString('SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES') ? 35 : $conf->global->SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES);
 					$labeltouse = '';
 					$postactionmessages=array();
 
@@ -1966,7 +1966,7 @@ class SellYourSaasUtils
 								$listofmimes=array(dol_mimetype($file));
 							}
 						}
-						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+						$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 						$trackid = 'inv'.$invoice->id;
 						$moreinheader = 'X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
@@ -2069,7 +2069,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doTakePaymentStripeSEPA.log';
 
 		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
@@ -2094,7 +2094,7 @@ class SellYourSaasUtils
 		// Define $service to use for Stripe
 		$service = 'StripeTest';
 		$servicestatus = 0;
-		if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+		if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 			$service = 'StripeLive';
 			$servicestatus = 1;
 		}
@@ -2250,7 +2250,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doTakePaymentPaypal.log';
 
 		$error = 0;
@@ -2291,7 +2291,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doRefreshContracts.log';
 
 		$now = dol_now();
@@ -2503,7 +2503,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doRenewalContracts.log';
 
 		$now = dol_now();
@@ -2742,7 +2742,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doSuspendExpiredTestInstances.log';
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
@@ -2769,7 +2769,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doSuspendExpiredRealInstances.log';
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
@@ -2813,10 +2813,10 @@ class SellYourSaasUtils
 
 		$gracedelay=9999999;
 		if ($mode == 'test') {
-			$gracedelay=$conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND;
+			$gracedelay=getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND');
 		}
 		if ($mode == 'paid') {
-			$gracedelay=$conf->global->SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND;
+			$gracedelay=getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND');
 		}
 		if ($gracedelay < 1) {
 			$this->error='BadValueForDelayBeforeSuspensionCheckSetup';
@@ -3084,7 +3084,7 @@ class SellYourSaasUtils
 										$discount = $lines[$i]->remise_percent;
 
 										// Extrafields
-										if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) {
+										if (!getDolGlobalString('MAIN_EXTRAFIELDS_DISABLED') && method_exists($lines[$i], 'fetch_optionals')) {
 											$lines[$i]->fetch_optionals();
 											$array_options = $lines[$i]->array_options;
 										}
@@ -3284,7 +3284,7 @@ class SellYourSaasUtils
 
 								$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $outputlangs);
 								$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $outputlangs);
-								$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+								$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 								/*if (is_object($tmpobject) &&
 									! empty($tmpobject->array_options['options_domain_registration_page'])
@@ -3363,7 +3363,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doUndeployOldSuspendedTestInstances.log';
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
@@ -3387,7 +3387,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$savlog = $conf->global->SYSLOG_FILE;
+		$savlog = getDolGlobalString('SYSLOG_FILE');
 		$conf->global->SYSLOG_FILE = 'DOL_DATA_ROOT/dolibarr_doUndeployOldSuspendedRealInstances.log';
 
 		dol_syslog(__METHOD__, LOG_DEBUG);
@@ -3411,7 +3411,7 @@ class SellYourSaasUtils
 
 		$langs->load("agenda");
 
-		$MAXPERCALL = (empty($conf->global->SELLYOURSAAS_MAX_UNDEPLOY_PER_CALL) ? 5 : $conf->global->SELLYOURSAAS_MAX_UNDEPLOY_PER_CALL);       // Undeploy can be long (1mn). So we limit to 5 per call
+		$MAXPERCALL = (!getDolGlobalString('SELLYOURSAAS_MAX_UNDEPLOY_PER_CALL') ? 5 : $conf->global->SELLYOURSAAS_MAX_UNDEPLOY_PER_CALL);       // Undeploy can be long (1mn). So we limit to 5 per call
 
 		if ($mode != 'test' && $mode != 'paid') {
 			$this->error = 'Function doUndeployOldSuspendedInstances called with bad value for parameter '.$mode;
@@ -3590,13 +3590,13 @@ class SellYourSaasUtils
 							$contract = $object;
 							$tmpcontract = $contract;
 
-							if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+							if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
 								try {
 									dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 									$arrayconfig=array();
-									if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-										$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+									if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+										$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 									}
 
 									$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -3618,12 +3618,12 @@ class SellYourSaasUtils
 										$tmpcontract->fetch_thirdparty();
 										$mythirdpartyaccount = $tmpcontract->thirdparty;
 
-										$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+										$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 										if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 											&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 											$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 											if (! empty($conf->global->$newnamekey)) {
-												$sellyoursaasname = $conf->global->$newnamekey;
+												$sellyoursaasname = getDolGlobalString($newnamekey);
 											}
 										}
 
@@ -3853,7 +3853,7 @@ class SellYourSaasUtils
 										$error++;
 										$this->errors[] = $langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile");
 									} else {
-										$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
+										$publickeystodeploy = getDolGlobalString('SELLYOURSAAS_PUBLIC_KEY');
 										// Add public keys
 										fwrite($stream, $publickeystodeploy);
 
@@ -3979,7 +3979,7 @@ class SellYourSaasUtils
 					}
 
 					if (function_exists('ssh2_disconnect')) {
-						if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+						if (!getDolGlobalString('SELLYOURSAAS_SSH2_DISCONNECT_DISABLED')) {
 							dol_syslog("If it hangs or core dump due to ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
 							ssh2_disconnect($connection);     // Hang on some config
 						}
@@ -4117,10 +4117,10 @@ class SellYourSaasUtils
 					$countryidcodelabel=$contract->thirdparty->country_id.':'.$contract->thirdparty->country_code.':'.$contract->thirdparty->country;
 				}
 
-				$targetdir            = $conf->global->DOLICLOUD_INSTANCES_PATH;
-				$archivedir           = $conf->global->SELLYOURSAAS_TEST_ARCHIVES_PATH;
+				$targetdir            = getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
+				$archivedir           = getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH');
 				if ($ispaidinstance) {
-					$archivedir = $conf->global->SELLYOURSAAS_PAID_ARCHIVES_PATH;
+					$archivedir = getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH');
 				}
 
 				$generatedunixlogin    = $contract->array_options['options_username_os'];
@@ -4160,13 +4160,13 @@ class SellYourSaasUtils
 					}
 				}
 
-				$savsalt = $conf->global->MAIN_SECURITY_SALT;
-				$savhashalgo = $conf->global->MAIN_SECURITY_HASH_ALGO;
+				$savsalt = getDolGlobalString('MAIN_SECURITY_SALT');
+				$savhashalgo = getDolGlobalString('MAIN_SECURITY_HASH_ALGO');
 
-				$conf->global->MAIN_SECURITY_HASH_ALGO = empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) ? '' : $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD;
+				$conf->global->MAIN_SECURITY_HASH_ALGO = !getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') ? '' : $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD;
 				dol_syslog("Using this MAIN_SECURITY_HASH_ALGO for __APPPASSWORDxxx__ variables : " . getDolGlobalString('MAIN_SECURITY_HASH_ALGO'));
 
-				$conf->global->MAIN_SECURITY_SALT = empty($conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION) ? '' : $conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION;
+				$conf->global->MAIN_SECURITY_SALT = !getDolGlobalString('SELLYOURSAAS_SALTFORPASSWORDENCRYPTION') ? '' : $conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION;
 				dol_syslog("Using this salt for __APPPASSWORDxxxSALTED__ variables : " . getDolGlobalString('MAIN_SECURITY_SALT'));
 				$password0salted = dol_hash($password);
 				$passwordmd5salted = dol_hash($password, 'md5');
@@ -4187,7 +4187,7 @@ class SellYourSaasUtils
 				$substitarray=array(
 					'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,
 					'__INSTANCEDBPREFIX__'=>$generateddbprefix,
-					'__DOL_DATA_ROOT__'=>(empty($conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT) ? DOL_DATA_ROOT : $conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT),
+					'__DOL_DATA_ROOT__'=>(!getDolGlobalString('SELLYOURSAAS_FORCE_DOL_DATA_ROOT') ? DOL_DATA_ROOT : $conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT),
 					'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
 					'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
 					'__OSHOSTNAME__'=>$generatedunixhostname,
@@ -4220,7 +4220,7 @@ class SellYourSaasUtils
 					'__APPDOMAIN__'=>$sldAndSubdomain.'.'.$domainname,
 					'__ALLOWOVERRIDE__'=>$tmppackage->allowoverride,
 					'__VIRTUALHOSTHEAD__'=>$customvirtualhostline,
-					'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT,
+					'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT'),
 				);
 
 				// If a given timezone was set for contract/instance
@@ -4324,7 +4324,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.$CERTIFFORCUSTOMDOMAIN;
 				$commandurl.= '&'.$archivedir;
 				$commandurl.= '&'.$SSLON;
-				$commandurl.= '&'.(empty($conf->global->noapachereload) ? 'apachereload' : 'noapachereload');
+				$commandurl.= '&'.(!getDolGlobalString('noapachereload') ? 'apachereload' : 'noapachereload');
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->allowoverride);	// Param 34 in .sh: Will replace __AllowOverride__ in virtual host
 				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostline);		// Param 35 in .sh: Will replace __VirtualHostHead__ in virtual host
 				$commandurl.= '&'.($ispaidinstance ? 1 : 0);
@@ -4419,7 +4419,7 @@ class SellYourSaasUtils
 
 				// Update resource count
 				if (! empty($producttmp->array_options['options_resource_formula'])) {
-					$targetdir = $conf->global->DOLICLOUD_INSTANCES_PATH;
+					$targetdir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
 
 					$tmp=explode('.', $contract->ref_customer, 2);
 					$sldAndSubdomain=$tmp[0];
@@ -4466,13 +4466,13 @@ class SellYourSaasUtils
 						$tmppackage->fetch($producttmp->array_options['options_package']);
 					}
 
-					$savsalt = $conf->global->MAIN_SECURITY_SALT;
-					$savhashalgo = $conf->global->MAIN_SECURITY_HASH_ALGO;
+					$savsalt = getDolGlobalString('MAIN_SECURITY_SALT');
+					$savhashalgo = getDolGlobalString('MAIN_SECURITY_HASH_ALGO');
 
-					$conf->global->MAIN_SECURITY_HASH_ALGO = empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) ? '' : $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD;
+					$conf->global->MAIN_SECURITY_HASH_ALGO = !getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') ? '' : $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD;
 					dol_syslog("Using this MAIN_SECURITY_HASH_ALGO for __APPPASSWORDxxx__ variables : " . getDolGlobalString('MAIN_SECURITY_HASH_ALGO'));
 
-					$conf->global->MAIN_SECURITY_SALT = empty($conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION) ? '' : $conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION;
+					$conf->global->MAIN_SECURITY_SALT = !getDolGlobalString('SELLYOURSAAS_SALTFORPASSWORDENCRYPTION') ? '' : $conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION;
 					dol_syslog("Using this salt for __APPPASSWORDxxxSALTED__ variables : " . getDolGlobalString('MAIN_SECURITY_SALT'));
 					$password0salted = dol_hash($password);
 					$passwordmd5salted = dol_hash($password, 'md5');
@@ -4674,7 +4674,7 @@ class SellYourSaasUtils
 								}
 
 								if (function_exists('ssh2_disconnect')) {
-									if (empty($conf->global->SELLYOURSAAS_SSH2_DISCONNECT_DISABLED)) {
+									if (!getDolGlobalString('SELLYOURSAAS_SSH2_DISCONNECT_DISABLED')) {
 										dol_syslog("If it hangs or core dump later due to ssh2_disconnect, try to set SELLYOURSAAS_SSH2_DISCONNECT_DISABLED=1", LOG_NOTICE);
 										ssh2_disconnect($connection);     // Hang on some config (ex: php7.0/ubuntu18.04.6 connecting to ubuntu 20.04 or 22.04.1
 									}
@@ -4939,13 +4939,13 @@ class SellYourSaasUtils
 
 
 		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && $remoteaction != 'backup') {
+		if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED') && $remoteaction != 'backup') {
 			try {
 				dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 				$arrayconfig=array();
-				if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-					$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+				if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+					$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 				}
 
 				$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -4972,12 +4972,12 @@ class SellYourSaasUtils
 					$tmpcontract->fetch_thirdparty();
 					$mythirdpartyaccount = $tmpcontract->thirdparty;
 
-					$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+					$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 					if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 						&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 						$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 						if (! empty($conf->global->$newnamekey)) {
-							$sellyoursaasname = $conf->global->$newnamekey;
+							$sellyoursaasname = getDolGlobalString($newnamekey);
 						}
 					}
 
@@ -5037,7 +5037,7 @@ class SellYourSaasUtils
 
 		$REMOTEIPTODEPLOYTO='';
 		if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
-			$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+			$tmparray=explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 			$found=0;
 			foreach ($tmparray as $key => $val) {
 				$newval = preg_replace('/:.*$/', '', $val);
@@ -5057,7 +5057,7 @@ class SellYourSaasUtils
 				$this->errors[] = "Failed to found position of server domain '".$domainname."' into SELLYOURSAAS_SUB_DOMAIN_NAMES";
 				$error++;
 			} else {
-				$tmparray = explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_IP);
+				$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'));
 				$REMOTEIPTODEPLOYTO = $tmparray[($found-1)];
 				if (! $REMOTEIPTODEPLOYTO) {
 					dol_syslog("Failed to found ip of server domain '".$domainname."' at position '".$found."' into SELLYOURSAAS_SUB_DOMAIN_IP" . getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP'), LOG_WARNING);

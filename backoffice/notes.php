@@ -89,7 +89,7 @@ $pagenext = $page + 1;
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = !getDolGlobalString('SELLYOURSAAS_INFRA_COST') ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 
 
 

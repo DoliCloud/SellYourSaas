@@ -496,7 +496,7 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	}
 	if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0) {
 		dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
-		setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, $conf->global->SELLYOURSAAS_MAIN_EMAIL), null, 'errors');
+		setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL')), null, 'errors');
 		header("Location: ".$newurl);
 		exit(-28);
 	}
@@ -504,8 +504,8 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	// Possibility to block email adresses from a regex into global setup
 	// TODO: should be possible to use the blacklist list.
 	if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
-		if (! empty($conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED)) {
-			$listofbanned = explode(",", $conf->global->SELLYOURSAAS_EMAIL_ADDRESSES_BANNED);
+		if (getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED')) {
+			$listofbanned = explode(",", getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED'));
 			if (! empty($listofbanned)) {
 				foreach ($listofbanned as $banned) {
 					if (preg_match('/'.preg_quote($banned, '/').'/i', $email)) {
@@ -521,8 +521,8 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 	if (getDolGlobalInt('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED') && getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY')) {
 		$allowed = false;
 		$disposable = false;
-		$allowedemail = (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED) ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());
-		$bannedemail = (! empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED) ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED, true) : array());
+		$allowedemail = (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED') ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());
+		$bannedemail = (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED') ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED, true) : array());
 		$parts = explode("@", $email);
 		$domaintocheck = $parts[1];
 
@@ -768,8 +768,8 @@ if ($reusecontractid) {
 	$fqdninstance = $sldAndSubdomain.'.'.$domainname;
 } else {
 	// Check number of instance with same IP deployed (Rem: for partners, ip are the one of their customer)
-	$MAXDEPLOYMENTPERIP = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP) ? 20 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP);
-	$MAXDEPLOYMENTPERIPVPN = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN) ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN);
+	$MAXDEPLOYMENTPERIP = (!getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIP') ? 20 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP);
+	$MAXDEPLOYMENTPERIPVPN = (!getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN') ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN);
 
 	$nbofinstancewithsameip=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
@@ -816,7 +816,7 @@ if ($reusecontractid) {
 	}
 
 	// Check number of instance with same IP on same hour
-	$MAXDEPLOYMENTPERIPPERHOUR = (empty($conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR) ? 5 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR);
+	$MAXDEPLOYMENTPERIPPERHOUR = (!getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR') ? 5 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR);
 
 	$nbofinstancewithsameip=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
@@ -926,7 +926,7 @@ if ($reusecontractid) {
 		$email = $tmpthirdparty->email;
 
 		// Check number of instances for the same thirdparty account
-		$MAXINSTANCESPERACCOUNT = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (empty($conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
+		$MAXINSTANCESPERACCOUNT = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (!getDolGlobalString('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT') ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
 
 		$listofcontractid = array();
 		$listofcontractidopen = array();
@@ -956,12 +956,12 @@ if ($reusecontractid) {
 		}
 
 		if (count($listofcontractidopen) >= $MAXINSTANCESPERACCOUNT) {
-			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+			$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$tmpthirdparty->array_options['options_domain_registration_page'];
 				if (! empty($conf->global->$newnamekey)) {
-					$sellyoursaasemail = $conf->global->$newnamekey;
+					$sellyoursaasemail = getDolGlobalString($newnamekey);
 				}
 			}
 
@@ -981,13 +981,13 @@ if ($reusecontractid) {
 			dol_print_error_email('FETCHTP'.$email, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
 			exit(-1);
 		} elseif ($result > 0) {	// Found 1 record of an existing account.
-			$myaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+			$myaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 			$myaccountorigindomain = $tmpthirdparty->array_options['options_domain_registration_page'];
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$tmpthirdparty->array_options['options_domain_registration_page'];
 				if (! empty($conf->global->$newnamekey)) {
-					$myaccounturl = $conf->global->$newnamekey;
+					$myaccounturl = getDolGlobalString($newnamekey);
 				}
 			}
 			$myaccounturl.='?mode=instances&addanotherinstance=1&service='.((int) $service).'&sldAndSubdomain='.urlencode($sldAndSubdomain).'#addanotherinstance';
@@ -1022,7 +1022,7 @@ if ($reusecontractid) {
 		}
 	}
 
-	if (! empty($conf->global->SELLYOURSAAS_NAME_RESERVED) && preg_match('/'.$conf->global->SELLYOURSAAS_NAME_RESERVED.'/', $fqdninstance)) {
+	if (getDolGlobalString('SELLYOURSAAS_NAME_RESERVED') && preg_match('/' . getDolGlobalString('SELLYOURSAAS_NAME_RESERVED').'/', $fqdninstance)) {
 		// @TODO Exclude some thirdparties
 
 
@@ -1043,8 +1043,8 @@ if ($reusecontractid) {
 	$generateddbname = 'dbn'.substr(getRandomPassword(true, array('I')), 0, 9);
 	$generateddbusername = 'dbu'.substr(getRandomPassword(true, array('I')), 0, 9);
 	$generateddbpassword = substr(getRandomPassword(true, array('I')), 0, 14);
-	$generateddbhostname = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $sldAndSubdomain.'.'.$domainname);
-	$generateddbport = (! empty($conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT) ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT : 3306);
+	$generateddbhostname = (getDolGlobalString('SELLYOURSAAS_FORCE_DATABASE_HOST') ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $sldAndSubdomain.'.'.$domainname);
+	$generateddbport = (getDolGlobalString('SELLYOURSAAS_FORCE_DATABASE_PORT') ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT : 3306);
 	$generatedunixhostname = $sldAndSubdomain.'.'.$domainname;
 
 
@@ -1071,7 +1071,7 @@ if ($reusecontractid) {
 
 	if ($productref == 'none') {	// If reseller
 		$tmpthirdparty->fournisseur = 1;
-		$tmpthirdparty->array_options['options_commission'] = (empty($conf->global->SELLYOURSAAS_DEFAULT_COMMISSION) ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
+		$tmpthirdparty->array_options['options_commission'] = (!getDolGlobalString('SELLYOURSAAS_DEFAULT_COMMISSION') ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
 	}
 
 	if ($country_code) {
@@ -1147,12 +1147,12 @@ if ($reusecontractid) {
 		$langs = $savlangs;
 	}
 
-	if (! empty($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG)) {
+	if (getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG')) {
 		dol_syslog("register_instance.php We will set customer into the categroy");
 
 		// To prevent deletion of categories already present
 		$categories =  $tmpthirdparty->getCategoriesCommon('customer');
-		$arraycateg = array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG);
+		$arraycateg = array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG'));
 		if (is_array($categories) && !in_array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG, $categories)) {
 			$categories = array_merge($categories, $arraycateg);
 		}
@@ -1177,9 +1177,9 @@ if ($reusecontractid) {
 	}
 
 	if ($productref == 'none') {
-		if (! empty($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG)) {
+		if (getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG')) {
 			$tmpthirdparty->name_alias = dol_sanitizeFileName($tmpthirdparty->name);
-			$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG), 'supplier');
+			$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG => getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG')), 'supplier');
 			if ($result < 0) {
 				$db->rollback();
 
@@ -1392,7 +1392,7 @@ if ($reusecontractid) {
 				$price = getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$tmpsubproduct->id."_".$partner."_".$tmpproduct->id) ? getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$tmpsubproduct->id."_".$partner."_".$tmpproduct->id) : $tmpsubproduct->price;
 			}
 			$desc = '';
-			if (empty($conf->global->SELLYOURSAAS_NO_PRODUCT_DESCRIPTION_IN_CONTRACT)) {
+			if (!getDolGlobalString('SELLYOURSAAS_NO_PRODUCT_DESCRIPTION_IN_CONTRACT')) {
 				$desc = $tmpsubproduct->description;
 			}
 			$discount = 0;
@@ -1483,7 +1483,7 @@ if (! $error && $productref != 'none') {
 	$contract->array_options['options_undeployment_ip'] = '';
 
 	// Clear password, we don't need it anymore.
-	if (empty($conf->global->SELLYOURSAAS_KEEP_INIT_ADMINPASS)) {
+	if (!getDolGlobalString('SELLYOURSAAS_KEEP_INIT_ADMINPASS')) {
 		$contract->array_options['options_deployment_init_adminpass'] = '';
 	}
 
@@ -1517,7 +1517,7 @@ if (! $error) {
 	$newurl=preg_replace('/register_instance\.php/', 'index.php?welcomecid='.$contract->id.(($fromsocid > 0) ? '&fromsocid='.$fromsocid : ''), $newurl);
 
 	$anonymoususer=new User($db);
-	$anonymoususer->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
+	$anonymoususer->fetch(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'));
 	$_SESSION['dol_login']=$anonymoususer->login;				// Set dol_login in session so for next page index.php we will load, we are already logged.
 
 	if ($fromsocid > 0) {
@@ -1567,12 +1567,12 @@ if (! $error) {
 		$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
 		$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
 
-		$sellyoursaasemailnoreply = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+		$sellyoursaasemailnoreply = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 		$constforaltemailnoreply = 'SELLYOURSAAS_NOREPLY_EMAIL-'.$domainname;
 		if (! empty($conf->global->$constforaltemailnoreply)) {
-			$sellyoursaasemailnoreply = $conf->global->$constforaltemailnoreply;
+			$sellyoursaasemailnoreply = getDolGlobalString($constforaltemailnoreply);
 		}
 
 		$to = $contract->thirdparty->email;
@@ -1630,9 +1630,9 @@ if (is_object($contract) && method_exists($contract, 'fetch_thirdparty')) {
 
 // Send email to customer
 if (is_object($contract->thirdparty)) {
-	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-	$sellyoursaasemailsupervision = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
-	$sellyoursaasemailnoreply = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+	$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
+	$sellyoursaasemailsupervision = getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL');
+	$sellyoursaasemailnoreply = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 	$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 	$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
@@ -1640,9 +1640,9 @@ if (is_object($contract->thirdparty)) {
 	$constforaltemailnoreply = 'SELLYOURSAAS_NOREPLY_EMAIL-'.$domainname;
 	if (! empty($conf->global->$constforaltname)) {
 		$sellyoursaasdomain = $domainname;
-		$sellyoursaasname = $conf->global->$constforaltname;
-		$sellyoursaasemailsupervision = $conf->global->$constforaltemailsupervision;
-		$sellyoursaasemailnoreply = $conf->global->$constforaltemailnoreply;
+		$sellyoursaasname = getDolGlobalString($constforaltname);
+		$sellyoursaasemailsupervision = getDolGlobalString($constforaltemailsupervision);
+		$sellyoursaasemailnoreply = getDolGlobalString($constforaltemailnoreply);
 	}
 
 	$to = $contract->thirdparty->email;
@@ -1666,8 +1666,8 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) {
 	$favicon.='.png';
 }
-if (! empty($conf->global->MAIN_FAVICON_URL)) {
-	$favicon=$conf->global->MAIN_FAVICON_URL;
+if (getDolGlobalString('MAIN_FAVICON_URL')) {
+	$favicon=getDolGlobalString('MAIN_FAVICON_URL');
 }
 
 $head = '';
@@ -1710,12 +1710,12 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 		}
 
 		if (empty($linklogo) && ! empty($conf->global->$constlogosmall)) {
-			if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.$conf->global->$constlogosmall)) {
-				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/'.$conf->global->$constlogosmall);
+			if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constlogosmall))) {
+				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/' . getDolGlobalString($constlogosmall));
 			}
 		} elseif (empty($linklogo) && ! empty($conf->global->$constlogo)) {
-			if (is_readable($conf->mycompany->dir_output.'/logos/'.$conf->global->$constlogo)) {
-				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/'.$conf->global->$constlogo);
+			if (is_readable($conf->mycompany->dir_output.'/logos/' . getDolGlobalString($constlogo))) {
+				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/' . getDolGlobalString($constlogo));
 			}
 		} else {
 			$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.getDolGlobalString('SELLYOURSAAS_LOGO_SMALL', 'notdefined.png'));

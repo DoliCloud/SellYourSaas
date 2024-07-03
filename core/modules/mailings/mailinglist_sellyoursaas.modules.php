@@ -281,7 +281,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 			$old = '';
 			while ($i < $num) {
 				$obj = $this->db->fetch_object($result);
-				if ($old <> $obj->email) {
+				if ($old != $obj->email) {
 					$cibles[$j] = array(
 						'email' => $obj->email,
 						'lastname' => $obj->lastname,

@@ -103,12 +103,12 @@ class ActionsSellyoursaas
 						if (! empty($conf->global->$newnamekey)) {
 							$newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
 							if (! empty($conf->global->$newurlkey)) {
-								$urlmyaccount = $conf->global->$newurlkey;
+								$urlmyaccount = getDolGlobalString($newurlkey);
 							} else {
 								$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);
 							}
 
-							$sellyoursaasname = $conf->global->$newnamekey;
+							$sellyoursaasname = getDolGlobalString($newnamekey);
 						}
 					}
 
@@ -162,7 +162,7 @@ class ActionsSellyoursaas
 		if (! empty($parameters['objref'])) {
 			$isanurlofasellyoursaasinstance=false;
 			if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
-				$tmparray=explode(',', $conf->global->SELLYOURSAAS_SUB_DOMAIN_NAMES);
+				$tmparray=explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 				foreach ($tmparray as $tmp) {
 					$newtmp = preg_replace('/:.*$/', '', $tmp);
 					if (preg_match('/'.preg_quote('.'.$newtmp, '/').'$/', $parameters['objref'])) {
@@ -644,7 +644,7 @@ class ActionsSellyoursaas
 					//setEventMessages($contract->error, $contract->errors, 'errors');
 				} else {
 					if ($action == 'suspendmaintenance') {
-						setEventMessages($langs->trans('InstanceInMaintenanceMode', $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), null, 'warnings');
+						setEventMessages($langs->trans('InstanceInMaintenanceMode', getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')), null, 'warnings');
 					} else {
 						setEventMessages('InstanceUnsuspended', null, 'mesgs');
 					}
@@ -659,7 +659,7 @@ class ActionsSellyoursaas
 			if (! empty($conf->stripe->enabled)) {
 				$service = 'StripeTest';
 				$servicestatusstripe = 0;
-				if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+				if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 					$service = 'StripeLive';
 					$servicestatusstripe = 1;
 				}
@@ -736,7 +736,7 @@ class ActionsSellyoursaas
 		if ($action == 'suspendmaintenancetoconfirm') {
 			// Switch to maintenance mode confirmation
 			$formquestion = array(array('type' => 'textarea', 'name' => 'suspendmaintenancemessage', 'label' => $langs->trans("MaintenanceMessage"), 'value' =>'', 'morecss'=>'centpercent'));
-			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Confirmation'), $langs->trans("ConfirmMaintenance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT), 'suspendmaintenance', $formquestion, 'no', 1, 350, 600);
+			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('Confirmation'), $langs->trans("ConfirmMaintenance", getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')), 'suspendmaintenance', $formquestion, 'no', 1, 350, 600);
 			$this->resprints = $formconfirm;
 		}
 
@@ -807,9 +807,9 @@ class ActionsSellyoursaas
 					// Show warning if in maintenance mode
 					if (! empty($object->array_options['options_suspendmaintenance_message'])) {
 						if (preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
-							$messagetoshow = $langs->trans("InstanceIsARedirectionInstance", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+							$messagetoshow = $langs->trans("InstanceIsARedirectionInstance", getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT'));
 						} else {
-							$messagetoshow = $langs->trans("InstanceInMaintenanceMode", $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT);
+							$messagetoshow = $langs->trans("InstanceInMaintenanceMode", getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT'));
 						}
 						$messagetoshow .= '<br><u>'.$langs->trans("MaintenanceMessage").':</u><br>';
 						$messagetoshow .= $object->array_options['options_suspendmaintenance_message'];
@@ -903,7 +903,7 @@ class ActionsSellyoursaas
 				}
 
 				if (is_object($thirdparty)) {
-					$categ_customer_sellyoursaas = $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG;
+					$categ_customer_sellyoursaas = getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG');
 
 					include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 					$categobj = new Categorie($this->db);
@@ -1018,10 +1018,10 @@ class ActionsSellyoursaas
 
 		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo'))) {
 			$langs->load("sellyoursaas@sellyoursaas");
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) {
+			if (!getDolGlobalString('SELLYOURSAAS_DISABLE_TRIAL_OR_PAID')) {
 				print_liste_field_titre("TrialOrPaid", $_SERVER["PHP_SELF"], '', '', $param, ' align="center"', $sortfield, $sortorder);
 			}
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED)) {
+			if (!getDolGlobalString('SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED')) {
 				print_liste_field_titre("PaymentModeSaved", $_SERVER["PHP_SELF"], '', '', $param, ' align="center"', $sortfield, $sortorder);
 			}
 		}
@@ -1047,10 +1047,10 @@ class ActionsSellyoursaas
 
 		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo'))) {
 			//global $param, $sortfield, $sortorder;
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) {
+			if (!getDolGlobalString('SELLYOURSAAS_DISABLE_TRIAL_OR_PAID')) {
 				print '<td class="liste_titre"></td>';
 			}
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED)) {
+			if (!getDolGlobalString('SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED')) {
 				print '<td class="liste_titre"></td>';
 			}
 		}
@@ -1072,7 +1072,7 @@ class ActionsSellyoursaas
 		global $contextpage;
 
 		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo'))) {
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_TRIAL_OR_PAID)) { // Column "Mode paid or free" not hidden
+			if (!getDolGlobalString('SELLYOURSAAS_DISABLE_TRIAL_OR_PAID')) { // Column "Mode paid or free" not hidden
 				global $contractmpforloop;
 				if (! is_object($contractmpforloop)) {
 					$contractmpforloop = new Contrat($db);
@@ -1103,7 +1103,7 @@ class ActionsSellyoursaas
 				}
 				print '</td>';
 			}
-			if (empty($conf->global->SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED)) {    // Column "Payment mode recorded" not hidden
+			if (!getDolGlobalString('SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED')) {    // Column "Payment mode recorded" not hidden
 				print '<td class="center">';
 				if (!empty($parameters['obj']->options_deployment_status)) {
 					dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
@@ -1146,7 +1146,7 @@ class ActionsSellyoursaas
 		global $conf,$langs;
 		global $hookmanager;
 
-		if (! empty($conf->global->SELLYOURSAAS_AFTERPDFCREATION_HOOK_DISABLED)) {
+		if (getDolGlobalString('SELLYOURSAAS_AFTERPDFCREATION_HOOK_DISABLED')) {
 			dol_syslog("Trigger afterPDFCreation was called but constant 'SELLYOURSAAS_AFTERPDFCREATION_HOOK_DISABLED' is defined.", LOG_WARNING);
 			return 0;
 		}
@@ -1241,7 +1241,7 @@ class ActionsSellyoursaas
 
 		if ($pagecounttmp) {
 			$pdf->Output($file, 'F');
-			if (! empty($conf->global->MAIN_UMASK)) {
+			if (getDolGlobalString('MAIN_UMASK')) {
 				@chmod($file, octdec($conf->global->MAIN_UMASK));
 			}
 		}

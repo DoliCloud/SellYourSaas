@@ -267,13 +267,13 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 		$thirdparty = $object->thirdparty;
 	}
 	if ($user->admin && is_object($thirdparty) && (! empty($thirdparty->array_options['options_dolicloud']))) {
-		$urlmyaccount = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+		$urlmyaccount = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 		if (! empty($thirdparty->array_options['options_domain_registration_page'])
 			&& $thirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 			$constforaltname = $thirdparty->array_options['options_domain_registration_page'];
 			$newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
 			if (! empty($conf->global->$newurlkey)) {
-				$urlmyaccount = $conf->global->$newurlkey;
+				$urlmyaccount = getDolGlobalString($newurlkey);
 			} else {
 				$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
 			}

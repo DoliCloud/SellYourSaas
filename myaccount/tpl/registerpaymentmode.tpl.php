@@ -120,7 +120,7 @@ if ($totalInvoiced == 0) {
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_PRICES_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
-				$urlforplanprices = $conf->global->$newnamekey;
+				$urlforplanprices = getDolGlobalString($newnamekey);
 			}
 
 			if ($urlforplanprices) {
@@ -288,7 +288,7 @@ if ($foundcard) {
 }
 
 
-if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {	// Use a SCA ready method
+if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {	// Use a SCA ready method
 	dol_syslog("Test if Stripe customer exists for current thirdparty (create it if not) and create the setupintent");
 
 	$fulltag='CUS='.$mythirdpartyaccount->id;
@@ -299,7 +299,7 @@ if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {	// 
 	$service = 'StripeLive';
 	$servicestatus = 1;
 
-	if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox', 'alpha')) {
+	if (!getDolGlobalString('STRIPE_LIVE') || GETPOST('forcesandbox', 'alpha')) {
 		$service = 'StripeTest';
 		$servicestatus = 0;
 	}
@@ -308,16 +308,16 @@ if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {	// 
 	$stripecu = null;
 	$stripecu = $stripe->customerStripe($mythirdpartyaccount, $stripeacc, $servicestatus, 1); // will use $stripearrayofkeysbyenv to know which env to search into
 
-	if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {
+	if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {
 		$setupintent=$stripe->getSetupIntent('Stripe setupintent '.$fulltag, $mythirdpartyaccount, $stripecu, $stripeacc, $servicestatus);
 		if ($stripe->error) {
 			setEventMessages($stripe->error, null, 'errors');
 
-			$emailforerror = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+			$emailforerror = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-				$emailforerror = $conf->global->$newnamekey;
+				$emailforerror = getDolGlobalString($newnamekey);
 			}
 
 			setEventMessages($langs->trans("ErrorContactEMail", $emailforerror, 'StripeCusNotFound'), null, 'errors');
@@ -332,7 +332,7 @@ print '</div></div>';
 
 require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
 // Reforce the $stripearrayofkeys because content may have been changed by the include of config.php
-if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox', 'alpha') || ! empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+if (!getDolGlobalString('STRIPE_LIVE') || GETPOST('forcesandbox', 'alpha') || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 	$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
 } else {
 	$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
@@ -352,7 +352,7 @@ print '	<center><div class="form-row" style="max-width: 320px">
 
 print '<br>';
 
-if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION) && is_object($setupintent)) {
+if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION') && is_object($setupintent)) {
 	print '<input type="hidden" name="setupintentid" value="'.$setupintent->id.'">'."\n";
 	print '<button class="btn btn-info btn-circle" id="buttontopay" data-secret="'.$setupintent->client_secret.'">'.$langs->trans("Save").'</button>';
 } else {
@@ -363,7 +363,7 @@ print '<img id="hourglasstopay" class="hidden" src="'.DOL_URL_ROOT.'/theme/'.$co
 print ' ';
 print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 
-if (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION) && is_object($setupintent)) {
+if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION') && is_object($setupintent)) {
 	// TODO Enable this legal mention for SCA
 	/*$urlfortermofuse = '';
 	 if ($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME == 'dolicloud.com')
@@ -385,9 +385,9 @@ print '<script src="https://js.stripe.com/v3/"></script>'."\n";
 // Code to ask the credit card. This use the default "API version". No way to force API version when using JS code.
 print '<script type="text/javascript" language="javascript">'."\n";
 
-if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
+if (getDolGlobalString('STRIPE_USE_NEW_CHECKOUT')) {
 	// Not implemented
-} elseif (! empty($conf->global->STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION)) {
+} elseif (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {
 	?>
 			// Code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION set
 
@@ -489,7 +489,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 				}
 			});
 
-	<?php
+<?php
 } else { // Old method (not SCA ready)
 	print "
             	// Old code for payment with option STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION off and STRIPE_USE_NEW_CHECKOUT off
@@ -539,7 +539,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
     			var form = document.getElementById('payment-form');
     			form.addEventListener('submit', function(event) {
     			  event.preventDefault();";
-	if (empty($conf->global->STRIPE_USE_3DSECURE)) {	// Ask credit card directly, no 3DS test
+	if (!getDolGlobalString('STRIPE_USE_3DSECURE')) {	// Ask credit card directly, no 3DS test
 		?>
 						/* Use token */
 						stripe.createToken(card).then(function(result) {
@@ -552,7 +552,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 							  stripeTokenHandler(result.token);
 							}
 						});
-		<?php
+<?php
 	} else { // Ask credit card with 3DS test
 		?>
 						/* Use 3DS source */
@@ -566,7 +566,7 @@ if (! empty($conf->global->STRIPE_USE_NEW_CHECKOUT)) {
 							  stripeSourceHandler(result.source);
 							}
 						});
-		<?php
+<?php
 	}
 		print "
     			});
@@ -686,7 +686,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 				print '<br><!-- Link to download main doc -->'."\n";
 				$publicurltodownload = $companybankaccounttemp->getLastMainDocLink($object->element, 0, 1);
 
-				$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+				$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 				include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 				$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 

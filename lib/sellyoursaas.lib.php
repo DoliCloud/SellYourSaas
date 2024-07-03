@@ -98,7 +98,7 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	if (! empty($conf->stripe->enabled)) {
 		$service = 'StripeTest';
 		$servicestatusstripe = 0;
-		if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+		if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 			$service = 'StripeLive';
 			$servicestatusstripe = 1;
 		}
@@ -106,7 +106,7 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	$servicestatuspaypal = 0;
 	if (! empty($conf->paypal->enabled)) {
 		$servicestatuspaypal = 0;
-		if (! empty($conf->global->PAYPAL_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_PAYPAL_TEST)) {
+		if (getDolGlobalString('PAYPAL_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
 			$servicestatuspaypal = 1;
 		}
 	}
@@ -375,7 +375,7 @@ function getRootUrlForAccount($object)
 {
 	global $db, $conf;
 
-	$tmpret = explode(',', $conf->global->SELLYOURSAAS_ACCOUNT_URL);     // By default
+	$tmpret = explode(',', getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL'));     // By default
 	$ret = $tmpret[0];
 
 	$newobject = $object;
@@ -501,10 +501,10 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 
 	// Evaluate VPN probability with Getintel
-	if (!empty($conf->global->SELLYOURSAAS_GETIPINTEL_ON)) {
+	if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON')) {
 		$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
-		if (!empty($conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL)) {
-			$emailforvpncheck = $conf->global->SELLYOURSAAS_GETIPINTEL_EMAIL;
+		if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL')) {
+			$emailforvpncheck = getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL');
 		}
 		$url = 'http://check.getipintel.net/check.php?ip='.urlencode($remoteip).'&contact='.urlencode($emailforvpncheck).'&flag=f';
 		$result = getURLContent($url, 'GET', '', 1, array(), array('http', 'https'), 0);
@@ -527,10 +527,10 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 		}
 
 		// Refused if VPN probability from GetIP is too high
-		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+		if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED')) {
 			$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED = 85;
 
-			if (empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
+			if (!getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON')) {
 				// If not other check, we get default $fraudscoreip = 99
 				$fraudscoreip = 99;		// getintel is very important because we did not do other tests with IPQuality
 			} else {
@@ -546,7 +546,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	}
 
 	// Evaluate VPN probability with IPQualityScore but also TOR or bad networks and email
-	if (!empty($conf->global->SELLYOURSAAS_IPQUALITY_ON) && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_IPQUALITY_KEY)) {
+	if (getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON') && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY')) {
 		// Retrieve additional (optional) data points which help us enhance fraud scores.
 		$user_agent = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]);
 		$user_language = (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? '' : $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
@@ -599,7 +599,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 				$jsonreponse = json_decode($result['content'], true);
 				dol_syslog("For ip ".$remoteip.": fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - recent_abuse=".$jsonreponse['recent_abuse']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
 				if ($jsonreponse['success']) {
-					if ($jsonreponse['recent_abuse'] && !empty($conf->global->SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP)) {	// Not recommanded if users are using shared IP
+					if ($jsonreponse['recent_abuse'] && getDolGlobalString('SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP')) {	// Not recommanded if users are using shared IP
 						dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
 						$abusetest = 2;
 					}
@@ -631,7 +631,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 		}
 
 		// Refused if VPN probability from IPQuality is too high
-		if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED)) {
+		if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED')) {
 			$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED = 85;
 
 			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED && ($fraudscoreip >= $conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED)) {
@@ -688,8 +688,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	// Deprecated. Use instead the List of blacklist ips into menu. This is done a begin of page
 
 	// Block for some IPs
-	if (!$whitelisted && empty($abusetest) && !empty($conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS)) {
-		$arrayofblacklistips = explode(',', $conf->global->SELLYOURSAAS_BLACKLIST_IP_MASKS);
+	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS')) {
+		$arrayofblacklistips = explode(',', getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS'));
 		foreach ($arrayofblacklistips as $blacklistip) {
 			if ($remoteip == $blacklistip) {
 				dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS");

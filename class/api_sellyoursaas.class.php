@@ -73,8 +73,8 @@ class Sellyoursaasapi extends DolibarrApi
 		$tmplangs->setDefaultLang($lang);
 		$tmplangs->load("sellyoursaas@sellyoursaas");
 
-		if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
-			$return['SELLYOURSAAS_DISABLE_NEW_INSTANCES'] = $conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES;	// Global disabling of new instance creation
+		if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
+			$return['SELLYOURSAAS_DISABLE_NEW_INSTANCES'] = getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES');	// Global disabling of new instance creation
 		}
 
 		$arrayofdifferentmessages = array();
@@ -85,7 +85,7 @@ class Sellyoursaasapi extends DolibarrApi
 					$return[$key] = $val;
 					$newkey = preg_replace('/_ON/', '', $key);
 					if (!empty($conf->global->$newkey)) {
-						$return[$newkey] = $conf->global->$newkey;
+						$return[$newkey] = getDolGlobalString($newkey);
 						$arrayofdifferentmessages[] = $tmplangs->trans(str_replace(array('(', ')'), '', $conf->global->$newkey));
 						$return[$newkey.'_trans'] = $tmplangs->trans(str_replace(array('(', ')'), '', $conf->global->$newkey));
 					}

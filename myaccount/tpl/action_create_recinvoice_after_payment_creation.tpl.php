@@ -208,7 +208,7 @@ if (! $error) {
 				$discount = $lines[$i]->remise_percent;
 
 				// Extrafields
-				if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) {
+				if (!getDolGlobalString('MAIN_EXTRAFIELDS_DISABLED') && method_exists($lines[$i], 'fetch_optionals')) {
 					$lines[$i]->fetch_optionals($lines[$i]->rowid);
 					$array_options = $lines[$i]->array_options;
 				}
@@ -488,13 +488,13 @@ if (! $error) {
 		$url.=(preg_match('/\?/', $url) ? '&' : '?').'paymentmodified=1';
 
 		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+		if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
 			try {
 				dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 				$arrayconfig=array();
-				if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-					$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+				if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+					$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 				}
 
 				$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -513,13 +513,13 @@ if (! $error) {
 		$url.=(preg_match('/\?/', $url) ? '&' : '?').'paymentrecorded=1';
 
 		// Send to DataDog (metric + event)
-		if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+		if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
 			try {
 				dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 				$arrayconfig=array();
-				if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-					$arrayconfig=array('apiKey' => $conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+				if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+					$arrayconfig=array('apiKey' => getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 				}
 
 				$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -532,12 +532,12 @@ if (! $error) {
 				$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
 				//$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
 
-				$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+				$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 				if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 					&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 					$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 					if (! empty($conf->global->$newnamekey)) {
-						$sellyoursaasname = $conf->global->$newnamekey;
+						$sellyoursaasname = getDolGlobalString($newnamekey);
 					}
 				}
 

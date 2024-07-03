@@ -240,7 +240,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED)) {
+	if (!getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -250,7 +250,7 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
-if (!empty($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED)) {
+if (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_API_KEY", "DispoableEmail").'</td>';
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY" value="'.getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY').'">';
@@ -265,7 +265,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_GETIPINTEL_ON', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_GETIPINTEL_ON)) {
+	if (!getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_GETIPINTEL_ON">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_GETIPINTEL_ON">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -275,7 +275,7 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
-if (!empty($conf->global->SELLYOURSAAS_GETIPINTEL_ON)) {
+if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_GETIPINTEL_EMAIL").'</td>';
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_GETIPINTEL_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL').'">';
@@ -290,7 +290,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_IPQUALITY_ON', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
+	if (!getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_IPQUALITY_ON">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_IPQUALITY_ON">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -300,7 +300,7 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
-if (!empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
+if (getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_API_KEY", "IPQualityScore").'</td>';
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_IPQUALITY_KEY" value="'.getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY').'">';
@@ -309,7 +309,7 @@ if (!empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
 	print '</tr>';
 }
 
-if (!empty($conf->global->SELLYOURSAAS_GETIPINTEL_ON) || !empty($conf->global->SELLYOURSAAS_IPQUALITY_ON)) {
+if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON') || getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_VPN_PROBA_REFUSED").'</td>';
 	print '<td>';
 	print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_VPN_PROBA_REFUSED" value="'.getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').'">';
@@ -360,7 +360,7 @@ print '</td>';
 print '<td><span class="opacitymedium small">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or __APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
 print '</tr>';
 
-if (empty($conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD) || $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
+if (!getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') || $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD != 'password_hash') {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION").'</td>';
 	print '<td>';
 	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.getDolGlobalString('SELLYOURSAAS_SALTFORPASSWORDENCRYPTION').'">';
