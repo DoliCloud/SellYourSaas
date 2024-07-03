@@ -140,7 +140,7 @@ dol_include_once('/sellyoursaas/class/blacklistip.class.php');
 dol_include_once('/sellyoursaas/class/whitelistip.class.php');
 
 // Re set variables specific to new environment
-$conf->global->SYSLOG_FILE_ONEPERSESSION='register';
+$conf->global->SYSLOG_FILE_ONEPERSESSION = 'register';
 
 
 //$langs=new Translate('', $conf);
@@ -158,7 +158,7 @@ if ($langs->defaultlang == 'en_US') {
 
 // Force user
 if (empty($user->id)) {
-	$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
+	$user->fetch(getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER'));
 	// Set $user to the anonymous user
 	if (empty($user->id)) {
 		dol_print_error_email('SETUPANON', 'Error setup of module not complete or wrong. Missing the anonymous user.', null, 'alert alert-error');
@@ -1153,7 +1153,7 @@ if ($reusecontractid) {
 		// To prevent deletion of categories already present
 		$categories =  $tmpthirdparty->getCategoriesCommon('customer');
 		$arraycateg = array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => $conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG);
-		if (is_array($categories) && !in_array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG, $categories)){
+		if (is_array($categories) && !in_array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG, $categories)) {
 			$categories = array_merge($categories, $arraycateg);
 		}
 
