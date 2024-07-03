@@ -63,7 +63,7 @@ return static function (RectorConfig $rectorConfig): void {
 		__DIR__ . '/../../../public/',
 		__DIR__ . '/../../../scripts/',
 		__DIR__ . '/../../../test/phpunit/',
-
+		//'test.php',
 	]);
 	$rectorConfig->parallel(240);
 
@@ -79,9 +79,9 @@ return static function (RectorConfig $rectorConfig): void {
 
 	//$rectorConfig->rule(ReplaceEachAssignmentWithKeyCurrentRector::class);
 
+
 	$rectorConfig->rule(Rector\CodeQuality\Rector\FuncCall\FloatvalToTypeCastRector::class);
 	$rectorConfig->rule(Rector\CodeQuality\Rector\FuncCall\BoolvalToTypeCastRector::class);
-	$rectorConfig->rule(Rector\CodeQuality\Rector\NotEqual\CommonNotEqualRector::class);
 	//Not yet ready: $rectorconfig->rule(Rector\CodeQuality\Rector\If_\CompleteMissingIfElseBracketRector::class);
 	$rectorConfig->rule(Rector\CodeQuality\Rector\For_\ForRepeatedCountToOwnVariableRector::class);
 
@@ -90,6 +90,11 @@ return static function (RectorConfig $rectorConfig): void {
 	$rectorConfig->rule(Dolibarr\Rector\Renaming\GlobalToFunction::class);
 	$rectorConfig->rule(Dolibarr\Rector\Renaming\UserRightsToFunction::class);
 	//$rectorConfig->rule(Dolibarr\Rector\Renaming\UsePositiveExit::class);
+
+
+	// This fix <> into != but it breaks other rules, so added at end.
+	$rectorConfig->rule(Rector\CodeQuality\Rector\NotEqual\CommonNotEqualRector::class);
+
 
 	// Add all predefined rules to migrate to up to php 71.
 	// Warning this break tab spacing of arrays on several lines

@@ -238,6 +238,7 @@ class GlobalToFunction extends AbstractRector
 			$node = $nodes->getFirstExpr();
 		}
 
+
 		// Now process all comparison like:
 		// $conf->global->... Operator Value
 
@@ -264,11 +265,14 @@ class GlobalToFunction extends AbstractRector
 			$typeofcomparison = 'NotIdentical';
 			//var_dump($node->left);
 		}
+
 		if (empty($typeofcomparison)) {
 			return;
 		}
 
-		if (!$this->isGlobalVar($node->left)) {
+		$isconfglobal = $this->isGlobalVar($node->left);
+		if (!$isconfglobal) {
+			// The left side is not conf->global->xxx, so we leave
 			return;
 		}
 
@@ -282,7 +286,8 @@ class GlobalToFunction extends AbstractRector
 				$funcName = 'getDolGlobalString';
 				break;
 			default:
-				return;
+				$funcName = 'getDolGlobalString';
+				break;
 		}
 
 		$constName = $this->getConstName($node->left);

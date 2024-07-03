@@ -82,7 +82,7 @@ class pdf_sellyoursaas extends pdf_crabe
 		$savname = $this->emetteur->name;
 		$savlogo = $this->emetteur->logo;
 
-		if (getDolGlobalString('SELLYOURSAAS_NAME') && $conf->global->SELLYOURSAAS_NAME != $this->emetteur->name) {
+		if (getDolGlobalString('SELLYOURSAAS_NAME') && getDolGlobalString('SELLYOURSAAS_NAME') != $this->emetteur->name) {
 			$this->emetteur->name = $this->emetteur->name.' - ' . getDolGlobalString('SELLYOURSAAS_NAME');
 		}
 		$this->emetteur->logo = getDolGlobalString('SELLYOURSAAS_LOGO');
