@@ -167,7 +167,7 @@ if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
 
 			$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);          // exemple 'DoliCloud'
 			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;     // exemple 'dolicloud.com'
-			if (! empty($conf->global->$constforaltname)) {
+			if (getDolGlobalString($constforaltname)) {
 				$sellyoursaasdomain = $domainname;
 				$sellyoursaasname = getDolGlobalString($constforaltname);
 			}

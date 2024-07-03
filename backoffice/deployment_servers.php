@@ -555,7 +555,7 @@ if (!getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP')) {
 			// Announce
 			print '<td>';
 			$keyforparam = 'SELLYOURSAAS_ANNOUNCE_ON_'.$tmparraydomain[0];
-			if (empty($conf->global->$keyforparam)) {
+			if (!getDolGlobalString($keyforparam)) {
 				// Button off, click to enable
 				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1&key='.urlencode($tmparraydomain[0]).'&token='.newToken().'">';
 				$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');

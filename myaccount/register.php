@@ -336,7 +336,7 @@ if ($reshook == 0) {
 
 		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 		$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-		if (! empty($conf->global->$constforaltname)) {
+		if (getDolGlobalString($constforaltname)) {
 			$sellyoursaasdomain = $domainname;
 			$sellyoursaasname = getDolGlobalString($constforaltname);
 			//var_dump($constforaltname.' '.$sellyoursaasdomain.' '.$sellyoursaasname);   // Example: 'SELLYOURSAAS_NAME_FORDOMAIN-glpi-network.cloud glpi-network.cloud GLPI-Network'
@@ -372,16 +372,16 @@ if ($reshook == 0) {
 			$constlogosmallalt = 'SELLYOURSAAS_LOGO_SMALL_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 
 			//var_dump($sellyoursaasdomain.' '.$constlogoalt.' '.$conf->global->$constlogoalt);exit;
-			if (! empty($conf->global->$constlogoalt)) {
+			if (getDolGlobalString($constlogoalt)) {
 				$constlogo=$constlogoalt;
 				$constlogosmall=$constlogosmallalt;
 			}
 
-			if (empty($linklogo) && ! empty($conf->global->$constlogosmall)) {
+			if (empty($linklogo) && getDolGlobalString($constlogosmall)) {
 				if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constlogosmall))) {
 					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/' . getDolGlobalString($constlogosmall));
 				}
-			} elseif (empty($urllogo) && ! empty($conf->global->$constlogo)) {
+			} elseif (empty($urllogo) && getDolGlobalString($constlogo)) {
 				if (is_readable($conf->mycompany->dir_output.'/logos/' . getDolGlobalString($constlogo))) {
 					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/' . getDolGlobalString($constlogo));
 				}

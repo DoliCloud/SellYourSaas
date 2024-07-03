@@ -393,7 +393,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '</td><td class="nocellnopadd" valign="middle">';
 	$constname = 'SELLYOURSAAS_LOGO_MINI'.$suffix;
 	print '<!-- constname = '.$constname.' -->';
-	if (! empty($conf->global->$constname)) {
+	if (getDolGlobalString($constname)) {
 		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogo&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
 		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
 			print ' &nbsp; ';
@@ -412,7 +412,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<input type="file" class="flat class=minwidth200" name="logoblack'.$suffix.'" id="logoblack'.$suffix.'">';
 	print '</td><td class="nocellnopadd" valign="middle">';
 	$constname = 'SELLYOURSAAS_LOGO_MINI_BLACK'.$suffix;
-	if (! empty($conf->global->$constname)) {
+	if (getDolGlobalString($constname)) {
 		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
 		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
 			print ' &nbsp; ';

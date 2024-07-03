@@ -100,9 +100,9 @@ class ActionsSellyoursaas
 						&& $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 						$constforaltname = $object->array_options['options_domain_registration_page'];
 						$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
-						if (! empty($conf->global->$newnamekey)) {
+						if (getDolGlobalString($newnamekey)) {
 							$newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
-							if (! empty($conf->global->$newurlkey)) {
+							if (getDolGlobalString($newurlkey)) {
 								$urlmyaccount = getDolGlobalString($newurlkey);
 							} else {
 								$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);

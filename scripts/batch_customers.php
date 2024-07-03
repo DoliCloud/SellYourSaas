@@ -862,7 +862,7 @@ if (! $nboferrors) {
 
 			/*$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-			if (! empty($conf->global->$constforaltname)) {
+			if (getDolGlobalString($constforaltname)) {
 				$sellyoursaasdomain = $domainname;
 				$sellyoursaasname = $conf->global->$constforaltname;
 			}*/
@@ -921,7 +921,7 @@ if (! $nboferrors) {
 
 					/*$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 					$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-					if (! empty($conf->global->$constforaltname)) {
+					if (getDolGlobalString($constforaltname)) {
 						$sellyoursaasdomain = $domainname;
 						$sellyoursaasname = $conf->global->$constforaltname;
 					}*/

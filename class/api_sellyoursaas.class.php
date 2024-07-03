@@ -84,7 +84,7 @@ class Sellyoursaasapi extends DolibarrApi
 				if ($val) {
 					$return[$key] = $val;
 					$newkey = preg_replace('/_ON/', '', $key);
-					if (!empty($conf->global->$newkey)) {
+					if (getDolGlobalString($newkey)) {
 						$return[$newkey] = getDolGlobalString($newkey);
 						$arrayofdifferentmessages[] = $tmplangs->trans(str_replace(array('(', ')'), '', $conf->global->$newkey));
 						$return[$newkey.'_trans'] = $tmplangs->trans(str_replace(array('(', ')'), '', $conf->global->$newkey));

@@ -211,7 +211,7 @@ if ($idforfetch <= 0 || empty($mythirdpartyaccount->status)) {
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
+		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
@@ -240,7 +240,7 @@ if (!getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL')) {
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 			$newnamekey = 'SELLYOURSAAS_MAIN_FAQ_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-			if (!empty($conf->global->$newnamekey)) {
+			if (getDolGlobalString($newnamekey)) {
 				$urlfaq = getDolGlobalString($newnamekey);
 			} else {
 				$urlfaq = 'https://www.'.$mythirdpartyaccount->array_options['options_domain_registration_page'].'/faq-'.$langcode.'.php';
@@ -255,7 +255,7 @@ $urlstatus = getDolGlobalString('SELLYOURSAAS_STATUS_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_STATUS_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (!empty($conf->global->$newnamekey)) {
+	if (getDolGlobalString($newnamekey)) {
 		$urlstatus = getDolGlobalString($newnamekey);
 	}
 }
@@ -622,7 +622,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
+		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
@@ -633,7 +633,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
+		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
@@ -682,7 +682,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_NOREPLY_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
+		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
@@ -839,11 +839,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
+		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasname = getDolGlobalString($newnamekey);
 		}
 		$newnamekey = 'SELLYOURSAAS_NOREPLAY_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
+		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasnoreplyemail = getDolGlobalString($newnamekey);
 		}
 	}
@@ -853,7 +853,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (!empty($conf->global->$newnamekey)) {
+		if (getDolGlobalString($newnamekey)) {
 			$emailto = getDolGlobalString($newnamekey);
 		}
 	}
@@ -1782,7 +1782,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 						if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 							&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 							$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-							if (! empty($conf->global->$newnamekey)) {
+							if (getDolGlobalString($newnamekey)) {
 								$sellyoursaasname = getDolGlobalString($newnamekey);
 							}
 						}
@@ -2196,10 +2196,10 @@ if (is_object($mythirdpartyaccount) && $mythirdpartyaccount->array_options['opti
 
 	$constname = 'SELLYOURSAAS_LOGO_MINI_'.$domainforkey;
 	$constnameblack = 'SELLYOURSAAS_LOGO_MINI_BLACK_'.$domainforkey;
-	if (!empty($conf->global->$constname)) {
+	if (getDolGlobalString($constname)) {
 		$logoval=getDolGlobalString($constname);
 	}
-	if (!empty($conf->global->$constnameblack)) {
+	if (getDolGlobalString($constnameblack)) {
 		$logoblackval=getDolGlobalString($constnameblack);
 	}
 }

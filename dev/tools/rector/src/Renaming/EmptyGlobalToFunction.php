@@ -78,7 +78,7 @@ class EmptyGlobalToFunction extends AbstractRector
 	 */
 	public function refactor(Node $node)
 	{
-		if ($node instanceof Node\Expr\BooleanNot) {
+		if ($node instanceof Node\Expr\BooleanNot) {			// Case !empty(
 			if (!$node->expr instanceof Node\Expr\Empty_) {
 				return null;
 			}
@@ -112,7 +112,7 @@ class EmptyGlobalToFunction extends AbstractRector
 		}
 
 
-		if ($node instanceof Node\Expr\Empty_) {
+		if ($node instanceof Node\Expr\Empty_) {			// Case !empty(
 			// node is empty(...) so we set newnode to ...
 			$newnode = $node->expr;			// newnode is conf->global->...
 
@@ -131,7 +131,7 @@ class EmptyGlobalToFunction extends AbstractRector
 
 			$nameforconst = $this->getName($newnode);
 			if (is_null($nameforconst)) {
-				return null;
+				return null;				// When code is $conf->global->$abc		$nameforconst for '$abc' is null
 			}
 			$constName = new String_($nameforconst);
 

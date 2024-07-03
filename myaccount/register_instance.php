@@ -960,7 +960,7 @@ if ($reusecontractid) {
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$tmpthirdparty->array_options['options_domain_registration_page'];
-				if (! empty($conf->global->$newnamekey)) {
+				if (getDolGlobalString($newnamekey)) {
 					$sellyoursaasemail = getDolGlobalString($newnamekey);
 				}
 			}
@@ -986,7 +986,7 @@ if ($reusecontractid) {
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
 				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$tmpthirdparty->array_options['options_domain_registration_page'];
-				if (! empty($conf->global->$newnamekey)) {
+				if (getDolGlobalString($newnamekey)) {
 					$myaccounturl = getDolGlobalString($newnamekey);
 				}
 			}
@@ -1571,7 +1571,7 @@ if (! $error) {
 
 		$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 		$constforaltemailnoreply = 'SELLYOURSAAS_NOREPLY_EMAIL-'.$domainname;
-		if (! empty($conf->global->$constforaltemailnoreply)) {
+		if (getDolGlobalString($constforaltemailnoreply)) {
 			$sellyoursaasemailnoreply = getDolGlobalString($constforaltemailnoreply);
 		}
 
@@ -1638,7 +1638,7 @@ if (is_object($contract->thirdparty)) {
 	$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
 	$constforaltemailsupervision = 'SELLYOURSAAS_SUPERVISION_EMAIL-'.$domainname;
 	$constforaltemailnoreply = 'SELLYOURSAAS_NOREPLY_EMAIL-'.$domainname;
-	if (! empty($conf->global->$constforaltname)) {
+	if (getDolGlobalString($constforaltname)) {
 		$sellyoursaasdomain = $domainname;
 		$sellyoursaasname = getDolGlobalString($constforaltname);
 		$sellyoursaasemailsupervision = getDolGlobalString($constforaltemailsupervision);
@@ -1709,11 +1709,11 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 			$constlogosmall=$constlogosmallalt;
 		}
 
-		if (empty($linklogo) && ! empty($conf->global->$constlogosmall)) {
+		if (empty($linklogo) && getDolGlobalString($constlogosmall)) {
 			if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constlogosmall))) {
 				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/' . getDolGlobalString($constlogosmall));
 			}
-		} elseif (empty($linklogo) && ! empty($conf->global->$constlogo)) {
+		} elseif (empty($linklogo) && getDolGlobalString($constlogo)) {
 			if (is_readable($conf->mycompany->dir_output.'/logos/' . getDolGlobalString($constlogo))) {
 				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/' . getDolGlobalString($constlogo));
 			}
@@ -1760,7 +1760,7 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$sellyoursaasdomain;
 			$constforaltemailto = 'SELLYOURSAAS_SUPERVISION_EMAIL-'.$sellyoursaasdomain;
 			$constforaltemailnoreply = 'SELLYOURSAAS_NOREPLY_EMAIL-'.$sellyoursaasdomain;
-			if (! empty($conf->global->$constforaltname))
+			if (getDolGlobalString($constforaltname))
 			{
 				$sellyoursaasdomain = $sellyoursaasdomain;
 				$sellyoursaasname = $conf->global->$constforaltname;

@@ -54,16 +54,16 @@ return static function (RectorConfig $rectorConfig): void {
 	]);
 
 	$rectorConfig->paths([
-		__DIR__ . '/../../../admin/',
-		__DIR__ . '/../../../backoffice/',
+		//__DIR__ . '/../../../admin/',
+		/*__DIR__ . '/../../../backoffice/',
 		__DIR__ . '/../../../class/',
 		__DIR__ . '/../../../core/',
 		__DIR__ . '/../../../lib/',
 		__DIR__ . '/../../../myaccount/',
 		__DIR__ . '/../../../public/',
 		__DIR__ . '/../../../scripts/',
-		__DIR__ . '/../../../test/phpunit/',
-		//'test.php',
+		__DIR__ . '/../../../test/phpunit/',*/
+		'test.php',
 	]);
 	$rectorConfig->parallel(240);
 
@@ -86,9 +86,9 @@ return static function (RectorConfig $rectorConfig): void {
 	$rectorConfig->rule(Rector\CodeQuality\Rector\For_\ForRepeatedCountToOwnVariableRector::class);
 
 	$rectorConfig->rule(Dolibarr\Rector\Renaming\EmptyGlobalToFunction::class);
-	$rectorConfig->rule(Dolibarr\Rector\Renaming\EmptyUserRightsToFunction::class);
-	$rectorConfig->rule(Dolibarr\Rector\Renaming\GlobalToFunction::class);
-	$rectorConfig->rule(Dolibarr\Rector\Renaming\UserRightsToFunction::class);
+	//$rectorConfig->rule(Dolibarr\Rector\Renaming\EmptyUserRightsToFunction::class);
+	//$rectorConfig->rule(Dolibarr\Rector\Renaming\GlobalToFunction::class);
+	//$rectorConfig->rule(Dolibarr\Rector\Renaming\UserRightsToFunction::class);
 	//$rectorConfig->rule(Dolibarr\Rector\Renaming\UsePositiveExit::class);
 
 

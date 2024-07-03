@@ -536,7 +536,7 @@ if (! $error) {
 				if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 					&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 					$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-					if (! empty($conf->global->$newnamekey)) {
+					if (getDolGlobalString($newnamekey)) {
 						$sellyoursaasname = getDolGlobalString($newnamekey);
 					}
 				}

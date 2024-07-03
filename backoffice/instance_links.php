@@ -205,7 +205,7 @@ if (empty($reshook)) {
 					&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 					$constforaltname = $tmpthirdparty->array_options['options_domain_registration_page'];
 					$newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
-					if (! empty($conf->global->$newurlkey)) {
+					if (getDolGlobalString($newurlkey)) {
 						$urlmyaccount = getDolGlobalString($newurlkey);
 					} else {
 						$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $tmpthirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
