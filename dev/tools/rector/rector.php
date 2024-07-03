@@ -63,6 +63,7 @@ return static function (RectorConfig $rectorConfig): void {
 		__DIR__ . '/../../../public/',
 		__DIR__ . '/../../../scripts/',
 		__DIR__ . '/../../../test/phpunit/',
+
 	]);
 	$rectorConfig->parallel(240);
 

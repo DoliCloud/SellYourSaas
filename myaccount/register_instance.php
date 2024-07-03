@@ -1152,8 +1152,8 @@ if ($reusecontractid) {
 
 		// To prevent deletion of categories already present
 		$categories =  $tmpthirdparty->getCategoriesCommon('customer');
-		$arraycateg = array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG => getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG'));
-		if (is_array($categories) && !in_array($conf->global->SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG, $categories)) {
+		$arraycateg = array(getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG') => getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG'));
+		if (is_array($categories) && !in_array(getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG'), $categories)) {
 			$categories = array_merge($categories, $arraycateg);
 		}
 

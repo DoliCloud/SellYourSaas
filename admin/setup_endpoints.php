@@ -211,7 +211,7 @@ print '<br><br>';
 
 /*
 $message='';
-$url='<a href="'.dol_buildpath('/sellyoursaas/myaccount/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/test.php', 3).'?key='.($conf->global->SELLYOURSAAS_SECURITY_KEY?urlencode($conf->global->SELLYOURSAAS_SECURITY_KEY):'KEYNOTDEFINED').'</a>';
+$url='<a href="'.dol_buildpath('/sellyoursaas/myaccount/public/test.php', 3).'?key='.(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')?urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')):'...').'" target="_blank">'.dol_buildpath('/sellyoursaas/public/test.php', 3).'?key='.(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')?urlencode(getDolGlobalString('SELLYOURSAAS_SECURITY_KEY')):'KEYNOTDEFINED').'</a>';
 $message.=img_picto('', 'object_globe.png').' '.$langs->trans("EndPointFor", "Test", '{s1}');
 $message = str_replace('{s1}', $url, $message);
 print $message;
