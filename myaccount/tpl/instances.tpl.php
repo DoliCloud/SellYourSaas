@@ -309,7 +309,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		// Detect what is the plan for this instance
 		$planid = 0;
 		$freeperioddays = 0;
-		$directaccess = 0;
+		$directaccess = empty($contract->array_options['options_directaccess']) ? 0 : $contract->array_options['options_directaccess'];	// O means use the value of the app service.
 		foreach ($contract->lines as $keyline => $line) {
 			if ($line->statut == ContratLigne::STATUS_CLOSED && $contract->array_options['options_deployment_status'] != 'undeployed') {
 				$statuslabel = 'suspended';
@@ -323,7 +323,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					$planlabel = $tmpproduct->label;		// Warning, label is in language of user
 					$planid = $tmpproduct->id;
 					$freeperioddays = $tmpproduct->array_options['options_freeperioddays'];
-					$directaccess = $tmpproduct->array_options['options_directaccess'];
+					if (empty($directaccess)) {
+						$directaccess = $tmpproduct->array_options['options_directaccess'];
+					}
 					break;
 				}
 			}
