@@ -32,7 +32,7 @@ if (!function_exists('getDolGlobalString')) {
 	{
 		global $conf;
 		// return $conf->global->$key ?? $default;
-		return (string) (empty($conf->global->$key) ? $default : $conf->global->$key);
+		return (string) (isset($conf->global->$key) ? $conf->global->$key : $default);
 	}
 }
 
@@ -47,7 +47,7 @@ if (!function_exists('getDolGlobalInt')) {
 	{
 		global $conf;
 		// return $conf->global->$key ?? $default;
-		return (int) (empty($conf->global->$key) ? $default : $conf->global->$key);
+		return (int) (isset($conf->global->$key) ? $conf->global->$key : $default);
 	}
 }
 
