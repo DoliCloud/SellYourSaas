@@ -41,6 +41,7 @@ do
 	fi
 
     echo -- Process dir $dir
+    echo cd $dir
     cd $dir || continue
 	if [ $? -eq 0 ]; then
 		export gitdir=`basename $dir`
@@ -82,6 +83,10 @@ do
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php from ".`pwd`
 	        php build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
+	        if [ $? -ne 0 ]; then
+	        	echo "Failed to generate the signature file"
+	        	exit 1;
+	        fi
 	    fi
 	
 		# Create a deployment tar file
