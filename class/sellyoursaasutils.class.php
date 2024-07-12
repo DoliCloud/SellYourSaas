@@ -1098,7 +1098,7 @@ class SellYourSaasUtils
 		$invoiceprocessedok = array();
 		$invoiceprocessedko = array();
 
-		if (empty($conf->stripe->enabled)) {
+		if (!isModEnabled('stripe')) {
 			$this->error='Error, stripe module not enabled';
 
 			$conf->global->SYSLOG_FILE = $savlog;
@@ -1204,7 +1204,7 @@ class SellYourSaasUtils
 	 * @param	int		             $service					'StripeTest' or 'StripeLive'
 	 * @param	int		             $servicestatus				Service 0 or 1
 	 * @param	int		             $thirdparty_id				Thirdparty id
-	 * @param	CompanyPaymentMode	 $companypaymentmode		Company payment mode id
+	 * @param	CompanyPaymentMode	 $companypaymentmode		Company payment mode
 	 * @param	null|Facture         $invoice					null=All invoices of thirdparty, Invoice=Only this invoice
 	 * @param	int		             $includedraft				Include draft invoices
 	 * @param	int		             $noemailtocustomeriferror	1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)
@@ -1724,8 +1724,13 @@ class SellYourSaasUtils
 										$errorforinvoice++;
 									}
 									$paiement->paiementid = $paymentTypeId;
-									$paiement->num_paiement = '';
 									$paiement->num_payment = '';
+									// If payment by card
+									if ($mode == 'card') {
+										$paiement->num_payment = $companypaymentmode->last_four;
+									}
+									$paiement->num_paiement = $paiement->num_payment;	// For backward compatibility
+
 									// Add a comment with keyword 'SellYourSaas' in text. Used by trigger.
 									$paiement->note_public = 'SellYourSaas payment '.dol_print_date($now, 'standard').' using '.$paymentmethod.($ipaddress ? ' from ip '.$ipaddress : '').' - Transaction ID = '.$TRANSACTIONID;
 									$paiement->note_private = 'SellYourSaas payment '.dol_print_date($now, 'standard').' using '.$paymentmethod.($ipaddress ? ' from ip '.$ipaddress : '').' - Transaction ID = '.$TRANSACTIONID;
