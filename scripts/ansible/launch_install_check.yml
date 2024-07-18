@@ -1118,7 +1118,7 @@
     - name: Create links to fail2ban jail files
       ansible.builtin.file:
         src: "{{ item.path }}"
-        dest: "/etc/fail2ban/filter.d/{{ item.path | basename }}"  
+        dest: "/etc/fail2ban/jail.d/{{ item.path | basename }}"  
         state: link
       loop: "{{ dolibarr_fail2ban_files2.files }}"      
 
