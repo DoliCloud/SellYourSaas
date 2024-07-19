@@ -1,24 +1,13 @@
 = Sell-Your-Saas installation and operation document - Web portal
 This document describes the technical and functional implementation of a server to host a web portal for SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
-:source-highlighter: rouge
-:companyname: Teclib
-:corpname: Teclib
-:orgname: Teclib
-:creator: Laurent Destailleur
+:source-highlighter: red
 :title: Document installation and operation for a Web portal
 :subject: This document describes the technical and functional implementation of SellYourSaas web portal
 :keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
-:city: Bordeaux
 :toc: manual
 :toclevels: 3
 :toc-title: Table of contents
 :toc-placement: preamble
-:revnumber: v1.0
-:revdate: 2019-01-30
-:revremark: First version
-:revnumber: v1.1
-:revdate: 2023-06-01
-:revremark: Many improvements
 
 <<<<
 

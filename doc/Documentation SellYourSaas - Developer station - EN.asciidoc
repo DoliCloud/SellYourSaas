@@ -1,13 +1,8 @@
 = Installation and operation document SellYourSaas - Developer station
 :source-highlighter: red
-:companyname: Teclib
-:corpname: Teclib
-:orgname: Teclib
-:title: Installation document for the SellYourSaas developer or maintainer stattion
+:title: Installation document for the SellYourSaas developer or maintainer station
 // Document date:
 :docdate: 01/30/2019
-// City associated with the document
-:city: Bordeaux
 :toc: manual
 :toc-placement: preamble
 
