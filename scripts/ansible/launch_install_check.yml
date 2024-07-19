@@ -1102,12 +1102,25 @@
         patterns: '*.conf'
       register: dolibarr_fail2ban_files
 
-    - name: Create links to fail2ban rules files
+    - name: Create links to fail2ban filter files
       ansible.builtin.file:
         src: "{{ item.path }}"
         dest: "/etc/fail2ban/filter.d/{{ item.path | basename }}"  
         state: link
       loop: "{{ dolibarr_fail2ban_files.files }}"      
+
+    - name: Search all fail2ban rules into jail.d directory
+      ansible.builtin.find:
+        paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d
+        patterns: '*.conf'
+      register: dolibarr_fail2ban_files2
+
+    - name: Create links to fail2ban jail files
+      ansible.builtin.file:
+        src: "{{ item.path }}"
+        dest: "/etc/fail2ban/jail.d/{{ item.path | basename }}"  
+        state: link
+      loop: "{{ dolibarr_fail2ban_files2.files }}"      
 
 
     - name: Update /etc/afick.conf to remove /var/log/datadog Logs* 
