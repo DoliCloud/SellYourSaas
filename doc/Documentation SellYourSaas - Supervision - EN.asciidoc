@@ -1,9 +1,9 @@
-= Sell-Your-Saas installation and operation document - Web portal
-This document describes the technical and functional implementation of a server to host a web portal for SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
+= Sell-Your-Saas installation and operation document - Supervision platform
+This document describes the technical and functional implementation of the supervision platform
 :source-highlighter: red
-:title: Document installation and operation for a Web portal
-:subject: This document describes the technical and functional implementation of SellYourSaas web portal
-:keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
+:title: Document installation and operation for the supervision platform
+:subject: This document describes the technical and functional implementation of SellYourSaas supervision platform
+:keywords: sellyoursaas, saas, supervision, wazuh
 :toc: manual
 :toclevels: 3
 :toc-title: Table of contents
@@ -13,18 +13,14 @@ This document describes the technical and functional implementation of a server 
 
 == Introduction ==
 
-This document explains how to install the optionnal web portal server of Sell-Your-Saas.
+This document explains how to install the optionnal supervision platform of Sell-Your-Saas.
 
 
 == Installation of the machine and OS
 
 === Choice of the machine and OS and create it ===
 
-Avec Amazon Standard Medium:
-Server *m1.medium* hosted in EU @ $0.18 per hour plus $10 for storage and bandwidth puis passage à *m1.large* @ $0.18 per hour
-
-Avec OVH Public Cloud:
-1 core.
+A 2 core server with 8Gb should be enough.
 
 
 === SSH and sudo
@@ -49,16 +45,6 @@ Create a user account for yourself (or other administrators), for example: *myun
 [source, bash]
 ---------------
 adduser myunixlogin
----------------
-
-
-==== Default shell
-
-Modify the default shell to use bash (instead of dh sh or dash)
-
-[source, bash]
----------------
-ln -fs /bin/bash /usr/bin/sh
 ---------------
 
 
@@ -308,58 +294,6 @@ netplan apply
 Rem: *eth0* can be something else, for example *ens3*.
 
 
-=== Add virtual IP (optional)
-
-- Add the virtual IP via the OVH manager.
-
-- Add and remove the virtual network interface on the server dynamically (for test).
-
-Addition:
-
-[source, bash]
----------------
-ifconfig eth0: 0 a.b.c.d
----------------
-
-Deletion:
-
-[source, bash]
----------------
-ifconfig eth0: 0 down
----------------
-
-- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
-
-Example for 2 virtual IPs:
-
-[source, conf]
----------------
-auto eth0: 0
-iface eth0: 0 inet static
-            address a.b.c.d
-            netmask 255.255.255.255
-            broadcast a.b.c.d
-
-# To declare a persistent virtual IP
-auto eth0: 1
-iface eth0: 1 inet static
-            address e.f.g.h
-            netmask 255.255.255.255
-            broadcast e.f.g.h
----------------
-
-Rem: *eth0* can be something else, for example *ens3*.
-
-To take this into account, try this, otherwise, reboot.
-
-[source, bash]
----------------
-/etc/init.d/networking restart
----------------
-
-- Associate the virtual IP with the server from the OVH manager.
-
-
 
 === Creation of working directories
 
@@ -532,70 +466,16 @@ Once such a file is created/removed or modified, you must run the *scripts/firew
 
 === Installation of packages
 
-* Installation des packages Ubuntu *18.04-*
-
-[source,bash]
----------------
-sudo apt update
-sudo apt install ntp git gzip zip zstd memcached ncdu ufw sudo
-sudo apt install mariadb-server mariadb-client
-sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysqlnd php-curl php-memcached php-rrd php-imagick php-geoip php-mcrypt php-intl php-zip php-bz2 php-ssh2 php-mbstring
-sudo apt install watchdog cpulimit libapache2-mpm-itk apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
-sudo apt install libapache2-mod-php
-sudo apt install bind9
-sudo apt install spamc spamassassin clamav clamav-daemon
-sudo apt install fail2ban
-sudo apt install soffice libreoffice-common libreoffice-writer
-sudo apt install mailutils postfix
----------------
-
 * Installation des packages Ubuntu *20.04+*
 
 [source,bash]
 ---------------
 sudo apt update
 sudo apt install systemd-timesyncd git gzip zip zstd memcached ncdu ufw sudo
-sudo apt install mariadb-server mariadb-client 
-sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
 sudo apt install watchdog cpulimit apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
-sudo apt install spamc spamassassin clamav clamav-daemon
 sudo apt install fail2ban
-sudo apt install libreoffice-common libreoffice-writer
 sudo apt install mailutils postfix
----------------
-
-
-=== Activation des modules apache
-
-On active les *modules* pour un fonctionnement avec PHP FPM:
-
-[source,bash]
----------------
-a2enmod expires fcgid filter headers http2 mime mpm_event negotiation proxy proxy_fcgi proxy_http reqtimeout rewrite setenvif socache_shmcb ssl status vhost_alias
-a2enmod access_compat actions alias auth_basic authn_core authn_file authz_core authz_groupfile authz_host authz_user autoindex cgi deflate dir env 
----------------
-
-On active les *configurations* pour un fonctionnement avec PHP FPM:
-
-[source,bash]
----------------
-a2enconf charset localized-error-pages other-vhosts-access-log security serve-cgi-bin
-a2enconf php7.2-fpm|php7.4-fpm
----------------
-
-On modifie la configuration du module *mpm_event* en éditant le fichier */etc/apache2/mods-enabled/mpm_event.conf*:
-
-[source,bash]
----------------
-<IfModule mpm_event_module>
-        StartServers               5
-        MinSpareThreads          100
-        MaxSpareThreads          150
-        ThreadLimit               64
-        ThreadsPerChild           20
-        MaxRequestWorkers        200
-        MaxConnectionsPerChild  5000
-</IfModule>
+...
 ---------------
 
 
@@ -823,58 +703,7 @@ bantime  = 7200      ; 2 hours
 findtime = 3600      ; 1 hour
 maxretry = 5
 
-
-[web-dol-passforgotten]
-
-; rule against call of passwordforgottenpage
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulespassforgotten
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 4320000   ; 50 days
-findtime = 86400     ; 1 day
-maxretry = 10
-
-[web-dol-bruteforce]
-
-; rule against bruteforce hacking (login + api)
-enabled = true
-port    = http,https
-filter  = web-dolibarr-rulesbruteforce
-logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr.log
-action  = %(action_mw)s
-bantime  = 86400     ; 1 day
-findtime = 3600      ; 1 hour
-maxretry = 10
-
-[web-dol-registerinstance]
-
-; rule against call to myaccount/register_instance.php (see file etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance)
-; disable this rule by setting enable to false on deployment servers
-;enabled = true
-;port    = http,https
-;filter  = web-dolibarr-rulesregisterinstance
-;logpath = /home/admin/wwwroot/dolibarr_documents/dolibarr_DOLSESSID_sellyoursaasXXXXXXXXXXX.log
-;action  = %(action_mw)s
-;bantime  = 4320000   ; 50 days
-;findtime = 86400     ; 1 day
-;maxretry = 10
-
 ---------------
-
-Then place the filter files supplied with the project in *etc/fail2ban/filter.d* in the directory of the same name */etc/fail2ban/filter.d* by creating a link:
-
-[source, bash]
----------------
-cd /etc/fail2ban/filter.d
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesregisterinstance.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulespassforgotten.conf
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
----------------
-
-Relaunch fail2ban and check errors into */var/log/fail2ban.log*
-
 
 
 === Test and setup of ClamAV
@@ -903,8 +732,6 @@ aa-disable usr.sbin.clamd
 ls -alrt /etc/apparmor.d/disable
 service apparmor reload
 service apparmor status
-service apache2 stop
-service apache2 start
 ---------------
 
 You should see into the status of apparmor a line saying that Profile *usr/sbin/clamd* is disabled.
@@ -1018,118 +845,8 @@ Test que l'exécution par la crontab fonctionne correctent en lançant sous root
 Ignore if you have error when sending emails, sending emails is setup later.
 
 
-=== Setup of cpulimit (optional) 
 
-* Lancement de cpulimit au démarrage pour exécuter:
-
-Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
-
-cpulimit launched with script  cpulimit --exe=apache2 --limit=20
-
-
-
-=== Installation de Open DKIM (port 12345)
-
-Voir http://lea-linux.org/documentations/DKIM_SPF_Postfix or
-
-[source,bash]
----------------
-apt-get install opendkim opendkim-tools
-
-mkdir -p /etc/opendkim/
-mv /etc/opendkim.conf /etc/opendkim/
-ln -s /etc/opendkim/opendkim.conf /etc/opendkim.conf
-
-openssl genrsa -out /etc/opendkim/opendkim.key 1024
-openssl rsa -in /etc/opendkim/opendkim.key -pubout -out /etc/opendkim/opendkim.pub.key
-chmod "u=rw,o=,g=" /etc/opendkim/opendkim.key
-chown opendkim:opendkim /etc/opendkim/opendkim.key
----------------
-
-
-Edit the file */etc/opendkim.conf*
-
-[source,bash]
----------------
-Domain                  mysellyoursaasdomain.com
-KeyFile                 /etc/opendkim/opendkim.key
-Selector                dkim
-Socket                  inet:12345@localhost
----------------
-
-Choose the value for 'dkim'
-
-
-Edit the file */etc/default/opendkim*
-
-[source,bash]
----------------
-SOCKET="inet:12345@localhost" # listen on loopback on port 12345
----------------
-
-
-Create file */etc/opendkim/KeyTable*
-
-[source,bash]
----------------
-# nom de domaine        nom de domaine  selector   fichier clef priv
-dkim._domainkey.mysellyoursaasdomain.com            mysellyoursaasdomain.com:dkim:/etc/opendkim/opendkim.key
-mysellyoursaasdomain.com             				mysellyoursaasdomain.com:dkim:/etc/opendkim/opendkim.key
----------------
-
-Reuse the value for 'dkim'
-
-
-Create file */etc/opendkim/SigningTable*
-
-[source,bash]
----------------
-# nom de domaine        nom de domaine  selector   fichier clef priv
-*@mysellyoursaasdomain.com             mysellyoursaasdomain.com
----------------
-
-
-Create file */etc/opendkim/TrustedHosts*
-
-[source,bash]
----------------
-127.0.0.1
-localhost
-mysellyoursaasdomain.com
----------------
-
-
-Edit postfix file */etc/postfix/main.cf*
-
-[source,bash]
----------------
-milter_default_action = accept
-milter_protocol = 6
-smtpd_milters = inet:localhost:12345
-non_smtpd_milters = inet:localhost:12345
----------------
-
-
-
-To test DKIM, send an email to  check-auth@verifier.port25.com, you will receive a response with success or failure.
-To test SPF + DKIM + spam analysis of an email,  send an email to email suggested by  https://www.mail-tester.com
-
-[source,bash]
----------------
-mail -aFrom:test@mysellyoursaasdomain.com test-email@test-email-service.com
----------------
-
-
-
-Setup of domains to protect are into */etc/opendkim/*
-
-Note: SPF a besoin d'une entrée séparé pour chaque domain utilisé @mysellyoursaasmydomain.com et pour chaque sous-domaines @mysubdomain.mysellyoursaasmydomain.com
-
-
-
-
-
-=== Configuration du nom de domain
+=== Setup of the domain name
 
 Modifier son enregistrement de domaine, pour ajouter SPF et DKIM et DMARC
 
@@ -1318,210 +1035,9 @@ broken_sasl_auth_clients = yes
 
 
 
-=== Setup of Mysql or Mariadb
-
-==== Setup
-
-Edit config file 
-*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
-or
-*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
-to change:
-
-[source,bash]
----------------
-bind-address = 0.0.0.0
----------------
-
-Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
-
-
-==== Set mysql root password
-
-[source,bash]
----------------
-SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
-FLUSH PRIVILEGES;
----------------
-
-
-==== Secure the root account (optional)
-
-In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
-from the system root account only (using *auth_socket* or *unix_socket*):
-
-For Mysql: The plugin is *auth_socket* and you have to install it manually. More info on: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
-
-[source,sql]
----------------
-INSTALL PLUGIN auth_socket SONAME 'auth_socket.so';
-SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
----------------
-
-For MariaDb: The plugin is *unix_socket* and is set by default on Ubuntu OS.
-
-
-To switch in mode authentification by password / by unix socket account :
-
-For Mysql:
-
-[source,sql]
----------------
-# Identification by password
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
-# Identification by unix socket
-ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
----------------
-You must stop/start database server to validate this change.
-
-For MariaDb:
-
-[source,sql]
----------------
-# Identification by password
-update mysql.user set plugin='' where user='root' and host='localhost';
-# Identification by unix socket
-update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
----------------
-You must stop/start database server to validate this change.
-
-
-Note: The show specific parameters that are not the default values, you can launch:
-
-[source,bash]
----------------
-mysqld --print-defaults
----------------
-
-
-Note: To delete active plugins, empty the mysql * plugins * table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
-
-
-
-[[creer_un_compte_db_sellyoursaas]]
-==== Create a user to login for remote administration (optional)
-
-Give access rights on the database server to allow remote administration on all databases from your desktop:
-
-[source,sql]
----------------
-CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordforyourlogin...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
-GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
-FLUSH PRIVILEGES;
----------------
-
-==== Create a user for supervision (optional)
-
-If you use a supervision agent like *DataDog* to superize the database, create an accunt to access localy to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
-
-[source,sql]
----------------
-CREATE USER 'datadog'@'localhost' IDENTIFIED BY '...passwordfordatadog...';
-GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
-GRANT PROCESS ON *.* TO 'datadog'@'localhost';
-FLUSH PRIVILEGES;
----------------
-
-
 === Configuration de apparmor
 
 ...
-
-
-=== Securisation rep session PHP
-
-Vérifier ou Mettre les droits en *drwx-wx-wt* sur le rep des sessions php */dev/shm/* ou */var/lib/php/sessions*
-
-
-=== Create a virtual host for the web portal
-
-
-vi */etc/apache2/sites-available/mysellyoursaasdomain.com.conf*
-
-
-[source,bash]
----------------
-##########################
-# Web site
-##########################
-<VirtualHost *:80>
-        #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i"
-        #php_admin_value mail.force_extra_parameters "-f postmaster@nltechno.com"
-        #php_admin_value sendmail_path "/usr/sbin/sendmail -t -i -f webmaster1@nltechno.com"
-        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/:/home/admin/awstats/:/usr/share/GeoIP:/home/jail/home:/home/admin/backup/dump:/home/admin/tools/
-
-        ServerName      mysellyoursaasdomain.com
-        ServerAlias     www.mysellyoursaasdomain.com
-        DocumentRoot /home/admin/wwwroot/dolibarr_documents/website/mysellyoursaasdomain.com/
-        ErrorLog     /home/admin/logs/mysellyoursaasdomain_error_log
-        CustomLog    /home/admin/logs/mysellyoursaasdomain_access_log combined
-
-        UseCanonicalName Off
-
-        # Not sure this can help
-        TimeOut 20
-
-        KeepAlive On
-        KeepAliveTimeout 5
-        MaxKeepAliveRequests 20
-
-        <Directory /home/admin/wwwroot>
-        AllowOverride FileInfo Limit
-        Options +FollowSymLinks
-        Order allow,deny
-        Deny from env=bad_bots
-        Allow from all
-        Require all granted
-        </Directory>
-
-	Header always set Strict-Transport-Security max-age=31536000
-   	#add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
-
-	RewriteEngine on
-	RewriteCond %{SERVER_NAME} =mysellyoursaasdomain.com
-	RewriteRule ^ https://www.%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
-
-</VirtualHost>
----------------
-
-Note: Penser à ajouter la ligne suivante pour gérer le http2
-
-[source,bash]
----------------
-Protocols h2 h2c http/1.1
----------------
-
-Activer le virtual host par
-
-[source,bash]
----------------
-a2ensite  mysellyoursaasdomain.com
----------------
-
-
-=== Setup of PHP
-
-==== Secure the directory of sessions PHP
-
-Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
-
-
-==== Define size of upload and session duration
-
-Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow upload of bigger files:
-
-[source,bash]
----------------
-upload_max_filesize = 20M
-
-post_max_size = 25M
-max_input_vars = 4000
-
-memory_limit = 256M
-
-session.gc_maxlifetime = 3600
----------------
 
 
 
@@ -1647,33 +1163,6 @@ sudo systemctl status apport.service
 
 Note: Les rapports sont dans */var/crash*
 
-
-=== Installer certbot (pour les certificats SSL)
-
-[source,bash]
----------------
-sudo apt remove cerbot
-sudo apt install snapd
-sudo snap install --classic certbot
-sudo ln -s /snap/bin/certbot /usr/bin/certbot
-
-# Old method was:
-#cd /root
-#apt install software-properties-common python-software-properties
-#add-apt-repository ppa:certbot/certbot
-#apt update
-#apt install certbot
----------------
-
-[[creation_certificat_ssl]]
-=== Création d'un certificat SSL pour les sites Web
-
-Lancer certbot et choisir le virtual hot du serveur Web
-    
-[source,bash]
----------------
-certbot
----------------
 
 
 [[installation_des_taches_cron]]
