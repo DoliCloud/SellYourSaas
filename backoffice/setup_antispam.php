@@ -105,7 +105,6 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 if ($action == 'testemail') {
 	$domainemail = preg_replace('/^.*@/', '', $emailtotest);
 	$result = isValidMXRecord($domainemail);
-	var_dump($result);
 	if ($result > 0) {
 		setEventMessages($langs->trans("EmailIsValid"), '', 'mesgs');
 	} else {
