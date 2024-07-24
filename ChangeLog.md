@@ -3,7 +3,8 @@
 
 ## Unreleased
 
-* NEW On payment by card, the last 4 numbers are saved into the field numero of the payment.
+* NEW Add a tool to test the email like it is done during registration. 
+* NEW On payment by card, the last 4 numbers are saved into the field "numero" of the payment in database.
 * NEW Can force permission to see SSH/Mysql access per instance.
 * NEW Show the possible substitutions keys for the helpdesk url into setup.
 * SEC When using ssh, a user can't see the OS and package information.

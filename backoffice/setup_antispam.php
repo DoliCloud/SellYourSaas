@@ -86,20 +86,34 @@ $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
-// Security check
-$result = restrictedArea($user, 'sellyoursaas', 0, '', '');
-
+$emailtotest = GETPOST('emailtotest');
 $keytodesactivate	= GETPOST('key', 'alpha');
 $value	= GETPOST('value', 'alpha');
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = !getDolGlobalString('SELLYOURSAAS_INFRA_COST') ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = getDolGlobalString('SELLYOURSAAS_INFRA_COST', '100');
+
+// Security check
+$result = restrictedArea($user, 'sellyoursaas', 0, '', '');
+
 
 
 /*
  *	Actions
  */
 
+if ($action == 'testemail') {
+	$domainemail = preg_replace('/^.*@/', '', $emailtotest);
+	$result = isValidMXRecord($domainemail);
+	var_dump($result);
+	if ($result > 0) {
+		setEventMessages($langs->trans("EmailIsValid"), '', 'mesgs');
+	} else {
+		setEventMessages($langs->trans("EmailIsNotValid"), '', 'errors');
+	}
+
+	$action = '';
+}
 // None
 
 
@@ -183,8 +197,18 @@ print $message;
 */
 
 print '<br>';
+print '<br>';
+print '<br>';
 
+print $langs->trans("TestEmailLikeOnRegistrationPage").'...<br>';
+print '<form action="'.$_SERVER["PHP_SELF"].'">';
+print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<input type="hidden" name="action" value="testemail">';
 
+print '<input type="email" name="emailtotest" value="'.$emailtotest.'" placeholder="Email to test">';
+print '<input type="submit" class="flat button small" name="submit" value="'.$langs->trans("TestMXEmail").'">';
+
+print '</form>';
 
 // End of page
 llxFooter();

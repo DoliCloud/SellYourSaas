@@ -873,3 +873,6 @@ AddPaymentMethodForSEPAWarningIfTransfer=WARNING: You are about to enter an auto
 ServerSignatureKey=Signature key for this server
 SupportFeatures=Support features
 SupportKey=Support key
+TestEmailLikeOnRegistrationPage=Test an email like on registration page (isValidMXRecord)
+EmailIsValid=Email is valid
+EmailIsNotValid=Email is not valid
