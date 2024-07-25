@@ -756,11 +756,11 @@ print '</tr>';
 
 // Upgrade.unlock file
 print '<tr>';
-print '<td>'.$langs->trans("UnlockfileInstalled").'</td><td>'.($object->array_options['options_fileunlock'] ? $langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileunlock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel') : $langs->trans("No")).'</span>';
+print '<td>'.$langs->trans("UnlockfileInstalled").'</td><td>'.($object->array_options['options_fileupgradeunlock'] ? $langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileupgradeunlock'], '%Y-%m-%d %H:%M:%S', 'tzuserrel') : $langs->trans("No")).'</span>';
 if ($object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addupgradeunlock&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 }
-print($object->array_options['options_fileunlock'] ? ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delupgradeunlock&token='.newToken().'">'.$langs->trans("Delete").'</a>)' : '');
+print($object->array_options['options_fileupgradeunlock'] ? ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=delupgradeunlock&token='.newToken().'">'.$langs->trans("Delete").'</a>)' : '');
 print '</td>';
 print '<td></td><td></td>';
 print '</tr>';

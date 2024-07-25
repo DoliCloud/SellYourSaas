@@ -3801,11 +3801,18 @@ class SellYourSaasUtils
 								$fstatinstallmoduleslock=@ssh2_sftp_stat($sftp, $fileinstallmoduleslock2);
 								$dateinstallmoduleslockfile=(empty($fstatinstallmoduleslock['atime']) ? '' : $fstatinstallmoduleslock['atime']);
 
+								// Check if upgrade.unlock exists
+								$dir = $object->array_options['options_database_db'];
+								$fileupgradeunlock="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/upgrade.unlock';
+								$fileupgradeunlock2=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/upgrade.unlock';
+								$fstatupgradeunlock=@ssh2_sftp_stat($sftp, $fileupgradeunlock2);
+								$dateupgradeunlockfile=(empty($fstatupgradeunlock['atime']) ? '' : $fstatupgradeunlock['atime']);
+
 								// Check if authorized_keys_support exists (created during os account creation, into skel dir)
 								$fileauthorizedkeys="ssh2.sftp://".intval($sftp).$object->array_options['options_hostname_os'].'/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
 								$fileauthorizedkeys2=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/.ssh/authorized_keys_support';
-								$fstatlock=@ssh2_sftp_stat($sftp, $fileauthorizedkeys2);
-								$dateauthorizedkeysfile=(empty($fstatlock['atime']) ? '' : $fstatlock['atime']);
+								$fstatauthorizedkeys=@ssh2_sftp_stat($sftp, $fileauthorizedkeys2);
+								$dateauthorizedkeysfile=(empty($fstatauthorizedkeys['atime']) ? '' : $fstatauthorizedkeys['atime']);
 								//var_dump($datelockfile);
 								//var_dump(dateinstallmoduleslockfile);
 								//var_dump($fileauthorizedkeys2);
@@ -3814,9 +3821,11 @@ class SellYourSaasUtils
 								$doupdate = 0;
 								if ($object->array_options['options_filelock'] != $datelockfile
 								|| $object->array_options['options_fileinstallmoduleslock'] != $dateinstallmoduleslockfile
+								|| $object->array_options['options_fileupgradeunlock'] != $dateupgradeunlockfile
 								|| $object->array_options['options_fileauthorizekey'] != $dateauthorizedkeysfile) {
 									$object->array_options['options_filelock'] = $datelockfile;
 									$object->array_options['options_fileinstallmoduleslock'] = $dateinstallmoduleslockfile;
+									$object->array_options['options_fileupgradeunlock'] = $dateupgradeunlockfile;
 									$object->array_options['options_fileauthorizekey'] = $dateauthorizedkeysfile;
 									$doupdate = 1;
 								}
@@ -3975,6 +3984,57 @@ class SellYourSaasUtils
 								}
 
 								$object->array_options['options_fileinstallmoduleslock']=(empty($fstat['atime']) ? '' : $fstat['atime']);
+
+								if (! empty($fstat['atime'])) {
+									$result = $object->update($user, 1);
+								}
+							}
+						} elseif ($remoteaction == 'deleteupgradeunlock') {
+							$sftp = ssh2_sftp($connection);
+							if (! $sftp) {
+								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
+								$this->errors[] = 'Failed to connect to ssh2_sftp to '.$server;
+								$error++;
+							} else {
+								// Check if upgrade;unlock exists
+								$dir = $object->array_options['options_database_db'];
+								$filetodelete=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/upgrade.unlock';
+								$result=ssh2_sftp_unlink($sftp, $filetodelete);
+
+								if (! $result) {
+									$error++;
+									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFailToDeleteFile", $object->array_options['options_username_os'].'/'.$dir.'/documents/upgrade.unlock');
+								} else {
+									$object->array_options['options_fileupgradeunlock'] = '';
+								}
+								if ($result) {
+									$result = $object->update($user, 1);
+								}
+							}
+						} elseif ($remoteaction == 'recreateupgradeunlock') {
+							$sftp = ssh2_sftp($connection);
+							if (! $sftp) {
+								dol_syslog("Could not execute ssh2_sftp", LOG_ERR);
+								$this->errors[] = 'Failed to connect to ssh2_sftp to '.$server;
+								$error++;
+							} else {
+								// Check if install.lock exists
+								$dir = $object->array_options['options_database_db'];
+								//$fileinstalllock="ssh2.sftp://".$sftp.$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/upgrade.unlock';
+								$fileupgradeunlock="ssh2.sftp://".intval($sftp) . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/upgrade.unlock';
+								$fstat=@ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/upgrade.unlock');
+								if (empty($fstat['atime'])) {
+									$stream = fopen($fileupgradeunlock, 'w');
+									//var_dump($stream);exit;
+									fwrite($stream, "// File to allow only upgrade process.\n");
+									fclose($stream);
+									$fstat=ssh2_sftp_stat($sftp, getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->array_options['options_username_os'].'/'.$dir.'/documents/upgrade.unlock');
+								} else {
+									$error++;
+									$this->errors[] = $langs->transnoentitiesnoconv("ErrorFileAlreadyExists");
+								}
+
+								$object->array_options['options_fileupgradeunlock']=(empty($fstat['atime']) ? '' : $fstat['atime']);
 
 								if (! empty($fstat['atime'])) {
 									$result = $object->update($user, 1);

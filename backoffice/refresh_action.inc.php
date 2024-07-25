@@ -234,7 +234,7 @@ if ($action == 'addauthorizedkey') {
 				setEventMessage($langs->transnoentitiesnoconv("ErrorFileAlreadyExists"), 'warnings');
 			}
 
-			$object->array_options['options_fileunlock']=(empty($fstat['atime']) ? '' : $fstat['atime']);
+			$object->array_options['options_fileupgradeunlock']=(empty($fstat['atime']) ? '' : $fstat['atime']);
 
 			if (! empty($fstat['atime'])) {
 				$result = $object->update($user);
@@ -495,7 +495,7 @@ if ($action == 'addauthorizedkey') {
 			}
 
 			//$object->filelock='';
-			$object->array_options['options_fileunlock']='';
+			$object->array_options['options_fileupgradeunlock']='';
 
 			if ($result) {
 				$result = $object->update($user);
