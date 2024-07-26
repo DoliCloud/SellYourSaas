@@ -170,6 +170,8 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOMIGRATION_CODE", GETPOST("SELLYOURSAAS_AUTOMIGRATION_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOUPGRADE_CODE", GETPOST("SELLYOURSAAS_AUTOUPGRADE_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
+		dolibarr_set_const($db, "SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", GETPOST("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+
 		foreach ($arrayofsuffixfound as $suffix) {
 			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".$suffix, GETPOST("SELLYOURSAAS_SUPPORT_URL".$suffix), 'chaine', 0, '', $conf->entity);
 		}
@@ -521,6 +523,7 @@ print '</td>';
 print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
 print '</tr>';
 
+
 // Allow deployment of Dolibarr website for specific thirdparty ID ?
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID").'</td>';
@@ -682,6 +685,8 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOUPGRADE_CODE").'</td>';
 print '<td class="nowraponall">';
 print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
+print ' &nbsp; ';
+print '<input class="maxwidth100" type="text" name="SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR" value="'.getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR', '').'">';
 print '</td>';
 print '<td></td>';
 print '</tr>';
