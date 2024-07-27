@@ -389,8 +389,8 @@ if [[ "$mode" == "upgrade" ]];then
 
 		# Note: if target is version 19, we must start with migration from 18 to 19, so 
 		# we manage the case the instance has a minor version lower.
-		versionfrom=(( $lastversiondolibarrinstance - 1 ))
-		versionto=(( $versionfrom + 1 ))
+		versionfrom=$(( $lastversiondolibarrinstance - 1 ))
+		versionto=$(( $versionfrom + 1 ))
 		echo `date +'%Y-%m-%d %H:%M:%S'`" versionfrom=$versionfrom versionto=$versionto"
 		
 		# Run the first pass of upgrade
