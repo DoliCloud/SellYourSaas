@@ -898,6 +898,10 @@ if (! $user->socid) {
 		}
 	}
 
+	if (getDolGlobalString("SellyoursaasForceUpgradeButton")) {
+		$disablebuttonupgrade = 0;
+	}
+
 	print '<div class="tabsAction">';
 
 	if ($user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
