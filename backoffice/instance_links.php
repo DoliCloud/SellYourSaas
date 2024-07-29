@@ -898,7 +898,7 @@ if (! $user->socid) {
 		}
 	}
 
-	if (getDolGlobalString("SellyoursaasForceUpgradeButton")) {
+	if (getDolGlobalString("SELLYOURSAAS_FORCE_UPGRADE_BUTTON")) {
 		$disablebuttonupgrade = 0;
 	}
 
