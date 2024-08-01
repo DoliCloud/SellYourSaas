@@ -703,7 +703,7 @@ if ($ok) {
 
 dol_delete_file('/tmp/batch_detect_evil_instance.tmp');
 
-print "----- Loop for test instance not matching the file signature - in trial instances (".count($instancestrial)." instances)\n";
+print "----- Loop among recent trial instances to check if file signature (".count($instancestrial)." instances)\n";
 foreach ($instancestrial as $instanceid => $instancearray) {
 	$error = 0;		// error for this instance
 
@@ -711,7 +711,7 @@ foreach ($instancestrial as $instanceid => $instancearray) {
 		print 'Discard '.$instancearray['instance']." - deployment date too old (< now - ".$datefilter.")\n";
 		continue;
 	} else {
-		print 'Process '.$instancearray['instance']."\n";
+		print 'Process '.$instancearray['instance']." - ";
 		file_put_contents('/tmp/batch_detect_evil_instance.tmp', "--- Process instance ".$instancearray['instance']." - Deployed on ".dol_print_date($instancearray['deployment_date_start'], 'dayhourrfc', 'gmt')."\n", FILE_APPEND);
 	}
 
