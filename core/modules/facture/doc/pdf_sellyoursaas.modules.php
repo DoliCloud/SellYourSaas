@@ -57,7 +57,7 @@ class pdf_sellyoursaas extends pdf_crabe
 		$this->name = strtolower($conf->global->SELLYOURSAAS_NAME);
 		$this->description = $langs->trans('PDFForSellYourSaas');
 
-		if (! empty($conf->global->SELLYOURSAAS_UPDATE_MAIN_DOC_FIELD_DISABLED)) {
+		if (getDolGlobalString('SELLYOURSAAS_UPDATE_MAIN_DOC_FIELD_DISABLED')) {
 			$this->update_main_doc_field = 0;
 		}
 	}
@@ -82,10 +82,10 @@ class pdf_sellyoursaas extends pdf_crabe
 		$savname = $this->emetteur->name;
 		$savlogo = $this->emetteur->logo;
 
-		if (!empty($conf->global->SELLYOURSAAS_NAME) && $conf->global->SELLYOURSAAS_NAME != $this->emetteur->name) {
+		if (getDolGlobalString('SELLYOURSAAS_NAME') && getDolGlobalString('SELLYOURSAAS_NAME') != $this->emetteur->name) {
 			$this->emetteur->name = $this->emetteur->name.' - ' . getDolGlobalString('SELLYOURSAAS_NAME');
 		}
-		$this->emetteur->logo = $conf->global->SELLYOURSAAS_LOGO;
+		$this->emetteur->logo = getDolGlobalString('SELLYOURSAAS_LOGO');
 
 		parent::_pagehead($pdf, $object, $showaddress, $outputlangs);
 

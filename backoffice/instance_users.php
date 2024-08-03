@@ -266,7 +266,7 @@ if (empty($reshook)) {
 			$newlangs->load("sellyoursaas@sellyoursaas");
 
 			$private_note = $newlangs->trans("NoteForSupportUser");
-			$emailsupport = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+			$emailsupport = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 			$signature = '--<br>Support team';
 
 			if ($fordolibarr) {
@@ -637,7 +637,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':' . getDolGlobalString('THIRDPARTY_REF_INPUT_SIZE') : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
 	// Thirdparty
 	$morehtmlref .= '<br>'.$object->thirdparty->getNomUrl(1, 'customer');
-	if (empty($conf->global->MAIN_DISABLE_OTHER_LINK) && $object->thirdparty->id > 0) {
+	if (!getDolGlobalString('MAIN_DISABLE_OTHER_LINK') && $object->thirdparty->id > 0) {
 		$morehtmlref .= ' (<a href="'.DOL_URL_ROOT.'/contrat/list.php?socid='.$object->thirdparty->id.'&search_societe='.urlencode($object->thirdparty->name).'">'.$langs->trans("OtherContracts").'</a>)';
 	}
 	// Project

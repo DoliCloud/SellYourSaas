@@ -205,8 +205,8 @@ if (empty($reshook)) {
 					&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 					$constforaltname = $tmpthirdparty->array_options['options_domain_registration_page'];
 					$newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
-					if (! empty($conf->global->$newurlkey)) {
-						$urlmyaccount = $conf->global->$newurlkey;
+					if (getDolGlobalString($newurlkey)) {
+						$urlmyaccount = getDolGlobalString($newurlkey);
 					} else {
 						$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $tmpthirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
 					}
@@ -488,7 +488,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$morehtmlref.=$form->editfieldval("RefSupplier", 'ref_supplier', $object->ref_supplier, $object, 0, 'string'.(isset($conf->global->THIRDPARTY_REF_INPUT_SIZE) ? ':' . getDolGlobalString('THIRDPARTY_REF_INPUT_SIZE') : ''), '', null, null, '', 1, 'getFormatedSupplierRef');
 	// Thirdparty
 	$morehtmlref .= '<br>'.$object->thirdparty->getNomUrl(1, 'customer');
-	if (empty($conf->global->MAIN_DISABLE_OTHER_LINK) && $object->thirdparty->id > 0) {
+	if (!getDolGlobalString('MAIN_DISABLE_OTHER_LINK') && $object->thirdparty->id > 0) {
 		$morehtmlref .= ' (<a href="'.DOL_URL_ROOT.'/contrat/list.php?socid='.$object->thirdparty->id.'&search_societe='.urlencode($object->thirdparty->name).'">'.$langs->trans("OtherContracts").'</a>)';
 	}
 	// Project
@@ -527,7 +527,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	print '<div class="fichecenter">';
 
-	$backupdir=$conf->global->DOLICLOUD_BACKUP_PATH;
+	$backupdir=getDolGlobalString('DOLICLOUD_BACKUP_PATH');
 
 	$dirdb = preg_replace('/_([a-zA-Z0-9]+)/', '', $object->database_db);
 	$login = $username_web;
@@ -604,7 +604,7 @@ if (empty($object->nbofusers)) {
 					'__APPPASSWORDSHA256SALTED__'=>$passwordsha256salted,*/
 					'__APPUNIQUEKEY__'=>$generateduniquekey,
 					'__APPDOMAIN__'=>$sldAndSubdomain.'.'.$domainname,
-					'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT
+					'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')
 				);
 
 				$newqty = 0;
@@ -837,7 +837,7 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td align="right">';
 	if ($user->hasRight('sellyoursaas', 'write')) {
 		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("MarkAsSpamAndClose").'</span></a>';
-		if (!empty($conf->global->SELLYOURSAAS_ADD_SPAMER_JS_SCANNER)) {
+		if (getDolGlobalString('SELLYOURSAAS_ADD_SPAMER_JS_SCANNER')) {
 			print ' &nbsp; ';
 			print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addspamtracker&token='.newToken().'&idtotrack='.$instance->id.'">'.$langs->trans("AddAntiSpamTracker").'</a>';
 			print ' &nbsp; ';

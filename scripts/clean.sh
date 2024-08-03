@@ -629,6 +629,7 @@ find $archivedircron -maxdepth 1 -type f -path '*cron*' -mtime +15 -delete
 # Now clean miscellaneous files
 echo "***** Now clean miscellaneous files"
 rm /var/log/repair.lock > /dev/null 2>&1
+rm -fr /tmp/cache > /dev/null 2>&1
 
 # Now clean old journalctl files
 echo "***** Now clean journal files older than 60 days"

@@ -1,0 +1,85 @@
+= Sell-Your-Saas ISO27001
+This document is a document to provide all information required to show your ISO27001 compliance when using SellYourSaas
+:source-highlighter: red
+:title: ISO 27001 compliance
+:subject: This document is a document to provide all information required to show your ISO27001 compliance when using SellYourSaas
+:keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
+:toc: manual
+:toclevels: 3
+:toc-title: Table of contents
+:toc-placement: preamble
+
+<<<<
+
+== Introduction ==
+
+This document provides all information required by the ISO27001 requirements.
+It describes the security expected, the existing tools and processes to reach this security goal.
+
+*Historic of version:* 
+
+The historic of the versions of this documents is available on github. 
+
+
+
+<<<<<<<
+
+== Organisation the company Organization
+
+
+
+
+
+
+
+<<<<<<<
+
+== About People
+
+=== Employees
+
+
+
+=== Rules 
+
+Employees must agree with all the terms defined into the "Acceptable Use Policy for IT resources" 
+
+This document is the file "Acceptable Use Policy for IT Resources".
+
+
+
+
+<<<<<<<
+
+== About physical access
+
+=== Situation ===
+
+The company is a full remote company. Any employee access the internal tool of the company from home. 
+
+Because any access to any tools need a password (never stored, or stored into a Password Manager where ) + a physical device (Multi Factor Authentication), risk is very loow. 
+
+
+
+
+<<<<<<<
+
+== About technologies
+
+=== Situation ===
+
+
+
+
+===
+
+
+
+
+
+
+
+
+<<<<<<<
+
+== Annexes

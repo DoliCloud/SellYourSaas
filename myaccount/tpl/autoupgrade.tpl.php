@@ -401,9 +401,11 @@ if ($action == "instanceverification") {
 		$idcontract = empty($instanceselect[1]) ? 0 : $instanceselect[1];
 	}
 
+	// Set newversion from the setup
 	$newversion = (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR") ? "(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")" : "");
 
-	if ($idcontract > 0) {
+	// If not set, we try to guess the $newversion from the name of the directory of the package
+	if ($idcontract > 0 && empty($newversion)) {
 		$object = new SellYourSaasContract($db);
 
 		$result=$object->fetch($idcontract);
@@ -416,6 +418,7 @@ if ($action == "instanceverification") {
 			$tmpproduct->fetch($dataofcontract['appproductid']);
 			$tmppackage->fetch($tmpproduct->array_options['options_package']);
 
+			// Set $newversion. Note this is not the exact version, just major version found into path name.
 			//$tmppackage->srcfile1 = 'ddd_16.0';
 			//var_dump($tmppackage->srcfile1);
 			$newversion = preg_replace('/[^0-9\.]/', '', $tmppackage->srcfile1);

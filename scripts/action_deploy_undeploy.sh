@@ -715,7 +715,13 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			mkdir -p $targetdirwithsources1
 			
 			# Check local cache
-			datesource=`date -r $dirwithsources1 +"%Y%m%d"`
+			
+			if [ -f "$dirwithsources1.tar.zst" ]; then
+				datesource=`date -r $dirwithsources1.tar.zst +"%Y%m%d"`
+			else
+				datesource=0
+			fi
+			
 			if [ -f "/tmp/cache$dirwithsources1.tar.zst" ]; then
 				datecache=`date -r /tmp/cache$dirwithsources1.tar.zst +"%Y%m%d"`
 			else
@@ -771,7 +777,13 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			mkdir -p $targetdirwithsources2
 			
 			# Check local cache
-			datesource=`date -r $dirwithsources2 +"%Y%m%d"`
+
+			if [ -f "$dirwithsources2.tar.zst" ]; then
+				datesource=`date -r $dirwithsources2.tar.zst +"%Y%m%d"`
+			else
+				datesource=0
+			fi
+			
 			if [ -f "/tmp/cache$dirwithsources2.tar.zst" ]; then
 				datecache=`date -r /tmp/cache$dirwithsources2.tar.zst +"%Y%m%d"`
 			else
@@ -827,7 +839,13 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			mkdir -p $targetdirwithsources3
 			
 			# Check local cache
-			datesource=`date -r $dirwithsources3 +"%Y%m%d"`
+			
+			if [ -f "$dirwithsources3.tar.zst" ]; then
+				datesource=`date -r $dirwithsources3.tar.zst +"%Y%m%d"`
+			else
+				datesource=0
+			fi
+			
 			if [ -f "/tmp/cache$dirwithsources3.tar.zst" ]; then
 				datecache=`date -r /tmp/cache$dirwithsources3.tar.zst +"%Y%m%d"`
 			else

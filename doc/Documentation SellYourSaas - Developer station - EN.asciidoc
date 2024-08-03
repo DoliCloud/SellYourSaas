@@ -1,13 +1,8 @@
 = Installation and operation document SellYourSaas - Developer station
 :source-highlighter: red
-:companyname: Teclib
-:corpname: Teclib
-:orgname: Teclib
-:title: Installation document for the SellYourSaas developer or maintainer stattion
+:title: Installation document for the SellYourSaas developer or maintainer station
 // Document date:
 :docdate: 01/30/2019
-// City associated with the document
-:city: Bordeaux
 :toc: manual
 :toc-placement: preamble
 
@@ -218,140 +213,6 @@ sudo apt install indicator-sound-switcher
 
 
 
-=== Added asciidoc support to Gedit or Pluma
-
-[source,bash]
----------------
-cd ~/git
-git clone https://github.com/edusantana/asciidoc-highlight
-cd ~/git/asciidoc-highlight/gedit/
-./install.sh
----------------
-
-
-
-=== Gestion Google Cloud Print
-
-[source,bash]
----------------
-cd ~
-sudo apt install google-cloud-print-connector
-adduser cloud-print-connector
-/usr/bin/gcp-connector-util i
----------------
-
-Corriger les chemins dans *~/gcp-cups-connector.config.json* si nécessaire et mettre les droits.
-
-chmod ug+rw ~/gcp-cups-connector.config.json
-chgrp cloud-print-connector ~/gcp-cups-connector.config.json
-
-Lancer manuellement /usr/bin/gcp-cups-connector et vérifier dans *https://www.google.com/cloudprint#printers* que les imprimantes sont visibles.
-
-
-Créer un fichier de lancement automatique *~/cloud-print-connector.service* avec ce contenu
-
-[source,bash]
----------------
-# Copyright 2016 Google Inc. All rights reserved.
-#
-# Use of this source code is governed by a BSD-style
-# license that can be found in the LICENSE file or at
-# https://developers.google.com/open-source/licenses/bsd
-
-[Unit]
-Description=Google Cloud Print Connector
-Documentation="https://github.com/google/cloud-print-connector"
-After=cups.service avahi-daemon.service network-online.target
-Wants=cups.service avahi-daemon.service network-online.target
-
-[Service]
-ExecStart=/usr/bin/gcp-cups-connector -config-filename /home/mylogin/gcp-cups-connector.config.json
-Restart=on-failure
-User=cloud-print-connector
-
-[Install]
-WantedBy=multi-user.target
----------------
-
-Et installer le lancement par
-
-    sudo install -o root -m 0664 cloud-print-connector.service /etc/systemd/system
-    sudo systemctl enable cloud-print-connector.service
-    sudo systemctl start cloud-print-connector.service
-    sudo systemctl status cloud-print-connector.service
-
-
-=== Avoir un bureau distant
-
-* Installer "vino"
-
-* Si le client VNC est trop ancien et refuse l'accès car le server demande du TLS, il est possible de faire ceci sur le serveur:
-
-[source,bash]
----------------
-sudo killall vino-server
-gsettings set org.gnome.Vino require-encryption false
-/usr/lib/vino/vino-server
----------------
-
-
-== Cloner son poste sur un autre
-Prerequisites:
-- You must have a remote ssh access to store the backup and you must be able to access it with 
-  ssh username@servername
-- The computer must have a LAN internet connexion
-
-Prepare the USB boot key:
-- Download the amd64 (x86-64) version of Clonezilla Live zip file from (https://clonezilla.org/)
-- unzip the file
-- copy all files into the root of the USB key.
-
-Make the image of the partition to save:
-- Start the computer with the CloneZilla USB key as boot
-- Choose to start CloneZilla then choose the SSH for the media storing the image.
-- Choose *saveparts* (or savedisks)
-
-Restore:
-
-- Start the computer with the CloneZilla USB key as boot
-- Choose to start CloneZilla then choose the SSH for the media storing the image.
-- Choose *restoreparts* (or restoredisks)
-- If the target partition is larger, don't forget to check during restoration option that the option auto-resize is set.
-
-After the restoration, you can make some check and fix keeping troubles:
-Reboot from a Live ubuntu) and then you can:
-
-Rename the UUID if it is already used by another partition on same disk. If not, fix this with 
-[source,bash]
----------------
-tune2fs 
----------------
-
-Check that the boot partition has the flag on (flag boot for BIOS/Legacy or flag ESP for UEFI).
-[source,bash]
----------------
-gparted
----------------
-
-Reinstall grub (if something is rong)
-[source,bash]
----------------
-update-grub
----------------
-
-You can also: Check/modify the /etc/fstab to automount the new partition. 
-
-
-If after a final reboot, you reach a grub prompt, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a Live Ubunu. Then:
-[source,bash]
----------------
-sudo add-apt-repository ppa:yannubuntu/boot-repair
-sudo apt update
-sudo apt install -y boot-repair
-sudo boot-repair
----------------
-
-
 === Google Cloud Print management
 
 [source,bash]
@@ -474,7 +335,24 @@ sudo boot-repair
 ---------------
 
 
-==== Error when running ansible
+== Connect to a server via a bastion with remmina
+
+When you are using a SSH bastion to connect to your production server and the ssh command is 
+
+ssh bastionuser@bastion.mysaasdomain.com -t -oRemoteCommand="my.remote.production.server"
+
+(So connection to the bastion with ssh bastionuser@bastion.mysaasdomain.com then connecting to the remote server with ssh my.remote.production.server) 
+
+You can setup Remmina with:
+- Server = Address of bastion server 
+- User name = bastionuser
+- Opening command = ssh my.remote.production.server
+
+
+
+== Troubelshooting
+
+=== Error when running ansible
 
 If you got this error:
 ModuleNotFoundError: No module named 'ansible.module_utils.six.moves'

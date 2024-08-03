@@ -253,11 +253,11 @@ if [[ "$mode" == "upgrade" ]];then
 	fi
 	if [ -d "$dirforexampleforsources" ]
 	then
-		# TODO LMR Replace this rsync with a untar from the tgz file, something like this:
-		# tar -I zstd -xf sourcefile.tar.zst --directory $targetdirwithsources1/
-		# First try with sourcefile.tar.zst that is into tmp cache dir /tmp/cache/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git/xxx.tar.zst 
-		# If cache file does not exists, use the archive file into NFS dir $dirforexampleforsources/
+		# First try with sourcefile.tar.zst/.tgz that is into tmp cache dir /tmp/cache/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git/xxx.tar.zst/.tgz 
+		# If cache file does not exists, use the archive file into NFS dir $dirforexampleforsources/ with tar -I zstd -xf sourcefile.tar.zst --directory $targetdirwithsources1/
 		# If archive file not found, do the rsync.
+
+		# First try to find the cache file
 		if [ -d $dirwithsources1 ]; then
 			if [[ "x$targetdirwithsources1" != "x" ]]; then
 				mkdir -p $targetdirwithsources1
@@ -265,16 +265,18 @@ if [[ "$mode" == "upgrade" ]];then
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 					tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/
 				else
+					echo "No cache file /tmp/cache$dirwithsources1.tar.zst found"; 
 					if [ -f /tmp/cache$dirwithsources1.tgz ]; then
 						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
 						tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/
 					else
+						echo "No cache file /tmp/cache$dirwithsources1.tgz found"; 
 						# If local cache does not exists
-						if [ -f $dirwithsources1.tgz ]; then
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/"
-							tar -xzf $dirwithsources1.tgz --directory $targetdirwithsources1/
+						if [ -f $dirwithsources1.tar.zst ]; then
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -I zstd -xf $dirwithsources1.tat.zst --directory $targetdirwithsources1/"
+							tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 						else
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources1."
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources1 (".$dirwithsources1.tar.zst." not found)."
 							archivenotfounddirwithsources=1
 						fi
 					fi
@@ -293,16 +295,18 @@ if [[ "$mode" == "upgrade" ]];then
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 					tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/
 				else
+					echo "No cache file /tmp/cache$dirwithsources2.tar.zst found"; 
 					if [ -f /tmp/cache$dirwithsources2.tgz ]; then
 						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
 						tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/
 					else
+						echo "No cache file /tmp/cache$dirwithsources2.tgz found"; 
 						# If local cache does not exists
-						if [ -f $dirwithsources2.tgz ]; then
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/"
-							tar -xzf $dirwithsources2.tgz --directory $targetdirwithsources2/
+						if [ -f $dirwithsources2.tar.zst ]; then
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+							tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 						else
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources2."
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources2 (".$dirwithsources2.tar.zst." not found)."
 							archivenotfounddirwithsources=1
 						fi
 					fi
@@ -319,16 +323,18 @@ if [[ "$mode" == "upgrade" ]];then
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 					tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/
 				else
+					echo "No cache file /tmp/cache$dirwithsources3.tar.zst found"; 
 					if [ -f /tmp/cache$dirwithsources3.tgz ]; then
 						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
 						tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/
 					else
+						echo "No cache file /tmp/cache$dirwithsources3.tgz found"; 
 						# If local cache does not exists
-						if [ -f $dirwithsources3.tgz ]; then
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/"
-							tar -xzf $dirwithsources3.tgz --directory $targetdirwithsources3/
+						if [ -f $dirwithsources3.tar.zst ]; then
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+							tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 						else
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources3."
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources3 (".$dirwithsources3.tar.zst." not found)."
 							archivenotfounddirwithsources=1
 						fi
 					fi
@@ -338,9 +344,10 @@ if [[ "$mode" == "upgrade" ]];then
 			fi
 		fi
 
+		# If some cache file not found, 
 		if [ $archivenotfounddirwithsources -eq 1 ]; then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache and remote archive not found for at least 1 dirwithsource."
-			echo "We try with $dirforexampleforsources with : rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" We try with $dirforexampleforsources with : rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom"
 			rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom
 			if [ $? -eq 0 ];then
 				archivenotfounddirwithsources=0
@@ -367,7 +374,7 @@ if [[ "$mode" == "upgrade" ]];then
 
 		if [ ! -d "$instancedir/documents/admin/temp" ]
 		then
-			echo "mkdir -p $instancedir/documents/admin/temp"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" mkdir -p $instancedir/documents/admin/temp"
 			mkdir -p "$instancedir/documents/admin/temp"
 			chown -R $osusername:$osusername "$instancedir/documents/admin/temp"
 		fi
@@ -380,8 +387,13 @@ if [[ "$mode" == "upgrade" ]];then
 		chown $osusername:$osusername "$instancedir/documents/admin/temp/output.html"
 
 
-		versionfrom=$lastversiondolibarrinstance
+		# Note: if target is version 19, we must start with migration from 18 to 19, so 
+		# we manage the case the instance has a minor version lower.
+		versionfrom=$(( $lastversiondolibarrinstance - 1 ))
 		versionto=$(( $versionfrom + 1 ))
+		echo `date +'%Y-%m-%d %H:%M:%S'`" versionfrom=$versionfrom versionto=$versionto"
+		
+		# Run the first pass of upgrade
 		while [ $versionto -le $laststableupgradeversion ]
 		do
 			if [ -f "$instancedir/documents/install.lock" ]
@@ -424,6 +436,7 @@ if [[ "$mode" == "upgrade" ]];then
 				echo "Error on upgrade.php"
 				exit 222
 			fi
+			
 			versionfrom=$(( $versionfrom + 1 ))
 			versionto=$(( $versionto + 1 ))
 		done

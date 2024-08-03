@@ -105,7 +105,7 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 			$passwordtotest_crypted == $thirdparty->array_options['options_password'] ||			// For compatibility with old versions
 			hash('sha256', $passwordtotest) == $thirdparty->array_options['options_oldpassword']	// For compatibility with old versions
 			) {
-			if (empty($conf->global->SELLYOURSAAS_ANONYMOUSUSER)) {
+			if (!getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER')) {
 				dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO Setup not complete", LOG_NOTICE);
 
 				// Load translation files required by the page

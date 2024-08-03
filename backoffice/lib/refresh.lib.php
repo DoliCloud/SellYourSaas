@@ -111,7 +111,7 @@ function dolicloud_files_refresh($conf, $db, &$object, &$errors, $printoutput = 
 					if ($recreateauthorizekey) {
 						@ssh2_sftp_mkdir($sftp, getDolGlobalString('DOLICLOUD_EXT_HOME') . '/'.$username_os.'/.ssh');
 
-						$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
+						$publickeystodeploy = getDolGlobalString('SELLYOURSAAS_PUBLIC_KEY');
 
 						// We overwrite authorized_keys_support
 						if ($printoutput) {
@@ -260,7 +260,7 @@ function dolicloud_database_refresh($conf, $db, &$object, &$errors)
 					$dbprefix = ($object->array_options['options_prefix_db'] ? $object->array_options['options_prefix_db'] : 'llx_');
 					$substitarray=array(
 						'__INSTANCEDBPREFIX__' => $dbprefix,
-						'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__' => $conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT
+						'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__' => getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')
 					);
 
 					$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);

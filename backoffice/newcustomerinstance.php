@@ -87,7 +87,7 @@ $error = 0; $errors = array();
 
 
 // Security check
-$user->rights->sellyoursaas->delete = $user->rights->sellyoursaas->write;
+$user->rights->sellyoursaas->delete = $user->hasRight('sellyoursaas', 'write');
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array array
@@ -107,7 +107,7 @@ if (GETPOST('add')) {
 $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
 
 // Set serverprice with the param from $conf of the $dbmaster server.
-$serverprice = empty($conf->global->SELLYOURSAAS_INFRA_COST) ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
+$serverprice = !getDolGlobalString('SELLYOURSAAS_INFRA_COST') ? '100' : $conf->global->SELLYOURSAAS_INFRA_COST;
 
 
 /*

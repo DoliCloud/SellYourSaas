@@ -25,12 +25,12 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE myaccount.tpl.php -->
 <?php
 
-$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) {
-		$sellyoursaasname = $conf->global->$newnamekey;
+	if (getDolGlobalString($newnamekey)) {
+		$sellyoursaasname = getDolGlobalString($newnamekey);
 	}
 }
 
@@ -95,8 +95,8 @@ print '
 	                  <label>'.$langs->trans("Country").'</label><br>';
 					$countryselected = (GETPOSTISSET('country_id') ? GETPOST('country_id', 'aZ09') : $mythirdpartyaccount->country_id);
 					$exclude_country_code = array();
-if (! empty($conf->global->SELLYOURSAAS_EXCLUDE_COUNTRY_CODES)) {
-	$exclude_country_code = explode(',', $conf->global->SELLYOURSAAS_EXCLUDE_COUNTRY_CODES);
+if (getDolGlobalString('SELLYOURSAAS_EXCLUDE_COUNTRY_CODES')) {
+	$exclude_country_code = explode(',', getDolGlobalString('SELLYOURSAAS_EXCLUDE_COUNTRY_CODES'));
 }
 					print '<input type="hidden" name="country_id_old" value="'.$countryselected.'">'."\n";
 					print $form->select_country($countryselected, 'country_id', '', 0, 'minwidth300', 'code2', 0, 1, 0, $exclude_country_code);
@@ -138,7 +138,7 @@ if ($mythirdpartyaccount->country_code == 'FR') {
 					print '</script>';
 					print "\n";
 
-if (empty($conf->global->MAIN_DISABLEVATCHECK) && $mythirdpartyaccount->isInEEC() && (GETPOST('admin', 'alpha'))) {
+if (!getDolGlobalString('MAIN_DISABLEVATCHECK') && $mythirdpartyaccount->isInEEC() && (GETPOST('admin', 'alpha'))) {
 	if (! empty($conf->use_javascript_ajax)) {
 		print "\n";
 		print '<script language="JavaScript" type="text/javascript">';
@@ -255,7 +255,7 @@ if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
 					</div>
 
 					';
-if (! empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_OPTINMESSAGES')) {
 	print '
 		                <div class="form-group paddingtop">
 		                  <!--<label>'.$langs->trans("OptinForCommercialMessages").'</label><br>-->
@@ -345,7 +345,7 @@ if (($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstan
 	print $langs->trans("ClosingAccountResellerNotPossible", ($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstancessuspendedreseller), $langs->transnoentities("MyInstances"), $langs->transnoentities("DangerZone")).'<br>';
 } elseif (($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended) > 0) {
 	print $langs->trans("ClosingAccountNotPossible", ($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended), $langs->transnoentities("MyInstances"), $langs->transnoentities("DangerZone")).'<br>';
-} elseif (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
+} elseif (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 	print '<!-- ClosingAccountIsTemporarlyDisabledTryLater -->'."\n";
 	print $langs->trans("ClosingAccountIsTemporarlyDisabledTryLater").'<br>';
 } else {

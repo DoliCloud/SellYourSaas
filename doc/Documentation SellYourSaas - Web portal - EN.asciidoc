@@ -1,24 +1,13 @@
 = Sell-Your-Saas installation and operation document - Web portal
 This document describes the technical and functional implementation of a server to host a web portal for SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
-:source-highlighter: rouge
-:companyname: Teclib
-:corpname: Teclib
-:orgname: Teclib
-:creator: Laurent Destailleur
+:source-highlighter: red
 :title: Document installation and operation for a Web portal
 :subject: This document describes the technical and functional implementation of SellYourSaas web portal
 :keywords: sellyoursaas, saas, dolibarr, wamp, glpi, webserver
-:city: Bordeaux
 :toc: manual
 :toclevels: 3
 :toc-title: Table of contents
 :toc-placement: preamble
-:revnumber: v1.0
-:revdate: 2019-01-30
-:revremark: First version
-:revnumber: v1.1
-:revdate: 2023-06-01
-:revremark: Many improvements
 
 <<<<
 
@@ -229,7 +218,7 @@ Run *ssh-keygen* for all these acounts : *root*, *admin* and *myunixlogin*
 
 === Deletion of information files at login
 
-In order not to give information to users doing SSH, on the deployment servers:
+In order not to give information to users doing SSH, on the server:
 
 [source, bash]
 ---------------
@@ -374,9 +363,7 @@ To take this into account, try this, otherwise, reboot.
 
 === Creation of working directories
 
-On the *Master* server and the *Deployment* servers, create the directories to store backups and archives.
-
-Create directories required to store data, backups and archives:
+Create the directories to store backups and archives.
 
 * Create directory */mnt/diskbackup/backup*:
 
@@ -397,8 +384,6 @@ ln -fs /mnt/diskhome/backup /mnt/diskbackup/backup
 
 
 === Getting files of Dolibarr and SellYourSaas application
-
-On all servers (*Master and Deployment*):
 
 * Under the *root* login, install git tool:
 
@@ -1041,16 +1026,6 @@ Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
 
 cpulimit launched with script  cpulimit --exe=apache2 --limit=20
 
-
-=== Installation of saslauthd (optional) ===
-
-Pour permettre authentification extern SMTP.
-
-[source,bash]
----------------
-sudo apt-get sasl2-bin
-vi /etc/default/saslauthd  pour mettre START=yes
----------------
 
 
 === Installation de Open DKIM (port 12345)
@@ -1710,15 +1685,12 @@ You must have inside the cron of user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master root
-#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 # cron master and deployment root
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1
 00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.sh >/home/admin/logs/perms.log
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
-
-Note: certbot-auto may be certbot
 
 You must have inside the cron of user *admin*:
 

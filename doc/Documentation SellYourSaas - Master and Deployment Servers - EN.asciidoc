@@ -1,25 +1,14 @@
 = Sell-Your-Saas installation and operation document - Master and deployment servers
 This document describes the technical and functional implementation of Sell-Your-Saas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...) - Laurent Destailleur - www.sellyoursaas.org
-:source-highlighter: rouge
-:companyname: Teclib
-:corpname: Teclib
-:orgname: Teclib
-:creator: Laurent Destailleur
+:source-highlighter: red
 :title: Document installation and operation of SellYourSaas
 :subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...).
 :keywords: sellyoursaas, saas, dolibarr, wamp, glpi
 :imagesdir: ./img_
-:city: Bordeaux
 :toc: manual
 :toclevels: 3
 :toc-title: Table of contents
 :toc-placement: preamble
-:revnumber: v1.0
-:revdate: 2019-01-30
-:revremark: First version
-:revnumber: v1.1
-:revdate: 2020-02-12
-:revremark: Many improvements
 
 <<<<
 
@@ -3674,6 +3663,8 @@ touch /etc/apache2/sites-available/000-default-ssl.conf
 				    Deny from env=bad_bots
 				    Allow from all
 				    Require local
+				    # To allow and amdin desktop to see status, you can uncomment this with the correct IP
+				    #Require ip 1.2.3.4
 				</Location>
 				
         </VirtualHost>
@@ -3718,7 +3709,6 @@ You must have inside the cron of user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master and deployment root
-#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1
 00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.sh >/home/admin/logs/perms.log
@@ -3752,7 +3742,6 @@ You must have inside the cron of user *root*
 ---------------
 # m h  dom mon dow   command
 # cron master and deployment root
-#47 2 * * * /root/certbot-auto renew --no-self-upgrade > /var/log/letsencrypt/certbot-auto_renew.log 2>&1
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.sh >/home/admin/logs/perms.log
 40 15 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1

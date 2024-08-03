@@ -112,8 +112,8 @@ $tmplangs = new Translate('', $conf);
 $tmplangs->setDefaultLang($lang);
 $tmplangs->load("sellyoursaas@sellyoursaas");
 
-if (!empty($conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES)) {
-	$return['SELLYOURSAAS_DISABLE_NEW_INSTANCES'] = $conf->global->SELLYOURSAAS_DISABLE_NEW_INSTANCES;	// Global disabling of new instance creation
+if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
+	$return['SELLYOURSAAS_DISABLE_NEW_INSTANCES'] = getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES');	// Global disabling of new instance creation
 }
 
 $arrayofdifferentmessages = array();

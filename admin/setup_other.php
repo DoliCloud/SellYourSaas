@@ -170,6 +170,8 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOMIGRATION_CODE", GETPOST("SELLYOURSAAS_AUTOMIGRATION_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_AUTOUPGRADE_CODE", GETPOST("SELLYOURSAAS_AUTOUPGRADE_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
+		dolibarr_set_const($db, "SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", GETPOST("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+
 		foreach ($arrayofsuffixfound as $suffix) {
 			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".$suffix, GETPOST("SELLYOURSAAS_SUPPORT_URL".$suffix), 'chaine', 0, '', $conf->entity);
 		}
@@ -259,21 +261,21 @@ if ($action == 'removelogo') {
 
 	$constname='SELLYOURSAAS_LOGO'.GETPOST('suffix', 'aZ09');
 	$logofile=$conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') {
+	if (getDolGlobalString($constname) != '') {
 		dol_delete_file($logofile);
 	}
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_SMALL'.GETPOST('suffix', 'aZ09');
 	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') {
+	if (getDolGlobalString($constname) != '') {
 		dol_delete_file($logosmallfile);
 	}
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_MINI'.GETPOST('suffix', 'aZ09');
 	$logominifile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') {
+	if (getDolGlobalString($constname) != '') {
 		dol_delete_file($logominifile);
 	}
 	dolibarr_del_const($db, $constname, $conf->entity);
@@ -283,21 +285,21 @@ if ($action == 'removelogoblack') {
 
 	$constname='SELLYOURSAAS_LOGO_BLACK'.GETPOST('suffix', 'aZ09');
 	$logofile=$conf->mycompany->dir_output.'/logos/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') {
+	if (getDolGlobalString($constname) != '') {
 		dol_delete_file($logofile);
 	}
 	dolibarr_del_const($db, "$constname", $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_SMALL_BLACK'.GETPOST('suffix', 'aZ09');
 	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') {
+	if (getDolGlobalString($constname) != '') {
 		dol_delete_file($logosmallfile);
 	}
 	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_MINI_BLACK'.GETPOST('suffix', 'aZ09');
 	$logominifile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
-	if ($conf->global->$constname != '') {
+	if (getDolGlobalString($constname) != '') {
 		dol_delete_file($logominifile);
 	}
 	dolibarr_del_const($db, $constname, $conf->entity);
@@ -372,7 +374,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_OPTINMESSAGES', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_OPTINMESSAGES)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_OPTINMESSAGES')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ENABLE_OPTINMESSAGES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -393,7 +395,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '</td><td class="nocellnopadd" valign="middle">';
 	$constname = 'SELLYOURSAAS_LOGO_MINI'.$suffix;
 	print '<!-- constname = '.$constname.' -->';
-	if (! empty($conf->global->$constname)) {
+	if (getDolGlobalString($constname)) {
 		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogo&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
 		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
 			print ' &nbsp; ';
@@ -412,7 +414,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<input type="file" class="flat class=minwidth200" name="logoblack'.$suffix.'" id="logoblack'.$suffix.'">';
 	print '</td><td class="nocellnopadd" valign="middle">';
 	$constname = 'SELLYOURSAAS_LOGO_MINI_BLACK'.$suffix;
-	if (! empty($conf->global->$constname)) {
+	if (getDolGlobalString($constname)) {
 		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
 		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
 			print ' &nbsp; ';
@@ -432,7 +434,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ACCEPT_DISCOUNTCODE', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ACCEPT_DISCOUNTCODE)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ACCEPT_DISCOUNTCODE')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -448,7 +450,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_SEPA', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_SEPA)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_SEPA">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -474,7 +476,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_CUSTOMURL', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_CUSTOMURL)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -511,7 +513,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES', array(), null, 0, 0, 1);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -520,6 +522,7 @@ if ($conf->use_javascript_ajax) {
 print '</td>';
 print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
 print '</tr>';
+
 
 // Allow deployment of Dolibarr website for specific thirdparty ID ?
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
@@ -548,7 +551,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -570,7 +573,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION)) {
+	if (!getDolGlobalString('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -622,7 +625,7 @@ print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ASK_DESTROY_REASON', array(), null, 0, 0, 0);
 } else {
-	if (empty($conf->global->SELLYOURSAAS_ASK_DESTROY_REASON)) {
+	if (!getDolGlobalString('SELLYOURSAAS_ASK_DESTROY_REASON')) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ASK_DESTROY_REASON">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ASK_DESTROY_REASON">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
@@ -682,6 +685,8 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOUPGRADE_CODE").'</td>';
 print '<td class="nowraponall">';
 print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
+print ' &nbsp; ';
+print '<input class="maxwidth100" type="text" name="SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR" value="'.getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR', '').'">';
 print '</td>';
 print '<td></td>';
 print '</tr>';

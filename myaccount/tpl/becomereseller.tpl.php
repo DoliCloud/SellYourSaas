@@ -25,22 +25,22 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE becomereseller.tpl.php -->
 <?php
 
-$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) {
-		$sellyoursaasname = $conf->global->$newnamekey;
+	if (getDolGlobalString($newnamekey)) {
+		$sellyoursaasname = getDolGlobalString($newnamekey);
 	}
 }
 
 // Print warning to read FAQ before
-$url = $conf->global->SELLYOURSAAS_RESELLER_URL;
+$url = getDolGlobalString('SELLYOURSAAS_RESELLER_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_RESELLER_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (! empty($conf->global->$newnamekey)) {
-		$url = $conf->global->$newnamekey;
+	if (getDolGlobalString($newnamekey)) {
+		$url = getDolGlobalString($newnamekey);
 	}
 }
 
@@ -102,14 +102,14 @@ if ($dateapplyreseller) {
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
-			$sellyoursaasemail = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
 
 	$subject = (GETPOST('subject', 'none') ? GETPOST('subject', 'none') : (preg_match('/fr/i', $langs->defaultlang) ? $langs->trans("BecomeReseller") : $langsen->trans("BecomeReseller")).' - '.$sellyoursaasemail);
 
-	$commissiondefault = (empty($conf->global->SELLYOURSAAS_DEFAULT_COMMISSION) ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
+	$commissiondefault = (!getDolGlobalString('SELLYOURSAAS_DEFAULT_COMMISSION') ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
 
 	print $langs->trans("MailFrom").' : <input type="text" required name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'"><br><br>';
 

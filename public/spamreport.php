@@ -115,18 +115,18 @@ echo "<br>\n";
 
 
 // Send email
-file_put_contents($tmpfile, "Now we send an email to supervisor ".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n", FILE_APPEND);
+file_put_contents($tmpfile, "Now we send an email to supervisor " . getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL')."\n", FILE_APPEND);
 
-$headers = 'From: <'.$conf->global->SELLYOURSAAS_NOREPLY_EMAIL.">\r\n";
+$headers = 'From: <' . getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL').">\r\n";
 if ($mode != 'test' && $mode != 'nomail') {
-	if (empty($conf->global->SELLYOURSAAS_SPAMREPORT_EMAIL_DISABLED)) {
+	if (!getDolGlobalString('SELLYOURSAAS_SPAMREPORT_EMAIL_DISABLED')) {
 		$success=mail($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '[Alert] Spam report received from external SMTP service', 'Spam was reported by external SMTP service:'."\r\n".($body ? $body : 'Body empty'), $headers);
 		if (!$success) {
 			$errorMessage = error_get_last()['message'];
 			print dol_escape_htmltag($errorMessage);
 		} else {
-			file_put_contents($tmpfile, "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."\n", FILE_APPEND);
-			print "Email sent to ".dol_escape_htmltag($conf->global->SELLYOURSAAS_SUPERVISION_EMAIL)."<br>\n";
+			file_put_contents($tmpfile, "Email sent to ".dol_escape_htmltag(getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL'))."\n", FILE_APPEND);
+			print "Email sent to ".dol_escape_htmltag(getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL'))."<br>\n";
 		}
 	} else {
 		file_put_contents($tmpfile, "Email not sent (email on spamreport disabled)\n", FILE_APPEND);
@@ -138,8 +138,8 @@ if ($mode != 'test' && $mode != 'nomail') {
 }
 
 // Send to DataDog (metric + event)
-if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
-	if (empty($conf->global->SELLYOURSAAS_SPAMREPORT_DATADOG_DISABLED)) {
+if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
+	if (!getDolGlobalString('SELLYOURSAAS_SPAMREPORT_DATADOG_DISABLED')) {
 		try {
 			file_put_contents($tmpfile, "Now we send ping to DataDog\n", FILE_APPEND);
 			echo "Now we send ping to DataDog<br>\n";
@@ -147,8 +147,8 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 			dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 			$arrayconfig=array();
-			if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-				$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+			if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+				$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 			}
 
 			$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -162,21 +162,21 @@ if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
 			}
 
 			// Add event in Datadog
-			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-			$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;
+			$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
+			$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');
 
 			$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);          // exemple 'DoliCloud'
 			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;     // exemple 'dolicloud.com'
-			if (! empty($conf->global->$constforaltname)) {
+			if (getDolGlobalString($constforaltname)) {
 				$sellyoursaasdomain = $domainname;
-				$sellyoursaasname = $conf->global->$constforaltname;
+				$sellyoursaasname = getDolGlobalString($constforaltname);
 			}
 
 			$titleofevent =  dol_trunc('[Warning] '.$sellyoursaasname.' - '.gethostname().' - Spam by an instance reported', 90);
 
 			if ($mode != 'test' && $mode != 'nodatadog') {
 				$body = file_get_contents('php://input');
-				$textforemail = "Spam by an instance reported.\n@".$conf->global->SELLYOURSAAS_SUPERVISION_EMAIL."\n\n".$body."\n";
+				$textforemail = "Spam by an instance reported.\n@" . getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL')."\n\n".$body."\n";
 				$textforemail .= "HTTP_USER_AGENT = ".$_SERVER["HTTP_USER_AGENT"]."\n";
 				$textforemail .= "REMOTE_ADDR = ".$_SERVER["HTTP_USER_AGENT"]."\n";
 

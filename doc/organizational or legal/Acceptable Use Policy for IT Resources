@@ -1,0 +1,113 @@
+= Acceptable Use Policy for IT Resources
+This document is the Acceptable Use Policy for IT Resources
+:source-highlighter: red
+:title: Acceptable Use Policy for IT Resources
+:subject: Acceptable Use Policy for IT Resources
+:keywords: acceptable use policy for it resources
+:toc: manual
+:toclevels: 3
+:toc-title: Table of contents
+:toc-placement: preamble
+
+<<<<
+
+== Introduction ==
+
+The acceptable use policy for IT resources aims to contribute to the preservation of the entity's information system security, making the user an essential player in achieving this objective.
+
+Employees must agree with all the terms defined into the "Acceptable Use Policy for IT resources" 
+
+
+== Definition
+
+* ERP/CRM: The tools used to manage the company including prospect/customer/supplier annuary, accountancy,
+ stock, human resources, mass emailing.
+* Email tool: The tool to send and read emails.
+* Chat tool: The messaging tool used to send instant direct and live messages.
+* Visio tools: The tool to make online remote meeting.
+* CEO: The Chief Executive Officer (CEO) is the general manager of the company. He is the most senior manager and administration officer of the company, responsible for making important strategic and operational decisions. 
+* CTO: The Chief Technology Officer (CTO) is the executive in a company who is responsible for managing and overseeing technology and research and development needs. 
+
+
+== Scope
+
+This document applies to any employee of the company.
+
+
+== Usage
+
+=== Messaging tools
+This includes:
+- the Email tool: Each employe has its own email account.
+- the Visio tool: The vision tool provided by the company must be used.
+- the Chat tool: Employees can use any end to end crypted chat tool (like WhatsApp, Signal, ...)
+
+=== Development
+All sources of code development by the company is open source and available in a public repository 
+at github.com.
+
+Each developer can use the development tool of its choice.
+
+=== Managing prospects/customers
+This includes all task to do follow prospects or customers.
+This is done using the following tool:
+* the ERP
+* the Email tool 
+
+=== Accountancy
+This include all task to do the accounting, to do the payment of salaries and taxes, to manage and pay suppliers, 
+to manage bank accounts. It needs access to:
+* the ERP (feature accountancy)
+* the online bank account.
+
+Access to the accountancy data is reserved to the main accountant and CTO (both ERP accounting features and online bank account).
+
+
+== Rules
+
+This is all the points any employee must agree with when using any IT tool in the company.
+
+=== Hours
+
+- Tools can be accessed at any day, any time.
+
+- Hours to work are free...
+
+=== Password privacy
+
+- All used tool, hosted online, must be accessed using the HTTPS protocol.
+
+- Passwords of users all tools, or servers of the company, must be store into a password manager with one master password
+never store anywhere.
+
+- A use must never communicate its password, even to another employee of the company.
+
+- In case of password lost or MFA lost, the employee must warn the CTO to get a new password or a MFA reset.
+
+=== Data privacy
+
+- Any information related to the company must never be communicate to someone that is not part of the company.
+
+=== Good practices
+
+- A user must never click into a link in a email, except if the main domain of the url is the one of the company.
+
+- Illegal downloading, consultation of child pornography sites,
+
+
+== Controls
+
+The CTO can make check, at any time, by analyzing the log on servers to understand or check 
+the activity of a user.
+
+The CTO check that data stored inthe ERP is compliant with GDPR.
+
+The supervision platform will check frequently the validity of SSL certificates, and report statistics
+on connection access.
+
+
+== Sanctions
+
+There is no specific sanction to the company. 
+Sanctions depend on the seriousness of the professional misconduct and are proportionnal to it.
+

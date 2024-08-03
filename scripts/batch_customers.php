@@ -424,7 +424,7 @@ print "We found ".count($instancestrial)." deployed trial + ".count($instances).
 
 //print "----- Start loop for backup_instance\n";
 if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdeleteexclude' || $action == 'backuprsync' || $action == 'backupdatabase' || $action == 'backuptest' || $action == 'backuptestrsync' || $action == 'backuptestdatabase') {
-	if (empty($conf->global->DOLICLOUD_BACKUP_PATH)) {
+	if (!getDolGlobalString('DOLICLOUD_BACKUP_PATH')) {
 		print "Error: Setup of module SellYourSaas not complete. Path to backup not defined.\n";
 		exit(-1);
 	}
@@ -652,7 +652,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 					$rep = sellyoursaas_calculate_stats($dbmaster, $datelastday, $datefirstday);	// Get qty and amount into all template invoices linked to active contracts deployed before the $datelastday
 
-					$part = (empty($conf->global->SELLYOURSAAS_PERCENTAGE_FEE) ? 0 : $conf->global->SELLYOURSAAS_PERCENTAGE_FEE);
+					$part = (!getDolGlobalString('SELLYOURSAAS_PERCENTAGE_FEE') ? 0 : $conf->global->SELLYOURSAAS_PERCENTAGE_FEE);
 
 					foreach ($statkeylist as $statkey) {
 						if (! isset($stats[$statkey][$x]) || ($today <= $datelastday)) {	// If metric does not exist yet or if we are current month.
@@ -820,14 +820,14 @@ if ($createlistofpaidinstance) {
 
 // Send to DataDog (metric)
 if ($action == 'updatestatsonly') {
-	if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+	if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
 		try {
 			print 'Send data to DataDog (sellyoursaas.instancedeployed='.((float) $nbofinstancedeployed).', sellyoursaas.instancepaymentko='.((float) (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror))).', sellyoursaas.instancepaymentok='.((float) (count($instances) - (count($instancespaidsuspended) + count($instancespaidnotsuspendedpaymenterror)))).")\n";
 			dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 			$arrayconfig=array();
-			if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-				$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+			if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+				$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 			}
 
 			$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -857,12 +857,12 @@ if (! $nboferrors) {
 			$subject = '[Backup instances - '.gethostname().'] Backup of user instances succeed';
 			$msg = 'Backup done without errors on '.gethostname().' by '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
 
-			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'DoliCloud'
-			$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'dolicloud.com'
+			$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');                 // exemple 'DoliCloud'
+			$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');   // exemple 'dolicloud.com'
 
 			/*$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-			if (! empty($conf->global->$constforaltname)) {
+			if (getDolGlobalString($constforaltname)) {
 				$sellyoursaasdomain = $domainname;
 				$sellyoursaasname = $conf->global->$constforaltname;
 			}*/
@@ -902,13 +902,13 @@ if (! $nboferrors) {
 			}
 
 			// Send to DataDog (metric + event)
-			if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+			if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
 				try {
 					dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 					$arrayconfig=array();
-					if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-						$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+					if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+						$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 					}
 
 					$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -916,12 +916,12 @@ if (! $nboferrors) {
 					//$arraytags=array('result'=>'ko');
 					//$statsd->increment('sellyoursaas.backup', 1, $arraytags);
 
-					$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;                 // exemple 'My SaaS Service'
-					$sellyoursaasdomain = $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME;   // exemple 'mysaasdomain.com'
+					$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');                 // exemple 'My SaaS Service'
+					$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');   // exemple 'mysaasdomain.com'
 
 					/*$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 					$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
-					if (! empty($conf->global->$constforaltname)) {
+					if (getDolGlobalString($constforaltname)) {
 						$sellyoursaasdomain = $domainname;
 						$sellyoursaasname = $conf->global->$constforaltname;
 					}*/

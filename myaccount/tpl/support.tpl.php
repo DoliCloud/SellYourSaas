@@ -303,18 +303,18 @@ if ($sellyoursaassupporturl) {
 		print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
 		print '<input type="hidden" name="supportchannel" value="'.GETPOST('supportchannel', 'alpha').'">';
 
-		$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+		$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 			$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-			if (! empty($conf->global->$newnamekey)) {
-				$sellyoursaasemail = $conf->global->$newnamekey;
+			if (getDolGlobalString($newnamekey)) {
+				$sellyoursaasemail = getDolGlobalString($newnamekey);
 			}
 		}
 
-		if (! empty($conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM) && preg_match('/high/', GETPOST('supportchannel', 'alpha'))) {
+		if (getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL_PREMIUM') && preg_match('/high/', GETPOST('supportchannel', 'alpha'))) {
 			// We must use the prioritary email
-			$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL_PREMIUM;
+			$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL_PREMIUM');
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_PREMIUM_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
@@ -439,7 +439,7 @@ if ($sellyoursaassupporturl) {
 		$stringtoprint .= '
 			});';
 
-		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
+		if (getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE')) {
 			if (GETPOST('backfromautomigration', 'alpha')) {
 				$stringtoprint .= '
 				console.log("We show for automigration");
@@ -467,7 +467,7 @@ if ($sellyoursaassupporturl) {
 				$("#subject_back").val($(this).val());
 			})';
 		}
-		if (!empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+		if (getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE')) {
 			$stringtoprint .= '
 			$("#hideautoupgradediv").on("click",function(){
 				console.log("We cancel the autoupgrade");
@@ -492,7 +492,7 @@ if ($sellyoursaassupporturl) {
 
 		print $stringtoprint;
 
-		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE)) {
+		if (getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE')) {
 			print '<div id="showforautomigration" class="showforautomigration" style="display:none;">';
 			print '<br><br>';
 			print '<div style="display:flex;justify-content: space-evenly;">';
@@ -503,7 +503,7 @@ if ($sellyoursaassupporturl) {
 			print '</div>';
 		}
 
-		if (!empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+		if (getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE')) {
 			print '<div id="showforautoupgrade" class="showforautoupgrade" style="display:none;">';
 			print '<br>';
 			print '<div style="display:flex;justify-content: space-evenly;">';
@@ -514,7 +514,7 @@ if ($sellyoursaassupporturl) {
 			print '</div>';
 		}
 
-		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE) || !empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+		if (getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE') || getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE')) {
 			print '<div id="hideforautomigration" class="hideforautomigration"><div>';
 		}
 
@@ -550,7 +550,7 @@ if ($sellyoursaassupporturl) {
 
 		print '</form>';
 
-		if (!empty($conf->global->SELLYOURSAAS_AUTOMIGRATION_CODE) || !empty($conf->global->SELLYOURSAAS_AUTOUPGRADE_CODE)) {
+		if (getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE') || getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE')) {
 			print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="get" id="changemodeForm">';
 			print '<input type="hidden" id="modeforchangemmode" name="mode" value="automigration">';
 			print '<input type="hidden" name="token" value="'.newToken().'">';

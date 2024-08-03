@@ -111,7 +111,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 			$outputlangs = $langs;
 		}
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
-		if (!empty($conf->global->MAIN_USE_FPDF)) {
+		if (getDolGlobalString('MAIN_USE_FPDF')) {
 			$outputlangs->charset_output = 'ISO-8859-1';
 		}
 
@@ -162,7 +162,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 				$heightforinfotot = 50;	// Height reserved to output the info and total part
 				$heightforfreetext= (isset($conf->global->MAIN_PDF_FREETEXT_HEIGHT) ? $conf->global->MAIN_PDF_FREETEXT_HEIGHT : 5);	// Height reserved to output the free text on last page
 				$heightforfooter = $this->marge_basse + 8;	// Height reserved to output the footer (value include bottom margin)
-				if (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS)) {
+				if (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS')) {
 					$heightforfooter += 6;
 				}
 				$pdf->SetAutoPageBreak(1, 0);
@@ -241,8 +241,8 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 					$tmpbankfordirectdebit->fetch($idbankfordirectdebit);
 					$ics = $tmpbankfordirectdebit->ics;	// ICS for direct debit
 				}
-				if (empty($ics) && !empty($conf->global->PRELEVEMENT_ICS)) {
-					$ics = $conf->global->PRELEVEMENT_ICS;
+				if (empty($ics) && getDolGlobalString('PRELEVEMENT_ICS')) {
+					$ics = getDolGlobalString('PRELEVEMENT_ICS');
 				}
 				$pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 3, $outputlangs->transnoentitiesnoconv("CreditorIdentifier").' ('.$outputlangs->transnoentitiesnoconv("ICS").') : '.$ics, 0, 'L');
 
@@ -460,13 +460,13 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 
-		$diffsizetitle=(empty($conf->global->PDF_DIFFSIZE_TITLE) ? 1 : $conf->global->PDF_DIFFSIZE_TITLE);
+		$diffsizetitle=(!getDolGlobalString('PDF_DIFFSIZE_TITLE') ? 1 : $conf->global->PDF_DIFFSIZE_TITLE);
 
 		$posy+=$this->_signature_area($pdf, $object, $posy, $outputlangs);
 
 		$pdf->SetXY($this->marge_gauche, $posy);
 		$pdf->SetFont('', '', $default_font_size);
-		$pdf->MultiCell(100, 3, $outputlangs->transnoentitiesnoconv("PleaseReturnMandate", (empty($conf->global->SELLYOURSAAS_MAIN_EMAIL) ? $mysoc->email : $conf->global->SELLYOURSAAS_MAIN_EMAIL)), 0, 'L', 0);
+		$pdf->MultiCell(100, 3, $outputlangs->transnoentitiesnoconv("PleaseReturnMandate", (!getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL') ? $mysoc->email : $conf->global->SELLYOURSAAS_MAIN_EMAIL)), 0, 'L', 0);
 		$posy=$pdf->GetY()+2;
 
 		$pdf->SetXY($this->marge_gauche, $posy);

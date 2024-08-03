@@ -130,7 +130,7 @@ class Deploymentserver extends CommonObject
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>-1, 'cssview'=>'wordbreak', 'csslist'=>'small', 'validate'=>'1',),
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
-		'serversignaturekey' => array('type'=>'varchar(128)', 'label'=>'ServerSignatureKey', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>5),
+		'serversignaturekey' => array('type'=>'varchar(128)', 'label'=>'ServerSignatureKey', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>5, 'csslist'=>'tdoverflowmax150'),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModification', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
 	);
 
@@ -739,7 +739,7 @@ class Deploymentserver extends CommonObject
 
 		$linkclose = '';
 		if (empty($notooltip)) {
-			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+			if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) {
 				$label = $langs->trans("ShowDeploymentserver");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
@@ -986,15 +986,15 @@ class Deploymentserver extends CommonObject
 		global $langs, $conf;
 		$langs->load("sellyoursaas@sellyoursaas");
 
-		if (empty($conf->global->SELLYOURSAAS_DEPLOYMENTSERVER_ADDON)) {
+		if (!getDolGlobalString('SELLYOURSAAS_DEPLOYMENTSERVER_ADDON')) {
 			$conf->global->SELLYOURSAAS_DEPLOYMENTSERVER_ADDON = 'mod_deploymentserver_standard';
 		}
 
-		if (!empty($conf->global->SELLYOURSAAS_DEPLOYMENTSERVER_ADDON)) {
+		if (getDolGlobalString('SELLYOURSAAS_DEPLOYMENTSERVER_ADDON')) {
 			$mybool = false;
 
 			$file = getDolGlobalString('SELLYOURSAAS_DEPLOYMENTSERVER_ADDON') . ".php";
-			$classname = $conf->global->SELLYOURSAAS_DEPLOYMENTSERVER_ADDON;
+			$classname = getDolGlobalString('SELLYOURSAAS_DEPLOYMENTSERVER_ADDON');
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
@@ -1056,8 +1056,8 @@ class Deploymentserver extends CommonObject
 
 			if (!empty($this->model_pdf)) {
 				$modele = $this->model_pdf;
-			} elseif (!empty($conf->global->DEPLOYMENTSERVER_ADDON_PDF)) {
-				$modele = $conf->global->DEPLOYMENTSERVER_ADDON_PDF;
+			} elseif (getDolGlobalString('DEPLOYMENTSERVER_ADDON_PDF')) {
+				$modele = getDolGlobalString('DEPLOYMENTSERVER_ADDON_PDF');
 			}
 		}
 

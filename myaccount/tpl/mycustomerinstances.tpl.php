@@ -421,16 +421,16 @@ if (count($listofcontractidreseller) == 0) {
 					print $tmpduration;
 					print '</span>';
 				} else {
-					if (empty($conf->global->SELLYOURSAAS_HIDE_PRODUCT_PRICE_IF_NULL)) {
+					if (!getDolGlobalString('SELLYOURSAAS_HIDE_PRODUCT_PRICE_IF_NULL')) {
 						print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
 						// TODO
 						print $tmpduration;
 						print '</span>';
 					} else {
 						// TODO
-						if (! empty($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL)) {
+						if (getDolGlobalString('SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL')) {
 							print '<span class="opacitymedium small">';
-							print $langs->trans($conf->global->SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL);
+							print $langs->trans(getDolGlobalString('SELLYOURSAAS_TRANSKEY_WHEN_PRODUCT_PRICE_IF_NULL'));
 							print '</span>';
 						}
 					}
@@ -507,12 +507,12 @@ if (count($listofcontractidreseller) == 0) {
 			print '<!-- Billing information of contract -->'."\n";
 			print '<span class="caption-helper spanbilling"><span class="opacitymedium">'.$langs->trans("Billing").' : </span>';
 			if ($foundtemplate > 1) {
-				$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+				$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 				if (! empty($tmpcustomer->array_options['options_domain_registration_page'])
 					&& $tmpcustomer->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 					$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$tmpcustomer->array_options['options_domain_registration_page'];
-					if (! empty($conf->global->$newnamekey)) {
-						$sellyoursaasemail = $conf->global->$newnamekey;
+					if (getDolGlobalString($newnamekey)) {
+						$sellyoursaasemail = getDolGlobalString($newnamekey);
 					}
 				}
 

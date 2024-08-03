@@ -163,7 +163,7 @@ class Blacklistto extends CommonObject
 
 		$this->db = $db;
 
-		if (empty($conf->global->MAIN_SHOW_TECHNICAL_ID) && isset($this->fields['rowid']) && !empty($this->fields['ref'])) {
+		if (!getDolGlobalString('MAIN_SHOW_TECHNICAL_ID') && isset($this->fields['rowid']) && !empty($this->fields['ref'])) {
 			$this->fields['rowid']['visible'] = 0;
 		}
 		if (empty($conf->multicompany->enabled) && isset($this->fields['entity'])) {
@@ -545,7 +545,7 @@ class Blacklistto extends CommonObject
 
 		$linkclose = '';
 		if (empty($notooltip)) {
-			if (!empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+			if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) {
 				$label = $langs->trans("ShowBlacklistto");
 				$linkclose .= ' alt="'.dol_escape_htmltag($label, 1).'"';
 			}
@@ -754,15 +754,15 @@ class Blacklistto extends CommonObject
 		global $langs, $conf;
 		$langs->load("sellyoursaas@sellyoursaas");
 
-		if (empty($conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON)) {
+		if (!getDolGlobalString('SELLYOURSAAS_BLACKLISTMAIL_ADDON')) {
 			$conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON = 'mod_blacklistto_standard';
 		}
 
-		if (!empty($conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON)) {
+		if (getDolGlobalString('SELLYOURSAAS_BLACKLISTMAIL_ADDON')) {
 			$mybool = false;
 
-			$file = $conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON.".php";
-			$classname = $conf->global->SELLYOURSAAS_BLACKLISTMAIL_ADDON;
+			$file = getDolGlobalString('SELLYOURSAAS_BLACKLISTMAIL_ADDON') . ".php";
+			$classname = getDolGlobalString('SELLYOURSAAS_BLACKLISTMAIL_ADDON');
 
 			// Include file with class
 			$dirmodels = array_merge(array('/'), (array) $conf->modules_parts['models']);
@@ -824,8 +824,8 @@ class Blacklistto extends CommonObject
 
 			if (!empty($this->model_pdf)) {
 				$modele = $this->model_pdf;
-			} elseif (!empty($conf->global->BLACKLISTMAIL_ADDON_PDF)) {
-				$modele = $conf->global->BLACKLISTMAIL_ADDON_PDF;
+			} elseif (getDolGlobalString('BLACKLISTMAIL_ADDON_PDF')) {
+				$modele = getDolGlobalString('BLACKLISTMAIL_ADDON_PDF');
 			}
 		}
 

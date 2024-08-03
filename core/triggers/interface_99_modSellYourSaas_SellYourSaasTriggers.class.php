@@ -345,7 +345,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				dol_syslog("We trap trigger PAYMENT_CUSTOMER_CREATE for id = ".$object->id);
 
 				// Send to DataDog (metric + event)
-				if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && preg_match('/SellYourSaas/i', ($object->note ? $object->note : $object->note_public))) {
+				if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED') && preg_match('/SellYourSaas/i', ($object->note ? $object->note : $object->note_public))) {
 					$totalamount = 0;
 					foreach ($object->amounts as $key => $amount) {
 						$totalamount+=$amount;
@@ -356,8 +356,8 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 						dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 						$arrayconfig=array();
-						if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-							$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+						if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+							$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 						}
 
 						$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -374,13 +374,13 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				dol_syslog("We trap trigger PAYMENT_CUSTOMER_DELETE for id = ".$object->id);
 
 				// Send to DataDog (metric + event)
-				if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED) && preg_match('/SellYourSaas/i', ($object->note ? $object->note : $object->note_public))) {
+				if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED') && preg_match('/SellYourSaas/i', ($object->note ? $object->note : $object->note_public))) {
 					try {
 						dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 						$arrayconfig=array();
-						if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-							$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+						if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+							$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 						}
 
 						$statsd = new DataDog\DogStatsd($arrayconfig);

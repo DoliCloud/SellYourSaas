@@ -76,7 +76,7 @@ if ($action == 'addauthorizedkey') {
 					setEventMessages($langs->transnoentitiesnoconv("ErrorConnectOkButFailedToCreateFile"), null, 'errors');
 				} else {
 					// Add public keys
-					$publickeystodeploy = $conf->global->SELLYOURSAAS_PUBLIC_KEY;
+					$publickeystodeploy = getDolGlobalString('SELLYOURSAAS_PUBLIC_KEY');
 					fwrite($stream, $publickeystodeploy);
 					fclose($stream);
 					// File authorized_keys_support must have rw------- permissions

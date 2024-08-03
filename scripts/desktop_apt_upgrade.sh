@@ -15,7 +15,8 @@ export YELLOW='\033[0;33m'
 
 
 if [ "x$2" == "x" ]; then
-   echo "***** Execute an apt upgrade on remote servers. This switch all instances in maintenancemode. *****"
+   echo "***** Launch the command apt update/upgrade on remote servers *****";
+   echo "Execute an apt update and upgrade on remote servers. On deployment server, this switches all instances in maintenancemode.";
    echo "Usage:   $0  hostfile  [hostgrouporname]  (reboot)"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  myhostfile  master,deployment"

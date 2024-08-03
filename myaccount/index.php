@@ -207,12 +207,12 @@ if ($idforfetch > 0) {
 }
 
 if ($idforfetch <= 0 || empty($mythirdpartyaccount->status)) {
-	$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
-			$sellyoursaasemail = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
 
@@ -232,31 +232,31 @@ if ($langs->getDefaultLang(1) == 'fr') {
 }
 
 $urlfaq = '';
-if (empty($conf->global->SELLYOURSAAS_MAIN_FAQ_URL)) {
+if (!getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL')) {
 	if (preg_match('/dolicloud\.com/', $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)) {
-		$urlfaq='https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/'.$langcode.'/faq';
+		$urlfaq='https://www.' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/'.$langcode.'/faq';
 	} else {
-		$urlfaq='https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/faq-'.$langcode.'.php';
+		$urlfaq='https://www.' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/faq-'.$langcode.'.php';
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 			$newnamekey = 'SELLYOURSAAS_MAIN_FAQ_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-			if (!empty($conf->global->$newnamekey)) {
-				$urlfaq = $conf->global->$newnamekey;
+			if (getDolGlobalString($newnamekey)) {
+				$urlfaq = getDolGlobalString($newnamekey);
 			} else {
 				$urlfaq = 'https://www.'.$mythirdpartyaccount->array_options['options_domain_registration_page'].'/faq-'.$langcode.'.php';
 			}
 		}
 	}
 } else {
-	$urlfaq = $conf->global->SELLYOURSAAS_MAIN_FAQ_URL;
+	$urlfaq = getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL');
 }
 
 $urlstatus = getDolGlobalString('SELLYOURSAAS_STATUS_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 	$newnamekey = 'SELLYOURSAAS_STATUS_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-	if (!empty($conf->global->$newnamekey)) {
-		$urlstatus = $conf->global->$newnamekey;
+	if (getDolGlobalString($newnamekey)) {
+		$urlstatus = getDolGlobalString($newnamekey);
 	}
 }
 
@@ -301,9 +301,9 @@ if ($resql) {
 }
 
 $mythirdpartyaccount->isareseller = 0;
-if ($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG > 0) {
+if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 	$categorie=new Categorie($db);
-	$categorie->fetch($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG);
+	$categorie->fetch(getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG'));
 	if ($categorie->containsObject('supplier', $mythirdpartyaccount->id) > 0) {
 		$mythirdpartyaccount->isareseller = 1;
 	}
@@ -395,7 +395,7 @@ $servicestatusstripe = 0;
 if (! empty($conf->stripe->enabled)) {
 	$service = 'StripeTest';
 	$servicestatusstripe = 0;
-	if (! empty($conf->global->STRIPE_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+	if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 		$service = 'StripeLive';
 		$servicestatusstripe = 1;
 	}
@@ -403,7 +403,7 @@ if (! empty($conf->stripe->enabled)) {
 $servicestatuspaypal = 0;
 if (! empty($conf->paypal->enabled)) {
 	$servicestatuspaypal = 0;
-	if (! empty($conf->global->PAYPAL_LIVE) && ! GETPOST('forcesandbox', 'alpha') && empty($conf->global->SELLYOURSAAS_FORCE_PAYPAL_TEST)) {
+	if (getDolGlobalString('PAYPAL_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
 		$servicestatuspaypal = 1;
 	}
 }
@@ -617,31 +617,31 @@ if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE") && $action == 'r
 }
 
 if ($action == 'updateurl') {	// update URL from the tab "Domain"
-	$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
-			$sellyoursaasemail = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
 
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 } elseif ($action == 'changeplan') {
-	$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
-			$sellyoursaasemail = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
 
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 	$action = '';
 } elseif ($action == 'validatefreemode') {
-	$sellyoursaasemail = $conf->global->SELLYOURSAAS_MAIN_EMAIL;
+	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 	if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit'
 		|| getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
 		// Make renewals on contracts of customer
@@ -677,13 +677,13 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	// Send support ticket
 	$error = 0;
 
-	$emailfrom = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+	$emailfrom = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_NOREPLY_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
-			$sellyoursaasemail = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
 	//dol_syslog($cmailfile->subject);exit;
@@ -833,18 +833,18 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	}
 
 	// Send reseller request
-	$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-	$sellyoursaasnoreplyemail = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+	$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
+	$sellyoursaasnoreplyemail = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
-			$sellyoursaasname = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasname = getDolGlobalString($newnamekey);
 		}
 		$newnamekey = 'SELLYOURSAAS_NOREPLAY_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (! empty($conf->global->$newnamekey)) {
-			$sellyoursaasnoreplyemail = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$sellyoursaasnoreplyemail = getDolGlobalString($newnamekey);
 		}
 	}
 
@@ -853,8 +853,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-		if (!empty($conf->global->$newnamekey)) {
-			$emailto = $conf->global->$newnamekey;
+		if (getDolGlobalString($newnamekey)) {
+			$emailto = getDolGlobalString($newnamekey);
 		}
 	}
 
@@ -1143,7 +1143,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$companybankaccount->fetch(GETPOSTINT('bankid'));
 			$service = 'StripeTest';
 			$servicestatus = 0;
-			if (!empty($conf->global->STRIPE_LIVE) && !GETPOST('forcesandbox', 'alpha')) {
+			if (getDolGlobalString('STRIPE_LIVE') && !GETPOST('forcesandbox', 'alpha')) {
 				$service = 'StripeLive';
 				$servicestatus = 1;
 			}
@@ -1294,7 +1294,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
 			global $stripearrayofkeysbyenv;
 			// Reforce the $stripearrayofkeys because content may change depending on option
-			if (empty($conf->global->STRIPE_LIVE) || GETPOST('forcesandbox', 'alpha') || ! empty($conf->global->SELLYOURSAAS_FORCE_STRIPE_TEST)) {
+			if (!getDolGlobalString('STRIPE_LIVE') || GETPOST('forcesandbox', 'alpha') || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 				$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
 			} else {
 				$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
@@ -1555,7 +1555,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	}
 
 	if (! $error) {
-		$stringtohash = $conf->global->SELLYOURSAAS_KEYFORHASH.$contract->thirdparty->email.dol_print_date($now, 'dayrfc');
+		$stringtohash = getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $contract->thirdparty->email.dol_print_date($now, 'dayrfc');
 
 		$hash = dol_hash($stringtohash);
 		dol_syslog("Hash generated to allow immediate deletion: ".$hash);
@@ -1643,7 +1643,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 				$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
 				$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
-				$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+				$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 				$to = $contract->thirdparty->email;
 
 				$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
@@ -1750,13 +1750,13 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 			$tmpcontract = $contract;
 
-			if (! empty($conf->global->SELLYOURSAAS_DATADOG_ENABLED)) {
+			if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
 				try {
 					dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
 
 					$arrayconfig=array();
-					if (! empty($conf->global->SELLYOURSAAS_DATADOG_APIKEY)) {
-						$arrayconfig=array('apiKey'=>$conf->global->SELLYOURSAAS_DATADOG_APIKEY, 'app_key' => $conf->global->SELLYOURSAAS_DATADOG_APPKEY);
+					if (getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY')) {
+						$arrayconfig=array('apiKey'=>getDolGlobalString('SELLYOURSAAS_DATADOG_APIKEY'), 'app_key' => getDolGlobalString('SELLYOURSAAS_DATADOG_APPKEY'));
 					}
 
 					$statsd = new DataDog\DogStatsd($arrayconfig);
@@ -1778,12 +1778,12 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 						//$tmpcontract->fetch_thirdparty();
 						$mythirdpartyaccount = $tmpcontract->thirdparty;
 
-						$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
+						$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 						if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 							&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 							$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-							if (! empty($conf->global->$newnamekey)) {
-								$sellyoursaasname = $conf->global->$newnamekey;
+							if (getDolGlobalString($newnamekey)) {
+								$sellyoursaasname = getDolGlobalString($newnamekey);
 							}
 						}
 
@@ -2137,8 +2137,8 @@ $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) {
 	$favicon.='.png';
 }
-if (! empty($conf->global->MAIN_FAVICON_URL)) {
-	$favicon=$conf->global->MAIN_FAVICON_URL;
+if (getDolGlobalString('MAIN_FAVICON_URL')) {
+	$favicon=getDolGlobalString('MAIN_FAVICON_URL');
 }
 
 $arrayofcss = array();
@@ -2196,11 +2196,11 @@ if (is_object($mythirdpartyaccount) && $mythirdpartyaccount->array_options['opti
 
 	$constname = 'SELLYOURSAAS_LOGO_MINI_'.$domainforkey;
 	$constnameblack = 'SELLYOURSAAS_LOGO_MINI_BLACK_'.$domainforkey;
-	if (!empty($conf->global->$constname)) {
-		$logoval=$conf->global->$constname;
+	if (getDolGlobalString($constname)) {
+		$logoval=getDolGlobalString($constname);
 	}
-	if (!empty($conf->global->$constnameblack)) {
-		$logoblackval=$conf->global->$constnameblack;
+	if (getDolGlobalString($constnameblack)) {
+		$logoblackval=getDolGlobalString($constnameblack);
 	}
 }
 
@@ -2274,12 +2274,12 @@ if ($mythirdpartyaccount->isareseller) {
                  <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>';
 		// Reseler request
 if (! $mythirdpartyaccount->isareseller) {
-	$allowresellerprogram = (! empty($conf->global->SELLYOURSAAS_ALLOW_RESELLER_PROGRAM));
+	$allowresellerprogram = (getDolGlobalString('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM'));
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
 		$newnamekey = 'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (isset($conf->global->$newnamekey)) {
-			$allowresellerprogram = $conf->global->$newnamekey;
+			$allowresellerprogram = getDolGlobalString($newnamekey);
 		}
 	}
 
@@ -2599,7 +2599,7 @@ if ($mythirdpartyaccount->isareseller) {
 		';
 	print '<span class="opacitymedium">'.$langs->trans("YourURLToCreateNewInstance").':</span><br>';
 
-	$sellyoursaasaccounturl = $conf->global->SELLYOURSAAS_ACCOUNT_URL;
+	$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 	$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);
@@ -3053,18 +3053,26 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 					print '<div class="note note-warning">'."\n";
 					print '		<h4 class="block">'."\n";
 					if ($delayindays >= 0) {
-						print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
+						if (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+							print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspendedFree", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
+						} else {
+							print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
+						}
 					} else {
 						print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
 					}
-					if (empty($atleastonepaymentmode)) {
-						print '<p class="pforbutton margintop nomarginbottom">';
-						print '<a class="paddingtop" href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
-						print '</p>';
-					} elseif (GETPOST('mode', 'alpha') != 'registerpaymentmode') {
-						print '<p class="pforbutton margintop nomarginbottom">';
-						print $langs->trans("IfInstanceWaSuspendedBecauseOrPaymentErrors").' : <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
-						print '</p>';
+					if (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+						// TODO LMR Add link to renew its free instance (same link than the one received by email at end of trial)...
+					} else {
+						if (empty($atleastonepaymentmode)) {
+							print '<p class="pforbutton margintop nomarginbottom">';
+							print '<a class="paddingtop" href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
+							print '</p>';
+						} elseif (GETPOST('mode', 'alpha') != 'registerpaymentmode') {
+							print '<p class="pforbutton margintop nomarginbottom">';
+							print $langs->trans("IfInstanceWaSuspendedBecauseOrPaymentErrors").' : <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
+							print '</p>';
+						}
 					}
 					print '     </h4>'."\n";
 					print '</div>'."\n";

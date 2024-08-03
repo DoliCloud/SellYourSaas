@@ -41,6 +41,7 @@ do
 	fi
 
     echo -- Process dir $dir
+    echo cd $dir
     cd $dir || continue
 	if [ $? -eq 0 ]; then
 		export gitdir=`basename $dir`
@@ -50,7 +51,7 @@ do
 	    	git pull
 	    	if [ $? -ne 0 ]; then
 	    		# If git pull fail, we force a git reset before and try again.
-	    		echo Execut a git reset --hard HEAD
+	    		echo Execute a git reset --hard HEAD
 	        	git reset --hard HEAD
 	        	# Do not use git pull --depth=1 here, this will make merge errors.
 	        	git pull
@@ -82,6 +83,10 @@ do
 	    if [ -s build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php from ".`pwd`
 	        php build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
+	        if [ $? -ne 0 ]; then
+	        	echo "Failed to generate the signature file"
+	        	exit 1;
+	        fi
 	    fi
 	
 		# Create a deployment tar file
