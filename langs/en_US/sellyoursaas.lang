@@ -169,6 +169,7 @@ LastNbOfGb=Last nb of Gb
 DateFileauthorizekey=Date of authorize key
 DateFilelock=Date of lock file
 DateFileInstallmoduleslock=Date of install modules lock file
+DateFileUpgradeUnlock=Date of upgrade unlock file
 InstanceNameAlreadyExists=An instance with address name <strong>%s</strong> already exists. Please choose another one...
 Registration=Registration
 InstanceCreation=Instance creation

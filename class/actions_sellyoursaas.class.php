@@ -294,6 +294,15 @@ class ActionsSellyoursaas
 					 {
 					 print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deleteinstallmoduleslock&token='.newToken().'">' . $langs->trans('SellYourSaasRemoveInstallModulesLock') . '</a>';
 					 }*/
+
+					/*if (empty($object->array_options['options_fileupgradeunlock']))
+					 {
+					 print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=recreateupgradeunlock&token='.newToken().'">' . $langs->trans('RecreateUpgradeUnlock') . '</a>';
+					 }
+					 else
+					 {
+					 print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=deleteupgradeunlock&token='.newToken().'">' . $langs->trans('SellYourSaasRemoveUpgradeUnlock') . '</a>';
+					 }*/
 				} else {
 					print '<a class="butActionRefused" href="#" title="'.$langs->trans("ContractMustHaveStatusDone").'">' . $langs->trans('RefreshRemoteData') . '</a>';
 				}
