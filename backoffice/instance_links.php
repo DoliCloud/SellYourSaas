@@ -61,6 +61,8 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/html.formcompany.class.php";
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
+dol_include_once("/sellyoursaas/class/sellyoursaasutils.class.php");
+dol_include_once('sellyoursaas/class/packages.class.php');
 
 $langs->loadLangs(array("admin","companies","users","contracts","other","commercial","sellyoursaas@sellyoursaas"));
 
@@ -254,6 +256,86 @@ if (empty($reshook)) {
 		}
 
 		exit;
+	}
+
+	if ($action == 'upgradeinstance') {
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+		$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
+		$tmpproduct = new Product($db);
+		$tmppackage = new Packages($db);
+
+		$type_db = $conf->db->type;
+		$hostname_db  = $object->array_options['options_hostname_db'];
+		$username_db  = $object->array_options['options_username_db'];
+		$password_db  = $object->array_options['options_password_db'];
+		$database_db  = $object->array_options['options_database_db'];
+		$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+		$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
+		$hostname_os  = $object->array_options['options_hostname_os'];
+		$username_os  = $object->array_options['options_username_os'];
+		$password_os  = $object->array_options['options_password_os'];
+		$username_web = $object->thirdparty->email;
+		$password_web = $object->thirdparty->array_options['options_password'];
+
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb->prefix_db = $prefix_db;
+		$lastversiondolibarrinstance = "";
+		if (is_object($newdb) && $newdb->connected) {
+			$confinstance = new Conf();
+			$confinstance->setValues($newdb);
+			$lastinstallinstance = isset($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? explode(".", $confinstance->global->MAIN_VERSION_LAST_INSTALL)[0] : "0";
+			$lastupgradeinstance = isset($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? explode(".", $confinstance->global->MAIN_VERSION_LAST_UPGRADE)[0] : "0";
+			$lastversiondolibarrinstance = max($lastinstallinstance, $lastupgradeinstance);
+		}
+
+		if ($dataofcontract['appproductid'] > 0) {
+			$tmpproduct->fetch($dataofcontract['appproductid']);
+			$tmppackage->fetch($tmpproduct->array_options['options_package']);
+			$dirforexampleforsources = preg_replace('/__DOL_DATA_ROOT__/', DOL_DATA_ROOT, preg_replace('/\/htdocs\/?$/', '', $tmppackage->srcfile1));
+			$dirforexampleforsourcesinstalldir = $dirforexampleforsources.'/htdocs/install/mysql/migration/';
+			$filelist = dol_dir_list($dirforexampleforsourcesinstalldir, 'files');
+			$laststableupgradeversion = 0;
+			foreach ($filelist as $key => $value) {
+				$version = explode("-", $value["name"])[1];
+				$version = explode(".", $version)[0];
+				$laststableupgradeversion = max($laststableupgradeversion, $version);
+			}
+			$object->array_options["dirforexampleforsources"] = $dirforexampleforsources;
+			$object->array_options["laststableupgradeversion"] = $laststableupgradeversion;
+			$object->array_options["lastversiondolibarrinstance"] = $lastversiondolibarrinstance;
+		} else {
+			$errortab[] = $langs->trans("ErrorFetchingProductOrPackage");
+			$errors++;
+		}
+		// Launch the remote action backup
+		$sellyoursaasutils = new SellYourSaasUtils($db);
+
+		dol_syslog("Launch the remote action upgrade for ".$object->ref);
+
+		$db->begin();
+
+		$errorforlocaltransaction = 0;
+
+		$comment = 'Launch upgrade from backoffice on contract '.$object->ref;
+		// First launch update of resources: This update status of install.lock+authorized key and update qty of contract lines + linked template invoice
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction('upgrade', $object, 'admin', '', '', '0', $comment);	// This include add of event if qty has changed
+
+		if ($result <= 0) {
+			$error++;
+			$errorforlocaltransaction++;
+			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+		} else {
+			setEventMessages('UpgradeOK', null, 'mesgs');
+		}
+
+		if (! $errorforlocaltransaction) {
+			$db->commit();
+
+			// Reload object to get updated values
+			$result = $object->fetch($object->id);
+		} else {
+			$db->rollback();
+		}
 	}
 
 	$action = 'view';
@@ -794,6 +876,46 @@ print "</div>";	//  End fiche=center
 
 print '<br>';
 
+if (! $user->socid) {
+	$listmodules = dol_dir_list(DOL_DOCUMENT_ROOT."/core/modules/", "files");
+	foreach ($listmodules as $key => $module) {
+		preg_match('/mod([[:upper:]].*)\.class\.php/', $module["name"], $namemodule);
+		if (!empty($namemodule)) {
+			$arraycoremodules[] = strtoupper($namemodule[1]);
+		}
+	}
+
+	// List of module that should not block installation
+	$arrayofexternalmodulesallowed = array('MEMCACHED', 'BILLEDONORDERS');
+	$arraymoduleok = array_merge($arraycoremodules, $arrayofexternalmodulesallowed);
+
+	$listmoduletotest = explode(', ', $object->modulesenabled);
+
+	$disablebuttonupgrade = 0;
+	foreach ($listmoduletotest as $key => $value) {
+		if (!in_array($value, $arraymoduleok)) {
+			$disablebuttonupgrade ++;
+		}
+	}
+
+	if (getDolGlobalString("SELLYOURSAAS_FORCE_UPGRADE_BUTTON")) {
+		$disablebuttonupgrade = 0;
+	}
+
+	print '<div class="tabsAction">';
+
+	if ($user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
+		if ($disablebuttonupgrade != 0) {
+			print '<div title="'.$langs->trans("ExternalModulesNeedDisabledInstanceLink").'">';
+		}
+		print '<a class="butAction '.($disablebuttonupgrade != 0 ? 'buttonRefused' : '' ).'" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=upgradeinstance&token='.newToken().'">'.$langs->trans('UpgradeNow').'</a>';
+		if ($disablebuttonupgrade != 0) {
+			print '</div>';
+		}
+	}
+
+	print "</div>";
+}
 
 print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
