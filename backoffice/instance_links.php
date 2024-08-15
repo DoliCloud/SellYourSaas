@@ -1,19 +1,19 @@
 <?php
 /* Copyright (C) 2004-2023 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
-*/
+ */
 
 /**
  *       \file       htdocs/sellyoursaas/backoffice/instance_links.php
@@ -950,7 +950,7 @@ foreach ($arraylistofinstances as $instance) {
 	// Nb of users
 	print '<tr>';
 	print '<td class="nowraponall">'.$instance->getNomUrl(1).'</td>';
-	print '<td>'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
+	print '<td class="tdoverflowmax150">'.$instance->getFormatedCustomerRef($instance->ref_customer).'</td>';
 	print '<td>'.$instance->array_options['options_cookieregister_counter'].'</td>';
 	print '<td>'.dol_print_ip($instance->array_options['options_deployment_ip'], 0).'</td>';
 	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
