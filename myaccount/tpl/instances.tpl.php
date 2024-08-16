@@ -1199,7 +1199,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
     				                </form>
                                     ';
-			print'					<div class="note note-warning">
+			print'					<br><div class="note note-warning">
 									'.$langs->trans("CommunicateIdentifiersToOnlyTrusted").'
 									</div>
 									';
@@ -1301,7 +1301,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
     				                </form>
                                     ';
-			print'					<div class="note note-warning">
+			print'					<br><div class="note note-warning">
 									'.$langs->trans("CommunicateIdentifiersToOnlyTrusted").'
 									</div>
 									';
