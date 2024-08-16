@@ -873,12 +873,18 @@ $sqlb.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat
 $sqlc = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $newobject->id);
 $sqlc.= ' WHERE fk_target = '.((int) $oldobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture')";
 
+$sqld = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields SET suspendmaintenance_message = '".$dbmaster->escape('https://'.$newobject->ref_customer)."'";
+$sqld.= ' WHERE fk_object = '.((int) $oldobject->id);
+
 if ($return_var) {
 	print "-> Error during mysql load of instance ".$newobject->ref_customer."\n";
 	print "FIX LOAD OF DUMP THEN RUN THIS MANUALLY:\n";
 	print $sqla."\n";
 	print $sqlb."\n";
 	print $sqlc."\n";
+	if ($mode == 'confirmredirect') {
+		print $sqld."\n";
+	}
 	exit(-1);
 }
 
