@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Add script master_move_several_instances.php 
 * NEW Add a tool to test the email like it is done during registration. 
 * NEW On payment by card, the last 4 numbers are saved into the field "numero" of the payment in database.
 * NEW Can force permission to see SSH/Mysql access per instance.

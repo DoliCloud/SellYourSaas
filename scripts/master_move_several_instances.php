@@ -21,7 +21,7 @@
  */
 
 /**
- *      \file       sellyoursaas/scripts/master_move_several_instance.php
+ *      \file       sellyoursaas/scripts/master_move_several_instances.php
  *		\ingroup    sellyoursaas
  *      \brief      Script to run from the master server to move several instances from a server to another one.
  */
@@ -386,7 +386,7 @@ $listofinstances = $instances;
 print "Found ".count($listofinstances)." instances.\n";
 
 
-foreach($listofinstances as $oldinstancecursor) {
+foreach ($listofinstances as $oldinstancecursor) {
 	// Process instance
 	$oldinstancecursorname = $oldinstancecursor['instance'];
 	$tmparray = explode('.', $oldinstancecursorname);
@@ -395,8 +395,8 @@ foreach($listofinstances as $oldinstancecursor) {
 	print "Move instance ".$oldinstancecursorname." into ".$newinstancecursorname.".\n";
 
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/scripts/master_move_instance.php ".escapeshellarg($oldinstancecursorname)." ".escapeshellarg($newinstancecursorname);
-	$command .= " ".$mode;
-	echo $command."\n";
+	$command .= " ".$mode." -y";
+	print $command."\n";
 
 	$return_val = 0;
 	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
@@ -406,10 +406,10 @@ foreach($listofinstances as $oldinstancecursor) {
 		$return_val = $resultarray['result'];
 		$content_grabbed = $resultarray['output'];
 
-		echo "Result: ".$return_val."\n";
+		print "Result: ".$return_val."\n";
 		if (!empty($resultarray['error'])) {
-			echo "Output: ".$content_grabbed."\n";
-			echo "Error: ".$resultarray['error']."\n";
+			print "Output: ".$content_grabbed."\n";
+			print "Error: ".$resultarray['error']."\n";
 		}
 	}
 
@@ -429,7 +429,7 @@ if (count($listofinstances)) {
 			print 'Move of old instances matching name '.$oldinstance." canceled (test mode)\n";
 		}
 	} else {
-		print 'Failed to move some instance'."\n";
+		print 'Failed to move last instance'."\n";
 		print "\n";
 		exit(-1);
 	}

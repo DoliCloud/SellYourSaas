@@ -167,10 +167,21 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 $langs->loadLangs(array("main", "errors"));
 
 $oldinstance=isset($argv[1]) ? $argv[1] : '';
-
 $newinstance=isset($argv[2]) ? strtolower($argv[2]) : '';
-
 $mode=isset($argv[3]) ? $argv[3] : '';
+$nointeractive = 0;
+
+$i = 0;
+while ($i < $argc) {
+	if (!empty($argv[$i])) {
+		if ($argv[$i] == '-y') {
+			$nointeractive = 1;
+			unset($argv[$i]);
+		}
+	}
+	$i++;
+}
+
 
 $langsen = new Translate('', $conf);
 $langsen->setDefaultLang($mysoc->default_lang);
@@ -191,12 +202,13 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an existing instance from an old server to a new server (with target instance not existing yet).\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect) [MYPRODUCTREF]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect) [MYPRODUCTREF] [-y]\n";
 	print "Mode is: test                test mode (nothing is done).\n";
 	print "         confirm             real move of the instance (deprecated, use confirmmaintenance or confirmredirect).\n";
 	print "         confirmmaintenance  real move and replace old instance with a definitive message 'Suspended. Instance has been moved.'.\n";
 	print "         confirmredirect     real move with a mesage 'Move in progress' during transfer, and then, switch old instance into a redirect instance.\n";
 	print "MYPRODUCTREF can be set to force a new hosting application service.\n";
+	print "Option -y can be added to automatically answer yes to questions.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	print "\n";
 	exit(-1);
@@ -288,7 +300,7 @@ if ($db2->error)
 
 $productref = '';
 $forceproductref = '';
-if (isset($argv[4])) {
+if (isset($argv[4]) && $argv[4] != '-y') {
 	$productref = $argv[4];
 	$forceproductref = $argv[4];
 }
@@ -383,7 +395,7 @@ if ($mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 
 
 // Share certificate of old instance by copying them into the common crt dir (they should already be into this directory)
-// TODO If the certificate of the source instance are not into crt directory, we must copy them into the sellyoursaas master crt directory with read permission to admin user.
+// If the certificate of the source instance are not into crt directory, we must copy them into the sellyoursaas master crt directory with read permission to admin user.
 $CERTIFFORCUSTOMDOMAIN = $oldinstance;
 if ($CERTIFFORCUSTOMDOMAIN) {
 	print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) of instance (generic and custom) into the sellyoursaas master crt directory (to reuse them on the new instance for backward compatibility).'."\n";
@@ -664,8 +676,11 @@ $fullcommand=$command." ".join(" ", $param);
 $output=array();
 $return_var=0;
 
-print "Press ENTER to continue by running the rsync command to get files of old instance...";
-$input = trim(fgets(STDIN));
+if (empty($nointeractive)) {
+	print "Press ENTER to continue by running the rsync command to get files of old instance...";
+	$input = trim(fgets(STDIN));
+}
+
 print $fullcommand."\n";
 
 $outputfile = $conf->admin->dir_temp.'/out.tmp';
@@ -729,8 +744,11 @@ $fullcommand=$command." ".join(" ", $param);
 $output=array();
 $return_var=0;
 
-print "Press ENTER to continue by running the rsync command to push files on remote target host...\n";
-$input = trim(fgets(STDIN));
+if (empty($nointeractive)) {
+	print "Press ENTER to continue by running the rsync command to push files on remote target host...\n";
+	$input = trim(fgets(STDIN));
+}
+
 print $fullcommand."\n";
 
 $outputfile = $conf->admin->dir_temp.'/out.tmp';
