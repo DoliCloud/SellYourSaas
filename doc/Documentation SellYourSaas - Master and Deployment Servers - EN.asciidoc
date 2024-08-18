@@ -1908,10 +1908,8 @@ Note: It seems we must also restart apache to have this effective inside apache.
 
 [source,bash]
 ---------------
-wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
-dpkg -i afick.deb
 
-ou pour Ubuntu 18.04
+pour Ubuntu 18.04
 
 wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
 dpkg -i afick.deb
@@ -3169,9 +3167,9 @@ Modify the file *`+/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for 
 
 [source,bash]
 ---------------
-upload_max_filesize = 20M
+upload_max_filesize = 50M
 
-post_max_size = 25M
+post_max_size = 60M
 max_input_vars = 4000
 
 memory_limit = 256M
@@ -3291,6 +3289,7 @@ cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
 chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
+chown admin:www-data /tmp/spam/*
 ---------------
 
 
