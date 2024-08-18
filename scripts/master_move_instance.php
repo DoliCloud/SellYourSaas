@@ -182,7 +182,6 @@ while ($i < $argc) {
 	$i++;
 }
 
-
 $langsen = new Translate('', $conf);
 $langsen->setDefaultLang($mysoc->default_lang);
 $langsen->loadLangs(array("main", "errors"));
@@ -304,6 +303,7 @@ if (isset($argv[4]) && $argv[4] != '-y') {
 	$productref = $argv[4];
 	$forceproductref = $argv[4];
 }
+
 if (empty($productref)) {
 	// Get tmppackage
 	foreach ($oldobject->lines as $keyline => $line) {
@@ -324,7 +324,7 @@ if (empty($productref)) {
 	}
 }
 if (empty($productref)) {
-	print "Error: Failed to get product ref of instance '".$oldinstance."'\n";
+	print "Error: Failed to get product ref from lines of instance '".$oldinstance."'\n";
 	print "\n";
 	exit(-1);
 }
