@@ -209,7 +209,7 @@
   owner @{HOME}/** rwl,
   owner /home/*/home/*/** rix,
   owner /mnt/diskhome/home/** rixwlk,
-  @{HOME}/dbn*/*_error.log r,			# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
+  @{HOME}/dbn*/*_error.log r,			# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home, so entry /mnt/diskhome/home is also added
   /mnt/diskhome/home/osu*/dbn*/*_error.log r,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmail.php rix,
   /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/phpsendmailprepend.php rix,
@@ -240,7 +240,7 @@
 		/etc/ssl/openssl.cnf r,
 		/mnt/diskhome/home/osu*/dbn*/*_error.log r,
 		/usr/lib/openssh/sftp-server mr,
-		@{HOME}/dbn*/*_error.log r,		# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home
+		@{HOME}/dbn*/*_error.log r,		# does not work because HOME is a /home/jail/home and sftp need /mnt/diskhome/home, so entry /mnt/diskhome/home is also added
 		
 		#allow owner /etc/passwd r,
 		allow /etc/passwd r,

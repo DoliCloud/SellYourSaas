@@ -1049,7 +1049,7 @@ sudo apt install -y apache2 apache2-bin lynx
 sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-soap
 sudo apt install -y php-readline php-xmlrpc
 sudo apt install -y php-pear
-sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit acct
+sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install -y bind9
 sudo apt install -y spamc spamassassin clamdscan clamav-daemon
 sudo apt install -y fail2ban
@@ -2744,11 +2744,11 @@ cp /usr/bin/dash /usr/bin/secureBash
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/usr.bin.secureBash* with Ubuntu 20.04) with this content:
+Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/usr.bin.secureBash* with Ubuntu 20.04+) with this content:
 
 [source,bash]
 ---------------
-include::repository_root/etc/apparmor.d/bin.secureBash[]
+include::repository_root/etc/apparmor.d/usr.bin.secureBash[]
 ---------------
 
 
@@ -2760,7 +2760,7 @@ include::repository_root/etc/apparmor.d/local/usr.sbin.apache2-deployment[]
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/php-fpm7.4* with this content:
+Note for future: if we use php-fpm instead of mod_itk, create an apparmor file */etc/apparmor.d/php-fpm7.4* with this content:
 
 [source,bash]
 ---------------
@@ -2780,7 +2780,7 @@ aa-status
 /etc/init.d/apparmor status
 ---------------
 
-To disable a profile:
+Note: To disable a profile:
 
 [source,bash]
 ---------------
@@ -3194,7 +3194,7 @@ Complete also the parameter *disable_functions* for the *apache* and *fpm* file 
 
 [source,bash]
 ---------------
-passthru,shell_exec,system,proc_open,popen,dl,apache_note,apache_setenv,show_source,virtual
+pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen,dl,apache_note,apache_setenv,show_source,virtual
 ---------------
 
 Warning: Do not add "exec".

@@ -1,30 +1,110 @@
-# Last Modified: Wed Feb 14 17:45:54 2024
-#include <tunables/global>
-
 # Author: Marc Deslauriers <marc.deslauriers@ubuntu.com>
 
+abi <abi/3.0>,
 
+include <tunables/global>
 profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
-  #include <abstractions/base>
-  #include <abstractions/nameservice>
-  #include <apache2.d>
-  #include <local/usr.sbin.apache2>
 
-  capability chown,
+  # This profile is completely permissive.
+  # It is designed to target specific applications using mod_apparmor,
+  # hats, and the apache2.d directory.
+  #
+  # In order to enable this profile, you must:
+  #
+  # 0- Stop apache:
+  #    sudo service apache2 stop
+  #
+  # 1- Enable the profile:
+  #    sudo aa-enforce /etc/apparmor.d/usr.sbin.apache2
+  #
+  # 2- Load the mpm_prefork and mod_apparmor modules:
+  #    sudo a2dismod <other non-prefork mpm>
+  #    sudo a2enmod mpm_prefork
+  #    sudo a2enmod apparmor
+  #    sudo service apache2 restart
+  #
+  # 3- Place an appropriate profile containing the desired hat in the
+  #    /etc/apparmor.d/apache2.d directory.  Such profiles must include
+  #    the "apache2-common" abstraction:
+  #
+  #    ^example.com flags=(complain) {
+  #        include <abstractions/apache2-common>
+  #        /var/www/html/             r,
+  #        /var/www/html/**           r,
+  #        /var/log/apache2/*.log     w,
+  #    }
+  #
+  # 4- Use the "AADefaultHatName" apache configuration option to specify a
+  #    hat to be used for a given apache virtualhost or "AAHatName" for
+  #    a given apache directory or location directive:
+  #
+  #    <VirtualHost example.com:80>
+  #        <IfModule mod_apparmor.c>
+  #            AADefaultHatName example.com
+  #        </IfModule>
+  #        ...
+  #    </VirtualHost>
+  #
+  #
+  # There is an example profile for phpsysinfo included in the
+  # apparmor-profiles package. To try it:
+  # 1- Install the phpsysinfo and the apparmor-profiles packages:
+  #    sudo apt-get install phpsysinfo apparmor-profiles
+  #
+  # 2- Enable the main apache2 profile
+  #    sudo aa-enforce /etc/apparmor.d/usr.sbin.apache2
+  #
+  # 3- Configure apache with the following (or similar):
+  #    Alias /phpsysinfo /usr/share/phpsysinfo
+  #    <Location /phpsysinfo>
+  #        <IfModule mod_apparmor.c>
+  #          AAHatName phpsysinfo
+  #        </IfModule>
+  #
+  #        # adjust as necessary:
+  #        Options None
+  #        Require local
+  #        Require ip 192.168.0.0/16
+  #    </Location>
+  #
+
+  include <abstractions/base>
+  include <abstractions/nameservice>
+
+  # Send signals to all hats.
+  signal (send) peer=@{profile_name}//*,
+
   capability dac_override,
-  capability dac_read_search,
   capability kill,
   capability net_bind_service,
   capability setgid,
   capability setuid,
-  capability sys_admin,
   capability sys_tty_config,
-
-  signal send peer=@{profile_name}//*,
-  signal send set=term peer=unconfined,
-  signal send set=usr1 peer=unconfined,
 
   / rw,
   /** mrwlkix,
 
+
+ # ^DEFAULT_URI flags=(attach_disconnected) {
+ #   include <abstractions/base>
+ #   include <abstractions/apache2-common>
+ #
+ #   / rw,
+ #   /** mrwlkix,
+ # }
+
+ # ^HANDLING_UNTRUSTED_INPUT flags=(attach_disconnected) {
+ #   include <abstractions/apache2-common>
+ #
+ #   / rw,
+ #   /** mrwlkix,
+ # }
+
+  # This directory contains web application
+  # package-specific apparmor files.
+
+  include <apache2.d>
+
+  # Site-specific additions and overrides. See local/README for details.
+  include if exists <local/usr.sbin.apache2>
 }
