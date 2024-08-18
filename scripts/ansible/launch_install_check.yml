@@ -6,6 +6,7 @@
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php74=1 apache=1'
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php80=1 apache=1'
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php81=1 apache=1'
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php83=1 apache=1'
 #
 
 
@@ -125,6 +126,7 @@
       - php7.0-dev
       - php7.0-mcrypt
       - php7.0-soap
+      - php7.0-tidy
     register: command_output
     when: 
       - php70 is defined
@@ -158,6 +160,7 @@
       - php7.4-mbstring 
       - php7.4-dev
       - php7.4-soap
+      - php7.4-tidy
     register: command_output
     when: 
       - php74 is defined
@@ -200,6 +203,7 @@
       - php8.0-mbstring 
       - php8.0-dev
       - php8.0-soap
+      - php8.0-tidy
     register: command_output
     when: 
       - php80 is defined
@@ -243,6 +247,7 @@
       - php8.1-mbstring 
       - php8.1-dev
       - php8.1-soap
+      - php8.1-tidy
     register: command_output
     when: 
       - php81 is defined
@@ -263,6 +268,50 @@
       var: command_output.stdout_lines
       
       
+  ##### For PHP 8.3
+  - name: Launch apt for php 8.3 packages
+    apt:
+      pkg:
+      - php8.3 
+      - php8.3-cli 
+      - libapache2-mod-php8.3 
+      #- php8.3-fpm 
+      - php8.3-gd 
+      - php8.3-imap 
+      - php8.3-ldap 
+      - php8.3-mysql 
+      - php8.3-curl 
+      - php8.3-memcached 
+      - php8.3-imagick 
+      - php8.3-intl 
+      - php8.3-xml 
+      - php8.3-zip 
+      - php8.3-bz2 
+      - php8.3-ssh2 
+      - php8.3-mbstring 
+      - php8.3-dev
+      - php8.3-soap
+      - php8.3-tidy
+    register: command_output
+    when: 
+      - php83 is defined
+
+  - debug:
+      var: command_output.stdout_lines
+
+  - name: Launch apt for GLPI packages
+    apt:
+      pkg:
+      - php8.3-readline
+      - php8.3-xmlrpc
+    register: command_output
+    when: 
+      - php83 is defined
+
+  - debug:
+      var: command_output.stdout_lines
+      
+            
   ##### PHP 7.0 apache2/php.ini
   - name: Check or update upload_max_filesize php.ini
     ini_file:
