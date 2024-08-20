@@ -3163,28 +3163,13 @@ chmod +t /dev/shm /var/lib/php/sessions
 
 ==== Define size of upload and session options
 
-Modify the file *`+/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
+Create a file */etc/php/sellyoursaas.ini* and enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
 
 [source,bash]
 ---------------
-upload_max_filesize = 50M
-
-post_max_size = 60M
-max_input_vars = 4000
-
-memory_limit = 256M
-
-session.gc_maxlifetime = 3600
-
-session.use_strict_mode = 1 
-session.use_only_cookies = 1
-session.cookie_httponly = 1
-session.cookie_samesite = Lax
-
-opcache.memory_consumption = 1024
-opcache.max_accelerated_files = 100000
-opcache.file_update_protection = 2
+include::repository_root/etc/apparmor.d/usr.bin.secureBash[]
 ---------------
+
 
 ==== Disable some functions (optionnal)
 
@@ -3236,22 +3221,22 @@ ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailpr
 ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/
 ---------------
 
-Modify the file *php.ini* (the one for *apache* and the one for *cli*) with:
+Create a file */etc/php/sellyoursaas.ini* with this content:
 
 [source,bash]
 ---------------
-; Automatically add files before PHP document.
-; http://php.net/auto-prepend-file
-auto_prepend_file = /usr/local/bin/phpsendmailprepend.php
-
-; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
-; http://php.net/sendmail-path
-sendmail_path = /usr/local/bin/phpsendmail.php
-
-; The path to a log file that will log all mail() calls. Log entries include
-; the full path of the script, line number, To address and headers.
-mail.log = /var/log/phpmail.log
+include::repository_root/etc/apparmor.d/usr.bin.secureBash[]
 ---------------
+
+Then enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
+
+[source,bash]
+---------------
+cd /etc/php/8.1/cli/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
+cd /etc/php/8.1/apache/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
+#cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
+---------------
+
 
 Create the files *phpmail.log* and *phpsendmail.log*:
 

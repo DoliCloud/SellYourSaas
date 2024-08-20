@@ -1509,20 +1509,21 @@ Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/
 
 ==== Define size of upload and session duration
 
-Modify the file *php.ini* (the one for *apache* and the one for *cli*) to allow upload of bigger files:
+Create a file */etc/php/sellyoursaas.ini* 
 
 [source,bash]
 ---------------
-upload_max_filesize = 20M
-
-post_max_size = 25M
-max_input_vars = 4000
-
-memory_limit = 256M
-
-session.gc_maxlifetime = 3600
+include::repository_root/etc/apparmor.d/usr.bin.secureBash[]
 ---------------
 
+But comment the line related to parameter *auto_prepend_file* and *sendmail_path*.
+
+Then enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
+
+[source,bash]
+---------------
+cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
+---------------
 
 
 === Setup of logrotate
@@ -1998,4 +1999,19 @@ The PIDFile is defined into the */lib/systemd/system/opendkim.service* but seems
 We can see this error into */var/log/syslog.log*.
 
 Check the configuration file */etc/default/opendkim* and verify that the socket is SOCKET="inet:12345@localhost"
+
+== Error fpm after upgrade
+
+If you have such kind of error:
+
+[Tue Aug 20 11:25:18.555744 2024] [proxy:error] [pid 1741] (2)No such file or directory: AH02454: FCGI: attempt to connect to Unix domain socket /run/php/php7.4-fpm.sock (*) failed
+[Tue Aug 20 11:25:18.555877 2024] [proxy_fcgi:error] [pid 1741] [client 82.64.109.15:46810] AH01079: failed to make connection to backend: httpd-UDS
+
+Check into /etc/apache2/conf-enabled that the correct version of php-fpm is enabled. If not, switch to the correct version, example:
+
+[source,bash]
+---------------
+/usr/sbin/a2disconf php7.4-fpm; /usr/sbin/a2enconf php8.1-fpm;
+---------------
+
 
