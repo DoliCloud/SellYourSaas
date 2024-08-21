@@ -387,15 +387,17 @@ print "Found ".count($listofinstances)." instance(s) to move.\n";
 
 $nbofmoveok = 0;
 $nbofmoveko = 0;
+$i = 0;
 
 foreach ($listofinstances as $oldinstancecursor) {
 	// Process instance
 	$oldinstancecursorname = $oldinstancecursor['instance'];
 	$tmparray = explode('.', $oldinstancecursorname);
 	$newinstancecursorname = $tmparray[0].'.'.getDomainFromURL($newinstance, 2);
+	$i++;
 
 	print "\n";
-	print "Move instance ".$oldinstancecursorname." into ".$newinstancecursorname.".\n";
+	print "Move instance #".$i." ".$oldinstancecursorname." into ".$newinstancecursorname.".\n";
 
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/scripts/master_move_instance.php ".escapeshellarg($oldinstancecursorname)." ".escapeshellarg($newinstancecursorname);
 	$command .= " ".$mode;
