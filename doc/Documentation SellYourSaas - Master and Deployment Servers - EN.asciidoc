@@ -1138,8 +1138,15 @@ a2enmod actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm
 a2enmod cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
 a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias
 a2enmod mpm_itk mpm_prefork
-a2enmod php7.0|php7.2|php7.4|php8.1
+a2enmod php7.0|php7.2|php7.4|php8.1|php8.3
 ---------------
+
+TODO Do not include/remove  
+a2dismod auth_digest authn_anon asis suexec userdir usertrack authn_dbd dbd ident mime_magic speling
+
+On php8.1
+a2dismod mcrypt
+
 
 Enable apache *configurations* to work with MPM_PREFORK and MPM_ITK:
 
@@ -3213,7 +3220,7 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendma
 
 For *PHP versions greater than or equal to 8.1*:
 
-Create a hard link to the 2 tools used for preprocessing PHP (be sure <<Installation of Dolibarr framework>> part is already done, else it will result in an error)
+Create a *hard* link to the 2 tools used for preprocessing PHP (be sure <<Installation of Dolibarr framework>> part is already done, else it will result in an error)
 
 [source,bash]
 ---------------
@@ -3233,7 +3240,7 @@ Then enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one 
 [source,bash]
 ---------------
 cd /etc/php/8.1/cli/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
-cd /etc/php/8.1/apache/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
+cd /etc/php/8.1/apache2/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
 #cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
 ---------------
 
