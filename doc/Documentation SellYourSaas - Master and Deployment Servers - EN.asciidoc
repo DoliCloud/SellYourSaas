@@ -4340,11 +4340,13 @@ Choose the snapshot or image to use and copy the content of file */scripts/post_
 Once the server is created, double check it does have an associated IP visible in OVH dashboard.
 If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field "Fixed IP" empty so it is set by OVH. Reboot the server.
 
-After a clone the IPv6 setup on OVH remains a copy of old instance so you can disable IPv6 to avoid network errors.
+After a clone, the IPv6 setup on OVH or virtual IPv4 addresses remains with same value than on old instance, so
+you must disable them to avoid network errors.
 
 [source,bash]
 ---------------
 ip -6 addr flush eth0
+ip addr del <IP_ADDRESS> dev eth0
 ---------------
 
 If you can't connect to server, it is possible that you have to configure */etc/network/interfaces* to get your IPv4 via DHCP. To do so :
