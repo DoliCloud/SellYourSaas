@@ -395,23 +395,25 @@ foreach ($listofinstances as $oldinstancecursor) {
 	print "Move instance ".$oldinstancecursorname." into ".$newinstancecursorname.".\n";
 
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/scripts/master_move_instance.php ".escapeshellarg($oldinstancecursorname)." ".escapeshellarg($newinstancecursorname);
-	$command .= " ".$mode." -y";
+	$command .= " ".$mode;
+	$command .= " -y";
 	print $command."\n";
 
 	$return_val = 0;
-	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
-		$outputfile = $conf->admin->dir_temp.'/out.tmp';
-		$resultarray = $utils->executeCLI($command, $outputfile, 0);
 
-		$return_val = $resultarray['result'];
-		$content_grabbed = $resultarray['output'];
+	$outputfile = $conf->admin->dir_temp.'/out.tmp';
+	//$resultarray = $utils->executeCLI($command, $outputfile, 0);
+	system($command, $return_val);
 
-		print "Result: ".$return_val."\n";
-		if (!empty($resultarray['error'])) {
-			print "Output: ".$content_grabbed."\n";
-			print "Error: ".$resultarray['error']."\n";
-		}
+	//$return_val = $resultarray['result'];
+	//$content_grabbed = $resultarray['output'];
+
+	/*print "Result: ".$return_val."\n";
+	if (!empty($resultarray['error'])) {
+		print "Output: ".$content_grabbed."\n";
+		print "Error: ".$resultarray['error']."\n";
 	}
+	*/
 
 	if ($return_val != 0) {
 		$error++;

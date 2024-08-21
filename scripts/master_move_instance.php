@@ -677,7 +677,7 @@ $output=array();
 $return_var=0;
 
 if (empty($nointeractive)) {
-	print "Press ENTER to continue by running the rsync command to get files of old instance...";
+	print "Press ENTER to continue by running the rsync command to get files of old instance...\n";
 	$input = trim(fgets(STDIN));
 }
 
