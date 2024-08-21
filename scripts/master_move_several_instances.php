@@ -383,8 +383,10 @@ print "We found ".count($instancestrial)." deployed trial + ".count($instances).
 
 $listofinstances = $instances;
 
-print "Found ".count($listofinstances)." instances.\n";
+print "Found ".count($listofinstances)." instance(s) to move.\n";
 
+$nbofmoveok = 0;
+$nbofmoveko = 0;
 
 foreach ($listofinstances as $oldinstancecursor) {
 	// Process instance
@@ -392,30 +394,38 @@ foreach ($listofinstances as $oldinstancecursor) {
 	$tmparray = explode('.', $oldinstancecursorname);
 	$newinstancecursorname = $tmparray[0].'.'.getDomainFromURL($newinstance, 2);
 
+	print "\n";
 	print "Move instance ".$oldinstancecursorname." into ".$newinstancecursorname.".\n";
 
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/scripts/master_move_instance.php ".escapeshellarg($oldinstancecursorname)." ".escapeshellarg($newinstancecursorname);
-	$command .= " ".$mode." -y";
+	$command .= " ".$mode;
+	$command .= " -y";
 	print $command."\n";
 
 	$return_val = 0;
-	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
-		$outputfile = $conf->admin->dir_temp.'/out.tmp';
-		$resultarray = $utils->executeCLI($command, $outputfile, 0);
 
-		$return_val = $resultarray['result'];
-		$content_grabbed = $resultarray['output'];
+	$outputfile = $conf->admin->dir_temp.'/out.tmp';
+	//$resultarray = $utils->executeCLI($command, $outputfile, 0);
+	system($command, $return_val);
 
-		print "Result: ".$return_val."\n";
-		if (!empty($resultarray['error'])) {
-			print "Output: ".$content_grabbed."\n";
-			print "Error: ".$resultarray['error']."\n";
-		}
+	//$return_val = $resultarray['result'];
+	//$content_grabbed = $resultarray['output'];
+
+	print "Result: ".$return_val."\n";
+
+	/*
+	if (!empty($resultarray['error'])) {
+		print "Output: ".$content_grabbed."\n";
+		print "Error: ".$resultarray['error']."\n";
 	}
+	*/
 
 	if ($return_val != 0) {
+		$nbofmoveko++;
 		$error++;
 		break;
+	} else {
+		$nbofmoveok++;
 	}
 }
 
@@ -436,7 +446,8 @@ if (count($listofinstances)) {
 }
 
 print "\n";
-print "Finished.\n";
+print "Finished (nb ok=".$nbofmoveok.", nb ko=".$nbofmoveko.").\n";
+
 print "\n";
 
 exit(0);
