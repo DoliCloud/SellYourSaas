@@ -897,17 +897,30 @@ $sqld.= ' WHERE fk_object = '.((int) $oldobject->id);
 
 if ($return_var) {
 	print "-> Error during mysql load of instance ".$newobject->ref_customer."\n";
-	print "FIX LOAD OF DUMP THEN RUN THIS MANUALLY:\n";
+
+	print "We try a common fix on the sql file with:\n";
+	$fullcommand = "sed -i.bak 's/`".$olddbuser."`@`%`/`".$newloginbase."`@`%`/g' ".$tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
+	print $fullcommand."\n";
+
+	$output=array();
+	$return_var=0;
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
+
+	$outputfile = $conf->admin->dir_temp.'/out.tmp';
+	$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, null, 1);
+
+	$return_var = $resultarray['result'];
+	$content_grabbed = $resultarray['output'];
+
+	print $content_grabbed."\n";
+
+	print "FIX AND REDO THE LOAD OF DUMP THEN RUN THIS MANUALLY:\n";
 	print $sqla."\n";
 	print $sqlb."\n";
 	print $sqlc."\n";
 	if ($mode == 'confirmredirect') {
 		print $sqld."\n";
 	}
-
-	print "NOTE: If you have error on permission to create views, you can try to fix the sql file with:\n";
-	print "sed -i.bak 's/`".$olddbuser."`@`%`/`".$newloginbase."`@`%`/g' ".$tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
-	print "Then reload the dump file.\n";
 
 	if (!$dnschangedone) {
 		print "NOTE: TO GET A REDIRECT WORKING AT THE DNS LEVEL, YOU CAN FIX THE DNS FILE /etc/bind/".$oldwilddomain.".hosts ON OLD SERVER TO SET THE LINE:\n";
