@@ -4283,9 +4283,9 @@ so the old URL will still works (temporarily until the old instance is closed)
 
 === Increase/extend size of disk
 
-* Take a snapshot of the disk to resize for backup. Create a new disk from this snapshot and attach it to another server (see chapter <<adding_a_disk>>) to ensure it is readable and you have backup files handy.
+This is to increase the size of an additionnal disk of data (not the system disk).
 
-If this is not a file system:
+* Take a snapshot or backup of the disk to resize (in case of trouble). Then check the backup is ok by creating a new disk from this snapshot and attach it to another server (see chapter <<adding_a_disk>>).
 
 * Unmount the filesystem:
 
@@ -4309,10 +4309,10 @@ lsof | grep "/mnt/disk"
 ---------------
 fdisk -l
 parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
-print all free
+print free
 resizepart 
 Y		  (the num of the part)
-999GB    (Don't input the default value but the max value of disk size found on line "Disk...:" that was shown by "print all free")
+999GB    (Don't input the default value but the max value of disk size found on line "Disk /dev/...: XXX" that was shown by "print all free")
 q
 ---------------
 
