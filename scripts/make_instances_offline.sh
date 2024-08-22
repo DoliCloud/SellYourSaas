@@ -16,10 +16,12 @@ echo "***** $0 *****"
 
 if [ "x$2" == "x" ]; then
    echo "Usage:   $0  urlwhenoffline  test|offline|online"
+   echo
    echo "Example: $0  offline.php  test"
    echo "Example: $0  maintenance.php  test"
    echo "Example: $0  https://myaccount.mydomain.com/offline.php  test       (old syntax)"
    echo "Example: $0  https://myaccount.mydomain.com/maintenance.php  test   (old syntax)"
+   echo
    exit 1
 fi
 
