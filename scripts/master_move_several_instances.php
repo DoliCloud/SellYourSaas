@@ -172,6 +172,8 @@ $newinstance=isset($argv[2]) ? strtolower($argv[2]) : '';
 
 $mode=isset($argv[3]) ? $argv[3] : '';
 
+$maxnb=isset($argv[4]) ? (int) $argv[4] : 0;
+
 $langsen = new Translate('', $conf);
 $langsen->setDefaultLang($mysoc->default_lang);
 $langsen->loadLangs(array("main", "errors"));
@@ -191,11 +193,12 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move existing instance from one server to another one (with target instances not existing yet).\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." *.withX.mysaasdomainname.com withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect)\n";
+	print "Usage: ".$script_file." *.withX.mysaasdomainname.com withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect) [maxnb]\n";
 	print "Mode is: test                test mode (nothing is done).\n";
 	print "         confirm             real move of the instance (deprecated, use confirmmaintenance or confirmredirect).\n";
 	print "         confirmmaintenance  real move and replace old instance with a definitive message 'Suspended. Instance has been moved.'.\n";
 	print "         confirmredirect     real move with a mesage 'Move in progress' during transfer, and then, switch old instance into a redirect instance.\n";
+	print "maxnb will process only the first maxnb instances found.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	print "\n";
 	exit(-1);
@@ -428,6 +431,11 @@ foreach ($listofinstances as $oldinstancecursor) {
 		break;
 	} else {
 		$nbofmoveok++;
+
+		if ($maxnb > 0 && $i >= $maxnb) {
+			print "We reach the maximum number of instances to process. We stop here. Re-run the script to process the remaining instances.\n";
+			break;
+		}
 	}
 }
 
