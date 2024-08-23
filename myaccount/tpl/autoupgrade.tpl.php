@@ -271,6 +271,24 @@ if ($action == "autoupgrade") {
 			$errors++;
 			$errortab[] = $langs->trans("ErrorOnUpgradeScript").' - exit code = '.$exitcode;
 			setEventMessages($langs->trans("ErrorOnUpgradeScript"), null, "errors");
+		} else {
+			if (getDolGlobalString("SELLYOURSAAS_DATADOG_ENABLED")) {
+				try {
+					dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+	
+					$arrayconfig=array();
+					if (getDolGlobalString("SELLYOURSAAS_DATADOG_APIKEY")) {
+						$arrayconfig=array('apiKey' => getDolGlobalString("SELLYOURSAAS_DATADOG_APIKEY"), 'app_key' => getDolGlobalString("SELLYOURSAAS_DATADOG_APPKEY"));
+					}
+	
+					$statsd = new DataDog\DogStatsd($arrayconfig);
+	
+					$arraytags=null;
+					$statsd->increment('sellyoursaas.upgradeinstance', 1, $arraytags);
+				} catch (Exception $e) {
+					// Nothing done
+				}
+			}
 		}
 	}
 }
