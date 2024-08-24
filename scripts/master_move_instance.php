@@ -175,10 +175,10 @@ $overwriteexistinginstance = 0;
 $i = 0;
 while ($i < $argc) {
 	if (!empty($argv[$i])) {
-		if ($argv[$i] == '-y') {
+		if ($argv[$i] === '-y') {
 			$nointeractive = 1;
 			unset($argv[$i]);
-		} elseif ($argv[$i] == '--ovewrite-existing-instance') {
+		} elseif ($argv[$i] === '--ovewrite-existing-instance') {
 			$overwriteexistinginstance = 1;
 			unset($argv[$i]);
 		}
@@ -484,7 +484,7 @@ print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) f
 // TODO
 
 
-if ($overwriteexistinginstance) {
+if (empty($overwriteexistinginstance)) {
 	print '--- Create new container for new instance (need sql create/write access on master database with master database user)'."\n";
 
 	$newpass = $oldobject->array_options['options_deployment_initial_password'];
