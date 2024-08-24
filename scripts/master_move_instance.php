@@ -529,7 +529,7 @@ if (empty($overwriteexistinginstance)) {
 		exit(-1);
 	}
 } else {
-	print '--- We do not recreate a new instance, we will reuse and overwrite the existing one'."\n";
+	print '--- We do not recreate a new container for the new instance, we will reuse and overwrite the existing one'."\n";
 }
 
 
@@ -555,17 +555,11 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 	}
 	print "\n";
 	exit(-1);
-} else {
-	if ($mode == 'test') {
-		print "We are in test mode, we found source files and the existing target instance, but we stop here.\n";
-		print "\n";
-		exit(-1);
-	}
 }
 
 // Set the custom url on new object with the one of the old one
 if (! empty($oldobject->array_options['options_custom_url'])) {
-	print "Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
+	print "--- Update new instance to set the custom url to ".$oldobject->array_options['options_custom_url']."\n";
 	$newobject->array_options['options_custom_url'] = $oldobject->array_options['options_custom_url'];
 	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 		$newobject->update($user, 1);
@@ -581,7 +575,7 @@ foreach ($oldobject->lines as $line) {
 		$dateendperiod = $line->date_end;
 	}
 }
-print "Lowest date of end of validity of services of old contract is ".dol_print_date($dateendperiod, 'standard').".\n";
+print "--- Lowest date of end of validity of services of old contract is ".dol_print_date($dateendperiod, 'standard').".\n";
 if ($dateendperiod > 0) {
 	$sql = 'UPDATE '.MAIN_DB_PREFIX."contratdet set date_fin_validite = '".$db->idate($dateendperiod)."'";
 	$sql .= " WHERE fk_contrat = ".((int) $newobject->id);
@@ -594,7 +588,7 @@ if ($dateendperiod > 0) {
 		}
 	}
 }
-print "Set end date of trial on new contract to the same value than the old contract.\n";
+print "--- Set end date of trial on new contract to the same value than the old contract.\n";
 $sql = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields set date_endfreeperiod = '".$db->idate($oldobject->array_options['options_date_endfreeperiod'])."'";
 $sql .= " WHERE fk_object = ".((int) $newobject->id);
 print $sql."\n";
@@ -606,9 +600,8 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 	}
 }
 
+print "--- Update price, discount and qty of the new contract lines to match the one on the source.\n";
 if (empty($forceproductref)) {
-	print "Update price, discount and qty of the new contract lines to match the one on the source.\n";
-
 	foreach ($oldpricesperproduct as $productid => $pricesperproduct) {
 		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX."contratdet";
 		$sql .= " WHERE fk_contrat = ".((int) $newobject->id);
@@ -654,7 +647,7 @@ dol_mkdir($tmptargetdir);
 
 
 print '--- Synchro of files '.$oldsftpconnectstring.' to '.$tmptargetdir."\n";
-print 'SFTP connect string : '.$oldsftpconnectstring."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' SFTP connect string : '.$oldsftpconnectstring."\n";
 //print 'SFTP old password '.$oldospass."\n";
 
 
@@ -723,7 +716,7 @@ $sourcedir = $tmptargetdir;
 $targetdir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$newlogin.'/'.$newdatabasedb;
 
 print '--- Synchro of files '.$sourcedir.' to '.$newsftpconnectstring."\n";
-print 'SFTP connect string : '.$newsftpconnectstring."\n";
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' SFTP connect string : '.$newsftpconnectstring."\n";
 //print 'SFTP new password '.$newpassword."\n";
 
 $command="rsync";
@@ -840,6 +833,7 @@ if ($return_var) {
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 //print "If the mysql fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
+// Drop llx_accounting_account (if it exists)
 $fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
@@ -860,6 +854,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 	}*/
 }
 
+// Drop llx_accounting_system (if it exists)
 $fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 $output=array();
 $return_var=0;
@@ -882,6 +877,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 
 $dnschangedone = 0;
 
+// Load dump
 $fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql | mysql -A -h ".$newserverbase." -u ".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
@@ -896,6 +892,8 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 	$content_grabbed = $resultarray['output'];
 
 	print $content_grabbed."\n";
+} else {
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Load canceled (test mode)'."\n";
 }
 
 // Prepare SQL commands to execute after the load
@@ -969,7 +967,6 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 		print 'ERROR '.$dbmaster->lasterror();
 	}
 }
-
 print $sqlb."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 	$resql = $dbmaster->query($sqlb);
@@ -985,6 +982,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 		print 'ERROR '.$dbmaster->lasterror();
 	}
 }
+
 
 print "Note: To revert the move of the recurring invoice, you can do:\n";
 
@@ -1005,7 +1003,7 @@ print "\n";
 
 
 if ($mode != 'confirmredirect' && $mode != 'confirmmaintenance') {
-	print "DON'T FORGET TO REDIRECT INSTANCE ON OLD SYSTEM BY SETTING THE MAINTENANCE MODE WITH THE MESSAGE\n";
+	print "NOTE: TO SET A REDIRECT ON OLD INSTANCE, SET THE MAINTENANCE MESSAGE TO THIS URL (not done automatically in this mode)\n";
 	print "https://".$newobject->ref_customer."\n";
 	print "\n";
 } else {
