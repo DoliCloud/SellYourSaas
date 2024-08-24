@@ -558,6 +558,8 @@ if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 } else {
 	if ($mode == 'test') {
 		print "We are in test mode, we found source files and the existing target instance, but we stop here.\n";
+		print "\n";
+		exit(-1);
 	}
 }
 
