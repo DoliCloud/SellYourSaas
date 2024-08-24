@@ -178,7 +178,7 @@ while ($i < $argc) {
 		if ($argv[$i] === '-y') {
 			$nointeractive = 1;
 			unset($argv[$i]);
-		} elseif ($argv[$i] === '--ovewrite-existing-instance') {
+		} elseif ($argv[$i] === '--overwrite-existing-instance') {
 			$overwriteexistinginstance = 1;
 			unset($argv[$i]);
 		}

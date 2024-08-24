@@ -179,7 +179,7 @@ $reusetargetinstance = 0;
 $i = 0;
 while ($i < $argc) {
 	if (!empty($argv[$i])) {
-		if ($argv[$i] === '--ovewrite-existing-instance') {
+		if ($argv[$i] === '--overwrite-existing-instance') {
 			$reusetargetinstance = 1;
 			unset($argv[$i]);
 		} elseif (is_numeric($argv[$i])) {
