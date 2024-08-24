@@ -423,7 +423,7 @@ foreach ($listofinstances as $oldinstancecursor) {
 	$command .= " ".$mode;
 	$command .= " -y";
 	if ($reusetargetinstance) {
-		$command .= ' --ovewrite-existing-instance';
+		$command .= ' --overwrite-existing-instance';
 	}
 
 	print $command."\n";
