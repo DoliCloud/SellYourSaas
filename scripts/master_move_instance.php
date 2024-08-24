@@ -170,12 +170,16 @@ $oldinstance=isset($argv[1]) ? $argv[1] : '';
 $newinstance=isset($argv[2]) ? strtolower($argv[2]) : '';
 $mode=isset($argv[3]) ? $argv[3] : '';
 $nointeractive = 0;
+$overwriteexistinginstance = 0;
 
 $i = 0;
 while ($i < $argc) {
 	if (!empty($argv[$i])) {
 		if ($argv[$i] == '-y') {
 			$nointeractive = 1;
+			unset($argv[$i]);
+		} elseif ($argv[$i] == '--ovewrite-existing-instance') {
+			$overwriteexistinginstance = 1;
 			unset($argv[$i]);
 		}
 	}
@@ -273,7 +277,7 @@ $oldobject = new SellYourSaasContract($dbmaster);
 $result=$oldobject->fetch('', '', $oldinstance);
 $oldobject->fetch_thirdparty();
 
-if (empty($oldinstance) || $result <= 0 || $oldobject->statut == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
+if (empty($oldinstance) || $result <= 0 || $oldobject->status == 0 || $oldobject->array_options['options_deployment_status'] != 'done') {
 	print "Error: the old instance to move with full name '".$oldinstance."' and a deployment status = 'done' was not found.\n";
 	print "\n";
 	exit(-1);
@@ -480,49 +484,54 @@ print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) f
 // TODO
 
 
-print '--- Create new container for new instance (need sql create/write access on master database with master database user)'."\n";
+if ($overwriteexistinginstance) {
+	print '--- Create new container for new instance (need sql create/write access on master database with master database user)'."\n";
 
-$newpass = $oldobject->array_options['options_deployment_initial_password'];
-if (empty($newpass)) {
-	$newpass = getRandomPassword(true, array('I'), 16);
-}
-
-$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
-$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
-$command.=" ".escapeshellarg($oldinstance);
-echo $commandnopass."\n";
-
-$return_val = 0;
-if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
-	$outputfile = $conf->admin->dir_temp.'/out.tmp';
-	$resultarray = $utils->executeCLI($command, $outputfile, 0);
-
-	$return_val = $resultarray['result'];
-	$content_grabbed = $resultarray['output'];
-
-	echo "Result: ".$return_val."\n";
-	if (!empty($resultarray['error'])) {
-		echo "Output: ".$content_grabbed."\n";
-		echo "Error: ".$resultarray['error']."\n";
+	$newpass = $oldobject->array_options['options_deployment_initial_password'];
+	if (empty($newpass)) {
+		$newpass = getRandomPassword(true, array('I'), 16);
 	}
-}
 
-if ($return_val != 0) {
-	$error++;
-}
+	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
+	$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
+	$command.=" ".escapeshellarg($oldinstance);
+	echo $commandnopass."\n";
 
-// Return
-if (! $error) {
+	$return_val = 0;
 	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
-		print '-> Creation of a new instance with name '.$newinstance." done.\n";
+		$outputfile = $conf->admin->dir_temp.'/out.tmp';
+		$resultarray = $utils->executeCLI($command, $outputfile, 0);
+
+		$return_val = $resultarray['result'];
+		$content_grabbed = $resultarray['output'];
+
+		echo "Result: ".$return_val."\n";
+		if (!empty($resultarray['error'])) {
+			echo "Output: ".$content_grabbed."\n";
+			echo "Error: ".$resultarray['error']."\n";
+		}
+	}
+
+	if ($return_val != 0) {
+		$error++;
+	}
+
+	// Return
+	if (! $error) {
+		if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+			print '-> Creation of a new instance with name '.$newinstance." done.\n";
+		} else {
+			print '-> Creation of a new instance with name '.$newinstance." canceled (test mode)\n";
+		}
 	} else {
-		print '-> Creation of a new instance with name '.$newinstance." canceled (test mode)\n";
+		print '-> Failed to create a new instance with name '.$newinstance."\n";
+		print "\n";
+		exit(-1);
 	}
 } else {
-	print '-> Failed to create a new instance with name '.$newinstance."\n";
-	print "\n";
-	exit(-1);
+	print '--- We do not recreate a new instance, we will reuse and overwrite the existing one'."\n";
 }
+
 
 // Reload contract to get all values up to date
 $newobject = new SellYourSaasContract($dbmaster);
@@ -538,9 +547,11 @@ $newdatabasedb=$newobject->array_options['options_database_db'];
 
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
-	print "Error: Failed to find target instance '".$newinstance."'";
+	print "Error: Failed to find target instance '".$newinstance."'.";
 	if ($mode == 'test') {
-		print " (it should have been created by this script but, in test mode, the instance can't be created).\n";
+		print " This may happen when you are in test mode. In this mode, no data is modified so we can't continue.\n";
+	} else {
+		print " This means creation of instance has failed or you used option --ovewrite-existing-instance and instance does not exists.\n";
 	}
 	print "\n";
 	exit(-1);

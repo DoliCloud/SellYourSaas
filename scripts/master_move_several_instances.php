@@ -172,7 +172,24 @@ $newinstance=isset($argv[2]) ? strtolower($argv[2]) : '';
 
 $mode=isset($argv[3]) ? $argv[3] : '';
 
-$maxnb=isset($argv[4]) ? (int) $argv[4] : 0;
+$maxnb = 0;
+
+$reusetargetinstance = 0;
+
+$i = 0;
+while ($i < $argc) {
+	if (!empty($argv[$i])) {
+		if ($argv[$i] === '--ovewrite-existing-instance') {
+			$reusetargetinstance = 1;
+			unset($argv[$i]);
+		} elseif (is_numeric($argv[$i])) {
+			$maxnb = (int) $argv[$i];
+		}
+	}
+
+	$i++;
+}
+
 
 $langsen = new Translate('', $conf);
 $langsen->setDefaultLang($mysoc->default_lang);
@@ -193,7 +210,7 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move existing instance from one server to another one (with target instances not existing yet).\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." *.withX.mysaasdomainname.com withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect) [maxnb]\n";
+	print "Usage: ".$script_file." *.withX.mysaasdomainname.com withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect) [maxnb] [--ovewrite-existing-instance]\n";
 	print "Mode is: test                test mode (nothing is done).\n";
 	print "         confirm             real move of the instance (deprecated, use confirmmaintenance or confirmredirect).\n";
 	print "         confirmmaintenance  real move and replace old instance with a definitive message 'Suspended. Instance has been moved.'.\n";
@@ -405,6 +422,10 @@ foreach ($listofinstances as $oldinstancecursor) {
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/scripts/master_move_instance.php ".escapeshellarg($oldinstancecursorname)." ".escapeshellarg($newinstancecursorname);
 	$command .= " ".$mode;
 	$command .= " -y";
+	if ($reusetargetinstance) {
+		$command .= ' --ovewrite-existing-instance';
+	}
+
 	print $command."\n";
 
 	$return_val = 0;
