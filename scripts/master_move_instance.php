@@ -549,12 +549,16 @@ $newdatabasedb=$newobject->array_options['options_database_db'];
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
 	print "Error: Failed to find target instance '".$newinstance."'.";
 	if ($mode == 'test') {
-		print " This may happen when you are in test mode. In this mode, no data is modified so we can't continue.\n";
+		print " This may happen when you are in test mode. In this mode, no data is modified so we can't continue by creating target instance.\n";
 	} else {
 		print " This means creation of instance has failed or you used option --ovewrite-existing-instance and instance does not exists.\n";
 	}
 	print "\n";
 	exit(-1);
+} else {
+	if ($mode == 'test') {
+		print "We are in test mode, we found source files and the existing target instance, but we stop here.\n";
+	}
 }
 
 // Set the custom url on new object with the one of the old one
