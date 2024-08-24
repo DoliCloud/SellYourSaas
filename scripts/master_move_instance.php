@@ -338,12 +338,22 @@ $createthirdandinstance = 0;
 dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
 
 $newobject = new SellYourSaasContract($dbmaster);
-$result=$newobject->fetch('', '', $newinstance);
+$result = $newobject->fetch('', '', $newinstance);
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
-	if ($result > 0 && ($newobject->statut > 0 || $newobject->array_options['options_deployment_status'] != 'processing')) {
-		print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
-		print "\n";
-		exit(-1);
+	if ($overwriteexistinginstance) {
+		// We want to overwrite an exsiting instance
+		if ($result > 0) {
+			print "An existing instance was found. We will overwrite it.\n";
+		}
+	} else {
+		// We don't want to run if instance already exists
+		if ($result > 0) {
+			if ($newobject->status > 0 || $newobject->array_options['options_deployment_status'] != 'processing') {
+				print "Error: An existing instance called '".$newinstance."' (with deployment status != 'processing') already exists.\n";
+				print "\n";
+				exit(-1);
+			}
+		}
 	}
 }
 
