@@ -4398,7 +4398,7 @@ network:
 ---------------
 			
 
-Then correct IPv6 setup into file */etc/netplan/50-cloud-init.yaml*.
+Then correct IPv6 setup into a file */etc/netplan/???.yaml*.
 
 [source,bash]
 ---------------
