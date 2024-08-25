@@ -4356,24 +4356,14 @@ ip -6 addr flush eth0
 ip addr del <IP_ADDRESS> dev eth0
 ---------------
 
-
 Note:
 
-If you can't connect to server, it is possible that you have to configure */etc/network/interfaces* to get your IPv4 via DHCP. To do so :
-Connect to the console of server from the cloud provider dashboard. Execute *ip link show* to get the MAC address (just after the "link/ether" text). For example with the output:
+If you can't ping the server
 
-[source,bash]
----------------
-1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-2: ens3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
-    link/ether fa:16:3e:75:62:dc brd ff:ff:ff:ff:ff:ff
-    altname enp0s3
----------------
+Check the file */etc/network/interfaces* or */etc/netplan/???.yaml* to set the right MAC address into the section *match: macaddress:" if it exists a condition to get a dhcp IP address, and reboot if needed (removing the match may also work).
+Check also that there is no old IP in file.
 
-The MAC address is "fa:16:3e:75:62:dc".
-
-Check the file */etc/netplan/50-cloud-init.yaml* to set the right MAC address after the "dhcp4: true" line into the section *match: macaddress:" and reboot if needed (removing the match may also work). For exemple here:
+For exemple here:
 
 [source,bash]
 ---------------
@@ -4396,6 +4386,21 @@ network:
                 via: 2402:1f00:8102:100::1
             set-name: ens3
 ---------------
+
+You can the MAC address by connecting to the console of server from the cloud provider dashboard. Execute *ip link show* to get the MAC address (just after the "link/ether" text). For example with the output:
+ 
+[source,bash]
+---------------
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: ens3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether fa:16:3e:75:62:dc brd ff:ff:ff:ff:ff:ff
+    altname enp0s3
+---------------
+
+The MAC address is "fa:16:3e:75:62:dc".
+
+
 			
 
 Then correct IPv6 setup into a file */etc/netplan/???.yaml*.
@@ -4411,11 +4416,13 @@ netplan apply
 Create an image from the server.
 
 Create a server from the image. 
-- If after creating the server, you can't ping, check the generated file */etc/netplan/50-cloud-init.yaml*
+- If after creating the server, you can't ping, check the generated file */etc/network/interfaces* or */etc/netplan/50-cloud-init.yaml*
 - If you can ping but you can't connect to SSH, may be problem is the one described on the trouble shooting "sshd: no hostkeys available -- exiting"
 
-If you want to restore the IP olf old serveurn detach IPs on the 2 servers. Then attach the IP of the old production server to the new one. 
 
+If you want to restore the IP olf old serveur:
+Detach IPs on the 2 servers. Then attach the IP of the old production server to the new one. 
+Always check after that that files into /etc/network/intefaces* or */etc/netplan/???.yaml* match the correct IP when IP is not get using dhcp and mac address (See notes into previous chapter for OVH)
 Go on the new server using the new IP to set the hostname with the same value than old name:
 
 [source,bash]
