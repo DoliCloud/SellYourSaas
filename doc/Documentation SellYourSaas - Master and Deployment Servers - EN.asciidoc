@@ -4356,9 +4356,47 @@ ip -6 addr flush eth0
 ip addr del <IP_ADDRESS> dev eth0
 ---------------
 
+
+Note:
+
 If you can't connect to server, it is possible that you have to configure */etc/network/interfaces* to get your IPv4 via DHCP. To do so :
-Connect to the console of server from OVH dashboard. Execute *ip link show* to get the MAC address. Check the file */etc/netplan/50-cloud-init.yaml* to get the right MAC address.
-Correct and reboot if needed. 
+Connect to the console of server from the cloud provider dashboard. Execute *ip link show* to get the MAC address (just after the "link/ether" text). For example with the output:
+
+[source,bash]
+---------------
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: ens3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether fa:16:3e:75:62:dc brd ff:ff:ff:ff:ff:ff
+    altname enp0s3
+---------------
+
+The MAC address is "fa:16:3e:75:62:dc".
+
+Check the file */etc/netplan/50-cloud-init.yaml* to set the right MAC address after the "dhcp4: true" line into the section *match: macaddress:" and reboot if needed (removing the match may also work). For exemple here:
+
+[source,bash]
+---------------
+network:
+    version: 2
+    ethernets:
+        ens3:
+            accept-ra: false
+            addresses:
+            - 2402:1f00:8102:100::38d/56
+            dhcp4: true
+            match:
+                macaddress: fa:16:3e:75:62:dc
+			nameservers:
+                addresses:
+                - ip.of.dns.server
+                search: []                
+			routes:
+            -   to: ::/0
+                via: 2402:1f00:8102:100::1
+            set-name: ens3
+---------------
+			
 
 Then correct IPv6 setup into file */etc/netplan/50-cloud-init.yaml*.
 
@@ -4372,11 +4410,13 @@ netplan apply
 
 Create an image from the server.
 
-Create a server from the image. If after creating the server, you can't connect to SSH, may be problem is the one described on the trouble shooting "sshd: no hostkeys available -- exiting"
+Create a server from the image. 
+- If after creating the server, you can't ping, check the generated file */etc/netplan/50-cloud-init.yaml*
+- If you can ping but you can't connect to SSH, may be problem is the one described on the trouble shooting "sshd: no hostkeys available -- exiting"
 
-Detach IP on the 2 servers. Then attach IP of the production serveur to the new one. 
+If you want to restore the IP olf old serveurn detach IPs on the 2 servers. Then attach the IP of the old production server to the new one. 
 
-Go on the new server using the new IP to set the hostname with same value than old name:
+Go on the new server using the new IP to set the hostname with the same value than old name:
 
 [source,bash]
 ---------------
