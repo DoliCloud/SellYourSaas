@@ -72,6 +72,7 @@ if ($totalInvoiced == 0) {
 	$amounttopayasfirstinvoice = 0;
 	$amounttopayasfirstinvoicetinstances = array();
 	foreach ($listofcontractid as $contract) {
+		/** @var SellYourSaasContract $contract */
 		if ($contract->array_options['options_deployment_status'] == 'done') {
 			$sellyoursaasutils = new SellYourSaasUtils($db);
 
