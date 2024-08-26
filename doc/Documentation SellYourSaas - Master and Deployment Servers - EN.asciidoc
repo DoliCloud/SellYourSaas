@@ -4347,8 +4347,11 @@ Choose the snapshot or image to use and copy the content of file */scripts/post_
 Once the server is created, double check it does have an associated IP visible in OVH dashboard.
 If not go to the horizon console on the server, detach the network interfaces, then add a new network interface. Leave the field "Fixed IP" empty so it is set by OVH. Reboot the server.
 
-After a clone, the IPv6 setup on OVH or virtual IPv4 addresses remains with same value than on old instance, so
-you must disable them to avoid network errors.
+Note: If you can't ping the server using IPv4, take a look at the Troubleshooting bad IP v4 mounting after cloning a server.
+Note: If you can't ping the server using IPv6, take a look at the Troubleshooting bad IP v6 mounting after cloning a server.
+Note: If you can ping but you can't connect to SSH, may be problem is the one described on the trouble shooting "sshd: no hostkeys available -- exiting"
+
+After a clone, the IPv6 setup on OVH or virtual IPv4 addresses remains with same value than on old instance, so you can disable the IPv6 to avoid network errors or see Trouble shooting for a more complete solution.
 
 [source,bash]
 ---------------
@@ -4356,71 +4359,17 @@ ip -6 addr flush eth0
 ip addr del <IP_ADDRESS> dev eth0
 ---------------
 
-Note:
-
-If you can't ping the server
-
-Check the file */etc/network/interfaces* or */etc/netplan/???.yaml* to set the right MAC address into the section *match: macaddress:" if it exists a condition to get a dhcp IP address, and reboot if needed (removing the match may also work).
-Check also that there is no old IP in file.
-
-For exemple here:
-
-[source,bash]
----------------
-network:
-    version: 2
-    ethernets:
-        ens3:
-            accept-ra: false
-            addresses:
-            - 2402:1f00:8102:100::38d/56
-            dhcp4: true
-            match:
-                macaddress: fa:16:3e:75:62:dc
-			nameservers:
-                addresses:
-                - ip.of.dns.server
-                search: []                
-			routes:
-            -   to: ::/0
-                via: 2402:1f00:8102:100::1
-            set-name: ens3
----------------
-
-You can the MAC address by connecting to the console of server from the cloud provider dashboard. Execute *ip link show* to get the MAC address (just after the "link/ether" text). For example with the output:
- 
-[source,bash]
----------------
-1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-2: ens3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
-    link/ether fa:16:3e:75:62:dc brd ff:ff:ff:ff:ff:ff
-    altname enp0s3
----------------
-
-The MAC address is "fa:16:3e:75:62:dc".
-
-
-			
-
-Then correct IPv6 setup into a file */etc/netplan/???.yaml*.
-
-[source,bash]
----------------
-netplan try
-netplan apply
----------------
-
 *With ScaleWay*:
 
 Create an image from the server.
 
 Create a server from the image. 
-- If after creating the server, you can't ping, check the generated file */etc/network/interfaces* or */etc/netplan/50-cloud-init.yaml*
-- If you can ping but you can't connect to SSH, may be problem is the one described on the trouble shooting "sshd: no hostkeys available -- exiting"
 
+Note: If you can't ping the server using IPv4, take a look at the Troubleshooting bad IP v4 mounting after cloning a server.
+Note: If you can't ping the server using IPv6, take a look at the Troubleshooting bad IP v6 mounting after cloning a server.
+Note: If you can ping but you can't connect to SSH, may be problem is the one described on the trouble shooting "sshd: no hostkeys available -- exiting"
 
-If you want to restore the IP olf old serveur:
+If you want to restore the IP of old serveur:
 Detach IPs on the 2 servers. Then attach the IP of the old production server to the new one. 
 Always check after that that files into /etc/network/intefaces* or */etc/netplan/???.yaml* match the correct IP when IP is not get using dhcp and mac address (See notes into previous chapter for OVH)
 Go on the new server using the new IP to set the hostname with the same value than old name:
@@ -5735,9 +5684,92 @@ ufw delete X
 ==== Ping hangs in input, not in output. IP v4 or V6 fails in input or output
 
 If you are using a server hosted on OpenStack, a security group may exists that block network in some direction/protocols.
-Check that your *security group* match the following setup
+If on a Public Cloud based on OpenStack, check that your *security group* match the following setup
 
 image::Example_setup_security_group_horizon.png[Example of setup of security group on horizon]
+
+On other Cloud solution, you may also need to check the *security group* applied to your server.
+
+
+=== Failed to ping or use IPv4 after cloning a server ===
+
+If you can ping with IPv6 but not using IPv4, there is a sometimes a trouble when setting the IPv4 layer.
+You can first try to restore the IPv4 manually by adding the declaration of the IP v4 manually by creating a netplan config file */etc/netplan/fixed-ip.yaml* for a static IP v4
+
+[source,bash]
+---------------
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      dhcp4: no
+      addresses:
+        - the.static.ipv4.server/24      # Adresse IPv4 statique avec le préfixe CIDR
+      gateway4: the.static.ipv4.gateway  # Adresse de la passerelle (gateway)
+      nameservers:
+        addresses:
+          - 8.8.8.8         # Serveur DNS primaire
+          - 8.8.4.4         # Serveur DNS secondaire 
+---------------
+
+Then run *netplan try* and apply.
+
+Check by doing an apt update your network and outgoing connexion are ok. If yes, you can follow this tutorial provided by scaleway https://www.scaleway.com/en/docs/compute/instances/troubleshooting/fix-unreachable-focal-with-two-public-ips/ to
+fix definetly the bad generation of the netplan file during boot. It will add a line *- on-link: true* into the routes section for IPv4 that solve the trouble. You can then remove 
+the file */etc/netplan/fixed-ip.yaml* that was previously added manually and reboot. IPv4 should be available.
+
+
+=== Failed to ping or use IPv6 after cloning a server ===
+
+If after creating the server, you can't ping on IPv6, check the file */etc/network/interfaces* or */etc/netplan/???.yaml* to set the correct MAC address into 
+the section *match: macaddress:" if it exists a condition to get a dhcp IP address, and reboot if needed (removing the match may also work).
+Check also that there is no old IP in file.
+
+For exemple here:
+
+[source,bash]
+---------------
+network:
+    version: 2
+    ethernets:
+        ens3:
+            accept-ra: false
+            addresses:
+            - 2402:1f00:8102:100::38d/56
+            dhcp4: true
+            match:
+                macaddress: fa:16:3e:75:62:dc
+			nameservers:
+                addresses:
+                - ip.of.dns.server
+                search: []                
+			routes:
+            -   to: ::/0
+                via: 2402:1f00:8102:100::1
+            set-name: ens3
+---------------
+
+You can get the MAC address by connecting to the console of server from the cloud provider dashboard. Execute *ip link show* to get the MAC address (just after the "link/ether" text). For example with the output:
+ 
+[source,bash]
+---------------
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+2: ens3: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether fa:16:3e:75:62:dc brd ff:ff:ff:ff:ff:ff
+    altname enp0s3
+---------------
+
+The MAC address is "fa:16:3e:75:62:dc".
+
+Then correct IPv6 setup into a file */etc/netplan/???.yaml*.
+
+[source,bash]
+---------------
+netplan try
+netplan apply
+---------------
 
 
 ==== error when enabling firewall with UFW

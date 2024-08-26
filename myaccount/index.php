@@ -2460,7 +2460,7 @@ foreach ($listofcontractidopen as $tmpcontract) {
 			if (preg_match('/^\((.*)\)$/', $deploymentserver->servercustomerannounce, $reg)) {
 				print $langs->trans($reg[1]);
 			} else {
-				print $deploymentserver->servercustomerannounce;
+				print dolPrintHTML($deploymentserver->servercustomerannounce);
 			}
 			print '</h4>';
 			print '</div>';
