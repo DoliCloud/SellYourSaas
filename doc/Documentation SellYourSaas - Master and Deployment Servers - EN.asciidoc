@@ -3174,7 +3174,7 @@ Create a file */etc/php/sellyoursaas.ini* and enable it by adding the symlinks i
 
 [source,bash]
 ---------------
-include::repository_root/etc/apparmor.d/usr.bin.secureBash[]
+include::repository_root/etc/php/sellyoursaas.ini[]
 ---------------
 
 
@@ -3232,15 +3232,14 @@ Create a file */etc/php/sellyoursaas.ini* with this content:
 
 [source,bash]
 ---------------
-include::repository_root/etc/apparmor.d/usr.bin.secureBash[]
+include::repository_root/etc/php/sellyoursaas.ini[]
 ---------------
 
 Then enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
 
 [source,bash]
 ---------------
-cd /etc/php/8.1/cli/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
-cd /etc/php/8.1/apache2/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
+cd /etc/php/8.1/cli/conf.d/; ln -fs /etc/php/sellyoursaas.ini; cd /etc/php/8.1/apache2/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
 #cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
 ---------------
 
