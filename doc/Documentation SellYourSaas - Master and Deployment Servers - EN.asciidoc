@@ -4645,6 +4645,9 @@ sudo add-apt-repository ppa:ondrej/php
 apt install php-mysql
 a2enmod php7.4
 apt remove php-fpm php7-fpm
+
+# if you move from 20.04 to 22.04, you must anable the correct php version
+a2dismod php7.4; a2enmod php8.1; 
 ---------------
 
 If you get a timeout error when running do-release-upgrade, take a look ath the troubleshooting section.
