@@ -65,11 +65,14 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 	{
 		global $user, $langs, $conf;
 
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+
 		$langs->loadLangs(array("sellyoursaas@sellyoursaas", "other"));
 
 		$this->max = $max;
 
 		$this->info_box_head = array('text' => $langs->trans("BoxTitleSellyoursaasBackupErrors"));
+		$error = 0;
 
 		if ($user->hasRight('sellyoursaas', 'read')) {
 			$nbinstancebackuperror = 0;
@@ -77,8 +80,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 			$modearray = array("","remote");
 			foreach ($modearray as $mode) {
 				$sql = "SELECT c.ref_customer as status,";
-				$sql .= " MIN(ce.latestbackup".$mode."_date) as mintry, MIN(ce.latestbackup".$mode."_date_ok) as minok,";
-				$sql .= " MAX(ce.latestbackup".$mode."_date) as maxtry, MAX(ce.latestbackup".$mode."_date_ok) as maxok";
+				$sql .= " ce.latestbackup".$mode."_date as datetry, ce.latestbackup".$mode."_date_ok as dateok";
 				$sql .= " FROM ".$this->db->prefix()."contrat as c, ".$this->db->prefix()."contrat_extrafields as ce";
 				$sql .= " WHERE ce.fk_object = c.rowid";
 				$sql .= " AND ce.deployment_status IN ('done', 'processing')";
@@ -92,34 +94,46 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				if ($result) {
 					while ($obj = $this->db->fetch_object($resql)) {
 						// Faire le test pour savoir si oui ou non > 48 dernière reussite
+						$datetry = $this->db->jdate($obj->datetry);
+						$dateok = $this->db->jdate($obj->dateok);
+						$datetryminus2day = dol_time_plus_duree($datetry, -2, "d");
+						if ($datetryminus2day > $dateok) {
+							if ($mode != "") {
+								$nbinstanceremotebackuperror ++;
+							} else {
+								$nbinstancebackuperror ++;
+							}
+						}
 					}
+				} else {
+					$error++;
 				}
 			}
-			if ($result) {
+			if (!$error) {
 				$line = 0;
 				$num = $this->db->num_rows($result);
 
 				$this->info_box_contents[$line][] = array(
 					'td' => '',
-					'text' => $langs->trans("NbPersistantErrorLocalBackup"),
+					'text' => $langs->trans("NbPersistentErrorLocalBackup"),
 					'asis' => 1,
 				);
 
 				$this->info_box_contents[$line][] = array(
-					'td' => '',
-					'text' => $objp->number,
+					'td' => 'class="right"',
+					'text' => $nbinstancebackuperror,
 				);
 				$line++;
 
 				$this->info_box_contents[$line][] = array(
 					'td' => '',
-					'text' => $langs->trans("NbPersistantErrorRemoteBackup"),
+					'text' => $langs->trans("NbPersistentErrorRemoteBackup"),
 					'asis' => 1,
 				);
 
 				$this->info_box_contents[$line][] = array(
-					'td' => '',
-					'text' => $objp->number,
+					'td' => 'class="right"',
+					'text' => $nbinstanceremotebackuperror,
 				);
 
 				$this->db->free($result);
