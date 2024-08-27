@@ -206,10 +206,12 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				|| $object->oldcopy->array_options['options_custom_url'] != $object->array_options['options_custom_url'])) {
 					$testok = 1;
 
+					/* Disabled. We must accept custom url from old server (for scripts and backoffice). A protection can be added in myaccount page however to avoid this.
 					if (preg_match('/\.with\./', $object->array_options['options_custom_url'])) {
 						$this->errors[]="Value of URL including .with. is not allowed as custom URL";
 						return -1;
 					}
+					*/
 
 					// Clean new value
 					$nametotest = $object->ref_customer;
