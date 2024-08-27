@@ -108,23 +108,35 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				} else {
 					$error++;
 				}
+				$this->db->free($result);
 			}
+
 			if (!$error) {
 				$line = 0;
-				$num = $this->db->num_rows($result);
-
 				$this->info_box_contents[$line][] = array(
-					'td' => '',
-					'text' => $langs->trans("NbPersistentErrorLocalBackup"),
-					'asis' => 1,
+					'td' => 'class="left" width="16"',
+					'url' => DOL_URL_ROOT."contrat/list.php?search_options_latestbackup_status=KO",
+					'logo' => 'contract',
+					'tooltip' => $langs->trans("NbPersistentErrorLocalBackup"),
 				);
-
+				$this->info_box_contents[$line][] = array(
+					'td' => 'left',
+					'text' => $langs->trans("NbPersistentErrorLocalBackup"),
+				);
 				$this->info_box_contents[$line][] = array(
 					'td' => 'class="right"',
 					'text' => $nbinstancebackuperror,
+					'url' =>  DOL_URL_ROOT."contrat/list.php?search_options_latestbackup_status=KO",
+					'tooltip' => $langs->trans("NbPersistentErrorLocalBackup"),
 				);
 				$line++;
 
+				$this->info_box_contents[$line][] = array(
+					'td' => 'class="left" width="16"',
+					'url' => DOL_URL_ROOT."contrat/list.php?search_options_latestbackupremote_status=KO",
+					'logo' => 'contract',
+					'tooltip' => $langs->trans("NbPersistentErrorRemoteBackup"),
+				);
 				$this->info_box_contents[$line][] = array(
 					'td' => '',
 					'text' => $langs->trans("NbPersistentErrorRemoteBackup"),
@@ -134,9 +146,9 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$this->info_box_contents[$line][] = array(
 					'td' => 'class="right"',
 					'text' => $nbinstanceremotebackuperror,
+					'url' =>  DOL_URL_ROOT."contrat/list.php?search_options_latestbackupremote_status=KO",
+					'tooltip' => $langs->trans("NbPersistentErrorRemoteBackup"),
 				);
-
-				$this->db->free($result);
 			} else {
 				$this->info_box_contents[0][0] = array(
 					'td' => '',
