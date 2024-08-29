@@ -818,6 +818,23 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		if ($result) {
 			setEventMessages($langs->trans("TicketSent"), null, 'warnings');
 			$action = '';
+			if (getDolGlobalString("SELLYOURSAAS_DATADOG_ENABLED")) {
+				try {
+					dol_include_once('/sellyoursaas/core/includes/php-datadogstatsd/src/DogStatsd.php');
+
+					$arrayconfig=array();
+					if (getDolGlobalString("SELLYOURSAAS_DATADOG_APIKEY")) {
+						$arrayconfig=array('apiKey' => getDolGlobalString("SELLYOURSAAS_DATADOG_APIKEY"), 'app_key' => getDolGlobalString("SELLYOURSAAS_DATADOG_APPKEY"));
+					}
+
+					$statsd = new DataDog\DogStatsd($arrayconfig);
+
+					$arraytags=null;
+					$statsd->increment('sellyoursaas.ticketsubmission', 1, $arraytags);
+				} catch (Exception $e) {
+					// Nothing done
+				}
+			}
 		} else {
 			setEventMessages($langs->trans("FailedToSentTicketPleaseTryLater").' '.$cmailfile->error, $cmailfile->errors, 'errors');
 			$action = 'presend';
@@ -2443,7 +2460,7 @@ foreach ($listofcontractidopen as $tmpcontract) {
 			if (preg_match('/^\((.*)\)$/', $deploymentserver->servercustomerannounce, $reg)) {
 				print $langs->trans($reg[1]);
 			} else {
-				print $deploymentserver->servercustomerannounce;
+				print dolPrintHTML($deploymentserver->servercustomerannounce);
 			}
 			print '</h4>';
 			print '</div>';
