@@ -242,6 +242,11 @@ if (in_array('exec', $arrayoffunctionsdisabled)) {
 } else {
 	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec<br>';
 }
+if (in_array('popen', $arrayoffunctionsdisabled)) {
+	print "Parameter <b>disable_functions</b>: Bad. Must not contain 'exec'<br>";
+} else {
+	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: popen (used by smtp_watchdog_daemon1.php)<br>';
+}
 print "<br>\n";
 
 print '<form enctype="multipart/form-data" method="POST" action="'.$_SERVER["PHP_SELF"].'" name="form_index">';
