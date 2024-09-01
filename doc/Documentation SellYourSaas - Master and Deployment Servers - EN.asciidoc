@@ -3526,21 +3526,28 @@ For example, you can use *supervision@mysaasdomainname.com* as the email for let
 
 This create certificates and also enable the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
 
-To read certificate .crt or .pem files, you can run:
+
+* To read/list existing certificates, you can run:
+
+[source,bash]
+---------------
+certbot certificates
+---------------
+
+* To read certificate .crt or .pem files, you can run:
 
 [source,bash]
 ---------------
 openssl x509 -in fullchain.pem -text
 ---------------
 
-To read renewal scheduler:
+* To read renewal scheduler:
 
 [source,bash]
 ---------------
 systemctl list-timers
 systemctl status snap.certbot.renew.timer
 ---------------
-
 
 * To renew a certificate on the *master*:
 
