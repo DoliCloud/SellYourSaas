@@ -5724,7 +5724,7 @@ network:
 
 Then run *netplan try* and apply.
 
-Check by doing an apt update your network and outgoing connexion are ok. If yes, you can follow this tutorial provided by scaleway https://www.scaleway.com/en/docs/compute/instances/troubleshooting/fix-unreachable-focal-with-two-public-ips/ to
+Check by doing an apt update that your network and outgoing connexion are ok. If yes, you can follow this tutorial provided by scaleway https://www.scaleway.com/en/docs/compute/instances/troubleshooting/fix-unreachable-focal-with-two-public-ips/ to
 fix definetly the bad generation of the netplan file during boot. It will add a line *- on-link: true* into the routes section for IPv4 that solve the trouble. You can then remove 
 the file */etc/netplan/fixed-ip.yaml* that was previously added manually and reboot. IPv4 should be available.
 
