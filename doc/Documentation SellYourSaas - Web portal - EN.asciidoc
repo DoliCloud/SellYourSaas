@@ -1653,10 +1653,10 @@ Note: Les rapports sont dans */var/crash*
 
 [source,bash]
 ---------------
-sudo apt remove cerbot
-sudo apt install snapd
+sudo apt remove cerbot; sudo apt install snapd;
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
+certbot --version
 
 # Old method was:
 #cd /root
@@ -1666,14 +1666,43 @@ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 #apt install certbot
 ---------------
 
-[[creation_certificat_ssl]]
-=== Création d'un certificat SSL pour les sites Web
+And to list certbot cron job:
 
-Lancer certbot et choisir le virtual hot du serveur Web
+[source,bash]
+---------------
+systemctl list-units | grep certbot
+systemctl status snap.certbot.renew.timer
+---------------
+
+The complete logs of certbot are into /var/log/letsencrypt/...
+
+
+[[creation_certificat_ssl]]
+=== Create a SSL certificate from LetsEncrypt for all web sites
+
+* To generate certificates, launch certbot and choose the virtual host of the web server yoy want a certificate of:
     
 [source,bash]
 ---------------
 certbot
+---------------
+
+* To read/list existing certificates, you can run:
+
+[source,bash]
+---------------
+certbot certificates
+---------------
+
+* To renew a certificate:
+
+[source,bash]
+---------------
+certbot renew -v [--dry-run]
+or
+certbot renew --force-renewal [--cert-name=...]
+or 
+certbot renew --cert-name admin.mysellyoursaasdomain.com --dry-run
 ---------------
 
 

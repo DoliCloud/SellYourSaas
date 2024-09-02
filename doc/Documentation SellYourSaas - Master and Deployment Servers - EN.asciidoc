@@ -2769,7 +2769,7 @@ Note for future: if we use php-fpm instead of mod_itk, create an apparmor file *
 
 [source,bash]
 ---------------
-include::repository_root/etc/apparmor.d/php-fpm7.4[]
+include::repository_root/etc/apparmor.d/php-fpm[]
 ---------------
 
 
@@ -3526,21 +3526,28 @@ For example, you can use *supervision@mysaasdomainname.com* as the email for let
 
 This create certificates and also enable the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
 
-To read certificate .crt or .pem files, you can run:
+
+* To read/list existing certificates, you can run:
+
+[source,bash]
+---------------
+certbot certificates
+---------------
+
+* To read certificate .crt or .pem files, you can run:
 
 [source,bash]
 ---------------
 openssl x509 -in fullchain.pem -text
 ---------------
 
-To read renewal scheduler:
+* To read renewal scheduler:
 
 [source,bash]
 ---------------
 systemctl list-timers
 systemctl status snap.certbot.renew.timer
 ---------------
-
 
 * To renew a certificate on the *master*:
 
@@ -4645,8 +4652,10 @@ apt install php-mysql
 a2enmod php7.4
 apt remove php-fpm php7-fpm
 
-# if you move from 20.04 to 22.04, you must anable the correct php version
-a2dismod php7.4; a2enmod php8.1; 
+# if you move from 20.04 to 22.04, you must enable the correct php version
+a2dismod php7.4; a2enmod php8.1;
+# You must also remove an old apache2 UFW profile that is duplicate with apache2-utils.ufw.profile
+rm -fr apache2.2-common
 ---------------
 
 If you get a timeout error when running do-release-upgrade, take a look ath the troubleshooting section.
@@ -4741,7 +4750,7 @@ or
 sudo apt install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" <package-name>
 ---------------
 
-Example when missing /etc/apparmor/severity.db, run sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" apparmor-utils
+Example when missing /etc/apparmor/severity.db, run: sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" apparmor-utils
 
 
 === Using OpenStack to manage server images
@@ -5717,7 +5726,7 @@ network:
 
 Then run *netplan try* and apply.
 
-Check by doing an apt update your network and outgoing connexion are ok. If yes, you can follow this tutorial provided by scaleway https://www.scaleway.com/en/docs/compute/instances/troubleshooting/fix-unreachable-focal-with-two-public-ips/ to
+Check by doing an apt update that your network and outgoing connexion are ok. If yes, you can follow this tutorial provided by scaleway https://www.scaleway.com/en/docs/compute/instances/troubleshooting/fix-unreachable-focal-with-two-public-ips/ to
 fix definetly the bad generation of the netplan file during boot. It will add a line *- on-link: true* into the routes section for IPv4 that solve the trouble. You can then remove 
 the file */etc/netplan/fixed-ip.yaml* that was previously added manually and reboot. IPv4 should be available.
 

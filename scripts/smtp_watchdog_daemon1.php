@@ -211,6 +211,10 @@ $datelastload = dol_now();
 $LOGPREFIX='UFW ALLOW SELLYOURSAAS';
 
 $handle = popen("tail -F ".$WDLOGFILE." | grep --line-buffered '".$LOGPREFIX."'", 'r');
+if (!$handle) {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " exit - failed to oopen the tail on log file.\n", FILE_APPEND);
+	exit(-2);
+}
 while (!feof($handle)) {
 	$line = fgets($handle);
 	flush();
