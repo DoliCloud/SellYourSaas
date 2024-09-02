@@ -258,7 +258,7 @@ if (empty($reshook)) {
 		exit;
 	}
 
-	if ($action == 'upgradeinstance') {
+	if ($action == 'confirm_upgradeinstance' && GETPOST('confirm') == 'yes') {
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 		$dataofcontract = sellyoursaasGetExpirationDate($object, 0);
 		$tmpproduct = new Product($db);
@@ -336,9 +336,10 @@ if (empty($reshook)) {
 		} else {
 			$db->rollback();
 		}
+		if (! in_array($action, array('upgradeinstance'))) {
+			$action = 'view';
+		}
 	}
-
-	$action = 'view';
 }
 
 
@@ -355,6 +356,10 @@ $form2 = new Form($db2);
 $formcompany = new FormCompany($db);
 
 $countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
+
+if ($action == 'upgradeinstance') {
+	print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$id, $langs->trans('UpgradeNow'), $langs->trans('ConfirmUpgradeNow'), 'confirm_upgradeinstance', '', 0, 1);
+}
 
 if ($action != 'create') {
 	// Show tabs
