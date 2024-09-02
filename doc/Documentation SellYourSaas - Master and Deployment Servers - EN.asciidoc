@@ -1167,7 +1167,9 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* On Ubuntu 18.04 and +, check that the *PrivateTmp* parameter is *false* in the *apache2.service* Apache launch configuration. This will make it possible to have a directory */tmp* which is not unique and not isolated to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam. It also allows to send antivirus into a separate process on uploaded files that are stored into this temporary directory.
+* On Ubuntu 18.04 and +, check that the *PrivateTmp* parameter is *false* in the *apache2.service* Apache launch configuration
+This will make it possible to have a directory */tmp* which is not unique and not isolated to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam.
+It also allows to send antivirus into a separate process on uploaded files that are stored into this temporary directory.
 
 [source, bash]
 ---------------
@@ -4659,6 +4661,12 @@ rm -fr apache2.2-common
 # You must also remove old apparmor lxc profiles
 apt remove lxc
 rm -fr /etc/apparmor.d/lxc*
+# Fix the script to stop apparmor:
+vi /lib/apparmor/rc.apparmor.functions
+  # FIX LDR
+  # sed -e "s/ (\(enforce\|complain\))$//" "$SFS_MOUNTPOINT/profiles" | \
+  sed -e "s/ (\(enforce\|complain\|unconfined\))$//" "$SFS_MOUNTPOINT/profiles" | \
+
 ---------------
 
 If you get a timeout error when running do-release-upgrade, take a look ath the troubleshooting section.
