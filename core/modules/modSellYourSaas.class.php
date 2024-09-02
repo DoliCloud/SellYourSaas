@@ -151,10 +151,11 @@ class modSellYourSaas extends DolibarrModules
 		$this->boxes = array();			// List of boxes
 		$r=0;
 
+		$this->boxes[$r][1] = 'box_sellyoursaas_backup_errors.php@sellyoursaas';
+		$this->boxes[$r][0] = 'home';
+		$r++;
 		// Add here list of php file(s) stored in includes/boxes that contains class to show a box.
 		// Example:
-		//$this->boxes[$r][1] = "myboxa.php";
-		//$r++;
 		//$this->boxes[$r][1] = "myboxb.php";
 		//$r++;
 
