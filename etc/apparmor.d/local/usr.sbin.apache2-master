@@ -154,6 +154,7 @@
     #deny /etc/passwd r,
 
     /dev/tty rw,
+    /etc/apache2/.htpasswd r,
     /etc/ImageMagick*/** rw,
     /etc/clamav/clamd.conf r,
     /etc/mysql/conf.d/ r,

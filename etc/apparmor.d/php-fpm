@@ -83,6 +83,7 @@ profile php-fpm /usr/{bin,sbin}/php-fpm flags=(attach_disconnected) {
     deny /var/www/** r,
 
     /dev/tty rw,
+    /etc/apache2/.htpasswd r,
     /etc/ImageMagick*/** rw,
     /etc/clamav/clamd.conf r,
     /etc/mysql/conf.d/mysql.cnf r,
