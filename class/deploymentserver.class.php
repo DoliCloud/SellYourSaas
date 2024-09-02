@@ -404,12 +404,14 @@ class Deploymentserver extends CommonObject
 		}
 
 		// Manage filter
-		$errormessage = '';
-		$sql .= forgeSQLFromUniversalSearchCriteria($filter, $errormessage);
-		if ($errormessage) {
-			$this->errors[] = $errormessage;
-			dol_syslog(__METHOD__.' '.implode(',', $this->errors), LOG_ERR);
-			return -1;
+		if (!empty($filter)) {
+			$errormessage = '';
+			$sql .= forgeSQLFromUniversalSearchCriteria($filter, $errormessage);
+			if ($errormessage) {
+				$this->errors[] = $errormessage;
+				dol_syslog(__METHOD__.' '.implode(',', $this->errors), LOG_ERR);
+				return -1;
+			}
 		}
 
 		if (!empty($sortfield)) {
