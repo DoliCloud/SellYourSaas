@@ -2769,7 +2769,7 @@ Note for future: if we use php-fpm instead of mod_itk, create an apparmor file *
 
 [source,bash]
 ---------------
-include::repository_root/etc/apparmor.d/php-fpm7.4[]
+include::repository_root/etc/apparmor.d/php-fpm[]
 ---------------
 
 
@@ -4652,8 +4652,10 @@ apt install php-mysql
 a2enmod php7.4
 apt remove php-fpm php7-fpm
 
-# if you move from 20.04 to 22.04, you must anable the correct php version
-a2dismod php7.4; a2enmod php8.1; 
+# if you move from 20.04 to 22.04, you must enable the correct php version
+a2dismod php7.4; a2enmod php8.1;
+# You must also remove an old apache2 UFW profile that is duplicate with apache2-utils.ufw.profile
+rm -fr apache2.2-common
 ---------------
 
 If you get a timeout error when running do-release-upgrade, take a look ath the troubleshooting section.
@@ -4748,7 +4750,7 @@ or
 sudo apt install --reinstall -o Dpkg::Options::="--force-confask,confnew,confmiss" <package-name>
 ---------------
 
-Example when missing /etc/apparmor/severity.db, run sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" apparmor-utils
+Example when missing /etc/apparmor/severity.db, run: sudo apt install --reinstall -o Dpkg::Options::="--force-confmiss" apparmor-utils
 
 
 === Using OpenStack to manage server images
