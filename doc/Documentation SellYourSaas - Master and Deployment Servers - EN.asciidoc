@@ -4667,6 +4667,20 @@ vi /lib/apparmor/rc.apparmor.functions
   # sed -e "s/ (\(enforce\|complain\))$//" "$SFS_MOUNTPOINT/profiles" | \
   sed -e "s/ (\(enforce\|complain\|unconfined\))$//" "$SFS_MOUNTPOINT/profiles" | \
 
+# if you move from 22.04 to 24.04, you must enable the correct php version
+apt install apache2; apt install libapache2-mod-apparmor; apt install php-tidy;
+a2enmod php8.3; a2enmod apparmor;
+# You must also remove an old apache2 UFW profile that is duplicate with apache2-utils.ufw.profile
+rm -fr apache2.2-common
+# You must also remove old apparmor lxc profiles
+apt remove lxc
+rm -fr /etc/apparmor.d/lxc*
+# Fix the script to stop apparmor:
+vi /lib/apparmor/rc.apparmor.functions
+  # FIX LDR
+  # sed -e "s/ (\(enforce\|complain\))$//" "$SFS_MOUNTPOINT/profiles" | \
+  sed -e "s/ (\(enforce\|complain\|unconfined\))$//" "$SFS_MOUNTPOINT/profiles" | \
+
 ---------------
 
 If you get a timeout error when running do-release-upgrade, take a look ath the troubleshooting section.
