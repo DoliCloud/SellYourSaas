@@ -4656,6 +4656,9 @@ apt remove php-fpm php7-fpm
 a2dismod php7.4; a2enmod php8.1;
 # You must also remove an old apache2 UFW profile that is duplicate with apache2-utils.ufw.profile
 rm -fr apache2.2-common
+# You must also remove old apparmor lxc profiles
+apt remove lxc
+rm -fr /etc/apparmor.d/lxc*
 ---------------
 
 If you get a timeout error when running do-release-upgrade, take a look ath the troubleshooting section.
