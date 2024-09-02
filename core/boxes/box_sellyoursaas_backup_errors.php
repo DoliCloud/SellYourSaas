@@ -34,7 +34,7 @@ include_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 class box_sellyoursaas_backup_errors extends ModeleBoxes
 {
 	public $boxcode  = "sellyoursaasbackuperrors";
-	public $boximg   = "sellyoursaas";
+	public $boximg   = "sellyoursaas@sellyoursaas";
 	public $boxlabel = "BoxSellyoursaasBackupErrors";
 	public $depends  = array("sellyoursaas"); // Box active if module sellyoursaas active
 
@@ -48,7 +48,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 	 */
 	public function __construct($db, $param = '')
 	{
-		global $conf, $user;
+		global $user;
 
 		$this->db = $db;
 
@@ -63,7 +63,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 	 */
 	public function loadBox($max = 5)
 	{
-		global $user, $langs, $conf;
+		global $user, $langs;
 
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 
