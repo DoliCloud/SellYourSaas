@@ -432,7 +432,16 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	print '<tr class="liste_titre">';
 	print '<td>'.$langs->trans("LocalBackup").'</td>';
-	print '<td>';
+	print '<td class="right">';
+
+	if (! $user->socid) {
+		if ($user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
+			print '<a class="butAction smallpaddingimp" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=backupinstance&token='.newToken().'">'.$langs->trans('BackupNow').'</a>';
+		} else {
+			print '<a class="butActionRefused smallpaddingimp" href="#">'.$langs->trans('BackupNow').'</a>';
+		}
+	}
+
 	print '</td>';
 	print '</tr>';
 
@@ -484,14 +493,15 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	print '<tr class="liste_titre">';
 	print '<td>'.$langs->trans("RemoteBackup").'</td>';
-	print '<td></td>';
+	print '<td class="right">';
+	print '<a class="butActionRefused smallpaddingimp" href="#" title="'.dol_escape_htmltag($langs->trans("NotYetAvailable")).'">'.$langs->trans('BackupNow').'</a>';
 	print '</td>';
 	print '</tr>';
 
 	// Backup dir
 	print '<tr class="oddeven">';
 	print '<td>'.$langs->trans("BackupDir").'</td>';
-	print '<td>'.$backupdirremote.'/'.$login.' or '.$backupdirremote2.'/'.$login.'</td>';
+	print '<td>'.$backupdirremote.'/'.$login.' &nbsp;<span class="opacitymedium">or</span>&nbsp; '.$backupdirremote2.'/'.$login.'</td>';
 	print '</tr>';
 
 	// Last remote backup date try
@@ -535,10 +545,6 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	if (! $user->socid) {
 		print '<div class="tabsAction">';
 
-		if ($user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
-			print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=backupinstance&token='.newToken().'">'.$langs->trans('BackupNow').'</a>';
-		}
-
 		print "</div>";
 	}
 }
@@ -551,7 +557,7 @@ print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-file
 print '<input type="text" name="backupstring" id="backupstring" value="'.$backupstringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 print ajax_autoselect('backupstring');
 
-print '<br>';
+print '<br><br>';
 
 // Restore command line from backup
 if ($restorestringfrombackup) {
@@ -560,7 +566,7 @@ if ($restorestringfrombackup) {
 	print '<input type="text" name="restorestring" id="restorestring" value="'.$restorestringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	print ajax_autoselect('restorestring');
 
-	print '<br>';
+	print '<br><br>';
 }
 
 // Restore commands from remote backup
@@ -573,7 +579,7 @@ if ($restorestringfromremotebackup) {
 	print '<br>';
 	print ajax_autoselect('restorestringfromremotebackup');
 
-	print '<br>';
+	print '<br><br>';
 }
 
 // Restore commands from archive
@@ -587,7 +593,7 @@ if ($restorestringfromarchive) {
 	print '</textarea>';
 	//print ajax_autoselect('restorestringfromarchive');
 
-	print '<br>';
+	print '<br><br>';
 	print '<br>';
 }
 
@@ -601,7 +607,7 @@ if ($restorestringfrombackupshort) {
 	print $restorestringtoshow;
 	print '</textarea>';
 
-	print '<br>';
+	print '<br><br>';
 	print '<br>';
 }
 
@@ -613,13 +619,13 @@ if ($moveinstancestringtoshow) {
 	print $moveinstancestringtoshow;
 	print '</textarea>';
 
-	print '<br>';
+	print '<br><br>';
 }
 
 
 
 if (! empty($mesg)) {
-	print '<br>';
+	print '<br><br>';
 	print $mesg;
 }
 
