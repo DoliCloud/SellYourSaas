@@ -1076,7 +1076,7 @@ sudo apt install -y libreoffice-common libreoffice-writer
 sudo apt install -y mailutils postfix
 ---------------
 
-* Installation of the 22.04+ Ubuntu packages
+* Installation of the 22.04+ or 24.04+ Ubuntu packages
 
 [source,bash]
 ---------------
@@ -6299,7 +6299,7 @@ If you have such an error:
 apparmor="DENIED" operation="open" profile="/usr/sbin/ntpd" name="/snap/bin/" pid=3516308 comm="ntpd" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
 ---------------
 
-You must remove the ntpd package and use instead the package *systemd-timesyncd* with sudo apt install systemd-timesyncd
+You must remove the ntpd package and use instead the package *systemd-timesyncd* with *sudo apt install systemd-timesyncd*
 
 
 ==== Error missing profile snap.certbot.certbot

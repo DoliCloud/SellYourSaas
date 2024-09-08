@@ -5,13 +5,14 @@
 
 
   ^DEFAULT_URI flags=(attach_disconnected) {
-    #include <abstractions/apache2-common>
-    #include <abstractions/base>
-    #include <abstractions/openssl>
-    #include <abstractions/php>
-    #include <abstractions/postfix-common>
-    #include <abstractions/user-tmp>
-    #include <abstractions/mysql>
+    include <abstractions/apache2-common>
+    include <abstractions/base>
+    include <abstractions/fonts>
+    include <abstractions/mysql>
+    include <abstractions/openssl>
+    include <abstractions/php>
+    include <abstractions/postfix-common>
+    include <abstractions/user-tmp>
 
     network inet,
     network inet6,
@@ -109,13 +110,14 @@
   }
 
   ^HANDLING_UNTRUSTED_INPUT flags=(attach_disconnected) {
-    #include <abstractions/apache2-common>
-    #include <abstractions/base>
-    #include <abstractions/openssl>
-    #include <abstractions/php>
-    #include <abstractions/postfix-common>
-    #include <abstractions/user-tmp>
-    #include <abstractions/mysql>
+    include <abstractions/apache2-common>
+    include <abstractions/base>
+    include <abstractions/fonts>
+    include <abstractions/mysql>
+    include <abstractions/openssl>
+    include <abstractions/php>
+    include <abstractions/postfix-common>
+    include <abstractions/user-tmp>
 
     capability dac_read_search,
 
@@ -134,7 +136,7 @@
     /var/log/apache2/other_vhosts_error.log w,
     /var/log/apache2/other_vhosts_pid.log w,
     /var/log/apache2/websites_vhosts_access.log w,
-   /var/log/apache2/websites_vhosts_error.log w,
+    /var/log/apache2/websites_vhosts_error.log w,
     /{usr/,}bin/dash rix,
     /{usr/,}bin/sh rix,
     /{usr/,}bin/tar rix,
@@ -143,13 +145,14 @@
   }
 
   ^sellyoursaas-instances flags=(attach_disconnected) {
-    #include <abstractions/apache2-common>
-    #include <abstractions/base>
-    #include <abstractions/openssl>
-    #include <abstractions/php>
-    #include <abstractions/postfix-common>
-    #include <abstractions/user-tmp>
-    #include <abstractions/mysql>
+    include <abstractions/apache2-common>
+    include <abstractions/base>
+    include <abstractions/fonts>
+    include <abstractions/mysql>
+    include <abstractions/openssl>
+    include <abstractions/php>
+    include <abstractions/postfix-common>
+    include <abstractions/user-tmp>
 
     network inet,
     network inet6,
@@ -157,13 +160,11 @@
 
     signal receive set=term peer=apache2,
 
-    # Warning, this may create troubles with sending email from postfix on ubuntu 18.04, 20.04
-    #deny /etc/group r,
-    #deny /etc/passwd r,
-
     /dev/tty rw,
     /etc/ImageMagick*/** rw,
     /etc/clamav/clamd.conf r,
+    /etc/libreoffice/registry/ r,
+    /etc/libreoffice/registry/** r,
     /etc/mysql/conf.d/ r,
     /etc/mysql/conf.d/** rix,
     /etc/mysql/conf.d/mysql.cnf r,
@@ -192,6 +193,8 @@
     /proc/loadavg r,
     /run/clamav/** rw,
     /run/mysqld/mysqld.sock r,
+    # require by libreoffice
+    /sys/devices/pci0000:00/0000:00:05.0/virtio2/host2/target2:0:0/2:0:0:0/block/sda/queue/rotational r,
     /tmp/spam/ rw,
     /tmp/spam/** rw,
     /usr/bin/basename rix,
@@ -209,7 +212,9 @@
     /usr/bin/wc rix,
     /usr/bin/zip rix,
     /usr/bin/zstd rix,
+    /usr/lib/libreoffice/program/oosplash rix,
     /usr/lib/libreoffice/program/soffice rix,
+    /usr/lib/libreoffice/program/soffice.bin rix,
     /usr/local/bin/phpsendmail.php rix,
     /usr/local/bin/phpsendmailprepend.php r,
     /usr/sbin/post* rix,
@@ -232,6 +237,7 @@
     /var/log/apache2/websites_vhosts_error.log w,
     /var/log/phpmail.log w,
     /var/log/phpsendmail.log rw,
+    /var/spool/libreoffice/uno_packages/** r,
     /var/spool/postfix/public/pickup rw,
     /var/www/html/index.html r,
     /{usr/,}bin/bash rix,
@@ -240,8 +246,10 @@
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
     /{usr/,}bin/uncompress rix,
+    owner /mnt/diskhome/home/osu*/** k,
     owner /mnt/diskhome/home/osu*/** rw,
     owner /run/systemd/notify w,
+    owner /var/spool/libreoffice/uno_packages/cache/** w,
     owner /var/spool/postfix/maildrop/ rw,
     owner /var/spool/postfix/maildrop/** rw,
 
