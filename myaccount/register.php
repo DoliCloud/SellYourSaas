@@ -280,9 +280,16 @@ $head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">'
 $head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
 
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
-$arrayofjs=array(
-	'/core/js/dst.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION))
-);
+if ((float) DOL_VERSION <= 19) {
+	$arrayofjs=array(
+		'/includes/jstz/jstz.min.js'.(empty($conf->dol_use_jmobile)?'':'?version='.urlencode(DOL_VERSION)),
+		'/core/js/dst.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION))
+	);
+} else {
+	$arrayofjs=array(
+		'/core/js/dst.js'.(empty($conf->dol_use_jmobile) ? '' : '?version='.urlencode(DOL_VERSION))
+	);
+}
 
 $title = $langs->trans("Registration").($tmpproduct->label ? ' ('.$tmpproduct->label.')' : '');
 
