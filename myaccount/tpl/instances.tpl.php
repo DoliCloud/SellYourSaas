@@ -821,7 +821,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 							$arraywebsitesenabled[$websiteref] = $websitecustomurl;
 						}
 					}
-					foreach ($listofwebsitestoactivate as $website) {
+					foreach ($websitestatic->records as $website) {
 						$isalreadyactivated = 0;
 						if (isset($arraywebsitesenabled[$website->ref])) {
 							$isalreadyactivated = 1;
