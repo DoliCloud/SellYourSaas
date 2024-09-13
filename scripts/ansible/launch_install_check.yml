@@ -1239,9 +1239,13 @@
       owner: root
       group: root
       mode: '0644'  
+
       
-      
-  #- name: Reload Apache configs if pyapp or Apache - files are changed
+  # TODO Create a symlink for PHP config
+  # ln -fs /etc/php/sellyoursaas.ini /etc/php/8.2/apache2/conf.d/sellyoursaas.ini
+  
+  
+  #- name: Reload Apache configs if php or apache config files were changed
   #  service: name=httpd state=reloaded
   #  when: phpversionmodified.changed
 
