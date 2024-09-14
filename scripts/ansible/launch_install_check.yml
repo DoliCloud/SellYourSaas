@@ -3,6 +3,7 @@
 #
 # To run the script:
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost'
+# ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost apache=1'
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php74=1 apache=1'
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php80=1 apache=1'
 # ansible-playbook -K launch_install_check.yml -i hosts-xxx -e 'target=targethost php81=1 apache=1'
