@@ -11,6 +11,8 @@
         # MaxRequestWorkers = MaxClients
         # MaxClientsVHost is for vhost/itk only
         #MaxClientsVHost 50
+        #RLimitMEM 100000000
+        #RLimitNProc 50
         
         ServerName __webSiteDomain__
         ServerAdmin __webAdminEmail__
