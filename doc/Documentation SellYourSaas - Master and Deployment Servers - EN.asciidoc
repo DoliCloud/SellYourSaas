@@ -2552,6 +2552,21 @@ SHOW VARIABLES LIKE 'default_authentication_plugin';
 
 Note: To delete active plugins, empty the mysql *plugin* table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
 
+Note: If there is a crash during upgrade and a need to restart, you may need to remove the redo log bild "id...*".
+
+
+[Starting mysql without permissions]
+
+To start mysql without password:
+
+[source,bash]
+---------------
+sudo mysqld_safe --skip-grant-tables &
+mysql -uroot
+use mysql;
+update user set password=PASSWORD("newpassword") where User='root';
+flush privileges;
+---------------
 
 
 [[creer_un_compte_db_sellyoursaas]]

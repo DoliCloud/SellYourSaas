@@ -17,10 +17,10 @@ export YELLOW='\033[0;33m'
 
 if [ "x$2" == "x" ]; then
    echo "***** Launch the script clean.sh on remote servers *****"
-   echo "Usage:   $0  hostfile  [hostgrouporname]"
+   echo "Usage:   $0  hostfile  [hostgrouporname]  [confirm|test]"
    echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment'"
    echo "Example: $0  myhostfile  deployment"
-   echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com"
+   echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com  test"
    exit 1
 fi
 
@@ -28,6 +28,8 @@ target=$2
 if [ "x$target" == "x" ]; then
 	target="master,deployment"
 fi
+
+test=$3
 
 export currentpath=$(dirname "$0")
 
@@ -38,7 +40,11 @@ pwd
 
 
 #command="ansible-playbook -K launch_clean.yml -i hosts-$1 -e 'target="$target"' --limit=*.mydomain.com"
-command='ansible-playbook -K launch_clean.yml -i hosts-'$1' -e "target='$target' command='confirm'"'
+if [ "x$test" == "x" ]; then
+	command='ansible-playbook -K launch_clean.yml -i hosts-'$1' -e "target='$target' command='confirm'"'
+else
+	command='ansible-playbook -K launch_clean.yml -i hosts-'$1' -e "target='$target' command='$test'"'
+fi
 echo "$command"
 eval $command
 
