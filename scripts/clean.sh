@@ -707,8 +707,12 @@ if [[ $testorconfirm == "test" ]]; then
 	if [[ "x$idlistofdb" != "x" ]]; then
 		echo "echo 'DROP TABLE llx_contracttoupdate_tmp;' | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx $database"
 		echo "DROP TABLE llx_contracttoupdate_tmp;" | $MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass $database
-		echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN (0) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -pxxxxxx -h $databasehost $database"
-		echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
+		echo "echo 'CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date, ce.deployment_ip FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';' | $MYSQL -usellyoursaas -pxxxxxx -h $databasehost $database"
+		echo "CREATE TABLE llx_contracttoupdate_tmp AS SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date, ce.deployment_ip FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
+		echo "or"
+		echo "DELETE FROM llx_contracttoupdate_tmp ;" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
+		echo "INSERT INTO TABLE llx_contracttoupdate_tmp (SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed');" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
+		echo
 		echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of database master.
 		echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_contracttoupdate_tmp);"
 	fi
