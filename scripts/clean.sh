@@ -712,8 +712,8 @@ if [[ $testorconfirm == "test" ]]; then
 		echo "echo \"INSERT INTO llx_sellyoursaas_clean_dbnotindisk(nom, client, rowid, ref, ref_customer, deployment_date_start, undeployment_date, deployment_host, deployment_ip) SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date, ce.deployment_host, ce.deployment_ip FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';\" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database"
 		echo "INSERT INTO llx_sellyoursaas_clean_dbnotindisk(nom, client, rowid, ref, ref_customer, deployment_date_start, undeployment_date, deployment_host, deployment_ip) SELECT s.nom, s.client, c.rowid, c.ref, c.ref_customer, ce.deployment_date_start, ce.undeployment_date, ce.deployment_host, ce.deployment_ip FROM llx_contrat as c LEFT JOIN llx_societe as s ON s.rowid = c.fk_soc, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.database_db IN ($idlistofdb) AND ce.deployment_status = 'undeployed';" | $MYSQL -usellyoursaas -p$databasepass -h $databasehost $database
 		echo
-		echo If there is some contracts not correctly undeployed, they are into llx_contracttoupdate_tmp of database master.
-		echo You can execute "update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_sellyoursaas_clean_dbnotindisk);"
+		echo "If there is some contracts not correctly undeployed, they are into llx_sellyoursaas_clean_dbnotindisk of database master."
+		#echo "You can execute: update llx_contrat_extrafields set deployment_status = 'done' where deployment_status = 'undeployed' AND fk_object in (select rowid from llx_sellyoursaas_clean_dbnotindisk);"
 	fi
 fi
 
