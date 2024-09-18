@@ -942,7 +942,7 @@ class ActionsSellyoursaas
 							}
 
 							if (!$error) {
-								setEventMessages("Suspended", null, 'mesgs');
+								//setEventMessages("Suspended", null, 'mesgs');	// Disabled, message will be output by main page
 							}
 						} else {
 							$error++;
