@@ -84,9 +84,6 @@ require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 dol_include_once('/sellyoursaas/class/packages.class.php');
 dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 
-// Re set variables specific to new environment
-$conf->global->SYSLOG_FILE_ONEPERSESSION='register';
-
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');

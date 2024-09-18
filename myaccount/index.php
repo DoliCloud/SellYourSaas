@@ -127,7 +127,6 @@ dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
-$conf->global->SYSLOG_FILE_ONEPERSESSION=2;
 
 $welcomecid = GETPOST('welcomecid', 'int');
 $mode = GETPOST('mode', 'aZ09');
