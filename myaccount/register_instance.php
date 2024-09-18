@@ -629,7 +629,8 @@ dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontracti
 
 
 if (empty($remoteip)) {
-	dol_syslog("InstanceCreationBlockedForSecurityPurpose: empty remoteip", LOG_WARNING);	// Should not happen, ip should always be defined.
+	// Should not happen, ip should always be defined.
+	dol_syslog("InstanceCreationBlockedForSecurityPurpose: empty remoteip", LOG_WARNING);
 
 	$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
 
@@ -642,12 +643,7 @@ if (empty($remoteip)) {
 	exit(-60);
 }
 
-$tmpblacklistip = new Blacklistip($db);
-$tmparrayblacklist = $tmpblacklistip->fetchAll('', '', 1000, 0, '(status:=:1)');
-if (is_numeric($tmparrayblacklist) && $tmparrayblacklist < 0) {
-	echo "Erreur: failed to get blacklistip elements.\n";
-	exit(-61);
-}
+// Load whitelist. This list should be limited in size.
 $tmpwhitelistip = new Whitelistip($db);
 $tmparraywhitelist = $tmpwhitelistip->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparraywhitelist) && $tmparraywhitelist < 0) {
@@ -679,10 +675,19 @@ if (!empty($tmparraywhitelist)) {
 	}
 }
 
-if (!$whitelisted && !empty($tmparrayblacklist)) {
-	foreach ($tmparrayblacklist as $val) {
+if (!$whitelisted) {
+	// Check if IP is blacklisted.
+	$tmpblacklistip = new Blacklistip($db);
+	$tmpblacklistresult = $tmpblacklistip->fetch(0, $remoteip);
+	if (is_numeric($tmpblacklistresult) && $tmpblacklistresult < 0) {
+		echo "Erreur: failed to get blacklistip record.\n";
+		exit(-61);
+	}
+
+	if ($tmpblacklistresult > 0) {
 		if ($val->content == $remoteip) {
-			dol_syslog("InstanceCreationBlockedForSecurityPurpose: remoteip ".$remoteip." is in blacklistip", LOG_WARNING);
+			// Output the key "Instance creation blocked for"
+			dol_syslog("InstanceCreationBlockedForSecurityPurpose: Instance creation blocked for remoteip ".$remoteip.", already in blacklistip", LOG_WARNING);
 
 			$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
 
@@ -740,7 +745,9 @@ if ($reusecontractid) {
 	if (substr($sapi_type, 0, 3) != 'cli') {
 		$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
 		if ($thirdpartyidinsession != $tmpthirdparty->id) {
-			dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$tmpthirdparty->id." when id in session is ".$thirdpartyidinsession);
+			// Output the key "Instance creation blocked for"
+			dol_syslog("ErrorInvalidReuseIDSurelyAHackAttempt Instance creation blocked for ".$remoteip." - You tried to create instance for thirdparty id = ".$tmpthirdparty->id." when id in session is ".$thirdpartyidinsession);
+
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
 				header("Location: index.php");
@@ -770,12 +777,13 @@ if ($reusecontractid) {
 	$fqdninstance = $sldAndSubdomain.'.'.$domainname;
 } else {
 	// Check number of instance with same IP deployed (Rem: for partners, ip are the one of their customer)
-	$MAXDEPLOYMENTPERIP = (!getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIP') ? 20 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIP);
-	$MAXDEPLOYMENTPERIPVPN = (!getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN') ? 2 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN);
+	$MAXDEPLOYMENTPERIP = getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIP', 20);
+	$MAXDEPLOYMENTPERIPVPN = getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN', 2);
 
-	$nbofinstancewithsameip=-1;
-	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
-	$select.= " AND deployment_status IN ('processing', 'done')";
+	$nbofinstancewithsameip = -1;
+	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
+	$select .= " WHERE deployment_ip = '".$db->escape($remoteip)."'";
+	$select .= " AND deployment_status IN ('processing', 'done')";
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
@@ -783,9 +791,12 @@ if ($reusecontractid) {
 			$nbofinstancewithsameip = $objselect->nb;
 		}
 	}
+
 	dol_syslog("nbofinstancewithsameip = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIP." except if ip is 127.0.0.1 or whitelisted)");
+
 	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIP))) {
 		dol_syslog("TooManyInstancesForSameIp - ".$remoteip);
+
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
@@ -795,9 +806,10 @@ if ($reusecontractid) {
 		exit(-70);
 	}
 
-	$nbofinstancewithsameipvpn=-1;
-	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."' AND deployment_vpn_proba = 1";
-	$select.= " AND deployment_status IN ('processing', 'done')";
+	$nbofinstancewithsameipvpn = -1;
+	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
+	$select .= " WHERE deployment_ip = '".$db->escape($remoteip)."' AND deployment_vpn_proba >= 1";
+	$select .= " AND deployment_status IN ('processing', 'done')";
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
@@ -805,9 +817,12 @@ if ($reusecontractid) {
 			$nbofinstancewithsameipvpn = $objselect->nb;
 		}
 	}
+
 	dol_syslog("nbofinstancewithsameipvpn = ".$nbofinstancewithsameipvpn." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPVPN." except if ip is 127.0.0.1 or whitelisted)");
+
 	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameipvpn < 0) || ($nbofinstancewithsameipvpn > $MAXDEPLOYMENTPERIPVPN))) {
-		dol_syslog("TooManyInstancesForSameIp - ".$remoteip);
+		dol_syslog("TooManyInstancesForSameIpvpn - ".$remoteip);
+
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
@@ -818,7 +833,7 @@ if ($reusecontractid) {
 	}
 
 	// Check number of instance with same IP on same hour
-	$MAXDEPLOYMENTPERIPPERHOUR = (!getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR') ? 5 : $conf->global->SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR);
+	$MAXDEPLOYMENTPERIPPERHOUR = getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR', 5);
 
 	$nbofinstancewithsameip=-1;
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields WHERE deployment_ip = '".$db->escape($remoteip)."'";
@@ -830,9 +845,12 @@ if ($reusecontractid) {
 			$nbofinstancewithsameip = $objselect->nb;
 		}
 	}
+
 	dol_syslog("nbofinstancewithsameipperhour = ".$nbofinstancewithsameip." for ip ".$remoteip." (must be lower or equal than ".$MAXDEPLOYMENTPERIPPERHOUR." except if ip is 127.0.0.1. Whitelist ip does not bypass this test)");
+
 	if ($remoteip != '127.0.0.1' && !$whitelisted && (($nbofinstancewithsameip < 0) || ($nbofinstancewithsameip > $MAXDEPLOYMENTPERIPPERHOUR))) {
 		dol_syslog("TooManyInstancesForSameIpThisHour - ".$remoteip);
+
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyInstancesForSameIpThisHour", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
@@ -868,7 +886,9 @@ if ($reusecontractid) {
 	} else {
 		dol_print_error($db, 'Bad sql request');
 	}
+
 	dol_syslog("nbofinstanceindeployment = ".$nbofinstanceindeployment." for ip ".$remoteip." (must be lower than ".$MAXDEPLOYMENTPARALLEL." except if ip is 127.0.0.1)");
+
 	if ($remoteip != '127.0.0.1' && (($nbofinstanceindeployment < 0) || ($nbofinstanceindeployment >= $MAXDEPLOYMENTPARALLEL))) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("TooManyRequestPleaseTryLater"), null, 'errors');
@@ -892,7 +912,9 @@ if ($reusecontractid) {
 			$thirdpartyidinsession = $_SESSION['dol_loginsellyoursaas'];
 			if ($fromsocid > 0) {
 				if ($thirdpartyidinsession != $fromsocid) {
-					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
+					// Output the key "Instance creation blocked for"
+					dol_syslog("Instance creation blocked for ".$remoteip." - You tried to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
+
 					if (substr($sapi_type, 0, 3) != 'cli') {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
 						header("Location: index.php");
@@ -902,7 +924,9 @@ if ($reusecontractid) {
 					exit(-74);
 				}
 				if ($tmpthirdparty->parent != $thirdpartyidinsession) {
-					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
+					// Output the key "Instance creation blocked for"
+					dol_syslog("Instance creation blocked for ".$remoteip." - You tried to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
+
 					if (substr($sapi_type, 0, 3) != 'cli') {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
 						header("Location: index.php");
@@ -913,7 +937,9 @@ if ($reusecontractid) {
 				}
 			} else {
 				if ($thirdpartyidinsession != $reusesocid) {
-					dol_syslog("Instance creation blocked for ".$remoteip." - Try to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
+					// Output the key "Instance creation blocked for"
+					dol_syslog("Instance creation blocked for ".$remoteip." - You tried to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
+
 					if (substr($sapi_type, 0, 3) != 'cli') {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
 						header("Location: index.php");
@@ -1311,7 +1337,8 @@ if ($reusecontractid) {
 		if ($abusetest) {
 			$db->rollback();
 
-			dol_syslog("InstanceCreationBlockedForSecurityPurpose ip ".$remoteip." is refused with value abusetest=".$abusetest, LOG_WARNING);
+			// Output the key "Instance creation blocked for"
+			dol_syslog("InstanceCreationBlockedForSecurityPurpose Instance creation blocked for ".$remoteip.". IP is refused with value abusetest=".$abusetest, LOG_WARNING);
 
 			$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
 
