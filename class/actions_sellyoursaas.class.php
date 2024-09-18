@@ -87,9 +87,13 @@ class ActionsSellyoursaas
 	 */
 	public function getNomUrl($parameters, &$object, &$action)
 	{
-		global $db,$langs,$conf,$user;
+		global $langs,$conf,$user;
 
 		if ($object->element == 'societe') {
+			if (empty($object->array_options)) {
+				$object->fetch_optionals();
+			}
+
 			// Dashboard
 			if ($user->hasRight('sellyoursaas', 'read') && ! empty($object->array_options['options_dolicloud'])) {
 				$url = '';
@@ -117,21 +121,25 @@ class ActionsSellyoursaas
 				}
 
 				if ($url) {
-					$this->resprints = (empty($parameters['notiret']) ? ' -' : '').'<!-- Added by getNomUrl hook of SellYourSaas -->';
-					$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft"></span></a>';
+					$this->resprints = '<!-- Added by getNomUrl hook of SellYourSaas -->';
+					//$this->resprints .= (empty($parameters['notiret']) ? ' -' : '');
+					$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft paddingright pictofixedwidth"></span></a>';
 				}
 
 				if (!empty($object->array_options['options_spammer'])) {
-					$this->resprints = img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$this->resprints;
-					//$this->resprints .= img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"');
+					$this->resprints = $this->resprints.img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$parameters['getnomurl'];
 				}
+
+				return 1;
 			}
 		}
 
 		if ($object->element == 'contrat') {
 			$reg = array();
 			if (preg_match('/title="([^"]+)"/', $parameters['getnomurl'], $reg)) {
-				//$object->fetch_optionals();
+				if (empty($object->array_options)) {
+					$object->fetch_optionals();
+				}
 				$newtitle = $reg[1].dol_escape_htmltag('<!-- Added by getNomUrl hook for contrat of SellYourSaas --><br>', 1);
 				$newtitle .= dol_escape_htmltag('<b>'.$langs->trans("DeploymentStatus").'</b> : '.(empty($object->array_options['options_deployment_status']) ? '' : $object->array_options['options_deployment_status']), 1);
 				if (!empty($object->array_options['options_suspendmaintenance_message']) && preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
