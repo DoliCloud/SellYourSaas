@@ -569,12 +569,14 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 				// Check if API account and credit are ok
 				$request = "https://status.block-disposable-email.com/status/?apikey=".$apikey;
-				$result = file_get_contents($request);
+				$resulturl = getURLContent($request);
+				$result = $resulturl['content'];
 				$resultData = json_decode($result, true);
 
 				if ($resultData["request_status"] == "ok" && $resultData["apikeystatus"] == "active" && $resultData["credits"] > "0") {
 					$request = 'https://api.block-disposable-email.com/easyapi/json/'.$apikey.'/'.$domaintocheck;
-					$result = file_get_contents($request);
+					$result = getURLContent($request);
+					$result = $resulturl['content'];
 					$resultData = json_decode($result, true);
 
 					if ($resultData["request_status"] == "success") {
