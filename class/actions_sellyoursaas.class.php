@@ -715,11 +715,11 @@ class ActionsSellyoursaas
 	 */
 	public function addMoreMassActions($parameters, &$action, $hookmanager)
 	{
+		$label = img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'Set as spammer';
+		$this->resprints = '<option value="markasspamandclose" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
+
 		$label = img_picto('', 'delete', 'class="pictofixedwidth"').'Undeploy';
 		$this->resprints = '<option value="undeploy" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
-
-		$label = img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'Set as spammer';
-		$this->resprints = '<option value="setasspammer" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
 	}
 
 	/**
@@ -860,12 +860,49 @@ class ActionsSellyoursaas
 				}
 			}
 
-			if ($parameters['massaction'] == 'setasspammer') {
+			if ($parameters['massaction'] == 'markasspamandclose') {
 				$db->begin();
 				if (!$error) {
 					$nbok = 0;
 					foreach ($toselect as $toselectid) {
 						//var_dump($toselectid);
+
+						$idtoclose = $toselectid;
+						//$idtoclose = GETPOST('idtoclose', 'int');
+						$tmpcontract = new Contrat($db);
+						$tmpcontract->fetch($idtoclose);
+						$tmpcontract->array_options['options_spammer'] = 1;
+						$tmpcontract->update($user, 1);
+
+						$result = $tmpcontract->closeAll($user, 0, 'Closed by spammer inspector.');
+						if ($result > 0) {
+							dol_include_once("/sellyoursaas/class/blacklistip.class.php");
+
+							$blacklistip = new Blacklistip($db);
+							$result = $blacklistip->fetch(0, $tmpcontract->array_options['options_deployment_ip']);
+							if ($result == 0) {
+								// If record does not exist yet
+								$blacklistip->status = Blacklistip::STATUS_ENABLED;
+								$blacklistip->date_use = $tmpcontract->array_options['options_deployment_date_start'];
+								$blacklistip->content = $tmpcontract->array_options['options_deployment_ip'];
+								$blacklistip->comment = "Flagged as Spammer (from the backoffice by ".$user->login."), after manual analyzis of the user activity";
+
+								$result2 = $blacklistip->create($user);
+								if ($result2 <= 0) {
+									setEventMessages($blacklistip->error, $blacklistip->errors, 'errors');
+									$error++;
+								}
+							} elseif ($result > 0) {
+								setEventMessages("IP was already blacklisted", null, 'mesgs');
+							}
+
+							if (!$error) {
+								setEventMessages("Suspended", null, 'mesgs');
+							}
+						} else {
+							$error++;
+							setEventMessages($tmpcontract->error, $tmpcontract->errors, 'errors');
+						}
 					}
 				}
 				if (!$error) {
