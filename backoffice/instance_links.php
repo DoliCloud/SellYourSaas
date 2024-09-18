@@ -154,7 +154,7 @@ if (empty($reshook)) {
 			if (!$error) {
 				$tmpcontract->fetch_thirdparty();
 				$tmpcontract->thirdparty->array_options['options_spammer'] = 1;
-				$tmpcontract->thirdparty->update($user, 1);
+				$tmpcontract->thirdparty->update(0, $user, 1);
 			}
 
 			if (!$error) {

@@ -120,13 +120,18 @@ class ActionsSellyoursaas
 					$this->resprints = (empty($parameters['notiret']) ? ' -' : '').'<!-- Added by getNomUrl hook of SellYourSaas -->';
 					$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft"></span></a>';
 				}
+
+				if (!empty($object->array_options['options_spammer'])) {
+					$this->resprints = img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$this->resprints;
+					//$this->resprints .= img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"');
+				}
 			}
 		}
 
 		if ($object->element == 'contrat') {
 			$reg = array();
 			if (preg_match('/title="([^"]+)"/', $parameters['getnomurl'], $reg)) {
-				$object->fetch_optionals();
+				//$object->fetch_optionals();
 				$newtitle = $reg[1].dol_escape_htmltag('<!-- Added by getNomUrl hook for contrat of SellYourSaas --><br>', 1);
 				$newtitle .= dol_escape_htmltag('<b>'.$langs->trans("DeploymentStatus").'</b> : '.(empty($object->array_options['options_deployment_status']) ? '' : $object->array_options['options_deployment_status']), 1);
 				if (!empty($object->array_options['options_suspendmaintenance_message']) && preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
@@ -135,7 +140,7 @@ class ActionsSellyoursaas
 				$this->resprints = preg_replace('/title="([^"]+)"/', 'title="'.$newtitle.'"', $parameters['getnomurl']);
 
 				if (!empty($object->array_options['options_spammer'])) {
-					$this->resprints .= img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"');
+					$this->resprints = img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$this->resprints;
 				}
 
 				return 1;
@@ -904,7 +909,7 @@ class ActionsSellyoursaas
 							if (!$error) {
 								$tmpcontract->fetch_thirdparty();
 								$tmpcontract->thirdparty->array_options['options_spammer'] = 1;
-								$tmpcontract->thirdparty->update($user, 1);
+								$tmpcontract->thirdparty->update(0, $user, 1);
 							}
 
 							if (!$error) {
