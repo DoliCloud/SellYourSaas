@@ -685,20 +685,18 @@ if (!$whitelisted) {
 	}
 
 	if ($tmpblacklistresult > 0) {
-		if ($val->content == $remoteip) {
-			// Output the key "Instance creation blocked for"
-			dol_syslog("InstanceCreationBlockedForSecurityPurpose: Instance creation blocked for remoteip ".$remoteip.", already in blacklistip", LOG_WARNING);
+		// Output the key "Instance creation blocked for"
+		dol_syslog("InstanceCreationBlockedForSecurityPurpose: Instance creation blocked for remoteip ".$remoteip.", already in blacklistip", LOG_WARNING);
 
-			$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
+		$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
 
-			if (substr($sapi_type, 0, 3) != 'cli') {
-				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action'), null, 'errors');
-				header("Location: ".$newurl);
-			} else {
-				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action')."\n";
-			}
-			exit(-62);
+		if (substr($sapi_type, 0, 3) != 'cli') {
+			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action'), null, 'errors');
+			header("Location: ".$newurl);
+		} else {
+			print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action')."\n";
 		}
+		exit(-62);
 	}
 }
 
