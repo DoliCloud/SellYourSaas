@@ -51,7 +51,7 @@ if (! defined('NOBROWSERNOTIF')) {
 
 
 define('SYSLOG_FILE_ADDIP', 1);
-define('SYSLOG_FILE_ADDSUFFIX', 'index');
+define('SYSLOG_FILE_ADDSUFFIX', 'myaccountindex');
 
 
 // Load Dolibarr environment

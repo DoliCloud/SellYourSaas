@@ -41,7 +41,7 @@ if (! defined('NOBROWSERNOTIF')) {
 
 
 define('SYSLOG_FILE_ADDIP', 1);
-define('SYSLOG_FILE_ADDSUFFIX', 'register');
+define('SYSLOG_FILE_ADDSUFFIX', 'myaccountregister');
 
 
 // Add specific definition to allow a dedicated session management
