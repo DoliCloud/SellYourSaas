@@ -608,7 +608,7 @@ if (!$whitelisted) {
 		exit(-61);
 	}
 
-	if ($tmpblacklistresult > 0) {
+	if ($tmpblacklistresult > 0 && $tmpblacklistip->status == Blacklistip::STATUS_ENABLED) {
 		// Output the key "Instance creation blocked for"
 		dol_syslog("InstanceCreationBlockedForSecurityPurpose: Instance creation blocked for remoteip ".$remoteip.", already in blacklistip", LOG_WARNING);
 
