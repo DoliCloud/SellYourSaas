@@ -90,26 +90,29 @@ class ActionsSellyoursaas
 		global $langs,$conf,$user;
 
 		if ($object->element == 'societe') {
-			if (empty($object->array_options)) {
+			if (empty($conf->cache['thirdparty_options'][$object->id])) {
 				$object->fetch_optionals();
+				$conf->cache['thirdparty_options'][$object->id] = $object->array_options;
 			}
 
+			$tmparray = $conf->cache['thirdparty_options'][$object->id];
+
 			// Dashboard
-			if ($user->hasRight('sellyoursaas', 'read') && ! empty($object->array_options['options_dolicloud'])) {
+			if ($user->hasRight('sellyoursaas', 'read') && ! empty($tmparray['options_dolicloud'])) {
 				$url = '';
-				if ($object->array_options['options_dolicloud'] == 'yesv2') {
+				if ($tmparray['options_dolicloud'] == 'yesv2') {
 					$urlmyaccount = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 					$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
-					if (! empty($object->array_options['options_domain_registration_page'])
-						&& $object->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
-						$constforaltname = $object->array_options['options_domain_registration_page'];
+					if (! empty($tmparray['options_domain_registration_page'])
+						&& $tmparray['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+						$constforaltname = $tmparray['options_domain_registration_page'];
 						$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$constforaltname;
 						if (getDolGlobalString($newnamekey)) {
 							$newurlkey = 'SELLYOURSAAS_ACCOUNT_URL-'.$constforaltname;
 							if (getDolGlobalString($newurlkey)) {
 								$urlmyaccount = getDolGlobalString($newurlkey);
 							} else {
-								$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $object->array_options['options_domain_registration_page'], $urlmyaccount);
+								$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $tmparray['options_domain_registration_page'], $urlmyaccount);
 							}
 
 							$sellyoursaasname = getDolGlobalString($newnamekey);
@@ -120,34 +123,52 @@ class ActionsSellyoursaas
 					$url=$urlmyaccount.'?mode=logout_dashboard&action=login&token='.newToken().'&actionlogin=login&username='.urlencode(empty($object->email) ? '' : $object->email).'&password=&login_hash='.urlencode($dol_login_hash);
 				}
 
+				$this->resprints = '';
+
 				if ($url) {
 					$this->resprints = '<!-- Added by getNomUrl hook of SellYourSaas -->';
 					//$this->resprints .= (empty($parameters['notiret']) ? ' -' : '');
 					$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft paddingright pictofixedwidth"></span></a>';
 				}
 
-				if (!empty($object->array_options['options_spammer'])) {
-					$this->resprints = $this->resprints.img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$parameters['getnomurl'];
+				if (!empty($parameters['getnomurl'])) {
+					if (!empty($tmparray['options_spammer'])) {
+						$this->resprints = $this->resprints.img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$parameters['getnomurl'];
+					} else {
+						$this->resprints = $this->resprints.$parameters['getnomurl'];
+					}
+				} else {
+					if (!empty($tmparray['options_spammer'])) {
+						$this->resprints .= img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"');
+					}
 				}
 
-				return 1;
+				if (!empty($parameters['getnomurl'])) {
+					return 1;
+				} else {
+					return 0;
+				}
 			}
 		}
 
 		if ($object->element == 'contrat') {
 			$reg = array();
 			if (preg_match('/title="([^"]+)"/', $parameters['getnomurl'], $reg)) {
-				if (empty($object->array_options)) {
+				if (empty($conf->cache['contract_options'][$object->id])) {
 					$object->fetch_optionals();
+					$conf->cache['contract_options'][$object->id] = $object->array_options;
 				}
+
+				$tmparray = $conf->cache['contract_options'][$object->id];
+
 				$newtitle = $reg[1].dol_escape_htmltag('<!-- Added by getNomUrl hook for contrat of SellYourSaas --><br>', 1);
-				$newtitle .= dol_escape_htmltag('<b>'.$langs->trans("DeploymentStatus").'</b> : '.(empty($object->array_options['options_deployment_status']) ? '' : $object->array_options['options_deployment_status']), 1);
-				if (!empty($object->array_options['options_suspendmaintenance_message']) && preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
-					$newtitle .= dol_escape_htmltag('<br><b>'.$langs->trans("Redirection").'</b> : '.(empty($object->array_options['options_suspendmaintenance_message']) ? '' : $object->array_options['options_suspendmaintenance_message']), 1);
+				$newtitle .= dol_escape_htmltag('<b>'.$langs->trans("DeploymentStatus").'</b> : '.(empty($tmparray['options_deployment_status']) ? '' : $tmparray['options_deployment_status']), 1);
+				if (!empty($tmparray['options_suspendmaintenance_message']) && preg_match('/^http/i', $tmparray['options_suspendmaintenance_message'])) {
+					$newtitle .= dol_escape_htmltag('<br><b>'.$langs->trans("Redirection").'</b> : '.(empty($tmparray['options_suspendmaintenance_message']) ? '' : $tmparray['options_suspendmaintenance_message']), 1);
 				}
 				$this->resprints = preg_replace('/title="([^"]+)"/', 'title="'.$newtitle.'"', $parameters['getnomurl']);
 
-				if (!empty($object->array_options['options_spammer'])) {
+				if (!empty($tmparray['options_spammer'])) {
 					$this->resprints = img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$this->resprints;
 				}
 
