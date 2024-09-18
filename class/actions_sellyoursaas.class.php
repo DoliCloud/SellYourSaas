@@ -904,7 +904,7 @@ class ActionsSellyoursaas
 							if (!$error) {
 								$tmpcontract->fetch_thirdparty();
 								$tmpcontract->thirdparty->array_options['options_spammer'] = 1;
-								$tmpcontract->update($user, 1);
+								$tmpcontract->thirdparty->update($user, 1);
 							}
 
 							if (!$error) {
