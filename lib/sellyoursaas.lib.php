@@ -508,6 +508,9 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 		$urltocall = 'https://www.google.com/recaptcha/api/siteverify';
 
 		$resurl = getURLContent($urltocall, 'POST', $message);
+
+		dol_syslog("getRemoteCheck Google Recaptcha getURLContent for urltocall=".$urltocall, LOG_DEBUG);
+
 		if (empty($resurl['curl_error_no']) && !empty($resurl['http_code']) && $resurl['http_code'] == '200') {
 			$jsonresult = json_decode($resurl['content']);
 			$keyforerrorcode = 'error-codes';
@@ -523,7 +526,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 				$ipquality .= 'grecaptcha-score='.$jsonresult->score.';';
 			}
 		} else {
-			dol_syslog("Captcha validation fails.", LOG_ERR);
+			dol_syslog("getRemoteCheck Captcha validation fails.", LOG_ERR);
 			// We do not stop
 		}
 	}
