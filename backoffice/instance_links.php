@@ -152,6 +152,12 @@ if (empty($reshook)) {
 			}
 
 			if (!$error) {
+				$tmpcontract->fetch_thirdparty();
+				$tmpcontract->thirdparty->array_options['options_spammer'] = 1;
+				$tmpcontract->update($user, 1);
+			}
+
+			if (!$error) {
 				setEventMessages("Suspended", null, 'mesgs');
 			}
 		} else {

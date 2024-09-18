@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW The action set as spammer flags also the thirdparty
 * NEW Better log for registration process
 * NEW Add mass action undeploy
 * NEW Add script master_move_several_instances.php 

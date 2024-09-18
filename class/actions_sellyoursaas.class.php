@@ -719,7 +719,7 @@ class ActionsSellyoursaas
 		$this->resprints = '<option value="markasspamandclose" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
 
 		$label = img_picto('', 'delete', 'class="pictofixedwidth"').'Undeploy';
-		$this->resprints = '<option value="undeploy" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
+		$this->resprints .= '<option value="undeploy" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
 	}
 
 	/**
@@ -894,6 +894,12 @@ class ActionsSellyoursaas
 								}
 							} elseif ($result > 0) {
 								setEventMessages("IP was already blacklisted", null, 'mesgs');
+							}
+
+							if (!$error) {
+								$tmpcontract->fetch_thirdparty();
+								$tmpcontract->thirdparty->array_options['options_spammer'] = 1;
+								$tmpcontract->update($user, 1);
 							}
 
 							if (!$error) {
