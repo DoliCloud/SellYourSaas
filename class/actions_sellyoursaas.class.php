@@ -157,7 +157,7 @@ class ActionsSellyoursaas
 	 */
 	public function getFormatedCustomerRef($parameters, &$object, &$action)
 	{
-		global $conf, $langs;
+		global $langs;
 
 		if (! empty($parameters['objref'])) {
 			$isanurlofasellyoursaasinstance=false;
@@ -327,7 +327,6 @@ class ActionsSellyoursaas
 
 		return 0;
 	}
-
 
 
 	/**
@@ -704,6 +703,147 @@ class ActionsSellyoursaas
 		dol_syslog(get_class($this).'::doActions end');
 		return 0;
 	}
+
+	/**
+	 *    Execute action
+	 *
+	 *    @param	array			$parameters		Array of parameters
+	 *    @param	CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
+	 *    @param    string			$action      	'add', 'update', 'view'
+	 *    @return   int         					<0 if KO,
+	 *                              				=0 if OK but we want to process standard actions too,
+	 *                              				>0 if OK and we want to replace standard actions.
+	 */
+	public function doMassActions($parameters, &$object, &$action)
+	{
+		global $db,$langs,$user;
+
+		$error = 0;
+
+		dol_syslog(get_class($this).'::doActions action='.$action);
+		$langs->load("sellyoursaas@sellyoursaas");
+
+		$toselect = $parameters['toselect'];
+
+		if (in_array($parameters['currentcontext'], array('contractlist'))) {
+			if ($parameters['massaction'] == 'undeploy') {
+				//$db->begin();
+				if (!$error) {
+					$nbok = 0;
+					foreach ($toselect as $toselectid) {
+						//var_dump($toselectid);
+						$db->begin();
+
+						$object->fetch($toselectid);
+
+						// SAME CODE THAN INTO MYACCOUNT INDEX.PHP
+
+						// Disable template invoice
+						$object->fetchObjectLinked();
+
+						$foundtemplate=0;
+						$freqlabel = array('d'=>$langs->trans('Day'), 'm'=>$langs->trans('Month'), 'y'=>$langs->trans('Year'));
+						if (is_array($object->linkedObjects['facturerec']) && count($object->linkedObjects['facturerec']) > 0) {
+							// Sort on ascending date
+							usort($object->linkedObjects['facturerec'], "sellyoursaasCmpDate");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
+
+							//var_dump($object->linkedObjects['facture']);
+							//dol_sort_array($object->linkedObjects['facture'], 'date');
+							foreach ($object->linkedObjects['facturerec'] as $idinvoice => $invoice) {
+								if ($invoice->suspended == FactureRec::STATUS_NOTSUSPENDED) {
+									$result = $invoice->setStatut(FactureRec::STATUS_SUSPENDED);
+									if ($result <= 0) {
+										$error++;
+										$this->error=$invoice->error;
+										$this->errors=$invoice->errors;
+										setEventMessages($this->error, $this->errors, 'errors');
+									}
+								}
+							}
+						}
+
+						if (! $error) {
+							dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
+							$sellyoursaasutils = new SellYourSaasUtils($db);
+							$result = $sellyoursaasutils->sellyoursaasRemoteAction('undeploy', $object, 'admin', '', '', '0', 'Undeployed from contract card', 300);
+							if ($result <= 0) {
+								$error++;
+								$this->error=$sellyoursaasutils->error;
+								$this->errors=$sellyoursaasutils->errors;
+								setEventMessages($this->error, $this->errors, 'errors');
+							}
+						}
+
+						// Finish deployall
+
+						$comment = 'Close after a mass action undeploy from contract list';
+
+						// Unactivate all lines
+						if (! $error) {
+							dol_syslog("Unactivate all lines - doMassActions undeploy");
+
+							$result = $object->closeAll($user, 1, $comment);
+							if ($result <= 0) {
+								$error++;
+								$this->error=$object->error;
+								$this->errors=$object->errors;
+								setEventMessages($this->error, $this->errors, 'errors');
+							}
+						}
+
+						// End of undeployment is now OK / Complete
+						if (! $error) {
+							$object->array_options['options_deployment_status'] = 'undeployed';
+							$object->array_options['options_undeployment_date'] = dol_now();
+							$object->array_options['options_undeployment_ip'] = $_SERVER['REMOTE_ADDR'];
+							$object->array_options['options_suspendmaintenance_message'] = '';
+
+							$result = $object->update($user);
+							if ($result < 0) {
+								// We ignore errors. This should not happen in real life.
+								//setEventMessages($contract->error, $contract->errors, 'errors');
+							} else {
+								//setEventMessages($langs->trans("InstanceWasUndeployed"), null, 'mesgs');
+								//setEventMessages($langs->trans("InstanceWasUndeployedToConfirm"), null, 'mesgs');
+							}
+						}
+
+						if (! $error) {
+							$db->commit();
+						} else {
+							$db->rollback();
+						}
+
+						/*
+						$urlto=preg_replace('/action=[a-z_]+/', '', $_SERVER['REQUEST_URI']);
+						$urlto=preg_replace('/&confirm=yes/', '', $urlto);
+						$urlto=preg_replace('/&token=/', '&tokendisabled=', $urlto);
+						if ($urlto) {
+							dol_syslog("Redirect to page urlto=".$urlto." to avoid to do action twice if we do back");
+							header("Location: ".$urlto);
+							exit;
+						}
+						*/
+
+						$nbok++;
+					}
+				}
+
+				if (!$error) {
+					if ($nbok > 1) {
+						setEventMessages($langs->trans("NInstancesUndeployed", $nbok), null, 'mesgs');
+					} elseif ($nbok == 1) {
+						setEventMessages($langs->trans("OneInstanceUndeployed"), null, 'mesgs');
+					}
+					//$db->commit();
+					$toselect = array();
+				} else {
+					//$db->rollback();
+				}
+			}
+		}
+	}
+
 
 	/**
 	 *    formConfirm
@@ -1348,6 +1488,19 @@ class ActionsSellyoursaas
 		return 0;
 	}
 
+	/**
+	 * Complete the mass action of contract list
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0
+	 */
+	public function addMoreMassActions($parameters, &$action, $hookmanager)
+	{
+		$label = 'Undeploy';
+		$this->resprints = '<option value="undeploy" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
+	}
 
 	/**
 	 * Overloading the restrictedArea function : check permission on an object

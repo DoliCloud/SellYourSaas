@@ -886,3 +886,5 @@ BoxTitleSellyoursaasBackupErrors=Number of instance backup in error
 NbPersistentErrorLocalBackup=Number of instances in persistent errors for local backups
 NbPersistentErrorRemoteBackup=Number of instances in persistent errors for remote backups
 Redirection=Redirection/Alias
+NInstancesUndeployed=%s instances undeployed
+OneInstanceUndeployed=1 instance undeployed
