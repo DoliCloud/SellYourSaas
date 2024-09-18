@@ -3,7 +3,8 @@
 
 ## Unreleased
 
-* NEW Add mass action undeploy 
+* NEW Better log for registration process
+* NEW Add mass action undeploy
 * NEW Add script master_move_several_instances.php 
 * NEW Add a tool to test the email like it is done during registration. 
 * NEW On payment by card, the last 4 numbers are saved into the field "numero" of the payment in database.

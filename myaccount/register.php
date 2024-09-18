@@ -39,6 +39,11 @@ if (! defined('NOBROWSERNOTIF')) {
 	define('NOBROWSERNOTIF', '1');
 }
 
+
+define('SYSLOG_FILE_ADDIP', 1);
+define('SYSLOG_FILE_ADDSUFFIX', 'register');
+
+
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
 

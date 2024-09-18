@@ -42,6 +42,11 @@ if (! defined('NOBROWSERNOTIF')) {
 	define('NOBROWSERNOTIF', '1');
 }
 
+
+define('SYSLOG_FILE_ADDIP', 1);
+define('SYSLOG_FILE_ADDSUFFIX', 'register');
+
+
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
 $path=dirname($_SERVER['PHP_SELF']).'/';

@@ -49,6 +49,11 @@ if (! defined('NOBROWSERNOTIF')) {
 	define('NOBROWSERNOTIF', '1');
 }
 
+
+define('SYSLOG_FILE_ADDIP', 1);
+define('SYSLOG_FILE_ADDSUFFIX', 'index');
+
+
 // Load Dolibarr environment
 include './mainmyaccount.inc.php';
 
