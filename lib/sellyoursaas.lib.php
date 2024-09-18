@@ -523,9 +523,18 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 				$abusetest = 10;
 				$errormessage = "Error in captcha validation. ".implode(', ', $errorcodes);
 			} else {
-				dol_syslog("getRemoteCheck Google Recaptcha says score=".$jsonresult->score, LOG_DEBUG);
+				// TODO Set a min score different according to country
+				$mingrecaptcha = (float) getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_MIN_SCORE', 0);
+
+				dol_syslog("getRemoteCheck Google Recaptcha score=".$jsonresult->score." min=".$mingrecaptcha, LOG_DEBUG);
 
 				$ipquality .= 'grecaptcha-score='.$jsonresult->score.';';
+
+				if ($jsonresult->score <= $mingrecaptcha) {
+					// Output the key "Instance creation blocked for"
+					dol_syslog("InstanceCreationBlockedForSecurityPurpose: Instance creation blocked for remoteip ".$remoteip.", score ".$jsonresult->score." is lower than ".$mingrecaptcha, LOG_DEBUG);
+					$abusetest = 10;
+				}
 			}
 		} else {
 			dol_syslog("getRemoteCheck Captcha validation fails.", LOG_ERR);
