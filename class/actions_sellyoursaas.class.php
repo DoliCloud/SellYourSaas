@@ -765,7 +765,7 @@ class ActionsSellyoursaas
 						if (! $error) {
 							dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 							$sellyoursaasutils = new SellYourSaasUtils($db);
-							$result = $sellyoursaasutils->sellyoursaasRemoteAction('undeploy', $object, 'admin', '', '', '0', 'Undeployed from contract card', 300);
+							$result = $sellyoursaasutils->sellyoursaasRemoteAction('undeploy', $object, 'admin', '', '', '0', 'Undeployed by a mass action from contract list', 300);
 							if ($result <= 0) {
 								$error++;
 								$this->error=$sellyoursaasutils->error;
