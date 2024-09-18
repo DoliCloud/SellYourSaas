@@ -913,7 +913,7 @@ if ($reusecontractid) {
 			if ($fromsocid > 0) {
 				if ($thirdpartyidinsession != $fromsocid) {
 					// Output the key "Instance creation blocked for"
-					dol_syslog("Instance creation blocked for ".$remoteip." - You tried to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
+					dol_syslog("ErrorInvalidReuseIDSurelyAHackAttempt Instance creation blocked for ".$remoteip." - You tried to create instance for reseller id = ".$fromsocid." when id in session is ".$thirdpartyidinsession);
 
 					if (substr($sapi_type, 0, 3) != 'cli') {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
@@ -925,7 +925,7 @@ if ($reusecontractid) {
 				}
 				if ($tmpthirdparty->parent != $thirdpartyidinsession) {
 					// Output the key "Instance creation blocked for"
-					dol_syslog("Instance creation blocked for ".$remoteip." - You tried to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
+					dol_syslog("ErrorInvalidReuseIDSurelyAHackAttempt Instance creation blocked for ".$remoteip." - You tried to create instance for reseller id = ".$fromsocid." when existing customer has reseller id ".$tmpthirdparty->parent);
 
 					if (substr($sapi_type, 0, 3) != 'cli') {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
@@ -938,7 +938,7 @@ if ($reusecontractid) {
 			} else {
 				if ($thirdpartyidinsession != $reusesocid) {
 					// Output the key "Instance creation blocked for"
-					dol_syslog("Instance creation blocked for ".$remoteip." - You tried to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
+					dol_syslog("ErrorInvalidReuseIDSurelyAHackAttempt Instance creation blocked for ".$remoteip." - You tried to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
 
 					if (substr($sapi_type, 0, 3) != 'cli') {
 						setEventMessages($langs->trans("ErrorInvalidReuseIDSurelyAHackAttempt"), null, 'errors');
