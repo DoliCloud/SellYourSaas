@@ -478,9 +478,9 @@ function sellyoursaas_admin_prepare_head()
  * Function with remote API call to check registration data quality
  *
  * @param	string		$remoteip		User remote IP
- * @param	boolean		$whitelisted	true or flase
+ * @param	boolean		$whitelisted	Is the IP or email white listed ?
  * @param	string		$email			User remote email
- * @return 	string[]					Array with ipquality, emailquality, vpnproba, abusetest, fraudscoreip, fraudscoreemail
+ * @return 	string[]					Array with ipquality (string with different scores), emailquality (string with different scores), vpnproba, abusetest, fraudscoreip, fraudscoreemail
  */
 function getRemoteCheck($remoteip, $whitelisted, $email)
 {
@@ -493,15 +493,126 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	$fraudscoreemail = 0;
 	$abusetest = 0;
 
+	$errormessage = '';
+
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 
-	dol_syslog("getRemoteCheck");
+	dol_syslog("getRemoteCheck remoteip=".$remoteip." email=".$email." whitelisted=".$whitelisted);
 
-	// TODO Insert evaluation by disposablemail here
+	// Check the captcha
+	if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON')) {
+		$grecaptcharesponse = GETPOST('g-recaptcha-response', 'alphanohtml');
 
+		// Check validation of the captcha
+		$message= "secret=".getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_SECRET_KEY').'&response='.urlencode($grecaptcharesponse)."&remoteip=".urlencode(getUserRemoteIP());
+		$urltocall = 'https://www.google.com/recaptcha/api/siteverify';
 
-	// Evaluate VPN probability with Getintel
-	if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON')) {
+		$resurl = getURLContent($urltocall, 'POST', $message);
+		if (empty($resurl['curl_error_no']) && !empty($resurl['http_code']) && $resurl['http_code'] == '200') {
+			$jsonresult = json_decode($resurl['content']);
+			$keyforerrorcode = 'error-codes';
+			$errorcodes = $jsonresult->$keyforerrorcode;
+
+			if (! $jsonresult->success) {
+				// Output the key "Instance creation blocked for"
+				dol_syslog("InstanceCreationBlockedForSecurityPurpose: Instance creation blocked for remoteip ".$remoteip.", bad validation of captcha", LOG_WARNING);
+
+				$abusetest = 10;
+				$errormessage = "Error in captcha validation. ".implode(', ', $errorcodes);
+			} else {
+				$ipquality .= 'grecaptcha-score='.$jsonresult->score.';';
+			}
+		} else {
+			dol_syslog("Captcha validation fails.", LOG_ERR);
+			// We do not stop
+		}
+	}
+
+	// Check email with disposablemail
+	if (empty($abusetest) && getDolGlobalInt('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED') && getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY')) {
+		$allowed = false;
+		$disposable = false;
+		$allowedemail = (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED') ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());
+		$bannedemail = (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED') ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED, true) : array());
+		$parts = explode("@", $email);
+		$domaintocheck = $parts[1];
+
+		// Check cache of domain already check and allowed
+		if (! empty($allowedemail)) {
+			foreach ($allowedemail as $alloweddomainname) {
+				if ($alloweddomainname == $domaintocheck) {
+					$allowed = true;
+					break;
+				}
+			}
+		}
+
+		// If not found in allowed database
+		if ($allowed === false) {
+			// Check cache of domain already check and banned
+			if (! empty($bannedemail)) {
+				foreach ($bannedemail as $banneddomainname) {
+					if ($banneddomainname == $domaintocheck) {
+						$disposable = true;
+						break;
+					}
+				}
+			}
+
+			// Check in API Block Disposable E-mail database
+			if ($disposable === false) {
+				$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
+				$apikey = getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY');
+
+				// Check if API account and credit are ok
+				$request = "https://status.block-disposable-email.com/status/?apikey=".$apikey;
+				$result = file_get_contents($request);
+				$resultData = json_decode($result, true);
+
+				if ($resultData["request_status"] == "ok" && $resultData["apikeystatus"] == "active" && $resultData["credits"] > "0") {
+					$request = 'https://api.block-disposable-email.com/easyapi/json/'.$apikey.'/'.$domaintocheck;
+					$result = file_get_contents($request);
+					$resultData = json_decode($result, true);
+
+					if ($resultData["request_status"] == "success") {
+						require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+
+						// domain is allowed
+						if ($resultData["domain_status"] == "ok") {
+							array_push($allowedemail, $domaintocheck);
+							dolibarr_set_const($db, 'SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED', json_encode($allowedemail), 'chaine', 0, '', $conf->entity);
+						} elseif ($resultData["domain_status"] == "block") {
+							array_push($bannedemail, $domaintocheck);
+							dolibarr_set_const($db, 'SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED', json_encode($bannedemail), 'chaine', 0, '', $conf->entity);
+
+							// Output the key "Instance creation blocked for"
+							dol_syslog("ErrorEMailAddressBannedForSecurityReasons Instance creation blocked for email ".$emailtowarn);
+							$abusetest = 1;
+						} else {
+							// Output the key "Instance creation blocked for"
+							dol_syslog("ErrorTechnicalErrorOccurredPleaseContactUsByEmail Instance creation blocked for email ".$emailtowarn);
+							$abusetest = 1;
+						}
+					} else {
+						// Output the key "Instance creation blocked for"
+						dol_syslog("ErrorTechnicalErrorOccurredPleaseContactUsByEmail Instance creation blocked for email ".$emailtowarn);
+						$abusetest = 1;
+					}
+				} else {
+					// Output the key "Instance creation blocked for"
+					dol_syslog("ErrorTechnicalErrorOccurredPleaseContactUsByEmail Instance creation blocked for email ".$emailtowarn);
+					$abusetest = 1;
+				}
+			} else {
+				// Output the key "Instance creation blocked for"
+				dol_syslog("ErrorEMailAddressBannedForSecurityReasons Instance creation blocked for email ".$emailtowarn);
+				$abusetest = 1;
+			}
+		}
+	}
+
+	// Evaluate VPN probability with GetIPIntel
+	if (empty($abusetest) && getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON')) {
 		$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
 		if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL')) {
 			$emailforvpncheck = getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL');
@@ -539,6 +650,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 			// We test if fraudscore is accepted or not
 			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED && ($fraudscoreip >= $conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED)) {
+				// Output the key "Instance creation blocked for"
 				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').' with a fraudscore '.$fraudscoreip.' >= ' . getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'));
 				$abusetest = 1;
 			}
@@ -587,7 +699,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 		// Create API URL for IP Check
 		$url = sprintf(
 			'https://www.ipqualityscore.com/api/json/ip/%s/%s?%s',
-			$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
+			getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY'),
 			urlencode($remoteip),
 			$formatted_parameters
 		);
@@ -634,7 +746,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 		if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED')) {
 			$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED = 85;
 
-			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED && ($fraudscoreip >= $conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED)) {
+			if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED') && ($fraudscoreip >= (float) getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'))) {
+				// Output the key "Instance creation blocked for"
 				dol_syslog("Instance creation blocked for ".$remoteip." - IPQuality VPN probability ".$vpnproba." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').' with a fraudscore '.$fraudscoreip.' >= ' . getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'));
 				$abusetest = 1;
 			}
@@ -644,7 +757,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 		// Create API URL for Email Check
 		$url = sprintf(
 			'https://www.ipqualityscore.com/api/json/email/%s/%s?%s',
-			$conf->global->SELLYOURSAAS_IPQUALITY_KEY,
+			getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY'),
 			urlencode($email),
 			$formatted_parameters
 		);
@@ -676,6 +789,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 			if ($jsonreponse['recent_abuse'] === false && ($jsonreponse['valid'] === true || ($jsonreponse['timed_out'] === true && $jsonreponse['disposable'] === false && $jsonreponse['dns_valid'] === true))) {
 				// Email valid
 			} else {
+				// Output the key "Instance creation blocked for"
 				dol_syslog("Instance creation blocked for email ".$email." - Email fraud probability ".$fraudscoreemail." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED'));
 				// TODO Enable this
 				// $abusetest = 6;
@@ -685,13 +799,14 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 
 	// SELLYOURSAAS_BLACKLIST_IP_MASKS and SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN are hidden constants.
-	// Deprecated. Use instead the List of blacklist ips into menu. This is done a begin of page
+	// Deprecated. Check instead into the lList of blacklist ips in database. This is done at begin of page.
 
 	// Block for some IPs
 	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS')) {
 		$arrayofblacklistips = explode(',', getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS'));
 		foreach ($arrayofblacklistips as $blacklistip) {
 			if ($remoteip == $blacklistip) {
+				// Output the key "Instance creation blocked for"
 				dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS");
 				$abusetest = 4;
 			}
@@ -704,6 +819,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 			$arrayofblacklistips = explode(',', getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN'));
 			foreach ($arrayofblacklistips as $blacklistip) {
 				if ($remoteip == $blacklistip) {
+					// Output the key "Instance creation blocked for"
 					dol_syslog("Instance creation blocked for ".$remoteip." - This IP is in blacklist SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN");
 					$abusetest = 5;
 				}
@@ -711,7 +827,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 		}
 	}
 
-	return array('ipquality'=>$ipquality, 'emailquality'=>$emailquality, 'vpnproba'=>$vpnproba, 'abusetest'=>$abusetest, 'fraudscoreip'=>$fraudscoreip, 'fraudscoreemail'=>$fraudscoreemail);
+	return array('ipquality'=>$ipquality, 'emailquality'=>$emailquality, 'vpnproba'=>$vpnproba, 'abusetest'=>$abusetest, 'fraudscoreip'=>$fraudscoreip, 'fraudscoreemail'=>$fraudscoreemail, 'error'=>$errormessage);
 }
 
 /**

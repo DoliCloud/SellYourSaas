@@ -293,14 +293,16 @@ $now = dol_now();
 // Back to url
 $newurl=preg_replace('/register_instance\.php/', 'register.php', $_SERVER["PHP_SELF"]);
 
-if ($reusecontractid) {		// When we use the "Restart deploy" after error from account backoffice
+if ($reusecontractid) {
+	// When we use the "Restart deploy" after error from account backoffice
 	$newurl=preg_replace('/register_instance/', 'index', $newurl);
 	if (! preg_match('/\?/', $newurl)) {
 		$newurl.='?';
 	}
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.((int) $reusecontractid);
-} elseif ($reusesocid) {		// When we use the "Add another instance" from myaccount dashboard
+} elseif ($reusesocid) {
+	// When we use the "Add another instance" from myaccount dashboard
 	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we have already load the $tmpproduct
 		$tmpproduct = new Product($db);
 		$tmpproduct->fetch($service, '', '', '', 1, 1, 1);
@@ -338,8 +340,8 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		$newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 	}
 
-	if ($reusesocid < 0) { // -1, the thirdparty was not selected
-		// Return to dashboard, the only page where the customer is requested.
+	if ($reusesocid < 0) { // -1, the thirdparty was not selected into the combolist
+		// Return to dashboard, the only page where the customer is requested as inside a combolist
 		$newurl=preg_replace('/register/', 'index', $newurl);
 		if (substr($sapi_type, 0, 3) != 'cli') {
 			setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer")), null, 'errors');
@@ -404,7 +406,9 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		}
 		exit(-16);
 	}
-} else { // When we deploy from the register.php page
+} else {
+	// When we deploy from the register.php page
+
 	// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 	$hookmanager->initHooks(array('sellyoursaas-register-instance'));
 
@@ -520,86 +524,6 @@ if ($reusecontractid) {		// When we use the "Restart deploy" after error from ac
 		}
 	}
 
-	if (getDolGlobalInt('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED') && getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY')) {
-		$allowed = false;
-		$disposable = false;
-		$allowedemail = (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED') ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());
-		$bannedemail = (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED') ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED, true) : array());
-		$parts = explode("@", $email);
-		$domaintocheck = $parts[1];
-
-		// Check cache of domain already check and allowed
-		if (! empty($allowedemail)) {
-			foreach ($allowedemail as $alloweddomainname) {
-				if ($alloweddomainname == $domaintocheck) {
-					$allowed = true;
-					break;
-				}
-			}
-		}
-
-		// If not found in allowed database
-		if ($allowed === false) {
-			// Check cache of domain already check and banned
-			if (! empty($bannedemail)) {
-				foreach ($bannedemail as $banneddomainname) {
-					if ($banneddomainname == $domaintocheck) {
-						$disposable = true;
-						break;
-					}
-				}
-			}
-
-			// Check in API Block Disposable E-mail database
-			if ($disposable === false) {
-				$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
-				$apikey = getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY');
-
-				// Check if API account and credit are ok
-				$request = "https://status.block-disposable-email.com/status/?apikey=".$apikey;
-				$result = file_get_contents($request);
-				$resultData = json_decode($result, true);
-
-				if ($resultData["request_status"] == "ok" && $resultData["apikeystatus"] == "active" && $resultData["credits"] > "0") {
-					$request = 'https://api.block-disposable-email.com/easyapi/json/'.$apikey.'/'.$domaintocheck;
-					$result = file_get_contents($request);
-					$resultData = json_decode($result, true);
-
-					if ($resultData["request_status"] == "success") {
-						require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
-
-						// domain is allowed
-						if ($resultData["domain_status"] == "ok") {
-							array_push($allowedemail, $domaintocheck);
-							dolibarr_set_const($db, 'SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED', json_encode($allowedemail), 'chaine', 0, '', $conf->entity);
-						} elseif ($resultData["domain_status"] == "block") {
-							array_push($bannedemail, $domaintocheck);
-							dolibarr_set_const($db, 'SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_BANNED', json_encode($bannedemail), 'chaine', 0, '', $conf->entity);
-							setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
-							header("Location: ".$newurl);
-							exit(-40);
-						} else {
-							setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
-							header("Location: ".$newurl);
-							exit(-41);
-						}
-					} else {
-						setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
-						header("Location: ".$newurl);
-						exit(-42);
-					}
-				} else {
-					setEventMessages($langs->trans("ErrorTechnicalErrorOccurredPleaseContactUsByEmail", $emailtowarn), null, 'errors');
-					header("Location: ".$newurl);
-					exit(-43);
-				}
-			} else {
-				setEventMessages($langs->trans("ErrorEMailAddressBannedForSecurityReasons"), null, 'errors');
-				header("Location: ".$newurl);
-				exit(-44);
-			}
-		}
-	}
 	if (empty($password) || empty($password2)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
 		header("Location: ".$newurl);
@@ -1316,6 +1240,10 @@ if ($reusecontractid) {
 
 		// Add security controls - call getRemoteCheck()
 		$resultremotecheck = getRemoteCheck($remoteip, $whitelisted, $email);
+
+		if (!empty($resultremotecheck['error'])) {
+			setEventMessages($resultremotecheck['error'], null, 'errors');
+		}
 
 		$contract->array_options['options_deployment_vpn_proba'] = $resultremotecheck['vpnproba'];
 		$contract->array_options['options_deployment_ipquality'] = $resultremotecheck['ipquality'];

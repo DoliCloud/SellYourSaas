@@ -281,6 +281,10 @@ $head .= '<!-- Bootstrap core CSS -->';
 $head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
 $head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
 
+if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON')) {
+	$head .= '<script src="https://www.google.com/recaptcha/api.js"></script>';
+}
+
 // Javascript code on logon page only to detect user tz, dst_observed, dst_first, dst_second
 if ((float) DOL_VERSION <= 19) {
 	$arrayofjs=array(
@@ -352,7 +356,7 @@ if ($reshook == 0) {
 		}
 
 		$linklogo = '';
-		$homepage = 'https://'.(!getDolGlobalString('SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME') ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
+		$homepage = 'https://'.getDolGlobalString('SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME', $sellyoursaasdomain);
 		if (isset($partnerthirdparty) && $partnerthirdparty->id > 0) {     // Show logo of partner
 			require_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
 			$ecmfile=new EcmFiles($db);
@@ -499,7 +503,7 @@ if ($reshook == 0) {
 			}
 			?>
 
-		  <form action="register_instance.php" method="post" id="formregister">
+		  <form action="register_instance.php" name="formregister" method="post" id="formregister">
 			<div class="form-content">
 			  <input type="hidden" name="token" value="<?php echo newToken(); ?>" />
 			  <input type="hidden" name="forcesubdomain" value="<?php echo dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')); ?>" />
@@ -875,13 +879,20 @@ if ($reshook == 0) {
 			?>
 			  <div class="form-actions center"">
 				<?php
+
+				$paramrecaptcha = '';
+				if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON')) {
+					$paramrecaptcha = ' data-sitekey="'.getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_SITE_KEY').'" data-callback="onSubmitCallBackForReCaptcha" data-action="submit"';
+					//$paramrecaptcha = ' data-sitekey="'.getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_SITE_KEY').'" data-action="submit"';
+				}
+
 				if ($productref != 'none') {
 					?>
-					<input type="submit"<?php echo $disabled; ?> name="newinstance" style="margin: 10px;" value="<?php echo $langs->trans("SignMeUp") ?>" class="btn btn-primary" id="newinstance" />
+					<input type="submit"<?php echo $disabled; echo $paramrecaptcha; ?> name="newinstance" style="margin: 10px;" value="<?php echo $langs->trans("SignMeUp") ?>" class="btn btn-primary g-recaptcha" id="newinstance" />
 					<?php
 				} else {
 					?>
-					<input type="submit"<?php echo $disabled; ?> name="newinstance" style="margin: 10px;" value="<?php echo $langs->trans("CreateMyAccount") ?>" class="btn btn-primary" id="newinstance" />
+					<input type="submit"<?php echo $disabled; echo $paramrecaptcha; ?> name="newinstance" style="margin: 10px;" value="<?php echo $langs->trans("CreateMyAccount") ?>" class="btn btn-primary g-recaptcha" id="newinstance" />
 					<?php
 				}
 				?>
@@ -946,8 +957,28 @@ if ($reshook >= 0) {
 		return domain
 	}
 
-	jQuery(document).ready(function() {
 
+	/* Add code for Google reCaptcha (if option enabled) */
+	/* we will test result from parameter g-recaptcha-response into the posted form register_instance.php */
+
+	function onSubmitCallBackForReCaptcha(token) {
+		event.preventDefault();
+
+		console.log("onSubmitCallBackForReCaptcha");
+		//console.log("token = "+token);
+
+		// Check if all required fields are filled
+		let form = document.getElementById('formregister');
+		if (!form.checkValidity()) {
+			 form.reportValidity();
+			 return false;
+		}
+
+		document.getElementById("formregister").submit();
+	}
+
+
+	jQuery(document).ready(function() {
 		/* Autofill the domain when filling the company */
 		jQuery("#formregister").on("change keyup", "#orgName", function() {
 			console.log("Update sldAndSubdomain in register.php");

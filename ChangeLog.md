@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Can add recaptcha on registration page.
 * NEW Add picto evil and dashboard at begin of thirdparty link
 * NEW The action set as spammer flags also the thirdparty
 * NEW Better log for registration process
