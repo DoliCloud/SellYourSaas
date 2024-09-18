@@ -523,6 +523,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 				$abusetest = 10;
 				$errormessage = "Error in captcha validation. ".implode(', ', $errorcodes);
 			} else {
+				dol_syslog("getRemoteCheck Google Recaptcha says score=".$jsonresult->score, LOG_DEBUG);
+
 				$ipquality .= 'grecaptcha-score='.$jsonresult->score.';';
 			}
 		} else {
@@ -658,7 +660,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 			}
 
 			// We test if fraudscore is accepted or not
-			if (is_numeric($vpnproba) && $vpnproba >= (float) $conf->global->SELLYOURSAAS_VPN_PROBA_REFUSED && ($fraudscoreip >= $conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED)) {
+			if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED') && ($fraudscoreip >= (float) getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'))) {
 				// Output the key "Instance creation blocked for"
 				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').' with a fraudscore '.$fraudscoreip.' >= ' . getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'));
 				$abusetest = 1;
@@ -800,10 +802,13 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 			if ($jsonreponse['recent_abuse'] === false && ($jsonreponse['valid'] === true || ($jsonreponse['timed_out'] === true && $jsonreponse['disposable'] === false && $jsonreponse['dns_valid'] === true))) {
 				// Email valid
 			} else {
-				// Output the key "Instance creation blocked for"
-				dol_syslog("Instance creation blocked for email ".$email." - Email fraud probability ".$fraudscoreemail." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED'));
-				// TODO Enable this
-				// $abusetest = 6;
+				$maxfraudscoreemail = getDolGlobalInt('SELLYOURSAAS_EMAIL_FRAUDSCORE_REFUSED', 100);
+				if ($fraudscoreemail >= $maxfraudscoreemail) {
+					// Output the key "Instance creation blocked for"
+					dol_syslog("Instance creation blocked for email ".$email." - Email fraudscoreemail ".$fraudscoreemail." is higher or equal than " . $maxfraudscoreemail);
+					// TODO Enabled this
+					//$abusetest = 6;
+				}
 			}
 		}
 	}
