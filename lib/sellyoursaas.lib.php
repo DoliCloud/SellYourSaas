@@ -497,19 +497,19 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 
-	dol_syslog("getRemoteCheck remoteip=".$remoteip." email=".$email." whitelisted=".$whitelisted);
+	dol_syslog("getRemoteCheck remoteip=".$remoteip." email=".$email." whitelisted=".$whitelisted, LOG_INFO);
 
 	// Check the captcha
 	if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON')) {
+		dol_syslog("getRemoteCheck Check using Google Recaptcha", LOG_DEBUG);
+
 		$grecaptcharesponse = GETPOST('g-recaptcha-response', 'alphanohtml');
 
-		// Check validation of the captcha
 		$message= "secret=".getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_SECRET_KEY').'&response='.urlencode($grecaptcharesponse)."&remoteip=".urlencode(getUserRemoteIP());
 		$urltocall = 'https://www.google.com/recaptcha/api/siteverify';
 
+		// Check validation of the captcha
 		$resurl = getURLContent($urltocall, 'POST', $message);
-
-		dol_syslog("getRemoteCheck Google Recaptcha getURLContent for urltocall=".$urltocall, LOG_DEBUG);
 
 		if (empty($resurl['curl_error_no']) && !empty($resurl['http_code']) && $resurl['http_code'] == '200') {
 			$jsonresult = json_decode($resurl['content']);
@@ -533,6 +533,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 	// Check email with disposablemail
 	if (empty($abusetest) && getDolGlobalInt('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED') && getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY')) {
+		dol_syslog("getRemoteCheck Check using DisposableEmail", LOG_DEBUG);
+
 		$allowed = false;
 		$disposable = false;
 		$allowedemail = (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED') ? json_decode($conf->global->SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ALLOWED, true) : array());
@@ -618,6 +620,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 	// Evaluate VPN probability with GetIPIntel
 	if (empty($abusetest) && getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON')) {
+		dol_syslog("getRemoteCheck Check using GETIPIntel", LOG_DEBUG);
+
 		$emailforvpncheck='contact+checkcustomer@mysaasdomainname.com';
 		if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL')) {
 			$emailforvpncheck = getDolGlobalString('SELLYOURSAAS_GETIPINTEL_EMAIL');
@@ -664,6 +668,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 	// Evaluate VPN probability with IPQualityScore but also TOR or bad networks and email
 	if (getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON') && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY')) {
+		dol_syslog("getRemoteCheck Check using IP Quality", LOG_DEBUG);
+
 		// Retrieve additional (optional) data points which help us enhance fraud scores.
 		$user_agent = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]);
 		$user_language = (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? '' : $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
@@ -808,6 +814,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 	// Block for some IPs
 	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS')) {
+		dol_syslog("getRemoteCheck Check using SELLYOURSAAS_BLACKLIST_IP_MASKS", LOG_DEBUG);
+
 		$arrayofblacklistips = explode(',', getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS'));
 		foreach ($arrayofblacklistips as $blacklistip) {
 			if ($remoteip == $blacklistip) {
@@ -820,6 +828,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 	// Block for some IPs if VPN proba is higher that a threshold
 	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN')) {
+		dol_syslog("getRemoteCheck Check using SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN", LOG_DEBUG);
+
 		if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalString('SELLYOURSAAS_VPN_PROBA_FOR_BLACKLIST', 1)) {
 			$arrayofblacklistips = explode(',', getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN'));
 			foreach ($arrayofblacklistips as $blacklistip) {
