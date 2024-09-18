@@ -715,10 +715,13 @@ class ActionsSellyoursaas
 	 */
 	public function addMoreMassActions($parameters, &$action, $hookmanager)
 	{
-		$label = img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'Set as spammer';
+		global $langs;
+		$langs->load("sellyoursaas@sellyoursaas");
+
+		$label = img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').$langs->trans("MarkAsSpamAndClose");
 		$this->resprints = '<option value="markasspamandclose" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
 
-		$label = img_picto('', 'delete', 'class="pictofixedwidth"').'Undeploy';
+		$label = img_picto('', 'delete', 'class="pictofixedwidth"').$langs->trans("Undeploy");
 		$this->resprints .= '<option value="undeploy" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
 	}
 
