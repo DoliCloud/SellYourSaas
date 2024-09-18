@@ -43,8 +43,8 @@ if (! defined('NOBROWSERNOTIF')) {
 }
 
 
-define('SYSLOG_FILE_ADDIP', 1);
-define('SYSLOG_FILE_ADDSUFFIX', 'myaccountregister');
+//define('SYSLOG_FILE_ADDIP', 1);
+define('SYSLOG_FILE_ADDSUFFIX', 'register');
 
 
 $sapi_type = php_sapi_name();
