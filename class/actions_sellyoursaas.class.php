@@ -704,6 +704,24 @@ class ActionsSellyoursaas
 		return 0;
 	}
 
+
+	/**
+	 * Complete the mass action of contract list
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   string          $action         Current action (if set). Generally create or edit or null
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0
+	 */
+	public function addMoreMassActions($parameters, &$action, $hookmanager)
+	{
+		$label = img_picto('', 'delete', 'class="pictofixedwidth"').'Undeploy';
+		$this->resprints = '<option value="undeploy" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
+
+		$label = img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'Set as spammer';
+		$this->resprints = '<option value="setasspammer" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
+	}
+
 	/**
 	 *    Execute action
 	 *
@@ -839,6 +857,25 @@ class ActionsSellyoursaas
 					$toselect = array();
 				} else {
 					//$db->rollback();
+				}
+			}
+
+			if ($parameters['massaction'] == 'setasspammer') {
+				$db->begin();
+				if (!$error) {
+					$nbok = 0;
+					foreach ($toselect as $toselectid) {
+						//var_dump($toselectid);
+					}
+				}
+				if (!$error) {
+					if ($nbok > 1) {
+						setEventMessages($langs->trans("Done"), null, 'mesgs');
+					}
+					$db->commit();
+					$toselect = array();
+				} else {
+					$db->rollback();
 				}
 			}
 		}
@@ -1486,20 +1523,6 @@ class ActionsSellyoursaas
 		$this->results['fieldstosearchall']['username_db'] = 'Username DB';
 
 		return 0;
-	}
-
-	/**
-	 * Complete the mass action of contract list
-	 *
-	 * @param   array           $parameters     Hook metadatas (context, etc...)
-	 * @param   string          $action         Current action (if set). Generally create or edit or null
-	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
-	 * @return  int 		      			  	=0
-	 */
-	public function addMoreMassActions($parameters, &$action, $hookmanager)
-	{
-		$label = 'Undeploy';
-		$this->resprints = '<option value="undeploy" data-html="' . dol_escape_htmltag($label) . '">' . $label . '</option>';
 	}
 
 	/**
