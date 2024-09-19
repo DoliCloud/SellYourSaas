@@ -890,4 +890,5 @@ NInstancesUndeployed=%s instances undeployed
 OneInstanceUndeployed=1 instance undeployed
 SELLYOURSAAS_GOOGLE_RECAPTCHA_ON=Enable the Google ReCaptcha service (v3 enterprise)
 SELLYOURSAAS_GOOGLE_RECAPTCHA_SITE_KEY=Site key
-SELLYOURSAAS_GOOGLE_RECAPTCHA_SECRET_KEY=Secret  key
+SELLYOURSAAS_GOOGLE_RECAPTCHA_SECRET_KEY=Secret key
+

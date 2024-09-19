@@ -34,11 +34,20 @@ include_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 class box_sellyoursaas_backup_errors extends ModeleBoxes
 {
 	public $boxcode  = "sellyoursaasbackuperrors";
+
 	public $boximg   = "sellyoursaas@sellyoursaas";
-	public $boxlabel = "BoxSellyoursaasBackupErrors";
+
+	public $boxlabel = "BoxTitleSellyoursaasBackupErrors";
+
+	/**
+	 * @var string Box language file if it needs a specific language file.
+	 */
+	public $lang = 'sellyoursaas@sellyoursaas';
+
 	public $depends  = array("sellyoursaas"); // Box active if module sellyoursaas active
 
 	public $enabled = 1;
+
 
 	/**
 	 *  Constructor
@@ -50,7 +59,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 	{
 		global $user;
 
-		$this->db = $db;
+		parent::__construct($db, $param);
 
 		$this->hidden = !$user->hasRight('sellyoursaas', 'read');
 	}
