@@ -703,6 +703,10 @@ if ($mythirdpartyaccount->isInEEC()) {
 	$enabledformtoentersepaforids = explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID'));	// To test by enabling only on a given thirdparty, use SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID = 'id1,id2...' of thirparty.
 	//$enabledformtoentersepa = 1;
 
+	if (empty($enabledformtoentersepaforids[0])) {
+		unset($enabledformtoentersepaforids[0]);
+	}
+
 	if ($enabledformtoentersepa && (empty($enabledformtoentersepaforids) || in_array($mythirdpartyaccount->id, $enabledformtoentersepaforids))) {
 		// Form to enter SEPA
 		print '<br>';
