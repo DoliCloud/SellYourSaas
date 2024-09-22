@@ -6274,6 +6274,16 @@ RequestReadTimeout handshake=5 header=10 body=30
 ---------------
 
 
+==== iowait are high even if few IOs are done
+
+Launch 
+dstat -f
+If iowait (column "wai") is high in percentage and there is few read/write access on disk (see column read/writ) on devices;
+
+Launchthis command to know wich process is waiting  
+pidstat -dtu 1 
+
+ 
 ==== Emails are blocked in postfix queue
 
 To scan all emails in postfix queue with Queue ID + Message-ID :
