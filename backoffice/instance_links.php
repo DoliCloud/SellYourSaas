@@ -881,11 +881,9 @@ print '<td>'.$langs->trans("Modules").'</td>';
 print '<td colspan="3"><span class="small">'.$object->modulesenabled.'</span></td>';
 print '</tr>';
 
-print "</table><br>";
+print "</table>";
 
 print "</div>";	//  End fiche=center
-
-print '<br>';
 
 if (! $user->socid) {
 	$listmodules = dol_dir_list(DOL_DOCUMENT_ROOT."/core/modules/", "files");
@@ -926,6 +924,8 @@ if (! $user->socid) {
 	}
 
 	print "</div>";
+
+	print '<br>';
 }
 
 print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
