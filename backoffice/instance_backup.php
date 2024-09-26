@@ -431,8 +431,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// ----- Backup result
 
 	print '<tr class="liste_titre">';
-	print '<td>'.$langs->trans("LocalBackup").'</td>';
-	print '<td class="right">';
+	print '<th>'.$langs->trans("LocalBackup").'</th>';
+	print '<th class="right">';
 
 	if (! $user->socid) {
 		if ($user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
@@ -442,7 +442,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		}
 	}
 
-	print '</td>';
+	print '</th>';
 	print '</tr>';
 
 	// Backup dir
@@ -492,10 +492,10 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	// ----- Remote backup
 
 	print '<tr class="liste_titre">';
-	print '<td>'.$langs->trans("RemoteBackup").'</td>';
-	print '<td class="right">';
+	print '<th>'.$langs->trans("RemoteBackup").'</th>';
+	print '<th class="right">';
 	print '<a class="butActionRefused smallpaddingimp" href="#" title="'.dol_escape_htmltag($langs->trans("NotYetAvailable")).'">'.$langs->trans('BackupNow').'</a>';
-	print '</td>';
+	print '</th>';
 	print '</tr>';
 
 	// Backup dir
