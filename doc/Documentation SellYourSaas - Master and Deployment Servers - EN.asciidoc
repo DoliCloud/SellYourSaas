@@ -340,19 +340,9 @@ chmod go-rw /etc/ssh/sshd_config
 ---------------
 
 
-Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas.conf* on the server in file */etc/ssh/sshd_config.d/sellyoursaas.conf*
+Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas.conf* onto the server under the name */etc/ssh/sshd_config.d/sellyoursaas.conf*
 
 For Ubuntu 18.04: you can concat the content into file *sshd_config*, but be sure to not have duplicate values.
-
-
-Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas-users.conf* on the server in file */etc/ssh/sshd_config.d/sellyoursaas-users.conf* and
-add entries for each sysadmin users.
-
-[source, conf]
----------------
-AllowUsers myunixlogin
-AllowUsers otherunixlogin
----------------
 
 
 Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rules into the custom file)
@@ -360,8 +350,8 @@ Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rul
 [source, conf]
 ---------------
 # BEGIN Block for SellYourSaas
-# Warning Match rule works only insshd_config not into include files
-# You can test a Match User rule with ssd -T -C user=aaa | grep param
+# Warning Match rule works only in sshd_config, not into include files
+# You can test a Match User rule with: ssd -T -C user=aaa | grep param
 #Match User osu*
 #  ChrootDirectory "/home/jail/home/"
 #  ForceCommand /usr/bin/secureBash
@@ -372,22 +362,36 @@ Match User osu*
 # END Block for SellYourSaas
 ---------------
 
-To test a ssh config, you can run
-
-[source, conf]
----------------
-sshd -T -C user=mylogin -C host=clienthost -C addr=clientaddr
----------------
-
-Then reload ssh 
-
-Please note: check you have replaced *myunixlogin* with the correct values before taking changes into account.
+Then reload ssh:
 
 [source, conf]
 ---------------
 /etc/init.d/ssh reload
 ---------------
 
+
+To test a ssh config, you can run
+
+[source, conf]
+---------------
+sshd -T -C user=logintotest -C host=clienthost -C addr=clientaddr
+---------------
+
+
+==== SSH add admin user
+
+Note: All the following steps can also be done with the script *desktop_admin_users.php*. 
+
+Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas-users.conf* on the server in file */etc/ssh/sshd_config.d/sellyoursaas-users.conf* and
+add entries for each admin users.
+
+[source, conf]
+---------------
+AllowUsers myadminunixlogin
+AllowUsers otheradminunixlogin
+---------------
+
+Please note: check you have replaced *myadminunixlogin* with the correct values before taking changes into account.
 
 Add the following line in the */etc/sudoers* file to reposition the HOME according to the user after a sudo -s:
 
@@ -397,15 +401,21 @@ Defaults set_home
 Defaults use_pty
 ---------------
 
-Create a file */etc/sudoers.d/myunixlogin* with the content
+[source, conf]
+---------------
+/etc/init.d/ssh reload
+---------------
+
+
+Create a file */etc/sudoers.d/myadminunixlogin* with the content
 
 [source, conf]
 ---------------
-myunixlogin ALL=(ALL) ALL
-# You can also add this lines to avoid users to re-enter a password when switching to 'admin' or 'osu*'
+myadminunixlogin ALL=(ALL) ALL
+# You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
 # This allows to switch to admin or osu* with "sudo su - admin" or "sudo su - osu..."
-#myunixlogin ALL=(ALL) /usr/bin/su - admin
-#myunixlogin ALL=(ALL) /usr/bin/su - osu*
+#myadminunixlogin ALL=(ALL) /usr/bin/su - admin
+#myadminunixlogin ALL=(ALL) /usr/bin/su - osu*
 ---------------
 
 This allows you to switch to *admin* or *osu...* without typing your password too:
@@ -416,23 +426,23 @@ sudo su - admin
 sudo su - osu...
 ---------------
 
-Please note: check you have replaced *myunixlogin* with the correct values before taking changes into account.
+Please note: check you have replaced *myadminunixlogin* with the correct values before taking changes into account.
 
 
 And set the *root*.*root* and the permissions *r--r-----*
 
 [source, conf]
 ---------------
-chmod a-w /etc/sudoers.d/myunixlogin
-chmod o-r /etc/sudoers.d/myunixlogin
+chmod a-w /etc/sudoers.d/myadminunixlogin
+chmod o-r /etc/sudoers.d/myadminunixlogin
 ---------------
 
 
-Test that you can connect using *myunixlogin* and you can make a sudo with
+Test that you can connect using *myadminunixlogin* and you can make a sudo with
 
 [source,bash]
 ---------------
-ssh -v myunixlogin@x.y.z.a
+ssh -v myadminunixlogin@x.y.z.a
 sudo -s
 ---------------
 
@@ -441,7 +451,7 @@ Add your public key to your unix account.
 
 [source, bash]
 ---------------
-ssh-copy-id myunixlogin@x.y.z.a
+ssh-copy-id myadminunixlogin@x.y.z.a
 ---------------
 
 
@@ -453,7 +463,7 @@ passwd root
 passwd admin
 ---------------
 
-Run *ssh-keygen* for all these acounts : *root*, *admin* and *myunixlogin*
+Run *ssh-keygen* for all these acounts : *root*, *admin* and *myadminunixlogin*
 
 
 === Deletion of information files at login

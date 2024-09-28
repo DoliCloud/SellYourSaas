@@ -84,15 +84,15 @@ if (! isset($argv[4])) {	// Check parameters
 	print "\n";
 	print "Example:\n";
 	print "- To create a sysadmin user (like the first one, root allowed):\n";
-	print "  ".$script_file.' create     hostfile master,deployment,web logintocreate ubuntu userroot=1 userpassword=... userpublickey="ABC..."'."\n";
+	print "  ".$script_file.' hostfile master,deployment,web create logintocreate ubuntu userroot=1 userpassword=... userpublickey="ABC..."'."\n";
 	print "- To add a sysadmin user (root not allowed):\n";
-	print "  ".$script_file.' create     hostfile master,deployment,web logintocreate userroot=0 userip=ipofuser userpassword=... userpublickey="ABC..."'."\n";
+	print "  ".$script_file.' hostfile master,deployment,web create logintocreate userroot=0 userip=ipofuser userpassword=... userpublickey="ABC..."'."\n";
 	print "- To update a user (for example to change root access or change password):\n";
-	print "  ".$script_file.' update     hostfile withX.sellyoursaasdomain.com logintoupdate userroot=X userpassword=...'."\n";
+	print "  ".$script_file.' hostfile withX.sellyoursaasdomain.com update logintoupdate userroot=X userpassword=...'."\n";
 	print "- To remove a disable/reenable a user:\n";
-	print "  ".$script_file.' deactivate hostfile master,deployment,web logintodeactivate'."\n";
+	print "  ".$script_file.' hostfile master,deployment,web deactivate logintodeactivate'."\n";
 	print "- To remove a user:\n";
-	print "  ".$script_file.' remove     hostfile master,deployment,web logintodelete'."\n";
+	print "  ".$script_file.' hostfile master,deployment,web remove logintodelete'."\n";
 	exit(-1);
 }
 print '--- start'."\n";

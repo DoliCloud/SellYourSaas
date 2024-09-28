@@ -1,0 +1,5 @@
+myadminunixlogin ALL=(ALL) ALL
+# You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
+# This allows to switch to admin or osu* with "sudo su - admin" or "sudo su - osu..."
+#myadminunixlogin ALL=(ALL) /usr/bin/su - admin
+#myadminunixlogin ALL=(ALL) /usr/bin/su - osu*
