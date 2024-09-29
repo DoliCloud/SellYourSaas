@@ -1163,11 +1163,15 @@ class SellYourSaasUtils
 					} else {
 						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
 
-						$result = $this->doTakePaymentStripeForThirdparty($service, $servicestatus, $obj->socid, $companypaymentmode, $invoice, 0, $noemailtocustomeriferror);
-						if ($result == 0) {	// No error
-							$invoiceprocessedok[$obj->rowid]=$invoice->ref;
+						if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
+							dol_syslog("The invoice is flagged as invoicepaymentdisputed so we discard it for any other payment");
 						} else {
-							$invoiceprocessedko[$obj->rowid]=$invoice->ref;
+							$result = $this->doTakePaymentStripeForThirdparty($service, $servicestatus, $obj->socid, $companypaymentmode, $invoice, 0, $noemailtocustomeriferror);
+							if ($result == 0) {	// No error
+								$invoiceprocessedok[$obj->rowid]=$invoice->ref;
+							} else {
+								$invoiceprocessedko[$obj->rowid]=$invoice->ref;
+							}
 						}
 					}
 
@@ -2158,18 +2162,22 @@ class SellYourSaasUtils
 					} else {
 						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
 
-						// Create a direct debit payment request (if none already exists)
-						$result = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture', 1);
-						if ($result == 0) {
-							$errorforinvoice++;
-							//$error++;		// This case should not generate a global error
-							dol_syslog('A direct-debit request already exists for invoice id='.$obj->rowid.', so we cancel payment try', LOG_ERR);
-							$this->errors[] = 'A direct-debit request already exists for the invoice '.$invoice->ref.', so we cancel payment try';
-						} elseif ($result < 0) {
-							$errorforinvoice++;
-							$error++;
-							dol_syslog('Failed to create withdrawal request for a direct debit order for the invoice id='.$obj->rowid, LOG_ERR);
-							$this->errors[] = 'Failed to create withdrawal request for a direct debit order for the invoice '.$obj->ref;
+						if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
+							dol_syslog("The invoice is flagged as invoicepaymentdisputed so we discard it for any other payment");
+						} else {
+							// Create a direct debit payment request (if none already exists)
+							$result = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture', 1);
+							if ($result == 0) {
+								$errorforinvoice++;
+								//$error++;		// This case should not generate a global error
+								dol_syslog('A direct-debit request already exists for invoice id='.$obj->rowid.', so we cancel payment try', LOG_ERR);
+								$this->errors[] = 'A direct-debit request already exists for the invoice '.$invoice->ref.', so we cancel payment try';
+							} elseif ($result < 0) {
+								$errorforinvoice++;
+								$error++;
+								dol_syslog('Failed to create withdrawal request for a direct debit order for the invoice id='.$obj->rowid, LOG_ERR);
+								$this->errors[] = 'Failed to create withdrawal request for a direct debit order for the invoice '.$obj->ref;
+							}
 						}
 					}
 

@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW When invoice is flagged as dispute, we do not try to take payment
 * NEW Can add recaptcha on registration page.
 * NEW Add picto evil and dashboard at begin of thirdparty link
 * NEW The action set as spammer flags also the thirdparty
