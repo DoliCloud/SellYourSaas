@@ -18,6 +18,7 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	ref varchar(128) NOT NULL,
+	label varchar(64),
 	entity integer DEFAULT 1 NOT NULL,  -- multi company id
 	note_private text, 
 	note_public text,
@@ -27,7 +28,7 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	fk_country integer,
 	fromdomainname varchar(128),
 	ipaddress varchar(128) NOT NULL,
-	servercountries text,
+	servercountries varchar(128),
 	servercustomerannouncestatus integer,
 	servercustomerannounce text,
 	serversignaturekey varchar(128)
