@@ -94,8 +94,6 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$sql .= " WHERE ce.fk_object = c.rowid";
 				$sql .= " AND ce.deployment_status IN ('done', 'processing')";
 				$sql .= " AND ce.latestbackup".$mode."_status = 'KO'";
-				$sql .= " GROUP BY c.ref_customer";
-
 
 				dol_syslog(get_class($this)."::loadBox", LOG_DEBUG);
 
