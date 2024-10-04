@@ -88,8 +88,8 @@ print '
 	                  <input type="text" class="form-control input-small" value="'.$mythirdpartyaccount->zip.'" name="zip">
 	                </div>
 	                <div class="form-group">
-	                  <label>'.$langs->trans("State").'</label>
-	                  <input type="text" class="form-control" placeholder="'.$langs->trans("StateOrCounty").'" name="stateorcounty" value="">
+	                  <label>'.$langs->trans("StateOrCounty").'</label>
+	                  <input type="text" class="form-control" name="stateorcounty" value="">
 	                </div>
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Country").'</label><br>';
