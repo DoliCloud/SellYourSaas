@@ -4697,7 +4697,8 @@ vi /lib/apparmor/rc.apparmor.functions
 
 # if you move from 22.04 to 24.04, you must enable the correct php version
 apt install apache2; apt install libapache2-mod-apparmor; apt install php-tidy;
-a2enmod php8.3; a2enmod apparmor;
+a2enmod php8.3; a2enmod apparmor
+a2disconf php8.3-fpm; a2enconf php8.3-fpm; 
 # You must also remove an old apache2 UFW profile that is duplicate with apache2-utils.ufw.profile
 rm -fr apache2.2-common
 # You must also remove old apparmor lxc profiles
