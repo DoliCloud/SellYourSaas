@@ -462,7 +462,7 @@ DeploymentIPVPNProbaDesc=Lorsqu'une inscription est effectuée, une vérificatio
 DeploymentIPQuality=Score IP Quality
 DeploymentIPQualityDesc=Lorsqu'un enregistrement est effectué, une vérification est effectuée sur l'adresse IP de l'abonné à : <br> - http://check.getipintel.net/check.php?ip=IP&contact=&flag=f <br> et/ou <br> - https://www. ipqualityscore.com
 DeploymentEmailQuality=Quality score Email
-DeploymentEmailQualityDesc=Lorsqu'une inscription est effectuée, une vérification est effectuée sur l'e-mail de l'abonné à : <br> <br> - https://www.ipqualityscore.com <br> et/ou <br> - https://disposableemail.com
+DeploymentEmailQualityDesc=Lorsqu'une inscription est effectuée, une vérification est effectuée sur l'e-mail de l'abonné à : <br> <br> - https://www.ipqualityscore.com <br> et/ou <br> - https://disposableemail.com<br>et/ou<br>- Google recaptcha API v3
 ListOfRegistrationLinks=Liste des liens d'inscription
 EnterVATHere=Entrez votre numéro de TVA ou de vente ici ...
 CreateMyAccount=Créer mon compte
