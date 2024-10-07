@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* FIX Add alter table for column 'label' on llx_sellyoursaas_deploymentserver
 * NEW Add label on deployment servers
 * NEW When invoice is flagged as dispute, we do not try to take payment
 * NEW Can add recaptcha on registration page.
