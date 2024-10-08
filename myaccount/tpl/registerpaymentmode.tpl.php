@@ -226,19 +226,19 @@ if ($resql) {
 print '
 		<div class="radio-list">
 		<label class="radio-inline" style="margin-right: 0px" id="linkcard">
-		<div class="radio inline-block"><span class="checked">'.$langs->trans("CreditOrDebitCard").'<input type="radio" name="type" value="card" checked></span></div><br>
+		<div class="radio inline-block marginbottom"><span class="checked">'.$langs->trans("CreditOrDebitCard").'<input type="radio" name="type" value="card" checked></span></div><br>
 		<img src="/img/mastercard.png" width="50" height="31">
 		<img src="/img/visa.png" width="50" height="31">
 		<img src="/img/american_express.png" width="50" height="31">
 		</label>
 		<!--
 		<label class="radio-inline" id="linkpaypal" style="margin-left: 40px;">
-		<div class="radio inline-block"><span>'.$langs->trans("PayPal").'<input type="radio" name="type" value="PayPal"></span></div><br>
+		<div class="radio inline-block marginbottom"><span>'.$langs->trans("PayPal").'<input type="radio" name="type" value="PayPal"></span></div><br>
 		<img src="/img/paypal.png" width="50" height="31">
 		</label>
 		-->
 		<label class="radio-inline" id="linksepa" style="margin-left: 30px;">
-		<div class="radio inline-block"><span>'.$langs->trans("SEPAMandate").'<input type="radio" name="type" value="SepaMandate"></span></div><br>
+		<div class="radio inline-block marginbottom"><span>'.$langs->trans("SEPAMandate").'<input type="radio" name="type" value="SepaMandate"></span></div><br>
 		<img src="/img/sepa.png" width="50" height="31">
 		</label>
 		</div>
