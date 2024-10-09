@@ -4416,7 +4416,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(' ', '£', $domainnamewebsite); 			// Param 46 in .sh
 				$commandurl.= '&'.str_replace(' ', '£', $websitenamedeploy); 			// Param 47 in .sh
 				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srccliafterpaid); 	// Param 48 in .sh src for cli after paid
-				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->rowid); 			// Param 49 in .sh src for dump files in deploy
+				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->id); 			// Param 49 in .sh src for dump files in deploy
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
