@@ -1522,6 +1522,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 					error=$(( $error + 1 ))
 					break
 				fi
+				echo "Dump $dumpfile successfully loaded"
 				mastermysqliteration=$(( $mastermysqliteration + 1 ))
 			else
 				echo "Error file $dumpfile does not exists"
