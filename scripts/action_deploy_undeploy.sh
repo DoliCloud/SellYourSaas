@@ -160,6 +160,7 @@ if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
 fi
 
 export CUSTOMDOMAIN=${46}
+export packageID=${49}
 
 
 
@@ -1492,19 +1493,59 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	echo "You can test with mysql $dbname -h $dbserverhost -P $dbserverport -u $dbusername -p$dbpassword"
 
-	# Load dump file
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Search dumpfile into $dirwithdumpfile"
-	for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
-	do
-		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
-		$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile
-		result=$?
-		if [[ "x$result" != "x0" ]]; then
-			echo Failed to load dump file $dumpfile
-			echo "Failed to $mode instance $instancename.$domainname with: Failed to load dump file $dumpfile" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deploy/undeploy" $EMAILTO
-			exit 25
-		fi
-	done
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Search dumpfile from master db"
+	error=0
+	mastermysqliteration=0
+	masterdatabasehost=`grep '^databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	masterdbport=`grep '^databaseport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	masterdbdatabase=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	masterdbuser=`grep '^databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	masterdbpass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+	SQL2="SELECT CONCAT('$dirwithdumpfile/', filename) as full_path FROM llx_ecm_files WHERE src_object_type = 'packages' AND src_object_id = $packageID AND filename like "%.sql" ORDER BY position ASC"
+	echo "$MYSQL -A -h $dbserverhost -D $masterdbdatabase -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL2\""
+
+	# Load dump file from master database
+	result=( $($MYSQL -u$dbadminuser -p$masterdbpass -h $dbserverhost -D $masterdbdatabase -P $dbserverport -ss -e "$SQL2") )
+	if [[ ${result[0]} == "" ]]; then
+			echo "Failed to get data from master databasebefore"
+			error=$(( $error + 1 ))
+	else
+		for dumpfile in ${result[@]};
+		do
+			if [[ -f $dumpfile ]]; then
+				echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
+				$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile
+				res=$?
+				if [[ "x$res" != "x0" ]]; then
+					echo Failed to load dump file $dumpfile
+					error=$(( $error + 1 ))
+					break
+				fi
+				mastermysqliteration=$(( $mastermysqliteration + 1 ))
+			else
+				echo "Error file $dumpfile does not exists"
+				error=$(( $error + 1 ))
+				break
+			fi
+		done
+	fi
+
+	# Load dump file if it didn't work with master db
+	if [[ $error -ne 0 ]] || [[ $mastermysqliteration -eq 0 ]]; then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Search dumpfile into $dirwithdumpfile"
+		for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
+		do
+			echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
+			$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile
+			result=$?
+			if [[ "x$result" != "x0" ]]; then
+				echo Failed to load dump file $dumpfile
+				echo "Failed to $mode instance $instancename.$domainname with: Failed to load dump file $dumpfile" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deploy/undeploy" $EMAILTO
+				exit 25
+			fi
+		done
+	fi
 
 fi
 

@@ -1632,4 +1632,99 @@ class ActionsSellyoursaas
 
 		return 0;
 	}
+
+	/**
+	 * Overloading the isLinkedDocumentObjectNotMovable function : check if we enable link document move
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   string          $object         Current object (if set)
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0 if OK but we want to process standard code,
+	 *  	                            		>0 if OK and we want to replace standard codeS.
+	 */
+	public function isLinkedDocumentObjectNotMovable($parameters, &$object, $hookmanager)
+	{
+		global $user;
+		if (in_array($object->element, array("packages"))) {
+			$this->results['disablemove'] = 0;
+			return 1;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Overloading the checkRowPerms function : check permission on an object
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   string          $object         Current object (if set)
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0 if OK but we want to process standard code,
+	 *  	                            		>0 if OK and we want to replace standard codeS.
+	 */
+	public function checkRowPerms($parameters, &$object, $hookmanager)
+	{
+		global $user;
+		if (in_array($parameters["fk_element"], array("fk_packages"))) {
+			$this->results['perm'] = $user->hasRight('sellyoursaas', 'write');
+			return 1;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Overloading the afterRankOfLineUpdate function : do an action after Rank line for an object
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   string          $object         Current object (if set)
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0 if OK but we want to process standard code,
+	 *  	                            		>0 if OK and we want to replace standard codeS.
+	 */
+	public function afterRankOfLineUpdate($parameters, &$object, $hookmanager)
+	{
+		global $user;
+		$error = 0;
+		if (in_array($object->fk_element, array('fk_packages'))) {
+			dol_include_once('sellyoursaas/class/packages.class.php');
+			$package = new Packages($this->db);
+			$result = $package->fetch($object->id);
+			if ($result <= 0) {
+				$this->error = $package->error;
+				$this->errors = array_merge($this->errors, $package->errors);
+				return -1;
+			}
+			
+			$dol_data_root = (!getDolGlobalString('SELLYOURSAAS_FORCE_DOL_DATA_ROOT') ? DOL_DATA_ROOT : $conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT);
+			$filepath = "";
+			$filename = "";
+
+			$sql = "SELECT f.filepath, f.filename";
+			$sql .= " FROM ".MAIN_DB_PREFIX."ecm_files as f";
+			$sql .= " WHERE rowid = ".((int) $parameters["rowid"]);
+
+			$result = $this->db->query($sql);
+			if ($result) {
+				if ($this->db->num_rows($result)) {
+					$obj = $this->db->fetch_object($result);
+					$filepath = $obj->filepath;
+					$filename = $obj->filename;
+				}
+			} else {
+				$error++;
+				$this->error = $this->db->last_error();
+			}
+
+			if (!$error) {
+				if (preg_match('/^\d_.*.sql$/', $filename)) {
+					$filetorename = $dol_data_root.'/'.$filepath.'/'.$filename;
+					if (is_file($filetorename)) {
+					}
+				}
+			}
+			return 1;
+		}
+		return 0;
+	}
 }
