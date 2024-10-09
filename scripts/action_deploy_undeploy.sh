@@ -1503,10 +1503,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	masterdbpass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 	SQL2="SELECT CONCAT('$dirwithdumpfile/', filename) as full_path FROM llx_ecm_files WHERE src_object_type = 'packages' AND src_object_id = $packageID AND filename like "%.sql" ORDER BY position ASC"
-	echo "$MYSQL -A -h $dbserverhost -D $masterdbdatabase -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL2\""
+	echo "$MYSQL -ss -h $masterdatabasehost -D $masterdbdatabase -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL2\""
 
 	# Load dump file from master database
-	result=( $($MYSQL -u$dbadminuser -p$masterdbpass -h $dbserverhost -D $masterdbdatabase -P $dbserverport -ss -e "$SQL2") )
+	result=( $($MYSQL -ss -h $masterdatabasehost -D $masterdbdatabase -P $dbserverport -u$dbadminuser -p$masterdbpass -e "$SQL2") )
 	if [[ ${result[0]} == "" ]]; then
 			echo "Failed to get data from master databasebefore"
 			error=$(( $error + 1 ))
