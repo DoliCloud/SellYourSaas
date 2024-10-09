@@ -47,7 +47,7 @@ class Packages extends CommonObject
 	public $module = 'sellyoursaas';
 
 	public $element_for_permission = 'sellyoursaas';
-
+	public $fk_element = 'fk_packages';
 	/**
 	 * @var array  Does packages support multicompany module ? 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
 	 */
