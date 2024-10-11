@@ -683,10 +683,11 @@ if ($reshook == 0) {
 							$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));   // This is list of all sub domains to show into combo list
 						} else {
 							$staticdeploymentserver = new Deploymentserver($db);
-							$listofdomain = $staticdeploymentserver->fetchAllDomains();
+							$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND', 1);
 						}
+
 						foreach ($listofdomain as $val) {
-							$newval = $val;
+							$newval = $val['fullstring'];
 							$reg = array();
 							if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
@@ -781,10 +782,19 @@ if ($reshook == 0) {
 							$domainstosuggest[] = $randomselect;
 						}
 						foreach ($domainstosuggest as $val) {
-							print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '').'>'.$val.'</option>';
+							$valwithoutfirstdot = preg_replace('/^\./', '', $val);
+							$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
+
+							print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
+							print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
+							print '>';
+							print $valtoshow;
+							print '</option>';
 						} ?>
 					</select>
 						<?php
+						print ajax_combobox('tldid');
+
 						// Show warning if forcesubdomain set and not found
 						if (GETPOST('forcesubdomain', 'alpha')) {
 							$forcesubdomainfound = false;

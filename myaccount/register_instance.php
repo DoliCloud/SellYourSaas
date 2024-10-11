@@ -294,7 +294,7 @@ $now = dol_now();
 $newurl=preg_replace('/register_instance\.php/', 'register.php', $_SERVER["PHP_SELF"]);
 
 if ($reusecontractid) {
-	// When we use the "Restart deploy" after error from account backoffice
+	// When we use the "Restart deploy" after error from the contract into the backoffice
 	$newurl=preg_replace('/register_instance/', 'index', $newurl);
 	if (! preg_match('/\?/', $newurl)) {
 		$newurl.='?';
@@ -302,7 +302,7 @@ if ($reusecontractid) {
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.((int) $reusecontractid);
 } elseif ($reusesocid) {
-	// When we use the "Add another instance" from myaccount dashboard
+	// When we use the "Add another instance" from the "myaccount" dashboard
 	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we have already load the $tmpproduct
 		$tmpproduct = new Product($db);
 		$tmpproduct->fetch($service, '', '', '', 1, 1, 1);
@@ -412,6 +412,12 @@ if ($reusecontractid) {
 	// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 	$hookmanager->initHooks(array('sellyoursaas-register-instance'));
 
+	$http_referer = $_SERVER['HTTP_REFERER'];
+	$tzstring = GETPOST('tzstring');
+	$humanprint = (empty($_SESSION['humanprint']) ? '' : $_SESSION['humanprint']);
+
+	dol_syslog("Registration from the page register.php: http_referer=".dol_escape_htmltag($http_referer)." tzstring=".$tzstring." humanprint=".$humanprint);
+
 	if (! preg_match('/\?/', $newurl)) {
 		$newurl.='?';
 	}
@@ -507,9 +513,31 @@ if ($reusecontractid) {
 		exit(-28);
 	}
 
+	// Other checks
+	if (empty($tzstring)) {
+		dol_syslog("Try to register with a bad value for tzstring : ".$tzstring, LOG_WARNING);
+		setEventMessages($langs->trans("ErrorBadValueProperty"), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-31);
+	}
+	if (empty($http_referer)) {
+		dol_syslog("Try to register with a bad value for http_referer : ".$http_referer, LOG_WARNING);
+		setEventMessages($langs->trans("ErrorBadValueProperty"), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-32);
+	}
+	/*
+	if (empty($humanprint)) {
+		dol_syslog("Try to register with a bad value for http_referer : ".$humanprint, LOG_WARNING);
+		setEventMessages($langs->trans("ErrorBadValueProperty"), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-31);
+	}
+	*/
+
 	// Possibility to block email adresses from a regex into global setup
-	// TODO: should be possible to use the blacklist list.
 	if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
+		// TODO: use the blacklist list instead.
 		if (getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED')) {
 			$listofbanned = explode(",", getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED'));
 			if (! empty($listofbanned)) {

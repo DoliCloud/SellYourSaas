@@ -895,7 +895,7 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 		$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 	} else {
 		$staticdeploymentserver = new Deploymentserver($db);
-		$listofdomain = $staticdeploymentserver->fetchAllDomains();
+		$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND');
 	}
 	foreach ($listofdomain as $val) {
 		$newval=$val;
@@ -928,7 +928,9 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 		foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
 			print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
 		}
-		print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"' : '').'>'.$newval.'</option>';
+		print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"' : '').'>';
+		print $newval;
+		print '</option>';
 	}
 	print '</select>
 	    		<br class="unfloat" />

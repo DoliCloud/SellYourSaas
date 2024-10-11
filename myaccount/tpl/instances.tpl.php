@@ -1692,7 +1692,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 		} else {
 			$staticdeploymentserver = new Deploymentserver($db);
-			$listofdomain = $staticdeploymentserver->fetchAllDomains();
+			$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND');
 		}
 		foreach ($listofdomain as $val) {
 			$newval=$val;
@@ -1787,7 +1787,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
 				print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
 			}
-			print '" value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '').'>'.$val.'</option>';
+			print '" value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '').'>';
+			print $val;
+			print '</option>';
 		}
 
 		print '</select>
