@@ -924,7 +924,7 @@ class ActionsSellyoursaas
 								$blacklistip->status = Blacklistip::STATUS_ENABLED;
 								$blacklistip->date_use = $tmpcontract->array_options['options_deployment_date_start'];
 								$blacklistip->content = $tmpcontract->array_options['options_deployment_ip'];
-								$blacklistip->comment = "Flagged as Spammer (from the backoffice by ".$user->login."), after manual analyzis of the user activity";
+								$blacklistip->comment = "Flagged as Spammer (from a massaction in the backoffice by ".$user->login."), after manual analyzis of the user activity";
 
 								$result2 = $blacklistip->create($user);
 								if ($result2 <= 0) {

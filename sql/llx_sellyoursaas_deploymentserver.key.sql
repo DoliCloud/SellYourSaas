@@ -17,6 +17,7 @@
 -- BEGIN MODULEBUILDER INDEXES
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD INDEX idx_sellyoursaas_deploymentserver_rowid (rowid);
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD INDEX idx_sellyoursaas_deploymentserver_status (status);
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD INDEX idx_sellyoursaas_deploymentserver_status (label);
 -- END MODULEBUILDER INDEXES
 
 --ALTER TABLE llx_sellyoursaas_deploymentserver ADD UNIQUE INDEX uk_sellyoursaas_deploymentserver_fieldxy(fieldx, fieldy);

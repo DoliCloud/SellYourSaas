@@ -1106,15 +1106,16 @@ class Deploymentserver extends CommonObject
 	/**
 	 * Load list of domainnames.
 	 *
-	 * @param  string      $sortorder    Sort Order
-	 * @param  string      $sortfield    Sort field
-	 * @param  int         $limit        limit
-	 * @param  int         $offset       Offset
-	 * @param  string      $filter       UFS filter.
-	 * @param  string      $filtermode   Filter mode (AND or OR)
-	 * @return array                	 array of domainnames
+	 * @param  	string      $sortorder    	Sort Order
+	 * @param  	string      $sortfield    	Sort field
+	 * @param  	int         $limit        	limit
+	 * @param  	int         $offset       	Offset
+	 * @param  	string      $filter       	UFS filter.
+	 * @param  	string      $filtermode   	Filter mode (AND or OR)
+	 * @param	int			$mode			0=Default, 1=Return array of array instead of array of string
+	 * @return 	array                	 	array of domainnames
 	 */
-	public function fetchAllDomains($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, $filter = '', $filtermode = 'AND')
+	public function fetchAllDomains($sortorder = '', $sortfield = '', $limit = 0, $offset = 0, $filter = '', $filtermode = 'AND', $mode = 0)
 	{
 		$reflist = array();
 		$objectlist = $this->fetchAll($sortorder, $sortfield, $limit, $offset, $filter, $filtermode);
@@ -1126,7 +1127,12 @@ class Deploymentserver extends CommonObject
 			if (!empty($value->fromdomainname)) {
 				$tmpstring .= ":".$value->fromdomainname;
 			}
-			$reflist[] = $tmpstring;
+
+			if (empty($mode)) {
+				$reflist[$value->ref] = $tmpstring;
+			} else {
+				$reflist[$value->ref] = array('ref' => $value->ref, 'fullstring' => $tmpstring, 'status' => $value->status, 'fromdomain' => $value->fromdomainname, 'label' => $value->label);
+			}
 		}
 		return $reflist;
 	}
