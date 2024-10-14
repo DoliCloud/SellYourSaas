@@ -354,7 +354,7 @@ CommandToManageRemoteDeploymentAgent=Commande pour démarrer/arrêter l'agent de
 CommandToPutInstancesOnOffline=Commande pour mettre toutes les instances en ligne / hors ligne
 CommandToMoveInstanceOnAnotherDeploymentServer=Commande pour déplacer plusieurs ou toutes les instances vers un autre serveur de déploiement
 InstanceWasDeployed=L'instance a été déployée
-YourPaymentModeWillExpireFixItSoon=Votre mode de paiement est sur le point d'expirer. Merci de <a href="%s">mettre à jour votre mode de paiement</a> afin d'éviter toute interruption de service.
+YourPaymentModeWillExpireFixItSoon=Votre mode de paiement a expiré ou est sur le point d'expirer. Merci de <a href="%s">mettre à jour votre mode de paiement</a> afin d'éviter toute interruption de service.
 YouAreAReseller=Vous êtes un revendeur
 YourURLToCreateNewInstance=Pour avoir de nouveaux utilisateurs liés à votre compte revendeur et apparaissant dans votre tableau de bord, il faut utiliser l'URL suivante lors de l'inscription
 YourCommissionsAppearsInMenu=Vos commissions (taux actuel <strong>%s%%</strong>) sont visibles dans le menu %s
