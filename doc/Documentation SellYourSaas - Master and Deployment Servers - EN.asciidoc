@@ -1986,9 +1986,10 @@ exclude_suffix := tmp old bak
 ---------------
 /snap/bin all
 
-! /var/log/mysql
-! /var/log/letsencrypt
-! /var/log/datadog
+!/var/log/mysql
+!/var/log/letsencrypt
+!/var/log/datadog
+!/var/log/clamav/
 
 !/etc/apache2/sellyoursaas-available
 !/etc/apache2/sellyoursaas-online
