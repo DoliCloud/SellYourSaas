@@ -350,7 +350,7 @@ if (empty($login) || empty($dirdb)) {
 
 if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/backup_servername/osu...'
 	// Rsync to get backup into /tmp/restore_instance
-	print "Recreate /tmp/restore_instance directory\n";
+	print "Delete and recreate /tmp/restore_instance directory\n";
 	dol_delete_dir_recursive('/tmp/restore_instance');
 	dol_mkdir('/tmp/restore_instance');
 
