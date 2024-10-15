@@ -348,6 +348,7 @@ if (empty($login) || empty($dirdb)) {
 }
 
 
+// Case we do a restore from a remote backup server
 if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/backup_servername/osu...'
 	// Rsync to get backup into /tmp/restore_instance
 	print "Delete and recreate /tmp/restore_instance directory\n";
@@ -432,6 +433,7 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 	exit(0);
 }
 
+// Case we do a restore from a local backup
 print 'Restore from '.$dirroot." to ".$targetdir.' into instance '.$instance."\n";
 print 'Target SFTP password '.dol_trunc($object->password_os, 2, 'right', 'UTF-8', 1).preg_replace('/./', '*', dol_substr($object->password_os, 3))."\n";
 print 'Target Database password '.dol_trunc($object->password_db, 2, 'right', 'UTF-8', 1).preg_replace('/./', '*', dol_substr($object->password_db, 3))."\n";
