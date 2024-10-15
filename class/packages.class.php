@@ -98,7 +98,7 @@ class Packages extends CommonObject
 		'label' => array('type'=>'varchar(255)', 'label'=>'Label', 'visible'=>1, 'enabled'=>1, 'position'=>30, 'notnull'=>-1, 'searchall'=>1, 'css'=>'minwidth200'),
 		'note_public'   =>array('type'=>'html',			'label'=>'NotePublic',		 'enabled'=>1, 'visible'=>-2,  'position'=>45),
 		'note_private'  =>array('type'=>'html',			'label'=>'NotePrivate',		 'enabled'=>1, 'visible'=>-2,  'position'=>46),
-		'restrict_domains' => array('type'=>'varchar(255)', 'label'=>'RestrictDomainNames', 'visible'=>-1, 'enabled'=>1, 'position'=>40, 'notnull'=>-1, 'help'=>'KeepEmptyForNoRestrictionOnDomain'),
+		'restrict_domains' => array('type'=>'varchar(255)', 'label'=>'RestrictDomainNames', 'visible'=>1, 'enabled'=>1, 'position'=>40, 'notnull'=>-1, 'help'=>'KeepEmptyForNoRestrictionOnDomain'),
 		'srcfile1' => array('type'=>'varchar(255)', 'label'=>'Dir with sources 1', 'visible'=>-1, 'enabled'=>1, 'position'=>51, 'notnull'=>-1, 'css'=>'minwidth500', 'csslist'=>'tdoverflowmax400', 'cssview'=>'wordbreak'),
 		'srcfile2' => array('type'=>'varchar(255)', 'label'=>'Dir with sources 2', 'visible'=>-1, 'enabled'=>1, 'position'=>52, 'notnull'=>-1, 'css'=>'minwidth500', 'csslist'=>'tdoverflowmax400', 'cssview'=>'wordbreak'),
 		'srcfile3' => array('type'=>'varchar(255)', 'label'=>'Dir with sources 3', 'visible'=>-1, 'enabled'=>1, 'position'=>53, 'notnull'=>-1, 'css'=>'minwidth500', 'csslist'=>'tdoverflowmax400', 'cssview'=>'wordbreak'),
@@ -162,8 +162,6 @@ class Packages extends CommonObject
 	 */
 	public function __construct(DoliDB $db)
 	{
-		global $conf;
-
 		$this->db = $db;
 
 		if (!getDolGlobalString('MAIN_SHOW_TECHNICAL_ID')) {
@@ -192,7 +190,7 @@ class Packages extends CommonObject
 	 */
 	public function createFromClone(User $user, $fromid)
 	{
-		global $langs, $extrafields, $hookmanager;
+		global $langs, $extrafields;
 		$error = 0;
 
 		dol_syslog(__METHOD__, LOG_DEBUG);

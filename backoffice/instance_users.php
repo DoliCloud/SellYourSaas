@@ -849,7 +849,7 @@ function print_user_table($newdb, $object)
 			} elseif (in_array($key, array('login', 'lastname', 'firstname', 'email'))) {
 				//print getTitleFieldOfList($arrayfields[$key]['label'], 0, $_SERVER['PHP_SELF'], $key, '', "&id=".$id, ($cssforfield ? 'class="'.$cssforfield.'"' : ''),      $sortfield, $sortorder, ($cssforfield ? $cssforfield.' ' : ''))."\n";
 				print '<td class="liste_titre'.($cssforfield ? ' '.$cssforfield : '').($key == 'status' ? ' parentonrightofpage' : '').'">';
-				print '<input type="text" class="flat maxwidth75" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
+				print '<input type="text" class="flat maxwidth'.($val['type'] == 'integer' ? '50' : '75').'" name="search_'.$key.'" value="'.dol_escape_htmltag(isset($search[$key]) ? $search[$key] : '').'">';
 				print '</td>';
 			} else {
 				print '<td class="liste_titre"></td>';
