@@ -577,7 +577,7 @@ if ($restorestringfromremotebackup) {
 	print $restorestringtoshow;
 	print '</textarea>';
 	print '<br>';
-	print ajax_autoselect('restorestringfromremotebackup');
+	//print ajax_autoselect('restorestringfromremotebackup');
 
 	print '<br><br>';
 }

@@ -387,16 +387,22 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 		print $outputline."\n";
 	}
 
+	if ($return_var > 0) {
+		exit(1);
+	}
+
 	// Change user and permission
 	$command = 'chown admin /tmp/restore_instance/';
+	$param = array();
 	$fullcommand=$command." ".join(" ", $param);
-	$output=array();
+	$output = array();
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
 
 	$command = 'chown -R admin /tmp/restore_instance/'.$object->username_os;
+	$param = array();
 	$fullcommand=$command." ".join(" ", $param);
-	$output=array();
+	$output = array();
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
 
