@@ -443,7 +443,7 @@ if (! in_array($mode, array('testrsync', 'testdatabase', 'test', 'confirmrsync',
 	exit(-6);
 }
 
-if ($dayofmysqldump == 'autoscan') {
+if ($dayofmysqldump == 'autoscan' && $mode != 'testrsync' && $mode != 'confirmrsync') {
 	print 'Scan directory '.$dirroot.'/.. for database dumps.'."\n";
 	$arrayoffiles = dol_dir_list($dirroot.'/..', 'files', 0, 'sql\.gz|sql\.bz2|sql\.zst', null, 'name', SORT_ASC, 1);
 	if (count($arrayoffiles)) {
