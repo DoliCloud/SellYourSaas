@@ -3198,7 +3198,7 @@ chmod +t /dev/shm /var/lib/php/sessions
 
 ==== Define size of upload and session options
 
-Create a file */etc/php/sellyoursaas.ini* and enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
+Create a file */etc/php/sellyoursaas.ini* and enable it by adding the symlinks into *`/etc/php/*.*/*/conf.d`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
 
 [source,bash]
 ---------------
@@ -3212,10 +3212,14 @@ Complete also the parameter *disable_functions* for the *apache* and *fpm* file 
 
 [source,bash]
 ---------------
-pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,shell_exec,system,proc_open,popen,dl,apache_note,apache_setenv,show_source,virtual
+pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,pcntl_unshare,passthru,system,proc_open,dl,apache_note,apache_setenv,show_source,virtual
 ---------------
 
-Warning: Do not add "exec".
+Warning, do not add;
+
+"exec" - used by most PHP applications
+"popen" - used by /etc/init.d/smtp_watchdog_daemon1.php
+"shell_exec" - used by /usr/local/bin/phpsendmail.php
 
 
 ==== Add a wrapper PHP for the mail() function
