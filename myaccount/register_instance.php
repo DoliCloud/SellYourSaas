@@ -413,7 +413,7 @@ if ($reusecontractid) {
 	$hookmanager->initHooks(array('sellyoursaas-register-instance'));
 
 	$http_referer = $_SERVER['HTTP_REFERER'];
-	$tzstring = GETPOST('tzstring');
+	$tzstring = GETPOST('tz_string');
 	$humanprint = (empty($_SESSION['humanprint']) ? '' : $_SESSION['humanprint']);
 
 	dol_syslog("Registration from the page register.php: http_referer=".dol_escape_htmltag($http_referer)." tzstring=".$tzstring." humanprint=".$humanprint);
