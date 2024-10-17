@@ -185,10 +185,10 @@ if (is_numeric($maxemailperdaypaid) && $maxemailperdaypaid > 0) {
 	$MAXPERDAYPAID = (int) $maxemailperdaypaid;
 }
 if (empty($MAXPERDAY)) {
-	$MAXPERDAY=1000;
+	$MAXPERDAY=500;
 }
 if (empty($MAXPERDAYPAID)) {
-	$MAXPERDAYPAID=1000;
+	$MAXPERDAYPAID=500;
 }
 
 
