@@ -23,7 +23,7 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 	public $desc = 'Prospects or Customers SellYourSaas with open recurring invoice';
 	public $require_admin = 0;
 
-	public $enabled = '$conf->sellyoursaas->enabled';
+	public $enabled = 'isModEnabled("sellyoursaas")';
 
 	public $require_module = array();
 	public $picto = 'sellyoursaas@sellyoursaas';

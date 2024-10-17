@@ -105,9 +105,9 @@ class modSellYourSaas extends DolibarrModules
 			10=>array('AUDIT_ENABLE_PREFIX_SESSION', 'chaine', 1, 'Enable column prefix session in audit view', 1, 'current', 0),
 		);
 
-		if (! isset($conf->sellyoursaas) || ! isset($conf->sellyoursaas->enabled)) {
-			$conf->sellyoursaas=new stdClass();
-			$conf->sellyoursaas->enabled=0;
+		if (!isModEnabled("sellyoursaas")) {
+			$conf->sellyoursaas = new stdClass();
+			$conf->sellyoursaas->enabled = 0;
 		}
 
 

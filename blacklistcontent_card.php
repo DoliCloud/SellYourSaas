@@ -149,8 +149,8 @@ $upload_dir = $conf->sellyoursaas->multidir_output[isset($object->entity) ? $obj
 //if ($user->socid > 0) $socid = $user->socid;
 //$isdraft = (isset($object->status) && ($object->status == $object::STATUS_DRAFT) ? 1 : 0);
 //restrictedArea($user, $object->element, $object->id, $object->table_element, '', 'fk_soc', 'rowid', $isdraft);
-if (empty($conf->sellyoursaas->enabled)) {
-	accessforbidden();
+if (!isModEnabled("sellyoursaas")) {
+	accessforbidden('Module not enabled');
 }
 if (!$permissiontoread) {
 	accessforbidden();

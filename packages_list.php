@@ -170,7 +170,7 @@ $permissiontoadd = $user->hasRight('sellyoursaas', 'write');
 $permissiontodelete = $user->hasRight('sellyoursaas', 'delete');
 
 // Security check
-if (empty($conf->sellyoursaas->enabled)) {
+if (!isModEnabled("sellyoursaas")) {
 	accessforbidden('Module not enabled');
 }
 

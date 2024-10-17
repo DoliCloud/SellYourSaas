@@ -23,7 +23,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	public $desc = 'Prospects or Customers SellYourSaas';
 	public $require_admin = 0;
 
-	public $enabled = '$conf->sellyoursaas->enabled';
+	public $enabled = 'isModEnabled("sellyoursaas")';
 
 	public $require_module = array();
 	public $picto = 'sellyoursaas@sellyoursaas';
