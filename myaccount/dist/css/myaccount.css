@@ -292,6 +292,7 @@ ul.nav.nav-tabs {
 
 select#tldid {
     margin-top: 2px;
+    min-width: 270px;
 }
 
 div.tab-content {
