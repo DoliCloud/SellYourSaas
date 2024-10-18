@@ -548,7 +548,10 @@ input.input-field {
     input.sldAndSubdomain {
         max-width: 150px;
     }
-
+	.sldAndSubdomaininput {
+		margin-bottom: 4px;
+		display: inline-block;
+	}
     img#logo {
         padding-top: 10px;
     }

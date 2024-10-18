@@ -669,7 +669,7 @@ if ($reshook == 0) {
 				<div class="fld select-domain required">
 				  <label trans="1"><?php echo $langs->trans("ChooseANameForYourApplication") ?></label>
 				  <div class="linked-flds">
-					  <span class="nowraponall">
+					  <span class="nowraponall sldAndSubdomaininput">
 					<span class="opacitymedium">https://</span>
 					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" required="" />
 					</span>
