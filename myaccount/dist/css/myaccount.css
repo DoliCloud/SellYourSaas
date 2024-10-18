@@ -292,7 +292,7 @@ ul.nav.nav-tabs {
 
 select#tldid {
     margin-top: 2px;
-    min-width: 270px;
+    min-width: 310px;
 }
 
 div.tab-content {
@@ -459,6 +459,12 @@ div.tab-content {
 	}
 }
 
+@media only screen and (max-width: 320px)
+{
+	select#tldid {
+    	min-width: 260px;
+	}
+}
 
 .boxresource .uppercase {
     text-transform: unset !important;
