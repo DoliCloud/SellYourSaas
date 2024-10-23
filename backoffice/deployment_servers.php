@@ -548,7 +548,7 @@ if (!getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP')) {
 			print $form->textwithpicto($langs->trans("StartStopAgent"), $langs->trans("CommandToManageRemoteDeploymentAgent").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'startstop'.$key).'<br>';
 			print '</td>';
 			print '<td class="small">';
-			$commandstartstop = 'sudo ' . getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offline.sh ' . getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL').'/offline.php test|offline|online';
+			$commandstartstop = 'sudo ' . getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offlineonline.sh ' . getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL').'/offline.php test|offline|online';
 			print $form->textwithpicto($langs->trans("OnlineOffline"), $langs->trans("CommandToPutInstancesOnOffline").':<br><br>'.$commandstartstop, 1, 'help', '', 0, 3, 'onoff'.$key).'<br>';
 			print '</td>';
 
@@ -604,7 +604,7 @@ if (!getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP')) {
 		 print '<tr class="oddeven"><td>';
 		 print $langs->trans("CommandToPutInstancesOnOffline").'<br>';
 		 print '<textarea class="flat inputsearch centpercent" type="text" name="SELLYOURSAAS_ANNOUNCE">';
-		 print 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offline.sh '.$conf->global->SELLYOURSAAS_ACCOUNT_URL.'/offline.php test|offline|online';
+		 print 'sudo '.$conf->global->DOLICLOUD_SCRIPTS_PATH.'/make_instances_offlineonline.sh offline.php test|offline|online';
 		 print '</textarea>';
 		 print '<a class="button" href="'.$_SERVER["PHP_SELF"].'?action=makeoffline&token='.newToken().'">'.$langs->trans("PutAllInstancesOffLine").'</a>';
 		 print ' &nbsp; - &nbsp; ';

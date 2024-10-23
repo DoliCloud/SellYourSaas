@@ -1,7 +1,8 @@
 #!/bin/bash
 #---------------------------------------------------------
 # Script to make all instances offline or back online.
-# Virtual hosts redirect to another URL.
+# When switching offline: the directory of virtual hosts will point to the direcotry with virtual hosts for offline answer.
+# When switching online: the directory of virtual hosts is restore to the directory with production virtual hosts.
 #---------------------------------------------------------
 
 source /etc/lsb-release
