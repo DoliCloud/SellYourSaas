@@ -16,6 +16,7 @@ export YELLOW='\033[0;33m'
 echo "***** $0 *****"
 
 if [ "x$2" == "x" ]; then
+   echo "Script to make all instances offline or back online."
    echo "Usage:   $0  urlwhenoffline  test|offline|online"
    echo
    echo "Example: $0  offline.php  test"
