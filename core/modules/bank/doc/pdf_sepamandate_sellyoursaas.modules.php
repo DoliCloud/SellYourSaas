@@ -286,7 +286,7 @@ class pdf_sepamandate_sellyoursaas extends pdf_sepamandate
 
 				$sepaname = '______________________________________________';
 				if ($thirdparty->id > 0) {
-					$sepaname = $thirdparty->name.($object->proprio ? ' ('.$object->proprio.')' : '');
+					$sepaname = $thirdparty->name.($object->owner_name ? ' ('.$object->owner_name.')' : '');
 				}
 				$posY=$pdf->GetY();
 				$posY+=3;

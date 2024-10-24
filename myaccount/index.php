@@ -1345,7 +1345,10 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$companypaymentmode->label           = 'Setup intent for '.$payment_method->id;
 			$companypaymentmode->number          = '';
 			$companypaymentmode->last_four       = $payment_method->card->last4;
-			$companypaymentmode->proprio         = GETPOST('proprio', 'alpha');
+
+			$companypaymentmode->owner_name      = GETPOST('proprio', 'alpha');
+			$companypaymentmode->proprio         = $companypaymentmode->owner_name;
+
 			$companypaymentmode->exp_date_month  = $payment_method->card->exp_month;
 			$companypaymentmode->exp_date_year   = $payment_method->card->exp_year;
 			$companypaymentmode->cvn             = '';
