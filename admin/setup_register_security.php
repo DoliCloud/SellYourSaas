@@ -227,7 +227,7 @@ print '</tr>';
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
 print '<td>';
 $array = array('0' => 'No', '1' => 'NonProfitOrganization', '2' => 'NonProfitOrganizationAndCaritative', '3' => 'NonProfitOrganizationAndSmall');
-print $form->selectarray('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', $array, getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA'), 0, 0, 0, '', 1, 0, 0, '', 'maxwidth200');
+print $form->selectarray('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', $array, getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA'), 0, 0, 0, '', 1, 0, 0, '', 'maxwidth250');
 print '</td>';
 print '<td><span class="opacitymedium small">Set to a value if you want to restrict registration to some non-profit organizations only</span></td>';
 print '</tr>';
@@ -238,6 +238,25 @@ print '<input class="minwidth300" type="text" name="SELLYOURSAAS_NAME_RESERVED" 
 print '</td>';
 print '<td><span class="opacitymedium small">^mycompany[0-9]*\.</span></td>';
 print '</tr>';
+
+// Option to disable the random autoselect of server
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL"), $langs->trans("SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERALHelp"));
+print '</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL', array(), null, 0, 0, 1);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
 
 
 // Google recaptcha

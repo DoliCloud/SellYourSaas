@@ -893,3 +893,6 @@ SELLYOURSAAS_GOOGLE_RECAPTCHA_ON=Enable the Google ReCaptcha service (v3 enterpr
 SELLYOURSAAS_GOOGLE_RECAPTCHA_SITE_KEY=Site key
 SELLYOURSAAS_GOOGLE_RECAPTCHA_SECRET_KEY=Secret key
 DefaultFromAppService=Use the value in the service setup
+SelectAServer=Select a server...
+SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL=Disable auto-suggestion of a server
+SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERALHelp=By default, the system suggests a server (selected randomly among servers in the same country, then among others). You can disable autosuggestion to force the user to select a server.
