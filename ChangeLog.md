@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Add hostname property in list of deployment servers  
 * NEW Add option SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL
 * NEW More protection on public registration
 * NEW Can show the label on server on registration page

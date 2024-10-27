@@ -161,3 +161,5 @@ ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN fk_user_modif integer;
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN note_public text;
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN serversignaturekey varchar(128);
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN label varchar(64);
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN hostname varchar(64);
+
