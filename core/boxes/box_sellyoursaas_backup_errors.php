@@ -119,6 +119,13 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 			}
 
 			if (!$error) {
+				$textbackup = "";
+				if (!$nbinstancebackuperror) {
+					$textbackup .= '<div class="badge badge-status4 nounderline">'.$nbinstancebackuperror.'</div>';
+				} else {
+					$textbackup .= '<div class="badge badge-danger nounderlineimp"><i class="fa fa-exclamation-triangle"></i> '.$nbinstancebackuperror.'</div>';
+				}
+
 				$textremotebackup = "";
 				if (!$nbinstanceremotebackuperror) {
 					$textremotebackup .= '<div class="badge badge-status4 nounderline">'.$nbinstanceremotebackuperror.'</div>';
@@ -139,19 +146,12 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				);
 				$this->info_box_contents[$line][] = array(
 					'td' => 'class="right"',
-					'text' => $textremotebackup,
+					'text' => $textbackup,
 					'url' =>  DOL_URL_ROOT."contrat/list.php?search_options_latestbackup_status=KO&search_options_deployment_status=processing%2Cdone&sortfield=ef.latestbackup_date&sortorder=asc",
 					'tooltip' => $langs->trans("NbPersistentErrorLocalBackup"),
 				);
+
 				$line++;
-
-				$textbackup = "";
-				if (!$nbinstancebackuperror) {
-					$textbackup .= '<div class="badge badge-status4 nounderline">'.$nbinstancebackuperror.'</div>';
-				} else {
-					$textbackup .= '<div class="badge badge-danger nounderlineimp"><i class="fa fa-exclamation-triangle"></i> '.$nbinstancebackuperror.'</div>';
-				}
-
 				$this->info_box_contents[$line][] = array(
 					'td' => 'class="left" width="16"',
 					'url' => DOL_URL_ROOT."contrat/list.php?search_options_latestbackupremote_status=KO&search_options_deployment_status=processing%2Cdone&sortfield=ef.latestbackupremote_date&sortorder=asc",
@@ -163,10 +163,9 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 					'text' => $langs->trans("NbPersistentErrorRemoteBackup"),
 					'asis' => 1,
 				);
-
 				$this->info_box_contents[$line][] = array(
 					'td' => 'class="right"',
-					'text' => $textbackup,
+					'text' => $textremotebackup,
 					'url' =>  DOL_URL_ROOT."contrat/list.php?search_options_latestbackupremote_status=KO&search_options_deployment_status=processing%2Cdone&sortfield=ef.latestbackupremote_date&sortorder=asc",
 					'tooltip' => $langs->trans("NbPersistentErrorRemoteBackup"),
 				);
