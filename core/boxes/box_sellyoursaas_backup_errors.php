@@ -135,13 +135,13 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 
 				$line = 0;
 				$this->info_box_contents[$line][] = array(
-					'td' => 'class="left" width="16"',
+					'td' => 'width="16"',
 					'url' => DOL_URL_ROOT."contrat/list.php?search_options_latestbackup_status=KO&search_options_deployment_status=processing%2Cdone&sortfield=ef.latestbackup_date&sortorder=asc",
 					'logo' => 'contract',
 					'tooltip' => $langs->trans("NbPersistentErrorLocalBackup"),
 				);
 				$this->info_box_contents[$line][] = array(
-					'td' => 'left',
+					'td' => '',
 					'text' => $langs->trans("NbPersistentErrorLocalBackup"),
 					'tooltip' => $langs->trans("NbPersistentErrorLocalBackup"),
 				);
@@ -154,7 +154,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 
 				$line++;
 				$this->info_box_contents[$line][] = array(
-					'td' => 'class="left" width="16"',
+					'td' => 'width="16"',
 					'url' => DOL_URL_ROOT."contrat/list.php?search_options_latestbackupremote_status=KO&search_options_deployment_status=processing%2Cdone&sortfield=ef.latestbackupremote_date&sortorder=asc",
 					'logo' => 'contract',
 					'tooltip' => $langs->trans("NbPersistentErrorRemoteBackup"),
@@ -162,7 +162,6 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$this->info_box_contents[$line][] = array(
 					'td' => '',
 					'text' => $langs->trans("NbPersistentErrorRemoteBackup"),
-					'asis' => 1,
 					'tooltip' => $langs->trans("NbPersistentErrorRemoteBackup"),
 				);
 				$this->info_box_contents[$line][] = array(
