@@ -143,6 +143,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$this->info_box_contents[$line][] = array(
 					'td' => 'left',
 					'text' => $langs->trans("NbPersistentErrorLocalBackup"),
+					'tooltip' => $langs->trans("NbPersistentErrorLocalBackup"),
 				);
 				$this->info_box_contents[$line][] = array(
 					'td' => 'class="right"',
@@ -162,6 +163,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 					'td' => '',
 					'text' => $langs->trans("NbPersistentErrorRemoteBackup"),
 					'asis' => 1,
+					'tooltip' => $langs->trans("NbPersistentErrorRemoteBackup"),
 				);
 				$this->info_box_contents[$line][] = array(
 					'td' => 'class="right"',
