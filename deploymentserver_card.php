@@ -675,10 +675,6 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			print $formfile->showdocuments('sellyoursaas:Deploymentserver', $object->element.'/'.$objref, $filedir, $urlsource, $genallowed, $delallowed, $object->model_pdf, 1, 0, 0, 28, 0, '', '', '', $langs->defaultlang);
 		}
 
-		// Show links to link elements
-		$linktoelem = $form->showLinkToObjectBlock($object, null, array('deploymentserver'));
-		$somethingshown = $form->showLinkedObjectBlock($object, $linktoelem);
-
 
 		print '</div><div class="fichehalfright">';
 

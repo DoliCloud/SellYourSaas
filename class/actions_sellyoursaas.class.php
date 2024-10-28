@@ -713,7 +713,7 @@ class ActionsSellyoursaas
 
 			include_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
 			$companypaymentmode = new CompanyPaymentMode($db);
-			$companypaymentmode->fetch(GETPOST('companymodeid', 'int'));     // Read into llx_societe_rib
+			$companypaymentmode->fetch(GETPOSTINT('companymodeid'));     // Read into llx_societe_rib
 
 			if ($companypaymentmode->id > 0) {
 				$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $object->id, $companypaymentmode, null, 0, 1, 1);

@@ -116,8 +116,9 @@ class Deploymentserver extends CommonObject
 	 */
 	public $fields=array(
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>-1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
-		'ref' => array('type'=>'varchar(128)', 'label'=>'SellYourSaasSubDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Reference of object', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1),
-		'label' => array('type'=>'varchar(64)', 'label'=>'Label', 'enabled'=>'1', 'position'=>11, 'comment'=>'Label to show incombo list on registration page', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1),
+		'ref' => array('type'=>'varchar(128)', 'label'=>'SellYourSaasSubDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Public sub domain or instances', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1),
+		'hostname' => array('type'=>'varchar(64)', 'label'=>'SellYourSaasHostname', 'enabled'=>'1', 'position'=>11, 'comment'=>'Name of the hosting server', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1),
+		'label' => array('type'=>'varchar(64)', 'label'=>'LabelToShow', 'enabled'=>'1', 'position'=>11, 'comment'=>'Label to show incombo list on registration page', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1),
 		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>12, 'notnull'=>0, 'visible'=>1, 'help'=>"FromDomainNameInfo", 'csslist'=>'tdoverflowmax100'),
 		'servercountries' => array('type'=>'varchar(256)', 'label'=>'ServedCountriesServer', 'enabled'=>'1', 'position'=>13, 'notnull'=>0,'visible'=>1, 'help'=>'ServedCountriesServerInfo', 'csslist'=>'tdoverflowmax100'),
 		'entity' =>array('type'=>'integer', 'label'=>'Entity', 'default'=>1, 'enabled'=>1, 'visible'=>0, 'notnull'=>1, 'position'=>20, 'index'=>1),
@@ -131,7 +132,7 @@ class Deploymentserver extends CommonObject
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>-1, 'cssview'=>'wordbreak', 'csslist'=>'small', 'validate'=>'1',),
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
-		'serversignaturekey' => array('type'=>'varchar(128)', 'label'=>'ServerSignatureKey', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>5, 'csslist'=>'tdoverflowmax150'),
+		'serversignaturekey' => array('type'=>'varchar(128)', 'label'=>'ServerSignatureKey', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>-5, 'csslist'=>'tdoverflowmax150'),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModification', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
 	);
 
@@ -1131,7 +1132,7 @@ class Deploymentserver extends CommonObject
 			if (empty($mode)) {
 				$reflist[$value->ref] = $tmpstring;
 			} else {
-				$reflist[$value->ref] = array('ref' => $value->ref, 'fullstring' => $tmpstring, 'status' => $value->status, 'fromdomain' => $value->fromdomainname, 'label' => $value->label);
+				$reflist[$value->ref] = array('ref' => $value->ref, 'fullstring' => $tmpstring, 'status' => $value->status, 'fromdomain' => $value->fromdomainname, 'label' => $value->label, 'servercountries' => $value->servercountries);
 			}
 		}
 		return $reflist;

@@ -3,9 +3,10 @@
 
 ## Unreleased
 
+* NEW Add hostname property in list of deployment servers  
+* NEW Add option SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL
 * NEW More protection on public registration
 * NEW Can show the label on server on registration page
-* FIX Add alter table for column 'label' on llx_sellyoursaas_deploymentserver
 * NEW Add label on deployment servers
 * NEW When invoice is flagged as dispute, we do not try to take payment
 * NEW Can add recaptcha on registration page.

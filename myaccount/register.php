@@ -673,18 +673,35 @@ if ($reshook == 0) {
 					<span class="opacitymedium">https://</span>
 					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" required="" />
 					</span>
-					<select<?php echo $disabled; ?> name="tldid" id="tldid" >
+					<select<?php echo $disabled; ?> name="tldid" id="tldid" placeholder="aaa">
 						<?php
 						// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 						$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
+
 						$domainstosuggest = array();
 						$domainstosuggestcountryfilter = array();
+
 						if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 							$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));   // This is list of all sub domains to show into combo list
 						} else {
 							$staticdeploymentserver = new Deploymentserver($db);
 							$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND', 1);
 						}
+
+						// Get the country of the user
+						$ipuser = getUserRemoteIP();
+						$countryuser = dolGetCountryCodeFromIp($ipuser);
+						if (GETPOST('country')) {	// Can force a country instead of default autodetected value
+							$countryuser = GETPOST('country');
+						}
+						if (empty($countryuser)) {
+							$countryuser = 'us';
+						}
+						$countryuser = strtolower($countryuser);
+
+						// For tests
+						//$countryuser = 'es';
+						//$conf->global->SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL = 1;
 
 						foreach ($listofdomain as $val) {
 							$newval = $val['fullstring'];
@@ -723,29 +740,25 @@ if ($reshook == 0) {
 									continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
 								}
 							}
-							if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
-								$deploymentserver = new Deploymentserver($db);
-								$deploymentserver->fetch(0, $newval);
 
-								if (!empty($deploymentserver->servercountries)) {
-									$servercountries = explode(',', $deploymentserver->servercountries);
-									$ipuser = getUserRemoteIP();
-									$countryuser = dolGetCountryCodeFromIp($ipuser);
-									if (GETPOST('country')) {	// Can force a country instead of default autodetected value
-										$countryuser = GETPOST('country');
-									}
-									if (empty($countryuser)) {
-										$countryuser='US';
-									}
-									$countryuser = strtolower($countryuser);
+							// Restriction on country
+							if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
+								$servercountriesstring = $val['servercountries'];
+								//var_dump($servercountries);
+								//$deploymentserver = new Deploymentserver($db);
+								//$deploymentserver->fetch(0, $newval);
+
+								if (!empty($servercountriesstring)) {
+									$servercountries = explode(',', $servercountriesstring);
 
 									if (in_array($countryuser, $servercountries)) {
 										if (! preg_match('/^\./', $newval)) {
 											$newval='.'.$newval;
 										}
 										$domainstosuggestcountryfilter[] = $newval; // Servers with user country
+										$domainstosuggest[] = $newval;
 									} else {
-										print '<!-- '.$newval.' disabled. Server country range '.$deploymentserver->servercountries.' does not contain '.$countryuser.' -->';
+										print '<!-- '.$newval.' disabled. Server country list '.$servercountriesstring.' does not contain '.$countryuser.' -->';
 										continue;
 									}
 								} else {
@@ -761,35 +774,58 @@ if ($reshook == 0) {
 								$domainstosuggest[] = $newval;
 							}
 						}
-						if (!empty($domainstosuggestcountryfilter)) {
-							foreach ($domainstosuggest as $key => $value) {
-								print '<!-- '.$value.' disabled. Matching server found with user location -->';
+
+						if (getDolGlobalString('SELLYOURSAAS_IF_ONE_SERVER_MATCH_COUNTRY_DO_NOT_SUGGEST_NO_COUNTRY_SERVERS')) {
+							if (!empty($domainstosuggestcountryfilter)) {
+								foreach ($domainstosuggest as $key => $value) {
+									print '<!-- '.$value.' disabled. Matching server found with user location -->';
+								}
+								$domainstosuggest = $domainstosuggestcountryfilter;
 							}
-							$domainstosuggest = $domainstosuggestcountryfilter;
 						}
 
 						// Defined a preselected domain
 						$randomselect = '';
 						$randomindex = 0;
 						if (empty($tldid) && ! GETPOSTISSET('tldid') && ! GETPOSTISSET('forcesubdomain') && count($domainstosuggest) >= 1) {
-							$maxforrandom = (count($domainstosuggest) - 1);
+							if (!empty($domainstosuggestcountryfilter)) {
+								// If there is at least one server that match the country, we make our random choice among them
+								$domainstouseforrandom = $domainstosuggestcountryfilter;
+							} else {
+								// If there is no server matching the country, we make our random choice among all enabled servers
+								$domainstouseforrandom = $domainstosuggest;
+							}
+
+							$maxforrandom = (count($domainstouseforrandom) - 1);
 							$randomindex = mt_rand(0, $maxforrandom);
-							$randomselect = $domainstosuggest[$randomindex];
+							$randomselect = $domainstouseforrandom[$randomindex];
 						}
-						// Force selection with no way to change value if SELLYOURSAAS_FORCE_RANDOM_SELECTION is set
+
+						// If SELLYOURSAAS_FORCE_RANDOM_SELECTION is set, force the selection on the value randomly selected with no way to select another choice;
 						if (getDolGlobalString('SELLYOURSAAS_FORCE_RANDOM_SELECTION') && !empty($randomselect)) {
 							$domainstosuggest = array();
 							$domainstosuggest[] = $randomselect;
 						}
+
+						// If SELLYOURSAAS_FORCE_NO_SELECTION is set, force a human selection (no auto-selection at all)
+						if (getDolGlobalString('SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL') && count($domainstosuggest) > 1) {
+							array_unshift($domainstosuggest, "SelectAServer");
+							$randomselect = null;
+						}
+
 						foreach ($domainstosuggest as $val) {
 							$valwithoutfirstdot = preg_replace('/^\./', '', $val);
-							$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
+							if (preg_match('/selectaserver/i', $val)) {
+								print '<option value="" class="opacitymedium" data-html="'.dol_escape_htmltag('<span class="opacitymedium">'.$langs->trans("SelectAServer").'</span>').'">'.$langs->trans("SelectAServer").'</option>';
+							} else {
+								$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
 
-							print '<option value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
-							print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
-							print '>';
-							print $valtoshow;
-							print '</option>';
+								print '<option value="'.dol_escape_htmltag($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
+								print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
+								print '>';
+								print $valtoshow;
+								print '</option>';
+							}
 						} ?>
 					</select>
 						<?php

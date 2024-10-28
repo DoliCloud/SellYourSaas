@@ -803,8 +803,8 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('ip_confirm_email', "IPConfirmEmail", 'ip', 180, '', 'thirdparty', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('source', "Source", 'varchar', 104, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax200'));
 		$resultx=$extrafields->addExtraField('source_utm', "SourceUtm", 'varchar', 104, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
-		$resultx=$extrafields->addExtraField('firstname', "FirstName", 'varchar', 105, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('lastname', "LastName", 'varchar', 106, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('firstname', "FirstName", 'varchar', 105, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax120'));
+		$resultx=$extrafields->addExtraField('lastname', "LastName", 'varchar', 106, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax120'));
 		$param=array('options'=>array('auto'=>null));	// Must use a non reversible password.
 		$resultx=$extrafields->addExtraField('password', "DashboardPassword", 'password', 150, '128', 'thirdparty', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('oldpassword', "OldDashboardPassword", 'password', 151, '128', 'thirdparty', 0, 0, '', $param, 0, '', -2, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');

@@ -1,23 +1,23 @@
 # Dolibarr language file - Source file is en_US - sellyoursaas
-RestoreInstance=Restaurar
+NonRedirectContractWithInvoiceRecCreateDuringMonth=Contratos não redirecionados com faturas recorrentes criadas durante o mês
 ConversionContent=Conteúdo do rodapé na "página de conversão" (apenas uma vez registrado um primeiro modo de pagamento)
 AccountAlreadyExistsForEmail=Já existe uma conta para este email. Se você já é um usuário registrado e deseja criar outra instância para sua conta, faça logon no <a href="%s" target="_myaccount">painel do cliente</a> para criar outra instância.
 XDaysBeforeEndOfTrialNoteForFreeMode=Observação: ao final do teste (um lembrete será enviado por e-mail 7 dias antes do término), ou você confirma seu desejo de continuar usando a instância, e o aplicativo permanecerá gratuito até o cancelamento, ou você não confirma , e neste caso, a instância e seus dados serão destruídos.
+XDaysAfterEndOfPeriodInstanceSuspendedFree=A renovação da sua instância não foi validada e sua instância <strong>%s</strong> (expirada há <strong>%s</strong> dias) está suspensa no momento (a seu pedido ou após uma ausência prolongada de uso). Ele será definitivamente destruído em <strong>%s</strong> dias.
 OldTickets=Ingressos antigos
 OldTicketsDesc=Lista de seus antigos tickets fechados ou abertos
-CancelInstance=Fechar instância
 DeploymentDate=Data de implantação
 SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT=Número máximo de instâncias por padrão para novo cliente em potencial ou cliente
 PleaseReadFAQFirst=Antes de enviar qualquer ticket de suporte, verifique se a resposta ainda não está disponível aqui: <br> <br> <center> <a href="%s" target="_faq"> FAQs (Perguntas Frequentes) </a> </center>
 RecreateAuthorizedKey=Criar arquivo allowed_keys
-CommandToMoveInstanceOnAnotherDeploymentServer=Comando para mover várias ou todas as instâncias para outro servidor de implantação
+DateHardAlertEndTrial=Data do último alerta rígido para o fim do julgamento
 DeploymentIPQuality=Índice de qualidade de IP
-DeploymentIPQualityDesc=Quando um cadastro é feito, é feita uma verificação no IP do assinante para: <br> - http://check.getipintel.net/check.php?ip=IP&contact=&flag=f <br> e/ou <br> - https://www. ipqualityscore.com
 CustomUrlDesc=Ter um URL personalizado adicionará um segundo arquivo virtualhost para a instância, mas terminando com .custom.conf.<br>Exemplo: /etc/apache2/sellyoursaas-available/seunome.withX.domainname .com.custom.conf<br>Se alguns arquivos de certificado SSL forem encontrados (no master em /home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt), eles serão usados. Caso contrário, eles podem ser gerados pelo letsencrypt. Em caso de erro, os arquivos de certificado curinga para *.withX.domainname.com serão usados.
 ClosingAccountIsTemporarlyDisabledTryLater=A exclusão de instâncias existentes é suspensa temporariamente para fins de manutenção. Por favor tente mais tarde...
 SSHPublicKeyDesc=Todas as chaves públicas SSH implantadas em cada nova instância. As chaves são implantadas no arquivo .ssh/authorized_keys_support. Você pode incluir aqui o conteúdo do arquivo /home/admin/.ssh/id_rsa_sellyoursaas.pub e as chaves públicas da equipe de administradores de TI.
 CustomVirtualHostDir=Linha RequireAll de host virtual personalizado
 EnterAVirtualHostDirLine=Insira uma linha para incluir na seção RequireAll da seção Directory do arquivo virtualhost do servidor da web. Por exemplo: <br> Exigir ip 1.2.3.4/16 <br> Você deve suspender e cancelar a suspensão da instância para que isso seja efetivo.
+ToUpdateDBPassword=Para atualizar a senha de um usuário do banco de dados, você pode fazer<br>SET PASSWORD FOR 'dbu...'@'%%' = PASSWORD('newpassword'); SET PASSWORD FOR 'dbu...'@'localhost' = PASSWORD('newpassword'); FLUSH PRIVILEGES;
 ErrorEMailAddressBannedForSecurityReasons=Este tipo de endereço de e-mail foi banido por motivos de segurança. Use outro endereço de e-mail ou entre em contato conosco se não puder fazer o contrário.
 RegistrationURLDesc=Para obter uma URL para registrar uma instância, você deve ter criado um serviço na categoria boa e com o tipo "Aplicativo".
 IHaveAVATID=Eu tenho um ID de imposto/IVA
@@ -40,9 +40,6 @@ MigrationSuccessNote=Aviso: Para acessar sua instância, você precisa usar o lo
 UpgradeErrorContent=Ocorreu um erro ao tentar atualizar automaticamente:\n&#60;adicione sua mensagem aqui&#62;
 ErrorListSupport=lista de erros
 SELLYOURSAAS_AUTOUPGRADE_CODE=Grupo de tickets para sugerir atualização automática
-SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID=Lista de ID de clientes com pagamento SEPA habilitado
 OptionYourWebsitePrerequisites=Pré-requisitos : Você deve ter um site ativo no módulo de sites da sua instância para instalar esta opção
-SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Chave no mestre para assinar mensagens de ação remota (o valor padrão não é definido no nível do servidor de implementação)
-AddPaymentMethodForCardWarningIfTransfer=AVISO: você está prestes a inserir uma forma de pagamento por débito direto com CARTÃO recorrente e automatizado para suas instâncias, mas já tem uma forma de pagamento definida como "Transferência de crédito" para as instâncias <b>%s</b>.<br>Isso será substituído por um automatizado pagamento com cartão de débito ou crédito, portanto, certifique-se de ter cancelado quaisquer processos internos de pagamento por transferência bancária em sua empresa, para evitar pagamentos duplos, antes de salvar seu novo método de débito direto.
-AddPaymentMethodForSEPAWarningIfTransfer=AVISO: você está prestes a inserir uma forma de pagamento por débito direto SEPA recorrente automatizado para suas instâncias, mas já tem uma forma de pagamento definida como "Transferência de crédito" para as instâncias <b>%s</b>.<br>Isso será substituído por um automatizado Pagamento por débito direto Sepa, portanto, certifique-se de ter cancelado quaisquer processos de pagamento por transferência bancária interna em sua empresa, para evitar pagamentos duplos, antes de salvar seu novo método de débito direto.
-ServerSignatureKey=Chave de assinatura do servidor
+AddPaymentMethodForCardWarningIfTransfer=AVISO: Você está prestes a inserir um método de pagamento automático recorrente de débito direto no CARTÃO para sua(s) instância(s), mas já tem uma fatura recorrente definida para ser paga com uma "Transferência de Crédito" para a(s) instância(s) <b>%s</b>.<br>Isso será substituído por um pagamento automático de cartão de débito ou crédito, portanto, certifique-se de ter cancelado todos os processos internos de pagamento por transferência bancária em sua empresa para evitar pagamentos duplicados antes de salvar seu novo modo de pagamento.
+AddPaymentMethodForSEPAWarningIfTransfer=AVISO: Você está prestes a inserir um método de pagamento de débito direto SEPA recorrente automatizado para sua(s) instância(s), mas já tem uma fatura recorrente definida para ser paga com uma "Transferência de Crédito" para instância(s) <b>%s</b>.<br>Isso será substituído por um pagamento de débito direto SEPA automatizado, portanto, certifique-se de ter cancelado todos os processos internos de pagamento por transferência bancária em sua empresa para evitar pagamentos duplicados antes de salvar seu novo modo de pagamento.

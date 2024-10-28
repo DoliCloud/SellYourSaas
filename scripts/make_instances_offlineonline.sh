@@ -1,7 +1,8 @@
 #!/bin/bash
 #---------------------------------------------------------
 # Script to make all instances offline or back online.
-# Virtual hosts redirect to another URL.
+# When switching offline: the directory of virtual hosts will point to the direcotry with virtual hosts for offline answer.
+# When switching online: the directory of virtual hosts is restore to the directory with production virtual hosts.
 #---------------------------------------------------------
 
 source /etc/lsb-release
@@ -15,6 +16,7 @@ export YELLOW='\033[0;33m'
 echo "***** $0 *****"
 
 if [ "x$2" == "x" ]; then
+   echo "Script to make all instances offline or back online."
    echo "Usage:   $0  urlwhenoffline  test|offline|online"
    echo
    echo "Example: $0  offline.php  test"
