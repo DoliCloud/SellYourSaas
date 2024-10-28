@@ -347,8 +347,8 @@ if (empty($urllogo) && getDolGlobalString($constlogosmall)) {
 }
 
 // Security graphical code
-if (function_exists("imagecreatefrompng") && ! $disabled) {
-	$captcha = 1;
+if (! $disabled) {
+	$captcha = '';
 	$captcha_refresh = img_picto($langs->trans("Refresh"), 'refresh', 'id="captcha_refresh_img"');
 }
 
