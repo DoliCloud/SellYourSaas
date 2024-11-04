@@ -225,8 +225,8 @@
 		#include <abstractions/consoles>
 		#include <abstractions/nameservice> 
 		
-		/usr/bin/crontab rix,
 		/etc/crontab r,
+		/usr/bin/crontab rix,
 		/var/spool/cron/crontabs/** r,
 		
 		allow owner /etc/passwd r,
