@@ -125,7 +125,8 @@ if (! $error) {
 		$frequency=1;
 		$frequency_unit='m';
 		$discountcode = strtoupper(trim(GETPOST('discountcode', 'aZ09')));	// If a discount code was prodived on page
-		/* If a discount code exists on contract level, it was used to prefill the payment page, so it is received into the GETPOST('discountcode', 'int').
+		$discountcode = preg_replace('/\-\d+$/', '', $discountcode);		// Remove the part "-123" into "MYCODE-123"
+		/* If a discount code exists on contract level, it was used to prefill the payment page, so it is received into the GETPOST('discountcode', 'aZ09').
 		if (empty($discountcode) && ! empty($contract->array_options['options_discountcode'])) {    // If no discount code provided, but we find one on contract, we use this one
 			$discountcode = $contract->array_options['options_discountcode'];
 		}*/

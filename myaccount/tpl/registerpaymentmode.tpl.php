@@ -87,7 +87,8 @@ if ($totalInvoiced == 0) {
 		}
 	}
 
-	$defaultdiscountcode = GETPOST('discountcode', 'aZ09');
+	$defaultdiscountcode = strtoupper(trim(GETPOST('discountcode', 'aZ09')));
+	$defaultdiscountcode = preg_replace('/\-\d+$/', '', $defaultdiscountcode);	// Remove the part "-123" into "MYCODE-123"
 	$acceptdiscountcode = getDolGlobalInt('SELLYOURSAAS_ACCEPT_DISCOUNTCODE');
 
 	// We are not yet a customer

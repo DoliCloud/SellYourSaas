@@ -94,7 +94,8 @@ dol_syslog("GET is ".join(',', $_GET));
 
 $contractids = explode(',', GETPOST('contractids', 'alpha'));
 
-$discountcode = GETPOST('discountcode', 'aZ09');
+$discountcode = strtoupper(trim(GETPOST('discountcode', 'aZ09')));
+$discountcode = preg_replace('/\-\d+$/', '', $discountcode);	// Remove the part "-123" into "MYCODE-123"
 
 $tmpcontract = new Contrat($db);
 $tmpproduct = new Product($db);
