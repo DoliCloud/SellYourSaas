@@ -585,7 +585,7 @@ SELLYOURSAAS_ACCEPT_DISCOUNTCODE=Accept discount code when entering payment mode
 SELLYOURSAAS_ENABLE_OPTINMESSAGES=Add an optin checkbox "Accept commercial offers" (on registration and customer dashboard)
 DiscountCodeDesc=The discount code used to register or to enter payment. The effective discount code used to define the real discount for invoice generation is the one saved at the recurring invoice level.
 DiscountCodeNotValid=Discount code is not valid (will be ignored)
-DiscountCodeIsValid=Discount code is valid. Discount will be %s %%
+DiscountCodeIsValid=Discount code is valid. Discount will be %s
 SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION=Force date of invoice to date of validation (instead of date of covered period) 
 LoginSupportHelp=Login to use to create a support user account on customer instances. This value is also used to bypass the maintenance mode when found into the User-Agent.
 SellYourSaasResellerUrl=URL of custom reseller program description
@@ -793,7 +793,7 @@ OpenCloseStatus=Opened | Closed
 FromDomainName=Only from domain
 FromDomainNameInfo=If the subdomain must be visible only when dashboard or registration page is on a particular domain, enter the subdomain. Put a dummy name will make the subdomain never visible, except if you add &forcesubdomain= as parameter on registration page.
 SubDomainName=Subdomain name
-SellYourSaasSubDomainName=Deployment public domain
+SellYourSaasSubDomainName=Public deployment domain
 SellYourSaasHostname=Deployment hostname
 LabelToShow=Label to show
 RecordsImported=%s Record(s) imported

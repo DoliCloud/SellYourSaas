@@ -242,16 +242,21 @@ if (! $error) {
 					$frequency = $tmpproduct->duration_value;
 					$frequency_unit = $tmpproduct->duration_unit;
 
+					// Process the discount code
 					if ($tmpproduct->array_options['options_register_discountcode']) {
 						$tmpvaliddiscountcodearray = explode(',', $tmpproduct->array_options['options_register_discountcode']);
 						foreach ($tmpvaliddiscountcodearray as $valdiscount) {
 							$valdiscountarray = explode(':', $valdiscount);
 							$tmpcode = strtoupper(trim($valdiscountarray[0]));
-							$tmpval = str_replace('%', '', trim($valdiscountarray[1]));
-							if (is_numeric($tmpval)) {
-								$validdiscountcodearray[$tmpcode] = array('code'=>$tmpcode, 'type'=>'percent', 'value'=>$tmpval);
+							if (preg_match('/%/', trim($valdiscountarray[1]))) {	// This is a percent discount
+								$tmpval = (int) str_replace('%', '', trim($valdiscountarray[1]));
+								if ($tmpval > 0 && $tmpval < 100) {
+									$validdiscountcodearray[$tmpcode] = array('code'=>$tmpcode, 'type'=>'percent', 'value'=>$tmpval);
+								} else {
+									dol_syslog("Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
+								}
 							} else {
-								dol_syslog("Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
+								dol_syslog("Error: Type of discount not yet supported for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
 							}
 						}
 						// If we entered a discountcode or get it from contract
@@ -264,7 +269,7 @@ if (! $error) {
 						//var_dump($validdiscountcodearray); var_dump($discountcode); var_dump($discounttype); var_dump($discountval); exit;
 						if ($discounttype == 'percent') {
 							if ($discountval > $discount) {
-								$discount = $discountval;		// If discount with coupon code is higher than the one defined into contract.
+								$discount = $discountval;		// If discount with coupon code is higher than the one defined into contract, we use it.
 							}
 						}
 					}

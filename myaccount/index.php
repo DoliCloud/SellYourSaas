@@ -1239,7 +1239,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 			if ($mythirdpartyaccount->client == 2) {
 				dol_syslog("--- Set status of thirdparty to prospect+client instead of only prospect", LOG_DEBUG, 0);
-				$mythirdpartyaccount->set_as_client();
+				$mythirdpartyaccount->setAsCustomer();
 			}
 
 			if (! $error) {
