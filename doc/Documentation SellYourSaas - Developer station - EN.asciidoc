@@ -138,6 +138,14 @@ relayhost=127.0.0.1:1025
 ---------------
 
 
+=== Installing Ansible
+
+[source,bash]
+---------------
+apt install ansible
+---------------
+
+
 === Installing ClamAV
 
 Install clamav and clamav-daemon
@@ -357,16 +365,36 @@ You can setup Remmina with:
 If you got this error:
 ModuleNotFoundError: No module named 'ansible.module_utils.six.moves'
 
-It probably means you try to execute a remote ansible rule on a new version of ansible with an old version of ansible.
-See compatible version on this page: https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix
+or
+
+If you got this error:
+"The following modules failed to execute: ansible.legacy.setup"
+
+
+It probably means you try to execute a remote ansible rule on a new version of ansible, from an old version of ansible.
+See compatible version on this page: 
+https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix
 
 Check ansible version:
+
 ansible --version
 
-Try to instal last version:
+If ansible version is not compatible with python versions (local and remote), you must update ansible:
+
 sudo add-apt-repository --yes --update ppa:ansible/ansible
 sudo apt update
 sudo apt upgrade
+sudo apt install python3-pip
+
 sudo apt install ansible -y
+or 
+pip install --force-reinstall ansible==9.11.0
+
 sudo ansible --version
+
+
+If ansible is not using the correct version of python, you can force to use the python3 by adding this in your host:
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
 
