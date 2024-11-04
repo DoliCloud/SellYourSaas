@@ -3858,7 +3858,9 @@ certbot
   *charge.dispute.funds_withdraw*		# When a withdraw is done
   *payment_intent.succeeded*			# When a payment is created (required to flag SEPA payments as paid)
   *payment_intent.payment_failed*		# When a payment fails (required to flag SEPA payments as error)
-
+  Not yet but may be used in a future, enable also the WebHooks for the message:
+  *charge.dispute.create*				# When a dispute start
+  *charge.dispute.closed*				# When a dispute is closed
 
 On *Deployment servers*:
 
