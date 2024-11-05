@@ -141,6 +141,9 @@ if ($action == 'set') {
 		if (GETPOSTISSET('SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION')) {
 			dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION", GETPOST("SELLYOURSAAS_RESELLER_MIN_INSTANCE_PRICE_REDUCTION"), 'chaine', 0, '', $conf->entity);
 		}
+		if (GETPOSTISSET('SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS')) {
+			dolibarr_set_const($db, "SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS", GETPOST("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS"), 'chaine', 0, '', $conf->entity);
+		}
 	}
 
 	if (! $error) {
@@ -260,6 +263,13 @@ if ($allowresellerprogram) {
 		print '<td><span class="opacitymedium small">30 %</span></td>';
 		print '</tr>';
 	}
+
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS").'</td>';
+	print '<td>';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS" value="'.getDolGlobalString('SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS', 4).'"> month(s)';
+	print '</td>';
+	print '<td><span class="opacitymedium small">4</span></td>';
+	print '</tr>';
 }
 
 print '</table>';

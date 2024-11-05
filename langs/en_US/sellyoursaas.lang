@@ -902,3 +902,4 @@ ErrorDateEndFreePeriodTooLate=End of period date must be before or %s
 ErrorDateEndFreePeriodTooEarly=End of free period must be after the installation date
 EditFreePeriodDateDone=End of free period sucessfully updated
 FreePeriodeDateAlreadyThisDate=End of free periode is already at this date
+SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS=Max number of month for free period after installation
