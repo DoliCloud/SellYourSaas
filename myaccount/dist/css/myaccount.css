@@ -17,9 +17,21 @@ label.nobold {
     display: inline-grid;
 }
 
+.jnotify-container {
+	position: fixed !important;
+    text-align: center;
+    min-width: 480px;
+    width: auto;
+    max-width: 1024px;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    padding-top: 10px !important;
+    word-wrap: break-word;    
+}
 .jnotify-container .jnotify-notification .jnotify-message {
-	box-shadow: 2px 3px 6px #eee;
+	/* box-shadow: 2px 3px 6px #eee; */
     border-radius: 10px;
+    padding: 20px;
 }
 
 .jnotify-notification-warning .jnotify-message {
