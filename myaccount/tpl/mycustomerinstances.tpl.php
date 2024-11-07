@@ -509,7 +509,7 @@ if (count($listofcontractidreseller) == 0) {
 			if ($foundtemplate > 1) {
 				$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 				if (! empty($tmpcustomer->array_options['options_domain_registration_page'])
-					&& $tmpcustomer->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+					&& $tmpcustomer->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 					$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$tmpcustomer->array_options['options_domain_registration_page'];
 					if (getDolGlobalString($newnamekey)) {
 						$sellyoursaasemail = getDolGlobalString($newnamekey);

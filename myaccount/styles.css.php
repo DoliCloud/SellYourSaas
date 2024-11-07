@@ -126,6 +126,8 @@ span.discountcodeko {
 	color: #800;
 }
 
+.maxwidthdate  { max-width: 100px; }
+
 .badge-status1 {
     background-color: #bc9526 !important;
 }
