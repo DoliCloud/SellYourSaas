@@ -172,6 +172,7 @@ $bic = GETPOST('bic', 'alphanohtml');
 
 
 $MAXINSTANCEVIGNETTE = 4;
+$MAXMONTHFORTRIAL = 4;
 
 // Load variable for pagination
 $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : ($mode == 'instance' ? $MAXINSTANCEVIGNETTE : 20);
@@ -2129,11 +2130,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		exit();
 	}
-} elseif ($action == 'confirmeditfreeperiod' && getDolGlobalInt("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS", 4) > 0) {
+} elseif ($action == 'confirmeditfreeperiod' && getDolGlobalInt("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS", $MAXMONTHFORTRIAL) > 0) {
 	$error = 0;$nothingdone =0;
 	$contractid = GETPOSTINT("contractid");
-	$freeprioddate = dol_stringtotime(GETPOST("freeperioddate"));
-	$maxnbmonthfreeperiod = getDolGlobalInt("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS", 4);
+	$freeprioddate = dol_mktime(0, 0, 0, GETPOSTINT("freeperioddatemonth"), GETPOSTINT("freeperioddateday"), GETPOSTINT("freeperioddateyear"));
+	$maxnbmonthfreeperiod = getDolGlobalInt("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS", $MAXMONTHFORTRIAL);
 	if ($contractid <= 0) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
 		header("Location: ".$backtourl);
@@ -2144,11 +2145,12 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		header("Location: ".$backtourl);
 		exit;
 	}
-	if ($mythirdpartyaccount->isareseller != 1 || !array_key_exists($contract->fk_soc, $listofcustomeridreseller) || !array_key_exists(GETPOSTINT("contractid"), $listofcontractidreseller)) {
+	if ($mythirdpartyaccount->isareseller != 1 || !array_key_exists($contract->socid, $listofcustomeridreseller) || !array_key_exists(GETPOSTINT("contractid"), $listofcontractidreseller)) {
 		setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
 		header("Location: ".$backtourl);
 		exit;
 	}
+
 	$db->begin();
 
 	$tmpcontract = new Contrat($db);
@@ -2159,8 +2161,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	}
 	if (!$error) {
 		$date_contract = $tmpcontract->date_contrat;
-		$date_endfreeperiod = dol_stringtotime(dol_print_date($tmpcontract->array_options["options_date_endfreeperiod"], '%d/%m/%Y'));
-		if ($date_endfreeperiod != $freeprioddate) {
+		$date_currentendoffreeperiod = $tmpcontract->array_options["options_date_endfreeperiod"];
+
+		if ($date_currentendoffreeperiod != $freeprioddate) {
 			if ($date_contract < $freeprioddate) {
 				$maxendfreeperiod = dol_time_plus_duree($date_contract, $maxnbmonthfreeperiod, 'm');
 				if ($maxendfreeperiod >= $freeprioddate) {
@@ -2182,6 +2185,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$nothingdone = 1;
 		}
 	}
+
 	if ($error) {
 		$db->rollback();
 	} else {
@@ -2192,6 +2196,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			setEventMessages($langs->trans("EditFreePeriodDateDone"), null, 'mesgs');
 		}
 	}
+
 	header("Location: ".$backtourl);
 	exit;
 }

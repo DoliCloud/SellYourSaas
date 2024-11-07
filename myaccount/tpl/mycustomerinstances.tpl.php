@@ -437,7 +437,7 @@ if (count($listofcontractidreseller) == 0) {
 				}
 			} else { // If there is no product, this is a free product
 				print '<span class="opacitymedium small">';
-				print($this->description ? $this->description : ($line->label ? $line->label : $line->libelle));
+				print ($line->description ? $line->description : ($line->label ? $line->label : $line->libelle));
 				// TODO
 				print ' / '.$langs->trans("Month");
 				print '</span>';
