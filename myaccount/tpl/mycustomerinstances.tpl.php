@@ -534,7 +534,23 @@ if (count($listofcontractidreseller) == 0) {
 
 					print ' <span style="color:'.$color.'">';
 					if ($contract->array_options['options_date_endfreeperiod'] > 0) {
-						print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
+						if ($action == "editfreeperiod" && GETPOST("idcontract", "int") == $contract->id) {
+							print '<form name="formupdatefreedate">';
+							print '<input type="hidden" name="token" value="'.newToken().'">';
+							print '<input type="hidden" name="action" value="confirmeditfreeperiod">';
+							print '<input type="hidden" name="mode" value="mycustomerinstances">';
+							print '<input type="hidden" name="backtourl" value="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances">';
+							print '<input type="hidden" name="contractid" value="'.$contract->id.'">';
+							
+							print $langs->trans("TrialUntil");
+							print $form->selectDate($contract->array_options['options_date_endfreeperiod'], "freeperioddate");
+							print $form->buttonsSaveCancel("Save", "Cancel", array(), true);
+							print "</form>";
+						} else {
+							print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
+							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=editfreeperiod&idcontract='.$contract->id.'&token='.newToken().'#contractid'.$contract->id.'"> '.img_edit().'</a>';
+						}
+
 					} else {
 						print $langs->trans("Trial");
 					}
