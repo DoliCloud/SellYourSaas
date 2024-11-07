@@ -2129,6 +2129,71 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		exit();
 	}
+} elseif ($action == 'confirmeditfreeperiod' && getDolGlobalInt("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS", 4) > 0) {
+	$error = 0;$nothingdone =0;
+	$contractid = GETPOSTINT("contractid");
+	$freeprioddate = dol_stringtotime(GETPOST("freeperioddate"));
+	$maxnbmonthfreeperiod = getDolGlobalInt("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS", 4);
+	if ($contractid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if (!$freeprioddate) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("DateEndTrial")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($mythirdpartyaccount->isareseller != 1 || !array_key_exists($contract->fk_soc, $listofcustomeridreseller) || !array_key_exists(GETPOSTINT("contractid"), $listofcontractidreseller)) {
+		setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	$db->begin();
+
+	$tmpcontract = new Contrat($db);
+	$res = $tmpcontract->fetch($contractid);
+	if ($res <= 0) {
+		setEventMessages($tmpcontract->error, null, 'errors');
+		$error++;
+	}
+	if (!$error) {
+		$date_contract = $tmpcontract->date_contrat;
+		$date_endfreeperiod = dol_stringtotime(dol_print_date($tmpcontract->array_options["options_date_endfreeperiod"], '%d/%m/%Y'));
+		if ($date_endfreeperiod != $freeprioddate) {
+			if ($date_contract < $freeprioddate) {
+				$maxendfreeperiod = dol_time_plus_duree($date_contract, $maxnbmonthfreeperiod, 'm');
+				if ($maxendfreeperiod >= $freeprioddate) {
+					$tmpcontract->array_options["options_date_endfreeperiod"] = $freeprioddate;
+					$res = $tmpcontract->update($user);
+					if ($res <= 0) {
+						setEventMessages($tmpcontract->error, null, 'errors');
+						$error++;
+					}
+				} else {
+					setEventMessages($langs->trans("ErrorDateEndFreePeriodTooLate", dol_print_date($maxendfreeperiod, 'day')), null, 'errors');
+					$error++;
+				}
+			} else {
+				setEventMessages($langs->trans("ErrorDateEndFreePeriodTooEarly"), null, 'errors');
+				$error++;
+			}
+		} else {
+			$nothingdone = 1;
+		}
+	}
+	if ($error) {
+		$db->rollback();
+	} else {
+		$db->commit();
+		if ($nothingdone) {
+			setEventMessages($langs->trans("FreePeriodeDateAlreadyThisDate"), null, 'warnings');
+		} else {
+			setEventMessages($langs->trans("EditFreePeriodDateDone"), null, 'mesgs');
+		}
+	}
+	header("Location: ".$backtourl);
+	exit;
 }
 
 
