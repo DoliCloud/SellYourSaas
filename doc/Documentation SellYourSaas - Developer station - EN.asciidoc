@@ -334,6 +334,7 @@ You can also: Check/modify the /etc/fstab to automount the new partition.
 
 
 If after a final reboot, you reach a grub prompt, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a Live Ubunu. Then:
+
 [source,bash]
 ---------------
 sudo add-apt-repository ppa:yannubuntu/boot-repair
@@ -377,10 +378,15 @@ https://docs.ansible.com/ansible/latest/reference_appendices/release_and_mainten
 
 Check ansible version:
 
+[source,bash]
+---------------
 ansible --version
+---------------
 
 If ansible version is not compatible with python versions (local and remote), you must update ansible:
 
+[source,bash]
+---------------
 sudo add-apt-repository --yes --update ppa:ansible/ansible
 sudo apt update
 sudo apt upgrade
@@ -391,10 +397,29 @@ or
 pip install --force-reinstall ansible==9.11.0
 
 sudo ansible --version
+---------------
 
 
 If ansible is not using the correct version of python, you can force to use the python3 by adding this in your host:
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
+
+=== Error ansible on paramiko
+
+For this error:
+
+ansible-playbook -K launch_git_update_sellyoursaas.yml -i hosts-dolicloud -e "target=master"
+/usr/lib/python3/dist-packages/paramiko/pkey.py:82: CryptographyDeprecationWarning: TripleDES has been moved to cryptography.hazmat.decrepit.ciphers.algorithms.TripleDES and will be removed from this module in 48.0.0.
+  "cipher": algorithms.TripleDES,
+
+Upgrade the package paramiko:
+
+[source,bash]
+---------------
+pip install --upgrade paramiko
+---------------
+
+
+
 
