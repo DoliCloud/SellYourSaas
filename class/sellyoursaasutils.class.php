@@ -2210,7 +2210,7 @@ class SellYourSaasUtils
 									}
 								}
 
-								$result = $invoice->makeStripeSepaRequest($user, $objd->rowid, 'direct-debit', 'facture', $service, $forcestripe);
+								$result = $invoice->makeStripeSepaRequest($user, (int) $objd->rowid, 'direct-debit', 'facture', $service, $forcestripe);
 								if ($result < 0) {
 									$errorforinvoice++;
 									$error++;
