@@ -382,9 +382,11 @@ if [[ "$mode" == "upgrade" ]];then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/htdocs/install/"
 		cd "$instancedir/htdocs/install/"
 
-		echo `date +'%Y-%m-%d %H:%M:%S'`" clean the output file $instancedir/documents/admin/temp/output.html"
-		> "$instancedir/documents/admin/temp/output.html"
-		chown $osusername:$osusername "$instancedir/documents/admin/temp/output.html"
+		fileoutputhtml="output-"`date +'%Y%m%d%H%M%S'`".html"
+
+		echo `date +'%Y-%m-%d %H:%M:%S'`" clean the output file $instancedir/documents/admin/temp/$fileoutputhtml"
+		> "$instancedir/documents/admin/temp/$fileoutputhtml"
+		chown $osusername:$osusername "$instancedir/documents/admin/temp/$fileoutputhtml"
 
 
 		# Note: if target is version 19, we must start with migration from 18 to 19, so 
@@ -404,21 +406,21 @@ if [[ "$mode" == "upgrade" ]];then
 
 			echo `date +'%Y-%m-%d %H:%M:%S'`" upgrade from version $versionfrom.0.0 to version $versionto.0.0 (or last minor version)"
 
-			echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
-			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
-			echo >> "$instancedir/documents/admin/temp/output.html"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
+			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/$fileoutputhtml"
+			echo >> "$instancedir/documents/admin/temp/$fileoutputhtml"
 
 			if [ $? -eq 0 ]
 			then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
-				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
-				echo >> "$instancedir/documents/admin/temp/output.html"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
+				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/$fileoutputhtml"
+				echo >> "$instancedir/documents/admin/temp/$fileoutputhtml"
 
 				if [ $? -eq 0 ]
 				then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/output.html"
-					php step5.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/output.html"
-					echo >> "$instancedir/documents/admin/temp/output.html"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
+					php step5.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/$fileoutputhtml"
+					echo >> "$instancedir/documents/admin/temp/$fileoutputhtml"
 
 					if [ $? -eq 0 ]
 					then
