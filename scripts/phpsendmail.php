@@ -30,7 +30,9 @@ $emailfrom = '';
 
 // Rules
 $MAXOK = 10;
-$MAXPERDAY = 250;	// By default, will be overwritten with sellyoursaas-public.conf
+$MAXPERDAY = 250;		// By default, will be overwritten with sellyoursaas-public.conf
+$MAXPERDAYPAID = 1000;	// By default, will be overwritten with sellyoursaas-public.conf
+$MAXPERDAYFORADMIN = 5000;
 
 file_put_contents($logfile, date('Y-m-d H:i:s') . " ----- start ".__FILE__."\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . " SERVER_NAME = ".(empty($_SERVER['SERVER_NAME']) ? '' : $_SERVER['SERVER_NAME'])."\n", FILE_APPEND);
@@ -205,11 +207,15 @@ $resexec = shell_exec($commandcheck);
 $resexec = (int) (empty($resexec) ? 0 : trim($resexec));
 
 $MAXALLOWED = $MAXPERDAYPAID;
-if ($usernamestring && $usernamestring != 'admin') {
-	if (in_array($usernamestring, array_keys($instanceofuser))) {
-		$MAXALLOWED = $instanceofuser[$usernamestring]['mailquota'];
+if ($usernamestring) {
+	if ($usernamestring == 'admin') {
+		$MAXALLOWED = $MAXPERDAYFORADMIN;
 	} else {
-		$MAXALLOWED = $MAXPERDAY;
+		if (in_array($usernamestring, array_keys($instanceofuser))) {
+			$MAXALLOWED = $instanceofuser[$usernamestring]['mailquota'];
+		} else {
+			$MAXALLOWED = $MAXPERDAY;
+		}
 	}
 }
 
