@@ -73,6 +73,7 @@ profile apache2 /usr/{bin,sbin}/apache2 flags=(attach_disconnected) {
 
   # Send signals to all hats.
   signal (send) peer=@{profile_name}//*,
+  signal send set=winch peer=unconfined,
 
   capability dac_override,
   capability kill,
