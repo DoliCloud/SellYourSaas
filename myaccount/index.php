@@ -1117,6 +1117,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		// First update or insert payment mode 'ban'
 		if (!$error) {
+			dol_syslog("No error on BAN validation, so we create the bank account in database");
+
 			$companybankid = $companybankaccount->create($user);	// Create with main data
 
 			if (empty($companybankaccount->rum)) {
