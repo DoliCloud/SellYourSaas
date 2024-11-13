@@ -744,9 +744,10 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$topic = '[Ticket '.getDolGlobalString('SELLYOURSAAS_NAME', getDolGlobalString('MAIN_INFO_SOCIETE_NOM')).' - '.$mythirdpartyaccount->name.'] '.$topic;
 		}
 
-		// Set $content
-		$content .= "<br><br>\n\n";
+		// Complete the $content
+		$content = dol_concatdesc($content, "<br><br>\n\n");
 
+		// Now we are sure that $content is HTML content.
 		if (!empty($mythirdpartyaccount->default_lang)) {
 			$content .= '<div lang="'.$mythirdpartyaccount->default_lang.'" class="cartouche">'."\n";
 		} else {
