@@ -1116,7 +1116,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$db->begin();
 
 		// First update or insert payment mode 'ban'
-		if (! $error) {
+		if (!$error) {
 			$companybankid = $companybankaccount->create($user);	// Create with main data
 
 			if (empty($companybankaccount->rum)) {
@@ -1143,8 +1143,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				if (!$error) {
 					$resultbanksetdefault = $companybankaccount->setAsDefault(0, '');
 					if ($resultbanksetdefault > 0) {
-						setEventMessages($langs->trans("BankSaved"), null, 'mesgs');
-						//setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
+						// No message here. An error can occur later.
 					} else {
 						setEventMessages($companybankaccount->error, $companybankaccount->errors, 'errors');
 						$error++;
@@ -1160,8 +1159,10 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			}
 		}
 
-		// Then create record on Stripe side
+		// Then create record of bank on Stripe side
 		if (!$error && isModEnabled('stripe')) {
+			dol_syslog("Creation record of bank account on Stripe side");
+
 			$companybankaccount->fetch(GETPOSTINT('bankid'));
 			$service = 'StripeTest';
 			$servicestatus = 0;
@@ -1201,6 +1202,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 
 		if (!$error) {
+			dol_syslog("Update existing invoices with the new payment mode");
+
 			$id_payment_mode_ban = dol_getIdFromCode($db, 'PRE', 'c_paiement', 'code', 'id', 1);
 
 			// Update all pending recurring invoices of the thirdparty to the payment mode direct debit. Update also the open invoices.
@@ -1267,7 +1270,18 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				//$actioncomm->fk_element  = $mythirdpartyaccount->id;
 				//$actioncomm->elementtype = 'thirdparty';
 				$ret=$actioncomm->create($user);       // User creating action
+
+				if ($ret <= 0) {
+					setEventMessages($actioncomm->error, $actioncomm->errors, 'errors');
+					$error++;
+				}
 			}
+		}
+
+		// If not error, we show the message
+		if (!$error) {
+			setEventMessages($langs->trans("BankSaved"), null, 'mesgs');
+			//setEventMessages($langs->trans("WeWillContactYouForMandaSepate"), null, 'warnings');
 		}
 
 		// Create a recurring invoice (+real invoice + contract renewal if payment try success and not 'ban') if there is no recurring invoice yet
