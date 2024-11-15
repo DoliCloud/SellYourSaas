@@ -1665,11 +1665,11 @@ class ActionsSellyoursaas
 	public function checkRowPerms($parameters, &$object, $hookmanager)
 	{
 		global $user;
-		if (in_array($parameters["fk_element"], array("fk_packages"))) {
+		$res = 0;
+		if (in_array($parameters["fk_element"], array("no_parent_package"))) {
 			$this->results['perm'] = $user->hasRight('sellyoursaas', 'write');
-			return 1;
+			$res = 1;
 		}
-
-		return 0;
+		return $res;
 	}
 }
