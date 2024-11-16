@@ -995,3 +995,22 @@ function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextraf
 
 	return $ret;
 }
+
+/**
+ * Function to know if we are in trial, free mode or paid mode
+ * @param	Contrat		$contract				Contract
+ * @param	Societe		$mythirdpartyaccount	Thirdparty
+ * @return 	int									0 if trial mode, 1 if paid mode, 2 free mode
+ */
+function sellyoursaasGetModeStatusInstance($contract, $mythirdpartyaccount){
+	$modeinstancestatus = 0;
+	$ispaid = sellyoursaasIsPaidInstance($contract);
+	if ($ispaid) {
+		if ((empty($mythirdpartyaccount->array_options['options_checkboxnonprofitorga']) || $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit') && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+			$modeinstancestatus = 2;
+		} else {
+			$modeinstancestatus = 1;
+		}
+	}
+	return $modeinstancestatus;
+}
