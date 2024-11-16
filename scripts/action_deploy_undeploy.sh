@@ -160,7 +160,6 @@ if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
 fi
 
 export CUSTOMDOMAIN=${46}
-export packageID=${49}
 
 
 
