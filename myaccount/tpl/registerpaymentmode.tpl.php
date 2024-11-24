@@ -714,9 +714,9 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<div class="marginbottomonly">'.img_picto('', 'bank_account', 'class="marginrightonlyimp"');
 		print '<span class="opacitymedium">'.$langs->trans("NewBAN").'</div>';
 		print '<table class="center">';
-		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BankName").' </td><td class="valignmiddle start"><input type="text" class="maxwidth150onsmartphone" name="bankname" id="bankname" value="'.dol_escape_htmltag($bankname).'"></td></tr>';
-		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("IBAN").' </td><td class="valignmiddle start"><input type="text" class="maxwidth150onsmartphone width300" name="iban" id="iban" value="'.dol_escape_htmltag($iban).'"></td></tr>';
-		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BIC").' </td><td class="valignmiddle start"><input type="text" name="bic" id="bic" value="'.dol_escape_htmltag($bic).'" class="maxwidth150"></td></tr>';
+		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BankName").' </td><td class="valignmiddle start"><input type="text" class="maxwidth150onsmartphone" name="bankname" id="bankname" value="'.dol_escape_htmltag(GETPOSTISSET('bankname') ? GETPOST('bankname') : $bankname).'"></td></tr>';
+		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("IBAN").' </td><td class="valignmiddle start"><input type="text" class="maxwidth150onsmartphone width300" name="iban" id="iban" value="'.dol_escape_htmltag(GETPOSTISSET('iban') ? GETPOST('iban') : $iban).'"></td></tr>';
+		print '<tr><td class="minwidth100 valignmiddle start bold">'.$langs->trans("BIC").' </td><td class="valignmiddle start"><input type="text" name="bic" id="bic" value="'.dol_escape_htmltag(GETPOSTISSET('bic') ? GETPOST('bic') : $bic).'" class="maxwidth150"></td></tr>';
 		print '</table>';
 
 		print '<br>';
