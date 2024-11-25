@@ -100,17 +100,3 @@ INSERT INTO llx_c_email_templates (module,type_template,label,lang,position,topi
 --INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-TECHISSUE-SLOW',45,'The application responds slowly',1,0,NULL,4,NULL,1);
 --INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-TECHISSUE-OTHER',46,'Other (bug, error, access broken, ...)',1,0,NULL,4,NULL,1);
 
-
--- Translations keys for group of tickets
-
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-COMMERCIAL',      'Question commerciale ou problème de facturation');
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-MIGRATION',       'Migration de mon instance locale sur l''offre Saas');
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-UPGRADE',         'Mise à jour de mon instance dans une version supérieure');
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-LOGINPASS',       'Problème de login ou mot de passe');
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-HELP',            'Question sur l''utilisation de l'application - How to');
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-TECHISSUE',       'Problème technique (crash de l'application, interruption de service ou bug)');
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-TECHISSUE-EMAIL', 'Les e-mails que j''envoie depuis l''application ne sont pas reçus ou reçus en SPAM');
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-TECHISSUE-SLOW',  'L''application répond lentement');
---INSERT INTO llx_overwrite_trans(lang, transkey, transvalue) values('fr_FR', 'TIGRP-TECHISSUE-OTHER', 'Autre (bug, erreur, instance inaccessible)');
-
-
