@@ -365,7 +365,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 				print '</tr>';
 
 				print '<tr><td colspan="3">';
-				print $langs->trans("IBAN").': <span class="small" title="'.$companypaymentmodetemp->iban_prefix.'">'.dol_trunc($companypaymentmodetemp->iban_prefix, 10, 'center').'</span><br>';
+				print $langs->trans("IBAN").': <span class="small" title="'.$companypaymentmodetemp->iban_prefix.'">'.dol_trunc($companypaymentmodetemp->iban_prefix, 12, 'middle').'</span><br>';
 				if ($companypaymentmodetemp->rum) {
 					print $langs->trans("RUM").': <span class="small" title="'.$companypaymentmodetemp->rum.'">'.$companypaymentmodetemp->rum.'</span>';
 				}
