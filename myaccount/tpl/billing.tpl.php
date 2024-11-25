@@ -337,7 +337,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 				print '<tr>';
 				print '<td colspan="3" class="wordbreak">';
 				print '<!-- '.$companypaymentmodetemp->id.' -->';
-				print img_picto('', 'paypal');
+				print img_picto('', 'paypal', 'class="pictofixedwidth"');
 				print $langs->trans("Paypal");
 				print '</td>';
 				print '</tr>';
@@ -359,7 +359,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 			} elseif ($companypaymentmodetemp->type == 'ban') {
 				print '<tr>';
 				print '<td colspan="3" class="wordbreak">';
-				print img_picto('', 'bank', '', false, 0, 0, '', 'fa-2x');
+				print img_picto('', 'bank', 'class="pictofixedwidth"', false, 0, 0, '', '');
 				print $langs->trans("PaymentTypeShortPRE");
 				print '</td>';
 				print '</tr>';
