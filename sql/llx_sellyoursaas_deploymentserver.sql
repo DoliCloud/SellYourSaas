@@ -32,6 +32,7 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	servercountries varchar(128),
 	servercustomerannouncestatus integer,
 	servercustomerannounce text,
-	serversignaturekey varchar(128)
+	serversignaturekey varchar(128),
+    fk_user_modif int DEFAULT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
