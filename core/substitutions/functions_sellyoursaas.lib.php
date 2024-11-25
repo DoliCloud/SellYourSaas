@@ -118,7 +118,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 
 		dol_syslog("savconf isset = ".isset($savconf));
 
-		if (! isset($savconf)) {
+		if (!isset($savconf) || !isset($savconf->global)) {
 			$savconf = dol_clone($conf, 0);
 		}
 
