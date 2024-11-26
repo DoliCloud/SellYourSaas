@@ -85,6 +85,8 @@ elif [ "x$php81" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' php81='1'"'
 elif [ "x$php82" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' php82='1'"'
+elif [ "x$php83" == "x1" ]; then
+	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' php83='1'"'
 elif [ "x$apache" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' apache='1'"'
 else
