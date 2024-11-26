@@ -365,7 +365,7 @@
       path: /etc/php/7.0/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '7200'
+      value: '14400'
     when: 
       - php70 is defined
 
@@ -539,7 +539,7 @@
       path: /etc/php/7.4/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '7200'
+      value: '14400'
     when: 
       - php74 is defined
 
@@ -713,7 +713,7 @@
       path: /etc/php/8.0/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '7200'
+      value: '14400'
     when: 
       - php80 is defined
 
@@ -903,7 +903,7 @@
       path: /etc/php/8.1/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '7200'
+      value: '14400'
     when: 
       - php81 is defined
 
@@ -1093,7 +1093,7 @@
       path: /etc/php/8.3/apache2/php.ini
       section: Session
       option: session.gc_maxlifetime
-      value: '7200'
+      value: '14400'
     when: 
       - php81 is defined
 
@@ -1387,7 +1387,7 @@
         state: absent
 
 
-    - name: Set an Apache config file to hide the version
+    - name: Set an Apache config file custom-server-tokens.conf to hide the version
       ignore_errors: true
       ansible.builtin.template:
         src: ../../etc/apache2/conf-available/custom-server-tokens.conf
@@ -1396,7 +1396,7 @@
         group: root
         mode: '0644'
 
-    - name: Activates config file Apache
+    - name: Activates config file Apache with a2enconf custom-server-tokens
       command: a2enconf custom-server-tokens
 
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
