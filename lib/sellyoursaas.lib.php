@@ -588,7 +588,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 				if ($resultData["request_status"] == "ok" && $resultData["apikeystatus"] == "active" && $resultData["credits"] > "0") {
 					$request = 'https://api.block-disposable-email.com/easyapi/json/'.$apikey.'/'.$domaintocheck;
-					$result = getURLContent($request);
+					$resulturl = getURLContent($request);
 					$result = $resulturl['content'];
 					$resultData = json_decode($result, true);
 
@@ -605,26 +605,26 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 							// Output the key "Instance creation blocked for"
 							dol_syslog("ErrorEMailAddressBannedForSecurityReasons Instance creation blocked for email ".$emailtowarn);
-							$abusetest = 1;
+							$abusetest = 50; // blocked email with api
 						} else {
 							// Output the key "Instance creation blocked for"
 							dol_syslog("ErrorTechnicalErrorOccurredPleaseContactUsByEmail Instance creation blocked for email ".$emailtowarn);
-							$abusetest = 1;
+							$abusetest = 99; // technical error
 						}
 					} else {
 						// Output the key "Instance creation blocked for"
 						dol_syslog("ErrorTechnicalErrorOccurredPleaseContactUsByEmail Instance creation blocked for email ".$emailtowarn);
-						$abusetest = 1;
+						$abusetest = 98; // technical error
 					}
 				} else {
 					// Output the key "Instance creation blocked for"
 					dol_syslog("ErrorTechnicalErrorOccurredPleaseContactUsByEmail Instance creation blocked for email ".$emailtowarn);
-					$abusetest = 1;
+					$abusetest = 97; // customer api access error
 				}
 			} else {
 				// Output the key "Instance creation blocked for"
 				dol_syslog("ErrorEMailAddressBannedForSecurityReasons Instance creation blocked for email ".$emailtowarn);
-				$abusetest = 1;
+				$abusetest = 55; // blocked email in cache
 			}
 		}
 	}
