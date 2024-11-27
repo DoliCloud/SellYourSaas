@@ -484,7 +484,7 @@ function sellyoursaas_admin_prepare_head()
  */
 function getRemoteCheck($remoteip, $whitelisted, $email)
 {
-	global $conf;
+	global $conf, $db;
 
 	$vpnproba = '';
 	$ipquality = '';
