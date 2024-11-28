@@ -762,9 +762,20 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$content .= 'Instance: <a href="https://'.$tmpcontract->ref_customer.'">'.$tmpcontract->ref_customer."</a><br>\n";
 			//$content .= 'Ref contract: <a href="xxx/contrat/card.php?id='.$tmpcontract->ref.">".$tmpcontract->ref."</a><br>\n"; 	// No link to backoffice as the mail is used with answer to.
 			$content .= 'Ref contract: '.$tmpcontract->ref."<br>\n";
+			$instancemodestatus  = "Trial";
+			$modeinstance = sellyoursaasGetModeStatusInstance($tmpcontract, $mythirdpartyaccount);
+			if ($modeinstance > 0) {
+				if ($modeinstance == 2) {
+					$instancemodestatus  = "Validated";
+				} else {
+					$instancemodestatus  = "Confirmed";
+				}
+			}
+			$content .= "Instance status: ".$instancemodestatus."<br>\n";
 		} else {
 			$content .= "Instance: None<br>\n";
 			$content .= "Ref contract: None<br>\n";
+			$content .= "Instance status: None<br>\n";
 		}
 
 		// Sender
