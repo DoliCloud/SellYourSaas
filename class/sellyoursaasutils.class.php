@@ -4381,6 +4381,22 @@ class SellYourSaasUtils
 						dol_syslog("No cli after paid file to create or no content");
 					}
 				}
+				if (in_array($remoteaction, array("deploy", "deployall"))) {
+					dol_syslog("Create meta file ".$tmppackage->datafile1."/sellyoursaas.deploy.meta");
+					$metadatadeploy = $tmppackage->datafile1."/.sellyoursaas.deploy.meta";
+					dol_delete_file($metadatadeploy, 0, 1, 0, null, false, 0);
+					$filearraydeploy = dol_dir_list_in_database('sellyoursaas/packages/'.$tmppackage->ref, '', '', 'position', SORT_ASC, 0, '(filename:like:%.sql)');
+					$strlistfile = "";
+					if (!empty($filearraydeploy)) {
+						foreach ($filearraydeploy as $key => $arr) {
+							$strlistfile .= $arr["fullname"]."\n";
+						}
+						$result = file_put_contents($metadatadeploy, $strlistfile);
+						@chmod($metadatadeploy, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
+					} else{
+						dol_syslog("No meta data file to creaaaate or no content ");
+					}
+				}
 				// Parameters for remote action
 				$commandurl = $generatedunixlogin.'&'.$generatedunixpassword.'&'.$sldAndSubdomain.'&'.$domainname;
 				$commandurl.= '&'.$generateddbname.'&'.$generateddbport.'&'.$generateddbusername.'&'.$generateddbpassword;

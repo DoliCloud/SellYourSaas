@@ -1494,7 +1494,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	# Load dump file
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Search dumpfile into $dirwithdumpfile"
-	for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
+	for dumpfile in `cat $dirwithdumpfile/.sellyoursaas.deploy.meta 2>/dev/null`
 	do
 		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
 		$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile

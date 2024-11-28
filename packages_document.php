@@ -90,7 +90,7 @@ if (! $sortorder) {
 	$sortorder="ASC";
 }
 if (! $sortfield) {
-	$sortfield="name";
+	$sortfield="position";
 }
 
 // Initialize technical objects
