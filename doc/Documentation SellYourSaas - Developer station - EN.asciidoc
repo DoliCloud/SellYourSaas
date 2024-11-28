@@ -185,7 +185,7 @@ Edit the macro file *~/.xbindkeysrc* to add your macro instruction
 
 Replace the "stringtoshow" with your sentence to ouput.
 
-Note: Because, the stringtoshow must be entered in Qwerty, it is easier to have it recorded by editing the macro file with xbindkeys-config
+Note: Because, the stringtoshow must be entered in Qwerty, it is easier to have it recorded by editing the macro file with xbindkeys-config (notavailable on some distrib)
 
 
 To test the macro file, run:

@@ -1494,7 +1494,15 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	# Load dump file
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Search dumpfile into $dirwithdumpfile"
-	for dumpfile in `ls $dirwithdumpfile/*.sql 2>/dev/null`
+	if [[ -s $dirwithdumpfile/.sellyoursaas.deploy.meta ]]; then
+		listoffiles=`cat $dirwithdumpfile/.sellyoursaas.deploy.meta 2>/dev/null`
+		echo `date +'%Y-%m-%d %H:%M:%S'`" list of sql files found into .sellyoursaas.deploy.meta: $listoffiles"
+	else
+		listoffiles=`ls -A -t $dirwithdumpfile/*.sql 2>/dev/null`
+		echo `date +'%Y-%m-%d %H:%M:%S'`" list of sql files found by a ls: $listoffiles"
+	fi
+	
+	for dumpfile in $listoffiles
 	do
 		echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -D $dbname < $dumpfile"
 		$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -D $dbname < $dumpfile
