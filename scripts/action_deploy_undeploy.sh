@@ -1494,7 +1494,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 
 	# Load dump file
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Search dumpfile into $dirwithdumpfile"
-	if [| -s $dirwithdumpfile/.sellyoursaas.deploy.meta ]]; then
+	if [[ -s $dirwithdumpfile/.sellyoursaas.deploy.meta ]]; then
 		listoffiles=`cat $dirwithdumpfile/.sellyoursaas.deploy.meta 2>/dev/null`
 		echo `date +'%Y-%m-%d %H:%M:%S'`" list of sql files found into .sellyoursaas.deploy.meta: $listoffiles"
 	else
