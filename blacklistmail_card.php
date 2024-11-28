@@ -425,7 +425,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 	$morehtmlref .= '</div>';
 
 
-	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref);
+	dol_banner_tab($object, 'id', $linkback, 1, 'rowid', 'rowid', $morehtmlref);
 
 
 	print '<div class="fichecenter">';
