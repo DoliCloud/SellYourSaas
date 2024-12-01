@@ -913,3 +913,6 @@ TIGRP-TECHISSUE=Technical issue (application crash, service interruption or bug)
 TIGRP-TECHISSUE-EMAIL=The emails I send from application goes into SPAM
 TIGRP-TECHISSUE-SLOW=The application responds slowly
 TIGRP-TECHISSUE-OTHER=Other (bug, error, access broken, ...)
+DefaultSellYourSaasCatLabel=Services Cloud
+DefaultSellYourSaasCustomerCatLabel=Prospects or Customers Cloud
+DefaultSellYourSaasSupplierCatLabel=Resellers Cloud

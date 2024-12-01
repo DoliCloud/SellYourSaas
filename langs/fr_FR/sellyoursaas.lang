@@ -907,3 +907,6 @@ TIGRP-TECHISSUE=Problème technique (crash de l'application, interruption de ser
 TIGRP-TECHISSUE-EMAIL=Les e-mails que j''envoie depuis l''application ne sont pas reçus ou reçus en SPAM
 TIGRP-TECHISSUE-SLOW=L'application répond lentement
 TIGRP-TECHISSUE-OTHER=Autre (bug, erreur, instance inaccessible)
+DefaultSellYourSaasCatLabel=Services Cloud
+DefaultSellYourSaasCustomerCatLabel=Prospects or Customers Cloud
+DefaultSellYourSaasSupplierCatLabel=Resellers Cloud

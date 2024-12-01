@@ -14,6 +14,7 @@
  *      \brief      Description and activation file for module SellYourSaas
  */
 include_once DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php";
+include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 
 
 /**
@@ -753,12 +754,76 @@ class modSellYourSaas extends DolibarrModules
 	 */
 	public function init($options = '')
 	{
+		global $conf, $langs, $user;
+
 		$result = $this->_load_tables('/sellyoursaas/sql/');
 		if ($result <= 0) {
 			$this->error = 'Error in loading sql files';
 			return 0;
 		}
+		
+		$langs->load("sellyoursaas@sellyoursaas");
+		
+		// Create product category DefaultPOSCatLabel if not configured yet
+		$categories = new Categorie($this->db);
+		$cate_arbo = $categories->get_full_arbo('product', 0, 1);
+		if (is_array($cate_arbo)) {
+			if (!count($cate_arbo) || (!getDolGlobalString('SELLYOURSAAS_DEFAULT_PRODUCT_CATEG') || getDolGlobalString('SELLYOURSAAS_DEFAULT_PRODUCT_CATEG') == '-1')) {
+				$category = new Categorie($this->db);
 
+				$category->label = $langs->trans("DefaultSellYourSaasCatLabel");
+				$category->type = Categorie::TYPE_PRODUCT;
+
+				$result = $category->create($user);
+
+				if ($result > 0) {
+					dolibarr_set_const($this->db, 'SELLYOURSAAS_DEFAULT_PRODUCT_CATEG', $result, 'chaine', 0, 'Id of category for products sold with SellYourSaas', $conf->entity);
+
+					/* TODO Create a generic product only if there is no product yet. If 0 product,  we create 1. If there is already product, it is better to show a message to ask to add product in the category */
+					/*
+					$product = new Product($this->db);
+					$product->status = 1;
+					$product->ref = "takepos";
+					$product->label = $langs->trans("DefaultPOSProductLabel");
+					$product->create($user);
+					$product->setCategories($result);
+					 */
+				} else {
+					setEventMessages($category->error, $category->errors, 'errors');
+				}
+			}
+		}
+		
+		// Create product category DefaultSellYourSaasCustomerCatLabel if not configured yet
+		$categories = new Categorie($this->db);
+		$cate_arbo = $categories->get_full_arbo('customer', 0, 1);
+		if (is_array($cate_arbo)) {
+			if (!count($cate_arbo) || (!getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG') || getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG') == '-1')) {
+				$category = new Categorie($this->db);
+
+				$category->label = $langs->trans("DefaultSellYourSaasCustomerCatLabel");
+				$category->type = Categorie::TYPE_CUSTOMER;
+
+				$result = $category->create($user);
+
+				if ($result > 0) {
+					dolibarr_set_const($this->db, 'SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG', $result, 'chaine', 0, 'Id of category for customers of SellYourSaas', $conf->entity);
+
+					/* TODO Create a generic product only if there is no product yet. If 0 product,  we create 1. If there is already product, it is better to show a message to ask to add product in the category */
+					/*
+					$product = new Product($this->db);
+					$product->status = 1;
+					$product->ref = "takepos";
+					$product->label = $langs->trans("DefaultPOSProductLabel");
+					$product->create($user);
+					$product->setCategories($result);
+					 */
+				} else {
+					setEventMessages($category->error, $category->errors, 'errors');
+				}
+			}
+		}
+		
 		// Create extrafields
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
