@@ -3247,7 +3247,7 @@ class SellYourSaasUtils
 							$conf->global->noapachereload = null;    // unset a global variable that can be read later by trigger
 							if ($result < 0) {
 								$error++;
-								$this->error = $object->error;
+								$this->error = $object->error.' ('.$object->ref.')';
 								if (is_array($object->errors) && count($object->errors)) {
 									if (is_array($this->errors)) {
 										$this->errors = array_merge($this->errors, $object->errors);
