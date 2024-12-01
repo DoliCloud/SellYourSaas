@@ -705,6 +705,11 @@ if ($reshook == 0) {
 
 						foreach ($listofdomain as $val) {
 							$newval = $val['fullstring'];
+							
+							if (empty($newval)) {
+								continue;
+							}
+							
 							$reg = array();
 							if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
 								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
@@ -813,20 +818,25 @@ if ($reshook == 0) {
 							$randomselect = null;
 						}
 
-						foreach ($domainstosuggest as $val) {
-							$valwithoutfirstdot = preg_replace('/^\./', '', $val);
-							if (preg_match('/selectaserver/i', $val)) {
-								print '<option value="" class="opacitymedium" data-html="'.dol_escape_htmltag('<span class="opacitymedium">'.$langs->trans("SelectAServer").'</span>').'">'.$langs->trans("SelectAServer").'</option>';
-							} else {
-								$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
-
-								print '<option value="'.dol_escape_htmltag($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
-								print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
-								print '>';
-								print $valtoshow;
-								print '</option>';
-							}
-						} ?>
+						if (!empty($domainstosuggest)) {
+							foreach ($domainstosuggest as $val) {
+								$valwithoutfirstdot = preg_replace('/^\./', '', $val);
+								if (preg_match('/selectaserver/i', $val)) {
+									print '<option value="" class="opacitymedium" data-html="'.dol_escape_htmltag('<span class="opacitymedium">'.$langs->trans("SelectAServer").'</span>').'">'.$langs->trans("SelectAServer").'</option>';
+								} else {
+									$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
+	
+									print '<option value="'.dol_escape_htmltag($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
+									print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
+									print '>';
+									print $valtoshow;
+									print '</option>';
+								}
+							} 
+						} else {
+							print '<option value="">No deployent server defined. Go on bak office to complete list</option>'; 	
+						}
+						?>
 					</select>
 						<?php
 						print ajax_combobox('tldid');
