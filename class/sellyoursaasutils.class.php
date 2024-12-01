@@ -3528,7 +3528,7 @@ class SellYourSaasUtils
 						$conf->global->noapachereload = null;    // unset a global variable that can be read later
 						if ($result <= 0) {
 							$error++;
-							$this->error = $this->error.' ('.$object->ref.')';
+							$this->error = $this->error;
 							$this->errors = $this->errors;
 						}
 						//$object->array_options['options_deployment_status'] = 'suspended';
