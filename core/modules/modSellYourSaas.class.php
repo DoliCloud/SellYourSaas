@@ -103,6 +103,7 @@ class modSellYourSaas extends DolibarrModules
 			8=>array('SELLYOURSAAS_NBHOURSBETWEENTRIES', 'chaine', 49, 'Nb hours minium between each try', 1, 'current', 0),
 			9=>array('SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES', 'chaine', 35, 'Nb days before stopping invoice payment try', 1, 'current', 0),
 			10=>array('AUDIT_ENABLE_PREFIX_SESSION', 'chaine', 1, 'Enable column prefix session in audit view', 1, 'current', 0),
+			11=>array('PRODUIT_SOUSPRODUITS', 'chaine', 1, 'Enable the feature of kit', 1, 'current', 0)
 		);
 
 		if (!isModEnabled("sellyoursaas")) {
