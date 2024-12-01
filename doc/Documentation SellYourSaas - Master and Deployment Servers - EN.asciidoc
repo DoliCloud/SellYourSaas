@@ -1155,12 +1155,15 @@ a2enmod mpm_itk mpm_prefork
 a2enmod php7.0|php7.2|php7.4|php8.1|php8.3
 ---------------
 
-TODO Do not include/remove  
+TODO Do not include, so remove  
+---------------
 a2dismod auth_digest authn_anon asis suexec userdir usertrack authn_dbd dbd ident mime_magic speling
+---------------
 
 On php8.1
+---------------
 a2dismod mcrypt
-
+---------------
 
 Enable apache *configurations* to work with MPM_PREFORK and MPM_ITK:
 
@@ -1200,8 +1203,8 @@ Note: Reload of apache seems not enough so we stop/start it.
 
 [source, conf]
 ---------------
-	# Include virtual host for sellyoursaas instances:
-	IncludeOptional sellyoursaas-enabled/*.conf
+# Include virtual host for sellyoursaas instances:
+IncludeOptional sellyoursaas-enabled/*.conf
 ---------------
 
 * Add directives to define the default error log in */etc/apache2/conf-enabled/other-vhosts-access-log.conf*
