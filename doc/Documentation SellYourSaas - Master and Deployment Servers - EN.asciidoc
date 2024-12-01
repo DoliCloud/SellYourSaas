@@ -76,9 +76,9 @@ The first step is to make one (or more) server available. If we are going on sev
 
 === Choice of machine and OS and create it
 
-* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Master server*.
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximum *24.04*) for the *Master server*.
 
-* Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *16.04* or *18.04* or *20.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
+* Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximu *24.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
 _Example with Amazon Standard Medium:_
 
@@ -519,7 +519,7 @@ HISTIGNORE='-*'
 
 === Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
 
-==== With ifupdown (Ubuntu 16.04)
+==== With ifupdown (legacy mode, any Ubuntu)
 
 - To add a v6 IP dynamically for testing purposes at first:
 
@@ -569,8 +569,7 @@ To disable manually an interface:
 ifconfig ethX down   or    ifconfig ethX:Y down
 ---------------
 
-
-==== With netplan (Ubuntu 18.04 +)
+==== With netplan (Ubuntu 18.04+)
 
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
@@ -4680,11 +4679,6 @@ To update Ubuntu to a higher LTS version on a SellYourSaas server:
 [source,sql]
 ---------------
 apt dist-upgrade or do-release-upgrade
-
-# if you move from 16.04 to 18.04, you must also delete old repository of ondrej/php and and reinstall it with
-apt install php-mysql
-a2enmod php7.2
-apt remove php-fpm php7-fpm
 
 # if you move from 18.04 to 20.04, you must also delete old repository of ondrej/php and and reinstall it with
 sudo add-apt-repository ppa:ondrej/php
