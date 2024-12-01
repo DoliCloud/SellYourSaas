@@ -1332,7 +1332,7 @@ You can create another virtual host for the HTTPS on port 443
 [source, bash]
 ---------------
 #########################
-# MyAccount
+# MyAccount Master
 #########################
 
 <VirtualHost *:80>
@@ -1346,8 +1346,9 @@ You can create another virtual host for the HTTPS on port 443
    ErrorLog     /home/admin/logs/mysaasdomainname_myaccount_error_log
    CustomLog    /home/admin/logs/mysaasdomainname_myaccount_access_log combined
 
-   DocumentRoot /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount
+   DocumentRoot /home/admin/wwwroot/dolibarr_sellyoursaas/myaccount
 
+	# To access files of myaccount
    <Directory /home/admin/wwwroot/dolibarr_sellyoursaas/myaccount>
    AllowOverride FileInfo Options
    Options       -Indexes -MultiViews +FollowSymLinks -ExecCGI
@@ -1364,15 +1365,15 @@ You can create another virtual host for the HTTPS on port 443
    AddOutputFilterByType DEFLATE text/html text/plain text/xml
    AddDefaultCharset utf-8
 
-	    ExpiresActive On
-	    ExpiresByType image/x-icon A2592000
-	    ExpiresByType image/gif A2592000
-	    ExpiresByType image/png A2592000
-	    ExpiresByType image/jpeg A2592000
-	    ExpiresByType text/css A2592000
-	    ExpiresByType text/javascript A2592000
-	    ExpiresByType application/x-javascript A2592000
-	    ExpiresByType application/javascript A2592000
+   #ExpiresActive On
+   #ExpiresByType image/x-icon A2592000
+   #ExpiresByType image/gif A2592000
+   #ExpiresByType image/png A2592000
+   #ExpiresByType image/jpeg A2592000
+   #ExpiresByType text/css A2592000
+   #ExpiresByType text/javascript A2592000
+   #ExpiresByType application/x-javascript A2592000
+   #ExpiresByType application/javascript A2592000
 
 #RewriteEngine On
 #RewriteRule !^/maintenance.php https://%{SERVER_NAME}/maintenance.php?instance=myaccount [R,L]
