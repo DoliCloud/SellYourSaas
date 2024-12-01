@@ -22,7 +22,7 @@ CREATE TABLE llx_packages(
 	label varchar(255), 
 	restrict_domains varchar(255),
 	date_creation datetime NOT NULL, 
-	tms timestamp NOT NULL, 
+	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,								-- last modification date 
 	fk_user_creat integer NOT NULL, 
 	fk_user_modif integer, 
 	import_key varchar(14),

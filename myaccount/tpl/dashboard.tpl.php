@@ -264,7 +264,7 @@ if ($amountdue > 0 && $atleastonepaymentmode) {
 if ($amountdue > 0) {
 	print '<font style="color: orange; white-space: nowrap;">';
 }
-				print price($amountdue, 1, $langs, 0, -1, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency);
+				print price($amountdue, 1, $langs, 0, -1, 'MT', $conf->currency);
 if ($amountdue > 0) {
 	print '</font>';
 }
