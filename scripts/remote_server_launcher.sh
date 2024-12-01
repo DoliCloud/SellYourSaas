@@ -71,9 +71,11 @@ if [ "x$1" == "xstart" ]; then
 		echo "Server started with php -S $remoteserverlistenip:$remoteserverlistenport -t remote_server $abc"
 		
 		echo "Logs of server will be in /var/log/remote_server.log"
+		echo "Server for deployment agent started - $now" >> /var/log/remote_server.log
 	else
 		echo Server is already running with PID $pid
 	fi
+	echo
 fi
 
 if [ "x$1" == "xstop" ]; then
@@ -85,7 +87,9 @@ if [ "x$1" == "xstop" ]; then
 	else
 		echo Launch kill to stop server with PID $pid
 		kill $pid
+		echo "Server for deployment agent stopped - $now" >> /var/log/remote_server.log
 	fi
+	echo
 fi
 
 if [ "x$1" == "xstatus" ]; then
@@ -97,4 +101,5 @@ if [ "x$1" == "xstatus" ]; then
 	else
 		echo Server run with PID $pid
 	fi
+	echo
 fi
