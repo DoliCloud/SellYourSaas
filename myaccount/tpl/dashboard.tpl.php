@@ -254,7 +254,7 @@ if ($nbinvoicenotpayed) {
                 	            </div>
                 				<div class="row">
                 				<div class="col-md-9">';
-if ($amountdue > 0 && $atleastonepaymentmode) {
+if (($amountdue > 0 || $nbinvoicenotpayed > 0) && $atleastonepaymentmode) {
 	print $form->textwithpicto($langs->trans("RemainderToPay"), $langs->trans("PaymentWillBeProcessedSoon"));
 }
 				print '</div>
@@ -262,7 +262,7 @@ if ($amountdue > 0 && $atleastonepaymentmode) {
 if ($amountdue > 0) {
 	print '<font style="color: orange; white-space: nowrap;">';
 }
-if ($amountdue > 0) {
+if ($amountdue > 0 || $nbinvoicenotpayed > 0) {
 	print price($amountdue, 1, $langs, 0, -1, 'MT', $conf->currency);
 }
 if ($amountdue > 0) {
