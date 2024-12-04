@@ -256,15 +256,15 @@ if ($nbinvoicenotpayed) {
                 				<div class="col-md-9">';
 if ($amountdue > 0 && $atleastonepaymentmode) {
 	print $form->textwithpicto($langs->trans("RemainderToPay"), $langs->trans("PaymentWillBeProcessedSoon"));
-} else {
-	print $langs->trans("RemainderToPay");
 }
 				print '</div>
                 				<div class="col-md-3 right"><h2>';
 if ($amountdue > 0) {
 	print '<font style="color: orange; white-space: nowrap;">';
 }
-				print price($amountdue, 1, $langs, 0, -1, 'MT', $conf->currency);
+if ($amountdue > 0) {
+	print price($amountdue, 1, $langs, 0, -1, 'MT', $conf->currency);
+}
 if ($amountdue > 0) {
 	print '</font>';
 }
