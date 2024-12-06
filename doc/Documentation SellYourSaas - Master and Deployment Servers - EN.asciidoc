@@ -6350,6 +6350,23 @@ apparmor="DENIED" operation="open" profile="/usr/sbin/ntpd" name="/snap/bin/" pi
 
 You must remove the ntpd package and use instead the package *systemd-timesyncd* with *sudo apt install systemd-timesyncd*
 
+You can test/check that ntp sync works with: 
+
+[source,bash]
+---------------
+timedatectl status
+---------------
+
+==== Error in syslog: "kernel reports TIME_ERROR: 0x2041: Clock Unsynchronized"
+
+You must remove the ntpd package and use instead the package *systemd-timesyncd* with *sudo apt install systemd-timesyncd*
+
+You can test/check that ntp sync works with: 
+
+[source,bash]
+---------------
+timedatectl status
+---------------
 
 ==== Error missing profile snap.certbot.certbot
 
