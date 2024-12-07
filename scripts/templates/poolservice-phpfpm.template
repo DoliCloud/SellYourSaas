@@ -1,0 +1,18 @@
+;----------------------------------------------------
+; php-fpm file for a pool service for sellyoursaas instances
+;
+;----------------------------------------------------
+
+[Unit]
+Description=PHP-FPM for __fqn__
+After=network.target
+
+[Service]
+Type=simple
+PIDFile=/run/php/php__phpversion__-fpm-__fqn__.pid
+ExecStart=/usr/sbin/php-fpm__phpversion__ --nodaemonize --fpm-config /etc/php/__phpversion__/fpm/pool.d/sellyoursaas/__fqn__.phpfpm.conf --allow-to-run-as-root
+ExecReload=/bin/kill -USR2 $MAINPID
+ExecStop=/bin/kill -QUIT $MAINPID
+
+[Install]
+WantedBy=multi-user.target

@@ -34,12 +34,30 @@ export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
+# possibility to use vhostfile templates associated to php-fpm mode with second priority
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$templatesdir" != "x" ]]; then
-	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
-	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
-	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
-	export fpmpoolfiletemplate="$templatesdir/osuxxx.template"
+  if [[ "x$phpfpm" != "x" ]]; then
+    export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
+    export vhostfilesuspended="$templatesdir/vhostHttps-phpfpm-sellyoursaas-suspended.template"
+    export vhostfilemaintenance="$templatesdir/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
+    export fpmpoolfiletemplate="$templatesdir/phppool-phpfpm.template"
+    export fpmservicefiletemplate="$templatesdir/poolservice-phpfpm.template"
+  else
+    export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
+    export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
+    export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
+    export fpmpoolfiletemplate="$templatesdir/osuxxx.template"
+  fi
+elif [[ "x$phpfpm" != "x" ]]; then
+  export vhostfile="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas.template"
+	export vhostfilesuspended="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
+	export fpmpoolfiletemplate="$scriptdir/templates/phppool-phpfpm.template"
+	export fpmservicefiletemplate="$scriptdir/templates/poolservice-phpfpm.template"
 else
 	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
@@ -1079,6 +1097,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				sed -e 's;__phpversion__;$phpversion;g' | \
+				sed -e 's;__fqn__;$fqn;g' | \
+				sed -e 's;__instancename__;$instancename;g' | \
+				sed -e 's;__localip__;$localip;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
@@ -1096,6 +1118,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				sed -e "s;__phpversion__;$phpversion;g" | \
+				sed -e "s;__fqn__;$fqn;g" | \
+				sed -e "s;__instancename__;$instancename;g" | \
+				sed -e "s;__localip__;$localip;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
 
@@ -1224,6 +1250,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
+				  sed -e 's;__instancename__;$instancename;g' | \
+				  sed -e 's;__localip__;$localip;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
@@ -1242,6 +1272,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__instancename__;$instancename;g" | \
+				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 
 
@@ -1251,9 +1285,11 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	
 	
 	# Deploy also the php fpm pool file from the scripts/templates/osuxxx.conf
-	# A link will also be created into /etc/php/x.x/fpm/pool.d/$fqn.conf to this fpm pool file $fqn.conf
-	export phpfpmconf="/etc/apache2/sellyoursaas-fpm-pool.d/$fqn.conf"
-	if [ -d /etc/apache2/sellyoursaas-fpm-pool.d ]; then
+	# A link will also be created into /etc/php/$phpversion/fpm/pool.d/$fqn.conf to this fpm pool file $fqn.conf
+	export phpfpmconf="/etc/php/$phpversion/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf"
+	export phpfpmservicename="sellyoursaas-php$phpversion-fpm-$fqn.service"
+	export phpfpmservice="/etc/systemd/system/$phpfpmservicename"
+	if [ -d /etc/php/$phpversion/fpm/pool.d/sellyoursaas ]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm conf $phpfpmconf from $fpmpoolfiletemplate"
 		if [[ -s $phpfpmconf ]]
 		then
@@ -1277,6 +1313,10 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
+				  sed -e 's;__instancename__;$instancename;g' | \
+				  sed -e 's;__localip__;$localip;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' > $phpfpmconf"
 		cat $fpmpoolfiletemplate | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
@@ -1294,10 +1334,76 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__instancename__;$instancename;g" | \
+				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" > $phpfpmconf
+
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm service $phpfpmservice from $fpmservicefiletemplate"
+		if [[ -s $phpfpmservice ]]
+		then
+			echo "Apache conf $phpfpmservice already exists, we delete it since it may be a file from an old instance with same name"
+			rm -f $phpfpmservice
+		fi
+
+		echo "cat $fpmservicefiletemplate | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
+				  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
+				  sed -e 's/__webAppLogName__/$instancename/g' | \
+	              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
+	              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
+	              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
+				  sed -e 's/__osUsername__/$osusername/g' | \
+				  sed -e 's/__osGroupname__/$osusername/g' | \
+				  sed -e 's;__osUserPath__;$targetdir/$osusername/$dbname;g' | \
+				  sed -e 's;__VirtualHostHead__;$VIRTUALHOSTHEAD;g' | \
+				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
+				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
+				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
+				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
+				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
+				  sed -e 's;__instancename__;$instancename;g' | \
+				  sed -e 's;__localip__;$localip;g' | \
+				  sed -e 's;__webAppPath__;$instancedir;g' > $phpfpmservice"
+		cat $fpmservicefiletemplate | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
+				  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
+				  sed -e "s/__webAppLogName__/$instancename/g" | \
+	              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
+	              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
+	              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
+				  sed -e "s/__osUsername__/$osusername/g" | \
+				  sed -e "s/__osGroupname__/$osusername/g" | \
+				  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
+				  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
+				  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
+				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
+				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
+				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__instancename__;$instancename;g" | \
+				  sed -e "s;__localip__;$localip;g" | \
+				  sed -e "s;__webAppPath__;$instancedir;g" > $phpfpmservice
+
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** php-fpm service created. We start $phpfpmservice service"
+		systemctl daemon-reload
+    systemctl enable $phpfpmservicename
+    systemctl restart $phpfpmservicename
+		if [[ "x$?" != "x0" ]]; then
+			echo Error when starting $phpfpmservicename
+			echo "Failed to deployall instance $instancename.$domainname with: Error when starting $phpfpmservicename" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
+			sleep 1		# add a delay after an php$phpversion-fpm reload
+			exit 20
+		fi
+		sleep 1			# add a delay after an php$phpversion-fpm reload
+
 	fi
-	
-	
+
 	echo /usr/sbin/apache2ctl configtest
 	/usr/sbin/apache2ctl configtest
 	if [[ "x$?" != "x0" ]]; then
