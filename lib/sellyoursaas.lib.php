@@ -500,7 +500,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 	dol_syslog("getRemoteCheck remoteip=".$remoteip." email=".$email." whitelisted=".$whitelisted, LOG_INFO);
 
 	// Check the captcha
-	if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON')) {
+	if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON') && $remoteip != '127.0.0.1') {
 		dol_syslog("getRemoteCheck Check using Google Recaptcha", LOG_DEBUG);
 
 		$grecaptcharesponse = GETPOST('g-recaptcha-response', 'alphanohtml');
@@ -824,7 +824,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email)
 
 
 	// SELLYOURSAAS_BLACKLIST_IP_MASKS and SELLYOURSAAS_BLACKLIST_IP_MASKS_FOR_VPN are hidden constants.
-	// Deprecated. Check instead into the lList of blacklist ips in database. This is done at begin of page.
+	// Deprecated. Check instead into the list of blacklist ips in database. This is done at begin of page.
 
 	// Block for some IPs
 	if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_BLACKLIST_IP_MASKS')) {

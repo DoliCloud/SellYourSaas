@@ -1297,6 +1297,8 @@ if ($reusecontractid) {
 			$emailtowarn = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL'));
 
 			if (substr($sapi_type, 0, 3) != 'cli') {
+				// $abusetest is the numeric value returned by getRemoteCheck().
+				// Example: 10 If pb with captcha, ...
 				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, $abusetest), null, 'errors');
 				//http_response_code(403);
 				header("Location: ".$newurl);
