@@ -152,6 +152,7 @@ a.btnalreadyanaccount {
     padding: 20px;
 	margin-bottom: 30px;
 	box-shadow: 0px 1px 5px #ddd;
+	min-height: 220px;
 }
 
 .portlet input[type='submit'] {
