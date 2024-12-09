@@ -131,6 +131,7 @@
     network inet6,
 
     /home/admin/logs/** w,
+    /var/lib/letsencrypt/http_challenges/** r,
     /var/log/apache2/access.log w,
     /var/log/apache2/access_ssl.log w,
     /var/log/apache2/error.log w,
