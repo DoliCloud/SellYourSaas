@@ -1,0 +1,28 @@
+;----------------------------------------------------
+; php-fpm config file for a pool for sellyoursaas instances
+;
+; All apache virtual hosts of user osuxxx will use this same pool
+;----------------------------------------------------
+
+[__fqn__]
+
+user = __osUsername__
+group = __osGroupname__
+
+listen = /run/php/php__phpversion__-fpm-__fqn__.sock
+listen.owner = __osUsername__
+listen.group = __osGroupname__
+request_terminate_timeout = 0
+
+pm = dynamic
+pm.max_children = 50
+pm.start_servers = 5
+pm.min_spare_servers = 5
+pm.max_spare_servers = 35
+
+env[PATH] = /usr/local/bin:/usr/bin:/bin
+env[TMP] = /tmp
+env[TMPDIR] = /tmp
+env[TEMP] = /tmp
+
+php_admin_value[open_basedir] = __webAppPath__:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:/tmp/:/usr/local/bin/
