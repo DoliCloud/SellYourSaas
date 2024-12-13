@@ -199,6 +199,7 @@ if [ ! -f  /var/log/apache2/other_vhosts_pid.log ]; then
 fi
 
 # Create test files to test apparmor in web
+chmod a+w /tmp/test.txt
 echo "Content of tmp/test.txt file. This files should not be readable from web context except if owner of file is the same as the web server user." > /tmp/test.txt
 chown www-data:www-data /tmp/test.txt
 echo "Content of test.txt file. This files should not be readable from web context." > /test.txt 
