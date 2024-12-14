@@ -130,7 +130,7 @@ Try to connect to webhog on: http://localhost:8025
 
 Install postfix by apt.
 
-Edit the postfix configuration file */etc/postfix/main.cf* to enable relaying to mailhog. Thus any email sent will be captured by mailhog.
+Edit the postfix configuration file */etc/postfix/main.cf* to enable relaying to *mailhog*. Thus any email sent will be captured by mailhog.
 
 [source,bash]
 ---------------

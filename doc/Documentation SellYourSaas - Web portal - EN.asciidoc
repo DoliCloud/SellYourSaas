@@ -1212,9 +1212,9 @@ inet_protocols = ipv4
 ---------------
 
 
-=== Configuration de Postfix pour authentification externe SMTP sécurisée (optionnel)
+=== Configuring Postfix for a secured external SMTP authentication (optional)
 
-En cas de besoin d'utiliser postfix depuis un accès externe (et donc authentifié)
+If you need to use postix from an external (and thus authenticated) access
 
 [source,bash]
 ---------------
@@ -1222,21 +1222,21 @@ sudo apt install sasl2-bin
 vi /etc/default/saslauthd  pour mettre START=yes
 ---------------
 
-Vérifier que le user postfix se trouve dans le groupe *sasl*. Si non, l'ajouter par:
+Check that user postfix is in the *sasl* group. If not, add it:
 
 [source,bash]
 ---------------
 adduser postfix sasl
 ---------------
 
-Modifier le fichier */etc/postfix/master.cf* pour ajouter un 'n' afin de désactiver le chroot de smtpd
+Add 'n' to */etc/postf*, to deactivate the smtpd chroot
 
 [source,bash]
 ---------------
 smtp      inet  n       -       n       -       -       smtpd
 ---------------
 
-Ajouter un fichier *smtpd.conf* dans */etc/postfix/sasl*
+Add a *smtpd.conf* file in */etc/postfix/sasl*
 
 [source,bash]
 ---------------
@@ -1245,7 +1245,7 @@ pwcheck_method: saslauthd
 mech_list: plain login
 ---------------
 
-Pour du SMTPS, créer un certificat:
+To use SMTPS, create a certificate:
  
 [source,bash]
 ---------------
@@ -1253,7 +1253,7 @@ cd /etc/postfix
 openssl req -nodes -new -x509 -keyout dsfc.key -out dsfc.crt
 ---------------
 
-Compléter le fichier */etc/postfix/main.cf* avec:
+Complete */etc/postfix/main.cf*:
 
 [source,bash]
 ---------------
@@ -1279,7 +1279,6 @@ smtpd_sasl_auth_enable = yes
 smtpd_sasl_security_options = noanonymous
 broken_sasl_auth_clients = yes
 ---------------
-
 
 
 === Setup of Mysql or Mariadb
