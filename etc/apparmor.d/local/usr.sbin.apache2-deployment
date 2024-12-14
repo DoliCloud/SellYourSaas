@@ -34,12 +34,12 @@
     /etc/mysql/conf.d/mysql.cnf r,
     /etc/mysql/conf.d/mysqldump.cnf r,
     /etc/mysql/mariadb.cnf r,
-    /etc/mysql/mariadb.conf.d/ r,
+    /etc/mysql/mariadb.conf.d/ r,  
     /etc/mysql/mariadb.conf.d/50-client.cnf r,
     /etc/mysql/mariadb.conf.d/50-mysql-clients.cnf r,
     /etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf r,
     /etc/mysql/mariadb.conf.d/50-server.cnf r,
-    /etc/php{,5,7,8}/** r,
+    /etc/php{,5,7,8}/** r,  
     /etc/postfix/dynamicmaps.cf.d/ r,
     /etc/sellyoursaas-public.conf r,
     /etc/ssl/openssl.cnf rw,
@@ -121,6 +121,8 @@
     /run/php{,-fpm}/php*-fpm*.sock rwlk,
     /usr/sbin/php-fpm* rix,
     
+    /mnt/diskhome/home/osu*/dbn*/documents/website/*/.well-known/** r,
+    
     owner /mnt/diskhome/home/osu*/** rwk,
     owner /run/systemd/notify w,
     owner /var/spool/postfix/maildrop/ rw,
@@ -147,7 +149,7 @@
 
     signal receive set=term peer=apache2,
 
-    /home/admin/logs/** w,
+    /home/admin/logs/** w,  
     /var/cache/fontconfig/** r,
     /var/lib/letsencrypt/http_challenges/** r,
     /var/lock/apache2/** rwk,
@@ -164,10 +166,9 @@
     /{usr/,}bin/dash rix,
     /{usr/,}bin/sh rix,
     /{usr/,}bin/tar rix,
-    /{usr/,}bin/uncompress rix,
-
+    /{usr/,}bin/uncompress rix,    
   }
-
+    
   ^sellyoursaas-instances flags=(attach_disconnected) {
     include <abstractions/apache2-common>
     include <abstractions/base>
@@ -184,6 +185,10 @@
 
     signal receive set=term peer=apache2,
 
+    # Warning, this may create troubles with sending email from postfix on ubuntu 18.04, 20.04
+    #deny /etc/group r,
+    #deny /etc/passwd r,
+
     /dev/tty rw,
     /etc/ImageMagick*/** rw,
     /etc/clamav/clamd.conf r,
@@ -195,12 +200,12 @@
     /etc/mysql/conf.d/mysql.cnf r,
     /etc/mysql/conf.d/mysqldump.cnf r,
     /etc/mysql/mariadb.cnf r,
-    /etc/mysql/mariadb.conf.d/ r,
+    /etc/mysql/mariadb.conf.d/ r,    
     /etc/mysql/mariadb.conf.d/50-client.cnf r,
     /etc/mysql/mariadb.conf.d/50-mysql-clients.cnf r,
     /etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf r,
     /etc/mysql/mariadb.conf.d/50-server.cnf r,
-    /etc/php{,5,7,8}/** r,
+    /etc/php{,5,7,8}/** r, 
     /etc/postfix/dynamicmaps.cf.d/ r,
     /etc/sellyoursaas-public.conf r,
     /etc/ssl/openssl.cnf rw,
@@ -278,12 +283,14 @@
     /{usr/,}bin/gzip rix,
     /{usr/,}bin/tar rix,
     /{usr/,}bin/uncompress rix,
-
+    
+    /mnt/diskhome/home/osu*/dbn*/documents/website/*/.well-known/** r,
+    
     /run/php{,-fpm}/php*-fpm-*.sock w,
     /run/php{,-fpm}/php*-fpm*.pid rw,
     /run/php{,-fpm}/php*-fpm*.sock rwlk,
     /usr/sbin/php-fpm* rix,
-
+    
     owner /mnt/diskhome/home/osu*/** rwk,
     owner /run/systemd/notify w,
     owner /var/spool/postfix/maildrop/ rw,
