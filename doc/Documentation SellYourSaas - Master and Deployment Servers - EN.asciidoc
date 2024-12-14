@@ -3435,45 +3435,9 @@ This must be done on deployment servers only.
 
 ==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
 
-You can use the solution 1 (not free and need annual manual update) or solution 2 (recommended as free and with no manual update required):
+You can use the solution 1 (recommended as free and with no manual update required) or solution 2 (not free and need annual manual update):
 
-===== Solution 1: From a SSL provider
-
-* Create the key *withX.mysaasdomainname.com.key* and csr *withX.mysaasdomainname.com.csr* files like so:
-
-To generate the .key file:   
-    
-[source,bash]
----------------
-cd /etc/apache2
-openssl genrsa 2048 > withX.mysaasdomainname.com.key
-chmod go-r withX.mysaasdomainname.com.key
----------------
-
-To generate the .csr file:
-
-[source,bash]
----------------
-openssl req -nodes -newkey rsa:2048 -sha256 -keyout withX.mysaasdomainname.com.key -out withX.mysaasdomainname.com.csr
----------------
-
-Choose:
-
-	CN	*.withX.mysaasdomainname.com
-	OU	IT
-	O	The company name
-	L	Paris
-	S	IDF
-	C	FR
-	Email				Ne rien mettre !
-	Challenge password		Ne rien mettre !
-
-* Submit the *.csr* file to the SSL certificate provider.
-
-* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
-
-
-===== Solution 2: From LetsEncrypt
+===== Solution 1: From LetsEncrypt (recommended)
 
 * To create a SSL certficate *on the master* :
 
@@ -3558,8 +3522,43 @@ or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 find /etc/letsencrypt/ -name "*with<X>.<your_domain>*" -exec rm -fr {} \;
 ---------------
 
+===== Solution 2: From a SSL provider (non free, need manual update)
 
-==== Install the certificates files
+* Create the key *withX.mysaasdomainname.com.key* and csr *withX.mysaasdomainname.com.csr* files like so:
+
+To generate the .key file:   
+    
+[source,bash]
+---------------
+cd /etc/apache2
+openssl genrsa 2048 > withX.mysaasdomainname.com.key
+chmod go-r withX.mysaasdomainname.com.key
+---------------
+
+To generate the .csr file:
+
+[source,bash]
+---------------
+openssl req -nodes -newkey rsa:2048 -sha256 -keyout withX.mysaasdomainname.com.key -out withX.mysaasdomainname.com.csr
+---------------
+
+Choose:
+
+	CN	*.withX.mysaasdomainname.com
+	OU	IT
+	O	The company name
+	L	Paris
+	S	IDF
+	C	FR
+	Email				Ne rien mettre !
+	Challenge password		Ne rien mettre !
+
+* Submit the *.csr* file to the SSL certificate provider.
+
+* Get the SSL certificate files (the *.crt* file of the certificate and the intermediate certificate) and install them into */etc/apache2*)
+
+
+==== Install the certificate files of domain withX.mysaasdomainname.com
 
 * Create a symbolic link with the generic name *withX.sellyoursaas.com.key*, *withX.sellyoursaas.com.crt* and *withX.sellyoursaas.com-intermediate.crt* to the generated certificate files:
 
@@ -3818,6 +3817,8 @@ $dolibarr_main_data_root='/home/admin/wwwroot/dolibarr_documents';
 
 
 === Installation of Geoip2
+
+On the *Master*:
 
 * Install the free database file of Maxmind.
 
@@ -4158,26 +4159,32 @@ vi /var/log/datadog/agent.log
 
 == Exploitation - Supervision
 
-=== Test an installation
+=== Test/Check an installation
 
 This is some steps to do to test an installation:
 
-- You can run the script desktop_install_check.sh. It will run an ansible script to check your instance (and may fix some trouble). This
+- You can run the script *desktop_install_check.sh*. It will run an ansible script to check your instance (and may fix some trouble). This
 script is regularly completed but still check only few part of your installation only.
 
-- If the deployed application is Dolibarr check the page Home - System info - security info.
-
-- If the deployed application is Dolibarr check the page Home - System info - performances.
-
-- If the deployed application is Dolibarr try to upload a file from menu Home - Setup - Security - Upload file.
-
-- If the deployed application is Dolibarr try to make a backup (mysqldump) from its internal backup tool (menu Home - Admin tools - Backup).
-
-- If the deployed application is Dolibarr, you can check a call of page https://myinstances/public/test/test_exec.php
+- Try to connect with SFTP. Try a "ls /etc", you should get Permission denied (blocked by apparmor). Try a "get /etc/passwd", you should get Permission denied (blocked by sftp). Try "get /etc/group", you should get Permission denied (blocked by apparmor).
 
 - Try to send an email from a deployed application with no particular setup.
 
 - Try to send an email from a deployed application using a setup of a SMTP server.
+
+
+*If the deployed application is Dolibarr*:
+
+- Check the page Home - System info - security info.
+
+- Check the page Home - System info - performances.
+
+- Try to upload a file from menu Home - Setup - Security - Upload file.
+
+- Try to make a backup (mysqldump) from its internal backup tool (menu Home - Admin tools - Backup).
+
+- Check a call of page https://myinstance.url/public/test/test_exec.php
+
 
 
 === Backup / Restore
