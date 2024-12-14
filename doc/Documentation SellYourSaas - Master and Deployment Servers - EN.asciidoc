@@ -4170,7 +4170,7 @@ script is regularly completed but still check only few part of your installation
 
 - Try to send an email from a deployed application with no particular setup.
 
-- Try to send an email from a deployed application using a setup of a SMTP server.
+- Try to send an email from a deployed application using a setup of an external SMTP server.
 
 
 *If the deployed application is Dolibarr*:
