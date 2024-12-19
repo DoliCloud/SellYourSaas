@@ -72,7 +72,9 @@ You need to acquire this domain name from a registrar.
 
 == Installation of the machine and OS
 
-The first step is to make one (or more) server available. If we are going on several servers, one will be *Master* server (management and invoicing) and the others will be *Deployment servers* (customer instances). The *Master* server can also be *Deployment server*, it is possible to start with a single server.
+The first step is to make one (or more) server available. If we are going on several servers, one will be the *Master* server (management and invoicing) and the others will be the *Deployment servers* (customer instances). The *Master* server can also be *Deployment server*, so it is possible to start with a single server but it is not recommended.
+
+All the command to run on the command line are supposed to be run with the user "root" when no specific user is defined.
 
 === Choice of machine and OS and create it
 
@@ -124,7 +126,7 @@ Connect and modify the file */etc/hosts* with the entry of the new server:
 [source, bash]
 ---------------
 main.ip.of.server nameofserver.mysaasdomainname.com
-127.0.0.1  nameofserver
+127.0.0.1  localhost nameofserver
 ---------------
 
 
@@ -182,9 +184,9 @@ blkid
 
 [source, bash]
 ---------------
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs defaults 0 0
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskhome btrfs defaults 0 0
 or
-UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0     #does not block the server from starting
+UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskhome btrfs noatime,nofail 0 0     #does not block the server from starting
 ---------------
 
 
@@ -275,35 +277,7 @@ mysqlcheck --all-databases
 
 
 
-=== SSH and sudo
-
-==== Unix admin account
-
-Create the user account *admin*. It will be used to install and administer the system when root is not required.
-
-[source, bash]
----------------
-useradd admin;
-groupadd admin; 
-useradd -m -s bash -g admin admin;
-mkdir -p /home/admin/logs; chown root:admin /home/admin/logs; chmod 770 /home/admin/logs;
-mkdir /mnt/diskbackup; chown admin:admin /mnt/diskbackup
-mkdir /home/admin/backup; chown admin:admin /home/admin/backup;
-mkdir /home/admin/backup/conf; chown admin:admin /home/admin/backup/conf;
-mkdir /home/admin/backup/mysql; chown admin:admin /home/admin/backup/mysql;
-mkdir /home/admin/wwwroot; chown admin:admin /home/admin/wwwroot
----------------
-
-Check in /etc/passwd that the id of this user *admin* is greater than or equal to 1000.
-
-
-Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to login remotely to server.
-
-[source, bash]
----------------
-adduser myunixlogin
----------------
-
+=== Login setup
 
 ==== Default shell
 
@@ -332,7 +306,85 @@ password        [success=1 default=ignore]      pam_unix.so obscure sha512 minle
 ---------------
 
 
-==== SSH setup
+==== Unix personal sysadmin account
+
+Note: All the following steps can also be done for other sysadmin users later with the script *desktop_admin_users.php*, but you must do it manually for the first one.
+
+Create your personal user login account, for yourself (or for other administrators), for example: *mylastnamefirstname*. It will be used to login remotely to the server.
+
+[source, bash]
+---------------
+adduser mylastnamefirstname
+---------------
+
+Create a file */etc/sudoers.d/mylastnamefirstname* with this content to be able to sudo to root.
+---------------
+mylastnamefirstname ALL=(ALL) ALL
+# You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
+# This allows to switch to admin or osu* with "sudo su - admin" or "sudo su - osu..."
+#mylastnamefirstname ALL=(ALL) /usr/bin/su - admin
+#mylastnamefirstname ALL=(ALL) /usr/bin/su - osu*
+---------------
+
+This allows you to switch to *admin* or *osu...* without typing your password too:
+
+[source, bash]
+---------------
+sudo su - admin
+sudo su - osu...
+---------------
+
+Please note: check you have replaced *mylastnamefirstname* with the correct values before taking changes into account.
+
+
+And set the *root*.*root* and the permissions *r--r-----*
+
+[source, conf]
+---------------
+chmod a-w /etc/sudoers.d/mylastnamefirstname
+chmod o-r /etc/sudoers.d/mylastnamefirstname
+---------------
+
+
+Add your SSH public key to be able to login using your RSA/DSA key
+
+[source, bash]
+---------------
+ssh-copy-id mylastnamefirstname@x.y.z.a
+---------------
+
+
+Test that you can connect using *mylastnamefirstname* and you can make a sudo -s to become root.
+
+[source,bash]
+---------------
+ssh -v mylastnamefirstname@x.y.z.a
+sudo -s
+---------------
+
+
+==== Unix admin account
+
+Create the user account *admin*. It will be used to install and administer the system when root is not required.
+
+[source, bash]
+---------------
+useradd admin;
+groupadd admin; 
+useradd -m -s bash -g admin admin;
+mkdir -p /home/admin/logs; chown root:admin /home/admin/logs; chmod 770 /home/admin/logs;
+mkdir /mnt/diskbackup; chown admin:admin /mnt/diskbackup
+mkdir /home/admin/backup; chown admin:admin /home/admin/backup;
+mkdir /home/admin/backup/conf; chown admin:admin /home/admin/backup/conf;
+mkdir /home/admin/backup/mysql; chown admin:admin /home/admin/backup/mysql;
+mkdir /home/admin/wwwroot; chown admin:admin /home/admin/wwwroot
+---------------
+
+Check in */etc/passwd* that the id of this user *admin* is greater than or equal to 1000.
+
+
+
+=== SSH setup
 
 Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
 
@@ -341,13 +393,12 @@ Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
 chmod go-rw /etc/ssh/sshd_config
 ---------------
 
-
 Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas.conf* onto the server under the name */etc/ssh/sshd_config.d/sellyoursaas.conf*
 
 For Ubuntu 18.04: you can concat the content into file *sshd_config*, but be sure to not have duplicate values.
 
 
-Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rules into the custom file)
+Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow "Match User" rules into the custom file)
 
 [source, conf]
 ---------------
@@ -363,6 +414,27 @@ Match User osu*
   PasswordAuthentication=yes
 # END Block for SellYourSaas
 ---------------
+
+
+Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas-users.conf* on the server and add entries for each sysadmin users.
+
+[source, conf]
+---------------
+AllowUsers mylastnamefirstname
+AllowUsers otheradminunixlogin
+---------------
+
+Please note: check you have replaced *mylastnamefirstname* with the correct values before taking changes into account.
+
+
+Add the following line in the */etc/sudoers* file to reposition the HOME according to the user after a sudo -s:
+
+[source, conf]
+---------------
+Defaults set_home
+Defaults use_pty
+---------------
+
 
 Then reload ssh:
 
@@ -380,81 +452,7 @@ sshd -T -C user=logintotest -C host=clienthost -C addr=clientaddr
 ---------------
 
 
-==== SSH add admin user
-
-Note: All the following steps can also be done with the script *desktop_admin_users.php*. 
-
-Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas-users.conf* on the server and add entries for each sysadmin users.
-
-[source, conf]
----------------
-AllowUsers myadminunixlogin
-AllowUsers otheradminunixlogin
----------------
-
-Please note: check you have replaced *myadminunixlogin* with the correct values before taking changes into account.
-
-Add the following line in the */etc/sudoers* file to reposition the HOME according to the user after a sudo -s:
-
-[source, conf]
----------------
-Defaults set_home
-Defaults use_pty
----------------
-
-[source, conf]
----------------
-/etc/init.d/ssh reload
----------------
-
-
-Create a file */etc/sudoers.d/myadminunixlogin* with the content
-
-[source, conf]
----------------
-myadminunixlogin ALL=(ALL) ALL
-# You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
-# This allows to switch to admin or osu* with "sudo su - admin" or "sudo su - osu..."
-#myadminunixlogin ALL=(ALL) /usr/bin/su - admin
-#myadminunixlogin ALL=(ALL) /usr/bin/su - osu*
----------------
-
-This allows you to switch to *admin* or *osu...* without typing your password too:
-
-[source, bash]
----------------
-sudo su - admin
-sudo su - osu...
----------------
-
-Please note: check you have replaced *myadminunixlogin* with the correct values before taking changes into account.
-
-
-And set the *root*.*root* and the permissions *r--r-----*
-
-[source, conf]
----------------
-chmod a-w /etc/sudoers.d/myadminunixlogin
-chmod o-r /etc/sudoers.d/myadminunixlogin
----------------
-
-
-Test that you can connect using *myadminunixlogin* and you can make a sudo with
-
-[source,bash]
----------------
-ssh -v myadminunixlogin@x.y.z.a
-sudo -s
----------------
-
-
-Add your public key to your sysadmin unix account.
-
-[source, bash]
----------------
-ssh-copy-id myadminunixlogin@x.y.z.a
----------------
-
+=== SSH secure root and admin users with a very strong password (+16 chars)
 
 Define or redefine the password for *root*, *admin* with a secured password saved into your password manager.
 
@@ -464,7 +462,7 @@ passwd root
 passwd admin
 ---------------
 
-Run *ssh-keygen* for all these acounts : *root*, *admin* and *myadminunixlogin*
+Run *ssh-keygen* for all these acounts : *root*, *admin* and *mylastnamefirstname*
 
 
 === Deletion of information files at login
