@@ -229,7 +229,7 @@ $moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/ma
 //$moveinstancestringtoshow .= "# On src server: gpasswd -d admin www-data\n";
 
 $ducstringtoshow = "duc index /mnt/diskhome/home/".$object->array_options['options_username_os']."/ -x -m 3 -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
-$ducstringtoshow .= "<br>duc info -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
+$ducstringtoshow .= "\nduc info -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
 
 
 // Increase limit of time. Works only if we are not in safe mode
@@ -634,7 +634,7 @@ if ($moveinstancestringtoshow) {
 // Script to list or update disk use
 if ($ducstringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
-	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Command to list or calculate disk use <span class="opacitymedium">(to run by root on deployment server)</span><br>';
+	print '<span class="fa fa-database secondary"></span> Command to list or update disk use <span class="opacitymedium">(to run by root on deployment server)</span><br>';
 	print '<textarea name="ducstring" id="ducstring" class="centpercent" spellcheck="false" rows="'.ROWS_2.'">';
 	print $ducstringtoshow;
 	print '</textarea>';
