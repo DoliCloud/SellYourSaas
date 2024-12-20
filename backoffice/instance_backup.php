@@ -228,8 +228,8 @@ $moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/ma
 // Remove read in certif file.
 //$moveinstancestringtoshow .= "# On src server: gpasswd -d admin www-data\n";
 
-$ducstringtoshow = "duc index /mnt/diskhome/home/".$object->array_options['options_username_os']."/ -x -m 3 -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
-$ducstringtoshow .= "\nduc info -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
+$ducstringtoshow = "duc info -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
+$ducstringtoshow .= "\nduc index /mnt/diskhome/home/".$object->array_options['options_username_os']."/ -x -m 3 -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
 
 
 // Increase limit of time. Works only if we are not in safe mode
