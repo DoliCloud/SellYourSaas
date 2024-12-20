@@ -229,6 +229,7 @@ $moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/ma
 //$moveinstancestringtoshow .= "# On src server: gpasswd -d admin www-data\n";
 
 $ducstringtoshow = "duc info -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
+$ducstringtoshow .= "\nduc ls -R -d /mnt/diskhome/home/".$object->array_options['options_username_os'].".duc.db ".$object->array_options['options_hostname_db']."/";
 $ducstringtoshow .= "\nduc index /mnt/diskhome/home/".$object->array_options['options_username_os']."/ -x -m 3 -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
 
 
@@ -635,7 +636,7 @@ if ($moveinstancestringtoshow) {
 if ($ducstringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span> Command to list or update disk use <span class="opacitymedium">(to run by root on deployment server)</span><br>';
-	print '<textarea name="ducstring" id="ducstring" class="centpercent" spellcheck="false" rows="'.ROWS_2.'">';
+	print '<textarea name="ducstring" id="ducstring" class="centpercent" spellcheck="false" rows="'.ROWS_3.'">';
 	print $ducstringtoshow;
 	print '</textarea>';
 
