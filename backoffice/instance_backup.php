@@ -228,6 +228,10 @@ $moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/ma
 // Remove read in certif file.
 //$moveinstancestringtoshow .= "# On src server: gpasswd -d admin www-data\n";
 
+$ducstringtoshow = "duc index /mnt/diskhome/home/".$object->array_options['options_username_os']."/ -x -m 3 -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
+$ducstringtoshow .= "<br>duc info -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
+
+
 // Increase limit of time. Works only if we are not in safe mode
 $ExecTimeLimit = 1800; // 30mn
 if (!empty($ExecTimeLimit)) {
@@ -621,6 +625,18 @@ if ($moveinstancestringtoshow) {
 	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Move an instance into another server (non existing target instance) <span class="opacitymedium">(to run by admin on master server)</span><br>';
 	print '<textarea name="moveinstancestring" id="moveinstancestring" class="centpercent" spellcheck="false" rows="'.ROWS_8.'">';
 	print $moveinstancestringtoshow;
+	print '</textarea>';
+
+	print '<br><br>';
+}
+
+
+// Script to list or update disk use
+if ($ducstringtoshow) {
+	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
+	print '<span class="fa fa-database secondary"></span> -> <span class="fa fa-database opacitymedium"></span><span class="fa fa-database secondary paddingright"></span> Command to list or calculate disk use <span class="opacitymedium">(to run by root on deployment server)</span><br>';
+	print '<textarea name="ducstring" id="ducstring" class="centpercent" spellcheck="false" rows="'.ROWS_2.'">';
+	print $ducstringtoshow;
 	print '</textarea>';
 
 	print '<br><br>';

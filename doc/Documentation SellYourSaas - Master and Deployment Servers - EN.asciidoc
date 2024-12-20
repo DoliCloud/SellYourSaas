@@ -424,6 +424,11 @@ AllowUsers mylastnamefirstname
 AllowUsers otheradminunixlogin
 ---------------
 
+[source, conf]
+---------------
+chmod o-rw /etc/ssh/sshd_config.d/sellyoursaas*.conf
+---------------
+
 Please note: check you have replaced *mylastnamefirstname* with the correct values before taking changes into account.
 
 
@@ -478,7 +483,7 @@ rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-availab
 Ignore error on missing files.
 
 
-=== Modification of /etc/skel
+=== Creation or modification of /etc/skel directory template
 
 Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys_support* with
 
@@ -487,10 +492,10 @@ Edit the contents of */etc/skel* on the deployment servers in order to fill in t
 
 [source, bash]
 ---------------
-sudo mkdir /etc/skel/.ssh
-sudo touch /etc/skel/.ssh/authorized_keys_support
-sudo chmod -R go-rwx /etc/skel/.ssh
-sudo vi /etc/skel/.ssh/authorized_keys_support
+mkdir -p /etc/skel/.ssh
+touch /etc/skel/.ssh/authorized_keys_support
+chmod -R go-rwx /etc/skel/.ssh
+vi /etc/skel/.ssh/authorized_keys_support
 ---------------
 
 Thus, any new linux account created (those of customer instances) will be accessible by the administrator(s).
