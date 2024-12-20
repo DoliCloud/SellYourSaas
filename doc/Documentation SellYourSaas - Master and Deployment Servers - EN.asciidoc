@@ -6066,15 +6066,15 @@ If it fails, you can fix path of extracted files with this command:
 
 ==== Error when doing PHP ssh2_connect or just a CLI ssh to a server
 
-If you find into */var/log/auth.log* an error like:
+If you find, on ssh server, into */var/log/auth.log* an error like:
 
 ... sshd[...]: Unable to negotiate with ... port ...: no matching key exchange method found. Their offer: ... [preauth]
 
-or into the apache error log file:
+or, into the apache client error log file, an error loke:
 
 ... Error starting up SSH connection(-5): Unable to exchange encryption keys in ...
 
-The client (maybe an old PHP version) is using a deprecated algorithm for negotiation. You can have a lost of algorithm supported by the server
+The client (maybe an old PHP version) is using a deprecated algorithm for negotiation. You can have a list of algorithm supported by the server
 
 [source,bash]
 ---------------
@@ -6087,6 +6087,7 @@ Edit the file */etc/ssh/sshd_config.d/sellyoursaas.conf* of the targeted server 
 [source,bash]
 ---------------
 # Legacy changes - To allow an old client to connect to
+# Warning: openssh does not support mixing + and - par
 #PubkeyAcceptedKeyTypes=+ssh-rsa
 HostKeyAlgorithms +ssh-rsa
 #HostKeyAlgorithms -ecdsa-sha2-nistp256
@@ -6104,7 +6105,7 @@ Then reload ssh with
 /etc/init.d/ssh reload
 ---------------
 
-To test if a couple client-server can work with one algorightm, you can try:
+To test if a couple client-server can work with one algorightm, you can try from the client:
 
 ssh -oHostKeyAlgorithms=ssh-rsa admin@ip.of.server
 ssh -oHostKeyAlgorithms=ssh-ed25519 admin@ip.of.server
