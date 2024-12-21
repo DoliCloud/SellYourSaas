@@ -1003,9 +1003,9 @@ Install the NFS client and install it manually. Editing is performed by default 
 
 [source, bash]
 ---------------
-sudo apt install nfs-common
-sudo mount -t nfs i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas
-sudo umount /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+apt install nfs-common
+mount -t nfs i.p.server.master:/home/admin/wwwroot/dolibarr_documents/sellyoursaas /home/admin/wwwroot/dolibarr_documents/sellyoursaas
+umount /home/admin/wwwroot/dolibarr_documents/sellyoursaas
 ---------------
 
 Add the line to the */etc/fstab* file to have automatic reboot mounting
@@ -1036,7 +1036,7 @@ chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
 
 
-Complete the file */home/admin/.ssh/config* to indicate to use this public key when accessing to itself or github instead of *id_rsa* by default.
+Create or complete the file */home/admin/.ssh/config* to indicate to use this public key when accessing to itself or github instead of *id_rsa* by default.
 
 [source, bash]
 ---------------
@@ -1044,6 +1044,14 @@ Host ip.server.deployment
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
 Host github.com
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas    
+---------------
+
+Set correct permission on file
+
+[source, bash]
+---------------
+chmod 600 /home/admin/.ssh/config
+chown admin:admin /home/admin/.ssh/config
 ---------------
 
   
