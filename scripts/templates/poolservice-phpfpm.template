@@ -10,6 +10,8 @@ After=network.target
 [Service]
 Type=simple
 PIDFile=/run/php/php__phpversion__-fpm-__fqn__.pid
+Restart=always
+RestartSec=10
 ExecStart=/usr/sbin/php-fpm__phpversion__ --nodaemonize --fpm-config /etc/php/__phpversion__/fpm/pool.d/sellyoursaas/__fqn__.phpfpm.conf --allow-to-run-as-root
 ExecReload=/bin/kill -USR2 $MAINPID
 ExecStop=/bin/kill -QUIT $MAINPID
