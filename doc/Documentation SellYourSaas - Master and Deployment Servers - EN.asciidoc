@@ -5873,6 +5873,14 @@ or
 
 Check in file */etc/apparmor.d/usr.sbin.apache2* that */etc/passwd* is not denied and that phpsendmail.php command is allowed.
 
+==== Erro when sending email into /var/log/phpsendmail.log
+
+If you got this error 
+	
+	ERROR /tmp/spam/... can't be read.
+	
+Check that the PrivateTmp mode is false into the launcher of apache2.
+
 
 ==== Error when sending email by the cron of a user. EMail is sent to the external relay instead of locally.
 
