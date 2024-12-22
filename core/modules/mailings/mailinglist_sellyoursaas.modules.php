@@ -56,42 +56,42 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		$arraystatus=array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed');
 
-		$s='';
-		$s.=$formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client', 'customerprospect', 'form', 'paddingrightonly', $langs->trans("Nature"));
+		$s = '';
+		$s .= $formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client', 'customerprospect', 'form', 'paddingrightonly', $langs->trans("Nature"));
 
-		$s.=img_picto($langs->trans("Country"), 'country', 'class="pictofixedwidth"');
+		$s .= '<br>'.img_picto($langs->trans("Country"), 'country', 'class="pictofixedwidth"');
 		$formother=new FormAdmin($this->db);
-		$s.=$form->select_country(GETPOST('country_id', 'alpha'), 'country_id', '', 0, 'minwidth300', '', $langs->trans("Country"));
+		$s .= $form->select_country(GETPOST('country_id', 'alpha'), 'country_id', '', 0, 'minwidth300', '', $langs->trans("Country"));
 
-		$s.='<br> ';
+		$s .= '<br> ';
 
-		$s.=img_picto($langs->trans("Language"), 'language', 'class="pictofixedwidth"');
+		$s .= img_picto($langs->trans("Language"), 'language', 'class="pictofixedwidth"');
 		$formother=new FormAdmin($this->db);
 
-		$s.=$formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, null, $langs->trans("Language"), 0, 0, '', 0, 0, 1);
+		$s .= $formother->select_language(GETPOST('lang_id', 'array'), 'lang_id', 0, null, $langs->trans("Language"), 0, 0, '', 0, 0, 1);
 
-		$s.=$langs->trans("NotLanguage").': ';
+		$s .= $langs->trans("NotLanguage").': ';
 		$formother=new FormAdmin($this->db);
-		$s.=$formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, null, $langs->trans("NotLanguage"), 0, 0, '', 0, 0, 1);
+		$s .= $formother->select_language(GETPOST('not_lang_id', 'array'), 'not_lang_id', 0, null, $langs->trans("NotLanguage"), 0, 0, '', 0, 0, 1);
 
 		$s .= '<br>';
 
-		$s.= '<label for="donotusedefaultstripeaccount">'.$langs->trans("DoNotUseDefaultStripeAccount").':</label> ';
-		$s.='<input type="checkbox" class="margintoponly marginbottomonly" value="1" id="donotusedefaultstripeaccount" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
+		$s .= '<label for="donotusedefaultstripeaccount">'.$langs->trans("DoNotUseDefaultStripeAccount").':</label> ';
+		$s .= '<input type="checkbox" class="margintoponly marginbottomonly" value="1" id="donotusedefaultstripeaccount" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
 
 		// Filter on contracts
-		$s.='<br>';
+		$s .= '<br>';
 
-		$s.=$langs->trans("DeploymentStatus").': ';
-		$s.='<select name="filter" id="sellyoursaas_filter" class="flat">';
-		$s.='<option value="none">&nbsp;</option>';
+		$s .= $langs->trans("DeploymentStatus").': ';
+		$s .= '<select name="filter" id="sellyoursaas_filter" class="flat">';
+		$s .= '<option value="none">&nbsp;</option>';
 		foreach ($arraystatus as $key => $status) {
-			$s.='<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected' : '').'>'.$status.'</option>';
+			$s .= '<option value="'.$key.'"'.(GETPOST('filter', 'alpha') == $key ? ' selected' : '').'>'.$status.'</option>';
 		}
-		$s.='</select>';
+		$s .= '</select>';
 		$s .= ajax_combobox("sellyoursaas_filter");
 
-		$s.='<br>';
+		$s .= '<br>';
 
 		$listofipwithinstances=array();
 		$sql = "SELECT rowid, ref, ipaddress, status, servercountries";
@@ -106,17 +106,17 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 			dol_print_error($this->db);
 		}
 
-		$s.=$langs->trans("DeploymentHost").': ';
-		$s.='<select name="filterip" id="sellyoursaas_filterip" class="flat maxwidth500">';
-		$s.='<option value="none">&nbsp;</option>';
+		$s .= $langs->trans("DeploymentHost").': ';
+		$s .= '<select name="filterip" id="sellyoursaas_filterip" class="flat maxwidth500">';
+		$s .= '<option value="none">&nbsp;</option>';
 		foreach ($listofipwithinstances as $key => $val) {
 			$label = $val['ref'].' - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : '('.$val['servercountries'].')');
 			$labelhtml = $val['ref'].'<span class="opacitymedium"> - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : ' ('.$val['servercountries'].')').'</span>';
-			$s.='<option value="'.$val['ipaddress'].'"'.(GETPOST('filterip', 'alpha') == $val['ipaddress'] ? ' selected' : '').' data-html="'.dol_escape_htmltag($labelhtml).'">'.dol_escape_htmltag($label).'</option>';
+			$s .= '<option value="'.$val['ipaddress'].'"'.(GETPOST('filterip', 'alpha') == $val['ipaddress'] ? ' selected' : '').' data-html="'.dol_escape_htmltag($labelhtml).'">'.dol_escape_htmltag($label).'</option>';
 		}
-		$s.='</select>';
+		$s .= '</select>';
 		$s .= ajax_combobox("sellyoursaas_filterip");
-		$s.='<br> ';
+		$s .= '<br> ';
 
 		/*$listofpackages=array();
 		$sql = "SELECT DISTINCT ref";
@@ -134,11 +134,13 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		// Filter on contract ref
 		$s .= img_picto('', 'contract', 'class="pictofixedwidth"').$langs->trans("Instance");
-		$s .= '<input type="text" class="flat maxwidth200" value="" placeholder="a*" name="instanceref">';
+		$s .= ' <input type="text" class="flat maxwidth200" value="" placeholder="a*" name="instanceref">';
+		
+		$s .= "<br>";
 		
 		// Filter on line of contracts
 		$s .= img_picto('', 'product');
-		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500', 0, '', array(), 1);
+		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, 'Contracts with at least one line with this product...', 0, 'maxwidth500', 0, '', array(), 1);
 
 		/*
 		$s .= '<br>';
