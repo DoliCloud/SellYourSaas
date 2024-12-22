@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Can filter on instance mask when selecting target of email.
 * NEW Add info on ducs command
 * NEW Support discount codes with a number part (MYDISCOUNTCODE-123)
 * NEW Add hostname property in list of deployment servers  

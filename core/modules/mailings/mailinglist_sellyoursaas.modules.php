@@ -57,10 +57,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$arraystatus=array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed');
 
 		$s='';
-		$s.=$langs->trans("Type").': ';
-		$s.=$formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client');
-
-		$s.=' ';
+		$s.=$formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client', 'customerprospect', 'form', 'paddingrightonly', $langs->trans("Nature"));
 
 		$s.=img_picto($langs->trans("Country"), 'country', 'class="pictofixedwidth"');
 		$formother=new FormAdmin($this->db);
@@ -79,11 +76,11 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		$s .= '<br>';
 
-		$s.= '<label for="donotusedefaultstripeaccount">'.$langs->trans("DoNotUseDefaultStripeAccount").':</span> ';
+		$s.= '<label for="donotusedefaultstripeaccount">'.$langs->trans("DoNotUseDefaultStripeAccount").':</label> ';
 		$s.='<input type="checkbox" class="margintoponly marginbottomonly" value="1" id="donotusedefaultstripeaccount" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
 
 		// Filter on contracts
-		$s.='<br> ';
+		$s.='<br>';
 
 		$s.=$langs->trans("DeploymentStatus").': ';
 		$s.='<select name="filter" id="sellyoursaas_filter" class="flat">';
@@ -94,7 +91,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s.='</select>';
 		$s .= ajax_combobox("sellyoursaas_filter");
 
-		$s.=' ';
+		$s.='<br>';
 
 		$listofipwithinstances=array();
 		$sql = "SELECT rowid, ref, ipaddress, status, servercountries";
@@ -110,7 +107,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		}
 
 		$s.=$langs->trans("DeploymentHost").': ';
-		$s.='<select name="filterip" id="sellyoursaas_filterip" class="flat">';
+		$s.='<select name="filterip" id="sellyoursaas_filterip" class="flat maxwidth500">';
 		$s.='<option value="none">&nbsp;</option>';
 		foreach ($listofipwithinstances as $key => $val) {
 			$label = $val['ref'].' - '.$val['ipaddress'].(empty($val['servercountries']) ? '' : '('.$val['servercountries'].')');
@@ -135,9 +132,13 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s .= $langs->trans("Package").': ';
 		*/
 
+		// Filter on contract ref
+		$s .= img_picto('', 'contract', 'class="pictofixedwidth"').$langs->trans("Instance");
+		$s .= '<input type="text" class="flat maxwidth200" value="" placeholder="a*" name="instanceref">';
+		
 		// Filter on line of contracts
 		$s .= img_picto('', 'product');
-		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
+		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500', 0, '', array(), 1);
 
 		/*
 		$s .= '<br>';
@@ -209,7 +210,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$sql .= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."societe_extrafields as se on se.fk_object = s.rowid";
 		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as c on s.fk_pays = c.rowid";
-		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') || (! empty($_POST['filterip']) && $_POST['filterip'] != 'none') || ($productid > 0)) {
+		if ((! empty($_POST['filter']) && $_POST['filter'] != 'none') || (! empty($_POST['filterip']) && $_POST['filterip'] != 'none') || ($productid > 0) || GETPOST('instanceref')) {
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat as co on co.fk_soc = s.rowid";
 			$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as coe on coe.fk_object = co.rowid";
 		}
@@ -228,6 +229,10 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		if (GETPOST('country_id') && GETPOST('country_id') != 'none' && GETPOST('country_id') != '-1') {
 			$sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
 		}
+		if (GETPOST('instanceref')) {
+			$sql .= " AND co.customer_ref LIKE '".$this->db->escape(str_replace('*', '%', GETPOST('instanceref')))."'";
+		}
+		
 		if (GETPOST('filter') && GETPOST('filter') != 'none') {
 			$sql.= " AND coe.deployment_status = '".$this->db->escape(GETPOST('filter'))."'";
 		}
