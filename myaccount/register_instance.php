@@ -349,7 +349,7 @@ if ($reusecontractid) {
 		} else {
 			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer"))."\n";
 		}
-		exit(-10);
+		exit(246);
 	}
 
 	if ($productref != 'none' && empty($sldAndSubdomain)) {
@@ -359,7 +359,7 @@ if ($reusecontractid) {
 		} else {
 			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
 		}
-		exit(-11);
+		exit(245);
 	}
 	if ($productref != 'none' && strlen($sldAndSubdomain) >= 29) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
@@ -368,7 +368,7 @@ if ($reusecontractid) {
 		} else {
 			print $langs->trans("ErrorFieldTooLong", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
 		}
-		exit(-12);
+		exit(244);
 	}
 	if ($productref != 'none' && ! preg_match('/^[a-zA-Z0-9\-]+$/', $sldAndSubdomain)) {		// Only a-z A-Z 0-9 and - . Note: - is removed by javascript part of register page.
 		if (substr($sapi_type, 0, 3) != 'cli') {
@@ -377,7 +377,7 @@ if ($reusecontractid) {
 		} else {
 			print $langs->trans("ErrorOnlyCharAZAllowedFor", $langs->transnoentitiesnoconv("NameForYourApplication"))."\n";
 		}
-		exit(-13);
+		exit(243);
 	}
 	if ($productref != 'none' && empty($tldid)) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
@@ -386,7 +386,7 @@ if ($reusecontractid) {
 		} else {
 			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Subdomain"))."\n";
 		}
-		exit(-14);
+		exit(242);
 	}
 	if (empty($password) || empty($password2)) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
@@ -395,7 +395,7 @@ if ($reusecontractid) {
 		} else {
 			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password"))."\n";
 		}
-		exit(-15);
+		exit(241);
 	}
 	if ($password != $password2) {
 		if (substr($sapi_type, 0, 3) != 'cli') {
@@ -404,7 +404,7 @@ if ($reusecontractid) {
 		} else {
 			print $langs->trans("ErrorPasswordMismatch")."\n";
 		}
-		exit(-16);
+		exit(240);
 	}
 } else {
 	// When we deploy from the register.php page
