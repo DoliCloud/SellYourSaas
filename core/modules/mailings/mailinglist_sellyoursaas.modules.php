@@ -232,7 +232,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 			$sql.= " AND fk_pays IN ('".$this->db->sanitize(GETPOST('country_id', 'intcomma'), 1)."')";
 		}
 		if (GETPOST('instanceref')) {
-			$sql .= " AND co.customer_ref LIKE '".$this->db->escape(str_replace('*', '%', GETPOST('instanceref')))."'";
+			$sql .= " AND co.ref_customer LIKE '".$this->db->escape(str_replace('*', '%', GETPOST('instanceref')))."'";
 		}
 		
 		if (GETPOST('filter') && GETPOST('filter') != 'none') {
