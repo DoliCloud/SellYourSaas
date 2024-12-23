@@ -1817,6 +1817,8 @@ NOTE: Fail2ban won't start if any log mentioned in its conf does not exist, so y
 
 [source, bash]
 ---------------
+mkdir -p /var/log/mysql; chown mysql:mysql /var/log/mysql; chmod 750 /var/log/mysql;
+touch /var/log/phpsendmail.log
 grep logpath /etc/fail2ban/jail.local | cut -d= -f2 | grep '^ /'|sort|uniq|xargs touch
 ---------------
 
@@ -1868,31 +1870,31 @@ To test that spamassassin client is working, create a file */tmp/testspam* with 
 
 [source,text]
 ---------------
-    Subject: Test spam mail (GTUBE)
-    Message-ID: <GTUBE1.1010101@example.net>
-    Date: Wed, 23 Jul 2003 23:30:00 +0200
-    From: Sender <sender@example.net>
-    To: Recipient <recipient@example.net>
-    Precedence: junk
-    MIME-Version: 1.0
-    Content-Type: text/plain; charset=us-ascii
-    Content-Transfer-Encoding: 7bit
+Subject: Test spam mail (GTUBE)
+Message-ID: <GTUBE1.1010101@example.net>
+Date: Wed, 23 Jul 2003 23:30:00 +0200
+From: Sender <sender@example.net>
+To: Recipient <recipient@example.net>
+Precedence: junk
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 
-    This is the GTUBE, the
-	    Generic
-	    Test for
-	    Unsolicited
-	    Bulk
-	    Email
+This is the GTUBE, the
+    Generic
+    Test for
+    Unsolicited
+    Bulk
+    Email
 
-    If your spam filter supports it, the GTUBE provides a test by which you
-    can verify that the filter is installed correctly and is detecting incoming
-    spam. You can send yourself a test mail containing the following string of
-    characters (in upper case and with no white spaces and line breaks):
+If your spam filter supports it, the GTUBE provides a test by which you
+can verify that the filter is installed correctly and is detecting incoming
+spam. You can send yourself a test mail containing the following string of
+characters (in upper case and with no white spaces and line breaks):
 
-    XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X
+XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X
 
-    You should send this test mail from an account outside of your network.
+You should send this test mail from an account outside of your network.
 ---------------
 
 Then test with:
@@ -1903,6 +1905,9 @@ spamc < /tmp/testspam
 spamc -c < /tmp/testspam
 echo $?
 ---------------
+
+If value of echo is 1, then the spam was correctly detected as spam.
+
 
 === Test and setup of ClamAV
 
@@ -1951,18 +1956,28 @@ pour Ubuntu 18.04
 
 wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
 dpkg -i afick.deb
+mv /etc/cron.daily/afick_cron.dpkg-new /etc/cron.daily/afick_cron
 
 ou pour Ubuntu 22.04
 
 wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick-3.7.0.tgz/download
 tar -xvf afick-3.7.0.tgz; 
 cd afick-3.7.0; perl Makefile.pl; make install; ln -fs /opt/afick/etc/afick.conf /etc/afick.conf; ln -fs /opt/afick/bin/afick.pl /usr/bin/afick.pl;
-mv /etc/cron.daily/afick_cron.dpkg-new /etc/cron.daily/afick_cron
+mv afick_cron /etc/cron.daily/afick_cron
+vi /etc/cron.daily/afick_cron to replace lines 
+  AFICK="/usr/bin/afick.pl" with AFICK="/opt/afick/bin/afick.pl"
+  /usr/bin/afick_archive.pl with /opt/afick/bin/afick_archive.pl
+  
+ou pour Ubuntu 24.04
+
+wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.8.1/afick-3.8.1.tgz/download
+tar -xvf afick-3.8.1.tgz; 
+cd afick-3.8.1; perl Makefile.pl; make install; ln -fs /opt/afick/etc/afick.conf /etc/afick.conf; ln -fs /opt/afick/bin/afick.pl /usr/bin/afick.pl;
+mv afick_cron /etc/cron.daily/afick_cron
 vi /etc/cron.daily/afick_cron to replace lines 
   AFICK="/usr/bin/afick.pl" with AFICK="/opt/afick/bin/afick.pl"
   /usr/bin/afick_archive.pl with /opt/afick/bin/afick_archive.pl
 ---------------
-
 
 
 * Comment the lines that exclude suffixes that we want to include in analysis in */etc/afick.conf* and keep uncommented only these ones (we only want to exclude log and backup):
