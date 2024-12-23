@@ -134,7 +134,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 
 		// Filter on contract ref
 		$s .= img_picto('', 'contract', 'class="pictofixedwidth"').$langs->trans("Instance");
-		$s .= ' <input type="text" class="flat maxwidth200" value="" placeholder="a*" name="instanceref">';
+		$s .= ' <input type="text" class="flat maxwidth200" value="'.GETPOST("instanceref").'" placeholder="abc*" name="instanceref">';
 		
 		$s .= "<br>";
 		
