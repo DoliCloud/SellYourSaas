@@ -2004,9 +2004,8 @@ exclude_suffix := tmp old bak
 # define the nice value : from 0 to 19 (priority of the job)
 @@define NICE 18
 # = 1 to allow cron job, = 0 to suppress cron job
-@@define 
+@@define BATCH 1
 
- 1
 # if set to 0, keep all archives, else define the number of days to keep
 # with the syntaxe nS , n for a number, S for the scale
 # (d for day, w for week, m for month, y for year)
@@ -2053,9 +2052,9 @@ exclude_suffix := tmp old bak
 !/home/admin/.bash_history
 !/home/admin/.viminfo
 !/home/admin/.mysql_history
-!/home/myunixlogin/.bash_history
-!/home/myunixlogin/.viminfo
-!/home/myunixlogin/.mysql_history
+!/home/myfirstnamelastname/.bash_history
+!/home/myfirstnamelastname/.viminfo
+!/home/myfirstnamelastname/.mysql_history
 !/root/.bash_history
 !/root/.viminfo
 !/root/.mysql_history
