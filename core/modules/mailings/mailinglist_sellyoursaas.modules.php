@@ -57,7 +57,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$arraystatus=array('processing'=>'Processing','done'=>'Done','undeployed'=>'Undeployed');
 
 		$s = '';
-		$s .= $formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client', 'customerprospect', 'form', 'paddingrightonly', $langs->trans("Nature"));
+		$s .= $formcompany->selectProspectCustomerType(GETPOST('client', 'alpha'), 'client', 'customerprospect', 'form', 'paddingrightonly', $langs->trans("NatureOfThirdParty"));
 
 		$s .= '<br>'.img_picto($langs->trans("Country"), 'country', 'class="pictofixedwidth"');
 		$formother=new FormAdmin($this->db);
