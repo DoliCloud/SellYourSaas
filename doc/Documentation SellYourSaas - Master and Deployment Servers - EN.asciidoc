@@ -198,8 +198,8 @@ mkdir /mnt/diskhome
 mount /dev/vdxY /mnt/diskhome
 mkdir /mnt/diskbackup
 
-And only if a disk was created (optionnel) for the backup:
-mount /dev/vdxZ /mnt/diskbackup
+And (optional), only if a dedicated disk was created for the backup (different than disk for home):
+mount /dev/vdxZ /mnt/diskbackup;
 
 blkid
 ---------------
@@ -687,21 +687,21 @@ On the *Master* server and the *Deployment* servers, create the directories to s
 
 Create directories required to store data, backups and archives:
 
-* Create directory */mnt/diskbackup/backup*:
+* Create the directory */mnt/diskbackup/backup*:
 
-If you have created a dedicated disk for the backup:
+If an optional dedicated disk was created for the backup (different than disk for home):
 
 [source, bash]
 ---------------
 mkdir /mnt/diskbackup/backup
 ---------------
 
-If you haven't:
+If you have not a dedicated disk for backup:
 
 [source, bash]
 ---------------
 mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
-ln -fs /mnt/diskhome/backup /mnt/diskbackup/backup
+ln -fs /mnt/diskhome/backup /mnt/diskbackup
 ---------------
 
 * Create the other directories on the deployment server:
