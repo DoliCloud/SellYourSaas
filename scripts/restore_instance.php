@@ -117,6 +117,7 @@ if (! $res) {
 }
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
+include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("/sellyoursaas/lib/sellyoursaas.lib.php");
 
@@ -400,7 +401,18 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand."\n";
 	exec($fullcommand, $output, $return_var);
 
-	$command = 'chown -R admin /tmp/restore_instance/'.$object->username_os;
+	// Rename dir into the name of the targeted instance instead of source
+	if ($object->username_os != basename($dirroot)) {
+		//print "Rename directory /tmp/restore_instance/".basename($dirroot)." into /tmp/restore_instance/".$object->username_os."\n";
+		//dol_move_dir('/tmp/restore_instance/'.basename($dirroot), '/tmp/restore_instance/'.$object->username_os);
+		$fromusername = basename($dirroot);
+		$fromdbname = 'dbnsourcebackup';
+	} else {
+		$fromusername = $object->username_os;
+		$fromdbname = $object->database_db;
+	}
+	
+	$command = 'chown -R admin /tmp/restore_instance/'.$fromusername;
 	$param = array();
 	$fullcommand=$command." ".join(" ", $param);
 	$output = array();
@@ -426,7 +438,7 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 		print "Data have been copied from the backup server in local /tmp/restore_instance.\n";
 		print "You must now run the script from user 'admin' with this parameters:\n";
 
-		print __FILE__." /tmp/restore_instance/".$object->username_os."/".$object->database_db." autoscan ".$instance." ".$mode."\n";
+		print __FILE__." /tmp/restore_instance/".$fromusername."/".$fromdbname." autoscan ".$instance." ".$mode."\n";
 	}
 	print "\n";
 
@@ -511,9 +523,10 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 
 	if ($RSYNCDELETE) {
 		//$param[]="--backup --suffix=.old --delete --delete-excluded";
-		$param[]="--delete --delete-excluded";
+		$param[] = "--delete --delete-excluded";
 	} else {
 		//$param[]="--backup --suffix=.old";
+		$param[] = "--delete";
 	}
 	$param[]="--stats";
 	$param[]="-e 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no'";
@@ -583,8 +596,54 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		$dumpfiletoload=$dayofmysqldump;
 	}
 
-	// TODO
 	// Drop table to avoid error on load due to foreign keys
+	$newserverbase = $serverdb;
+	$newloginbase = $object->username_db;
+	$newpasswordbase = str_replace(array('"','`'), array('\"','\`'), $object->password_db);
+	$newdatabasedb = $object->database_db;
+	$utils = new Utils($db);
+	
+	// Drop llx_accounting_account (if it exists)
+	$fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+	$output=array();
+	$return_var=0;
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropa."\n";
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+		$outputfile = $conf->admin->dir_temp.'/out.tmp';
+		$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
+	
+		$return_var = $resultarray['result'];
+		$content_grabbed = $resultarray['output'];
+	
+		print $content_grabbed."\n";
+		// If table already not exist, return_var is 1
+		// If technical error, return_var is also 1, so we disable this test
+		/*if ($return_var) {
+			print "Error on droping table into the new instance\n";
+			exit(-2);
+		}*/
+	}
+	
+	// Drop llx_accounting_system (if it exists)
+	$fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+	$output=array();
+	$return_var=0;
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropb."\n";
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+		$outputfile = $conf->admin->dir_temp.'/out.tmp';
+		$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
+	
+		$return_var = $resultarray['result'];
+		$content_grabbed = $resultarray['output'];
+	
+		print $content_grabbed."\n";
+		// If table already not exist, return_var is 1
+		// If technical error, return_var is also 1, so we disable this test
+		/*if ($return_var) {
+			print "Error on droping table into the new instance\n";
+			exit(-2);
+		}*/
+	}
 
 	// Launch load
 	$fullcommand=$command." ".join(" ", $param);
