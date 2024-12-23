@@ -1120,6 +1120,8 @@ sudo apt install -y libreoffice-common libreoffice-writer
 sudo apt install -y mailutils postfix
 ---------------
 
+During the installation of the postfix package, you can answer the installation mode "Internet Site"
+
 
 === Disabling automatic update
 
