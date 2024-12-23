@@ -397,7 +397,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myc
 
 // Define environment of payment modes
 $servicestatusstripe = 0;
-if (! empty($conf->stripe->enabled)) {
+if (isModEnabled('stripe')) {
 	$service = 'StripeTest';
 	$servicestatusstripe = 0;
 	if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
@@ -406,7 +406,7 @@ if (! empty($conf->stripe->enabled)) {
 	}
 }
 $servicestatuspaypal = 0;
-if (! empty($conf->paypal->enabled)) {
+if (isModEnabled('paypal')) {
 	$servicestatuspaypal = 0;
 	if (getDolGlobalString('PAYPAL_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
 		$servicestatuspaypal = 1;
@@ -446,7 +446,7 @@ if (preg_match('/logout/', $mode)) {
 		$param.='&username='.urlencode(GETPOST('username', 'alpha'));
 	}
 	if (GETPOSTISSET('password')) {
-		$param.='&password='.urlencode(GETPOST('password', 'alpha'));
+		$param.='&password='.urlencode(GETPOST('password', 'password'));
 	}
 	if (GETPOSTISSET('login_hash')) {
 		$param.='&login_hash='.urlencode(GETPOST('login_hash', 'alpha'));
@@ -718,7 +718,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	}
 
 	if (!$error) {
-		$channel = GETPOST('supportchannel', 'alpha');
+		$channel = GETPOST('supportchannel', 'alphanohtml');
 		$tmparray = explode('_', $channel, 2);
 		$priority = 'low';
 		if (!empty($tmparray[1])) {
@@ -922,14 +922,14 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 } elseif ($action == 'updatemythirdpartyaccount') {
 	$error = 0;
 
-	$orgname = GETPOST('orgName', 'nohtml');
-	$address = GETPOST('address', 'nohtml');
-	$town = GETPOST('town', 'nohtml');
-	$zip = GETPOST('zip', 'nohtml');
-	$stateorcounty = GETPOST('stateorcounty', 'nohtml');
+	$orgname = GETPOST('orgName', 'alphanohtml');
+	$address = GETPOST('address', 'alphanohtml');
+	$town = GETPOST('town', 'alphanohtml');
+	$zip = GETPOST('zip', 'alphanohtml');
+	$stateorcounty = GETPOST('stateorcounty', 'alphanohtml');
 	$country_code = GETPOST('country_id', 'aZ09');
-	$vatassuj = (GETPOST('vatassuj', 'alpha') == 'on' ? 1 : 0);
-	$vatnumber = GETPOST('vatnumber', 'alpha');
+	$vatassuj = (GETPOST('vatassuj', 'alphanohtml') == 'on' ? 1 : 0);
+	$vatnumber = GETPOST('vatnumber', 'alphanohtml');
 
 	if (empty($orgname)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameOfCompany")), null, 'errors');
@@ -987,14 +987,14 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 } elseif ($action == 'updatemythirdpartylogin') {
-	$email = trim(GETPOST('email', 'nohtml'));
-	$oldemail = trim(GETPOST('oldemail', 'nohtml'));
-	$emailccinvoice = trim(GETPOST('emailccinvoice', 'nohtml'));
-	$oldemailccinvoice = trim(GETPOST('oldemailccinvoice', 'nohtml'));
-	$firstname = trim(GETPOST('firstName', 'nohtml'));
-	$lastname = trim(GETPOST('lastName', 'nohtml'));
-	$phone = trim(GETPOST('phone', 'nohtml'));
-	$oldphone = trim(GETPOST('oldphone', 'nohtml'));
+	$email = trim(GETPOST('email', 'alphanohtml'));
+	$oldemail = trim(GETPOST('oldemail', 'alphanohtml'));
+	$emailccinvoice = trim(GETPOST('emailccinvoice', 'alphanohtml'));
+	$oldemailccinvoice = trim(GETPOST('oldemailccinvoice', 'alphanohtml'));
+	$firstname = trim(GETPOST('firstName', 'alphanohtml'));
+	$lastname = trim(GETPOST('lastName', 'alphanohtml'));
+	$phone = trim(GETPOST('phone', 'alphanohtml'));
+	$oldphone = trim(GETPOST('oldphone', 'alphanohtml'));
 
 	if (empty($email)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Email")), null, 'errors');
@@ -1052,8 +1052,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 } elseif ($action == 'updatepassword') {
-	$password = GETPOST('password', 'nohtml');
-	$password2 = GETPOST('password2', 'nohtml');
+	$password = GETPOST('password', 'password');
+	$password2 = GETPOST('password2', 'password');
 
 	if (empty($password) || empty($password2)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');
