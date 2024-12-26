@@ -3450,7 +3450,7 @@ systemctl list-units | grep certbot
 systemctl status snap.certbot.renew.timer
 ---------------
 
-The complete logs of certbot are into /var/log/letsencrypt/...
+The complete logs of certbot are into */var/log/letsencrypt/*...
 
 
 [[creation_certificat_ssl]]
@@ -3500,7 +3500,7 @@ certbot certificates
 
 [source,bash]
 ---------------
-openssl x509 -in fullchain.pem -text
+openssl x509 -in fullchain.pem|.crt -text
 ---------------
 
 * To read renewal scheduler:
@@ -3542,7 +3542,7 @@ To check that a DNS update is ok for a challenge, you can use this URL:
 https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
 or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
-* To remove completely a certificate, you can run
+* To remove completely a certificate from letsencrypt, you can run
 
 [source,bash]
 ---------------
