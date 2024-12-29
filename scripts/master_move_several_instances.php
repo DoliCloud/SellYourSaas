@@ -210,9 +210,8 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move existing instance from one server to another one (with target instances not existing yet).\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." *.withX.mysaasdomainname.com withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect) [maxnb] [--overwrite-existing-instance]\n";
+	print "Usage: ".$script_file." *.withX.mysaasdomainname.com withY.mysaasdomainname.com (test|confirmmaintenance|confirmredirect) [maxnb] [--overwrite-existing-instance]\n";
 	print "Mode is: test                test mode (nothing is done).\n";
-	print "         confirm             real move of the instance (deprecated, use confirmmaintenance or confirmredirect).\n";
 	print "         confirmmaintenance  real move and replace old instance with a definitive message 'Suspended. Instance has been moved.'.\n";
 	print "         confirmredirect     real move with a mesage 'Move in progress' during transfer, and then, switch old instance into a redirect instance.\n";
 	print "maxnb will process only the first maxnb instances found.\n";
@@ -221,6 +220,11 @@ if (empty($newinstance) || empty($mode)) {
 	exit(-1);
 }
 
+if ($mode == 'confirm') {
+	echo "Mode 'confirm' has been deprecated. Use 'confirmmaintenance' or 'confirmredirect' instead).\n";
+	print "\n";
+	exit(-1);
+}
 /*
 	if (0 != posix_getuid()) {
 		echo "Script must be ran with root.\n";
@@ -464,7 +468,7 @@ foreach ($listofinstances as $oldinstancecursor) {
 if (count($listofinstances)) {
 	print "\n";
 	if (! $error) {
-		if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+		if ($mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 			print 'Move of old instances matching name '.$oldinstance." done.\n";
 		} else {
 			print 'Move of old instances matching name '.$oldinstance." canceled (test mode)\n";
