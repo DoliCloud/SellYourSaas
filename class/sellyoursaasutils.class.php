@@ -3646,7 +3646,7 @@ class SellYourSaasUtils
 										$titleofevent = dol_trunc($sellyoursaasname.' - '.gethostname().' - '.$langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name, 90);
 										$messageofevent = ' - '.$langs->trans("IPAddress").' '.getUserRemoteIP()."\n";
 										$messageofevent.= $langs->trans("PayingInstanceLost").': '.$tmpcontract->ref.' - '.$mythirdpartyaccount->name.' ['.$langs->trans("SeeOnBackoffice").']('.$urlwithouturlroot.'/societe/card.php?socid='.$mythirdpartyaccount->id.')'."\n";
-										$messageofevent.= 'Lost after cron job made a remoteaction='.$remotetouse."\n";
+										$messageofevent.= 'Lost after the cron job has made a remoteaction='.$remotetouse."\n";
 
 										// See https://docs.datadoghq.com/api/?lang=python#post-an-event
 										$statsd->event(
