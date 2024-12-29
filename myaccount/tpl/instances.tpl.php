@@ -775,7 +775,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					}
 				}
 
-				print '<-- Hard coded option for a Dolibarr website -->'."\n";
+				print '<!-- Hard coded option for a Dolibarr website -->'."\n";
 				print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 
 				print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
