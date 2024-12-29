@@ -874,7 +874,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 				print '</div>';
 
-				print '<div class="tagtd center minwidth100 width100">';
+				print '<div class="tagtd right minwidth100 width100">';
 				// TODO Use same frequency than into the template invoice ?
 				$nbmonth = 1;
 				if (!empty($websitemodenabled)) {
@@ -905,7 +905,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 
 				print '<div class="tagtable centpercent divdolibarroptionfromservices"><div class="tagtr">';
-				print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
+				print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
 
 				$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, -1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
 
@@ -929,9 +929,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					$description = $tmpproduct->multilangs['en_US']['description'];
 				}
 				
-				print '<div class="inline-block">';
-				print $label.'<br>';
+				print '<div class="inline-block paddingleft marginleftonly bold">';
+				print $label;
 				print '</div>';
+				print '<br>';
 				
 				print '<div class="valignmiddle">';
 				if ($description) {
@@ -946,7 +947,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</div>';
 				print '</div>';
 				
-				print '<div class="tagtd valignmiddle width100 paddingleft paddingright">';
+				print '<div class="tagtd right valignmiddle minwidth100 width100 paddingleft paddingright">';
 				if ($arrayofoptionsfull[$key]['labelprice']) {
 					print $arrayofoptionsfull[$key]['labelprice'].'<br>';
 				}
