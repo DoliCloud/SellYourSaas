@@ -775,6 +775,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					}
 				}
 
+				print '<-- Hard coded option for a Dolibarr website -->'."\n";
 				print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 
 				print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
@@ -793,6 +794,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					$websitestatic = new Website($newdb);
 					$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0, '(t.status:=:'.$websitestatic::STATUS_VALIDATED.')');
 					//$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0);
+					
 					print '<span class="small">';
 					print $langs->trans("OptionYourWebsiteDesc").'<br>';
 					print '</span>';
@@ -811,6 +813,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<select style="width:60%" id="websiteidoption" name="websiteidoption">';
 					print '<option value="">&nbsp;</option>';
 					$contractlines = $contract->lines;
+					// Fill the array of websites that are already activated
 					$arraywebsitesenabled = array();
 					foreach ($contractlines as $line) {
 						if ($line->fk_product == getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT")) {
@@ -821,25 +824,32 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 							$arraywebsitesenabled[$websiteref] = $websitecustomurl;
 						}
 					}
-					foreach ($websitestatic->records as $website) {
-						$isalreadyactivated = 0;
-						if (isset($arraywebsitesenabled[$website->ref])) {
-							$isalreadyactivated = 1;
+					
+					if (count($listofwebsitestoactivate)) {
+						foreach ($listofwebsitestoactivate as $website) {
+							$isalreadyactivated = 0;
+							if (isset($arraywebsitesenabled[$website->ref])) {
+								$isalreadyactivated = 1;
+							}
+							print '<option value="'.$website->id.'" '.(GETPOST("websiteidoption", "int") == $website->id ? "selected" : "");
+							if ($isalreadyactivated) {
+								print " disabled";
+							}
+							if ($website->status != $websitestatic::STATUS_VALIDATED) {
+								print " disabled";
+							}
+							print '>'.$website->ref;
+							if ($isalreadyactivated) {
+								print ' - '.$arraywebsitesenabled[$website->ref];
+							}
+							if ($website->status != $websitestatic::STATUS_VALIDATED) {
+								print ' - '.$langs->trans("Disabled");
+							}
+							print '</option>';
 						}
-						print '<option value="'.$website->id.'" '.(GETPOST("websiteidoption", "int") == $website->id ? "selected" : "");
-						if ($isalreadyactivated) {
-							print " disabled";
-						}
-						if ($website->status != $websitestatic::STATUS_VALIDATED) {
-							print " disabled";
-						}
-						print '>'.$website->ref;
-						if ($isalreadyactivated) {
-							print ' - '.$arraywebsitesenabled[$website->ref];
-						}
-						if ($website->status != $websitestatic::STATUS_VALIDATED) {
-							print ' - '.$langs->trans("Disabled");
-						}
+					} else {
+						print '<option value="" disabled>';
+						print $langs->trans("NoWebsiteToMakeOnline");
 						print '</option>';
 					}
 					print '</select>';
@@ -868,9 +878,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				// TODO Use same frequency than into the template invoice ?
 				$nbmonth = 1;
 				if (!empty($websitemodenabled)) {
-					print '<span class="font-green-sharp">'.(6 * $nbmonth).' '.$conf->currency.' / '.$langs->trans("month").'</span><br>';
+					print '<span class="font-green-sharp">'.price(6 * $nbmonth, 0, $langs, 1, -1, -1, $conf->currency).' / '.$langs->trans("DurationMonth").'</span><br>';
 					//print '<span class="opacitymedium warning" style="color:orange">'.$langs->trans("NotYetAvailable").'</span><br>';
-					print '<input type="button" class="btn btn-primary wordbreak chooseoptionwebsite" id="chooseoptionwebsite_'.$id.'" name="chooseoption" value="'.$langs->trans("Install").'">';
+					print '<input type="button" class="btn btn-primary wordbreak chooseoptionwebsite" id="chooseoptionwebsite_'.$id.'" name="chooseoption" value="'.$langs->trans("ToSetup").'">';
 				}
 				print '</div>';
 				print '</div></div>';	// end tr, end table
@@ -894,7 +904,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					continue;
 				}
 
-				print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
+				print '<div class="tagtable centpercent divdolibarroptionfromservices"><div class="tagtr">';
 				print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
 
 				$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
@@ -951,7 +961,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<hr>';
 			}
 
-			print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
+			print '<div class="tagtable centpercent divdolibarrmoreoptions"><div class="tagtr">';
 			print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
 			print '<br>';
 			print '<span class="opacitymedium">'.$langs->trans("SoonMoreOptionsHere").'...</span><br>';

@@ -830,7 +830,7 @@ OptionYourCustomDomainNamePrerequisites=Prerequisites: You must own the domain n
 OptionYourCustomDomainNameStep1=Enter the name to use as the custom URL and click on <b>%s</b>
 OptionYourCustomDomainNameStep2=Add an entry in your DNS provider setup with type CNAME pointing to <b>%s</b> 
 OptionWebsite=Website
-OptionYourWebsite=Enable a website
+OptionYourWebsite=Make a public website online
 OptionYourWebsiteDesc=You can activate here a public website built using the Dolibarr website CMS
 OptionYourWebsitePrerequisites=Prérequis : You must have an active website in the websites module of your instance to install this option
 OptionYourWebsiteStep1=Choose the website to publish on internet and click on <b>%s</b> 
@@ -916,3 +916,6 @@ TIGRP-TECHISSUE-OTHER=Other (bug, error, access broken, ...)
 DefaultSellYourSaasCatLabel=Services Cloud
 DefaultSellYourSaasCustomerCatLabel=Prospects or Customers Cloud
 DefaultSellYourSaasSupplierCatLabel=Resellers Cloud
+ToSetup=Setup
+NoWebsiteToMakeOnline=No website to make online. To make a website online, first check that the status of the website create into the module Website of Dolibarr has the statu "Online".
+  
