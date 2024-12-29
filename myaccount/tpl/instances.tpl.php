@@ -947,7 +947,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</div>';
 				print '</div>';
 				
-				print '<div class="tagtd right valignmiddle minwidth100 width100 paddingleft paddingright">';
+				print '<div class="tagtd right valignmiddle minwidth100 paddingleft paddingright">';
 				if ($arrayofoptionsfull[$key]['labelprice']) {
 					print $arrayofoptionsfull[$key]['labelprice'].'<br>';
 				}
