@@ -907,19 +907,17 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<div class="tagtable centpercent divdolibarroptionfromservices"><div class="tagtr">';
 				print '<div class="tagtd width50 paddingleft paddingright marginrightonly valignmiddle">';
 
-				$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, 1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
+				$htmlforphoto = $tmpproduct->show_photos('product', $conf->product->dir_output, 1, 1, -1, 0, 0, $maxHeight, $maxWidth, 1, 1, 1);
 
 				if (empty($htmlforphoto) || $htmlforphoto == '<!-- Photo -->' || $htmlforphoto == '<!-- Photo -->'."\n") {
 					print '<!--no photo defined -->';
-					print '<table width="100%" valign="top" align="center" border="0" cellpadding="2" cellspacing="2"><tr><td width="100%" class="photo">';
+					print '<table class="valignmiddle center" border="0" cellpadding="2" cellspacing="2"><tr><td class="centpercent photo">';
 					print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png" title="'.dol_escape_htmltag($alt).'">';
 					print '</td></tr></table>';
 				} else {
 					print $htmlforphoto;
 				}
 
-				print '</div>';
-				print '<div class="tagtd valignmiddle">';
 				$label = $tmpprod->label;
 				$desc = $tmpprod->description;
 				$producturl = $tmpproduct->url;
@@ -930,7 +928,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					$label = $tmpproduct->multilangs['en_US']['label'];
 					$description = $tmpproduct->multilangs['en_US']['description'];
 				}
+				
+				print '<div class="inline-block">';
 				print $label.'<br>';
+				print '</div>';
+				
+				print '<div class="valignmiddle">';
 				if ($description) {
 					print '<span class="small">';
 					print $description.'<br>';
@@ -941,6 +944,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 				// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
 				print '</div>';
+				print '</div>';
+				
 				print '<div class="tagtd valignmiddle width100 paddingleft paddingright">';
 				if ($arrayofoptionsfull[$key]['labelprice']) {
 					print $arrayofoptionsfull[$key]['labelprice'].'<br>';
