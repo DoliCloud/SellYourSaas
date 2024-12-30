@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW For payment mode credit transfer, an email is sent at invoice validation
 * NEW Can filter on instance mask when selecting target of email.
 * NEW Add info on ducs command
 * NEW Support discount codes with a number part (MYDISCOUNTCODE-123)
