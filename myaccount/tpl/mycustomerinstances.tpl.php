@@ -64,9 +64,11 @@ if (empty($conf) || ! is_object($conf)) {
 	print '</div>';
 
 if (count($listofcontractidreseller) > 0) {
-	print $langs->trans("FirstRecord").' <input type="text" name="firstrecord" class="maxwidth50 right" value="'.$firstrecord.'"> - '.$langs->trans("LastRecord");
-	print ' <input type="text" name="lastrecord" class="maxwidth50" value="'.$lastrecord.'"> / ';
-	print '<span style="font-size: 14px;">'. count($listofcontractidreseller) .'</span><br>';
+	print $langs->trans("FirstRecord").' <input type="text" name="firstrecord" class="width50 right" value="'.$firstrecord.'">';
+	print ' - ';
+	print $langs->trans("LastRecord").' <input type="text" name="lastrecord" class="width50 right" value="'.$lastrecord.'">';
+	print '<span class="opacitymedium"> / ';
+	print count($listofcontractidreseller) .'</span><br>';
 }
 
 	print '</form>';
