@@ -774,10 +774,10 @@ if ($reusecontractid) {
 		dol_syslog("TooManyInstancesForSameIpvpn - ".$remoteip);
 
 		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages($langs->trans("TooManyInstancesForSameIp", $remoteip), null, 'errors');
+			setEventMessages($langs->trans("TooManyInstancesForSameIpvpn", $remoteip), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("TooManyInstancesForSameIp", $remoteip)."\n";
+			print $langs->trans("TooManyInstancesForSameIpvpn", $remoteip)."\n";
 		}
 		exit(-70);
 	}
