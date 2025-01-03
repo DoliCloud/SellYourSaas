@@ -1,6 +1,6 @@
 #!/bin/bash
 # Purge data.
-# This script can be run on master or deployment servers.
+# This script can be run on the master or any deployment servers.
 #
 # Put the following entry into your root cron
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
@@ -431,7 +431,7 @@ if [ -s /tmp/osutoclean ]; then
 		fi
 
 
-		# If osusername is known, remove user and archive dir (Note: archive with clean.sh is always done in test !!!!!!!)
+		# If osusername is known, remove user and archive dir (Note: archive with clean.sh is always done into test directory !!!)
 		if [[ "x$osusername" != "x" ]]; then	
 			if [[ "x$osusername" != "xNULL" ]]; then
 				echo rm -f $targetdir/$osusername/$dbname/*.log
