@@ -1,6 +1,7 @@
 <VirtualHost __localip__:443 __localip__:80>
         __VirtualHostHead__
-        
+        ProxyTimeout 180
+
         <IfModule mod_apparmor.c>
         AADefaultHatName sellyoursaas-instances
         </IfModule>
@@ -12,7 +13,7 @@
 
         # Indiquer à Apache d'utiliser le socket de PHP-FPM spécifique
         <FilesMatch \.php$>
-            SetEnv PHP_ADMIN_VALUE "php_admin_value[fpm.config] = /etc/php/__phpversion__/fpm/pool.d/sellyoursaas/__fqn__.phpfpm.conf"
+            ProxyFCGIBackendType GENERIC
             SetHandler "proxy:unix:/run/php/php__phpversion__-fpm-__fqn__.sock|fcgi://localhost/"
         </FilesMatch>
 
@@ -28,7 +29,7 @@
         </IfModule>
 
 		# __ AllowOverride __ is defined on package.
-		# __ IncludeFromContract __ is defined on contract. 
+		# __ IncludeFromContract __ is defined on contract.
 		# For example: "Require ip 1.2.3.4"
 		# or "IncludeOptional /etc/apache2/sellyoursaas-online/__webAppDomain__-directory-options.conf"
         <Directory "__webAppPath__/htdocs">
@@ -76,10 +77,10 @@
 
         RewriteEngine On
         # This will enable the Rewrite capabilities
-		
+
         RewriteCond %{HTTPS} !=on
         # This checks to make sure the connection is not already HTTPS
-		
+
         RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
         # This rule will redirect users from their original location, to the same location but using HTTPS.
         # i.e.  http://www.example.com/foo/ to https://www.example.com/foo/

@@ -1,8 +1,7 @@
-<VirtualHost *:443 *:80>
+<VirtualHost __localip__:443 __localip__:80>
         __VirtualHostHead__
         
         # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir.
-        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__webAppPath__/:/usr/local/bin/
 
         ServerName __webAppDomain__
         ServerAdmin __webAdminEmail__
@@ -69,10 +68,9 @@
                 nokeepalive ssl-unclean-shutdown \
                 downgrade-1.0 force-response-1.0
 
-SSLCertificateFile /etc/apache2/__webSSLCertificateCRT__
-SSLCertificateKeyFile /etc/apache2/__webSSLCertificateKEY__
-SSLCertificateChainFile /etc/apache2/__webSSLCertificateIntermediate__
-SSLCACertificateFile /etc/apache2/__webSSLCertificateIntermediate__
+SSLCertificateFile __webSSLCertificateCRT__
+SSLCertificateKeyFile __webSSLCertificateKEY__
+SSLCertificateChainFile __webSSLCertificateIntermediate__
 
 </VirtualHost>
 
