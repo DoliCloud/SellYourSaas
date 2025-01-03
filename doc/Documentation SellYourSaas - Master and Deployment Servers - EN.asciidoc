@@ -2464,8 +2464,8 @@ On *all servers*:
 [source,bash]
 ---------------
 SET PASSWORD FOR 'root'@'localhost' = PASSWORD('mysqlrootpassword');
--- For newer versions of mariadb, you must also do:
-UPDATE mysql.user SET authentication_string = PASSWORD('mysqlrootpassword') WHERE user='root';
+-- For some old versions of mariadb, you may also need to do:
+-- UPDATE mysql.user SET authentication_string = PASSWORD('mysqlrootpassword') WHERE user='root';
 
 FLUSH PRIVILEGES;
 ---------------
@@ -2495,8 +2495,8 @@ For Mysql:
 [source,sql]
 ---------------
 # Identification by password
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
-# Identification by unix socket
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'mysqlrootpassword';
+# Identification by unix socket (recommended)
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
 You must stop/start database server to validate this change !
@@ -2506,9 +2506,11 @@ For MariaDb:
 [source,sql]
 ---------------
 # Identification by password
-update mysql.user set plugin='' where user='root' and host='localhost';
-# Identification by unix socket
-update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'mysqlrootpassword';
+-- Or on old version: update mysql.user set plugin='' where user='root' and host='localhost';
+# Identification by unix socket (recommended)
+ALTER USER 'root'@'localhost' IDENTIFIED VIA unix_socket;
+-- Or on old version: update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
 ---------------
 You must stop/start database server to validate this change !
 
@@ -2728,14 +2730,14 @@ But remove it after you solve the problem, to have the tables writable again.
 
 On *deployment servers*:
 
-Copy */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
+* Copy */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
 
 [source,bash]
 ---------------
 cp /bin/dash /bin/secureBash
 ---------------
 
-On Ubuntu 20.04+, copy also */usr/bin/dash* into */usr/bin/secureBash*
+* On Ubuntu 20.04+, copy also */usr/bin/dash* into */usr/bin/secureBash*
 
 [source,bash]
 ---------------
@@ -2743,7 +2745,7 @@ cp /usr/bin/dash /usr/bin/secureBash
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/usr.bin.secureBash* with Ubuntu 20.04+) with this content:
+* Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/usr.bin.secureBash* with Ubuntu 20.04+) with this content:
 
 [source,bash]
 ---------------
@@ -2751,7 +2753,8 @@ include::repository_root/etc/apparmor.d/usr.bin.secureBash[]
 ---------------
 
 
-Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.d/usr.sbin.apache2/* with this content:
+* Create an apparmor file */etc/apparmor.d/local/usr.sbin.apache2* or */etc/apparmor.d/usr.sbin.apache2/* with the content found
+at /etc/apparmor.d/local/usr.sbin.apache2-deployment:
 
 [source,bash]
 ---------------
@@ -2759,7 +2762,8 @@ include::repository_root/etc/apparmor.d/local/usr.sbin.apache2-deployment[]
 ---------------
 
 
-Note for future: if we use php-fpm instead of mod_itk, create an apparmor file */etc/apparmor.d/php-fpm7.4* with this content:
+Note: for future (experimental, not yet ready): if we use php-fpm instead of mod_itk, create an apparmor file */etc/apparmor.d/php-fpmX.Y* with the content found
+at /etc/apparmor.d/php-fpm:
 
 [source,bash]
 ---------------
@@ -2767,7 +2771,7 @@ include::repository_root/etc/apparmor.d/php-fpm[]
 ---------------
 
 
-* Note: To activate(reload)/desactivate a rule apparmor, use *aa-disable* or *aa-enforce* (or *aa-complain*)
+Note: To activate(reload)/desactivate a rule apparmor, use *aa-disable* or *aa-enforce* (or *aa-complain*)
 
 To enable a profile:
 
@@ -2779,34 +2783,38 @@ aa-status
 /etc/init.d/apparmor status
 ---------------
 
-Note: To disable a profile:
+Note: For information, to disable a profile:
 
 [source,bash]
 ---------------
-aa-disable usr.sbin.mysqld
+aa-disable nameofprofile
 ---------------
-
-Sometimes, a reboot of server may be required to take into account any change on profile files.
 
 All the disabled profiles are visible into */etc/apparmor.d/disable*
 
-The log are visible into */var/log/kern.log* or */var/log/audit/audit.log*. 
-To solve a problem of permission, you can use 
+Sometimes, a reboot of server may be required to take into account any change on apparmor profile files.
+
+
+Note: The apparmor logs are visible into */var/log/kern.log* or */var/log/audit/audit.log* or */var/log/syslog*. 
+
+To solve a problem of permission blocked by apparmor, you can clean the file */var/log/syslog*, then execute the failed command, then run:
+
 [source,bash]
 ---------------
 aa-logprof
 ---------------
-Then execut the failed command or access and answer S to update the profile.
+
+and answer the question (finishing with S) to update the profile.
 
 
-* Note: From Ubuntu 20.04+, to unload ALL apparmor profiles and reload them:
+Note: From Ubuntu 20.04+, to unload ALL apparmor profiles and reload them:
 
 [source,bash]
 ---------------
 aa-teardown; /etc/init.d/apparmor restart;
 ---------------
 
-* Note: Before Ubuntu 20.04, to unload ALL apparmor profiles and reload them:
+Note: Before Ubuntu 20.04, to unload ALL apparmor profiles and reload them:
 
 [source,bash]
 ---------------
@@ -2814,15 +2822,16 @@ aa-teardown; /etc/init.d/apparmor restart;
 ---------------
 
 
-* Note: To list all confined/unconfined processus:
+Note: To list all confined/unconfined processus:
 
 [source,bash]
 ---------------
 ps fauxZ
 ---------------
 
+
 * Once the apparmor is enabled for apache2, we must enable the module "apparmor" for apache, so Apache will switch to the profile *sellyoursaas-instances* 
-when a instance is opened (and if the entry <IfModule mod_apparmor.c>AADefaultHatName sellyoursaas-instances</IfModule> is added into virtual host).
+when an instance is opened (and if the entry <IfModule mod_apparmor.c>AADefaultHatName sellyoursaas-instances</IfModule> is added into the virtual host).
 For this run:
 
 [source,bash]
