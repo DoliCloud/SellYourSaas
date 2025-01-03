@@ -94,9 +94,9 @@ class ActionsSellyoursaas
 				$object->fetch_optionals();
 				$conf->cache['thirdparty_options'][$object->id] = $object->array_options;
 			}
-
+			
 			$tmparray = $conf->cache['thirdparty_options'][$object->id];
-
+			
 			// Dashboard
 			if ($user->hasRight('sellyoursaas', 'read') && ! empty($tmparray['options_dolicloud'])) {
 				$url = '';
