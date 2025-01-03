@@ -2745,7 +2745,7 @@ cp /usr/bin/dash /usr/bin/secureBash
 ---------------
 
 
-* Create an apparmor file */etc/apparmor.d/bin.secureBash* (or */etc/apparmor.d/usr.bin.secureBash* with Ubuntu 20.04+) with this content:
+* Create an apparmor file */etc/apparmor.d/usr.bin.secureBash* (or */etc/apparmor.d/bin.secureBash* with Ubuntu 18.04-) with this content:
 
 [source,bash]
 ---------------
@@ -2778,7 +2778,7 @@ To enable a profile:
 [source,bash]
 ---------------
 aa-status
-aa-enforce bin.secureBash
+aa-enforce usr.bin.secureBash
 aa-status
 /etc/init.d/apparmor status
 ---------------
