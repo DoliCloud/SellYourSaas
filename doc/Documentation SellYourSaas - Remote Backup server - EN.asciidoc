@@ -707,7 +707,7 @@ Note: Reports are into */var/crash*
 
 === Installation of cron tasks
 
-Delete very old files every sunday by adding the cron task:
+Delete very old files daily by adding the crontab task:
 
 [source,bash]
 ---------------
