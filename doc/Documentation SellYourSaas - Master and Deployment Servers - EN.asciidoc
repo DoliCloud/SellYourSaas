@@ -4211,8 +4211,11 @@ vi /var/log/datadog/agent.log
 
 This is some steps to do to test an installation:
 
-- You can run the script *desktop_install_check.sh*. It will run an ansible script to check your instance (and may fix some trouble). This
-script is regularly completed but still check only few part of your installation only.
+- You can run the script *desktop_install_check.sh*. 
+
+This script suppose you have *ansible* installed on your desktop, and you have created a host file to list all your master/deployment/backup servers to check. See the example of a host file into *scripts/ansible/hosts.example* (you can copy this file into *scripts/ansible/hosts-mycompany* and update it manually).
+
+It will run an ansible script to check your instance (and may fix some trouble). This script is regularly completed but still check only few part of your installation only.
 
 - Try to connect with SFTP. Try a "ls /etc", you should get Permission denied (blocked by apparmor). Try a "get /etc/passwd", you should get Permission denied (blocked by sftp). Try "get /etc/group", you should get Permission denied (blocked by apparmor).
 
