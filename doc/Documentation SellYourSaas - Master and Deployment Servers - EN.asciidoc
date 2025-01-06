@@ -4209,9 +4209,9 @@ vi /var/log/datadog/agent.log
 
 === Test/Check an installation
 
-This is some steps to do to test an installation:
+This is some steps to do to test/check that an installation is correct:
 
-- You can run the script *desktop_install_check.sh*. 
+- You can/should run the script *desktop_install_check.sh*. 
 
 This script suppose you have *ansible* installed on your desktop, and you have created a host file to list all your master/deployment/backup servers to check. See the example of a host file into *scripts/ansible/hosts.example* (you can copy this file into *scripts/ansible/hosts-mycompany* and update it manually).
 
