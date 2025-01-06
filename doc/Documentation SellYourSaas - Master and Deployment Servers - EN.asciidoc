@@ -3299,19 +3299,20 @@ chown admin:www-data /tmp/spam/*
 
 === Setup of logrotate
 
-* Add a line if not already present into file */etc/logrotate.conf*
+* Add a line "su root syslog" if not already present into file */etc/logrotate.conf* and comment the line "su root adm" if found.
 
 [source,bash]
 ---------------
 # use the syslog group by default, since this is the owning group of /var/log.
+# su root adm
 su root syslog
 ---------------
 
-* Modify the */etc/logrotate.d/apache2* to increase the delay of purge to 365 days.
+* Modify the */etc/logrotate.d/apache2* to increase the delay of purge to 100 days.
 
 [source,conf]
 ---------------
-rotate 365
+rotate 100
 ---------------
 
 * Create a file */etc/logrotate.d/logrotate_admin_log*
@@ -3381,6 +3382,8 @@ cd /etc/logrotate.d
 logrotate -f logrotate_admin_log
 logrotate -f logrotate_sellyoursaas_log
 ---------------
+
+The logrotate -d logrotate_admin_log can report an error saying there is no files yet to rotate. Ignore this, files will appears after first deployment.
 
 
 === Setup of journalctl
@@ -3494,7 +3497,7 @@ Run cerbot with the following command line (you can test it beforehand by adding
 
 [source,bash]
 ---------------
-certbot certonly -n [--manual-public-ip-logging-ok] --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
+certbot certonly -n --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
 ---------------
 
 The option [--expand] is to concate the result to the existing certificate when you want to add another domain.
@@ -3712,7 +3715,7 @@ a2ensite 000-default-ssl.conf
 
 ==== On Master server
 
-You must have inside the cron of user *root*
+You must have inside the cron of user *root* (You can view the cron with *crontab -u root -l*):
 
 [source,bash]
 ---------------
@@ -3725,7 +3728,7 @@ You must have inside the cron of user *root*
 ---------------
 
 
-You must have inside the cron of user *admin*:
+You must have inside the cron of user *admin* (You can view the cron with *crontab -u admin -l*):
 
 [source,bash]
 ---------------
@@ -3739,13 +3742,13 @@ You must have inside the cron of user *admin*:
 5 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
-
 Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *anonymousbatch* is the user dedicated for batch processing. You will set them
 later on the Dolibarr master.
 
+
 ==== On deployment servers
 
-You must have inside the cron of user *root*
+You must have inside the cron of user *root* (You can view the cron with *crontab -u root -l*):
 
 [source,bash]
 ---------------
@@ -3758,7 +3761,7 @@ You must have inside the cron of user *root*
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
-You must have inside the cron of user *admin*:
+You must have inside the cron of user *admin* (You can view the cron with *crontab -u root -l*):
 
 [source,bash]
 ---------------
@@ -3767,6 +3770,7 @@ You must have inside the cron of user *admin*:
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
+
 
 ==== Check that launching of cron is ok
 
@@ -3881,7 +3885,7 @@ For a first installation, you must make all the initial setup of plugin.
 If you just added a new deployment server, you must just edit the setup of the module to declare the new server.
 
 
-On the *Master*:
+On the *Master*, at first installation only:
 
 Connect to Dolibarr's master server's user interface (https://admin.mysaasdomainname.com):
 
@@ -3954,14 +3958,11 @@ Give this user the permissions below and only the permission below:
 
 * Create a *Third-party tag* called "SaaS customers" and "Saas resellers"
 
-* Setup the module *SellYoursSaas*, at least the following mandatory fields:
+* Go into the setup of the module *SellYoursSaas*, and set at least the following mandatory fields:
 
 ** Name of Saas service
 ** Name of main domain
-** Liste des sous-domaines pour déploiement de nouvelles instances: You must enter here the domain name and ip of deployment server that are open for deployment.
-** List of ip
 ** Main email 
-...
 
 * Create a *Package* to configure the applications to be deployed (files, config, database dump...)
 
@@ -3987,6 +3988,11 @@ Note: The URL to deploy *Applications* type packages can be viewed in the *SellY
 * Go to the configuration of the *Scheduled jobs* module and retrieve the instruction to add in the cron of the user *admin* and check 
 it has been added into the cron so the Sell-Your-Saas batches can run.
 The value for <securitykeydefinedinscheduledjobsetup> must match into the setup of the module and into the cron command line.
+
+
+On the *Master*, if you install a new deployment server:
+
+* Go into the top menu of *SellYourSaas*, choose the tab *Deployment server* and enter the list of your deployment server (sub domain and IP).
 
 
 <<<<
