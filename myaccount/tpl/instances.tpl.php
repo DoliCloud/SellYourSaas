@@ -293,6 +293,58 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		$id = $tmparray['id'];
 		$contract = $tmparray['contract'];
 
+		// Set environment for this contract
+		$type_db = $conf->db->type;
+		$hostname_db  = $contract->array_options['options_hostname_db'];
+		$username_db  = $contract->array_options['options_username_db'];
+		$password_db  = $contract->array_options['options_password_db'];
+		$database_db  = $contract->array_options['options_database_db'];
+		$port_db      = (!empty($contract->array_options['options_port_db']) ? $contract->array_options['options_port_db'] : 3306);
+		$prefix_db    = (!empty($contract->array_options['options_prefix_db']) ? $contract->array_options['options_prefix_db'] : 'llx_');
+		$hostname_os  = $contract->array_options['options_hostname_os'];
+		$username_os  = $contract->array_options['options_username_os'];
+		$password_os  = $contract->array_options['options_password_os'];
+		$username_web = $contract->thirdparty->email;
+		$password_web = $contract->thirdparty->array_options['options_password'];
+		$iphostwebsite = $contract->array_options['options_deployment_host'];
+
+		$websitemodenabled = 0;
+		$lastversiondolibarrinstance = 0;
+
+		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+		$newdb->prefix_db = $prefix_db;
+
+		if ($newdb->connected) {
+			$confinstance = new Conf();
+			$confinstance->setValues($newdb);
+
+			foreach ($confinstance->global as $key => $val) {
+				if (preg_match('/^MAIN_MODULE_WEBSITE+$/', $key) && ! empty($val)) {
+					$websitemodenabled ++;
+				}
+			}
+			$lastinstallinstance = isset($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? explode(".", $confinstance->global->MAIN_VERSION_LAST_INSTALL)[0] : "0";
+			$lastupgradeinstance = isset($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? explode(".", $confinstance->global->MAIN_VERSION_LAST_UPGRADE)[0] : "0";
+			$lastversiondolibarrinstance = max($lastinstallinstance, $lastupgradeinstance);
+		}
+		// Set newversion from the setup
+		$newversiondolibarr = (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR") ? "(v".getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR").")" : "");
+
+		// If not set, we try to guess the $newversion from the name of the directory of the package
+		$dataofcontract = sellyoursaasGetExpirationDate($contract, 0);
+		$tmpproduct = new Product($db);
+		$tmppackage = new Packages($db);
+
+		if ($dataofcontract['appproductid'] > 0) {
+			$tmpproduct->fetch($dataofcontract['appproductid']);
+			$tmppackage->fetch($tmpproduct->array_options['options_package']);
+
+			// Set $newversion. Note this is not the exact version, just major version found into path name.
+			//$tmppackage->srcfile1 = 'ddd_16.0';
+			//var_dump($tmppackage->srcfile1);
+			$newversiondolibarr = preg_replace('/[^0-9\.]/', '', $tmppackage->srcfile1);
+		}
+
 		$planref = $contract->array_options['options_plan'];
 		$statuslabel = $contract->array_options['options_deployment_status'];
 		$statuslabeltitle = '';
@@ -512,6 +564,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		}
 		if (in_array($statuslabel, array('done','suspended')) && $directaccess) {
 			print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
+		}
+		if (in_array($statuslabel, array('done','suspended'))) {
+			print '<li><a id="a_tab_upgrade_'.$contract->id.'" href="#tab_upgrade_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Upgrade")." ".img_warning().'</a></li>';
 		}
 		if (in_array($statuslabel, array('done','suspended'))) {
 			print '<li><a id="a_tab_danger_'.$contract->id.'" href="#tab_danger_'.$contract->id.'" data-toggle="tab">'.$langs->trans("CancelInstance").'</a></li>';
@@ -745,36 +800,6 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			// Hard coded option: A website
 			if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT") > 0
 				&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID'))))) {
-				$type_db = $conf->db->type;
-				$hostname_db  = $contract->array_options['options_hostname_db'];
-				$username_db  = $contract->array_options['options_username_db'];
-				$password_db  = $contract->array_options['options_password_db'];
-				$database_db  = $contract->array_options['options_database_db'];
-				$port_db      = (!empty($contract->array_options['options_port_db']) ? $contract->array_options['options_port_db'] : 3306);
-				$prefix_db    = (!empty($contract->array_options['options_prefix_db']) ? $contract->array_options['options_prefix_db'] : 'llx_');
-				$hostname_os  = $contract->array_options['options_hostname_os'];
-				$username_os  = $contract->array_options['options_username_os'];
-				$password_os  = $contract->array_options['options_password_os'];
-				$username_web = $contract->thirdparty->email;
-				$password_web = $contract->thirdparty->array_options['options_password'];
-				$iphostwebsite = $contract->array_options['options_deployment_host'];
-
-				$websitemodenabled = 0;
-
-				$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
-				$newdb->prefix_db = $prefix_db;
-
-				if ($newdb->connected) {
-					$confinstance = new Conf();
-					$confinstance->setValues($newdb);
-
-					foreach ($confinstance->global as $key => $val) {
-						if (preg_match('/^MAIN_MODULE_WEBSITE+$/', $key) && ! empty($val)) {
-							$websitemodenabled ++;
-						}
-					}
-				}
-
 				print '<!-- Hard coded option for a Dolibarr website -->'."\n";
 				print '<div class="tagtable centpercent divdolibarrwebsites"><div class="tagtr">';
 
@@ -1343,10 +1368,46 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 		}
 
-		print '
-				              </div> <!-- END TAB DB PANE -->
+		print '              </div> <!-- END TAB DB PANE -->';
 
-							<!-- tab destroy -->
+		$ispaid = sellyoursaasIsPaidInstance($contract);
+		if (! $ispaid) {	// non paid instances
+			$priority = 'low';
+		} else {
+			if ($ispaid) {	// paid with level Premium
+				if ($tmpproduct->array_options['options_typesupport'] == 'premium') {
+					$priority = 'high';
+				} else {	// paid with level Basic
+					$priority = 'medium';
+				}
+			}
+		}
+		print '				<!-- tab upgrade -->
+							<div class="tab-pane" id="tab_upgrade_'.$contract->id.'">';
+		if ($lastversiondolibarrinstance < $newversiondolibarr) {
+		print '				<form class="form-upgrade" action="'.$_SERVER["PHP_SELF"].'" method="POST">
+							<input type="hidden" name="token" value="'.newToken().'">
+							<input type="hidden" name="mode" value="autoupgrade">
+							<input type="hidden" name="backtopagesupport" value="'.$_SERVER["PHP_SELF"].'?mode=instances">
+							<input type="hidden" name="instanceselect" value="'.$priority.'_'.$contract->id.'">
+							<p class="opacitymediumbis" style="padding: 15px">
+								'.$langs->trans("NewerVersionAvailable", $lastversiondolibarrinstance, $newversiondolibarr).'
+							</p>
+							<p class="center" style="padding-bottom: 15px">
+								<input type="submit" class="btn" name="undeploy" value="'.$langs->trans("Upgrade").'">
+							</p>
+							</form>';
+		}else {
+			print '			<p class="opacitymediumbis" style="padding: 15px">
+								'.$langs->trans("AlreadyToLastVersionUpgrade", $newversiondolibarr).'
+							</p>
+			';
+		}
+
+		print '				</div>
+							<!-- END tab upgrade -->
+';
+print '						<!-- tab destroy -->
 				            <div class="tab-pane" id="tab_danger_'.$contract->id.'">
 
 							<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST">

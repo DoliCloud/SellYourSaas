@@ -919,4 +919,5 @@ DefaultSellYourSaasCustomerCatLabel=Prospects or Customers Cloud
 DefaultSellYourSaasSupplierCatLabel=Resellers Cloud
 ToSetup=Setup
 NoWebsiteToMakeOnline=No website to make online. To make a website online, first check that the status of the website create into the module Website of Dolibarr has the statu "Online".
-  
+AlreadyToLastVersionUpgrade=This application is already to last version of v%s.
+NewerVersionAvailable=A new version of the application is available. The current version of the application is <b>v%s</b> and the last version disponible for the application is <b>v%s</b>.<br>  To proceed to upgrade click on the following button
