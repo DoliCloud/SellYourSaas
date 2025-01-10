@@ -566,7 +566,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
 		}
 		if (in_array($statuslabel, array('done','suspended'))) {
-			print '<li><a id="a_tab_upgrade_'.$contract->id.'" href="#tab_upgrade_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Upgrade")." ".img_warning().'</a></li>';
+			print '<li><a id="a_tab_upgrade_'.$contract->id.'" href="#tab_upgrade_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Upgrade").($lastversiondolibarrinstance < $newversiondolibarr ? " ".img_warning() : "").'</a></li>';
 		}
 		if (in_array($statuslabel, array('done','suspended'))) {
 			print '<li><a id="a_tab_danger_'.$contract->id.'" href="#tab_danger_'.$contract->id.'" data-toggle="tab">'.$langs->trans("CancelInstance").'</a></li>';
