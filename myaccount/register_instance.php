@@ -458,6 +458,9 @@ if ($reusecontractid) {
 	$_SESSION['tmppassinform'] = dolEncrypt($password);
 	$_SESSION['tmppassinform2'] = dolEncrypt($password2);
 
+    include_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+    $tmpthirdparty=new Societe($db);
+
 	$parameters = array('tldid' => $tldid, 'username' => $email, 'sldAndSubdomain' => $sldAndSubdomain);
 	$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 	if ($reshook < 0) {
@@ -849,7 +852,6 @@ if ($reusecontractid) {
 		exit(-72);
 	}
 
-	$tmpthirdparty=new Societe($db);
 	if ($reusesocid > 0) {
 		$result = $tmpthirdparty->fetch($reusesocid);
 		if ($result < 0) {
