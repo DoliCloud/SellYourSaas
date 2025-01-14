@@ -31,14 +31,33 @@ export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$templatesdir" != "x" ]]; then
-	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
-	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
-	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
+  if [[ "x$phpfpm" != "x" ]]; then
+    export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
+    export vhostfilesuspended="$templatesdir/vhostHttps-phpfpm-sellyoursaas-suspended.template"
+    export vhostfilemaintenance="$templatesdir/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
+    export fpmpoolfiletemplate="$templatesdir/phppool-phpfpm.template"
+    export fpmservicefiletemplate="$templatesdir/poolservice-phpfpm.template"
+  else
+    export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
+    export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
+    export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
+    export fpmpoolfiletemplate="$templatesdir/osuxxx.template"
+  fi
+elif [[ "x$phpfpm" != "x" ]]; then
+  export vhostfile="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas.template"
+	export vhostfilesuspended="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-suspended.template"
+	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
+	export fpmpoolfiletemplate="$scriptdir/templates/phppool-phpfpm.template"
+	export fpmservicefiletemplate="$scriptdir/templates/poolservice-phpfpm.template"
 else
 	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+	export fpmpoolfiletemplate="$scriptdir/templates/osuxxx.template"
 fi
 
 if [ "$(id -u)" != "0" ]; then
@@ -271,7 +290,11 @@ if [[ "$mode" == "rename" ]]; then
 			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
-			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+				sed -e 's;__phpversion__;$phpversion;g' | \
+				sed -e 's;__fqn__;$fqn;g' | \
+				sed -e 's;__instancename__;$instancename;g' | \
+				sed -e 's;__localip__;$localip;g' | \
+		  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -288,6 +311,10 @@ if [[ "$mode" == "rename" ]]; then
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				sed -e "s;__phpversion__;$phpversion;g" | \
+				sed -e "s;__fqn__;$fqn;g" | \
+				sed -e "s;__instancename__;$instancename;g" | \
+				sed -e "s;__localip__;$localip;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
 
@@ -434,6 +461,10 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
+				  sed -e 's;__instancename__;$instancename;g' | \
+				  sed -e 's;__localip__;$localip;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
@@ -455,6 +486,10 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__instancename__;$instancename;g" | \
+				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 	
@@ -582,6 +617,10 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+        sed -e 's;__phpversion__;$phpversion;g' | \
+        sed -e 's;__fqn__;$fqn;g' | \
+        sed -e 's;__instancename__;$instancename;g' | \
+        sed -e 's;__localip__;$localip;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 	cat $vhostfiletouse | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
@@ -599,6 +638,10 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+        sed -e "s;__phpversion__;$phpversion;g" | \
+        sed -e "s;__fqn__;$fqn;g" | \
+        sed -e "s;__instancename__;$instancename;g" | \
+        sed -e "s;__localip__;$localip;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
 
@@ -706,6 +749,10 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
+				  sed -e 's;__instancename__;$instancename;g' | \
+				  sed -e 's;__localip__;$localip;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
@@ -723,6 +770,10 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 			  	  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 			  	  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__instancename__;$instancename;g" | \
+				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 	
@@ -805,6 +856,10 @@ if [[ "$mode" == "unsuspend" ]]; then
 			  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
 			  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
+				  sed -e 's;__instancename__;$instancename;g' | \
+				  sed -e 's;__localip__;$localip;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 	cat $vhostfiletouse | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
@@ -820,6 +875,10 @@ if [[ "$mode" == "unsuspend" ]]; then
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
 			  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__instancename__;$instancename;g" | \
+				  sed -e "s;__localip__;$localip;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 
 
@@ -926,6 +985,10 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e 's;__AllowOverride__;$ALLOWOVERRIDE;g' | \
 				  sed -e 's;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
+				  sed -e 's;__instancename__;$instancename;g' | \
+				  sed -e 's;__localip__;$localip;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
@@ -942,6 +1005,10 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
 				  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__instancename__;$instancename;g" | \
+				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 	
