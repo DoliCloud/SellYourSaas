@@ -50,3 +50,4 @@ foreach ($envVars as $key) {
 
 define('MAIN_ANTIVIRUS_COMMAND', '/usr/bin/clamdscan');
 define('MAIN_ANTIVIRUS_PARAM', '--fdpass');
+define('MAILING_LIMIT_SENDBYWEB_HARD', '50');		// Not used, value dolibarr_mailing_limit_sendbyweb is preferred
