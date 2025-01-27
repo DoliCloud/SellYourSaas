@@ -143,6 +143,7 @@ dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 dol_include_once('/sellyoursaas/class/blacklistip.class.php');
 dol_include_once('/sellyoursaas/class/whitelistip.class.php');
+dol_include_once('/sellyoursaas/class/whitelistemail.class.php');
 
 
 //$langs=new Translate('', $conf);
@@ -283,11 +284,15 @@ $freeperioddays = $tmpproduct->array_options['options_freeperioddays'];
 
 $now = dol_now();
 
+$errormessages = array();
+$error = 0;
+
 
 /*
  * Actions
  */
 
+dol_syslog("Start actions of register_instance (reusecontractid = ".$reusecontractid.", reusesocid = ".$reusesocid.", fromsocid = ".$fromsocid.", sldAndSubdomain = ".$sldAndSubdomain.")");
 //print "partner=".$partner." productref=".$productref." orgname = ".$orgname." email=".$email." password=".$password." password2=".$password2." country_code=".$country_code." remoteip=".$remoteip." sldAndSubdomain=".$sldAndSubdomain." tldid=".$tldid;
 
 // Back to url
@@ -501,17 +506,6 @@ if ($reusecontractid) {
 		header("Location: ".$newurl);
 		exit(-26);
 	}
-	if (! isValidEmail($email)) {
-		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-27);
-	}
-	if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0) {
-		dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
-		setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL')), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-28);
-	}
 
 	// Other checks
 	if (empty($tzstring)) {
@@ -565,21 +559,7 @@ if ($reusecontractid) {
 }
 
 
-
-/*
- * View
- */
-
-$errormessages = array();
-
-//print '<center>'.$langs->trans("PleaseWait").'</center>';		// Message if redirection after this page fails
-
-
-$error = 0;
-
-dol_syslog("Start view of register_instance (reusecontractid = ".$reusecontractid.", reusesocid = ".$reusesocid.", fromsocid = ".$fromsocid.", sldAndSubdomain = ".$sldAndSubdomain.")");
-
-
+// Check remote ip
 if (empty($remoteip)) {
 	// Should not happen, ip should always be defined.
 	dol_syslog("InstanceCreationBlockedForSecurityPurpose: empty remoteip", LOG_WARNING);
@@ -600,6 +580,12 @@ $tmpwhitelistip = new Whitelistip($db);
 $tmparraywhitelist = $tmpwhitelistip->fetchAll('', '', 1000, 0, '(status:=:1)');
 if (is_numeric($tmparraywhitelist) && $tmparraywhitelist < 0) {
 	echo "Erreur: failed to get whitelistip elements.\n";
+	exit(-61);
+}
+$tmpwhitelistemail = new Whitelistemail($db);
+$tmparraywhitelistemail = $tmpwhitelistemail->fetchAll('', '', 1000, 0, '(status:=:1)');
+if (is_numeric($tmparraywhitelistemail) && $tmparraywhitelistemail < 0) {
+	echo "Erreur: failed to get whitelistemail elements.\n";
 	exit(-61);
 }
 
@@ -652,9 +638,53 @@ if (!$whitelisted) {
 	}
 }
 
+// Set if email is whitelisted
+$whitelistedemail = false;
+if (!empty($tmparraywhitelistemail)) {
+	foreach ($tmparraywhitelistemail as $val) {
+		if (strpos($val->content, '*') !== false) {
+			// An IP with a wild card
+			$tmpval = str_replace('*', '__STAR__', $val->content);
+			$tmpval = '^'.preg_quote($tmpval, '/').'$';
+			$tmpval = str_replace('__STAR__', '.*', $tmpval);
+
+			if (preg_match('/'.$tmpval.'/', $email)) {
+				$whitelistedemail = true;
+				break;
+			}
+		} else {
+			// A simple IP
+			if ($val->content == $email) {
+				$whitelistedemail = true;
+				break;
+			}
+		}
+	}
+}
+
+if (!$whitelistedemail) {
+	if (! isValidEmail($email)) {
+		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-27);
+	}
+
+	if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0) {
+		dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
+		setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL')), null, 'errors');
+		header("Location: ".$newurl);
+		exit(-28);
+	}
+}
+
+
+
 // TODO Move other check on abuse here
 
 
+/*
+ * View
+ */
 
 $contract = new Contrat($db);
 if ($reusecontractid) {
