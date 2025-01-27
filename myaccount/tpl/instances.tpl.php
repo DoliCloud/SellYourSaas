@@ -565,9 +565,16 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		if (in_array($statuslabel, array('done','suspended')) && $directaccess) {
 			print '<li><a id="a_tab_db_'.$contract->id.'" href="#tab_db_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Database").'</a></li>';
 		}
-		if (in_array($statuslabel, array('done','suspended'))) {
-			print '<li><a id="a_tab_upgrade_'.$contract->id.'" href="#tab_upgrade_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Upgrade").($lastversiondolibarrinstance < $newversiondolibarr ? " ".img_warning() : "").'</a></li>';
+		// Specific if we distribute Dolibarr
+		if (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR")) {
+			if (in_array($statuslabel, array('done','suspended'))) {
+				print '<li><a id="a_tab_upgrade_'.$contract->id.'" href="#tab_upgrade_'.$contract->id.'" data-toggle="tab">'.$langs->trans("Upgrade");
+				// Disable warning: Being not up to date is not an error but is a common situation.
+				//print ($lastversiondolibarrinstance < $newversiondolibarr ? " ".img_warning() : "")
+				print '</a></li>';
+			}
 		}
+
 		if (in_array($statuslabel, array('done','suspended'))) {
 			print '<li><a id="a_tab_danger_'.$contract->id.'" href="#tab_danger_'.$contract->id.'" data-toggle="tab">'.$langs->trans("CancelInstance").'</a></li>';
 		}
@@ -819,7 +826,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					$websitestatic = new Website($newdb);
 					$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0, '(t.status:=:'.$websitestatic::STATUS_VALIDATED.')');
 					//$listofwebsitestoactivate = $websitestatic->fetchAll('', '', 0, 0);
-					
+
 					print '<span class="small">';
 					print $langs->trans("OptionYourWebsiteDesc").'<br>';
 					print '</span>';
@@ -849,7 +856,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 							$arraywebsitesenabled[$websiteref] = $websitecustomurl;
 						}
 					}
-					
+
 					if (count($listofwebsitestoactivate)) {
 						foreach ($listofwebsitestoactivate as $website) {
 							$isalreadyactivated = 0;
@@ -953,12 +960,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					$label = $tmpproduct->multilangs['en_US']['label'];
 					$description = $tmpproduct->multilangs['en_US']['description'];
 				}
-				
+
 				print '<div class="inline-block paddingleft marginleftonly bold">';
 				print $label;
 				print '</div>';
 				print '<br>';
-				
+
 				print '<div class="valignmiddle">';
 				if ($description) {
 					print '<span class="small">';
@@ -971,7 +978,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				// TODO Scan if module is enabled, if no, show a message to do it. If yes, show list of available websites
 				print '</div>';
 				print '</div>';
-				
+
 				print '<div class="tagtd right valignmiddle minwidth100 paddingleft paddingright">';
 				if ($arrayofoptionsfull[$key]['labelprice']) {
 					print $arrayofoptionsfull[$key]['labelprice'].'<br>';
