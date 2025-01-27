@@ -130,6 +130,21 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
 
+
+CREATE TABLE llx_sellyoursaas_whitelistemail(
+	-- BEGIN MODULEBUILDER FIELDS
+	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, 
+	entity integer DEFAULT 1 NOT NULL, 
+	content varchar(128) NOT NULL, 
+	comment varchar(255) NULL,
+	date_creation datetime NOT NULL, 
+	tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, 
+	status integer DEFAULT 1 NOT NULL
+	-- END MODULEBUILDER FIELDS
+) ENGINE=innodb;
+
+ALTER TABLE llx_sellyoursaas_whitelistemail ADD UNIQUE INDEX uk_sellyoursaas_whitelistemail_content (content);
+
 ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN date_use datetime;
 ALTER TABLE llx_sellyoursaas_blacklistip ADD COLUMN comment varchar(255);
 ALTER TABLE llx_sellyoursaas_whitelistip ADD COLUMN comment varchar(255);

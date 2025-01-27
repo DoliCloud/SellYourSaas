@@ -247,7 +247,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->rights[$r][4] = 'salesrepresentative';	// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$this->rights[$r][5] = 'write';					// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
 		$r++;
-		
+
 		$this->rights[$r][0] = 101068; 				// Permission id (must not be already used)
 		$this->rights[$r][1] = 'Delete SellYourSaaS data (package, ...)';	// Permission label
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
@@ -606,7 +606,7 @@ class modSellYourSaas extends DolibarrModules
 			'leftmenu'=>'sellyoursaas_evilthidparties',
 			'url'=>'/societe/list.php?contextpage=sellyoursaasevilthirdparties&search_options_spammer=1',
 			'langs'=>'sellyoursaas@sellyoursaas',
-			'position'=>651,
+			'position'=>621,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
@@ -623,13 +623,15 @@ class modSellYourSaas extends DolibarrModules
 			'leftmenu'=>'sellyoursaas_evilinstances',
 			'url'=>'/contrat/list.php?contextpage=sellyoursaasevilinstances&search_options_spammer=1&search_product_category=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
 			'langs'=>'sellyoursaas@sellyoursaas',
-			'position'=>651,
+			'position'=>622,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
 		);
 		$r++;
+
+		// Whitelists
 
 		$this->menu[$r]=array(
 			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
@@ -640,13 +642,32 @@ class modSellYourSaas extends DolibarrModules
 			'leftmenu'=>'sellyoursaas_whitelistip',
 			'url'=>'/sellyoursaas/whitelistip_list.php',
 			'langs'=>'',
-			'position'=>651,
+			'position'=>641,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
 			'perms'=>'$user->hasRight("sellyoursaas", "read")',
 			'target'=>'',
 			'user'=>0
 		);
 		$r++;
+
+		$this->menu[$r]=array(
+			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
+			'type'=>'left',
+			'titre'=>'WhitelistEmail',
+			'prefix' => '',
+			'mainmenu'=>'sellyoursaas',
+			'leftmenu'=>'sellyoursaas_whitelistemail',
+			'url'=>'/sellyoursaas/whitelistemail_list.php',
+			'langs'=>'',
+			'position'=>642,
+			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
+			'perms'=>'$user->hasRight("sellyoursaas", "read")',
+			'target'=>'',
+			'user'=>0
+		);
+		$r++;
+
+		// Blacklists
 
 		$this->menu[$r]=array(
 			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
@@ -768,9 +789,9 @@ class modSellYourSaas extends DolibarrModules
 			$this->error = 'Error in loading sql files';
 			return 0;
 		}
-		
+
 		$langs->load("sellyoursaas@sellyoursaas");
-		
+
 		// Create product category DefaultPOSCatLabel if not configured yet
 		$categories = new Categorie($this->db);
 		$cate_arbo = $categories->get_full_arbo('product', 0, 1);
@@ -800,7 +821,7 @@ class modSellYourSaas extends DolibarrModules
 				}
 			}
 		}
-		
+
 		// Create product category DefaultSellYourSaasCustomerCatLabel if not configured yet
 		$categories = new Categorie($this->db);
 		$cate_arbo = $categories->get_full_arbo('customer', 0, 1);
@@ -830,7 +851,7 @@ class modSellYourSaas extends DolibarrModules
 				}
 			}
 		}
-		
+
 		// Create extrafields
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
