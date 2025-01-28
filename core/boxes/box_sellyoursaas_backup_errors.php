@@ -97,8 +97,8 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 
 				dol_syslog(get_class($this)."::loadBox", LOG_DEBUG);
 
-				$result = $this->db->query($sql);
-				if ($result) {
+				$resql = $this->db->query($sql);
+				if ($resql) {
 					while ($obj = $this->db->fetch_object($resql)) {
 						// Faire le test pour savoir si oui ou non > 48 dernière reussite
 						$datetry = $this->db->jdate($obj->datetry);
@@ -106,16 +106,16 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 						$datetryminus2day = dol_time_plus_duree($datetry, -2, "d");
 						if ($datetryminus2day > $dateok) {
 							if ($mode != "") {
-								$nbinstanceremotebackuperror ++;
+								$nbinstanceremotebackuperror++;
 							} else {
-								$nbinstancebackuperror ++;
+								$nbinstancebackuperror++;
 							}
 						}
 					}
 				} else {
 					$error++;
 				}
-				$this->db->free($result);
+				$this->db->free($resql);
 			}
 
 			if (!$error) {
