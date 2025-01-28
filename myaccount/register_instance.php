@@ -354,7 +354,16 @@ if ($reusecontractid) {
 		} else {
 			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer"))."\n";
 		}
-		exit(246);
+		exit(248);
+	}
+
+	// Here $reusesocid is > 0
+	if (substr($sapi_type, 0, 3) != 'cli') {
+		if ($_SESSION['dol_loginsellyoursaas'] != $reusesocid) {
+			setEventMessages("Error, you try to install an instance on an account you don't own", null, 'errors');
+			header("Location: ".$newurl.'#addanotherinstance');
+			exit(247);
+		}
 	}
 
 	if ($productref != 'none' && empty($sldAndSubdomain)) {
@@ -638,45 +647,46 @@ if (!$whitelisted) {
 	}
 }
 
-// Set if email is whitelisted
-$whitelistedemail = false;
-if (!empty($tmparraywhitelistemail)) {
-	foreach ($tmparraywhitelistemail as $val) {
-		if (strpos($val->content, '*') !== false) {
-			// An IP with a wild card
-			$tmpval = str_replace('*', '__STAR__', $val->content);
-			$tmpval = '^'.preg_quote($tmpval, '/').'$';
-			$tmpval = str_replace('__STAR__', '.*', $tmpval);
+if (!$reusecontractid && !$reusesocid) {
+	// Set if email is whitelisted
+	$whitelistedemail = false;
+	if (!empty($tmparraywhitelistemail)) {
+		foreach ($tmparraywhitelistemail as $val) {
+			if (strpos($val->content, '*') !== false) {
+				// An IP with a wild card
+				$tmpval = str_replace('*', '__STAR__', $val->content);
+				$tmpval = '^'.preg_quote($tmpval, '/').'$';
+				$tmpval = str_replace('__STAR__', '.*', $tmpval);
 
-			if (preg_match('/'.$tmpval.'/', $email)) {
-				$whitelistedemail = true;
-				break;
-			}
-		} else {
-			// A simple IP
-			if ($val->content == $email) {
-				$whitelistedemail = true;
-				break;
+				if (preg_match('/'.$tmpval.'/', $email)) {
+					$whitelistedemail = true;
+					break;
+				}
+			} else {
+				// A simple IP
+				if ($val->content == $email) {
+					$whitelistedemail = true;
+					break;
+				}
 			}
 		}
 	}
-}
 
-if (!$whitelistedemail) {
-	if (! isValidEmail($email)) {
-		setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-27);
+	if (!$whitelistedemail) {
+		if (! isValidEmail($email)) {
+			setEventMessages($langs->trans("ErrorBadEMail", $email), null, 'errors');
+			header("Location: ".$newurl);
+			exit(-27);
+		}
+
+		if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0) {
+			dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
+			setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL')), null, 'errors');
+			header("Location: ".$newurl);
+			exit(-28);
+		}
 	}
-
-	if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0) {
-		dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
-		setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL')), null, 'errors');
-		header("Location: ".$newurl);
-		exit(-28);
-	}
 }
-
 
 
 // TODO Move other check on abuse here
