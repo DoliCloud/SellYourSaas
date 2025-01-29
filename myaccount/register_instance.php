@@ -299,15 +299,29 @@ dol_syslog("Start actions of register_instance (reusecontractid = ".$reusecontra
 $newurl=preg_replace('/register_instance\.php/', 'register.php', $_SERVER["PHP_SELF"]);
 
 if ($reusecontractid) {
-	// When we use the "Restart deploy" after error from the contract into the backoffice
+	// When we use the "Restart deploy" from the contract after error into the backoffice
+
+	// Check we are logged in backoffice and that reusecontractid is not forged
+	// TODO
+
 	$newurl=preg_replace('/register_instance/', 'index', $newurl);
 	if (! preg_match('/\?/', $newurl)) {
 		$newurl.='?';
 	}
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.((int) $reusecontractid);
-} elseif ($reusesocid) {
+} elseif ($reusesocid) {	// Can be >= 0, but also -1
 	// When we use the "Add another instance" from the "myaccount" dashboard
+
+	// Check we are logged and that reusesocid is not forged
+	if (substr($sapi_type, 0, 3) != 'cli') {
+		if ($_SESSION['dol_loginsellyoursaas'] != (string) $reusesocid) {
+			setEventMessages("Error, you try to install an instance on an account you don't own", null, 'errors');
+			header("Location: ".$newurl.'#addanotherinstance');
+			exit(247);
+		}
+	}
+
 	if (empty($productref) && ! empty($service)) {	// if $productref is defined, we have already load the $tmpproduct
 		$tmpproduct = new Product($db);
 		$tmpproduct->fetch($service, '', '', '', 1, 1, 1);
@@ -318,7 +332,7 @@ if ($reusecontractid) {
 	if (! preg_match('/\?/', $newurl)) {
 		$newurl.='?';
 	}
-	$newurl.='&reusesocid='.$reusesocid;
+	$newurl.='&reusesocid='.((int) $reusesocid);
 	$newurl.='&mode='.(GETPOST('mode', 'alpha') == 'mycustomerinstances' ? 'mycustomerinstances' : 'instances');
 	if (! preg_match('/sldAndSubdomain/i', $sldAndSubdomain)) {
 		$newurl.='&sldAndSubdomain='.urlencode($sldAndSubdomain);
@@ -345,7 +359,7 @@ if ($reusecontractid) {
 		$newurl.='&checkboxnonprofitorga='.urlencode($checkboxnonprofitorga);
 	}
 
-	if ($reusesocid < 0) { // -1, the thirdparty was not selected into the combolist
+	if ((int) $reusesocid < 0) { // -1, the thirdparty was not selected into the combolist
 		// Return to dashboard, the only page where the customer is requested as inside a combolist
 		$newurl=preg_replace('/register/', 'index', $newurl);
 		if (substr($sapi_type, 0, 3) != 'cli') {
@@ -355,15 +369,6 @@ if ($reusecontractid) {
 			print $langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Customer"))."\n";
 		}
 		exit(248);
-	}
-
-	// Here $reusesocid is > 0
-	if (substr($sapi_type, 0, 3) != 'cli') {
-		if ($_SESSION['dol_loginsellyoursaas'] != $reusesocid) {
-			setEventMessages("Error, you try to install an instance on an account you don't own", null, 'errors');
-			header("Location: ".$newurl.'#addanotherinstance');
-			exit(247);
-		}
 	}
 
 	if ($productref != 'none' && empty($sldAndSubdomain)) {
@@ -771,7 +776,7 @@ if ($reusecontractid) {
 	$MAXDEPLOYMENTPERIPVPN = getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN', 2);
 
 	$nbofinstancewithsameip = -1;
-	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
+	$select = "SELECT COUNT(*) as nb FROM ".MAIN_DB_PREFIX."contrat_extrafields";
 	$select .= " WHERE deployment_ip = '".$db->escape($remoteip)."'";
 	$select .= " AND deployment_status IN ('processing', 'done')";
 	$resselect = $db->query($select);
@@ -890,7 +895,7 @@ if ($reusecontractid) {
 	}
 
 	$tmpthirdparty=new Societe($db);
-	if ($reusesocid > 0) {
+	if ((int) $reusesocid > 0) {
 		$result = $tmpthirdparty->fetch($reusesocid);
 		if ($result < 0) {
 			dol_print_error_email('FETCHTP'.$reusesocid, $tmpthirdparty->error, $tmpthirdparty->errors, 'alert alert-error');
@@ -926,7 +931,7 @@ if ($reusecontractid) {
 					exit(-75);
 				}
 			} else {
-				if ($thirdpartyidinsession != $reusesocid) {
+				if ((int) $thirdpartyidinsession != (int) $reusesocid) {
 					// Output the key "Instance creation blocked for"
 					dol_syslog("ErrorInvalidReuseIDSurelyAHackAttempt Instance creation blocked for ".$remoteip." - You tried to create instance for thirdparty id = ".$reusesocid." when id in session is ".$thirdpartyidinsession);
 
@@ -1307,7 +1312,11 @@ if ($reusecontractid) {
 		}
 
 		// Add security controls - call getRemoteCheck()
-		$resultremotecheck = getRemoteCheck($remoteip, $whitelisted, $email);
+		$checkcaptcha = 1;
+		if ($reusesocid > 0) {
+			$checkcaptcha = 0;
+		}
+		$resultremotecheck = getRemoteCheck($remoteip, $whitelisted, $email, $checkcaptcha);
 
 		if (!empty($resultremotecheck['error'])) {
 			setEventMessages($resultremotecheck['error'], null, 'errors');
