@@ -229,7 +229,7 @@ $moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/ma
 //$moveinstancestringtoshow .= "# On src server: gpasswd -d admin www-data\n";
 
 $ducstringtoshow = "duc info -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
-$ducstringtoshow .= "\nduc ls -R -d /mnt/diskhome/home/".$object->array_options['options_username_os'].".duc.db ".$object->array_options['options_hostname_db']."/";
+$ducstringtoshow .= "\nduc ls -R -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db /mnt/diskhome/home/".$object->array_options['options_username_os']."/".$object->array_options['options_username_db']."/";
 $ducstringtoshow .= "\nduc index /mnt/diskhome/home/".$object->array_options['options_username_os']."/ -x -m 3 -d /mnt/diskhome/home/".$object->array_options['options_username_os']."/.duc.db";
 
 
