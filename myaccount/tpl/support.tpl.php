@@ -334,8 +334,17 @@ if ($sellyoursaassupporturl) {
 		$atleastonepublicgroup = 0;
 		$ticketstat = new Ticket($db);
 		$ticketstat->loadCacheCategoriesTickets();
-		if (is_array($ticketstat->cache_category_tickets) && count($ticketstat->cache_category_tickets)) {
+		// For v21-
+		if (!empty($ticketstat->cache_category_tickets) && is_array($ticketstat->cache_category_tickets)) {
 			foreach ($ticketstat->cache_category_tickets as $tg) {
+				if (!empty($tg['public'])) {
+					$atleastonepublicgroup++;
+				}
+			}
+		}
+		// For v22+
+		if (!empty($conf->cache['category_tickets']) && is_array($conf->cache['category_tickets'])) {
+			foreach ($conf->cache['category_tickets'] as $tg) {
 				if (!empty($tg['public'])) {
 					$atleastonepublicgroup++;
 				}
