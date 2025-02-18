@@ -718,9 +718,9 @@ if [[ $testorconfirm == "test" ]]; then
 fi
 
 # Clean backup dir of instances that are now archived
-export $DAYSFORINACTIVEBACKUPDELETION=90;
+export DAYSFORINACTIVEBACKUPDELETION=90;
 echo "***** Search backup directories $backupdir/osu* without last_(mysqldump|rsync)*.txt files modified in the last $DAYSFORINACTIVEBACKUPDELETION days"
-echo "find $backupdir/*/last_mysqldump*.txt $backupdir/*/last_rsync*.txt \( -name 'last_mysqldump*.txt' -o -name 'last_rsync*.txt' \) -mtime +$DAYSFORINACTIVEBACKUPDELETION | awk -F'/' '{NF--; print $0}' OFS='/' | sort -u"
+echo "find $backupdir/*/last_mysqldump*.txt $backupdir/*/last_rsync*.txt \( -name 'last_mysqldump*.txt' -o -name 'last_rsync*.txt' \) -mtime +$DAYSFORINACTIVEBACKUPDELETION | awk -F'/' '{NF--; print \$0}' OFS='/' | sort -u"
 > /tmp/deletedirs.sh
 for dirtoscan in `find $backupdir/*/last_mysqldump*.txt $backupdir/*/last_rsync*.txt \( -name "last_mysqldump*.txt" -o -name "last_rsync*.txt" \) -mtime +$DAYSFORINACTIVEBACKUPDELETION | awk -F'/' '{NF--; print $0}' OFS='/' | sort -u`
 do
@@ -737,21 +737,21 @@ do
 	if [[ "x$veryoldosudir" == "x1" ]]; then
 		if [ -d "$archivedirpaid/$osusername" ]; then
 			echo "# ----- $dirtoscan - inactive=$veryoldosudir - archive dir $archivedirpaid/$osusername exists, we can remove backup" >> /tmp/deletedirs.sh
-			echo "rm -fr "`dirname $dirtoscan` >> /tmp/deletedirs.sh
+			echo "rm -fr '$dirtoscan'" >> /tmp/deletedirs.sh
 		else
 			echo "# ----- $dirtoscan - inactive=$veryoldosudir" >> /tmp/deletedirs.sh
 			echo "# NOTE Dir $archivedirpaid/$osusername does not exists. It means instance was not archived !!! Do it with:" >> /tmp/deletedirs.sh
 			echo "mv $backupdir/$osusername $archivedirpaid/$osusername; chown -R root:root $archivedirpaid/$osusername" >> /tmp/deletedirs.sh
 		fi
 	else
-        echo "# ----- $dirtoscan - inactive=$veryoldosudir - backup dir $dirtoscan exists with a very old last_mysqldump* or last_rsync* file, but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
+        echo "# ----- $dirtoscan - inactive=$veryoldosudir - backup dir $dirtoscan exists with old last_(mysqldump|rsync)* files, but was still active recently in backup. We must keep it." >> /tmp/deletedirs.sh
         echo "# ALERT This may happen when an instance is renamed so mysqldump of old name is old and the one of new name is new." >> /tmp/deletedirs.sh
 		echo "#rm $dirtoscan" >> /tmp/deletedirs.sh
-        echo "#rm -fr "`dirname $dirtoscan` >> /tmp/deletedirs.sh
+        echo "#rm -fr '$dirtoscan'" >> /tmp/deletedirs.sh
 	fi
 done
 if [ -s /tmp/deletedirs.sh ]; then
-	echo "We should also clean old inactive backup directories of paying instances in $backupdir/osusername/ no more saved since a long time (last_mysqldump > 90days) and that are archived" 
+	echo "We should also clean old inactive backup directories of paying instances in $backupdir/osusername/ no more saved since a long time (all last_(mysqldump|rsync)* > 90days) and that are archived" 
 	echo For this, you can execute commands into file: /tmp/deletedirs.sh
 else
 	echo "No old inactive backup directories" 
