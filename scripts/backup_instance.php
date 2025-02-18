@@ -143,6 +143,8 @@ if (! $res) {
 	print("Include of master fails");
 	exit(-1);
 }
+// After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
+// $user is created but empty.
 
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
