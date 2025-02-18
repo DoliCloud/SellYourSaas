@@ -751,7 +751,7 @@ do
 	fi
 done
 if [ -s /tmp/deletedirs.sh ]; then
-	echo "We should also clean old inactive backup directories of paying instances in $backupdir/osusername/ no more saved since a long time (all last_(mysqldump|rsync)* > 90days) and that are archived" 
+	echo "We should also clean old inactive backup directories of paying instances in $backupdir/osusername/ no more saved since a long time (all last_(mysqldump|rsync)* > $DAYSFORINACTIVEBACKUPDELETION days) and that are archived" 
 	echo For this, you can execute commands into file: /tmp/deletedirs.sh
 else
 	echo "No old inactive backup directories" 
