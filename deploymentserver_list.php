@@ -932,10 +932,12 @@ while ($i < $imaxinloop) {
 			$tmpdata = $object->getLastBackupDate('');
 			$titletoshow .= 'Oldest backup try: '.dol_print_date(findMinimum($tmpdata['mintryok'], $tmpdata['mintryko']), 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Latest backup try: '.dol_print_date(max($tmpdata['maxtryok'], $tmpdata['maxtryko']), 'dayhoursec', 'tzuserrel');
-			$titletoshow .= '<br>Oldest backup KO: '.dol_print_date($tmpdata['mintryko'], 'dayhoursec', 'tzuserrel');
-			$titletoshow .= '<br>Latest backup KO: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>';
 			$titletoshow .= '<br>Oldest backup OK: '.dol_print_date($tmpdata['minokok'], 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Latest backup OK: '.dol_print_date($tmpdata['maxokok'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>';
+			$titletoshow .= '<br>Oldest backup KO: '.dol_print_date($tmpdata['mintryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest backup KO: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
 			if ($backuptotalinstances[$obj->ipaddress] > 0 && ($tmpdata['maxokok'] < $WARNINGDATEFORREMOTEBACKUP)) {
 				$titletoshow .= img_warning("No success since more than 3 days !").' ';
 			}
@@ -969,13 +971,15 @@ while ($i < $imaxinloop) {
 			$tmpdata = $object->getLastBackupDate('remote');
 			$titletoshow .= 'Oldest remote backup try: '.dol_print_date(findMinimum($tmpdata['mintryok'], $tmpdata['mintryko']), 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Latest remote backup try: '.dol_print_date(max($tmpdata['maxtryok'], $tmpdata['maxtryko']), 'dayhoursec', 'tzuserrel');
-			$titletoshow .= '<br>Oldest remote backup KO: '.dol_print_date($tmpdata['mintryko'], 'dayhoursec', 'tzuserrel');
-			$titletoshow .= '<br>Latest remote backup KO: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>';
 			$titletoshow .= '<br>Oldest remote backup OK: '.dol_print_date($tmpdata['minokok'], 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Latest remote backup OK: '.dol_print_date($tmpdata['maxokok'], 'dayhoursec', 'tzuserrel');
 			if ($backuptotalinstancesremote[$obj->ipaddress] > 0 && ($tmpdata['maxokok'] < $WARNINGDATEFORREMOTEBACKUP)) {
 				$titletoshow .= img_warning("No success since more than 3 days !").' ';
 			}
+			$titletoshow .= '<br>';
+			$titletoshow .= '<br>Oldest remote backup KO: '.dol_print_date($tmpdata['mintryko'], 'dayhoursec', 'tzuserrel');
+			$titletoshow .= '<br>Latest remote backup KO: '.dol_print_date($tmpdata['maxtryko'], 'dayhoursec', 'tzuserrel');
 			print '<td class="right classfortooltip" title="'.dol_escape_htmltag($titletoshow).'">';
 			if (!empty($backuptotalinstancesremote[$obj->ipaddress])) {
 				if ($tmpdata['maxokok'] < $WARNINGDATEFORREMOTEBACKUP) {
