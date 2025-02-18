@@ -967,7 +967,7 @@ while ($i < $imaxinloop) {
 			$titletoshow .= '<br>Oldest remote backup OK: '.dol_print_date($tmpdata['minokok'], 'dayhoursec', 'tzuserrel');
 			$titletoshow .= '<br>Latest remote backup OK: '.dol_print_date($tmpdata['maxokok'], 'dayhoursec', 'tzuserrel');
 			if ($backuptotalinstancesremote[$obj->ipaddress] > 0 && ($tmpdata['maxokok'] < $WARNINGDATEFORREMOTEBACKUP)) {
-				$titletoshow .= img_warning("No success since more than 3 days !");
+				$titletoshow .= img_warning("No success since more than 3 days !").' ';
 			}
 			print '<td class="right classfortooltip" title="'.dol_escape_htmltag($titletoshow).'">';
 			if (!empty($backuptotalinstancesremote[$obj->ipaddress])) {
