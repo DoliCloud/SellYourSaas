@@ -54,16 +54,24 @@ echo "Search local cert files to relink with: ls /home/admin/wwwroot/dolibarr_do
 for fic in `ls /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/*.key | grep $2`
 do
 	newfic="${fic%.key}"
-	echo "* Process file $newfic..."
-	echo "ln -fs $1.key $newfic.key"
-	echo "ln -fs $1.crt $newfic.crt"
-	echo "ln -fs $1-intermediate.crt $newfic-intermediate.crt"
-	if [ "x$3" == "xconfirm" ]; then
-		ln -fs $1.key $newfic.key
-		ln -fs $1.crt $newfic.crt
-		ln -fs $1-intermediate.crt $newfic-intermediate.crt
-	else 
-		echo "Test mode: nothing done"
+	echo "* Process files $newfic.(key|crt|-intermediate.crt).."
+	#echo "ls -l $newfic.key | grep $1"
+	islink=`ls -l $newfic.key | grep $1 | cut -c1`
+	#echo "islink=$islink"
+	
+	if [ "x$islink" == "xl" ]; then
+		echo "File $newfic.key is already a link, we ignore it"
+	else
+		echo "ln -fs $1.key $newfic.key"
+		echo "ln -fs $1.crt $newfic.crt"
+		echo "ln -fs $1-intermediate.crt $newfic-intermediate.crt"
+		if [ "x$3" == "xconfirm" ]; then
+			ln -fs $1.key $newfic.key
+			ln -fs $1.crt $newfic.crt
+			ln -fs $1-intermediate.crt $newfic-intermediate.crt
+		else
+			echo "Test mode: nothing done"
+		fi
 	fi
 done
 
