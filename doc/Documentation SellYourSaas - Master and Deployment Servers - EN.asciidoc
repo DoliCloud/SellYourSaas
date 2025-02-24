@@ -4352,7 +4352,7 @@ parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
 print free
 resizepart 
 Y		  (the num of the part)
-999GB    (Don't input the default value but the max value of disk size found on line "Disk /dev/...: XXX" that was shown by "print all free")
+999GB    (Don't input the default value but the max value of disk size found on line "Disk /dev/...: XXX" that was shown by "print free")
 q
 ---------------
 
