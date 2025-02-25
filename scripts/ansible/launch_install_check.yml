@@ -1372,13 +1372,13 @@
         patterns: '*.conf'
       register: dolibarr_fail2ban_files2
 
-    - name: Create links to fail2ban jail files
+    - name: Create links to fail2ban jail files only if they do not exist
       ansible.builtin.file:
         src: "{{ item.path }}"
         dest: "/etc/fail2ban/jail.d/{{ item.path | basename }}"  
         state: link
       loop: "{{ dolibarr_fail2ban_files2.files }}"      
-
+      when: not ("/etc/fail2ban/jail.d/{{ item.path | basename }}" | ansible.builtin.stat).islnk)
 
     - name: Update /etc/afick.conf to remove /var/log/datadog Logs* 
       lineinfile:
