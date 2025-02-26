@@ -210,7 +210,7 @@ if ($allowresellerprogram) {
 
 	print '<tr class="oddeven"><td>'.$langs->trans("DefaultCategoryForSaaSResellers").'</td>';
 	print '<td>';
-	$defaultcustomercategid = getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG');
+	$defaultcustomercategid = getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG');
 	print $formother->select_categories(Categorie::TYPE_SUPPLIER, $defaultcustomercategid, 'SELLYOURSAAS_DEFAULT_RESELLER_CATEG', 0, 1, 'miwidth300');
 	print '</td>';
 	print '<td><span class="opacitymedium small">SaaS Resellers</span></td>';

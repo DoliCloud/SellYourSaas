@@ -37,7 +37,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 
 	public $boximg   = "sellyoursaas@sellyoursaas";
 
-	public $boxlabel = "BoxTitleSellyoursaasBackupErrors";
+	public $boxlabel = "BoxTitleSellyoursaas";
 
 	/**
 	 * @var string Box language file if it needs a specific language file.
@@ -80,13 +80,16 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 
 		$this->max = $max;
 
-		$this->info_box_head = array('text' => $langs->trans("BoxTitleSellyoursaasBackupErrors"));
+		$this->info_box_head = array('text' => $langs->trans("BoxTitleSellyoursaas"));
 		$error = 0;
+
+		dol_syslog(get_class($this)."::loadBox", LOG_DEBUG);
 
 		if ($user->hasRight('sellyoursaas', 'read')) {
 			$nbinstancebackuperror = 0;
 			$nbinstanceremotebackuperror = 0;
-			$modearray = array("","remote");
+
+			$modearray = array("", "remote");
 			foreach ($modearray as $mode) {
 				$sql = "SELECT c.ref_customer as status,";
 				$sql .= " ce.latestbackup".$mode."_date as datetry, ce.latestbackup".$mode."_date_ok as dateok";
@@ -94,8 +97,6 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$sql .= " WHERE ce.fk_object = c.rowid";
 				$sql .= " AND ce.deployment_status IN ('done', 'processing')";
 				$sql .= " AND ce.latestbackup".$mode."_status = 'KO'";
-
-				dol_syslog(get_class($this)."::loadBox", LOG_DEBUG);
 
 				$resql = $this->db->query($sql);
 				if ($resql) {
@@ -118,21 +119,33 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$this->db->free($resql);
 			}
 
+			$nbpendingreseller = 0;
+			$sql = "SELECT COUNT(s.rowid) as nb";
+			$sql .= " FROM ".$this->db->prefix()."societe as s, ".$this->db->prefix()."societe_extrafields as se";
+			$sql .= " WHERE se.fk_object = s.rowid";
+			$sql .= " AND se.date_apply_for_reseller > '2000-01-01'";
+			$sql .= " AND NOT EXISTS (SELECT * FROM ".$this->db->prefix().'categorie_fournisseur as cf WHERE cf.fk_soc = s.rowid AND cf.fk_categorie = '.getDolGlobalInt("SELLYOURSAAS_DEFAULT_RESELLER_CATEG").")";
+
+			$resql = $this->db->query($sql);
+			if ($resql) {
+				$obj = $this->db->fetch_object($resql);
+				if ($obj) {
+					$nbpendingreseller = $obj->nb;
+				}
+			} else {
+				$error++;
+			}
+			$this->db->free($resql);
+
+
 			if (!$error) {
+				// Line for information on local backup
 				$textbackup = "";
 				if (!$nbinstancebackuperror) {
 					$textbackup .= '<div class="badge badge-status4 nounderline">'.$nbinstancebackuperror.'</div>';
 				} else {
 					$textbackup .= '<div class="badge badge-danger nounderlineimp"><i class="fa fa-exclamation-triangle"></i> '.$nbinstancebackuperror.'</div>';
 				}
-
-				$textremotebackup = "";
-				if (!$nbinstanceremotebackuperror) {
-					$textremotebackup .= '<div class="badge badge-status4 nounderline">'.$nbinstanceremotebackuperror.'</div>';
-				} else {
-					$textremotebackup .= '<div class="badge badge-danger nounderlineimp"><i class="fa fa-exclamation-triangle"></i> '.$nbinstanceremotebackuperror.'</div>';
-				}
-
 				$line = 0;
 				$this->info_box_contents[$line][] = array(
 					'td' => 'width="16"',
@@ -152,6 +165,13 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 					'tooltip' => $langs->trans("NbPersistentErrorLocalBackup"),
 				);
 
+				// Line for information on remote backup
+				$textremotebackup = "";
+				if (!$nbinstanceremotebackuperror) {
+					$textremotebackup .= '<div class="badge badge-status4 nounderline">'.$nbinstanceremotebackuperror.'</div>';
+				} else {
+					$textremotebackup .= '<div class="badge badge-danger nounderlineimp"><i class="fa fa-exclamation-triangle"></i> '.$nbinstanceremotebackuperror.'</div>';
+				}
 				$line++;
 				$this->info_box_contents[$line][] = array(
 					'td' => 'width="16"',
@@ -170,6 +190,34 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 					'url' =>  DOL_URL_ROOT."contrat/list.php?search_options_latestbackupremote_status=KO&search_options_deployment_status=processing%2Cdone&sortfield=ef.latestbackupremote_date&sortorder=asc",
 					'tooltip' => $langs->trans("NbPersistentErrorRemoteBackup"),
 				);
+
+				// Line for information on pending reseller
+				if (getDolGlobalString("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM")) {
+					$textpendingreseller = "";
+					if (!$nbpendingreseller) {
+						$textpendingreseller .= '<div class="badge badge-status4 nounderline">'.$nbpendingreseller.'</div>';
+					} else {
+						$textpendingreseller .= '<div class="badge badge-warning nounderlineimp"><i class="fa fa-exclamation-triangle"></i> '.$nbpendingreseller.'</div>';
+					}
+					$line++;
+					$this->info_box_contents[$line][] = array(
+						'td' => 'width="16"',
+						'url' =>  DOL_URL_ROOT."/societe/list.php?contextpage=sellyoursaasresellers&search_categ_sup=-2&search_options_date_apply_for_reseller_startday=1&search_options_date_apply_for_reseller_startmonth=1&search_options_date_apply_for_reseller_startyear=2000",
+						'logo' => 'company',
+						'tooltip' => $langs->trans("NbOfPendingReseller"),
+					);
+					$this->info_box_contents[$line][] = array(
+						'td' => '',
+						'text' => $langs->trans("NbOfPendingReseller"),
+						'tooltip' => $langs->trans("NbOfPendingReseller"),
+					);
+					$this->info_box_contents[$line][] = array(
+						'td' => 'class="right"',
+						'text' => $textpendingreseller,
+						'url' =>  DOL_URL_ROOT."/societe/list.php?contextpage=sellyoursaasresellers&search_categ_sup=-2&search_options_date_apply_for_reseller_startday=1&search_options_date_apply_for_reseller_startmonth=1&search_options_date_apply_for_reseller_startyear=2000",
+						'tooltip' => $langs->trans("NbOfPendingReseller"),
+					);
+				}
 			} else {
 				$this->info_box_contents[0][0] = array(
 					'td' => '',
