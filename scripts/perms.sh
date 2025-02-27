@@ -167,8 +167,9 @@ chown -R admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_loca
 [ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip -o -s $pathtospamdir/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip $pathtospamdir/;
 [ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom -o -s $pathtospamdir/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom $pathtospamdir/;
 [ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent -o -s $pathtospamdir/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent $pathtospamdir/;
-chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/*
-chown admin:www-data $pathtospamdir/*
+chmod a+rwx $pathtospamdir
+chmod a+rw $pathtospamdir/* >/dev/null 2>&1
+chown admin:www-data $pathtospamdir/* >/dev/null 2>&1
 
 
 # Special actions...
