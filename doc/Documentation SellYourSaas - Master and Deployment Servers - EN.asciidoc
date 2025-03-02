@@ -6519,3 +6519,32 @@ TODO Add command for local antivirus
 If you confirm, this is a false positive, you can report it to the Antivirus provider.
 For example for AVAST: https://www.avast.com/report-false-positive#pc (need the report ID)
 
+
+==== Upload blocked by the clamd antivirus. Error is reported as Heuristics.Structured.CreditCardNumber FOUND.
+
+An antivirus return a false positive saying "ErrorFileIsInfectedWithAVirus: Error 1,/tmp/...: Heuristics.Structured.CreditCardNumber FOUND.."
+
+Check options of clamd by running
+
+[source,bash]
+---------------
+clamconf
+---------------
+
+You can exclude error by adding a line into */etc/clamav/clamd.conf*
+
+[source,bash]
+---------------
+StructuredMinCreditCardCount 10
+---------------
+
+See https://github.com/Cisco-Talos/clamav/blob/main/etc/clamd.conf.sample for explanation of all options.
+
+Restart the clamd daemon and check again with clamconf that the new parameter is modified.
+
+[source,bash]
+---------------
+/etc/spamassassin# systemctl restart clamav-daemon
+clamconf
+---------------
+
