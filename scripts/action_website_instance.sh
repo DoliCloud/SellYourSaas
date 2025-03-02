@@ -293,8 +293,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
 		certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
 		export certko=$?
 	else
-		echo certbot certonly --webroot -w $instancedir/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
-		certbot certonly --webroot -w $instancedir/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
+		echo certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
+		certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
 		export certko=$?
 	fi
 	
