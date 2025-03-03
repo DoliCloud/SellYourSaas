@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Can use an url instead of email to warn about a trouble on registration
 * NEW Add list of pending reseller in the SellYourSaas widget
 * NEW Can defined a whitelist of emails for registration (for special emails where MX record detection fails)
 * NEW For payment mode credit transfer, an email is sent at invoice validation
