@@ -259,7 +259,7 @@ class SellYourSaasUtils
 
 									$codepaiementdirectdebit = 'PRE';
 									$codepaiementtransfer = 'VIR';
-									
+
 									if ($invoice->mode_reglement_code == $codepaiementdirectdebit || $invoice->mode_reglement_code == $codepaiementtransfer) {
 										// If customer invoice is an invoice to pay with a direct debit or is waiting a credit transfer
 										$enddatetoscan = dol_time_plus_duree($now, 20, 'd');
@@ -350,20 +350,20 @@ class SellYourSaasUtils
 											$sendemailtocustomer = 1;
 											$labeltouse = 'InvoicePaymentWaitingCreditTransfer';
 										}
-										
+
 										$object = $invoice;
 
 										if (!$errorforinvoice && $sendemailtocustomer && $labeltouse) {
 											dol_syslog("* Send email to inform about the invoice availability - ".$labeltouse);
-					
+
 											// Set output language
 											$outputlangs = new Translate('', $conf);
 											$outputlangs->setDefaultLang(empty($object->thirdparty->default_lang) ? $mysoc->default_lang : $object->thirdparty->default_lang);
 											$outputlangs->loadLangs(array("main", "members", "bills"));
-					
+
 											// Get email content from template
 											$arraydefaultmessage = null;
-					
+
 											include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 											$formmail=new FormMail($this->db);
 
@@ -379,7 +379,7 @@ class SellYourSaasUtils
 											$substitutionarray = getCommonSubstitutionArray($outputlangs, 0, null, $object);
 
 											complete_substitutions_array($substitutionarray, $outputlangs, $object);
-					
+
 											// Set the property ->ref_customer with ref_customer of contract so __REF_CLIENT__ will be replaced in email content
 											// Search contract linked to invoice
 											$foundcontract = null;
@@ -398,7 +398,7 @@ class SellYourSaasUtils
 											}
 
 											dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-					
+
 											$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
 											if ($urlforsellyoursaasaccount) {
 												$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
@@ -408,10 +408,10 @@ class SellYourSaasUtils
 													$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
 												}
 											}
-					
+
 											$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
 											$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
-					
+
 											// Attach a file ?
 											$file='';
 											$listofpaths=array();
@@ -422,7 +422,7 @@ class SellYourSaasUtils
 												$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
 												$file = $fileparams['fullname'];
 												$file = '';		// Disable attachment of invoice in emails
-					
+
 												if ($file) {
 													$listofpaths=array($file);
 													$listofnames=array(basename($file));
@@ -430,14 +430,14 @@ class SellYourSaasUtils
 												}
 											}
 											$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
-					
+
 											$trackid = 'inv'.$invoice->id;
 											$moreinheader = 'X-Dolibarr-Info: doValidateInvoice'."\r\n";
 											$addr_cc = '';
 											if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
 												$addr_cc = $invoice->thirdparty->array_options['options_emailccinvoice'];
 											}
-					
+
 											// Send email (substitutionarray must be done just before this)
 											include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 											$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, $addr_cc, '', 0, -1, '', '', $trackid, $moreinheader);
@@ -445,18 +445,18 @@ class SellYourSaasUtils
 												$result = 1;
 											} else {
 												$errmsg = $langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).'. '.$mailfile->error;
-												
+
 												dol_syslog($errmsg, LOG_WARNING);
-												
+
 												$this->errors[] = $errmsg;
 												$result = -1;
 											}
-					
+
 											if ($result > 0) {
 												// TODO Add an event to say email was sent or the event invoice validate is enough ?
 											}
 										}
-															
+
 									}
 								}
 							}
@@ -1941,13 +1941,13 @@ class SellYourSaasUtils
 
 								// Add an action event into database
 								if (empty($charge) || $charge->status == 'failed') {
-									$actioncode='PAYMENT_STRIPE_KO';
-									$extraparams=$stripefailurecode;
-									$extraparams.=(($extraparams && $stripefailuremessage) ? ' - ' : '').$stripefailuremessage;
-									$extraparams.=(($extraparams && $stripefailuredeclinecode) ? ' - ' : '').$stripefailuredeclinecode;
+									$actioncode = 'PAYMENT_STRIPE_KO';
+									$extraparams = $stripefailurecode;
+									$extraparams .= (($extraparams && $stripefailuremessage) ? ' - ' : '').$stripefailuremessage;
+									$extraparams .= (($extraparams && $stripefailuredeclinecode) ? ' - ' : '').$stripefailuredeclinecode;
 								} else {
-									$actioncode='PAYMENT_STRIPE_OK';
-									$extraparams='';
+									$actioncode = 'PAYMENT_STRIPE_OK';
+									$extraparams = array();
 								}
 							} else {
 								$error++;
@@ -1970,8 +1970,8 @@ class SellYourSaasUtils
 
 								$object = $invoice;
 
-								$actioncode='PAYMENT_STRIPE_KO';
-								$extraparams='';
+								$actioncode = 'PAYMENT_STRIPE_KO';
+								$extraparams = array();
 							}
 						} else {
 							// If error because payment was canceled for a logical reason, we do nothing (no email and no event added)
@@ -1984,8 +1984,8 @@ class SellYourSaasUtils
 
 							$object = $invoice;
 
-							$actioncode='';
-							$extraparams='';
+							$actioncode = '';
+							$extraparams = array();
 						}
 					} else {	// Else of the   if ($resultthirdparty > 0 && ! empty($customer)) {
 						if ($resultthirdparty <= 0) {
@@ -2011,8 +2011,8 @@ class SellYourSaasUtils
 
 						$object = $invoice;
 
-						$actioncode='PAYMENT_STRIPE_KO';
-						$extraparams='';
+						$actioncode = 'PAYMENT_STRIPE_KO';
+						$extraparams = array();
 					}
 
 
@@ -2111,7 +2111,7 @@ class SellYourSaasUtils
 							$result = 1;
 						} else {
 							$errmsg = $langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).'. '.$mailfile->error;
-							
+
 							$this->error = $errmsg;
 							$result = -1;
 						}
@@ -2158,7 +2158,7 @@ class SellYourSaasUtils
 						 $actioncomm->errors_to   = $object->errors_to;*/
 						$actioncomm->fk_element   = $invoice->id;
 						$actioncomm->elementtype  = $invoice->element;
-						$actioncomm->extraparams  = dol_trunc($extraparams, 250);
+						$actioncomm->extraparams  = $extraparams;
 
 						$actioncomm->create($user);
 					}
