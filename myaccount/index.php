@@ -1691,7 +1691,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 				$substitutionarray=getCommonSubstitutionArray($langs, 0, null, $contract);
 				$substitutionarray['__HASH__']=$hash;
-
+				$substitutionarray['__SELLYOURSAAS_ACCOUNT_URL__'] = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 				complete_substitutions_array($substitutionarray, $langs, $contract);
 
 				$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
