@@ -94,9 +94,9 @@ class ActionsSellyoursaas
 				$object->fetch_optionals();
 				$conf->cache['thirdparty_options'][$object->id] = $object->array_options;
 			}
-			
+
 			$tmparray = $conf->cache['thirdparty_options'][$object->id];
-			
+
 			// Dashboard
 			if ($user->hasRight('sellyoursaas', 'read') && ! empty($tmparray['options_dolicloud'])) {
 				$url = '';
@@ -1591,18 +1591,25 @@ class ActionsSellyoursaas
 	}
 
 	/**
-	 * Overloading the restrictedArea function : check permission on an object
+	 * Overloading the completeFieldsToSearchAll function
 	 *
 	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   Object          $object         Object
 	 * @param   string          $action         Current action (if set). Generally create or edit or null
 	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
 	 * @return  int 		      			  	=0
 	 */
-	public function completeFieldsToSearchAll($parameters, &$action, $hookmanager)
+	public function completeFieldsToSearchAll($parameters, $object, $action, $aa)
 	{
-		$this->results['fieldstosearchall']['username_os'] = 'Username OS';
-		$this->results['fieldstosearchall']['database_db'] = 'Database DB';
-		$this->results['fieldstosearchall']['username_db'] = 'Username DB';
+		if ($object->element == 'societe') {
+			$this->results['fieldstosearchall']['ef.firstname'] = 'Firstname';
+			$this->results['fieldstosearchall']['ef.lastname'] = 'Lastname';
+		}
+		if ($object->element == 'contrat') {
+			$this->results['fieldstosearchall']['username_os'] = 'Username OS';
+			$this->results['fieldstosearchall']['database_db'] = 'Database DB';
+			$this->results['fieldstosearchall']['username_db'] = 'Username DB';
+		}
 
 		return 0;
 	}
