@@ -160,9 +160,12 @@ X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
 
 === Installation of keyboard macros
 
-apt install xbindkeys xbindkeys-config xautomation
+[source,txt]
+---------------
+apt install xbindkeys xautomation
+---------------
 
-Edit the macro file *~/.xbindkeysrc* to add your macro instruction
+Edit the macro file "~/.xbindkeysrc" to add your macro instruction
 
 [source,txt]
 ---------------
