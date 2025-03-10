@@ -244,7 +244,7 @@ print '</tr>';
 // SSH public keys to deploy on authized_public file.
 print '<tr class="oddeven"><td>'.$langs->trans("SSHPublicKey").'</td>';
 print '<td>';
-print '<textarea name="SELLYOURSAAS_PUBLIC_KEY" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_PUBLIC_KEY').'</textarea>';
+print '<textarea name="SELLYOURSAAS_PUBLIC_KEY" class="centpercent" rows="4">'.getDolGlobalString('SELLYOURSAAS_PUBLIC_KEY').'</textarea>';
 print '</td>';
 print '<td><span class="opacitymedium small">'.$langs->trans("SSHPublicKeyDesc").'</span></td>';
 print '</tr>';
