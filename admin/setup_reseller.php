@@ -266,7 +266,7 @@ if ($allowresellerprogram) {
 
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS").'</td>';
 	print '<td>';
-	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS" value="'.getDolGlobalString('SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS', 4).'"> month(s)';
+	print '<input class="width50" type="text" name="SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS" value="'.getDolGlobalString('SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS', 4).'"> month(s)';
 	print '</td>';
 	print '<td><span class="opacitymedium small">4</span></td>';
 	print '</tr>';
