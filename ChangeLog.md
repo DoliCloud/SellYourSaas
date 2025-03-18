@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Add hidden option SELLYOURSAAS_EMAILORURL_TO_WARN to set another email or contact to contact
 * NEW Search also on sellyoursaas firstname and lastname when using the quick filter on thirdparty
 * NEW Can use an url instead of email to warn about a trouble on registration
 * NEW Add list of pending reseller in the SellYourSaas widget
