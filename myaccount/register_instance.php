@@ -578,13 +578,13 @@ if (empty($remoteip)) {
 	// Should not happen, ip should always be defined.
 	dol_syslog("InstanceCreationBlockedForSecurityPurpose: empty remoteip", LOG_WARNING);
 
-	$emailtowarn = getDolGlobalString('SELLYOURSAAS_EMAILORURL_TO_WARN', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL')));
+	$emailorurltowarn = getDolGlobalString('SELLYOURSAAS_EMAILORURL_TO_WARN', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL')));
 
 	if (substr($sapi_type, 0, 3) != 'cli') {
-		setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP'), null, 'errors');
+		setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailorurltowarn, 'Unknown remote IP'), null, 'errors');
 		header("Location: ".$newurl);
 	} else {
-		print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, 'Unknown remote IP')."\n";
+		print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailorurltowarn, 'Unknown remote IP')."\n";
 	}
 	exit(-60);
 }
@@ -640,13 +640,13 @@ if (!$whitelisted) {
 		// Output the key "Instance creation blocked for"
 		dol_syslog("InstanceCreationBlockedForSecurityPurpose: Instance creation blocked for remoteip ".$remoteip.", already in blacklistip", LOG_WARNING);
 
-		$emailtowarn = getDolGlobalString('SELLYOURSAAS_EMAILORURL_TO_WARN', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL')));
+		$emailorurltowarn = getDolGlobalString('SELLYOURSAAS_EMAILORURL_TO_WARN', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL')));
 
 		if (substr($sapi_type, 0, 3) != 'cli') {
-			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action'), null, 'errors');
+			setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailorurltowarn, $remoteip, 'IP already included for a legal action'), null, 'errors');
 			header("Location: ".$newurl);
 		} else {
-			print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, 'IP already included for a legal action')."\n";
+			print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailorurltowarn, $remoteip, 'IP already included for a legal action')."\n";
 		}
 		exit(-62);
 	}
@@ -1343,16 +1343,16 @@ if ($reusecontractid) {
 			// Output the key "Instance creation blocked for"
 			dol_syslog("InstanceCreationBlockedForSecurityPurpose Instance creation blocked for ".$remoteip.". IP is refused with value abusetest=".$abusetest, LOG_WARNING);
 
-			$emailtowarn = getDolGlobalString('SELLYOURSAAS_EMAILORURL_TO_WARN', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL')));
+			$emailorurltowarn = getDolGlobalString('SELLYOURSAAS_EMAILORURL_TO_WARN', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL', getDolGlobalString('MAIN_INFO_SOCIETE_MAIL')));
 
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				// $abusetest is the numeric value returned by getRemoteCheck().
 				// Example: 10 If pb with captcha, ...
-				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, $abusetest), null, 'errors');
+				setEventMessages($langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailorurltowarn, $remoteip, $abusetest), null, 'errors');
 				//http_response_code(403);
 				header("Location: ".$newurl);
 			} else {
-				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailtowarn, $remoteip, $abusetest)."\n";
+				print $langs->trans("InstanceCreationBlockedForSecurityPurpose", $emailorurltowarn, $remoteip, $abusetest)."\n";
 			}
 			exit(-95);
 		}
