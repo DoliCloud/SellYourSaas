@@ -59,7 +59,7 @@ print '
 
 	        <div class="portlet light">
 	          <div class="portlet-title">
-	            <div class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("Organization").'</div>
+	            <div class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("Organization").' <small>('.$langs->trans("Code").' '.dolPrintHTML($mythirdpartyaccount->code_client).')</small></div>
 	          </div>
 	          <div class="portlet-body">
 
