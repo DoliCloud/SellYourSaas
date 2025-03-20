@@ -95,67 +95,70 @@ print '
 	                  <label>'.$langs->trans("Country").'</label><br>';
 					$countryselected = (GETPOSTISSET('country_id') ? GETPOST('country_id', 'aZ09') : $mythirdpartyaccount->country_id);
 					$exclude_country_code = array();
-if (getDolGlobalString('SELLYOURSAAS_EXCLUDE_COUNTRY_CODES')) {
-	$exclude_country_code = explode(',', getDolGlobalString('SELLYOURSAAS_EXCLUDE_COUNTRY_CODES'));
-}
+					if (getDolGlobalString('SELLYOURSAAS_EXCLUDE_COUNTRY_CODES')) {
+						$exclude_country_code = explode(',', getDolGlobalString('SELLYOURSAAS_EXCLUDE_COUNTRY_CODES'));
+					}
 					print '<input type="hidden" name="country_id_old" value="'.$countryselected.'">'."\n";
 					print $form->select_country($countryselected, 'country_id', '', 0, 'minwidth300', 'code2', 0, 1, 0, $exclude_country_code);
-					print '
-	                                </div>
-	                                <div class="form-group">
+					print '</div>'."\n";
+
+					if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
+						print '<div class="form-group">
 	                                  <label>'.$langs->trans("VATIntra").'</label> ';
-if (! empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra)) {
-	print img_warning($langs->trans("Mandatory"), 'class="hideifnonassuj"');
-}
+						if (! empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra)) {
+							print img_warning($langs->trans("Mandatory"), 'class="hideifnonassuj"');
+						}
 
-					$placeholderforvat='';
-if ($mythirdpartyaccount->country_code == 'FR') {
-	$placeholderforvat='Exemple: FR12345678';
-} elseif ($mythirdpartyaccount->country_code == 'BE') {
-	$placeholderforvat='Exemple: BE12345678';
-} elseif ($mythirdpartyaccount->country_code == 'ES') {
-	$placeholderforvat='Exemple: ES12345678';
-} else {
-	$placeholderforvat=$langs->trans("EnterVATHere");
-}
+						$placeholderforvat='';
+						if ($mythirdpartyaccount->country_code == 'FR') {
+							$placeholderforvat='Exemple: FR12345678';
+						} elseif ($mythirdpartyaccount->country_code == 'BE') {
+							$placeholderforvat='Exemple: BE12345678';
+						} elseif ($mythirdpartyaccount->country_code == 'ES') {
+							$placeholderforvat='Exemple: ES12345678';
+						} else {
+							$placeholderforvat=$langs->trans("EnterVATHere");
+						}
 
-					print '
-						<br>
-	                  <input type="hidden" name="vatassuj_old" value="'.($mythirdpartyaccount->tva_assuj).'">
-	                  <input type="checkbox" style="margin-bottom: 3px;" class="inline-block valignmiddle"'.($mythirdpartyaccount->tva_assuj ? ' checked="checked"' : '').' id="vatassuj" name="vatassuj"> <label for="vatassuj" class="valignmiddle nobold">'.$langs->trans("IHaveAVATID").'</label>
-						<br>
-	                  <input type="hidden" name="vatnumber_old" value="'.$mythirdpartyaccount->tva_intra.'">
-	                  <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" id="vatnumber" placeholder="'.$placeholderforvat.'">
-	                    ';
-					print "\n";
-					print '<script>';
-					print '$( document ).ready(function() {'."\n";
-					print '$("#vatnumber").keyup(function() {'."\n";
-					print "   console.log('We change the vatnumber='+$('#vatnumber').val());\n";
-					print "   if ($('#vatnumber').val() != '')  { $('#vatassuj').prop('checked', true ); }\n";
-					print '});'."\n";
-					print '});'."\n";
-					print '</script>';
-					print "\n";
+						print '
+							<br>
+		                  <input type="hidden" name="vatassuj_old" value="'.($mythirdpartyaccount->tva_assuj).'">
+		                  <input type="checkbox" style="margin-bottom: 3px;" class="inline-block valignmiddle"'.($mythirdpartyaccount->tva_assuj ? ' checked="checked"' : '').' id="vatassuj" name="vatassuj"> <label for="vatassuj" class="valignmiddle nobold">'.$langs->trans("IHaveAVATID").'</label>
+							<br>
+		                  <input type="hidden" name="vatnumber_old" value="'.$mythirdpartyaccount->tva_intra.'">
+		                  <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" id="vatnumber" placeholder="'.$placeholderforvat.'">
+		                    ';
+						print "\n";
+						print '<script>';
+						print '$( document ).ready(function() {'."\n";
+						print '$("#vatnumber").keyup(function() {'."\n";
+						print "   console.log('We change the vatnumber='+$('#vatnumber').val());\n";
+						print "   if ($('#vatnumber').val() != '')  { $('#vatassuj').prop('checked', true ); }\n";
+						print '});'."\n";
+						print '});'."\n";
+						print '</script>';
+						print "\n";
 
-if (!getDolGlobalString('MAIN_DISABLEVATCHECK') && $mythirdpartyaccount->isInEEC() && (GETPOST('admin', 'alpha'))) {
-	if (! empty($conf->use_javascript_ajax)) {
-		print "\n";
-		print '<script language="JavaScript" type="text/javascript">';
-		print "function CheckVAT(a) {\n";
-		print "newpopup('".DOL_URL_ROOT."/societe/checkvat/checkVatPopup.php?vatNumber='+a,'".dol_escape_js($langs->trans("VATIntraCheckableOnEUSite"))."', 540, 350);\n";
-		print "}\n";
-		print '</script>';
-		print "\n";
-		$s.='<a href="#" class="hideonsmartphone" onclick="javascript: CheckVAT(document.formsoc.vatnumber.value);">'.$langs->trans("VATIntraCheck").'</a>';
-		$s = $form->textwithpicto($s, $langs->trans("VATIntraCheckDesc", $langs->transnoentitiesnoconv("VATIntraCheck")), 1);
-	} else {
-		$s.='<a href="'.$langs->transcountry("VATIntraCheckURL", $mythirdpartyaccount->country_id).'" target="_blank">'.img_picto($langs->trans("VATIntraCheckableOnEUSite"), 'help').'</a>';
-	}
-	print $s;
-}
-					print '
-	                </div>
+						if (!getDolGlobalString('MAIN_DISABLEVATCHECK') && $mythirdpartyaccount->isInEEC() && (GETPOST('admin', 'alpha'))) {
+							if (! empty($conf->use_javascript_ajax)) {
+								print "\n";
+								print '<script language="JavaScript" type="text/javascript">';
+								print "function CheckVAT(a) {\n";
+								print "newpopup('".DOL_URL_ROOT."/societe/checkvat/checkVatPopup.php?vatNumber='+a,'".dol_escape_js($langs->trans("VATIntraCheckableOnEUSite"))."', 540, 350);\n";
+								print "}\n";
+								print '</script>';
+								print "\n";
+								$s.='<a href="#" class="hideonsmartphone" onclick="javascript: CheckVAT(document.formsoc.vatnumber.value);">'.$langs->trans("VATIntraCheck").'</a>';
+								$s = $form->textwithpicto($s, $langs->trans("VATIntraCheckDesc", $langs->transnoentitiesnoconv("VATIntraCheck")), 1);
+							} else {
+								$s.='<a href="'.$langs->transcountry("VATIntraCheckURL", $mythirdpartyaccount->country_id).'" target="_blank">'.img_picto($langs->trans("VATIntraCheckableOnEUSite"), 'help').'</a>';
+							}
+							print $s;
+						}
+						print '</div>'."\n";
+					}
+
+				print '
 	              </div>
 	              <!-- END FORM BODY -->
 
