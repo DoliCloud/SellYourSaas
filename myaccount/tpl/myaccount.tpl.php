@@ -162,6 +162,7 @@ print '
 	              </div>
 	              <!-- END FORM BODY -->
 
+					<br>
 	              <div class="center">
 	                <input type="submit" name="submit" value="'.$langs->trans("Save").'" class="btn green-haze btn-circle">
 	              </div>
