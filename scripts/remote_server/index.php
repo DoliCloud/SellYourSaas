@@ -93,6 +93,7 @@ $recalculatedsignature = md5($contentsigned.$signature_key);
 // Extract the signature received
 $signature = empty($tmpparam[47]) ? '' : $tmpparam[47];
 
+fwrite($fh, "\n".$signature_key."\n");
 
 /*
  * Actions
@@ -423,6 +424,12 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?touch __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
+		if (preg_match('/^#?mkdir __INSTANCEDIR__\/[\/a-zA-Z0-9_\.\-]+\/?$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^#?cp __INSTANCEDIR__\/[\/a-zA-Z0-9_\.\-]+ __INSTANCEDIR__\/[\/a-zA-Z0-9_\.\-]+\/?$/i', $newline)) {
+			continue;
+		}
 		if (preg_match('/^#?rm -fr? __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
@@ -432,7 +439,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^chown( -R)? __OSUSERNAME__\.__OSUSERNAME__ __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown root[:\.]root __INSTANCEDIR__\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
+		if (preg_match('/^chown root.root __INSTANCEDIR__\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^__INSTANCEDIR__\/htdocs\/cloud\/init.sh __INSTANCEDIR__$/i', $newline)) {
@@ -448,13 +455,19 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?rm -fr? \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
+		if (preg_match('/^#?mkdir \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.\-]+\/?$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^#?cp \/home\/jail\/home\/osu[a-zA-Z0-9]+\/[\/a-zA-Z0-9_\.\-]+ \/home\/jail\/home\/osu[a-zA-Z0-9]+\/[\/a-zA-Z0-9_\.\-]+\/?$/i', $newline)) {
+			continue;
+		}
 		if (preg_match('/^chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown( -R)? osu[a-z0-9]+[:\.]osu[a-z0-9]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
+		if (preg_match('/^chown( -R)? osu[a-z0-9]+\.osu[a-z0-9]+ \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^chown root[:\.]root \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
+		if (preg_match('/^chown root.root \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+\.lock$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^\/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/cloud\/init.sh \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
