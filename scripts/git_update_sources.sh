@@ -57,7 +57,7 @@ do
 	        	git pull
 	        fi
 	        echo Result of git pull = $?
-
+		git submodule update --remote --recursive
 	    	git rev-parse HEAD > gitcommit.txt
 	    else
 	        echo "Not a git dir. Nothing done."
