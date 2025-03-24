@@ -512,7 +512,7 @@ function getRemoteCheck($remoteip, $whitelisted, $email, $checkcaptcha = 1)
 		// Check validation of the captcha
 		$resurl = getURLContent($urltocall, 'POST', $message);
 
-		if (empty($resurl['curl_error_no']) && !empty($resurl['http_code']) && $resurl['http_code'] == '200') {
+		if (empty($resurl['curl_error_no']) && !empty($resurl['http_code']) && $resurl['http_code'] == 200) {
 			$jsonresult = json_decode($resurl['content']);
 			$keyforerrorcode = 'error-codes';
 			$errorcodes = $jsonresult->$keyforerrorcode;
