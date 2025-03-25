@@ -414,7 +414,7 @@ if [[ "$mode" == "rename" ]]; then
 			fi
 			
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-						if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				export webCustomSSLCertificateCRT="/etc/apache2/$webSSLCertificateCRT"
 				export webCustomSSLCertificateKEY="/etc/apache2/$webSSLCertificateKEY"
 				export webCustomSSLCertificateIntermediate="/etc/apache2/$webSSLCertificateIntermediate"
