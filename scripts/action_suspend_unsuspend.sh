@@ -277,9 +277,9 @@ if [[ "$mode" == "rename" ]]; then
 	echo "cat $vhostfile | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppLogName__/$instancename/g' | \
-              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
-              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
-              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+              sed -e 's;__webSSLCertificateCRT__;$webSSLCertificateCRT;g' | \
+              sed -e 's;__webSSLCertificateKEY__;$webSSLCertificateKEY;g' | \
+              sed -e 's;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g' | \
 			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 			  sed -e 's/__osUsername__/$osusername/g' | \
 			  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -298,9 +298,9 @@ if [[ "$mode" == "rename" ]]; then
 	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
-              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
-              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
-              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+              sed -e "s;__webSSLCertificateCRT__;$webSSLCertificateCRT;g" | \
+              sed -e "s;__webSSLCertificateKEY__;$webSSLCertificateKEY;g" | \
+              sed -e "s;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g" | \
 			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 			  sed -e "s/__osUsername__/$osusername/g" | \
 			  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -415,21 +415,21 @@ if [[ "$mode" == "rename" ]]; then
 			
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
 			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
-				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
-				export webCustomSSLCertificateKEY=$webSSLCertificateKEY
-				export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
+				export webCustomSSLCertificateCRT="/etc/apache2/$webSSLCertificateCRT"
+				export webCustomSSLCertificateKEY="/etc/apache2/$webSSLCertificateKEY"
+				export webCustomSSLCertificateIntermediate="/etc/apache2/$webSSLCertificateIntermediate"
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
 				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
 				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
-				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.key
+				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
 				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
 			fi
 		fi
 		
 		
 		# If the certificate file is not found, we disable SSL
-		if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+		if [[ ! -e $webCustomSSLCertificateCRT ]]; then
 			SSLON="Off"
 		else
 			SSLON="On"
@@ -447,9 +447,9 @@ if [[ "$mode" == "rename" ]]; then
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's/__webSSLCertificateCRT__/$webCustomSSLCertificateCRT/g' | \
-                  sed -e 's/__webSSLCertificateKEY__/$webCustomSSLCertificateKEY/g' | \
-                  sed -e 's/__webSSLCertificateIntermediate__/$webCustomSSLCertificateIntermediate/g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$webCustomSSLCertificateCRT;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$webCustomSSLCertificateKEY;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$webCustomSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -469,9 +469,9 @@ if [[ "$mode" == "rename" ]]; then
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s/__webSSLCertificateCRT__/$webCustomSSLCertificateCRT/g" | \
-                  sed -e "s/__webSSLCertificateKEY__/$webCustomSSLCertificateKEY/g" | \
-                  sed -e "s/__webSSLCertificateIntermediate__/$webCustomSSLCertificateIntermediate/g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$webCustomSSLCertificateCRT;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$webCustomSSLCertificateKEY;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$webCustomSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -604,9 +604,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 	echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppLogName__/$instancename/g' | \
-              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
-              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
-              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+              sed -e 's;__webSSLCertificateCRT__;$webSSLCertificateCRT;g' | \
+              sed -e 's;__webSSLCertificateKEY__;$webSSLCertificateKEY;g' | \
+              sed -e 's;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g' | \
 			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 			  sed -e 's/__osUsername__/$osusername/g' | \
 			  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -625,9 +625,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 	cat $vhostfiletouse | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
-              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
-              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
-              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+              sed -e "s;__webSSLCertificateCRT__;$webSSLCertificateCRT;g" | \
+              sed -e "s;__webSSLCertificateKEY__;$webSSLCertificateKEY;g" | \
+              sed -e "s;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g" | \
 			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 			  sed -e "s/__osUsername__/$osusername/g" | \
 			  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -737,9 +737,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 		echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
-                  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
-                  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+                  sed -e 's;__webSSLCertificateCRT__;$webSSLCertificateCRT;g' | \
+                  sed -e 's;__webSSLCertificateKEY__;$webSSLCertificateKEY;g' | \
+                  sed -e 's;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -758,9 +758,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
-                  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
-                  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+                  sed -e "s;__webSSLCertificateCRT__;$webSSLCertificateCRT;g" | \
+                  sed -e "s;__webSSLCertificateKEY__;$webSSLCertificateKEY;g" | \
+                  sed -e "s;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -845,9 +845,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 	echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppAliases__/$instancename.$domainname/g' | \
 			  sed -e 's/__webAppLogName__/$instancename/g' | \
-              sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
-              sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
-              sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+              sed -e 's;__webSSLCertificateCRT__;$webSSLCertificateCRT;g' | \
+              sed -e 's;__webSSLCertificateKEY__;$webSSLCertificateKEY;g' | \
+              sed -e 's;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g' | \
 			  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 			  sed -e 's/__osUsername__/$osusername/g' | \
 			  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -864,9 +864,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 	cat $vhostfiletouse | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
-              sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
-              sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
-              sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+              sed -e "s;__webSSLCertificateCRT__;$webSSLCertificateCRT;g" | \
+              sed -e "s;__webSSLCertificateKEY__;$webSSLCertificateKEY;g" | \
+              sed -e "s;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g" | \
 			  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 			  sed -e "s/__osUsername__/$osusername/g" | \
 			  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -974,9 +974,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 		echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's/__webSSLCertificateCRT__/$webSSLCertificateCRT/g' | \
-                  sed -e 's/__webSSLCertificateKEY__/$webSSLCertificateKEY/g' | \
-                  sed -e 's/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g' | \
+                  sed -e 's;__webSSLCertificateCRT__;$webSSLCertificateCRT;g' | \
+                  sed -e 's;__webSSLCertificateKEY__;$webSSLCertificateKEY;g' | \
+                  sed -e 's;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -994,9 +994,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s/__webSSLCertificateCRT__/$webSSLCertificateCRT/g" | \
-                  sed -e "s/__webSSLCertificateKEY__/$webSSLCertificateKEY/g" | \
-                  sed -e "s/__webSSLCertificateIntermediate__/$webSSLCertificateIntermediate/g" | \
+                  sed -e "s;__webSSLCertificateCRT__;$webSSLCertificateCRT;g" | \
+                  sed -e "s;__webSSLCertificateKEY__;$webSSLCertificateKEY;g" | \
+                  sed -e "s;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
