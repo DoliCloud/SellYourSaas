@@ -1289,7 +1289,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	export phpfpmconf="/etc/php/$phpversion/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf"
 	export phpfpmservicename="sellyoursaas-php$phpversion-fpm-$fqn.service"
 	export phpfpmservice="/etc/systemd/system/$phpfpmservicename"
-	if [ -d /etc/php/$phpversion/fpm/pool.d/sellyoursaas ]; then
+	if [ "x$phpfpm" != "x" ]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm conf $phpfpmconf from $fpmpoolfiletemplate"
 		if [[ -s $phpfpmconf ]]
 		then
