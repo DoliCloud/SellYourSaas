@@ -348,7 +348,7 @@ if (empty($reshook)) {
 	if ($action == "deletesupportuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
-		$parameters = array('newdb'=>$newdb);
+		$parameters = array('newdb' => $newdb);
 		$reshook = $hookmanager->executeHooks('deleteSupportUser', $parameters, $object, $action);
 
 		if (is_object($newdb)) {
