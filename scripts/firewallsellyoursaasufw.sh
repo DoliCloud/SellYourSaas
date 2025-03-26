@@ -62,42 +62,42 @@ case $1 in
 #------------------------------------
 
 # SSH
-ufw allow out $port_ssh/tcp
+ufw allow out $port_ssh/tcp	comment "SSH servers"
 # HTTP
-ufw allow out 80/tcp
-ufw allow out 8080/tcp
-ufw allow out 443/tcp
+ufw allow out 80/tcp comment "HTTP servers"
+ufw allow out 8080/tcp comment "HTTP alternative servers"
+ufw allow out 443/tcp comment "HTTP servers (crypted)"
 # Mysql/Mariadb
-ufw allow out 3306/tcp
+ufw allow out 3306/tcp comment "Mysql servers"
 # Send Mail
-ufw allow out log 25/tcp
-ufw allow out log 2525/tcp
-ufw allow out log 465/tcp
-ufw allow out log 587/tcp
+ufw allow out log 25/tcp comment "SMTP servers"
+ufw allow out log 2525/tcp comment "SMTP servers"
+ufw allow out log 465/tcp comment "SMTP servers"
+ufw allow out log 587/tcp comment "SMTP servers"
 #ufw allow out log 1025/tcp
 # LDAP LDAPS
-ufw allow out 389/tcp
-ufw allow out 636/tcp
+ufw allow out 389/tcp comment "LDAP servers"
+ufw allow out 636/tcp comment "LDAP servers (crypted)"
 # POP
-ufw allow out 110/tcp
+ufw allow out 110/tcp comment "POP servers"
 # IMAP
-ufw allow out 143/tcp
-ufw allow out 993/tcp
+ufw allow out 143/tcp comment "IMAP servers"
+ufw allow out 993/tcp comment "IMAP servers (crypted)"
 # Printers (ESC/POS port)
-ufw allow out 9100/tcp
+ufw allow out 9100/tcp comment "ESC-POST printers"
 # DCC (anti spam public services)
 #ufw allow out 6277/tcp
 #ufw allow out 6277/udpvi
 # Rdate / NTP
 #ufw allow out 37/tcp deprecated
-ufw allow out 123/udp
+ufw allow out 123/udp comment "rdate/ntp servers"
 # Whois
-ufw allow out 43/tcp
+ufw allow out 43/tcp comment "Whois servers"
 # DNS
-ufw allow out 53/tcp
-ufw allow out 53/udp
+ufw allow out 53/tcp comment "DNS servers"
+ufw allow out 53/udp comment "DNS servers"
 # NFS (only 2049/tcp is required for NFS)
-ufw allow out 2049/tcp
+ufw allow out 2049/tcp comment "NFS servers"
 # DHCP
 # TODO Allow DHCP client access ?
 # ufw allow out from $ipserver port 68 to any port 67 proto udp
@@ -156,7 +156,7 @@ if [[ "x$atleastoneipfound" == "x1" ]]; then
 	ufw delete allow in $port_ssh/tcp
 else 
 	echo Allow In access with SSH to everybody
-	ufw allow in $port_ssh/tcp
+	ufw allow in $port_ssh/tcp comment "SSH Server"
 fi
 
 # MySQL
@@ -205,31 +205,26 @@ if [[ "x$atleastoneipfound" == "x1" ]]; then
 	ufw delete allow in 3306/tcp
 else 
 	echo Allow In access with Mysql to everybody
-	ufw allow in 3306/tcp
+	ufw allow in 3306/tcp comment "Mysql in access for everybody"
 fi
 
-# Seems not required
-#ufw allow from 127.0.0.0/8 to any port $port_ssh proto tcp
-#ufw allow from 192.168.0.0/16 to any port $port_ssh proto tcp
-#ufw allow from 127.0.0.0/8 to any port 3306 proto tcp
-#ufw allow from 192.168.0.0/16 to any port 3306 proto tcp
 
 echo "Allow In access to common port (http and dns) to everybody"
 # HTTP
-ufw allow in 80/tcp
-ufw allow in 443/tcp
+ufw allow in 80/tcp comment "HTTP Server"
+ufw allow in 443/tcp comment "HTTP Server (crypted)"
 # DNS
-ufw allow in 53/tcp
-ufw allow in 53/udp
-ufw allow in 953/tcp
-ufw allow in 953/udp
+ufw allow in 53/tcp comment "DNS Server tcp"
+ufw allow in 53/udp comment "DNS Server udp"
+ufw allow in 953/tcp comment "DNS Server tcp (crypted)"
+ufw allow in 953/udp comment "DNS Server upd (crypted)"
 
 # To see master NFS server
 if [[ "x$masterserver" != "x0" ]]; then
 	echo Enable NFS entry to allow access to master from instance servers
 	#ufw allow in 111/tcp
 	#ufw allow in 111/udp
-	ufw allow in 2049/tcp
+	ufw allow in 2049/tcp comment "NFS Server access from deployment servers"
 	#ufw allow in 2049/udp
 else
 	ufw delete allow in 111/tcp
