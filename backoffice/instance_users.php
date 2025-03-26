@@ -345,8 +345,14 @@ if (empty($reshook)) {
 			setEventMessages('Password for user <b>'.$loginforsupport.'</b> set to <b>'.$password.'</b>', null, 'warnings');
 		}
 	}
+
+
 	if ($action == "deletesupportuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+
+		$parameters = array('newdb'=>$newdb);
+		$reshook = $hookmanager->executeHooks('deleteSupportUser', $parameters, $object, $action);
+
 		if (is_object($newdb)) {
 			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
