@@ -350,6 +350,9 @@ if (empty($reshook)) {
 
 		$parameters = array('newdb' => $newdb);
 		$reshook = $hookmanager->executeHooks('deleteSupportUser', $parameters, $object, $action);
+		if ($reshook < 0) {
+			setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+		}
 
 		if (is_object($newdb)) {
 			$fordolibarr = 1;
