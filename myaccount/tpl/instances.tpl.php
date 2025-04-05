@@ -999,7 +999,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" target="_blank" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 					} else {
 						// Show link to unsubscribe
-						print '<a class="btn btn-alert wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'#tab_domain_'.$contract->id.'" target="_blank" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'#tab_domain_'.$contract->id.'" target="_blank" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
 					}
 					print '</div>';
 				} else {
