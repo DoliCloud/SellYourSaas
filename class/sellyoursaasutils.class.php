@@ -211,13 +211,13 @@ class SellYourSaasUtils
 												$monthfactor *=  $tmpinvoicerec->frequency;
 											}
 										}
-										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
+										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".price2num($amountofinvoice, 'MT')." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
 										// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 										if ($amountofinvoice >= (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') * $monthfactor)) {
 											$draftinvoicecanceled[$invoice->id] = $invoice->ref;
 
 											$errorforinvoice++;
-											$this->error = 'The invoice '.$invoice->ref." can't be validated by doValidateDraftInvoices: Amount ".$amountofinvoice." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
+											$this->error = 'The invoice '.$invoice->ref." can't be validated by doValidateDraftInvoices: Amount ".price2num($amountofinvoice, 'MT')." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
 											$this->errors[] = $this->error;
 											break;
 										}
