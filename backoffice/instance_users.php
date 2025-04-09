@@ -349,7 +349,7 @@ if (empty($reshook)) {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 
 		$parameters = array('newdb' => $newdb);
-		$reshook = $hookmanager->executeHooks('deleteSupportUser', $parameters, $object, $action);
+		$reshook = $hookmanager->executeHooks('sellYourSaasDeleteSupportUser', $parameters, $object, $action);
 		if ($reshook < 0) {
 			setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 		}
