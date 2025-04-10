@@ -985,7 +985,23 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 				// Button to subscribe
 				if (!empty($tmpproduct->array_options['options_package'])) {
-					// If there is a package, sho wlink to subscribe
+					// If there is a package, test if module already depoyed on instance
+					$productalreadyininstance = 0;
+					foreach ($arrayoflines as $keyline => $line) {
+						if ($tmpproduct->id == $line->id) {
+							$productalreadyininstance = 1;
+							break;
+						}
+					}
+					print '<div class="divforbutton">';
+					if ($productalreadyininstance) {
+						// Show link to subscribe
+						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" target="_blank" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+					} else {
+						// Show link to unsubscribe
+						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'#tab_domain_'.$contract->id.'" target="_blank" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+					}
+					print '</div>';
 				} else {
 					// If no package
 					if ($producturl) {

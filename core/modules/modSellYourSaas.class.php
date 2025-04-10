@@ -983,7 +983,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('latestbackup_date', "LatestBackupDate", 'datetime', 159, '', 'contrat', 0, 0, '', '', 1, '', -5, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('latestbackup_date_ok', "LatestBackupDateOK", 'datetime', 160, '', 'contrat', 0, 0, '', '', 1, '', -5, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('latestbackup_status', "LatestBackupStatus", 'varchar', 161, '2', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('latestbackup_message', "LatestBackupMessage", 'text', 162, '8192', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('latestbackup_message', "LatestBackupMessage", 'text', 162, '8192', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'small'));
 
 		$resultx=$extrafields->addExtraField('latestbackupremote_date', "LatestBackupRemoteDate", 'datetime', 163, '', 'contrat', 0, 0, '', '', 1, '', -5, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('latestbackupremote_date_ok', "LatestBackupRemoteDateOK", 'datetime', 164, '', 'contrat', 0, 0, '', '', 1, '', -5, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');

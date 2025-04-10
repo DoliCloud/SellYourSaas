@@ -211,13 +211,13 @@ class SellYourSaasUtils
 												$monthfactor *=  $tmpinvoicerec->frequency;
 											}
 										}
-										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".$amountofinvoice." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
+										dol_syslog("doValidateDraftInvoices The invoice to validate has amount = ".price2num($amountofinvoice, 'MT')." and come from recurring invoice with frequency ".$tmpinvoicerec->frequency."/".$tmpinvoicerec->unit_frequency." so a month factor of ".$monthfactor);
 										// Check amount with monthfactor is lower than $conf->global->SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
 										if ($amountofinvoice >= (getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE') * $monthfactor)) {
 											$draftinvoicecanceled[$invoice->id] = $invoice->ref;
 
 											$errorforinvoice++;
-											$this->error = 'The invoice '.$invoice->ref." can't be validated by doValidateDraftInvoices: Amount ".$amountofinvoice." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
+											$this->error = 'The invoice '.$invoice->ref." can't be validated by doValidateDraftInvoices: Amount ".price2num($amountofinvoice, 'MT')." > ".getDolGlobalInt('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE')." * ".$monthfactor;
 											$this->errors[] = $this->error;
 											break;
 										}
@@ -4568,9 +4568,9 @@ class SellYourSaasUtils
 					include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 					$retarray = getURLContent($urltoget, 'GET', '', 0, array(), array('http', 'https'), 2);   // Timeout is defined before into $conf->global->MAIN_USE_RESPONSE_TIMEOUT
 
-					if ($retarray['curl_error_no'] != '' || $retarray['http_code'] != 200) {
+					if (!empty($retarray['curl_error_no']) || $retarray['http_code'] != 200) {
 						$error++;
-						if ($retarray['curl_error_no'] != '') {
+						if (!empty($retarray['curl_error_no'])) {
 							$this->errors[] = $retarray['curl_error_msg'];
 						} else {
 							$this->errors[] = $retarray['content'];
