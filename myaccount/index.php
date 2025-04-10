@@ -3015,7 +3015,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 							<div class="note note-warning">
 							<h4 class="block">'.str_replace('{s1}', '<span class="wordbreak">'.$contract->ref_customer.'</span>', $langs->trans("XDaysBeforeEndOfTrial", abs($delayindays), '{s1}')).' !';
 						if (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
-							print '<br>'.$langs->trans("XDaysBeforeEndOfTrialNoteForFreeMode");
+							print '<br><span class="small">'.$langs->trans("XDaysBeforeEndOfTrialNoteForFreeMode").'</span>';
 						}
 						print '</h4>';
 						if ($mode != 'registerpaymentmode') {
