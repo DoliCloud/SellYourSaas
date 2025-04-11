@@ -347,6 +347,13 @@ if (empty($reshook)) {
 	}
 	if ($action == "deletesupportuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+
+		$parameters = array('newdb' => $newdb);
+		$reshook = $hookmanager->executeHooks('sellYourSaasDeleteSupportUser', $parameters, $object, $action);
+		if ($reshook < 0) {
+			setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+		}
+
 		if (is_object($newdb)) {
 			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
