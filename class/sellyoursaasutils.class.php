@@ -622,11 +622,14 @@ class SellYourSaasUtils
 						$outputlangs->loadLangs(array('main'));
 
 						// @TODO Save in cache $arraydefaultmessage for each $object->thirdparty->default_lang and reuse it to avoid getEMailTemplate called each time
-						dol_syslog("We will call getEMailTemplate for type 'contract', label 'GentleTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
 						if ($object->thirdparty->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
-							$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'GentleTrialExpiringReminderFreeInstance');
+							dol_syslog("We will call getEMailTemplate for type 'contract', label 'GentleTrialExpiringReminderFreeInstance', outputlangs->defaultlang=".$outputlangs->defaultlang);
+							$arraydefaultmessage = $formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'GentleTrialExpiringReminderFreeInstance');
+							dol_syslog("Topic found is ".$arraydefaultmessage->topic);
 						} else {
-							$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'GentleTrialExpiringReminder');
+							dol_syslog("We will call getEMailTemplate for type 'contract', label 'GentleTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
+							$arraydefaultmessage = $formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'GentleTrialExpiringReminder');
+							dol_syslog("Topic found is ".$arraydefaultmessage->topic);
 						}
 
 						$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
