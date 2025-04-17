@@ -237,10 +237,6 @@ if (!GETPOSTINT('noheader')) {
 
 <div class="signup">
 
-<div id="login_left">
-<img alt="" src="<?php echo $urllogo; ?>" id="logo" />
-</div>
-
 <?php
 // Show global announce
 if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') && getDolGlobalString('SELLYOURSAAS_ANNOUNCE')) {
