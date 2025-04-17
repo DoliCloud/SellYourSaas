@@ -40,6 +40,10 @@ figure {
   margin: 1em 40px;
 }
 
+.radio-list img {
+    filter: saturate(0.7);
+}
+
 hr {
   -webkit-box-sizing: content-box;
           box-sizing: content-box;
