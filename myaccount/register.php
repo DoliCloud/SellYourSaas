@@ -448,7 +448,7 @@ if ($reshook == 0) {
 		<?php
 		if (! GETPOST('noheader', 'int')) {
 			?>
-		<header class="invers">
+		<header class="register">
 			<div class="customregisterheader">
 				<h1><?php echo $langs->trans("InstanceCreation") ?><br><small><?php echo($tmpproduct->label ? '('.$tmpproduct->label.')' : ''); ?></small></h1>
 				<div class="paddingtop20">
