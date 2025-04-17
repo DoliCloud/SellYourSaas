@@ -567,4 +567,8 @@ input.input-field {
 	}
 }
 
+/* Ad custom CSS into SellyourSaas setup page */
 ";
+
+print getDolGlobalString('SELLYOURSAAS_CSS');
+
