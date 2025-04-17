@@ -47,6 +47,14 @@ define('SYSLOG_FILE_ADDSUFFIX', 'register');
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
 
+/**
+ * @var Database	$db
+ * @var Conf		$conf
+ * @var Translate 	$langs
+ * @var string 		$urllogo
+ */
+
+
 // Load Dolibarr environment
 $res=0;
 // Try main.inc.php into web root known defined into CONTEXT_DOCUMENT_ROOT (not always defined)
@@ -87,7 +95,7 @@ dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
-$langs->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors"));
+$langs->loadLangs(array("main","companies","sellyoursaas@sellyoursaas","errors","website"));
 
 if ($langs->defaultlang == 'en_US') {
 	$langsen = $langs;
@@ -344,6 +352,9 @@ if ($reshook == 0) {
 	?>
 	<div class="large">
 		<?php
+
+		// Define the $linklogo and $homepage
+
 		$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');
 		$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 
@@ -407,7 +418,7 @@ if ($reshook == 0) {
 			}
 		}
 
-		if (! GETPOST('noheader', 'int')) {
+		if (!GETPOSTINT('noheader')) {
 			?>
 		<div class="page-header-top">
 			<div class="container">
@@ -415,8 +426,7 @@ if ($reshook == 0) {
 				  <div class="valignmiddle" style="padding-right: 25px;">
 				  <a href="<?php echo $homepage ?>"><img class="logoheader"  src="<?php echo $linklogo; ?>" id="logo" /></a><br>
 				  </div>
-				  <?php if (empty($mythirdparty->id)) {
-						$langs->load("website"); ?>
+				  <?php if (empty($mythirdparty->id)) { ?>
 				  <div class="paddingtop20" style="float: right;">
 					  <div class="btn-sm">
 					  <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
@@ -440,7 +450,7 @@ if ($reshook == 0) {
 			  </div> <!-- END TOP NAVIGATION MENU -->
 
 			</div>
-		  </div>
+		</div>
 			<?php
 		}
 		?>

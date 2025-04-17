@@ -690,7 +690,7 @@ function dol_loginfunction($langs, $conf, $mysoc)
 	//$langs=new Translate('', $conf);
 	$langs->setDefaultLang(GETPOST('lang', 'aZ09') ? GETPOST('lang', 'aZ09') : 'auto');
 
-	$langs->loadLangs(array("main","other","help","admin","sellyoursaas@sellyoursaas"));
+	$langs->loadLangs(array("main","other","help","admin","sellyoursaas@sellyoursaas","website"));
 
 	// Instantiate hooks of thirdparty module only if not already define
 	$hookmanager->initHooks(array('mainmyaccountloginpage'));
