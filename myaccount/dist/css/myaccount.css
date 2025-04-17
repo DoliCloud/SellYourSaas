@@ -260,6 +260,9 @@ nav.navbar.bg-inverse {
     z-index: 10;
 }
 
+.page-content-wrapper {
+	margin-top: 20px;
+}
 .portlet-title {
     padding-bottom: 10px;
 }

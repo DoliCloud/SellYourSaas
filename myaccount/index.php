@@ -20,22 +20,12 @@
  * You can add &admin=1 as parameter to get more features
  */
 
-//if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER','1');
-//if (! defined('NOREQUIREDB'))    define('NOREQUIREDB','1');
-//if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC','1');
-//if (! defined('NOREQUIRETRAN'))  define('NOREQUIRETRAN','1');
-//if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');			// Do not check anti CSRF attack test (we can go on this page after a stripe payment recording)
-if (! defined('NOIPCHECK')) {
+if (! defined('NOIPCHECK')) {		// Do not check IP defined into conf $dolibarr_main_restrict_ip
 	define('NOIPCHECK', '1');
-}				// Do not check IP defined into conf $dolibarr_main_restrict_ip
-//if (! defined('NOSTYLECHECK'))   define('NOSTYLECHECK','1');			// Do not check style html tag into posted data
-//if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL','1');		// Do not check anti POST attack test
-if (! defined('NOREQUIREMENU')) {
+}
+if (! defined('NOREQUIREMENU')) {	// If there is no need to load and show top and left menu
 	define('NOREQUIREMENU', '1');
-}			// If there is no need to load and show top and left menu
-//if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
-//if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
-//if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				    	// If this page is public (can be called outside logged session)
+}
 if (! defined("MAIN_LANG_DEFAULT") && empty($_GET['lang'])) {
 	define('MAIN_LANG_DEFAULT', 'auto');
 }
@@ -48,7 +38,6 @@ if (! defined("MAIN_AUTHENTICATION_POST_METHOD")) {
 if (! defined('NOBROWSERNOTIF')) {
 	define('NOBROWSERNOTIF', '1');
 }
-
 
 define('SYSLOG_FILE_ADDIP', 1);
 define('SYSLOG_FILE_ADDSUFFIX', 'myaccountindex');
@@ -2247,8 +2236,8 @@ if ($welcomecid > 0) {
 	$contract->fetch($welcomecid);
 	$listofcontractid[$welcomecid] = $contract;
 	// Add a protection to avoid to see dashboard of others by changing welcomecid.
-	if (($mythirdpartyaccount->isareseller == 0 && $contract->fk_soc != $_SESSION['dol_loginsellyoursaas'])           // Not reseller, and contract is for another thirdparty
-	|| ($mythirdpartyaccount->isareseller == 1 && array_key_exists($contract->fk_soc, $listofcustomeridreseller))) { // Is a reseller and contract is for a company that is a customer of reseller
+	if (($mythirdpartyaccount->isareseller == 0 && $contract->socid != $_SESSION['dol_loginsellyoursaas'])           // Not reseller, and contract is for another thirdparty
+	|| ($mythirdpartyaccount->isareseller == 1 && array_key_exists($contract->socid, $listofcustomeridreseller))) { // Is a reseller and contract is for a company that is a customer of reseller
 		dol_print_error_email('DEPLOY-WELCOMEID'.$welcomecid, 'Bad value for welcomeid. Try to remove the parameter welcomeid from your URL.', null, 'alert alert-error');
 		exit;
 	}
@@ -2299,7 +2288,6 @@ var select2arrayoflanguage = {
 
 
 llxHeader($head, $langs->trans("MyAccount"), '', '', 0, 0, $arrayofjs, $arrayofcss, '', 'myaccount');
-
 
 ?>
 
