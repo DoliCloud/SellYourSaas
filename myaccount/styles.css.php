@@ -476,7 +476,7 @@ border-radius: 0 4px 4px 0;
 }
 
 .badge-myaccount-status {
-	box-shadow: 0px 0px 10px #ccc;
+/* 	box-shadow: 0px 0px 10px #ccc; */
 }
 
 .whitespacenowrap {
