@@ -27,6 +27,7 @@
 //require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+require_once DOL_DOCUMENT_ROOT.'/contrat/class/contratligne.class.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
@@ -282,10 +283,10 @@ class SellYourSaasUtils
 
 											if ($protecti < 1000) {	// If not, there is a pb
 												// We will update the end of date of contrat
-												dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc'));
+												dol_syslog("We will update the end of date of contract lines that are not yet suspended with newdate = ".dol_print_date($newdate, 'dayhourrfc'));
 
-												$label = 'Increase end date of services for contract '.$contract->ref.' (payment mode '.$invoice->mode_reglement_code.')';
-												$comment = 'Increase end date of services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices() to give more time to make payment.';
+												$label = 'Increase end date of open services for contract '.$contract->ref.' (payment mode '.$invoice->mode_reglement_code.')';
+												$comment = 'Increase end date of open services for contract '.$contract->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doValidateDraftInvoices() to give more time to make payment.';
 
 												// First launch update of resources if it is not a redirect contract:
 												// We should not have to do that because the batch SellYourSaasRefreshContracts is called 2 days before
@@ -298,7 +299,9 @@ class SellYourSaasUtils
 												*/
 
 												$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
-												$sqlupdate.= ' WHERE fk_contrat = '.((int) $contract->id);
+												$sqlupdate .= ' WHERE fk_contrat = '.((int) $contract->id);
+												$sqlupdate .= ' AND statut <> '.ContratLigne::STATUS_CLOSED;
+
 												$resqlupdate = $this->db->query($sqlupdate);
 												if ($resqlupdate) {
 													$actioncode = 'RENEW_CONTRACT';
