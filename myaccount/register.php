@@ -894,7 +894,7 @@ if ($reshook == 0) {
 				if (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') == 2) {
 					echo $langs->trans("ConfirmNonProfitOrgaCaritative", $sellyoursaasname).'. ';
 				} elseif (getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') == 3) {
-					echo $langs->trans("ConfirmNonProfitOrgaSmall", getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS', 50), getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES', 2)).'. ';
+					echo $langs->trans("ConfirmNonProfitOrgaSmall", getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS', 100), getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES', 2)).'. ';
 				} else {
 					echo $langs->trans("ConfirmNonProfitOrga").'. ';
 				}

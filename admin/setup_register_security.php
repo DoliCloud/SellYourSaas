@@ -125,6 +125,12 @@ if ($action == 'set') {
 		if (GETPOSTISSET("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_ONLY_NON_PROFIT_ORGA", GETPOST("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA", 'alpha'), 'chaine', 0, '', $conf->entity);
 		}
+		if (GETPOSTISSET("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS", GETPOST("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
+		if (GETPOSTISSET("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES", GETPOST("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
 
 		if (GETPOSTISSET("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", GETPOST("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", 'alpha'), 'chaine', 0, '', $conf->entity);
@@ -226,11 +232,32 @@ print '</tr>';
 // Option to say that only non profit organisation can register. The checkbox become mandatory
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA").'</td>';
 print '<td>';
-$array = array('0' => 'No', '1' => 'NonProfitOrganization', '2' => 'NonProfitOrganizationAndCaritative', '3' => 'NonProfitOrganizationAndSmall');
+$array = array(
+	'0' => 'No',
+	'1' => 'NonProfitOrganization',
+	'2' => 'NonProfitOrganizationAndCaritative',
+	'3' => $langs->trans('NonProfitOrganizationAndSmall', getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_NB_MEMBERS', 100), getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_NB_SALARIES', 2))
+);
 print $form->selectarray('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA', $array, getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA'), 0, 0, 0, '', 1, 0, 0, '', 'maxwidth250');
 print '</td>';
 print '<td><span class="opacitymedium small">Set to a value if you want to restrict registration to some non-profit organizations only</span></td>';
 print '</tr>';
+
+if (getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA') == 3) {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS").'</td>';
+	print '<td>';
+	print '<input class="width75" type="number" name="SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS" value="'.getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS', 100).'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">100</span></td>';
+	print '</tr>';
+
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES").'</td>';
+	print '<td>';
+	print '<input class="width75" type="number" name="SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES" value="'.getDolGlobalString('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES', 2).'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">2</span></td>';
+	print '</tr>';
+}
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_NAME_RESERVED").'</td>';
 print '<td>';
