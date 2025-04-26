@@ -129,14 +129,14 @@ if (count($listofcontractid) > 0) {
 			//dol_sort_array($contract->linkedObjects['facture'], 'date');
 			foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 				/* @var Facture $invoice */
-				if ($invoice->statut == Facture::STATUS_DRAFT) {
+				if ($invoice->status == Facture::STATUS_DRAFT) {
 					continue;
 				}
 
 				print '
 					            <div class="row" style="margin-top:20px">
 
-					              <div class="col-md-4 nowraponall">
+					              <!-- Ref invoice --><div class="col-12 col-md-4 nowraponall">
 									';
 
 				// Execute hook getLastMainDocLink
@@ -156,21 +156,21 @@ if (count($listofcontractid) > 0) {
 				print '</div>
 
 								  <!-- Date -->
-					              <div class="col-md-2">
+					              <div class="col-6 col-md-2">
 									'.dol_print_date($invoice->date, 'dayrfc', $langs).'
 					              </div>
 
 								  <!-- Price -->
-					              <div class="col-md-2">
+					              <div class="col-6 col-md-2">
 									'.price(price2num($invoice->total_ttc), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
 					              </div>
 
 								  <!-- Payment mode -->
-								  <div class="col-md-2 tdoverflowmax150" title="'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'">
+								  <div class="col-6 col-md-2 tdoverflowmax150" title="'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'">
 									'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'
 					              </div>
 
-					              <div class="col-md-2 nowrap">
+					              <div class="col-6 col-md-2 nowrap">
 									';
 				$alreadypayed = $invoice->getSommePaiement();
 				$amount_credit_notes_included = $invoice->getSumCreditNotesUsed();
@@ -227,6 +227,12 @@ if (count($listofcontractid) > 0) {
 						}
 					}
 					print $s;
+
+					// If invoice is in dispute, we show it here
+					if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
+						print ' <span class="badge badge-warning badge-status" title="'.$langs->trans("InvoicePaymentDisputedMessage", $invoice->ref, dol_print_date($invoice->date, 'day')).'">';
+						print $langs->trans("Canceled").'</span>';
+					}
 					// TODO Add details of payments
 					//$htmltext = 'Soon here: Details of payment...';
 					//print $form->textwithpicto('', $htmltext);
