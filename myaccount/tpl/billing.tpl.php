@@ -233,7 +233,12 @@ if (count($listofcontractid) > 0) {
 
 								<!-- Price -->
 					            <div class="col-6 col-md-2">
-									'.price(price2num($invoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency).'
+									';
+				print (empty($invoice->array_options['options_invoicepaymentdisputed']) ? '' : '<strike>');
+				print price(price2num($invoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency);
+				print (empty($invoice->array_options['options_invoicepaymentdisputed']) ? '' : '</strike>');
+
+				print '
 					            </div>
 
 								<!-- Payment mode -->
