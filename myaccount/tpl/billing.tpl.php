@@ -129,49 +129,13 @@ if (count($listofcontractid) > 0) {
 			//dol_sort_array($contract->linkedObjects['facture'], 'date');
 			foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 				/* @var Facture $invoice */
-				if ($invoice->statut == Facture::STATUS_DRAFT) {
+				if ($invoice->status == Facture::STATUS_DRAFT) {
 					continue;
 				}
 
-				print '
-					            <div class="row" style="margin-top:20px">
+				// Set $statusstring
+				$statusstring = '';
 
-					              <div class="col-md-4 nowraponall">
-									';
-
-				// Execute hook getLastMainDocLink
-				$parameters=array('invoice' => $invoice, 'contract' => $contract);
-				$reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
-				if ($reshook > 0) {
-					print $hookmanager->resPrint;
-				} else {
-					$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
-					if ($url) {
-						print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
-					} else {
-						print $invoice->ref.' <span class="small opacitymedium">('.$langs->trans("InvoicePDFNotYetAvailable").')</span>';
-					}
-				}
-
-				print '</div>
-
-								  <!-- Date -->
-					              <div class="col-md-2">
-									'.dol_print_date($invoice->date, 'dayrfc', $langs).'
-					              </div>
-
-								  <!-- Price -->
-					              <div class="col-md-2">
-									'.price(price2num($invoice->total_ttc), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
-					              </div>
-
-								  <!-- Payment mode -->
-								  <div class="col-md-2 tdoverflowmax150" title="'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'">
-									'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'
-					              </div>
-
-					              <div class="col-md-2 nowrap">
-									';
 				$alreadypayed = $invoice->getSommePaiement();
 				$amount_credit_notes_included = $invoice->getSumCreditNotesUsed();
 				$paymentinerroronthisinvoice = 0;
@@ -195,16 +159,16 @@ if (count($listofcontractid) > 0) {
 						// There is at least one payment error
 						$lasttrystring = $langs->trans("LastTry").': '.dol_print_date($db->jdate($obj->datep));
 						if ($obj->label == 'Cancellation of payment by the bank') {
-							print '<span title="'.dol_escape_htmltag($langs->trans("PaymentChargedButReversedByBank").' - '.$lasttrystring).'">';
-							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError"), $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							$statusstring .= '<span title="'.dol_escape_htmltag($langs->trans("PaymentChargedButReversedByBank").' - '.$lasttrystring).'">';
+							$statusstring .= dolGetStatus($langs->transnoentitiesnoconv("PaymentError"), $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
 							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
 						} elseif ($obj->extraparams == 'PAYMENT_ERROR_INSUFICIENT_FUNDS') {
-							print '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'">';
-							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError").' Insuficient funds', $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							$statusstring .= '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'">';
+							$statusstring .= dolGetStatus($langs->transnoentitiesnoconv("PaymentError").' Insuficient funds', $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
 							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png" alt="Insuficient funds"> '.$langs->trans("PaymentError").'</span>';
 						} else {
-							print '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'">';
-							print dolGetStatus($langs->transnoentitiesnoconv("PaymentError"), $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
+							$statusstring .= '<span title="'.dol_escape_htmltag($obj->extraparams.($obj->extraparams ? ' - ' : '').$lasttrystring).'">';
+							$statusstring .= dolGetStatus($langs->transnoentitiesnoconv("PaymentError"), $langs->transnoentitiesnoconv("PaymentError"), '', 'status8', 2);
 							//print '<img src="'.DOL_URL_ROOT.'/theme/eldy/img/statut8.png"> '.$langs->trans("PaymentError").'</span>';
 						}
 					}
@@ -226,13 +190,65 @@ if (count($listofcontractid) > 0) {
 							$s = preg_replace('/'.$langs->trans("BillShortStatusNotPaid").'/', $langs->trans("SepaSentToBank"), $s);
 						}
 					}
-					print $s;
+					$statusstring .= $s;
+
+					// If invoice is in dispute, we show it here
+					if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
+						$statusstring .= ' <span class="badge badge-warning badge-status" title="'.$langs->trans("InvoicePaymentDisputedMessage", $invoice->ref, dol_print_date($invoice->date, 'day')).'">';
+						$statusstring .= $langs->trans("Canceled").'</span>';
+					}
 					// TODO Add details of payments
 					//$htmltext = 'Soon here: Details of payment...';
 					//print $form->textwithpicto('', $htmltext);
 				}
+
+
 				print '
-					              </div>
+					            <div class="row" style="margin-top:20px">
+
+					            <!-- Ref invoice -->
+								<div class="col-12 col-md-4 nowraponall">
+								';
+
+								// Execute hook getLastMainDocLink
+								$parameters=array('invoice' => $invoice, 'contract' => $contract);
+								$reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
+								if ($reshook > 0) {
+									print $hookmanager->resPrint;
+								} else {
+									$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
+									if ($url) {
+										print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
+									} else {
+										print $invoice->ref.' <span class="small opacitymedium">('.$langs->trans("InvoicePDFNotYetAvailable").')</span>';
+									}
+								}
+
+								print '</div>
+
+								<!-- Date -->
+					            <div class="col-6 col-md-2">
+									'.dol_print_date($invoice->date, 'dayrfc', $langs).'
+					            </div>
+
+								<!-- Price -->
+					            <div class="col-6 col-md-2">
+									';
+				print (empty($invoice->array_options['options_invoicepaymentdisputed']) ? '' : '<strike>');
+				print price(price2num($invoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency);
+				print (empty($invoice->array_options['options_invoicepaymentdisputed']) ? '' : '</strike>');
+
+				print '
+					            </div>
+
+								<!-- Payment mode -->
+								<div class="col-6 col-md-2 tdoverflowmax150" title="'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'">
+									'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'
+					            </div>
+
+					            <div class="col-6 col-md-2 nowrap">
+									'.$statusstring.'
+					            </div>
 
 					            </div>
 							';

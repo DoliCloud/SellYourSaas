@@ -328,10 +328,8 @@ $result=0;
 if ($idofinstancefound) {
 	$result = $object->fetch($idofinstancefound);
 }
-
-
 if ($result <= 0) {
-	print "Error: instance ".$instance." not found.\n";
+	print "Error: instance ".$instance." not found. ".$object->error."\n";
 	exit(-2);
 }
 

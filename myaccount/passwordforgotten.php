@@ -80,14 +80,14 @@ if (isModEnabled('ldap')) {
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09')?GETPOST('lang', 'aZ09'):'auto');
-$langs->loadLangs(array("main","users","ldap","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other'));
+$langs->loadLangs(array("main","users","ldap","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other','website'));
 
 if ($langs->defaultlang == 'en_US') {
 	$langsen = $langs;
 } else {
 	$langsen=new Translate('', $conf);
 	$langsen->setDefaultLang('en_US');
-	$langsen->loadLangs(array("main","users","ldap","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other'));
+	$langsen->loadLangs(array("main","users","ldap","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other','website'));
 }
 
 

@@ -1005,7 +1005,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('separatorinvoice', "SELLYOURSAAS_NAME", 'separate', 1000, '', 'facture', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('commission', "PartnerCommissionForThisInvoice", 'int', 1020, '3', 'facture', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('Societe:societe/class/societe.class.php'=>null));
-		$resultx=$extrafields->addExtraField('reseller', "Reseller", 'link', 1030, '', 'facture', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('reseller', "Reseller", 'link', 1030, '', 'facture', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax125'));
 		$resultx=$extrafields->addExtraField('delayautopayment', "DelayAutomaticPayment", 'date', 1035, '', 'facture', 0, 0, '', '', 1, '', -1, 'DelayAutomaticPaymentDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('invoicepaymentdisputed', "InvoicePaymentDisputed", 'boolean', 1040, '', 'facture', 0, 0, '', '', 1, '', -1, 'InvoicePaymentDisputedDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 

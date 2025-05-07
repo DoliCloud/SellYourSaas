@@ -149,10 +149,12 @@ a.btnalreadyanaccount {
 }
 .portlet {
     border: 1px solid #ddd;
+    border-radius: 6px;
     padding: 20px;
 	margin-bottom: 30px;
 	box-shadow: 0px 1px 5px #ddd;
 	min-height: 220px;
+	background-color: #fff;
 }
 
 .portlet input[type='submit'] {
@@ -260,6 +262,9 @@ nav.navbar.bg-inverse {
     z-index: 10;
 }
 
+.page-content-wrapper {
+	margin-top: 20px;
+}
 .portlet-title {
     padding-bottom: 10px;
 }

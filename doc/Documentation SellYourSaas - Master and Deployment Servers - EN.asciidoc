@@ -6535,7 +6535,7 @@ You can exclude error by adding a line into */etc/clamav/clamd.conf*
 
 [source,bash]
 ---------------
-StructuredMinCreditCardCount 10
+StructuredMinCreditCardCount 50
 ---------------
 
 See https://github.com/Cisco-Talos/clamav/blob/main/etc/clamd.conf.sample for explanation of all options.
@@ -6544,7 +6544,7 @@ Restart the clamd daemon and check again with clamconf that the new parameter is
 
 [source,bash]
 ---------------
-/etc/spamassassin# systemctl restart clamav-daemon
+systemctl restart clamav-daemon
 clamconf
 ---------------
 
