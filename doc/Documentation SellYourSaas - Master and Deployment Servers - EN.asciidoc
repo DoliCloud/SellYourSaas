@@ -5409,7 +5409,7 @@ Into field *Dir with dump files*
 __DOL_DATA_ROOT__/sellyoursaas/packages/__PACKAGEREF__
 ---------------
 
-(With this value, you can then upload the dump file to load in the *Attachments* tab)
+(With this value, you can upload the SQL dump file to load into the *Attachments* tab)
 
 
 Into field *Template fo cron file*
