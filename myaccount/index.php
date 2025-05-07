@@ -2267,6 +2267,12 @@ $head.='<!-- Bootstrap core CSS -->
 <link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">
 <link href="dist/css/myaccount.css" type="text/css" rel="stylesheet">
 <link href="dist/css/stripe.css" type="text/css" rel="stylesheet">';
+
+if (getDolGlobalString('SELLYOURSAAS_EXTCSS')) {
+	$customcss=getDolGlobalString('SELLYOURSAAS_EXTCSS');
+	$head.='<link href="'.$customcss.'" type="text/css" rel="stylesheet">';
+}
+
 $head.="
 <script>
 var select2arrayoflanguage = {
