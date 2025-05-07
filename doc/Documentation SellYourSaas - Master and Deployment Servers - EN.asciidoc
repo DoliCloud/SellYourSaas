@@ -5307,8 +5307,9 @@ journalctl --since="YYYY-MM-DD HH:MM:SS" _UID=1001
 
 Go into menu *SellYourSaas - Packages* to create your new package.
 
-For example, to deploy an application like Dolibarr, with sources in directory *documents/sellyoursaas/git*, enter the values of the following fields (Note: dunder variables __XXX__ are reserved keywords that will be replaced by SellYourSaas process that uses those fields):
 
+For example, to deploy an application like Dolibarr, with sources in directory *documents/sellyoursaas/git*, this is a possible setup
+for each fields (Note: under variables __XXX__ are reserved keywords that will be replaced by SellYourSaas process that uses those fields):
 
 Into field *Dir with sources 1*
 
@@ -5411,7 +5412,7 @@ __DOL_DATA_ROOT__/sellyoursaas/packages/__PACKAGEREF__
 (With this value, you can then upload the dump file to load in the *Attachments* tab)
 
 
-Into field *template fo cron file*
+Into field *Template fo cron file*
 
 [source,bash]
 ---------------
@@ -5422,18 +5423,27 @@ __INSTALLMINUTES__ __INSTALLHOURS__ * * * __INSTANCEDIR__/scripts/cron/cron_run_
 ---------------
 
 
-Into field *shell after*
+Into field *Shell after deployment*
 
 [source,bash]
 ---------------
-touch __INSTANCEDIR__/documents/install.lock;
-chown __OSUSERNAME__:__OSUSERNAME__ __INSTANCEDIR__/documents/install.lock
+touch __INSTANCEDIR__/documents/install.lock; 
+touch __INSTANCEDIR__/documents/installmodules.lock; 
+chown -R __OSUSERNAME__:__OSUSERNAME__ __INSTANCEDIR__/documents;
 chmod -R a-w __INSTANCEDIR__/htdocs
 chmod -R u+w __INSTANCEDIR__/htdocs/custom
 ---------------
 
 
-Into field *sql after*
+Into field *Shell after switch to paying mode*
+
+[source,bash]
+---------------
+rm -f __INSTANCEDIR__/documents/installmodules.lock;
+---------------
+
+
+Into field *Sql after deployment*
 
 [source,bash]
 ---------------
@@ -5473,12 +5483,25 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURIT
 
 Change the value 18.0.0 with version of the image you will build to deploy.
 
-Into field *sql to reset password*
+
+Into field *Sql to reset password of a deployed instance user*
 
 [source,bash]
 ---------------
 UPDATE llx_user set pass='__NEWUSERPASSWORD__', pass_crypted = '__NEWUSERPASSWORDCRYPTED__' where rowid = __REMOTEUSERID__;
 ---------------
+
+
+Into field *Sql after switch to paid *
+
+[source,bash]
+---------------
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_UPLOAD_DOC', 0, '10000', 'chaine', 0);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_LIMIT_SENDBYDAY', 0, '250', 'chaine', 1);
+REPLACE INTO llx_const (name, entity, value, type, visible) values('MAILING_LIMIT_SENDBYCLI', 0, '250', 'chaine', 1);
+---------------
+
+
 
 === Setup of Services
 
