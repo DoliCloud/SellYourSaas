@@ -202,7 +202,7 @@ class modSellYourSaas extends DolibarrModules
 
 		// Add here list of permission defined by an id, a label, a boolean and two constant strings.
 		$this->rights[$r][0] = 101051; 				// Permission id (must not be already used)
-		$this->rights[$r][1] = 'See SellYourSaas Home area';	// Permission label
+		$this->rights[$r][1] = 'See SellYourSaas Home area (read statistics, list of servers)';	// Permission label
 		$this->rights[$r][2] = 'r'; 					// Permission by default for new user (0/1)
 		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'liens';				// In php code, permission will be checked by test if ($user->rights->permkey->level1->level2)
