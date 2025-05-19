@@ -226,20 +226,21 @@ class SellYourSaasUtils
 
 									$invoice->context['actionmsg'] = 'Invoice id = '.$invoice->id.' validated by doValidateDraftInvoices()';
 
-									$result = $invoice->validate($user);
+									$result = $invoice->validate($user);	// Validate invoice (does not regenerate the PDF)
 
 									if ($result > 0) {
 										$draftinvoiceprocessed[$invoice->id] = $invoice->ref;
 
-										// Now we build the PDF invoice
+										// Now we build/regenerate the PDF invoice
 										$hidedetails = (GETPOST('hidedetails', 'int') ? GETPOST('hidedetails', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS') ? 1 : 0));
 										$hidedesc = (GETPOST('hidedesc', 'int') ? GETPOST('hidedesc', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_DESC') ? 1 : 0));
 										$hideref = (GETPOST('hideref', 'int') ? GETPOST('hideref', 'int') : (getDolGlobalString('MAIN_GENERATE_DOCUMENTS_HIDE_REF') ? 1 : 0));
 
 										$model_pdf = $invoice->model_pdf;
+
 										$ret = $invoice->fetch($invoice->id); // Reload to get new records
 
-										dol_syslog("GETPOST('lang_id','aZ09')=".GETPOST('lang_id', 'aZ09')." invoice->thirdparty->default_lang=".(is_object($invoice->thirdparty) ? $invoice->thirdparty->default_lang : 'invoice->thirdparty not defined')." newlang=".$newlang." outputlangs->defaultlang=".$outputlangs->defaultlang);
+										dol_syslog("We regenerate the document (should also update ecm index + last_main_doc) : id=".$invoice->id." GETPOST('lang_id','aZ09')=".GETPOST('lang_id', 'aZ09')." invoice->thirdparty->default_lang=".(is_object($invoice->thirdparty) ? $invoice->thirdparty->default_lang : 'invoice->thirdparty not defined')." newlang=".$newlang." outputlangs->defaultlang=".$outputlangs->defaultlang);
 
 										$result = $invoice->generateDocument($model_pdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
 									} else {

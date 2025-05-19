@@ -1,4 +1,8 @@
 
+-- Detect pb of field last_main_doc not updated after a validatoin + generation of doc by doValidateDraftInvoices
+select rowid, ref, last_main_doc, fk_mode_reglement, type, fk_statut, datec, datef, date_valid, tms from llx_facture where last_main_doc like '%PROV%';
+
+
 -- To move user elements onto another user
 update llx_societe set fk_user_creat = newid where fk_user_creat = oldid;
 update llx_societe set fk_user_modif = newid where fk_user_modif = oldid;
