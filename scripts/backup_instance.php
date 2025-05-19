@@ -665,11 +665,11 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 			// Rename dump file with a constant name file
 			if (command_exists("zstd") && "x$usecompressformatforarchive" == "xzstd") {
-				dol_move($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst', $dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.zst');
+				dol_move($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.zst', $dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.zst', '0', 1, 0, 0);
 				// Delete file with same extensions but using old version name
 				dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.zst');
 			} else {
-				dol_move($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz', $dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.gz');
+				dol_move($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.$prefixdumptemp.'.sql.gz', $dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_ok.sql.gz', '0', 1, 0, 0);
 				// Delete file with same extensions but using old version name
 				dol_delete_file($dirroot.'/'.$login.'/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now('gmt'), '%d', 'gmt').'.sql.gz');
 			}
