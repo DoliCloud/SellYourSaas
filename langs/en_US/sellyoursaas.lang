@@ -929,3 +929,5 @@ NewerVersionAvailable=A new version of the application is available. The current
 NbOfPendingReseller=Number of pending reseller
 SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_MEMBERS=Max number of members for free use by non profit organization
 SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES=Max number of salaries for free use by non profit organization
+SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE=Allow the selection of the service from the registration page
+SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICEHelp=Allow the selection of the service from the registration page
