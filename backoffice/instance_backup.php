@@ -224,7 +224,7 @@ $moveinstancestringtoshow .= "# cp /etc/skel/.ssh/authorized_keys_support /home/
 //$moveinstancestringtoshow .= "# - If some cert files read is denied, do this on ".getDomainFromURL($object->ref_customer, 2).":\n";
 //$moveinstancestringtoshow .= "#   gpasswd -a admin www-data\n";
 $moveinstancestringtoshow .= "su - admin\n";
-$moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/master_move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirm|confirmredirect|confirmmaintenance)'."\n";
+$moveinstancestringtoshow .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/master_move_instance.php '.$object->ref_customer.' '.$tmparray[0].'.withNEW.'.getDomainFromURL($object->ref_customer, 1).' (test|confirmredirect|confirmmaintenance)'."\n";
 // Remove read in certif file.
 //$moveinstancestringtoshow .= "# On src server: gpasswd -d admin www-data\n";
 
