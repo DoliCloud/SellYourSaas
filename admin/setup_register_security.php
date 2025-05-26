@@ -289,6 +289,7 @@ print '<td></td>';
 print '</tr>';
 
 // Option to allow the selection of the service
+/* To do this, just use several servive keys as parameter plan= of the register URL
 print '<tr class="oddeven"><td>';
 print $form->textwithpicto($langs->trans("SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE"), $langs->trans("SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICEHelp"));
 print '</td>';
@@ -305,6 +306,7 @@ if ($conf->use_javascript_ajax) {
 print '</td>';
 print '<td></td>';
 print '</tr>';
+*/
 
 // Set the default product to use when registering a new instance
 foreach ($arrayofsuffixfound as $service => $suffix) {

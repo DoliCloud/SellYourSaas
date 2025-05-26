@@ -217,10 +217,11 @@ if ($ispaid) {
 
 $tmparray = explode('.', $object->ref_customer);
 
-$moveinstancestringtoshow .= "# First, check that the master server can connect with ssh and user admin on the source instance server with:\n";
+$moveinstancestringtoshow .= "# First, check that the master server can connect with ssh and user admin to the source instance server with:\n";
 $moveinstancestringtoshow .= "# ssh admin@".getDomainFromURL($object->ref_customer, 2)." wc /etc/apache2/with.sellyoursaas.com*.*\n";
 $moveinstancestringtoshow .= "# If ssh connect fails, do this on ".getDomainFromURL($object->ref_customer, 2).":\n";
 $moveinstancestringtoshow .= "# cp /etc/skel/.ssh/authorized_keys_support /home/admin/.ssh/authorized_keys_support; chown admin:admin /home/admin/.ssh/authorized_keys_support\n";
+$moveinstancestringtoshow .= "# once ok, you can run the move command.\n";
 //$moveinstancestringtoshow .= "# - If some cert files read is denied, do this on ".getDomainFromURL($object->ref_customer, 2).":\n";
 //$moveinstancestringtoshow .= "#   gpasswd -a admin www-data\n";
 $moveinstancestringtoshow .= "su - admin\n";
@@ -610,7 +611,7 @@ if ($restorestringfromarchive) {
 // Duplicate an instance into another instance (already existing instance)
 if ($restorestringfrombackupshort) {
 	$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
-	print '<span class="fa fa-database secondary"></span><span class="fa fa-database"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(to run by admin on master server)</span><br>';
+	print '<span class="fa fa-database secondary"></span><span class="fa fa-database opacitymedium"></span> -> <span class="fa fa-database secondary"></span><span class="fa fa-database secondary paddingright"></span> Duplicate an instance into another instance (already existing instance) <span class="opacitymedium">(to run by admin on master server)</span><br>';
 	print '<textarea name="restorestringfromarchive" id="restorestringfromarchive" class="centpercent" spellcheck="false" rows="'.ROWS_2.'">';
 	print $backupstringtoshow."\n";
 	print $restorestringtoshow;
