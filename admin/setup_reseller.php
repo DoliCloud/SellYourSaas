@@ -178,11 +178,11 @@ print '<input type="hidden" name="action" value="set">';
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
-print '<td>'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
+print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
 print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM").'</td>';
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM"), 'Set to yes if you want your customers being able to apply to become resellers').'</td>';
 print '<td>';
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', array(), null, 0, 0, 1);
@@ -195,7 +195,7 @@ if ($conf->use_javascript_ajax) {
 }
 //print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
 print '</td>';
-print '<td><span class="opacitymedium small">Set to yes if you want your customers being able to apply to become resellers</span></td>';
+print '<td><span class="opacitymedium small"></span></td>';
 print '</tr>';
 
 $allowresellerprogram = getDolGlobalInt('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM');

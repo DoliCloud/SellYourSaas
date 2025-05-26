@@ -154,7 +154,7 @@ print '<input type="hidden" name="action" value="set">';
 print '<div class="div-table-responsive-no-min">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
-print '<td>'.$langs->trans("Parameters").'</td><td>'.$langs->trans("Value").'</td>';
+print '<td>'.$langs->trans("Parameters").'</td><td></td>';
 print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 print "</tr>\n";
 
