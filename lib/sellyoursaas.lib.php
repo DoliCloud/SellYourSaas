@@ -421,7 +421,7 @@ function getRootUrlForAccount($object)
  */
 function sellyoursaas_admin_prepare_head()
 {
-	global $langs, $conf, $user;
+	global $langs, $conf;
 
 	$langs->load("sellyoursaas");
 	$h = 0;
@@ -455,6 +455,11 @@ function sellyoursaas_admin_prepare_head()
 	$head[$h][0] = "setup_endpoints.php";
 	$head[$h][1] = $langs->trans("Endpoints");
 	$head[$h][2] = "setup_endpoints";
+	$h++;
+
+	$head[$h][0] = "setup_supervision.php";
+	$head[$h][1] = $langs->trans("Supervision");
+	$head[$h][2] = "setup_supervision";
 	$h++;
 
 	$head[$h][0] = "setup_other.php";
