@@ -532,7 +532,7 @@ if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON') || getDolGlobalString('SELL
 }
 
 // Key to sign message on each deployment servers
-print '<tr class="liste_titre"><td colspan="3">Message to deployment servers (Deprecated. Use instead a different key on each deployment server)</td></tr>';
+print '<tr class="liste_titre"><td colspan="3">Security for communication from master to deployment servers (Deprecated. Use instead a different key on each deployment server)</td></tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY").'</td>';
 print '<td>';
