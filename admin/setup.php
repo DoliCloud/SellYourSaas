@@ -136,16 +136,11 @@ if ($action == 'set') {
 		}
 		dolibarr_set_const($db, "DOLICLOUD_SCRIPTS_PATH", GETPOST("DOLICLOUD_SCRIPTS_PATH"), 'chaine', 0, '', $conf->entity);
 
-		foreach ($arrayofsuffixfound as $suffix) {
-			dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_PRODUCT".$suffix, GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT".$suffix), 'chaine', 0, '', $conf->entity);
-		}
-		//dolibarr_set_const($db,"SELLYOURSAAS_DEFAULT_PRODUCT_FOR_USERS",GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT_FOR_USERS"),'chaine',0,'',$conf->entity);
-
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_PRODUCT_CATEG", GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT_CATEG"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG", GETPOST("SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG"), 'chaine', 0, '', $conf->entity);
 
-		dolibarr_set_const($db, "SELLYOURSAAS_REFS_URL", GETPOST("SELLYOURSAAS_REFS_URL"), 'chaine', 0, '', $conf->entity);
+		//dolibarr_set_const($db, "SELLYOURSAAS_REFS_URL", GETPOST("SELLYOURSAAS_REFS_URL"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_ACCOUNT_URL", GETPOST("SELLYOURSAAS_ACCOUNT_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
 		foreach ($arrayofsuffixfound as $suffix) {
@@ -337,21 +332,6 @@ print '</td>';
 print '<td><span class="opacitymedium small wordbreak">'.dol_buildpath('sellyoursaas/scripts').'</span></td>';
 print '</tr>';
 
-foreach ($arrayofsuffixfound as $service => $suffix) {
-	print '<!-- suffix = '.$suffix.' -->'."\n";
-
-	print '<tr class="oddeven"><td>'.($service ? $service.' - ' : '').$langs->trans("DefaultProductForInstances").'</td>';
-	print '<td>';
-	$constname = 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix;
-	print '<!-- constname = '.$constname.' -->';
-	$defaultproductid = getDolGlobalString($constname);
-	print img_picto('', 'product', 'class="pictofixedwidth"');
-	print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix, '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'minwidth175 maxwidth500 widthcentpercentminusx');
-	print '</td>';
-	print '<td><span class="opacitymedium small">My SaaS service for instance</span></td>';
-	print '</tr>';
-}
-
 /*print '<tr class="oddeven"><td>'.$langs->trans("DefaultProductForUsers").'</td>';
 print '<td>';
 $defaultproductforusersid=getDolGlobalString('SELLYOURSAAS_DEFAULT_PRODUCT_FOR_USERS');
@@ -379,6 +359,7 @@ print '</td>';
 print '<td><span class="opacitymedium small">SaaS Customers</span></td>';
 print '</tr>';
 
+/*
 print '<tr class="oddeven"><td>'.$langs->trans("RefsUrl", DOL_DOCUMENT_ROOT.'/sellyoursaas/git');
 print '</td>';
 print '<td>';
@@ -386,6 +367,7 @@ print '<input class="minwidth300" type="text" name="SELLYOURSAAS_REFS_URL" value
 print '</td>';
 print '<td><span class="opacitymedium small wordbreak">https://admin.mysaasdomainname.com/git</span></td>';
 print '</tr>';
+*/
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasAccountUrl").'</td>';
 print '<td>';

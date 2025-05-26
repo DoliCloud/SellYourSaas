@@ -323,6 +323,7 @@ class modSellYourSaas extends DolibarrModules
 			'user'=>0);
 		$r++;
 
+		/*
 		$this->menu[$r]=array(
 			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_packages',
 			'type'=>'left',
@@ -337,7 +338,7 @@ class modSellYourSaas extends DolibarrModules
 			'target'=>'_refs',
 			'user'=>0);
 		$r++;
-
+		*/
 
 		// Products - Services
 		$this->menu[$r]=array(

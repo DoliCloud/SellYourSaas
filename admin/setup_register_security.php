@@ -184,6 +184,10 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, "SELLYOURSAAS_SSH2_HOSTKEYALGO", GETPOST("SELLYOURSAAS_SSH2_HOSTKEYALGO", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_SSH2_KEXALGO", GETPOST("SELLYOURSAAS_SSH2_KEXALGO", 'alpha'), 'chaine', 0, '', $conf->entity);
+
+		foreach ($arrayofsuffixfound as $suffix) {
+			dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_PRODUCT".$suffix, GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT".$suffix), 'chaine', 0, '', $conf->entity);
+		}
 	}
 	if (! $error) {
 		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
@@ -284,6 +288,84 @@ print '</td>';
 print '<td></td>';
 print '</tr>';
 
+// Option to allow the selection of the service
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE"), $langs->trans("SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICEHelp"));
+print '</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE', array(), null, 0, 0, 1);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
+// Set the default product to use when registering a new instance
+foreach ($arrayofsuffixfound as $service => $suffix) {
+	print '<!-- suffix = '.$suffix.' -->'."\n";
+
+	print '<tr class="oddeven"><td>'.($service ? $service.' - ' : '').$langs->trans("DefaultProductForInstances").'</td>';
+	print '<td>';
+	$constname = 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix;
+	print '<!-- constname = '.$constname.' -->';
+	$defaultproductid = getDolGlobalString($constname);
+	print img_picto('', 'product', 'class="pictofixedwidth"');
+	print $form->select_produits($defaultproductid, 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix, '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'minwidth175 maxwidth500 widthcentpercentminusx');
+	print '</td>';
+	print '<td><span class="opacitymedium small">My SaaS service for instance</span></td>';
+	print '</tr>';
+}
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIP").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIP" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIP', 20).'">';
+print '</td>';
+print '<td><span class="opacitymedium small">20</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR', 5).'">';
+print '</td>';
+print '<td><span class="opacitymedium small">5</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLEL"), $langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLELDesc")).'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPARALLEL" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 4).'">';
+print '</td>';
+print '<td><span class="opacitymedium small">4</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT" value="'.getDolGlobalInt('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', 4).'">';
+print '</td>';
+print '<td><span class="opacitymedium small">4</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD").'</td>';
+print '<td>';
+print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or __APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
+print '</tr>';
+
+if (!getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') || getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') != 'password_hash') {
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION").'</td>';
+	print '<td>';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.getDolGlobalString('SELLYOURSAAS_SALTFORPASSWORDENCRYPTION').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small"></span></td>';
+	print '</tr>';
+}
+
 
 
 // Google recaptcha
@@ -335,6 +417,7 @@ if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
 	print '</tr>';
 }
 
+
 // Enable DisposableEmail service
 print '<tr class="liste_titre">';
 print '<td>DisposableEmail (free)</td>';
@@ -366,6 +449,7 @@ if (getDolGlobalString('SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED')) {
 	print '</tr>';
 }
 
+
 // Enable GetIPIntel
 print '<tr class="liste_titre">';
 print '<td>GetIPIntel (free)</td>';
@@ -396,6 +480,7 @@ if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON')) {
 	print '<td><span class="opacitymedium small">myemail@email.com</span></td>';
 	print '</tr>';
 }
+
 
 // Enable IPQualityScore
 print '<tr class="liste_titre">';
@@ -444,49 +529,8 @@ if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON') || getDolGlobalString('SELL
 	print '</tr>';
 }
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIP").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIP" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIP', 20).'">';
-print '</td>';
-print '<td><span class="opacitymedium small">20</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIPPERHOUR', 5).'">';
-print '</td>';
-print '<td><span class="opacitymedium small">5</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLEL"), $langs->trans("SELLYOURSAAS_MAXDEPLOYMENTPARALLELDesc")).'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAXDEPLOYMENTPARALLEL" value="'.getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 4).'">';
-print '</td>';
-print '<td><span class="opacitymedium small">4</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT" value="'.getDolGlobalInt('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', 4).'">';
-print '</td>';
-print '<td><span class="opacitymedium small">4</span></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_HASHALGOFORPASSWORD").'</td>';
-print '<td>';
-print '<input type="text" name="SELLYOURSAAS_HASHALGOFORPASSWORD" value="'.getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">\'sha1md5\', \'sha256\', \'password_hash\', ...<br>Useless if you don\'t use the substitution key __APPPASSWORD0__ in package definition (for example if you used __APPPASSWORDMD5__ or __APPPASSWORDSHA256__ or __APPPASSWORDPASSWORD_HASH__ instead)</span></td>';
-print '</tr>';
-
-if (!getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') || getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') != 'password_hash') {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION").'</td>';
-	print '<td>';
-	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_SALTFORPASSWORDENCRYPTION" value="'.getDolGlobalString('SELLYOURSAAS_SALTFORPASSWORDENCRYPTION').'">';
-	print '</td>';
-	print '<td><span class="opacitymedium small"></span></td>';
-	print '</tr>';
-}
+// Key to sign message on each deployment servers
+print '<tr class="liste_titre"><td colspan="3">Message to deployment servers (Deprecated. Use instead a different key on each deployment server)</td></tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY").'</td>';
 print '<td>';
@@ -501,7 +545,8 @@ print '</td>';
 print '<td><span class="opacitymedium small">Define a value to add a security signature of messages. This key must also be added into all deployment servers into file /etc/sellyoursaas.conf on key "signature_key=..."</span></td>';
 print '</tr>';
 
-print '<tr class="liste_titre"><td colspan="3">SSH2</td></tr>';
+// SSH2 for master to deployment connection
+print '<tr class="liste_titre"><td colspan="3">SSH2 (for master to deployment connection)</td></tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SSH2_HOSTKEYALGO").'</td>';
 print '<td>';
