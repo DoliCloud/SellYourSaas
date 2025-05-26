@@ -3175,7 +3175,11 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 							print $langs->trans("XDaysAfterEndOfPeriodInstanceSuspended", $contract->ref_customer, abs($delayindays), $delaybeforeundeployment);
 						}
 					} else {
-						print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
+						if (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+							print $langs->trans("BeforeEndOfPeriodInstanceSuspendedFree", $contract->ref_customer, $delaybeforeundeployment);
+						} else {
+							print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
+						}
 					}
 					if (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
 						// TODO LMR Add link to renew its free instance (same link than the one received by email at end of trial)...
