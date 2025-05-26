@@ -205,9 +205,9 @@ if (empty($newinstance) || empty($mode)) {
 	print "Move an existing instance from an old server to a new server (with target instance not existing yet).\n";
 	print "Script must be ran from the master server with login admin.\n";
 	print "\n";
-	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirm|confirmmaintenance|confirmredirect) [MYPRODUCTREF] [-y]\n";
+	print "Usage: ".$script_file." oldinstance.withX.mysaasdomainname.com newinstance.withY.mysaasdomainname.com (test|confirmmaintenance|confirmredirect) [MYPRODUCTREF] [-y]\n";
 	print "Mode is: test                test mode (nothing is done).\n";
-	print "         confirm             real move of the instance (deprecated, use confirmmaintenance or confirmredirect).\n";
+	//print "         confirm             real move of the instance (deprecated, use confirmmaintenance or confirmredirect).\n";
 	print "         confirmmaintenance  real move and replace old instance with a definitive message 'Suspended. Instance has been moved.'.\n";
 	print "         confirmredirect     real move with a mesage 'Move in progress' during transfer, and then, switch old instance into a redirect instance.\n";
 	print "MYPRODUCTREF can be set to force a new hosting application service.\n";

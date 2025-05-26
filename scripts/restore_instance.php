@@ -411,7 +411,7 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 		$fromusername = $object->username_os;
 		$fromdbname = $object->database_db;
 	}
-	
+
 	$command = 'chown -R admin /tmp/restore_instance/'.$fromusername;
 	$param = array();
 	$fullcommand=$command." ".join(" ", $param);
@@ -602,19 +602,19 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$newpasswordbase = str_replace(array('"','`'), array('\"','\`'), $object->password_db);
 	$newdatabasedb = $object->database_db;
 	$utils = new Utils($db);
-	
+
 	// Drop llx_accounting_account (if it exists)
 	$fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 	$output=array();
 	$return_var=0;
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropa."\n";
-	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
 		$outputfile = $conf->admin->dir_temp.'/out.tmp';
 		$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
-	
+
 		$return_var = $resultarray['result'];
 		$content_grabbed = $resultarray['output'];
-	
+
 		print $content_grabbed."\n";
 		// If table already not exist, return_var is 1
 		// If technical error, return_var is also 1, so we disable this test
@@ -623,19 +623,19 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 			exit(-2);
 		}*/
 	}
-	
+
 	// Drop llx_accounting_system (if it exists)
 	$fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
 	$output=array();
 	$return_var=0;
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropb."\n";
-	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
 		$outputfile = $conf->admin->dir_temp.'/out.tmp';
 		$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
-	
+
 		$return_var = $resultarray['result'];
 		$content_grabbed = $resultarray['output'];
-	
+
 		print $content_grabbed."\n";
 		// If table already not exist, return_var is 1
 		// If technical error, return_var is also 1, so we disable this test
