@@ -73,11 +73,16 @@ if ($action == 'fileverification') {
 		$pathinfo = pathinfo($upload_dir.'/'.$filename);
 		if ($types[$key] == 'application/gzip') {
 			if (pathinfo($pathinfo['filename'])['extension'] == "sql") {
-				$contents=file_get_contents($upload_dir.'/'.$filename);
-				$uncompressed = gzuncompress($contents);
+				$buffer_size = 4096;
+				$gzfile = gzopen($upload_dir.'/'.$filename, 'rb');
 				$fileuncompressed = fopen($upload_dir.'/'.$pathinfo['filename'], 'wb');
-				fwrite($fileuncompressed, $uncompressed);
-				fclose($fp);
+				while (!gzeof($gzfile)) {
+					// Read buffer-size bytes
+					// Both fwrite and gzread and binary-safe
+					fwrite($fileuncompressed, gzread($gzfile, $buffer_size));
+				}
+				fclose($fileuncompressed);
+				gzclose($gzfile);
 				$filetoverify["sql"] = $pathinfo['filename'];
 			} else {
 				if (!file_exists($upload_dir.'/'.$pathinfo['filename'])) {
@@ -92,11 +97,17 @@ if ($action == 'fileverification') {
 		} elseif ($types[$key] == 'application/x-bzip') {
 			$extensionfile = pathinfo($pathinfo['filename'])['extension'];
 			if ($extensionfile == "sql") {
-				$contents = file_get_contents($upload_dir.'/'.$filename);
-				$uncompressed = bzdecompress($contents);
-				$fileuncompressed = fopen($upload_dir.'/'.$pathinfo['filename'], 'wb');
-				fwrite($fileuncompressed, $uncompressed);
-				fclose($fp);
+				$buffer_size = 4096;
+				//$contents = file_get_contents($upload_dir.'/'.$filename);
+				$bzfile = bzopen($upload_dir.'/'.$filename, 'r');
+				$fileuncompressed = fopen($upload_dir.'/'.$pathinfo['filename'], 'w');
+				while (!feof($bzfile)) {
+					// Read buffer-size bytes
+					// Both fwrite and bzread
+					fwrite($fileuncompressed, bzread($bzfile, $buffer_size));
+				}
+				fclose($fileuncompressed);
+				bzclose($bzfile);
 				$filetoverify["sql"] = $pathinfo['filename'];
 			} else {
 				if (!file_exists($upload_dir.'/'.$pathinfo['filename'])) {
@@ -127,7 +138,8 @@ if ($action == 'fileverification') {
 		}
 	}
 	if (empty($error)) {
-		$filecontent = file_get_contents($upload_dir.'/'.$filetoverify["sql"]);
+		$filename = $upload_dir.'/'.$filetoverify["sql"];
+		$filecontent = file_get_contents($filename);
 		if (empty(preg_match('/'.preg_quote('-- Dump completed').'/i', $filecontent))) {
 			$error = array("error"=>array("errorcode" =>"ErrorOnSqlDumpForge"));
 		}
@@ -673,7 +685,7 @@ if ($action == 'view') {
 	jQuery(document).ready(function() {
 		var flow = new Flow({
 			target:"source/core/ajax/flowjs-server.php",
-			query:{module:"sellyoursaas",upload_dir:"'.$upload_dir.'"},
+			query:{module:"sellyoursaas",upload_dir:"'.$upload_dir.'",token:"'.currentToken().'", action:"upload"},
 			testChunks:false
 		});
 		if(flow.support){
