@@ -133,6 +133,12 @@ $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 $productid=GETPOST('service', 'int');
 $productref=(GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : '');
 $defaultproduct = '';
+
+$planarray = preg_split('/(,|;)/',$plan);
+if (!empty($planarray[1])) {
+	$productref = 'array';
+}
+
 if (empty($productid) && empty($productref)) {
 	$productref = $plan;
 	if (empty($productref)) {
@@ -179,7 +185,7 @@ $tmpproduct = new Product($db);
 $tmppackage = new Packages($db);
 
 // Load main product
-if ($productref != 'none') {
+if ($productref != 'none' && $productref != 'array') {
 	$result = $tmpproduct->fetch($productid, $productref);
 	if (empty($tmpproduct->id)) {
 		print 'Service/Plan (Product id / ref) '.$productid.' / '.$productref.' was not found.';
@@ -534,6 +540,25 @@ if ($reshook == 0) {
 			  <input type="hidden" name="disablecustomeremail" value="<?php echo dol_escape_htmltag($disablecustomeremail); ?>" />
 			  <!-- _SESSION['dol_loginsellyoursaas'] = <?php echo(empty($_SESSION['dol_loginsellyoursaas']) ? '' : $_SESSION['dol_loginsellyoursaas']); ?> -->
 
+			<?php
+			if ($productref == 'array') {
+				print '<section id="enterPlanPackage">';
+				print '<div class="fld select-plan required">';
+				print '<label class="control-label" for="plan">'.$langs->trans("ChooseAProductForYourApplication").'</label>';
+				print '<div class="control">';
+				print '<select required id="planselect" name="plan">';
+				print '<option>&nbsp;</option>';
+				foreach ($planarray as $key => $planref) {
+					print '<option>'.$planref.'</option>';
+				}
+				print '</select>';
+				print '</div>';
+				print '</div>';
+				print '</section><br>';
+				print ajax_combobox("planselect");
+			}
+
+			?>
 			  <section id="enterUserAccountDetails">
 
 
