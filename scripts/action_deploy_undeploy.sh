@@ -752,7 +752,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
 
 			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
 				mkdir -p "/tmp/cache$dirwithsources1"
 				#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
 
@@ -814,7 +814,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
 
 			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
 				mkdir -p "/tmp/cache$dirwithsources2"
 				#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
 
@@ -876,7 +876,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
 
 			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
 				mkdir -p "/tmp/cache$dirwithsources3"
 				#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
 
