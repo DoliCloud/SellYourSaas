@@ -749,9 +749,14 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					datecache=0
 				fi
 			fi
-			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache"
+			
+			datecachets=$(date -d "${datecache}" +%s)
+			now=$(date +%s)
+			datecacheage=$(( (now - datecachets) / 86400 ))
+			
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache - age of datecache=$datecacheage"
 
-			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
+			if [ $datecache -eq 0 -o $datesource -gt $datecache -o "$datecacheage" -gt 7 ]; then
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
 				mkdir -p "/tmp/cache$dirwithsources1"
 				#echo "cp -r $dirwithsources1/. /tmp/cache$dirwithsources1"
@@ -811,9 +816,14 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					datecache=0
 				fi
 			fi
-			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache"
+			
+			datecachets=$(date -d "${datecache}" +%s)
+			now=$(date +%s)
+			datecacheage=$(( (now - datecachets) / 86400 ))
+			
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache - age of datecache=$datecacheage"
 
-			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
+			if [ $datecache -eq 0 -o $datesource -gt $datecache -o "$datecacheage" -gt 7 ]; then
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
 				mkdir -p "/tmp/cache$dirwithsources2"
 				#echo "cp -r $dirwithsources2/. /tmp/cache$dirwithsources2"
@@ -873,9 +883,14 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					datecache=0
 				fi
 			fi
-			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache"
+			
+			datecachets=$(date -d "${datecache}" +%s)
+			now=$(date +%s)
+			datecacheage=$(( (now - datecachets) / 86400 ))
+			
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache - age of datecache=$datecacheage"
 
-			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
+			if [ $datecache -eq 0 -o $datesource -gt $datecache -o "$datecacheage" -gt 7 ]; then
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
 				mkdir -p "/tmp/cache$dirwithsources3"
 				#echo "cp -r $dirwithsources3/. /tmp/cache$dirwithsources3"
