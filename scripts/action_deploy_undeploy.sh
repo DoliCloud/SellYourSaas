@@ -749,7 +749,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					datecache=0
 				fi
 			fi
-			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache"
 
 			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
@@ -811,7 +811,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					datecache=0
 				fi
 			fi
-			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache"
 
 			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
@@ -873,7 +873,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 					datecache=0
 				fi
 			fi
-			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource=$datesource datecache=$datecache"
+			echo `date +'%Y-%m-%d %H:%M:%S'`" datesource (archive on NFS dir)=$datesource - datecache (archive on local dir)=$datecache"
 
 			if [ $datecache -eq 0 -o $datesource -gt $datecache ]; then
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache does not exists or is too old, we recreate local cache from NFS dir"
