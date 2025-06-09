@@ -308,7 +308,7 @@ body:not(.bodylogin) {
 	padding-top: 60px; padding-bottom: 40px;
 }
 body.bodylogin {
-	padding-top: 0px;
+	padding-top: 0px !important;
 }
 
 body.register {
