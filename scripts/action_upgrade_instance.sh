@@ -262,18 +262,18 @@ if [[ "$mode" == "upgrade" ]];then
 			if [[ "x$targetdirwithsources1" != "x" ]]; then
 				mkdir -p $targetdirwithsources1
 				if [[ -f /tmp/cache$dirwithsources1.tar.zst ]]; then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 1. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 					tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/
 				else
 					echo "No cache file /tmp/cache$dirwithsources1.tar.zst found"; 
 					if [ -f /tmp/cache$dirwithsources1.tgz ]; then
-						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
+						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found for src 1. We use it with: tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
 						tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/
 					else
 						echo "No cache file /tmp/cache$dirwithsources1.tgz found"; 
 						# If local cache does not exists
 						if [ -f $dirwithsources1.tar.zst ]; then
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -I zstd -xf $dirwithsources1.tat.zst --directory $targetdirwithsources1/"
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found for src 1. We try with with remote archive with: tar -I zstd -xf $dirwithsources1.tat.zst --directory $targetdirwithsources1/"
 							tar -I zstd -xf $dirwithsources1.tar.zst --directory $targetdirwithsources1/
 						else
 							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources1 (".$dirwithsources1.tar.zst." not found)."
@@ -292,18 +292,18 @@ if [[ "$mode" == "upgrade" ]];then
 			if [[ "x$targetdirwithsources2" != "x" ]]; then
 				mkdir -p $targetdirwithsources2
 				if [[ -f /tmp/cache$dirwithsources2.tar.zst ]]; then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 2. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 					tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/
 				else
 					echo "No cache file /tmp/cache$dirwithsources2.tar.zst found"; 
 					if [ -f /tmp/cache$dirwithsources2.tgz ]; then
-						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
+						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found for src 2. We use it with: tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
 						tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/
 					else
 						echo "No cache file /tmp/cache$dirwithsources2.tgz found"; 
 						# If local cache does not exists
 						if [ -f $dirwithsources2.tar.zst ]; then
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found for src 2. We try with with remote archive with: tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 							tar -I zstd -xf $dirwithsources2.tar.zst --directory $targetdirwithsources2/
 						else
 							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources2 (".$dirwithsources2.tar.zst." not found)."
@@ -320,18 +320,18 @@ if [[ "$mode" == "upgrade" ]];then
 			if [[ "x$targetdirwithsources3" != "x" ]]; then
 				mkdir -p $targetdirwithsources3
 				if [[ -f /tmp/cache$dirwithsources3.tar.zst ]]; then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 3. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 					tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/
 				else
 					echo "No cache file /tmp/cache$dirwithsources3.tar.zst found"; 
 					if [ -f /tmp/cache$dirwithsources3.tgz ]; then
-						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
+						echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found for src 3. We use it with: tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
 						tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/
 					else
 						echo "No cache file /tmp/cache$dirwithsources3.tgz found"; 
 						# If local cache does not exists
 						if [ -f $dirwithsources3.tar.zst ]; then
-							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found. We try with with remote archive with: tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+							echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache not found for src 3. We try with with remote archive with: tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 							tar -I zstd -xf $dirwithsources3.tar.zst --directory $targetdirwithsources3/
 						else
 							echo `date +'%Y-%m-%d %H:%M:%S'`" Remote archive not found for dirwithsources3 (".$dirwithsources3.tar.zst." not found)."

@@ -779,11 +779,11 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			fi 
 
 			if [[ -f /tmp/cache$dirwithsources1.tar.zst ]]; then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 1. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 				tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/
 			else
 				if [ -f /tmp/cache$dirwithsources1.tgz ]; then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found for src 1. We use it with: tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/"
 					tar -xzf /tmp/cache$dirwithsources1.tgz --directory $targetdirwithsources1/
 				else
 					# If both remote and local cache does not exists. Should not happen
@@ -846,11 +846,11 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			fi 
 
 			if [[ -f /tmp/cache$dirwithsources2.tar.zst ]]; then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 2. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 				tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/
 			else
 				if [ -f /tmp/cache$dirwithsources2.tgz ]; then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found for src 2. We use it with: tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/"
 					tar -xzf /tmp/cache$dirwithsources2.tgz --directory $targetdirwithsources2/
 				else
 					# If both remote and local cache does not exists. Should not happen
@@ -913,11 +913,11 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			fi 
 
 			if [[ -f /tmp/cache$dirwithsources3.tar.zst ]]; then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 3. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 				tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/
 			else
 				if [ -f /tmp/cache$dirwithsources3.tgz ]; then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found. We use it with: tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" Local tgz cache found for src 3. We use it with: tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/"
 					tar -xzf /tmp/cache$dirwithsources3.tgz --directory $targetdirwithsources3/
 				else
 					# If both remote and local cache does not exists. Should not happen
