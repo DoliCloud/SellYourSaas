@@ -192,7 +192,7 @@ class SellYourSaasUtils
 										$publicnoteofcontract = str_replace('User Accounts', $outputlangs->trans("ListOfUsers"), $contract->array_options['options_commentonqty']);
 										$newpublicnote = dol_concatdesc($invoice->note_public, $publicnoteofcontract);
 
-										$invoice->context['actionmsg'] = 'Record modified to concat the non empty options_commentonqty into the public note by doValidateDraftInvoices()';
+										$invoice->context['actionmsgmore'] = 'Record modified to concat the non empty options_commentonqty into the public note by doValidateDraftInvoices()';
 
 										$invoice->update_note($newpublicnote, '_public');
 									}
@@ -224,7 +224,7 @@ class SellYourSaasUtils
 										}
 									}
 
-									$invoice->context['actionmsg'] = 'Invoice id = '.$invoice->id.' validated by doValidateDraftInvoices()';
+									$invoice->context['actionmsgmore'] = 'Invoice id = '.$invoice->id.' validated by doValidateDraftInvoices()';
 
 									$result = $invoice->validate($user);	// Validate invoice (does not regenerate the PDF)
 
@@ -3972,7 +3972,7 @@ class SellYourSaasUtils
 								}
 
 								if ($doupdate) {
-									$object->context['actionmsg'] = 'Update contract by '.getUserRemoteIP().' to modify the date of files lock, install and authorized keys during a refresh';
+									$object->context['actionmsgmore'] = 'Update contract by '.getUserRemoteIP().' to modify the date of files lock, install and authorized keys during a refresh';
 
 									$object->update($user);
 								}
@@ -5075,7 +5075,7 @@ class SellYourSaasUtils
 				$contract->array_options['options_commentonqty'] = $newcommentonqty;
 			}
 
-			$contract->context['actionmsg'] = 'sellyoursaasRemoteAction '.$remoteaction.': Update contract by '.(getUserRemoteIP() ? getUserRemoteIP() : 'localhost').' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
+			$contract->context['actionmsgmore'] = 'sellyoursaasRemoteAction '.$remoteaction.': Update contract by '.(getUserRemoteIP() ? getUserRemoteIP() : 'localhost').' to set options_latestresupdate_date'.($newcommentonqty ? ' and options_commentonqty' : '');
 
 			$result = $contract->update($user);
 			if ($result <= 0) {

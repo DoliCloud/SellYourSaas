@@ -50,7 +50,7 @@ Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and ht
 * Management of a reseller network. Dedicated reseller area (invoicing, customer account).
 * Infrastructure cost per instance <50 cents (Cost observed on the DoliCloud sales department providing Dolibarr ERP CRM).
 * ...
-     
+
 
 The project has been available as a community project since 2020 on GitHub: https://github.com/dolicloud/sellyoursaas
 
