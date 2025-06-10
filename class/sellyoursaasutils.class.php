@@ -439,6 +439,7 @@ class SellYourSaasUtils
 											$moreinheader = 'X-Dolibarr-Info: doValidateInvoice'."\r\n";
 											$addr_cc = '';
 											if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
+												dol_syslog("We add the recipient ".$invoice->thirdparty->array_options['options_emailccinvoice']." as CC to send the invoice", LOG_DEBUG);
 												$addr_cc = $invoice->thirdparty->array_options['options_emailccinvoice'];
 											}
 
