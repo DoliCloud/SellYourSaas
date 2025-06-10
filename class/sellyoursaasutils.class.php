@@ -2024,7 +2024,7 @@ class SellYourSaasUtils
 					}
 
 
-					// Send email to customer (Note: we are in batch to take payment by credit card. For payment mode that waits credit transfer, email sis sent by batch that validate invoice)
+					// Send email to customer (Note: we are in batch to take payment by credit card. For payment mode that waits credit transfer, email is sent by batch that validate invoice)
 					if ($sendemailtocustomer && $labeltouse) {
 						dol_syslog("* Send email with result of payment - ".$labeltouse);
 
@@ -2109,6 +2109,7 @@ class SellYourSaasUtils
 						$moreinheader = 'X-Dolibarr-Info: doTakeStripePaymentForThirdParty'."\r\n";
 						$addr_cc = '';
 						if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
+							dol_syslog("We add the recipient ".$invoice->thirdparty->array_options['options_emailccinvoice']." as CC to warn about invoice payment (credit card)", LOG_DEBUG);
 							$addr_cc = $invoice->thirdparty->array_options['options_emailccinvoice'];
 						}
 
