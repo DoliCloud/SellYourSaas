@@ -680,6 +680,8 @@ if [[ $testorconfirm == "confirm" ]]; then
 	rm -f /tmp/osusernamefound*
 	echo rm -f /tmp/idlistofdb
 	rm -f /tmp/idlistofdb
+	echo rm -f /tmp/cache
+	rm -f /tmp/cache
 fi
 
 
