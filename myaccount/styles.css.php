@@ -300,16 +300,22 @@ min-height: 0.01%;
 background-color: #ddd;
 }
 .tablecommission tr td { padding: 4px; }
-.group:before,.group:after {content: '';display: table;}.group:after {clear: both;}.group {zoom: 1;}ol,ul {list-style: none;}
+.group:before, .group:after {content: '';display: table;}
+.group:after {clear: both;}
+.group {zoom: 1;}ol,ul {list-style: none;}
 
 body:not(.bodylogin) {
 	padding-top: 60px; padding-bottom: 40px;
+}
+body.bodylogin {
+	padding-top: 0px !important;
 }
 
 body.register {
 background: #fff;
 }
-.container-fluid {margin: 0 20px;}table thead {background-color: #eee;}
+.container-fluid {margin: 0 20px;}
+table thead {background-color: #eee;}
 div.block {
 background-color: #fff;
 }
