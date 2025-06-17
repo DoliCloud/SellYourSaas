@@ -857,34 +857,35 @@ class modSellYourSaas extends DolibarrModules
 		include_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 		$extrafields = new ExtraFields($this->db);
 
-		// Product
+		// Extrafields for Services (Products)
 		$param=array('options'=>array(1=>1));
 		$resultx=$extrafields->addExtraField('separatorproduct', "SELLYOURSAAS_NAME", 'separate', 100, '', 'product', 0, 1, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$param=array('options'=>array('app'=>'Application','system'=>'System','option'=>'Option'));
+		$param=array('options'=>array('app' => 'Application', 'system' => 'System', 'option' => 'Option'));
 		$resultx=$extrafields->addExtraField('app_or_option', "AppOrOption", 'select', 110, '', 'product', 0, 0, '', $param, 1, '', 1, 'HelpOnAppOrOption', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('option_condition', "OptionCondition", 'varchar', 111, '200', 'product', 0, 0, '', $param, 1, '', 1, 'HelpOnOptionCondition', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('availabelforresellers', "AvailableForResellers", 'boolean', 111, '', 'product', 0, 0, '', '', 1, '', 1, 'HelpOnAvailableForSale', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$param=array('options'=>array('Packages:sellyoursaas/class/packages.class.php'=>null));
-		$resultx=$extrafields->addExtraField('package', "Package", 'link', 111, '', 'product', 0, 0, '', $param, 1, '', 1, 'IfSomethingMustBeDeployed', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax100'));
-		$resultx=$extrafields->addExtraField('resource_formula', "QuantityCalculationFormula", 'text', 112, '8192', 'product', 0, 0, '', '', 1, '', -1, 'QtyFormulaExamples', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('resource_label', "ResourceUnitLabel", 'varchar', 112, '32', 'product', 0, 0, '', '', 1, '', -1, 'ResourceUnitLabelDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('onlyserver', "OnlyThoseServers", 'varchar', 112, '200', 'product', 0, 0, '', $param, 1, '', 1, 'HelpOnOnlyThoseServers', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('option_condition', "OptionCondition", 'varchar', 113, '200', 'product', 0, 0, '', $param, 1, '', 1, 'HelpOnOptionCondition', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$param=array('options'=>array('Packages:sellyoursaas/class/packages.class.php' => null));
+		$resultx=$extrafields->addExtraField('package', "Package", 'link', 114, '', 'product', 0, 0, '', $param, 1, '', 1, 'IfSomethingMustBeDeployed', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax100'));
+		$resultx=$extrafields->addExtraField('resource_formula', "QuantityCalculationFormula", 'text', 115, '8192', 'product', 0, 0, '', '', 1, '', -1, 'QtyFormulaExamples', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('resource_label', "ResourceUnitLabel", 'varchar', 116, '32', 'product', 0, 0, '', '', 1, '', -1, 'ResourceUnitLabelDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
-		$resultx=$extrafields->addExtraField('freeperioddays', "DaysForFreePeriod", 'int', 113, '6', 'product', 0, 0, '', '', 1, '', 1, 'HelpOnDaysForFreePeriod', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$param=array('options'=>array('0'=>'No','1'=>'Yes','2'=>'DuringTestPeriodOnly','3'=>'AfterTestPeriodOnly','4'=>'OnDemand'));
-		$resultx=$extrafields->addExtraField('directaccess', "AccessToResources", 'select', 114, '', 'product', 0, 0, '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$param=array('options'=>array('0'=>'SystemDefault','1'=>'CommonUserJail','2'=>'PrivateUserJail'));
-		$resultx=$extrafields->addExtraField('sshaccesstype', "SshAccessType", 'select', 114, '', 'product', 0, 0, '', $param, 1, '', 'getDolGlobalInt("SELLYOURSAAS_SSH_JAILKIT_ENABLED")', 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('freeperioddays', "DaysForFreePeriod", 'int', 117, '6', 'product', 0, 0, '', '', 1, '', 1, 'HelpOnDaysForFreePeriod', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$param=array('options'=>array('0' => 'No','1'=>'Yes', '2' => 'DuringTestPeriodOnly', '3' => 'AfterTestPeriodOnly', '4' => 'OnDemand'));
+		$resultx=$extrafields->addExtraField('directaccess', "AccessToResources", 'select', 118, '', 'product', 0, 0, '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$param=array('options'=>array('0' => 'SystemDefault', '1' => 'CommonUserJail', '2' => 'PrivateUserJail'));
+		$resultx=$extrafields->addExtraField('sshaccesstype', "SshAccessType", 'select', 119, '', 'product', 0, 0, '', $param, 1, '', 'getDolGlobalInt("SELLYOURSAAS_SSH_JAILKIT_ENABLED")', 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('basic'=>'Basic','premium'=>'Premium','none'=>'None'));
-		$resultx=$extrafields->addExtraField('typesupport', "TypeOfSupport", 'select', 115, '', 'product', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('register_text', "RegisterText", 'varchar', 120, '255', 'product', 0, 0, '', '', 1, '', -1, 'EnterHereTranslationKeyToUseOnRegisterPage', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
-		$resultx=$extrafields->addExtraField('register_discountcode', "DiscountCodes", 'varchar', 121, '255', 'product', 0, 0, '', '', 1, '', -1, 'EnterHereListOfDiscountCodes', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas") && getDolGlobalString("SELLYOURSAAS_ACCEPT_DISCOUNTCODE")', 0, 0, array('csslist'=>'tdoverflowmax100'));
-		$resultx=$extrafields->addExtraField('email_template_trialreminder', "EmailTemplateTrialExpiringReminder", 'int', 123, '', 'product', 0, 0, '', '', 1, '', -1, 'EmailTemplateTrialExpiringReminderHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		//$resultx=$extrafields->addExtraField('email_template_trialend',               "EmailTemplateEndOfTrial",     'int',  124,     '',  'product', 0, 0,   '',     '', 1, '', -1, 'EmailTemplateEndOfTrialHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('email_template_trialsuspended', "EmailTemplateSuspendedTrial", 'int', 125, '', 'product', 0, 0, '', '', 1, '', -1, 'EmailTemplateSuspendedTrialHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('typesupport', "TypeOfSupport", 'select', 125, '', 'product', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('register_text', "RegisterText", 'varchar', 130, '255', 'product', 0, 0, '', '', 1, '', -1, 'EnterHereTranslationKeyToUseOnRegisterPage', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
+		$resultx=$extrafields->addExtraField('register_discountcode', "DiscountCodes", 'varchar', 131, '255', 'product', 0, 0, '', '', 1, '', -1, 'EnterHereListOfDiscountCodes', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas") && getDolGlobalString("SELLYOURSAAS_ACCEPT_DISCOUNTCODE")', 0, 0, array('csslist'=>'tdoverflowmax100'));
+		$resultx=$extrafields->addExtraField('email_template_trialreminder', "EmailTemplateTrialExpiringReminder", 'int', 135, '', 'product', 0, 0, '', '', 1, '', -1, 'EmailTemplateTrialExpiringReminderHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		//$resultx=$extrafields->addExtraField('email_template_trialend',               "EmailTemplateEndOfTrial",     'int',  136,     '',  'product', 0, 0,   '',     '', 1, '', -1, 'EmailTemplateEndOfTrialHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('email_template_trialsuspended', "EmailTemplateSuspendedTrial", 'int', 137, '', 'product', 0, 0, '', '', 1, '', -1, 'EmailTemplateSuspendedTrialHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('position', "Position", 'int', 150, '5', 'product', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		//$resultx=$extrafields->addExtraField('separatorproductend',                   "Other", 'separate',   199,     '',  'product', 0, 1,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
-		// Thirdparty
+		// Extrafields for Thirdparties
 		$param=array('options'=>array(1=>1));
 		$resultx=$extrafields->addExtraField('separatorthirdparty', "SELLYOURSAAS_NAME", 'separate', 100, '', 'thirdparty', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$arrayoptions=array(
