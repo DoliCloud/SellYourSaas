@@ -3,6 +3,8 @@
 
 ## Unreleased
 
+* NEW Full compatibility with PHP 8.4 (need dolibarr v22)
+* NEW Can set a list of service on registration url to choose which package to install during registration
 * NEW Add hidden option SELLYOURSAAS_EMAILORURL_TO_WARN to set another email or contact to contact
 * NEW Search also on sellyoursaas firstname and lastname when using the quick filter on thirdparty
 * NEW Can use an url instead of email to warn about a trouble on registration
