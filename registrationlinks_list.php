@@ -161,6 +161,16 @@ include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_array_fields.tpl.php';
 $object->fields = dol_sort_array($object->fields, 'position');
 $arrayfields = dol_sort_array($arrayfields, 'position');
 
+// Remove fields of product not relevant with registration links
+unset($arrayfields['t.fk_barcode_type']);
+unset($arrayfields['t.stockable_product']);
+unset($arrayfields['t.localtax1_type']);
+unset($arrayfields['t.localtax1_tx']);
+unset($arrayfields['t.localtax2_type']);
+unset($arrayfields['t.localtax2_tx']);
+unset($arrayfields['t.last_main_doc']);
+
+
 $permissiontoread = $user->hasRight('sellyoursaas', 'read');
 $permissiontoadd = $user->hasRight('sellyoursaas', 'write');
 $permissiontodelete = $user->hasRight('sellyoursaas', 'delete');

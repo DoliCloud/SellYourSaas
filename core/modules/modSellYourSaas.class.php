@@ -863,13 +863,13 @@ class modSellYourSaas extends DolibarrModules
 		$param=array('options'=>array('app'=>'Application','system'=>'System','option'=>'Option'));
 		$resultx=$extrafields->addExtraField('app_or_option', "AppOrOption", 'select', 110, '', 'product', 0, 0, '', $param, 1, '', 1, 'HelpOnAppOrOption', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('option_condition', "OptionCondition", 'varchar', 111, '200', 'product', 0, 0, '', $param, 1, '', 1, 'HelpOnOptionCondition', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		$resultx=$extrafields->addExtraField('availabelforresellers', "AvailableForResellers", 'boolean', 111, '', 'product', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('availabelforresellers', "AvailableForResellers", 'boolean', 111, '', 'product', 0, 0, '', '', 1, '', 1, 'HelpOnAvailableForSale', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('Packages:sellyoursaas/class/packages.class.php'=>null));
 		$resultx=$extrafields->addExtraField('package', "Package", 'link', 111, '', 'product', 0, 0, '', $param, 1, '', 1, 'IfSomethingMustBeDeployed', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax100'));
 		$resultx=$extrafields->addExtraField('resource_formula', "QuantityCalculationFormula", 'text', 112, '8192', 'product', 0, 0, '', '', 1, '', -1, 'QtyFormulaExamples', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('resource_label', "ResourceUnitLabel", 'varchar', 112, '32', 'product', 0, 0, '', '', 1, '', -1, 'ResourceUnitLabelDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
-		$resultx=$extrafields->addExtraField('freeperioddays', "DaysForFreePeriod", 'int', 113, '6', 'product', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('freeperioddays', "DaysForFreePeriod", 'int', 113, '6', 'product', 0, 0, '', '', 1, '', 1, 'HelpOnDaysForFreePeriod', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('0'=>'No','1'=>'Yes','2'=>'DuringTestPeriodOnly','3'=>'AfterTestPeriodOnly','4'=>'OnDemand'));
 		$resultx=$extrafields->addExtraField('directaccess', "AccessToResources", 'select', 114, '', 'product', 0, 0, '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('0'=>'SystemDefault','1'=>'CommonUserJail','2'=>'PrivateUserJail'));

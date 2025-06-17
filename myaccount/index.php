@@ -2603,17 +2603,18 @@ if (!empty($showannouncefordomain)) {
 	}
 }
 
-// List of available plans/products (available for reseller)
+// List of available plans/products (available for customers and resellers)
 $arrayofplans=array();
 $arrayofplanscode=array();
 $sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers';
 $sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
-$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
+$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
 $sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 $sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
-$sqlproducts.= " AND pe.availabelforresellers = 1";
+$sqlproducts.= " AND pe.availabelforresellers = 1";		// despite the name, this is for both customers and resellers
 //$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";
 $sqlproducts.= " ORDER BY pe.position ASC";
+
 $resqlproducts = $db->query($sqlproducts);
 if ($resqlproducts) {
 	$num = $db->num_rows($resqlproducts);

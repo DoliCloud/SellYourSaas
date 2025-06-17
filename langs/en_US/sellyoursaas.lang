@@ -848,7 +848,7 @@ ErrorDeployWebsite=Error while website deployment
 DeploymentWebsiteDone=Website deployed successfully
 IWantToTest=I want to test
 OptionCondition=Condition to see the option
-HelpOnOptionCondition=Enter the condition to have the option visible into customer dashboard. Example: 1=always visible. 0=Never visible
+HelpOnOptionCondition=When the service has type "Option", enter the condition to have the option visible into customer dashboard.<br>Example: 1=always visible. 0=Never visible
 NewEmailToConfirm=New email to confirm
 UnitPriceOfLine=Unit price of line
 InvoicePaymentDisputed=Invoice payment disputed
@@ -932,3 +932,5 @@ SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES=Max number of salaries for free 
 SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE=Allow the selection of the service from the registration page
 SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICEHelp=Allow the selection of the service from the registration page
 ChooseAProductForYourApplication=Choose the application to deploy
+HelpOnAvailableForSale=When the service has type "Application", check this is you want to have this service visible into the combo list of available applications into the customer and reseller dashboard. If not you can still register and deploy it by using its name as the parameter plan= on the registration page.
+HelpOnDaysForFreePeriod=When the service has type "Application", enter the number of days you want to have the service free before requesting a payment or a validation to keep the instance
