@@ -441,7 +441,7 @@ SELLYOURSAAS_PERCENTAGE_FEE=Percentage of fee per transaction (used to calculate
 BecomeResellerDesc=You will apply to become a %s Reseller. First check into menu 'My account' that all data are correctly filled. Then please read the following page to be sure you understand what this means: <a href="%s" target="_blank">Become a %s reseller</a>
 YourTextBecomeReseller=My web site: https://_______________________ (the request will be discarded if this information is not provided)\n\nI understood the meaning of the %s reseller program and I want to be part of it, so please enable the reseller feature for my account.\nI plan to get ___ new customers per year.\nI understand that I have no work to do except promoting my personalized URL to record new customers. My initial commission rate will be %s %% (but may increase when my customer number increase).
 NbOfResellers=Number of resellers
-AvailableForResellers=Application available in dashboard (customers and resellers)
+AvailableForResellers=Application available in dashboard
 PaymentWillBeProcessedSoon=A payment attempt should be made soon...
 PaymentError=Payment error
 SorryInstancesAreOffLine=Sorry, due to a maintenance operation, instances are currently offline, please retry in few minutes after our intervention...
@@ -932,5 +932,5 @@ SELLYOURSAAS_ONLY_NON_PROFIT_ORGA_MAX_EMPLOYEES=Max number of salaries for free 
 SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICE=Allow the selection of the service from the registration page
 SELLYOURSAAS_ALLOW_SELECTION_OF_SERVICEHelp=Allow the selection of the service from the registration page
 ChooseAProductForYourApplication=Choose the application to deploy
-HelpOnAvailableForSale=When the service has type "Application", check this is you want to have this service visible into the combo list of available applications into the customer and reseller dashboard. If not you can still register and deploy it by using its name as the parameter plan= on the registration page.
+HelpOnAvailableForSale=When the service has type "Application", check this is you want to have this service visible into the combo list of available applications into the customer and reseller dashboard. If not you can still register and deploy the application by using its name in the parameter "&plan=" on the registration page.
 HelpOnDaysForFreePeriod=When the service has type "Application", enter the number of days you want to have the service free before requesting a payment or a validation to keep the instance
