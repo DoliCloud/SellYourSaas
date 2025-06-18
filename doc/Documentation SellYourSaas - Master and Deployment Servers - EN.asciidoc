@@ -4961,7 +4961,7 @@ vi /mnt/etc/fstab
 ---------------
 
 
-=== Move the database (var/lib/mysql into /mnt/diskhome/mysql/)
+=== Move the database directory (var/lib/mysql into /mnt/diskhome/mysql/)
 
 From the MySQL prompt, select the data directory:
 
@@ -5871,7 +5871,7 @@ netplan apply
 ---------------
 
 
-==== error when enabling firewall with UFW
+==== Error when enabling firewall with UFW
 
 If you get this error after *ufw enable*:
 
@@ -5936,6 +5936,7 @@ or
 
 Check in file */etc/apparmor.d/usr.sbin.apache2* that */etc/passwd* is not denied and that phpsendmail.php command is allowed.
 
+
 ==== Erro when sending email into /var/log/phpsendmail.log
 
 If you got this error 
@@ -5963,12 +5964,12 @@ Response:421 4.7.0 Try again later, closing connection. (EHLO) n17-20020a5099d10
 Error [126]: "smtp-relay.gmail.com" does not support authenticated connections. Error after sending EHLO smtp-relay.gmail.com
 ------------
 
-Full list of errors can be found with 
+Full list of errors can be found with
+
 [source,bash]
 -------------
 grep 'CMailFile::sendfile: mail end error' dolibarr.log
 -------------
-
 
 To fix this, try to add the constant: MAIL_SMTP_USE_FROM_FOR_HELO = yourdomainname.com
 
@@ -6342,7 +6343,7 @@ If iowait (column "wai") is high in percentage and there is few read/write acces
 Launchthis command to know wich process is waiting  
 pidstat -dtu 1
 
- 
+
 ==== Emails are blocked in postfix queue
 
 To scan all emails in postfix queue with Queue ID + Message-ID :
