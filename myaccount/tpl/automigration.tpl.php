@@ -31,8 +31,8 @@ if (GETPOST('instanceselect', 'alpha')) {
 	$instanceselect = explode("_", $instanceselect);
 	$idcontract = $instanceselect[1];
 }
-
-$upload_dir = $conf->sellyoursaas->dir_temp."/automigration_".$idcontract.'.tmp';
+$uploaddirname = "automigration_".$idcontract.".tmp";
+$upload_dir = $conf->sellyoursaas->dir_temp.'/'.$uploaddirname;
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
@@ -161,7 +161,7 @@ if ($action == 'automigration') {
 	$utils = new Utils($db);
 
 	$sellyoursaasutils = new SellYourSaasUtils($db);
-	$instanceselect = GETPOST('instanceselect', 'alapha');
+	$instanceselect = GETPOST('instanceselect', 'alpha');
 	$instanceselect = explode("_", $instanceselect);
 	$idcontract = $instanceselect[1];
 
@@ -231,8 +231,17 @@ if ($action == 'automigration') {
 		//Backup old database
 		$mysqlbackupfilename=$upload_dir.'/mysqldump_'.$database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
 		$param = array();
+
+		$commandtestmysqldumpversion = "mysqldump --version";
+		$resultversion = $utils->executeCLI($commandtestmysqldumpversion, "", 0);
+		$mysqldumpversionarr = array();
+		preg_match('/Ver (\d+)(?:\.\d+)*/',$resultversion["output"], $mysqldumpversionarr);
+		$mysqldumpversion = $mysqldumpversionarr[1];
+
 		$command = "mysqldump";
-		$param[] = "--column-statistics=0"; // Remove a new flag with mysqldump v8
+		if ($mysqldumpversion == "8") {
+			$param[] = "--column-statistics=0"; // Remove a new flag with mysqldump v8
+		}
 		$param[] = "--no-tablespaces";
 		$param[] = "-C";
 		$param[] = "-h";
@@ -684,8 +693,8 @@ if ($action == 'view') {
 	<script>
 	jQuery(document).ready(function() {
 		var flow = new Flow({
-			target:"source/core/ajax/flowjs-server.php",
-			query:{module:"sellyoursaas",upload_dir:"'.$upload_dir.'",token:"'.currentToken().'", action:"upload"},
+			target:"ajax/flowjs-server.php",
+			query:{module:"sellyoursaas",uploaddirname:"'.$uploaddirname.'",token:"'.currentToken().'", action:"upload"},
 			testChunks:false
 		});
 		if(flow.support){
