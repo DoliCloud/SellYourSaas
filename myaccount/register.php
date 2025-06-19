@@ -549,7 +549,11 @@ if ($reshook == 0) {
 				print '<select required id="planselect" name="plan">';
 				print '<option>&nbsp;</option>';
 				foreach ($planarray as $key => $planref) {
-					print '<option>'.$planref.'</option>';
+					$tmpplan = new Product($db);
+					$tmpplan->fetch(0, $planref, '', '', 1, 1);
+					print '<option data-id="'.$tmpplan->id.'" data-ref="'.$planref.'">';
+					print empty($tmpplan->multilangs[$langs->defaultlang]['label']) ? $planref : $tmpplan->multilangs[$langs->defaultlang]['label'];
+					print '</option>';
 				}
 				print '</select>';
 				print '</div>';
