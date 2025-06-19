@@ -546,7 +546,7 @@ if ($reshook == 0) {
 				print '<div class="fld select-plan required">';
 				print '<label class="control-label" for="plan">'.$langs->trans("ChooseAProductForYourApplication").'</label>';
 				print '<div class="control">';
-				print '<select required id="planselect" name="plan">';
+				print '<select class="minwidth400" required id="planselect" name="plan">';
 				print '<option>&nbsp;</option>';
 				foreach ($planarray as $key => $planref) {
 					$tmpplan = new Product($db);
