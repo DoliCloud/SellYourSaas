@@ -3225,7 +3225,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 	}
 
 	// Test if there is a payment error, if yes, ask to fix payment data
-	$sql = 'SELECT f.rowid, ee.code, ee.label, ee.extraparams FROM '.MAIN_DB_PREFIX.'facture as f';
+	$sql = 'SELECT f.rowid, ee.id as eid, ee.code, ee.label, ee.extraparams FROM '.MAIN_DB_PREFIX.'facture as f';
 	$sql.= ' INNER JOIN '.MAIN_DB_PREFIX."actioncomm as ee ON ee.fk_element = f.rowid AND ee.elementtype = 'invoice'";
 	$sql.= " AND (ee.code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";		// See also into sellyoursaasIsPaymentKo
 	$sql.= ' WHERE f.fk_soc = '.((int) $mythirdpartyaccount->id).' AND f.paye = 0';
@@ -3241,7 +3241,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 			$obj = $db->fetch_object($resql);
 			$labelerror = $obj->extraparams;
 			if (empty($labelerror)) {
-				$labelerror=$langs->trans("UnknownError");
+				$labelerror = (empty($obj->label) ? $langs->transnoentities("UnknownError") : $obj->label).' - '.$langs->transnoentities("Event").' '.$obj->eid;
 			}
 
 			// There is at least one payment error
