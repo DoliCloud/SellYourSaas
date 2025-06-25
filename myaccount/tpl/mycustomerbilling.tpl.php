@@ -153,7 +153,7 @@ print '
 
 					$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 					include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-					$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
+					$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL(getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL'), 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 					$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT ? DOL_URL_ROOT.'/' : '').$publicurltodownload;
 					//print '<br><a href="'.$urltouse.'" target="_download">'.$langs->trans("Download").'</a>';
@@ -168,10 +168,10 @@ print '
 			                '.dol_print_date($obj->datef, 'dayrfc', $langs).'
 			              </td>
 			              <td align="right">
-			                '.price(price2num($obj->total_ht), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
+			                '.price(price2num($obj->total_ht), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency).'
 			              </td>
 			              <td align="right">
-			                '.price(price2num($obj->total_ttc), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
+			                '.price(price2num($obj->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency).'
 			              </td>
 			              <td>
 			                ';
@@ -326,7 +326,7 @@ print '
 
 			$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-			$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
+			$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL(getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL'), 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 			$parameters=array('invoice' => $tmpinvoice, 'thirdparty' => $tmpthirdparty, 'sellyoursaasaccounturl' => $sellyoursaasaccounturl);
 			$reshook = $hookmanager->executeHooks('getLastMainDocLink', $parameters);    // Note that $action and $object may have been modified by some hooks.
@@ -344,7 +344,7 @@ print '
 				                        '.dol_print_date($obj->datef, 'dayrfc', $langs).'
 				                      </td>
 				              <td align="right">
-				                '.price(price2num($obj->total_ht), 1, $langs, 0, 0, $conf->global->MAIN_MAX_DECIMALS_TOT, $conf->currency).'
+				                '.price(price2num($obj->total_ht), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency).'
 				              </td>
 				              <td>
 				                ';

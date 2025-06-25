@@ -269,7 +269,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		}
 		// Refresh value of MAIN_IHM_PARAMS_REV before forging the parameter line.
 		if (GETPOST('dol_resetcache')) {
-			dolibarr_set_const($db, "MAIN_IHM_PARAMS_REV", ((int) $conf->global->MAIN_IHM_PARAMS_REV) + 1, 'chaine', 0, '', $conf->entity);
+			dolibarr_set_const($db, "MAIN_IHM_PARAMS_REV", getDolGlobalInt('MAIN_IHM_PARAMS_REV') + 1, 'chaine', 0, '', $conf->entity);
 		}
 
 		$themeparam = '?lang='.$langs->defaultlang.'&amp;theme='.$conf->theme.(GETPOST('optioncss', 'aZ09') ? '&amp;optioncss='.GETPOST('optioncss', 'aZ09', 1) : '').(empty($user->id) ? '' : ('&amp;userid='.$user->id)).'&amp;entity='.$conf->entity;
@@ -317,7 +317,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify-alt.min.css'.($ext ? '?'.$ext : '').'">'."\n";          // JNotify
 			}
 			if (! defined('DISABLE_SELECT2') && (getDolGlobalString('MAIN_USE_JQUERY_MULTISELECT') || defined('REQUIRE_JQUERY_MULTISELECT'))) {     // jQuery plugin "mutiselect", "multiple-select", "select2"...
-				$tmpplugin=!getDolGlobalString('MAIN_USE_JQUERY_MULTISELECT') ? constant('REQUIRE_JQUERY_MULTISELECT') : $conf->global->MAIN_USE_JQUERY_MULTISELECT;
+				$tmpplugin=!getDolGlobalString('MAIN_USE_JQUERY_MULTISELECT') ? constant('REQUIRE_JQUERY_MULTISELECT') : getDolGlobalString('MAIN_USE_JQUERY_MULTISELECT');
 				print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/css/'.$tmpplugin.'.css'.($ext ? '?'.$ext : '').'">'."\n";
 			}
 		}
@@ -380,7 +380,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			}
 			if (!defined('DISABLE_SELECT2') && (getDolGlobalString('MAIN_USE_JQUERY_MULTISELECT') || defined('REQUIRE_JQUERY_MULTISELECT'))) {
 				// jQuery plugin "mutiselect", "multiple-select", "select2", ...
-				$tmpplugin = !getDolGlobalString('MAIN_USE_JQUERY_MULTISELECT') ? constant('REQUIRE_JQUERY_MULTISELECT') : $conf->global->MAIN_USE_JQUERY_MULTISELECT;
+				$tmpplugin = !getDolGlobalString('MAIN_USE_JQUERY_MULTISELECT') ? constant('REQUIRE_JQUERY_MULTISELECT') : getDolGlobalString('MAIN_USE_JQUERY_MULTISELECT');
 				print '<script src="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/js/'.$tmpplugin.'.full.min.js'.($ext ? '?'.$ext : '').'"></script>'."\n"; // We include full because we need the support of containerCssClass
 			}
 			if (!defined('DISABLE_MULTISELECT')) {     // jQuery plugin "mutiselect" to select with checkboxes. Can be removed once we have an enhanced search tool
@@ -535,7 +535,7 @@ if (! function_exists("llxFooter")) {
 		//var_dump($langs);		// Uncommment to see the property _tab_loaded to see which language file were loaded
 
 		if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
-			print $conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER;
+			print getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER');
 		}
 
 
@@ -608,7 +608,7 @@ if (! function_exists("llxFooter")) {
 		if (! empty($_SESSION['showconversiontracker'])) {
 			print "\n".'<!-- Conversion tracker $_SESSION[\'showconversiontracker\']='.$_SESSION['showconversiontracker'].' -->'."\n";
 			if ($_SESSION['showconversiontracker'] == 'paymentrecorded') {
-				print $conf->global->SELLYOURSAAS_CONVERSION_FOOTER;
+				print getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER');
 				$_SESSION['showconversiontracker'] = '';
 				unset($_SESSION['showconversiontracker']);
 			}
@@ -734,7 +734,7 @@ function dol_loginfunction($langs, $conf, $mysoc)
 	$prefix=dol_getprefix('');
 	$sessiontimeout='DOLSESSTIMEOUT_'.$prefix;
 	if (getDolGlobalString('MAIN_SESSION_TIMEOUT')) {
-		setcookie($sessiontimeout, $conf->global->MAIN_SESSION_TIMEOUT, 0, "/", null, false, true);
+		setcookie($sessiontimeout, getDolGlobalString('MAIN_SESSION_TIMEOUT'), 0, "/", null, false, true);
 	}
 
 	if (GETPOST('urlfrom', 'alpha')) {
@@ -796,7 +796,7 @@ function dol_loginfunction($langs, $conf, $mysoc)
 		$constlogosmall.='_'.strtoupper(str_replace('.', '_', $sellyoursaasdomain));
 	}
 
-	$homepage = 'https://'.(!getDolGlobalString('SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME') ? $sellyoursaasdomain : $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME);
+	$homepage = 'https://'.(!getDolGlobalString('SELLYOURSAAS_FORCE_MAIN_DOMAIN_NAME') ? $sellyoursaasdomain : getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME'));
 
 	if (empty($urllogo) && getDolGlobalString($constlogosmall)) {
 		if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constlogosmall))) {
