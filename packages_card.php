@@ -79,14 +79,8 @@ $cancel     = GETPOST('cancel', 'aZ09');
 $contextpage = GETPOST('contextpage', 'aZ') ? GETPOST('contextpage', 'aZ') : str_replace('_', '', basename(dirname(__FILE__)).basename(__FILE__, '.php')); // To manage different context of search
 $backtopage = GETPOST('backtopage', 'alpha');					// if not set, a default page will be used
 $backtopageforcancel = GETPOST('backtopageforcancel', 'alpha');	// if not set, $backtopage will be used
-$backtopagejsfields = GETPOST('backtopagejsfields', 'alpha');
 $optioncss = GETPOST('optioncss', 'aZ'); // Option for the css output (always '' except when 'print')
 $dol_openinpopup = GETPOST('dol_openinpopup', 'aZ09');
-
-if (!empty($backtopagejsfields)) {
-	$tmpbacktopagejsfields = explode(':', $backtopagejsfields);
-	$dol_openinpopup = preg_replace('/[^a-z0-9_]/i', '', $tmpbacktopagejsfields[0]);
-}
 
 // Initialize technical objects
 $object = new Packages($db);
@@ -212,9 +206,6 @@ if ($action == 'create') {
 	}
 	if ($backtopageforcancel) {
 		print '<input type="hidden" name="backtopageforcancel" value="'.$backtopageforcancel.'">';
-	}
-	if ($backtopagejsfields) {
-		print '<input type="hidden" name="backtopagejsfields" value="'.$backtopagejsfields.'">';
 	}
 	if ($dol_openinpopup) {
 		print '<input type="hidden" name="dol_openinpopup" value="'.$dol_openinpopup.'">';
