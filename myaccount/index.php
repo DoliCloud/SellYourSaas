@@ -225,6 +225,15 @@ if ($langs->getDefaultLang(1) == 'fr') {
 	$langcode = 'fr';
 }
 
+$urlportal= getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');
+if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
+	$newnamekey = 'SELLYOURSAAS_MAIN_DOMAIN_NAME-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+	if (getDolGlobalString($newnamekey)) {
+		$urlportal = getDolGlobalString($newnamekey);
+	}
+}
+
 $urlfaq = '';
 if (!getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL')) {
 	if (preg_match('/dolicloud\.com/', getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME'))) {
@@ -621,6 +630,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 
+	// TODO
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 } elseif ($action == 'changeplan') {
 	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
@@ -632,6 +642,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 
+	// TODO
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 	$action = '';
 } elseif ($action == 'validatefreemode') {
@@ -2342,7 +2353,7 @@ print '
 	  </form>
 
 	  <!-- Logo -->
-      <span class="navbar-brand"><img src="'.$linklogoblack.'" height="34px"></span>
+      <span class="navbar-brand"><a href="'.$urlportal.'" target="_blank" rel="noopener"><img src="'.$linklogoblack.'" height="34px"></a></span>
 
 	  <!-- Menu -->
       <div class="collapse navbar-collapse" id="navbars">
