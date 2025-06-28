@@ -2353,7 +2353,7 @@ print '
 	  </form>
 
 	  <!-- Logo -->
-      <span class="navbar-brand"><a href="'.$urlportal.'" target="_blank" rel="noopener"><img src="'.$linklogoblack.'" height="34px"></a></span>
+      <span class="navbar-brand"><a href="https://'.$urlportal.'" target="_blank" rel="noopener"><img src="'.$linklogoblack.'" height="34px"></a></span>
 
 	  <!-- Menu -->
       <div class="collapse navbar-collapse" id="navbars">
