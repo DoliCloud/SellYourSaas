@@ -364,7 +364,9 @@ $formcompany = new FormCompany($db);
 $countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
 
 if ($action == 'upgradeinstance') {
-	print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$id, $langs->trans('UpgradeNow'), $langs->trans('ConfirmUpgradeNow'), 'confirm_upgradeinstance', '', 0, 1);
+	$laststableversion = getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR');
+	$laststableversionmsg = !empty($laststableversion) ? "(v".$laststableversion.")" : "";
+	print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$id, $langs->trans('UpgradeNow'), $langs->trans('ConfirmUpgradeNow', $laststableversionmsg), 'confirm_upgradeinstance', '', 0, 1);
 }
 
 if ($action != 'create') {
