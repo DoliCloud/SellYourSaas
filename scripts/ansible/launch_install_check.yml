@@ -1337,6 +1337,10 @@
       file:
         path: /etc/update-motd.d/50-landscape-sysinfo
         state: absent
+    - name: Delete file /etc/update-motd.d/50-motd-news
+      file:
+        path: /etc/update-motd.d/50-motd-news
+        state: absent
     - name: Find files /etc/update-motd.d/9*-update*-available
       find:
         paths: /etc/update-motd.d/
