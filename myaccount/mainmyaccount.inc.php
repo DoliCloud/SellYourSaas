@@ -563,7 +563,7 @@ if (! function_exists("llxFooter")) {
 
 		// Wrapper to manage dropdown
 		if (! empty($conf->use_javascript_ajax) && ! defined('JS_JQUERY_DISABLE_DROPDOWN')) {
-			print "\n<!-- JS CODE TO ENABLE dropdown -->\n";
+			print "\n<!-- JS CODE TO ENABLE dropdown (hamburger, linkto, ...) by SellYourSaas -->\n";
 			print '<script type="text/javascript">
                 jQuery(document).ready(function () {
                   $(".dropdown dt a").on(\'click\', function () {
