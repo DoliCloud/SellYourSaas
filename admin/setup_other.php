@@ -139,24 +139,6 @@ if ($action == 'set') {
 		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID')) {
 			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
 		}
-		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_CUSTOMURL', GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL", 'int'), 'chaine', 0, '', $conf->entity);
-		}
-		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID')) {
-			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
-		}
-		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_WEBSITES')) {
-			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_WEBSITES', GETPOST("SELLYOURSAAS_ENABLE_WEBSITES", 'int'), 'chaine', 0, '', $conf->entity);
-		}
-		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID')) {
-			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
-		}
-		if (GETPOSTISSET('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT')) {
-			dolibarr_set_const($db, "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", GETPOST("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", 'int'), 'chaine', 0, '', $conf->entity);
-		}
-		if (GETPOSTISSET('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL')) {
-			dolibarr_set_const($db, "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", GETPOST("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", 'int'), 'chaine', 0, '', $conf->entity);
-		}
 
 		dolibarr_set_const($db, 'SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', GETPOST("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE", 'int'), 'chaine', 0, '', $conf->entity);
 
@@ -463,81 +445,6 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA')) {
 	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', '').'">';
 	print '</td>';
 	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
-	print '</tr>';
-}
-
-// Allow Custom URL
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL").'</td>';
-print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ENABLE_CUSTOMURL', array(), null, 0, 0, 1);
-} else {
-	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
-print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to allow customer to set a custom URL.</td>';
-print '</tr>';
-
-// Allow Custom URL for specific thirdparty ID ?
-if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID").'</td>';
-	print '<td>';
-	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', '').'">';
-	print '</td>';
-	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
-	print '</tr>';
-}
-
-// Product ID for custom URL
-if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'</td>';
-	print '<td>';
-	print img_picto('', 'product', 'class="pictofixedwidth"');
-	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", '', 0, 0, '', 1, 2, 0, 0, 1, 0, 'maxwidth500 widthcentpercentminusx');
-	print '</td>';
-	print '<td><span class="opacitymedium small"></span></td>';
-	print '</tr>';
-}
-
-// Allow deployment of Dolibarr website
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES").'</td>';
-print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES', array(), null, 0, 0, 1);
-} else {
-	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
-print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
-print '</tr>';
-
-
-// Allow deployment of Dolibarr website for specific thirdparty ID ?
-if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID").'</td>';
-	print '<td>';
-	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', '').'">';
-	print '</td>';
-	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
-	print '</tr>';
-}
-
-// Product ID for website deployment
-if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT").'</td>';
-	print '<td>';
-	print img_picto('', 'product', 'class="pictofixedwidth"');
-	print $form->select_produits_list(getDolGlobalInt('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", '', 0, 0, '', 1, 2, 0, 0, 1, 0, 'maxwidth500 widthcentpercentminusx');
-	print '</td>';
-	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
 }
 

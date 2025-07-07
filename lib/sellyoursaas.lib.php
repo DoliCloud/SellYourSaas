@@ -462,6 +462,11 @@ function sellyoursaas_admin_prepare_head()
 	$head[$h][2] = "setup_supervision";
 	$h++;
 
+	$head[$h][0] = "setup_deploy_dolibarr.php";
+	$head[$h][1] = $langs->trans("DolibarrDeployment");
+	$head[$h][2] = "setup_deploy_dolibarr";
+	$h++;
+
 	$head[$h][0] = "setup_other.php";
 	$head[$h][1] = $langs->trans("Other");
 	$head[$h][2] = "setup_other";
