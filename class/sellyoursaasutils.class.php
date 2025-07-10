@@ -1085,7 +1085,7 @@ class SellYourSaasUtils
 		if (! empty($conf->paypal->enabled)) {
 			//$service = 'PaypalTest';
 			$servicestatus = 0;
-			if (getDolGlobalString('PAYPAL_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
+			if (getDolGlobalString('PAYPAL_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
 				//$service = 'PaypalLive';
 				$servicestatus = 1;
 			}

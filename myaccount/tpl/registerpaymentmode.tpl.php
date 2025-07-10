@@ -300,11 +300,11 @@ if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {	// Us
 
 	$service = 'StripeLive';
 	$servicestatus = 1;
-
-	if (!getDolGlobalString('STRIPE_LIVE') || GETPOST('forcesandbox', 'alpha')) {
+	if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 		$service = 'StripeTest';
 		$servicestatus = 0;
 	}
+
 	$stripe = new Stripe($db);
 	$stripeacc = $stripe->getStripeAccount($service);
 	$stripecu = null;
