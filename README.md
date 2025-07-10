@@ -1,60 +1,146 @@
-# SELLYOURSAAS
+# SellYourSaaS 🚀
 
+**Offer any web application as a SaaS with full automation—from deployment to billing.**
 
-## Features
+---
 
-SellYourSaas is a tool to offer any Web application as a Saas service (for a free or paid offer).
+## 🧩 Overview
 
-<span style="color: #268260">100% of the needs, from customer acquisition to generation of information for end-of-year accounting, including deployment, management and backup of customer instances are provided by the project.</span>
- 
-The project provides ready to use and friendly interfaces to record definition of the packages to sell (which application, where to find sources and database images, how to deploy them), the tools to deploy the application on a remote server (on a simple mono server infrastructure or into a scalable farm), but also a customer dashboard for your subscribers, automatic invoicing and renewal. The administration and backoffice of solution is based on Dolibarr ERP CRM Open Source software.
+**SellYourSaaS** is a powerful open-source platform that transforms any web application into a full-fledged SaaS product — with minimal effort.
+It automates everything from customer onboarding and instance deployment to invoicing, usage tracking, and reseller commissions.
 
-This is a list of some features supported by this project:
+Built on top of [Dolibarr ERP & CRM](https://www.dolibarr.org/), SellYourSaaS gives you a complete solution to launch, manage, and scale your SaaS offering — all with **low infrastructure cost** and a **fully automated workflow**.
 
-- Creation of profiles of packages - to define what to deploy when a subscription to this package is done: files or directories to deploy, databases dump to load, cron entry to add, SSH public keys of administrator to deploy and any other command lines to launch.
-- Create services that define the plan (which package and which options) and the price policy to use for invoicing: free, per application, per user, per Gigabytes, ... (or any combination).
-- Customizable SQL or CLI commands for each sold services to define how to count the quantity to bill (For example a SQL request to count the number of users or a CLI command to get the consummed disk space).
-- Get ready to use URLs of public online subscription forms to register to the hosting service.
-- Autofill and autodetection of country and language in the subscription page using GeoIP, recording a probability of VPN usage for each subscriber (for fight against spammer or evil users).
-- Each customer has its own system and data environment (jail).
-- Option to support free subscription, time limited trial periods (with no credit card required) or payment instances.
-- Define quotas (deployment per customer, per ip, per hour, ...).
-- Provide a customer dashboard for customers to manage their subscription, download their invoices. You also decide if customers can deploy more applications or options with the same existing account from their customer dashboard. 
-- Decide if customer has a direct access to the database and a restricted (or not) SSH access to its instance.
-- Add a system layer to replace the php "mail" function to track and stop evil users using their created instance to try to make Spams.  
-- Manage a network of reseller with commission dedicated to each reseller (a reseller has its own URL to register/create a new instances of an application and any customer that use it to create its instance is linked to the reseller. Reseller will gain a commission for each invoice paid by the customer). 
-- Payment of customers can be done automatically by credit card (currently using Stripe service) or semi-automatically by SEPA mandate.
-- Billing rules (date, amount, frequency of next payment) can be modified differently for each customer.
-- Provide a lot of predefined email templates in several languages for the management of service (subscription, trial expiration, cancellation, ...)
-- Can manage each customer and subscription from the backoffice (deploy, suspend, unsuspend, undeploy an instance manually, create a maintenance account, backup, ...).
-- Provide statistics reports on trial instances, customers, etc.
-- Scalable solution (install more servers if you have too much customers or users).
-- A lot of "ready in the box" tools (backups, migration, upgrades, ...) 
-- Multilang (both front and backoffice)
-- A cost of infrastructure lower than 0.5 USD per instance/customer.
-- A 100% automated workflow.
+---
 
+## 📑 Menu
 
-## Documentation
+* [Key Features](#-key-features)
 
-You may find asciidoc documentation here:
+  * [Deployment & Instance Management](#-deployment--instance-management)
+  * [Subscription & Billing](#-subscription--billing)
+  * [Usage Tracking & Reporting](#-usage-tracking--reporting)
+  * [Subscription Flow & Customer Dashboard](#-subscription-flow--customer-dashboard)
+  * [Admin Tools](#-admin-tools)
+  * [Reseller Support](#-reseller-support)
+  * [Multilingual & Scalable](#-multilingual--scalable)
+* [Quick Start](#-quick-start)
+* [Documentation](#-documentation)
+* [License](#-license)
+* [Contribution](#-contribution)
+* [Contact & Community](#-contact--community)
 
-* <a href="https://github.com/eldy/sellyoursaas/blob/master/doc/Documentation%20SellYourSaas%20-%20Master%20and%20Deployment%20Servers%20-%20EN.asciidoc">English version</a>
+---
 
+## 📌 Key Features
 
-## Licenses
+### 🚀 Deployment & Instance Management
 
-### Main code
+* Define **packages**: applications, files, database dumps, cron jobs, custom commands.
+* Automated **instance provisioning** for every new subscriber.
+* Flexible deployment support: single server or scalable infrastructure.
+* **SSH key** support for administrators; isolated environments (jails) per customer.
+* Built-in tools for **backup, migration, and upgrades**.
 
-![GPLv3 logo](img/gplv3.png)
+### 💳 Subscription & Billing
 
-GPLv3 or (at your option) any later version.
+* Create pricing plans: free, per-user, per-app, per-GB, or hybrid models.
+* **Trial periods** supported (even without credit card).
+* **Quota limits**: restrict deployment per customer, IP, time window, etc.
+* Stripe and SEPA support for automatic and semi-automatic billing.
+* Modifiable billing frequency, due dates, and amounts per customer.
 
-See [COPYING](COPYING) for more information.
+### 📈 Usage Tracking & Reporting
 
+* Custom SQL or CLI metrics to track billable usage (e.g. disk space, user count).
+* Built-in **statistics dashboards** for trial usage, customer counts, etc.
+* Generate detailed reports for accounting or audits.
 
-#### Documentation
+### 🌍 Subscription Flow & Customer Dashboard
 
-All texts and readmes.
+* Public subscription forms with auto-detection of **country/language** via GeoIP.
+* Built-in VPN usage scoring to prevent spam or abuse.
+* End users get a **dashboard** to manage subscriptions, invoices, and deploy additional apps.
+* Control customer access to databases and SSH for their instance.
 
-![GFDL logo](img/gfdl.png)
+### 🛠️ Admin Tools
+
+* Manual override options: deploy/suspend/undeploy instances, reset passwords, create maintenance access, etc.
+* Manage subscriptions and invoices from Dolibarr back office.
+* Replace PHP `mail()` with a secure system-wide mail layer to block spammers.
+
+### 🤝 Reseller Support
+
+* Each reseller has a unique referral link to register customers.
+* Automated **commission system** for resellers.
+* Track earnings based on paid invoices linked to reseller accounts.
+
+### 🌐 Multilingual & Scalable
+
+* Fully translated back office and front end (multi-language support).
+* Supports **horizontal scaling**—simply add servers as you grow.
+* Infrastructure cost: **< \$0.50 per instance**.
+* Designed to run with a **100% automated workflow**.
+
+---
+
+## 🚀 Quick Start
+
+### 🔧 Requirements
+
+* PHP 7.4+
+* MySQL / MariaDB
+* [Dolibarr ERP/CRM](https://www.dolibarr.org/)
+* Web server (Apache/Nginx)
+* Git
+
+### 📥 Installation
+
+1. Clone the repository into your Dolibarr `htdocs/custom` folder:
+
+   ```bash
+   git clone https://github.com/DoliCloud/SellYourSaas.git
+   ```
+2. Enable the **SellYourSaaS** module from the Dolibarr admin interface.
+3. Follow the documentation below to define packages, create services, and deploy.
+
+---
+
+## 📚 Documentation
+
+* 📘 [English Documentation (asciidoc)](https://github.com/DoliCloud/SellYourSaas/tree/master/doc)
+
+Includes setup instructions, deployment examples, system architecture, pricing models, and more.
+
+---
+
+## 📄 License
+
+**Code:**
+This project is licensed under the [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html) (or later).
+
+**Documentation:**
+All documentation and READMEs are under the [GNU Free Documentation License (GFDL)](https://www.gnu.org/licenses/fdl-1.3.en.html).
+
+---
+
+## 🤝 Contribution
+
+Contributions are welcome!
+
+* Fork this repo
+* Create a branch: `git checkout -b fix/something`
+* Commit changes: `git commit -m "Fix typo or improve feature"`
+* Push and open a Pull Request
+
+Please review existing issues and discussions before starting major work.
+
+---
+
+## 📬 Contact & Community
+
+* Official Site: [www.sellyoursaas.org](https://www.sellyoursaas.org/)
+* Twitter: [@Dolibarr](https://twitter.com/Dolibarr)
+* Contact: [Contact Form](https://www.sellyoursaas.org/contact.php)
+
+---
