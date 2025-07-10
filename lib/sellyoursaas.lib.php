@@ -98,7 +98,7 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	if (! empty($conf->stripe->enabled)) {
 		$service = 'StripeTest';
 		$servicestatusstripe = 0;
-		if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+		if (getDolGlobalString('STRIPE_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 			$service = 'StripeLive';
 			$servicestatusstripe = 1;
 		}
@@ -106,7 +106,7 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	$servicestatuspaypal = 0;
 	if (! empty($conf->paypal->enabled)) {
 		$servicestatuspaypal = 0;
-		if (getDolGlobalString('PAYPAL_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
+		if (getDolGlobalString('PAYPAL_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
 			$servicestatuspaypal = 1;
 		}
 	}
