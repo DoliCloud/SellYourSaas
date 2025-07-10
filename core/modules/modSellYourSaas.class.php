@@ -92,7 +92,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->const = array(
 			0=>array('NLTECHNO_NOTE', 'chaine',
 				'Welcome to SellYourSaas Home page<br><br>
-		        Link to the specification: https://framagit.org/eldy/sell-your-saas<br><br>
+		        Link to the website: https://www.sellyoursass.org<br><br>
 		        ...You can enter content on this page to save any notes/information of your choices.', 'This is another constant to add', 0, 'allentities', 0),
 			1=>array('CONTRACT_SYNC_PLANNED_DATE_OF_SERVICES', 'chaine', 1, 'Sync the planned date of services to the same value for all lines in the same contract', 0, 'current', 1),
 			2=>array('THIRDPARTY_LOGO_ALLOW_EXTERNAL_DOWNLOAD', 'chaine', 1, 'Allow to access thirdparty logo from external link', 0, 'current', 0),

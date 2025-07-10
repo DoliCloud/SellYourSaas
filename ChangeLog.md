@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Search on firstname and last name of thirdparty with global search on contract.  
 * NEW Full compatibility with PHP 8.4 (need dolibarr v22)
 * NEW Can set a list of service on registration url to choose which package to install during registration
 * NEW Add hidden option SELLYOURSAAS_EMAILORURL_TO_WARN to set another email or contact to contact
@@ -12,8 +13,8 @@
 * NEW Can defined a whitelist of emails for registration (for special emails where MX record detection fails)
 * NEW For payment mode credit transfer, an email is sent at invoice validation
 * NEW Can filter on instance mask when selecting target of email.
-* NEW Add info on ducs command
-* NEW Support discount codes with a number part (MYDISCOUNTCODE-123)
+* NEW Add info on how to use ducs command in backup tab.
+* NEW Support discount codes with a number part (MYDISCOUNTCODE-123) acting as MYDISCOUNTCODE.
 * NEW Add hostname property in list of deployment servers  
 * NEW Add option SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL
 * NEW More protection on public registration

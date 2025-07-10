@@ -551,7 +551,7 @@ if ($reshook == 0) {
 				foreach ($planarray as $key => $planref) {
 					$tmpplan = new Product($db);
 					$tmpplan->fetch(0, $planref, '', '', 1, 1);
-					print '<option data-id="'.$tmpplan->id.'" data-ref="'.$planref.'">';
+					print '<option data-id="'.$tmpplan->id.'" data-ref="'.$planref.'" data-onlyserver="'.$tmpplan->array_options['options_onlyserver'].'">';
 					print empty($tmpplan->multilangs[$langs->defaultlang]['label']) ? $planref : $tmpplan->multilangs[$langs->defaultlang]['label'];
 					print '</option>';
 				}
