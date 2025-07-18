@@ -228,7 +228,7 @@ print "</tr>\n";
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP").'</td>';
 print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP" value="'.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP').'">';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP" spellcheck="false" value="'.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP').'">';
 print '</td>';
 print '<td><span class="opacitymedium small">1.2.3.4,...</span></td>';
 print '</tr>';
@@ -313,7 +313,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<!-- suffix = '.$suffix.' -->'."\n";
 
 	print '<tr class="oddeven"><td>'.($service ? $service.' - ' : '').$langs->trans("DefaultProductForInstances").'</td>';
-	print '<td>';
+	print '<td class="nowraponall">';
 	$constname = 'SELLYOURSAAS_DEFAULT_PRODUCT'.$suffix;
 	print '<!-- constname = '.$constname.' -->';
 	$defaultproductid = getDolGlobalString($constname);
