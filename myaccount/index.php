@@ -682,7 +682,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	// Send support ticket
 	$error = 0;
 
-	$emailfrom = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
+	$emailfrom = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');	// The email that is allowed to send technical emails.
+	//$emailfrom = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
@@ -694,7 +695,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	//dol_syslog($cmailfile->subject);exit;
 
 	$emailto = GETPOST('to', 'alphanohtml');
-	$replyto = GETPOST('from', 'alphanohtml');
+	$replyto = GETPOST('from', 'alphanohtml');		// The email of customers to have into the Reply-To of the support email we will receive.
 	$topic = GETPOST('subject', 'alphanohtml');
 	$content = GETPOST('content', 'restricthtml');
 	$groupticket=GETPOST('ticketcategory', 'aZ09');
