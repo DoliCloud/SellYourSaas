@@ -147,7 +147,7 @@ if (empty($linklogo)) {               // Show main logo of Cloud service
 	$constlogoalt = 'SELLYOURSAAS_LOGO_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 	$constlogosmallalt = 'SELLYOURSAAS_LOGO_SMALL_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 
-	//var_dump($sellyoursaasdomain.' '.$constlogoalt.' '.$conf->global->$constlogoalt);exit;
+	//var_dump($sellyoursaasdomain.' '.$constlogoalt.' '.getDolGlobalString($constlogoalt);exit;
 	if (getDolGlobalString($constlogoalt)) {
 		$constlogo=$constlogoalt;
 		$constlogosmall=$constlogosmallalt;
@@ -428,7 +428,7 @@ if ($forgetpasslink || $helpcenterlink) {
 
 
 if (getDolGlobalString('MAIN_HTML_FOOTER')) {
-	print $conf->global->MAIN_HTML_FOOTER;
+	print getDolGlobalString('MAIN_HTML_FOOTER');
 }
 
 if (! empty($morelogincontent) && is_array($morelogincontent)) {
@@ -467,7 +467,7 @@ if (! empty($conf->google->enabled) && getDolGlobalString('MAIN_GOOGLE_AN_ID')) 
 
 <?php
 if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
-	print $conf->global->SELLYOURSAAS_MYACCOUNT_FOOTER;
+	print getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER');
 }
 ?>
 

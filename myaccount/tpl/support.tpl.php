@@ -305,7 +305,7 @@ if ($sellyoursaassupporturl) {
 
 		$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 			$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 			if (getDolGlobalString($newnamekey)) {
 				$sellyoursaasemail = getDolGlobalString($newnamekey);
@@ -316,7 +316,7 @@ if ($sellyoursaassupporturl) {
 			// We must use the prioritary email
 			$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL_PREMIUM');
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_PREMIUM_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 				if (getDolGlobalString($newnamekey)) {
 					$sellyoursaasemail = getDolGlobalString($newnamekey);

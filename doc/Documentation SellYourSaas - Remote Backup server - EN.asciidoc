@@ -715,7 +715,7 @@ Delete very old files daily by adding the crontab task:
 #0 18 * * 1 find /mnt/diskbackup/*/backupold_* -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
 55 23 * * * btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >/var/log/sellyoursaas_btrfs.log; btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >>/var/log/sellyoursaas_btrfs.log; rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +\%j`/.snapshots >>/var/log/sellyoursaas_btrfs.log; btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` ro true >>/var/log/sellyoursaas_btrfs.log;
 0 0 * * * find /mnt/diskbackup/.snapshots -maxdepth 1 -type d -mtime +40 -exec btrfs subvolume delete {} \; >>/var/log/sellyoursaas_btrfs.log;
-0 1 * * * find /mnt/diskbackup/backup_*/osu*/ -maxdepth 0 -type d -mtime +730 -exec rm -fr {} \; >>/var/log/sellyoursaas_btrfs.log
+0 1 * * * find "/mnt/diskbackup/" -maxdepth 2 -path "/mnt/diskbackup/backup_*/osu*" -type d -mtime +365 -exec rm -fr {} \; >>/var/log/sellyoursaas_btrfs.log
 ---------------
 
 

@@ -27,7 +27,7 @@ if (empty($conf) || ! is_object($conf)) {
 
 $sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 	$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 	if (getDolGlobalString($newnamekey)) {
 		$sellyoursaasname = getDolGlobalString($newnamekey);
@@ -346,9 +346,9 @@ if (! GETPOST('deleteaccount')) {
 				                <p class="opacitymedium error" style="padding: 5px">
 				                    ';
 if (($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstancessuspendedreseller) > 0) {
-	print $langs->trans("ClosingAccountResellerNotPossible", ($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstancessuspendedreseller), $langs->transnoentities("MyInstances"), $langs->transnoentities("DangerZone")).'<br>';
+	print $langs->trans("ClosingAccountResellerNotPossible", ($nbofinstancesinprogressreseller + $nbofinstancesdonereseller + $nbofinstancessuspendedreseller), $langs->transnoentities("MyInstances"), $langs->transnoentities("CancelInstance")).'<br>';
 } elseif (($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended) > 0) {
-	print $langs->trans("ClosingAccountNotPossible", ($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended), $langs->transnoentities("MyInstances"), $langs->transnoentities("DangerZone")).'<br>';
+	print $langs->trans("ClosingAccountNotPossible", ($nbofinstancesinprogress + $nbofinstancesdone + $nbofinstancessuspended), $langs->transnoentities("MyInstances"), $langs->transnoentities("CancelInstance")).'<br>';
 } elseif (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 	print '<!-- ClosingAccountIsTemporarlyDisabledTryLater -->'."\n";
 	print $langs->trans("ClosingAccountIsTemporarlyDisabledTryLater").'<br>';

@@ -401,7 +401,7 @@ if ($reshook == 0) {
 			$constlogoalt = 'SELLYOURSAAS_LOGO_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 			$constlogosmallalt = 'SELLYOURSAAS_LOGO_SMALL_'.str_replace('.', '_', strtoupper($sellyoursaasdomain));
 
-			//var_dump($sellyoursaasdomain.' '.$constlogoalt.' '.$conf->global->$constlogoalt);exit;
+			//var_dump($sellyoursaasdomain.' '.$constlogoalt.' '.getDolGlobalString($constlogoalt));exit;
 			if (getDolGlobalString($constlogoalt)) {
 				$constlogo=$constlogoalt;
 				$constlogosmall=$constlogosmallalt;
@@ -546,10 +546,14 @@ if ($reshook == 0) {
 				print '<div class="fld select-plan required">';
 				print '<label class="control-label" for="plan">'.$langs->trans("ChooseAProductForYourApplication").'</label>';
 				print '<div class="control">';
-				print '<select required id="planselect" name="plan">';
+				print '<select class="minwidth400" required id="planselect" name="plan">';
 				print '<option>&nbsp;</option>';
 				foreach ($planarray as $key => $planref) {
-					print '<option>'.$planref.'</option>';
+					$tmpplan = new Product($db);
+					$tmpplan->fetch(0, $planref, '', '', 1, 1);
+					print '<option data-id="'.$tmpplan->id.'" data-ref="'.$planref.'" data-onlyserver="'.$tmpplan->array_options['options_onlyserver'].'">';
+					print empty($tmpplan->multilangs[$langs->defaultlang]['label']) ? $planref : $tmpplan->multilangs[$langs->defaultlang]['label'];
+					print '</option>';
 				}
 				print '</select>';
 				print '</div>';

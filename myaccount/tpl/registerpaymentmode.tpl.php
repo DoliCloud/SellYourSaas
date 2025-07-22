@@ -120,7 +120,7 @@ if ($totalInvoiced == 0) {
 
 			$urlforplanprices = getDolGlobalString('SELLYOURSAAS_PRICES_URL');
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 				$newnamekey = 'SELLYOURSAAS_PRICES_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
 				$urlforplanprices = getDolGlobalString($newnamekey);
 			}
@@ -300,11 +300,11 @@ if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {	// Us
 
 	$service = 'StripeLive';
 	$servicestatus = 1;
-
-	if (!getDolGlobalString('STRIPE_LIVE') || GETPOST('forcesandbox', 'alpha')) {
+	if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 		$service = 'StripeTest';
 		$servicestatus = 0;
 	}
+
 	$stripe = new Stripe($db);
 	$stripeacc = $stripe->getStripeAccount($service);
 	$stripecu = null;
@@ -317,7 +317,7 @@ if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {	// Us
 
 			$emailforerror = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+				&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 				$emailforerror = getDolGlobalString($newnamekey);
 			}
@@ -334,7 +334,7 @@ print '</div></div>';
 
 require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
 // Reforce the $stripearrayofkeys because content may have been changed by the include of config.php
-if (!getDolGlobalString('STRIPE_LIVE') || GETPOST('forcesandbox', 'alpha') || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 	$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
 } else {
 	$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
@@ -368,11 +368,10 @@ print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_S
 if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION') && is_object($setupintent)) {
 	// TODO Enable this legal mention for SCA
 	/*$urlfortermofuse = '';
-	 if ($conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME == 'dolicloud.com')
-	 {
-	 $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/en-terms-and-conditions.php';
-	 if (preg_match('/^fr/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/fr-conditions-utilisations.php';
-	 if (preg_match('/^es/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.$conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME.'/es-terminos-y-condiciones.php';
+	 if (getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME') == 'dolicloud.com') {
+	 $urlfortermofuse = 'https://www.'.getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/en-terms-and-conditions.php';
+	 if (preg_match('/^fr/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/fr-conditions-utilisations.php';
+	 if (preg_match('/^es/i', $langs->defaultlang)) $urlfortermofuse = 'https://www.'.getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/es-terminos-y-condiciones.php';
 	 }
 	 if ($urlfortermofuse)
 	 {
@@ -690,7 +689,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 
 				$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 				include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-				$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
+				$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL(getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL'), 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 				$urltouse=$sellyoursaasaccounturl.'/'.(DOL_URL_ROOT ? DOL_URL_ROOT.'/' : '').$publicurltodownload;
 				//print img_mime('sepa.pdf').'  <a href="'.$urltouse.'" target="_download">'.$langs->trans("DownloadTheSEPAMandate").'</a><br>';

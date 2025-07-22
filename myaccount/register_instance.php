@@ -949,7 +949,7 @@ if ($reusecontractid) {
 		$email = $tmpthirdparty->email;
 
 		// Check number of instances for the same thirdparty account
-		$MAXINSTANCESPERACCOUNT = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? (!getDolGlobalString('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT') ? 4 : $conf->global->SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT) : $tmpthirdparty->array_options['options_maxnbofinstances']);
+		$MAXINSTANCESPERACCOUNT = ((empty($tmpthirdparty->array_options['options_maxnbofinstances']) && $tmpthirdparty->array_options['options_maxnbofinstances'] != '0') ? getDolGlobalInt('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', 4) : $tmpthirdparty->array_options['options_maxnbofinstances']);
 
 		$listofcontractid = array();
 		$listofcontractidopen = array();
@@ -981,7 +981,7 @@ if ($reusecontractid) {
 		if (count($listofcontractidopen) >= $MAXINSTANCESPERACCOUNT) {
 			$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
-				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+				&& $tmpthirdparty->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 				$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$tmpthirdparty->array_options['options_domain_registration_page'];
 				if (getDolGlobalString($newnamekey)) {
 					$sellyoursaasemail = getDolGlobalString($newnamekey);
@@ -1007,7 +1007,7 @@ if ($reusecontractid) {
 			$myaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
 			$myaccountorigindomain = $tmpthirdparty->array_options['options_domain_registration_page'];
 			if (! empty($tmpthirdparty->array_options['options_domain_registration_page'])
-				&& $tmpthirdparty->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+				&& $tmpthirdparty->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 				$newnamekey = 'SELLYOURSAAS_ACCOUNT_URL-'.$tmpthirdparty->array_options['options_domain_registration_page'];
 				if (getDolGlobalString($newnamekey)) {
 					$myaccounturl = getDolGlobalString($newnamekey);
@@ -1066,8 +1066,8 @@ if ($reusecontractid) {
 	$generateddbname = 'dbn'.substr(getRandomPassword(true, array('I')), 0, 9);
 	$generateddbusername = 'dbu'.substr(getRandomPassword(true, array('I')), 0, 9);
 	$generateddbpassword = substr(getRandomPassword(true, array('I')), 0, 14);
-	$generateddbhostname = (getDolGlobalString('SELLYOURSAAS_FORCE_DATABASE_HOST') ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_HOST : $sldAndSubdomain.'.'.$domainname);
-	$generateddbport = (getDolGlobalString('SELLYOURSAAS_FORCE_DATABASE_PORT') ? $conf->global->SELLYOURSAAS_FORCE_DATABASE_PORT : 3306);
+	$generateddbhostname = getDolGlobalString('SELLYOURSAAS_FORCE_DATABASE_HOST', $sldAndSubdomain.'.'.$domainname);
+	$generateddbport = getDolGlobalInt('SELLYOURSAAS_FORCE_DATABASE_PORT', 3306);
 	$generatedunixhostname = $sldAndSubdomain.'.'.$domainname;
 
 
@@ -1094,7 +1094,7 @@ if ($reusecontractid) {
 
 	if ($productref == 'none') {	// If reseller
 		$tmpthirdparty->fournisseur = 1;
-		$tmpthirdparty->array_options['options_commission'] = (!getDolGlobalString('SELLYOURSAAS_DEFAULT_COMMISSION') ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
+		$tmpthirdparty->array_options['options_commission'] = getDolGlobalInt('SELLYOURSAAS_DEFAULT_COMMISSION', 25);
 	}
 
 	if ($country_code) {
@@ -1202,7 +1202,7 @@ if ($reusecontractid) {
 	if ($productref == 'none') {
 		if (getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG')) {
 			$tmpthirdparty->name_alias = dol_sanitizeFileName($tmpthirdparty->name);
-			$result = $tmpthirdparty->setCategories(array($conf->global->SELLYOURSAAS_DEFAULT_RESELLER_CATEG => getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG')), 'supplier');
+			$result = $tmpthirdparty->setCategories(array(getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') => getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG')), 'supplier');
 			if ($result < 0) {
 				$db->rollback();
 
@@ -1786,9 +1786,9 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 			dol_print_error_email('DEPLOY-'.$generateddbhostname.'-', '', $errormessages, 'alert alert-error');
 
 			/*
-			$sellyoursaasname = $conf->global->SELLYOURSAAS_NAME;
-			$sellyoursaasemail = $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL;
-			$sellyoursaasemailnoreply = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
+			$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
+			$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL');
+			$sellyoursaasemailnoreply = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 			$sellyoursaasdomain=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$sellyoursaasdomain;
@@ -1797,14 +1797,14 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 			if (getDolGlobalString($constforaltname))
 			{
 				$sellyoursaasdomain = $sellyoursaasdomain;
-				$sellyoursaasname = $conf->global->$constforaltname;
-				$sellyoursaasemail = $conf->global->$constforaltemailto;
-				$sellyoursaasemailnoreply = $conf->global->$constforaltemailnoreply;
+				$sellyoursaasname = getDolGlobalString($constforaltname);
+				$sellyoursaasemail = getDolGlobalString($constforaltemailto);
+				$sellyoursaasemailnoreply = getDolGlobalString($constforaltemailnoreply);
 			}
 
 			$to = $sellyoursaasemail;
 			$from = $sellyoursaasemailnoreply;
-			$email = new CMailFile('[Alert] Failed to deploy instance '.$generateddbhostname.' - '.dol_print_date(dol_now(), 'dayhourrfc'), $to, $from, join("\n",$errormessages)."\n", array(), array(), array(), $conf->global->SELLYOURSAAS_SUPERVISION_EMAIL, '', 0, 0, '', '', '', '', 'emailing');
+			$email = new CMailFile('[Alert] Failed to deploy instance '.$generateddbhostname.' - '.dol_print_date(dol_now(), 'dayhourrfc'), $to, $from, join("\n",$errormessages)."\n", array(), array(), array(), getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL'), '', 0, 0, '', '', '', '', 'emailing');
 			$email->sendfile();
 			*/
 			?>

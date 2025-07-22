@@ -27,7 +27,7 @@ if (empty($conf) || ! is_object($conf)) {
 
 $sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 	$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 	if (getDolGlobalString($newnamekey)) {
 		$sellyoursaasname = getDolGlobalString($newnamekey);
@@ -37,7 +37,7 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 // Print warning to read FAQ before
 $url = getDolGlobalString('SELLYOURSAAS_RESELLER_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 	$newnamekey = 'SELLYOURSAAS_RESELLER_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 	if (getDolGlobalString($newnamekey)) {
 		$url = getDolGlobalString($newnamekey);
@@ -100,7 +100,7 @@ if ($dateapplyreseller) {
 	// Set email to use when applying for reseller program
 	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL'));
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
@@ -109,7 +109,7 @@ if ($dateapplyreseller) {
 
 	$subject = (GETPOST('subject', 'none') ? GETPOST('subject', 'none') : (preg_match('/fr/i', $langs->defaultlang) ? $langs->trans("BecomeReseller") : $langsen->trans("BecomeReseller")).' - '.$sellyoursaasemail);
 
-	$commissiondefault = (!getDolGlobalString('SELLYOURSAAS_DEFAULT_COMMISSION') ? 25 : $conf->global->SELLYOURSAAS_DEFAULT_COMMISSION);
+	$commissiondefault = getDolGlobalInt('SELLYOURSAAS_DEFAULT_COMMISSION', 25);
 
 	print $langs->trans("MailFrom").' : <input type="text" required name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'"><br><br>';
 

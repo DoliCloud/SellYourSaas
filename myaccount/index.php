@@ -203,7 +203,7 @@ if ($idforfetch > 0) {
 if ($idforfetch <= 0 || empty($mythirdpartyaccount->status)) {
 	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
@@ -225,14 +225,23 @@ if ($langs->getDefaultLang(1) == 'fr') {
 	$langcode = 'fr';
 }
 
+$urlportal= getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');
+if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
+	$newnamekey = 'SELLYOURSAAS_MAIN_DOMAIN_NAME-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+	if (getDolGlobalString($newnamekey)) {
+		$urlportal = getDolGlobalString($newnamekey);
+	}
+}
+
 $urlfaq = '';
 if (!getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL')) {
-	if (preg_match('/dolicloud\.com/', $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME)) {
+	if (preg_match('/dolicloud\.com/', getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME'))) {
 		$urlfaq='https://www.' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/'.$langcode.'/faq';
 	} else {
 		$urlfaq='https://www.' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/faq-'.$langcode.'.php';
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 			$newnamekey = 'SELLYOURSAAS_MAIN_FAQ_URL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 			if (getDolGlobalString($newnamekey)) {
 				$urlfaq = getDolGlobalString($newnamekey);
@@ -247,7 +256,7 @@ if (!getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL')) {
 
 $urlstatus = getDolGlobalString('SELLYOURSAAS_STATUS_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 	$newnamekey = 'SELLYOURSAAS_STATUS_URL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 	if (getDolGlobalString($newnamekey)) {
 		$urlstatus = getDolGlobalString($newnamekey);
@@ -389,7 +398,7 @@ $servicestatusstripe = 0;
 if (isModEnabled('stripe')) {
 	$service = 'StripeTest';
 	$servicestatusstripe = 0;
-	if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+	if (getDolGlobalString('STRIPE_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 		$service = 'StripeLive';
 		$servicestatusstripe = 1;
 	}
@@ -397,7 +406,7 @@ if (isModEnabled('stripe')) {
 $servicestatuspaypal = 0;
 if (isModEnabled('paypal')) {
 	$servicestatuspaypal = 0;
-	if (getDolGlobalString('PAYPAL_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
+	if (getDolGlobalString('PAYPAL_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_PAYPAL_TEST')) {
 		$servicestatuspaypal = 1;
 	}
 }
@@ -614,24 +623,26 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
 
+	// TODO
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 } elseif ($action == 'changeplan') {
 	$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
 		}
 	}
 
+	// TODO
 	setEventMessages($langs->trans("FeatureNotYetAvailable").'.<br>'.$langs->trans("ContactUsByEmail", $sellyoursaasemail), null, 'warnings');
 	$action = '';
 } elseif ($action == 'validatefreemode') {
@@ -671,10 +682,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	// Send support ticket
 	$error = 0;
 
-	$emailfrom = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
+	$emailfrom = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');	// The email that is allowed to send technical emails.
+	//$emailfrom = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_NOREPLY_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasemail = getDolGlobalString($newnamekey);
@@ -683,7 +695,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	//dol_syslog($cmailfile->subject);exit;
 
 	$emailto = GETPOST('to', 'alphanohtml');
-	$replyto = GETPOST('from', 'alphanohtml');
+	$replyto = GETPOST('from', 'alphanohtml');		// The email of customers to have into the Reply-To of the support email we will receive.
 	$topic = GETPOST('subject', 'alphanohtml');
 	$content = GETPOST('content', 'restricthtml');
 	$groupticket=GETPOST('ticketcategory', 'aZ09');
@@ -860,7 +872,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$sellyoursaasnoreplyemail = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (getDolGlobalString($newnamekey)) {
 			$sellyoursaasname = getDolGlobalString($newnamekey);
@@ -874,7 +886,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	// Set email to use when applying for reseller program. Use SELLYOURSAAS_RESELLER_EMAIL and if not found backfall on SELLYOURSAAS_MAIN_EMAIL.
 	$emailto = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL', getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL'));
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (getDolGlobalString($newnamekey)) {
 			$emailto = getDolGlobalString($newnamekey);
@@ -1169,7 +1181,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$companybankaccount->fetch(GETPOSTINT('bankid'));
 			$service = 'StripeTest';
 			$servicestatus = 0;
-			if (getDolGlobalString('STRIPE_LIVE') && !GETPOST('forcesandbox', 'alpha')) {
+			if (getDolGlobalString('STRIPE_LIVE')/* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 				$service = 'StripeLive';
 				$servicestatus = 1;
 			}
@@ -1333,7 +1345,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
 			global $stripearrayofkeysbyenv;
 			// Reforce the $stripearrayofkeys because content may change depending on option
-			if (!getDolGlobalString('STRIPE_LIVE') || GETPOST('forcesandbox', 'alpha') || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+			if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 				$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
 			} else {
 				$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
@@ -1822,7 +1834,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 						$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');
 						if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-							&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+							&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 							$newnamekey = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 							if (getDolGlobalString($newnamekey)) {
 								$sellyoursaasname = getDolGlobalString($newnamekey);
@@ -2342,7 +2354,7 @@ print '
 	  </form>
 
 	  <!-- Logo -->
-      <span class="navbar-brand"><img src="'.$linklogoblack.'" height="34px"></span>
+      <span class="navbar-brand"><a href="https://'.$urlportal.'" target="_blank" rel="noopener"><img src="'.$linklogoblack.'" height="34px"></a></span>
 
 	  <!-- Menu -->
       <div class="collapse navbar-collapse" id="navbars">
@@ -2390,9 +2402,9 @@ if ($mythirdpartyaccount->isareseller) {
                  <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>';
 		// Reseler request
 if (! $mythirdpartyaccount->isareseller) {
-	$allowresellerprogram = (getDolGlobalString('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM'));
+	$allowresellerprogram = getDolGlobalString('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM');
 	if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != $conf->global->SELLYOURSAAS_MAIN_DOMAIN_NAME) {
+		&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 		$newnamekey = 'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
 		if (isset($conf->global->$newnamekey)) {
 			$allowresellerprogram = getDolGlobalString($newnamekey);
@@ -2603,17 +2615,18 @@ if (!empty($showannouncefordomain)) {
 	}
 }
 
-// List of available plans/products (available for reseller)
+// List of available plans/products (available for customers and resellers)
 $arrayofplans=array();
 $arrayofplanscode=array();
 $sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers';
 $sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
-$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
+$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
 $sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 $sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
-$sqlproducts.= " AND pe.availabelforresellers = 1";
+$sqlproducts.= " AND pe.availabelforresellers = 1";		// despite the name, this is for both customers and resellers
 //$sqlproducts.= " AND (p.rowid = ".$planid." OR 1 = 1)";
 $sqlproducts.= " ORDER BY pe.position ASC";
+
 $resqlproducts = $db->query($sqlproducts);
 if ($resqlproducts) {
 	$num = $db->num_rows($resqlproducts);
@@ -2716,7 +2729,7 @@ if ($mythirdpartyaccount->isareseller) {
 	print '<span class="opacitymedium">'.$langs->trans("YourURLToCreateNewInstance").':</span><br>';
 
 	$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
-	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL($conf->global->SELLYOURSAAS_ACCOUNT_URL, 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
+	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL(getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL'), 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
 	$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);
 	//print '<a class="wordbreak" href="'.$urlforpartner.'" target="_blankinstance" rel="noopener">';
@@ -3224,7 +3237,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 	}
 
 	// Test if there is a payment error, if yes, ask to fix payment data
-	$sql = 'SELECT f.rowid, ee.code, ee.label, ee.extraparams FROM '.MAIN_DB_PREFIX.'facture as f';
+	$sql = 'SELECT f.rowid, ee.id as eid, ee.code, ee.label, ee.extraparams FROM '.MAIN_DB_PREFIX.'facture as f';
 	$sql.= ' INNER JOIN '.MAIN_DB_PREFIX."actioncomm as ee ON ee.fk_element = f.rowid AND ee.elementtype = 'invoice'";
 	$sql.= " AND (ee.code LIKE 'AC_PAYMENT_%_KO' OR ee.label = 'Cancellation of payment by the bank')";		// See also into sellyoursaasIsPaymentKo
 	$sql.= ' WHERE f.fk_soc = '.((int) $mythirdpartyaccount->id).' AND f.paye = 0';
@@ -3240,7 +3253,7 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 			$obj = $db->fetch_object($resql);
 			$labelerror = $obj->extraparams;
 			if (empty($labelerror)) {
-				$labelerror=$langs->trans("UnknownError");
+				$labelerror = (empty($obj->label) ? $langs->transnoentities("UnknownError") : $obj->label).' - '.$langs->transnoentities("Event").' '.$obj->eid;
 			}
 
 			// There is at least one payment error

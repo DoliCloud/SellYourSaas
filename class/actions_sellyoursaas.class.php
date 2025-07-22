@@ -260,7 +260,7 @@ class ActionsSellyoursaas
 	 */
 	public function addMoreActionsButtons($parameters, &$object, &$action)
 	{
-		global $langs,$conf,$user;
+		global $langs, $conf, $user;
 
 		dol_syslog(get_class($this).'::addMoreActionsButtons action='.$action);
 		$langs->load("sellyoursaas@sellyoursaas");
@@ -701,7 +701,7 @@ class ActionsSellyoursaas
 			if (! empty($conf->stripe->enabled)) {
 				$service = 'StripeTest';
 				$servicestatusstripe = 0;
-				if (getDolGlobalString('STRIPE_LIVE') && ! GETPOST('forcesandbox', 'alpha') && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+				if (getDolGlobalString('STRIPE_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
 					$service = 'StripeLive';
 					$servicestatusstripe = 1;
 				}
@@ -976,7 +976,7 @@ class ActionsSellyoursaas
 	 */
 	public function formConfirm($parameters, &$object, &$action)
 	{
-		global $langs, $conf, $user, $form;
+		global $langs, $form;
 
 		dol_syslog(get_class($this).'::doActions action='.$action);
 		$langs->load("sellyoursaas@sellyoursaas");
@@ -1036,7 +1036,7 @@ class ActionsSellyoursaas
 	 */
 	public function addSearchEntry($parameters)
 	{
-		global $conf, $langs, $user;
+		global $user;
 
 		if ($user->hasRight('sellyoursaas', 'read')) {
 			/*$langs->load("sellyoursaas@sellyoursaas");
@@ -1063,7 +1063,7 @@ class ActionsSellyoursaas
 	 */
 	public function moreHtmlStatus($parameters, $object = null, $action = '')
 	{
-		global $conf, $langs;
+		global $langs;
 		global $object;
 
 		if ($parameters['currentcontext'] == 'contractcard') {
@@ -1132,7 +1132,6 @@ class ActionsSellyoursaas
 	 */
 	public function printEmail($parameters)
 	{
-		global $conf, $langs, $user;
 		global $object, $action;
 
 		if (in_array($parameters['currentcontext'], array('thirdpartycard','thirdpartycontact','thirdpartycomm','thirdpartysupplier','thirdpartyticket','thirdpartynote','thirdpartydocument','contactthirdparty','thirdpartypartnership','projectthirdparty','consumptionthirdparty','thirdpartybancard','thirdpartymargins','ticketlist','thirdpartynotification','agendathirdparty'))) {
@@ -1145,16 +1144,15 @@ class ActionsSellyoursaas
 	}
 
 
-
 	/**
-	 * Complete search forms
+	 * Complete from emails
 	 *
 	 * @param	array	$parameters		Array of parameters
 	 * @return	int						1=Replace standard code, 0=Continue standard code
 	 */
 	public function getDefaultFromEmail($parameters)
 	{
-		global $conf, $langs, $user;
+		global $langs, $user;
 		global $object;
 
 		$langs->load("sellyoursaas@sellyoursaas");
@@ -1272,6 +1270,24 @@ class ActionsSellyoursaas
 
 
 	/**
+	 * Complete SQL by adding tables in FROM
+	 *
+	 * @param	array	$parameters		Array of parameters
+	 * @param	object	$object			Object
+	 * @return	string					HTML content to add by hook
+	 */
+	public function printFieldListFrom($parameters, &$object)
+	{
+		global $contextpage;
+
+		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('contractlist', 'sellyoursaasinstances','sellyoursaasinstancesvtwo'))) {
+			$this->resprints = ' LEFT JOIN '.$this->db->prefix().'societe_extrafields as se ON s.rowid = se.fk_object';
+		}
+
+		return 0;
+	}
+
+	/**
 	 * Complete list
 	 *
 	 * @param	array	$parameters		Array of parameters
@@ -1280,7 +1296,7 @@ class ActionsSellyoursaas
 	 */
 	public function printFieldListTitle($parameters, &$object)
 	{
-		global $conf, $langs;
+		global $langs;
 		global $param, $sortfield, $sortorder;
 		global $contextpage;
 
@@ -1310,7 +1326,6 @@ class ActionsSellyoursaas
 	 */
 	public function printFieldListOption($parameters, &$object)
 	{
-		global $conf, $langs;
 		global $contextpage;
 
 		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo'))) {
@@ -1335,7 +1350,7 @@ class ActionsSellyoursaas
 	 */
 	public function printFieldListValue($parameters, &$object)
 	{
-		global $conf, $langs;
+		global $langs;
 		global $db;
 		global $contextpage;
 
@@ -1454,14 +1469,14 @@ class ActionsSellyoursaas
 		}
 
 		// Is second logo is same than main logo ?
-		if ($secondlogo == $conf->global->MAIN_INFO_SOCIETE_LOGO_SMALL || empty($secondlogo)) {
+		if ($secondlogo == getDolGlobalString('MAIN_INFO_SOCIETE_LOGO_SMALL') || empty($secondlogo)) {
 			return 0;
 		}
 
 		// If this is a customer of SellYourSaas, we add logo of SellYourSaas
 		$outputlangs=$langs;
 
-		$this->marge_haute =isset($conf->global->MAIN_PDF_MARGIN_TOP) ? $conf->global->MAIN_PDF_MARGIN_TOP : 10;
+		$this->marge_haute = getDolGlobalInt('MAIN_PDF_MARGIN_TOP', 10);
 
 		//var_dump($parameters['object']);
 
@@ -1509,9 +1524,7 @@ class ActionsSellyoursaas
 
 		if ($pagecounttmp) {
 			$pdf->Output($file, 'F');
-			if (getDolGlobalString('MAIN_UMASK')) {
-				@chmod($file, octdec($conf->global->MAIN_UMASK));
-			}
+			dolChmod($file);
 		}
 
 		return $ret;
@@ -1528,7 +1541,7 @@ class ActionsSellyoursaas
 	 */
 	public function loadDataForCustomReports($parameters, &$action, $hookmanager)
 	{
-		global $user, $langs;
+		global $langs;
 
 		$langs->load("sellyoursaas@sellyoursaas");
 
@@ -1606,6 +1619,8 @@ class ActionsSellyoursaas
 			$this->results['fieldstosearchall']['ef.lastname'] = 'Lastname';
 		}
 		if ($object->element == 'contrat') {
+			$this->results['fieldstosearchall']['se.firstname'] = 'Firstname';
+			$this->results['fieldstosearchall']['se.lastname'] = 'Lastname';
 			$this->results['fieldstosearchall']['username_os'] = 'Username OS';
 			$this->results['fieldstosearchall']['database_db'] = 'Database DB';
 			$this->results['fieldstosearchall']['username_db'] = 'Username DB';

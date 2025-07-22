@@ -253,7 +253,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 		$url='https://'.$object->ref_customer.'?username='.urlencode($lastloginadmin).'&amp;password='.urlencode($lastpassadmin);
 		$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to application (last logged admin)<br><div class="urllink">';
 	}
-	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
+	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'" spellcheck="false"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
 	$links .= $link.'</div>';
 
 	$links.='<br>';
@@ -282,7 +282,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.urlencode($thirdparty->email).'&login_hash='.urlencode($dol_login_hash);	// Note that password may have change and not being the one of dolibarr admin user
 	}
 
-	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
+	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'" spellcheck="false"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';
 	$links .= img_picto('', 'globe', 'class="pictofixedwidth"').'Link to customer dashboard<br><div class="urllink">';
 	$links .= $link.'</div>';
 
@@ -294,7 +294,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	//$homestring=$conf->global->DOLICLOUD_INSTANCES_PATH.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
 	$homestring=getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$object->username_os;
 	$links.='Home dir: ';
-	$links.='<input type="text" name="homestring" id="homestring" value="'.$homestring.'" class="maxwidth250"> ';
+	$links.='<input type="text" name="homestring" id="homestring" value="'.$homestring.'" class="maxwidth250" spellcheck="false"> ';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('homestring');
 	}
@@ -305,7 +305,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links .= ' &nbsp; ';
 	$links .= ' &nbsp; ';
 	$links.='Backup dir: ';
-	$links.='<input type="text" name="backupstring" id="backupstring" value="'.$backupstring.'" class="maxwidth250"> ';
+	$links.='<input type="text" name="backupstring" id="backupstring" value="'.$backupstring.'" class="maxwidth250" spellcheck="false"> ';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('backupstring');
 	}
@@ -321,7 +321,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links .= ' &nbsp; ';
 	$links .= ' &nbsp; ';
 	$links .= 'Archive dir: ';
-	$links .= '<input type="text" name="archivestring" id="archivestring" value="'.$archivestring.'" class="maxwidth250"><br>';
+	$links .= '<input type="text" name="archivestring" id="archivestring" value="'.$archivestring.'" class="maxwidth250" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links .= ajax_autoselect('archivestring');
 	}
@@ -329,13 +329,13 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	// User and Password
 	$userstring=$object->username_os;
 	$links.=$langs->trans("User").': ';
-	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" class="maxwidth200">';
+	$links.='<input type="text" name="userstring" id="userstring" value="'.$userstring.'" class="maxwidth200" spellcheck="false">';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('userstring');
 	}
 	$links .= ' &nbsp; ';
 	$links .= $langs->trans("Password").': ';
-	$links.='<input type="text" name="sshpassword" id="sshpassword" value="'.dol_escape_htmltag($object->password_os).'" class="maxwidth200">';
+	$links.='<input type="text" name="sshpassword" id="sshpassword" value="'.dol_escape_htmltag($object->password_os).'" class="maxwidth200" spellcheck="false">';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('sshpassword');
 	}
@@ -346,13 +346,13 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	// SSH
 	$sshconnectstring='ssh '.$object->username_os.'@'.$object->hostname_os;
 	$links.='<span class="fa fa-terminal"></span> SSH connect string: ';
-	$links.='<input type="text" name="sshconnectstring" id="sshconnectstring" value="'.dol_escape_htmltag($sshconnectstring).'" class="maxwidth250">';
+	$links.='<input type="text" name="sshconnectstring" id="sshconnectstring" value="'.dol_escape_htmltag($sshconnectstring).'" class="maxwidth250" spellcheck="false">';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('sshconnectstring');
 	}
 	$links.=' &nbsp; '.$langs->trans("or").' SU: ';
 	$sustring='su '.$object->username_os;
-	$links.='<input type="text" name="sustring" id="sustring" value="'.$sustring.'" class="maxwidth200">';
+	$links.='<input type="text" name="sustring" id="sustring" value="'.$sustring.'" class="maxwidth200" spellcheck="false">';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('sustring');
 	}
@@ -363,7 +363,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	//$sftpconnectstring=$object->username_os.':'.$object->password_web.'@'.$object->hostname_os.$conf->global->DOLICLOUD_EXT_HOME.'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/','',$object->database_db);
 	$sftpconnectstring='sftp://'.$object->username_os.'@'.$object->hostname_os.'/' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db);
 	$links.='<span class="fa fa-terminal"></span> SFTP connect string: ';
-	$links.='<input type="text" name="sftpconnectstring" id="sftpconnectstring" value="'.dol_escape_htmltag($sftpconnectstring).'"><br>';
+	$links.='<input type="text" name="sftpconnectstring" id="sftpconnectstring" value="'.dol_escape_htmltag($sftpconnectstring).'" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('sftpconnectstring');
 	}
@@ -372,7 +372,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	// MySQL
 	$mysqlconnectstring='mysql -A -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db;
 	$links.='<span class="fa fa-database"></span> Mysql connect string: ';
-	$links.='<input type="text" name="mysqlconnectstring" id="mysqlconnectstring" value="'.dol_escape_htmltag($mysqlconnectstring).'"><br>';
+	$links.='<input type="text" name="mysqlconnectstring" id="mysqlconnectstring" value="'.dol_escape_htmltag($mysqlconnectstring).'" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('mysqlconnectstring');
 	}
@@ -386,7 +386,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$jdbcconnectstring='jdbc:mysql://'.$object->hostname_db.'/';
 	//$jdbcconnectstring.=$object->database_db;
 	$links.='<span class="fa fa-database"></span> JDBC connect string: ';
-	$links.='<input type="text" name="jdbcconnectstring" id="jdbcconnectstring" value="'.dol_escape_htmltag($jdbcconnectstring).'"><br>';
+	$links.='<input type="text" name="jdbcconnectstring" id="jdbcconnectstring" value="'.dol_escape_htmltag($jdbcconnectstring).'" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect('jdbcconnectstring');
 	}
@@ -404,7 +404,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$mysqlbackupcommand='mysqldump -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db.' > ' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$object->username_os.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $object->database_db).'/documents/admin/backup/mysqldump_'.$object->database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql backup database:<br>';
-	$links.='<input type="text" id="mysqlbackupcommand" name="mysqlbackupcommand" value="'.$mysqlbackupcommand.'" class="marginleftonly quatrevingtpercent"><br>';
+	$links.='<input type="text" id="mysqlbackupcommand" name="mysqlbackupcommand" value="'.$mysqlbackupcommand.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("mysqlbackupcommand", 0);
 	}
@@ -415,7 +415,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$mysqlrestorecommand='mysql -C -A -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' -D '.$object->database_db.' < filetorestore.sql';
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql restore database:<br>';
-	$links.='<input type="text" id="mysqlrestorecommand" name="mysqlrestorecommand" value="'.$mysqlrestorecommand.'" class="marginleftonly quatrevingtpercent"><br>';
+	$links.='<input type="text" id="mysqlrestorecommand" name="mysqlrestorecommand" value="'.$mysqlrestorecommand.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("mysqlrestorecommand", 0);
 	}
@@ -431,7 +431,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$mysqlblockallowremoteip .= " DROP USER '".$object->username_db."'@'".$ipofmaster."';";
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql sql command to block/allow remote IP access:<br>';
-	$links.='<textarea id="mysqlblockallowremoteip" name="mysqlblockallowremoteip" class="marginleftonly quatrevingtpercent" rows="'.ROWS_3.'">'.$mysqlblockallowremoteip.'</textarea>';
+	$links.='<textarea id="mysqlblockallowremoteip" name="mysqlblockallowremoteip" class="quatrevingtpercent" rows="'.ROWS_3.'" spellcheck="false">'.$mysqlblockallowremoteip.'</textarea>';
 	//if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlblockallowremoteip", 0);
 	$links.='<br><br>';
 
@@ -440,7 +440,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite application dir';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
-	$links.='<input type="text" id="sftprestoreappstring" name="sftprestoreappstring" value="'.$sftprestorestring.'" class="marginleftonly quatrevingtpercent"><br>';
+	$links.='<input type="text" id="sftprestoreappstring" name="sftprestoreappstring" value="'.$sftprestorestring.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("sftprestoreappstring", 0);
 	}
@@ -451,7 +451,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite document dir';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
-	$links.='<input type="text" id="sftprestorestring" name="sftprestorestring" value="'.$sftprestorestring.'" class="marginleftonly quatrevingtpercent"><br>';
+	$links.='<input type="text" id="sftprestorestring" name="sftprestorestring" value="'.$sftprestorestring.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("sftprestorestring", 0);
 	}
@@ -462,7 +462,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to install or overwrite module';
 	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
-	$links.='<input type="text" id="sftpdeploystring" name="sftpdeploystring" value="'.$sftpdeploystring.'" class="marginleftonly quatrevingtpercent"><br>';
+	$links.='<input type="text" id="sftpdeploystring" name="sftpdeploystring" value="'.$sftpdeploystring.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("sftpdeploystring", 0);
 	}
@@ -473,7 +473,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-arrow-up"></span> ';
 	$links.='Upgrade version line string';
 	$links.='<span class="opacitymedium"> (remplacer "test" par "confirmunlock" pour exécuter réellement)</span><br>';
-	$links.='<input type="text" id="upgradestring" name="upgradestring" value="'.$upgradestringtoshow.'" class="marginleftonly quatrevingtpercent"><br>';
+	$links.='<input type="text" id="upgradestring" name="upgradestring" value="'.$upgradestringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("upgradestring", 0);
 	}
@@ -484,7 +484,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-eraser"></span> ';
 	$links.='Purge command line string';
 	$links.='<span class="opacitymedium"> (remplacer "test" par "confirm" pour exécuter réellement)</span><br>';
-	$links.='<input type="text" id="purgestring" name="purgestring" value="'.$purgestringtoshow.'" class="marginleftonly quatrevingtpercent"><br>';
+	$links.='<input type="text" id="purgestring" name="purgestring" value="'.$purgestringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("purgestring", 0);
 	}
@@ -502,7 +502,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<span class="fa fa-certificate"></span> ';
 	$links.='Generate SSL certificate for the custom domain '.$object->array_options['options_custom_url'];
 	$links.='<span class="opacitymedium"> (to run on the deployment server)</span>';
-	$links.='<textarea name="generatecertifstring" id="generatecertifstring" class="centpercent marginleftonly" rows="'.ROWS_4.'">';
+	$links.='<textarea name="generatecertifstring" id="generatecertifstring" class="centpercent marginleftonly" rows="'.ROWS_4.'" spellcheck="false">';
 	//$links.='<input type="text" id="generatecertifstring" name="generatecertifstring" value="'.$generatecertif.'" class="marginleftonly quatrevingtpercent"><br>';
 	$links.=$generatecertif;
 	$links.='</textarea>';

@@ -73,12 +73,18 @@ if (!$res) {
 	die("Include of main fails");
 }
 
+/**
+ * @var DoliDB $db
+ * @var Translate $langs
+ * @var Hookmanager $hookmanager
+ * @var User $user
+ */
+
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
-dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
-
 // load module libraries
+require_once __DIR__.'/backoffice/lib/backoffice.lib.php';
 require_once __DIR__.'/class/deploymentserver.class.php';
 
 // for other modules
@@ -867,7 +873,7 @@ while ($i < $imaxinloop) {
 			$html = '<span class="smal">'.$langs->trans("CommandForDeploymentServer").':</span><br>';
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToManageRemoteDeploymentAgent").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
-			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/remote_server_launcher.sh start|status|stop';
 			$html .= '">';
 			$html .= '</div>';
@@ -889,21 +895,21 @@ while ($i < $imaxinloop) {
 
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToSqlToReGenerateDb").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
-			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_build_sql_for_instances.php '.$object->ref.' dbcreate|usercreate|userresetpass';
 			$html .= '">';
 			$html .= '</div>';
 
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
-			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_redeploy_instances.php '.$object->ref.' test|confirm';
 			$html .= '">';
 			$html .= '</div>';
 
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToMoveInstanceOnAnotherDeploymentServer").' <span class="opacitymedium">(to run as admin from the master server)</span>:<br>';
-			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
 			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_move_several_instances.php afilter*.'.$object->ref.' withX.mysaaasdomain.com test|confirm';
 			$html .= '">';
 			$html .= '</div>';
