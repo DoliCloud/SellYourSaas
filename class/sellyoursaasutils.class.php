@@ -4369,10 +4369,10 @@ class SellYourSaasUtils
 				$savsalt = getDolGlobalString('MAIN_SECURITY_SALT');
 				$savhashalgo = getDolGlobalString('MAIN_SECURITY_HASH_ALGO');
 
-				$conf->global->MAIN_SECURITY_HASH_ALGO = !getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') ? '' : $conf->global->SELLYOURSAAS_HASHALGOFORPASSWORD;
+				$conf->global->MAIN_SECURITY_HASH_ALGO = getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD');
 				dol_syslog("Using this MAIN_SECURITY_HASH_ALGO for __APPPASSWORDxxx__ variables : " . getDolGlobalString('MAIN_SECURITY_HASH_ALGO'));
 
-				$conf->global->MAIN_SECURITY_SALT = !getDolGlobalString('SELLYOURSAAS_SALTFORPASSWORDENCRYPTION') ? '' : $conf->global->SELLYOURSAAS_SALTFORPASSWORDENCRYPTION;
+				$conf->global->MAIN_SECURITY_SALT = getDolGlobalString('SELLYOURSAAS_SALTFORPASSWORDENCRYPTION');
 				dol_syslog("Using this salt for __APPPASSWORDxxxSALTED__ variables : " . getDolGlobalString('MAIN_SECURITY_SALT'));
 				$password0salted = dol_hash($password);
 				$passwordmd5salted = dol_hash($password, 'md5');
@@ -4393,7 +4393,7 @@ class SellYourSaasUtils
 				$substitarray=array(
 					'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,
 					'__INSTANCEDBPREFIX__'=>$generateddbprefix,
-					'__DOL_DATA_ROOT__'=>(!getDolGlobalString('SELLYOURSAAS_FORCE_DOL_DATA_ROOT') ? DOL_DATA_ROOT : $conf->global->SELLYOURSAAS_FORCE_DOL_DATA_ROOT),
+					'__DOL_DATA_ROOT__'=> getDolGlobalString('SELLYOURSAAS_FORCE_DOL_DATA_ROOT', DOL_DATA_ROOT),
 					'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
 					'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
 					'__OSHOSTNAME__'=>$generatedunixhostname,
