@@ -130,8 +130,9 @@ if (empty($extcss)) {
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
-$productid=GETPOST('service', 'int');
-$productref=(GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : '');
+$productid = GETPOST('service', 'int');
+$productref = (GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : '');
+
 $defaultproduct = '';
 
 $planarray = preg_split('/(,|;)/',$plan);
@@ -168,9 +169,7 @@ if (empty($productid) && empty($productref)) {
 		//print $_SERVER["SERVER_NAME"].' - '.$sqlproducts;
 		$resqlproducts = $db->query($sqlproducts);
 		if ($resqlproducts) {
-			$num = $db->num_rows($resqlproducts);
-
-			$tmpprod = new Product($db);
+			//$num = $db->num_rows($resqlproducts);
 			$obj = $db->fetch_object($resqlproducts);
 			if ($obj) {
 				$productref = $obj->ref;
@@ -183,6 +182,8 @@ if (empty($productid) && empty($productref)) {
 
 $tmpproduct = new Product($db);
 $tmppackage = new Packages($db);
+
+$productonlyserver = '';
 
 // Load main product
 if ($productref != 'none' && $productref != 'array') {
@@ -197,6 +198,7 @@ if ($productref != 'none' && $productref != 'array') {
 		exit;
 	}
 	$productref = $tmpproduct->ref;
+	$productonlyserver = $tmpproduct->array_options['options_onlyserver'];
 
 	if (empty($tmpproduct->status)) {
 		print "Product '".$productref."' is not on sale.";
@@ -549,14 +551,15 @@ if ($reshook == 0) {
 
 				print '<select class="minwidth400" required="required" id="planselect" name="plan">';
 				print '<option value="">&nbsp;</option>';
-				foreach ($planarray as $key => $planref) {
+				foreach ($planarray as $tmpkey => $tmpplanref) {
 					$tmpplan = new Product($db);
-					$tmpplan->fetch(0, $planref, '', '', 1, 1);
-					print '<option value="'.$tmpplan->ref.'" data-id="'.$tmpplan->id.'" data-ref="'.$planref.'" data-onlyserver="'.$tmpplan->array_options['options_onlyserver'].'">';
-					print empty($tmpplan->multilangs[$langs->defaultlang]['label']) ? $planref : $tmpplan->multilangs[$langs->defaultlang]['label'];
+					$tmpplan->fetch(0, $tmpplanref, '', '', 1, 1);
+					print '<option value="'.$tmpplan->ref.'" data-id="'.$tmpplan->id.'" data-ref="'.$tmpplanref.'" data-onlyserver="'.$tmpplan->array_options['options_onlyserver'].'">';
+					print empty($tmpplan->multilangs[$langs->defaultlang]['label']) ? $tmpplanref : $tmpplan->multilangs[$langs->defaultlang]['label'];
 					print '</option>';
 				}
 				print '</select>';
+
 				print '</div>';
 				print '</div>';
 				print '</section><br>';
@@ -723,7 +726,7 @@ if ($reshook == 0) {
 						</div>
 					</div>
 				</div>
-				<?php if (! getDolGlobalInt('SELLYOURSAAS_REGISTER_HIDE_PHONE')) { ?>
+				<?php if (!getDolGlobalInt('SELLYOURSAAS_REGISTER_HIDE_PHONE')) { ?>
 				<div class="horizontal-fld">
 					<div class='control-group'>
 						<label class='control-label' for='phone' spellcheck="false" trans='1'><span class="fa fa-phone opacityhigh"></span> <?php echo $langs->trans('Phone') ?></label>
@@ -890,6 +893,24 @@ if ($reshook == 0) {
 								}
 								if (! $restrictfound && $newval != GETPOST('forcesubdomain', 'alpha')) {
 									print '<!-- '.$newval.' disabled. There is a restriction on package to use only '.$tmppackage->restrict_domains.' -->';
+									continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
+								}
+							}
+
+							// Restriction on onlyhost of the service
+							if ($productonlyserver) {
+								// Check if domain is allowed by $productref
+								$arrayofonlyserver = explode(',', $productonlyserver);
+								$qualifiedbyonlyserver = false;
+								foreach($arrayofonlyserver as $onlyserver) {
+									//var_dump($onlyserver.' '.$newval);
+									if (preg_match('/'.$onlyserver.'/', $newval)) {
+										$qualifiedbyonlyserver = 1;
+										break;
+									}
+								}
+								if (!$qualifiedbyonlyserver) {
+									print '<!-- '.$newval.' disabled. There is a restriction on onlyserver to use only '.$productonlyserver.' -->';
 									continue;   // The subdomain in SELLYOURSAAS_SUB_DOMAIN_NAMES has not a domain inside restrictlist of package, so we discard it.
 								}
 							}

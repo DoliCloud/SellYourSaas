@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Can for a server on a service.
 * NEW Search on firstname and last name of thirdparty with global search on contract.  
 * NEW Full compatibility with PHP 8.4 (need dolibarr v22)
 * NEW Can set a list of service on registration url to choose which package to install during registration
