@@ -259,17 +259,17 @@ $tmppackage = new Packages($db);
 if (empty($reusecontractid) && $productref != 'none') {
 	$result = $tmpproduct->fetch($productid, $productref, '', '', 1, 1, 1);
 	if (empty($tmpproduct->id)) {
-		print 'Service/Plan (Product id / ref) '.$productid.' / '.$productref.' was not found.'."\n";
+		print 'Service/Plan (Product id = '.$productid.' / ref = '.$productref.') was not found.'."\n";
 		exit(-1);
 	}
 	// We have the main product, we are searching the package
 	if (empty($tmpproduct->array_options['options_package'])) {
-		print 'Service/Plan (Product id / ref) '.$tmpproduct->id.' / '.$productref.' has no package defined on it.'."\n";
+		print 'Service/Plan (Product id = '.$tmpproduct->id.' / ref = '.$productref.') has no package defined on it.'."\n";
 		exit(-2);
 	}
 	// We have the main product, we are searching the duration
 	if (empty($tmpproduct->duration_value) || empty($tmpproduct->duration_unit)) {
-		print 'Service/Plan name (Product ref) '.$productref.' has no default duration'."\n";
+		print 'Service/Plan name (Product ref = '.$productref.') has no default duration'."\n";
 		exit(-3);
 	}
 

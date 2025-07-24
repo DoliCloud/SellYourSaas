@@ -188,12 +188,12 @@ $tmppackage = new Packages($db);
 if ($productref != 'none' && $productref != 'array') {
 	$result = $tmpproduct->fetch($productid, $productref);
 	if (empty($tmpproduct->id)) {
-		print 'Service/Plan (Product id / ref) '.$productid.' / '.$productref.' was not found.';
+		print 'Service/Plan (Product id = '.$productid.' / ref = '.$productref.') was not found.';
 		exit;
 	}
 	// We have the main product, we are searching the package
 	if (empty($tmpproduct->array_options['options_package'])) {
-		print 'Service/Plan (Product id / ref) '.$tmpproduct->id.' / '.$productref.' has no package defined on it.';
+		print 'Service/Plan (Product id = '.$tmpproduct->id.' / ref = '.$productref.') has no package defined on it.';
 		exit;
 	}
 	$productref = $tmpproduct->ref;
@@ -546,12 +546,13 @@ if ($reshook == 0) {
 				print '<div class="fld select-plan required">';
 				print '<label class="control-label" for="plan">'.$langs->trans("ChooseAProductForYourApplication").'</label>';
 				print '<div class="control">';
-				print '<select class="minwidth400" required id="planselect" name="plan">';
-				print '<option>&nbsp;</option>';
+
+				print '<select class="minwidth400" required="required" id="planselect" name="plan">';
+				print '<option value="">&nbsp;</option>';
 				foreach ($planarray as $key => $planref) {
 					$tmpplan = new Product($db);
 					$tmpplan->fetch(0, $planref, '', '', 1, 1);
-					print '<option data-id="'.$tmpplan->id.'" data-ref="'.$planref.'" data-onlyserver="'.$tmpplan->array_options['options_onlyserver'].'">';
+					print '<option value="'.$tmpplan->ref.'" data-id="'.$tmpplan->id.'" data-ref="'.$planref.'" data-onlyserver="'.$tmpplan->array_options['options_onlyserver'].'">';
 					print empty($tmpplan->multilangs[$langs->defaultlang]['label']) ? $planref : $tmpplan->multilangs[$langs->defaultlang]['label'];
 					print '</option>';
 				}
@@ -560,11 +561,118 @@ if ($reshook == 0) {
 				print '</div>';
 				print '</section><br>';
 				print ajax_combobox("planselect");
+
+				// Add dynamic code to disable/enable the submit button
+				print '<script>
+				$(document).ready(function() {
+					var initialValueSelectedInTldid = jQuery("#tldid").val();
+					console.log("Initial value selected in tldid = "+initialValueSelectedInTldid);
+
+				    $("#planselect").change(function() {
+						console.log("We update a mandatory field");
+
+						var selectedOption = this.options[this.selectedIndex];
+						var value = selectedOption.value;
+    					var dataOnlyServer = selectedOption.getAttribute("data-onlyserver");
+
+						if (dataOnlyServer) {
+							/* We also refresh the combo list tldid */
+							let arrayDataOnlyServer = dataOnlyServer.split(",");
+							console.log("arrayDataOnlyServer="+arrayDataOnlyServer);
+
+							jQuery("#tldid option").each(function() {
+								var valueOfSubDomain = $(this).val();
+        						var text = $(this).text();
+								var newSelectedInTldid = initialValueSelectedInTldid;
+								/* console.log("Process line for value="+valueOfSubDomain+" text="+text); */
+
+								var qualified = 0;
+								arrayDataOnlyServer.forEach(function(onlyServer) {
+		        					if (valueOfSubDomain.includes(onlyServer)) {
+		            					/* console.log("This subdomain line match the rule "+onlyServer); */
+										qualified = 1;
+		        					}
+								});
+
+								mustChangeSelectedValue = 0;
+								initialValueIsQualified = 0;
+								currentSelectedValue = jQuery("#tldid").val();
+
+								if (qualified) {
+									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+
+									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+									jQuery("#tldid").val(valueOfSubDomain);
+
+									if (valueOfSubDomain == initialValueSelectedInTldid) {
+										initialValueIsQualified = 1;
+									}
+									newSelectedInTldid = valueOfSubDomain;
+								} else {
+									console.log("The subdomain line "+valueOfSubDomain+" is NOT qualified");
+
+									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", true);
+
+									if (valueOfSubDomain == currentSelectedValue) {
+										mustChangeSelectedValue = 1;
+									}
+								}
+
+								if (mustChangeSelectedValue) {	/* select a new qualified value */
+									if (initialValueIsQualified) {
+										newSelectedInTldid = initialValueSelectedInTldid;
+									}
+
+									jQuery("#tldid").val(newSelectedInTldid);
+								}
+
+								jQuery("#tldid").trigger("change.select2");
+							});
+						} else {
+							/* We enable all choices in combo list tldid */
+							jQuery("#tldid option").each(function() {
+								var valueOfSubDomain = $(this).val();
+        						var text = $(this).text();
+
+								console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+								jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+								jQuery("#tldid").val(initialValueSelectedInTldid);
+
+								jQuery("#tldid").trigger("change.select2");
+							});
+						}
+
+						setButtonDisabled();
+				    });
+
+					jQuery("#formregister").on("change keyup", "#username", function() {
+						console.log("We update a mandatory field");
+						setButtonDisabled();
+					});
+					jQuery("#formregister").on("change keyup", "#orgName", function() {
+						console.log("We update a mandatory field");
+						setButtonDisabled();
+					});
+					jQuery("#formregister").on("change keyup", "#sldAndSubdomain", function() {
+						console.log("We update a mandatory field");
+						setButtonDisabled();
+					});
+
+					function setButtonDisabled() {
+				        if (jQuery("#planselect").val() && jQuery("#username").val() && jQuery("#orgName").val() && jQuery("#sldAndSubdomain").val()) {
+				            $(\'#newinstance\').prop(\'disabled\', false);
+				        } else {
+				            $(\'#newinstance\').prop(\'disabled\', true);
+				        }
+					}
+				});
+
+				</script>
+				';
 			}
 
 			?>
 			  <section id="enterUserAccountDetails">
-
 
 			<?php
 			$disabled='';
@@ -599,7 +707,7 @@ if ($reshook == 0) {
 			<div class="control-group  required">
 				<label class="control-label" for="username" trans="1"><span class="fas fa-at opacityhigh"></span> <?php echo $langs->trans("Email") ?></label>
 				<div class="controls">
-					<input type="text"<?php echo $disabled; ?> name="username" maxlength="255" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="" id="username" />
+					<input type="text"<?php echo $disabled; ?> name="username" id="username" autocomplete="true" spellcheck="false" maxlength="255" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="required" />
 
 				</div>
 			</div>
@@ -610,15 +718,15 @@ if ($reshook == 0) {
 						<label class="control-label" for="orgName"
 							   trans="1"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
 						<div class="controls">
-							<input type="text"<?php echo $disabled; ?> name="orgName" maxlength="250"
-								   value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="" id="orgName"/>
+							<input type="text"<?php echo $disabled; ?> name="orgName" id="orgName" spellcheck="false" maxlength="250"
+								   value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="required" id="orgName"/>
 						</div>
 					</div>
 				</div>
 				<?php if (! getDolGlobalInt('SELLYOURSAAS_REGISTER_HIDE_PHONE')) { ?>
 				<div class="horizontal-fld">
 					<div class='control-group'>
-						<label class='control-label' for='phone' trans='1'><span class="fa fa-phone opacityhigh"></span> <?php echo $langs->trans('Phone') ?></label>
+						<label class='control-label' for='phone' spellcheck="false" trans='1'><span class="fa fa-phone opacityhigh"></span> <?php echo $langs->trans('Phone') ?></label>
 						<div class="controls">
 							<input type="text"<?php echo $disabled; ?> name="phone" maxlength="250"
 								   value="<?php echo GETPOST('phone', 'alpha'); ?>" id="phone"/>
@@ -700,8 +808,9 @@ if ($reshook == 0) {
 				if (empty($reusecontractid)) {
 					print '<br>';
 				} else {
-					print '<hr/>';
-				} ?>
+					print '<hr>';
+				}
+			?>
 
 			  <!-- Selection of domain to create instance -->
 			  <section id="selectDomain">
@@ -710,9 +819,9 @@ if ($reshook == 0) {
 				  <div class="linked-flds">
 					  <span class="nowraponall sldAndSubdomaininput">
 					<span class="opacitymedium">https://</span>
-					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" required="" />
+					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" spellcheck="false" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" required="" />
 					</span>
-					<select<?php echo $disabled; ?> name="tldid" id="tldid" placeholder="aaa">
+					<select<?php echo $disabled; ?> name="tldid" id="tldid">
 						<?php
 						// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 						$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
@@ -979,6 +1088,11 @@ if ($reshook == 0) {
 				if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON')) {
 					$paramrecaptcha = ' data-sitekey="'.getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_SITE_KEY').'" data-callback="onSubmitCallBackForReCaptcha" data-action="submit"';
 					//$paramrecaptcha = ' data-sitekey="'.getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_SITE_KEY').'" data-action="submit"';
+				}
+
+				if ($productref == 'array') {
+					$disabled = ' disabled="disabled" title="'.$langs->trans("ChooseAProductForYourApplication").'"';
+
 				}
 
 				if ($productref != 'none') {
