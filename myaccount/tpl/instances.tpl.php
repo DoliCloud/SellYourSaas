@@ -667,8 +667,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					}
 				}
 
-				if ($line->price_ht) {
-					print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+				if ($line->subprice) {
+					print '<span class="opacitymedium small">'.price($line->subprice, 1, $langs, 0, -1, -1, $conf->currency);
 					//if ($line->qty > 1 && $labelprodsing) print ' / '.$labelprodsing;
 					if ($tmpproduct->array_options['options_resource_label']) {
 						print ' / '.$langs->trans($tmpproduct->array_options['options_resource_label']);	// Label of units
@@ -680,7 +680,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '</span>';
 				} else {
 					if (!getDolGlobalString('SELLYOURSAAS_HIDE_PRODUCT_PRICE_IF_NULL')) {
-						print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+						print '<span class="opacitymedium small">'.price($line->subprice, 1, $langs, 0, -1, -1, $conf->currency);
 						// TODO
 						print $tmpduration;
 						print '</span>';
@@ -715,14 +715,14 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '<span class="font-green-sharp counternumber">'.$line->qty.'</span>';
 				print '<br>';
 
-				if ($line->price_ht) {
-					$priceforline = $line->price_ht * $line->qty;
+				if ($line->subprice) {
+					$priceforline = $line->subprice * $line->qty;
 					print '<span class="opacitymedium small">'.price($priceforline, 1, $langs, 0, -1, -1, $conf->currency);
 					//if (preg_match('/users/i', $line->description)) print ' / '.$langs->trans("User");
 					print ' / '.$langs->trans("Month");
 					print '</span>';
 				} else {
-					print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+					print '<span class="opacitymedium small">'.price($line->subprice, 1, $langs, 0, -1, -1, $conf->currency);
 					// TODO
 					print ' / '.$langs->trans("Month");
 					print '</span>';

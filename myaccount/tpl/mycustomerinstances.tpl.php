@@ -411,8 +411,8 @@ if (count($listofcontractidreseller) == 0) {
 					}
 				}
 
-				if ($line->price_ht) {
-					print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+				if ($line->subprice) {
+					print '<span class="opacitymedium small">'.price($line->subprice, 1, $langs, 0, -1, -1, $conf->currency);
 					//if ($line->qty > 1 && $labelprodsing) print ' / '.$labelprodsing;
 					if ($tmpproduct->array_options['options_resource_label']) {
 						print ' / '.$langs->trans($tmpproduct->array_options['options_resource_label']);	// Label of units
@@ -424,7 +424,7 @@ if (count($listofcontractidreseller) == 0) {
 					print '</span>';
 				} else {
 					if (!getDolGlobalString('SELLYOURSAAS_HIDE_PRODUCT_PRICE_IF_NULL')) {
-						print '<span class="opacitymedium small">'.price($line->price_ht, 1, $langs, 0, -1, -1, $conf->currency);
+						print '<span class="opacitymedium small">'.price($line->subprice, 1, $langs, 0, -1, -1, $conf->currency);
 						// TODO
 						print $tmpduration;
 						print '</span>';

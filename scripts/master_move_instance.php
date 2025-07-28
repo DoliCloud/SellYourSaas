@@ -580,7 +580,7 @@ if (! empty($oldobject->array_options['options_custom_url'])) {
 $dateendperiod = 0;
 $oldpricesperproduct = array();
 foreach ($oldobject->lines as $line) {
-	$oldpricesperproduct[$line->fk_product] = array('price_ht' => $line->price_ht, 'discount' => $line->remise_percent, 'qty' => $line->qty);
+	$oldpricesperproduct[$line->fk_product] = array('price_ht' => $line->subprice, 'discount' => $line->remise_percent, 'qty' => $line->qty);
 	if ($line->date_end && (empty($dateendperiod) || $line->date_end < $dateendperiod)) {
 		$dateendperiod = $line->date_end;
 	}
@@ -626,7 +626,6 @@ if (empty($forceproductref)) {
 			$contractline->qty = $pricesperproduct['qty'];
 			$contractline->remise_percent = $pricesperproduct['discount'];
 			$contractline->subprice = $pricesperproduct['price_ht'];
-			$contractline->price_ht = $pricesperproduct['price_ht'];	// deprecated
 
 			print "We update line ".$objselect->rowid." with price_ht = ".$pricesperproduct['price_ht']." discount = ".$pricesperproduct['discount']."\n";
 			if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
