@@ -244,9 +244,7 @@ $now = dol_now();
 
 $action=$argv[1];
 $nbofok=0;
-// Nb of deployed instances
 $nbofinstancedeployed=0;
-// Nb of paying instance
 $nboferrors=0;
 $instances=array();
 $instancespaidsuspended=array();
