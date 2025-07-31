@@ -713,9 +713,12 @@ Delete very old files daily by adding the crontab task:
 ---------------
 #0 18 * * 0 find /mnt/diskbackup/*/backupold_* -type f -mtime +50 -ls -delete > /var/log/find_delete_old_files.log 2>&1
 #0 18 * * 1 find /mnt/diskbackup/*/backupold_* -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
+# Make a snapshot of the complete main backup dir (that contains all repositories modified during last year)
 55 23 * * * btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >/var/log/sellyoursaas_btrfs.log; btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >>/var/log/sellyoursaas_btrfs.log; rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +\%j`/.snapshots >>/var/log/sellyoursaas_btrfs.log; btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` ro true >>/var/log/sellyoursaas_btrfs.log;
-0 0 * * * find /mnt/diskbackup/.snapshots -maxdepth 1 -type d -mtime +40 -exec btrfs subvolume delete {} \; >>/var/log/sellyoursaas_btrfs.log;
-0 1 * * * find "/mnt/diskbackup/" -maxdepth 2 -path "/mnt/diskbackup/backup_*/osu*" -type d -mtime +365 -exec rm -fr {} \; >>/var/log/sellyoursaas_btrfs.log
+# We keep data files on main backup dir for 1 years
+0 0 * * * find "/mnt/diskbackup/" -maxdepth 2 -path "/mnt/diskbackup/backup_*/osu*" -type d -mtime +365 -exec rm -fr {} \; >>/var/log/sellyoursaas_btrfs.log
+# We keep snapshots for 60 days (but a snapshot is of all main backup dir)
+0 1 * * * find /mnt/diskbackup/.snapshots -maxdepth 1 -type d -mtime +60 -exec btrfs subvolume delete {} \; >>/var/log/sellyoursaas_btrfs.log;
 ---------------
 
 
