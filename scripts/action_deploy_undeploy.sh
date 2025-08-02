@@ -736,10 +736,14 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			
 			if [ -f "$dirwithsources1.tar.zst" ]; then
 				datesource=`date -r $dirwithsources1.tar.zst +"%Y%m%d"`
+			elif [[ "$mode" == "deployall" ]]; then
+				datesource=$(find "$dirwithsources1" -type f -printf '%T@\n' | sort -n | tail -1)
+				datesource=${datesource%.*}
+				datesource=$(date -d @"$datesource" +"%Y%m%d")
 			else
 				datesource=0
 			fi
-			
+
 			if [ -f "/tmp/cache$dirwithsources1.tar.zst" ]; then
 				datecache=`date -r /tmp/cache$dirwithsources1.tar.zst +"%Y%m%d"`
 			else
