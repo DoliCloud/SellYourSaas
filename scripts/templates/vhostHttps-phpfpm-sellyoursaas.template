@@ -45,7 +45,7 @@
         LogLevel info
 
         ErrorLog __osUserPath__/__webAppLogName___error.log
-        #TransferLog ${APACHE_LOG_DIR}/__webAppLogName___access_log
+        #TransferLog ${APACHE_LOG_DIR}/__webAppLogName___access.log
         CustomLog ${APACHE_LOG_DIR}/other_vhosts_access.log vhost_combined
         CustomLog ${APACHE_LOG_DIR}/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
 
