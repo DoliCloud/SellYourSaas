@@ -23,9 +23,8 @@
 
 
 if (! defined('NOSCANPOSTFORINJECTION')) {
-	define('NOSCANPOSTFORINJECTION', '1');
-}		// Do not check anti CSRF attack test
-
+	define('NOSCANPOSTFORINJECTION', '1');		// Do not check anti CSRF attack test
+}
 
 // Load Dolibarr environment
 $res=0;
@@ -33,8 +32,8 @@ $res=0;
 if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
 	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 }
-// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
-$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
+// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
+$tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME']; $tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
 	$j--;
@@ -55,7 +54,14 @@ if (! $res && file_exists("../../../main.inc.php")) {
 if (! $res) {
 	die("Include of main fails");
 }
-
+/**
+ * The main.inc.php has been included so the following variable are now defined:
+ * @var Conf $conf
+ * @var DoliDb $db
+ * @var Hookmanager $hookmanager
+ * @var Translate $langs
+ * @var User $user
+ */
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/images.lib.php";
@@ -158,9 +164,7 @@ if ($action == 'set') {
  * View
  */
 
-$formother=new FormOther($db);
-$form=new Form($db);
-$formticket = new FormTicket($db);
+$form = new Form($db);
 
 $help_url="";
 llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
@@ -215,7 +219,7 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'</td>';
 	print '<td>';
 	print img_picto('', 'product', 'class="pictofixedwidth"');
-	print $form->select_produits_list(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", '', 0, 0, '', 1, 2, 0, 0, 1, 0, 'maxwidth500 widthcentpercentminusx');
+	print $form->select_produits(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500 widthcentpercentminusx');
 	print '</td>';
 	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
@@ -253,7 +257,7 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT").'</td>';
 	print '<td>';
 	print img_picto('', 'product', 'class="pictofixedwidth"');
-	print $form->select_produits_list(getDolGlobalInt('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", '', 0, 0, '', 1, 2, 0, 0, 1, 0, 'maxwidth500 widthcentpercentminusx');
+	print $form->select_produits(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500 widthcentpercentminusx');
 	print '</td>';
 	print '<td><span class="opacitymedium small"></span></td>';
 	print '</tr>';
