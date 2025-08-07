@@ -21,6 +21,15 @@ if (empty($conf) || ! is_object($conf)) {
 	exit(1);
 }
 
+/**
+ * @var DoliDB $db
+ * @var Hookmanager $hookmanager
+ * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
+ * @var int $nowmonth
+ * @var int $nowyear
+ */
 ?>
 <!-- BEGIN PHP TEMPLATE billing.tpl.php -->
 <?php
@@ -381,10 +390,29 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 				print '</tr>';
 
 				print '<tr><td colspan="3">';
+				// Show IBAN
 				print $langs->trans("IBAN").': <span class="small" title="'.$companypaymentmodetemp->iban_prefix.'">'.dol_trunc($companypaymentmodetemp->iban_prefix, 12, 'middle').'</span><br>';
+				// Show BIC
+				print $langs->trans("BIC").': <span class="small" title="'.$companypaymentmodetemp->bic.'">'.dol_trunc($companypaymentmodetemp->bic, 12, 'middle').'</span><br>';
+				// Show RUM
 				if ($companypaymentmodetemp->rum) {
-					print $langs->trans("RUM").': <span class="small" title="'.$companypaymentmodetemp->rum.'">'.$companypaymentmodetemp->rum.'</span>';
+					print $langs->trans("RUM").': <span class="small" title="'.$companypaymentmodetemp->rum.'">'.$companypaymentmodetemp->rum.'</span><br>';
 				}
+				// Show ICS
+				$ics = '';
+				$idbankfordirectdebit = getDolGlobalInt('PRELEVEMENT_ID_BANKACCOUNT');
+				if ($idbankfordirectdebit > 0) {
+					$tmpbankfordirectdebit = new Account($db);
+					$tmpbankfordirectdebit->fetch($idbankfordirectdebit);
+					$ics = $tmpbankfordirectdebit->ics;	// ICS for direct debit
+				}
+				if (empty($ics) && getDolGlobalString('PRELEVEMENT_ICS')) {
+					$ics = getDolGlobalString('PRELEVEMENT_ICS');
+				}
+				if ($ics) {
+					print $langs->trans("CreditorIdentifier").': <span class="small" title="'.$ics.'">'.$ics.'</span><br>';
+				}
+				// TODO Add link to download the mandate doc
 				print '</td></tr>';
 			} else {
 				print '<tr>';

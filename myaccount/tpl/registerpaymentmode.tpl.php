@@ -668,11 +668,29 @@ if ($mythirdpartyaccount->isInEEC()) {
 			print '<div class="marginbottomonly">'.img_picto('', 'bank_account', 'class="marginrightonlyimp"');
 			print '<span class="opacitymedium">'.$langs->trans("CurrentBAN").'</span></div>';
 			print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
+			// Show IBAN
 			print '<b>'.$langs->trans("IBAN").'</b>: '.$companypaymentmodetemp->iban.'<br>';
+			// Show BIC
 			print '<b>'.$langs->trans("BIC").'</b>: '.$companypaymentmodetemp->bic.'<br>';
+			// Show RUM
 			if ($companypaymentmodetemp->rum) {
-				print '<b>'.$langs->trans("RUM").'</b>: '.$companypaymentmodetemp->rum;
+				print '<b>'.$langs->trans("RUM").'</b>: '.$companypaymentmodetemp->rum.'<br>';
 			}
+			// Show ICS
+			$ics = '';
+			$idbankfordirectdebit = getDolGlobalInt('PRELEVEMENT_ID_BANKACCOUNT');
+			if ($idbankfordirectdebit > 0) {
+				$tmpbankfordirectdebit = new Account($db);
+				$tmpbankfordirectdebit->fetch($idbankfordirectdebit);
+				$ics = $tmpbankfordirectdebit->ics;	// ICS for direct debit
+			}
+			if (empty($ics) && getDolGlobalString('PRELEVEMENT_ICS')) {
+				$ics = getDolGlobalString('PRELEVEMENT_ICS');
+			}
+			if ($ics) {
+				print '<b>'.$langs->trans("CreditorIdentifier").'</b>: '.$ics.'<br>';
+			}
+			// TODO Add link to download the mandate doc
 			$foundban++;
 
 			//print $langs->trans("FindYourSEPAMandate");
