@@ -390,6 +390,7 @@ class ActionsSellyoursaas
 
 
 		if (in_array($parameters['currentcontext'], array('contractlist'))) {
+			/** @var $fieldstosearchall array<string,mied> */
 			global $fieldstosearchall;
 
 			$fieldstosearchall['s.email']="ThirdPartyEmail";
