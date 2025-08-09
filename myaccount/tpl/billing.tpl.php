@@ -23,7 +23,7 @@ if (empty($conf) || ! is_object($conf)) {
 
 /**
  * @var DoliDB $db
- * @var Hookmanager $hookmanager
+ * @var HookManager $hookmanager
  * @var Translate $langs
  *
  * @var Societe $mythirdpartyaccount

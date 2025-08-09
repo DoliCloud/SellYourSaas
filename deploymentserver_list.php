@@ -76,7 +76,7 @@ if (!$res) {
 /**
  * @var DoliDB $db
  * @var Translate $langs
- * @var Hookmanager $hookmanager
+ * @var HookManager $hookmanager
  * @var User $user
  */
 
