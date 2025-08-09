@@ -527,7 +527,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 /**
  * getvalfromkey
  *
- * @param 	DoliDb	$db		Database handler
+ * @param 	DoliDB	$db		Database handler
  * @param 	string	$param	Param
  * @param	string	$val	Val
  * @return	string			Value
