@@ -410,7 +410,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 					$ics = getDolGlobalString('PRELEVEMENT_ICS');
 				}
 				if ($ics) {
-					print $langs->trans("CreditorIdentifier").': <span class="small" title="'.$ics.'">'.$ics.'</span><br>';
+					print $langs->trans("ICSShort").': <span class="small" title="'.$ics.'">'.$ics.'</span><br>';
 				}
 				// TODO Add link to download the mandate doc
 				print '</td></tr>';
