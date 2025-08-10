@@ -192,6 +192,11 @@ $langsen->loadLangs(array("main", "errors"));
 
 $user->fetch(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'));
 
+// Force permissions
+$user->rights->societe->lire;
+$user->rights->societe->creer;
+$user->rights->societe->clients->voir;
+
 
 /*
  *	Main
