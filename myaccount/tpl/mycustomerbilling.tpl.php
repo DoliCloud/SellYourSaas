@@ -101,7 +101,7 @@ print '
 				$nbtotalofrecords = $db->num_rows($resql);
 
 				// if total resultset is smaller then paging size (filtering), goto and load page 0
-				if (($page * $limit) > $nbtotalofrecords) {
+				if (($page * $limit) > (int) $nbtotalofrecords) {
 					$page = 0;
 					$offset = 0;
 				}
