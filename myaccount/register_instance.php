@@ -169,6 +169,11 @@ if (empty($user->id)) {
 	}
 
 	$user->getrights();
+
+	// Add more permissions
+	$user->rights->societe->lire = 1;
+	$user->rights->societe->creer = 1;
+	$user->rights->societe->client->voir = 1;
 }
 
 $action = GETPOST('action', 'alpha');
