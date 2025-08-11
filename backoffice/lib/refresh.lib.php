@@ -515,11 +515,6 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 	if ($datelim && ($datelim < $now)) {
 		$sql.= " AND ce.deployment_date_end <= '".$db->idate($datelim)."'";		// Only instances deployed with end before this date
 	}
-	/*
-	if ($datefirstday) {
-		$sql.= " AND ce.deployment_date_end >= '".$db->idate($datefirstday)."'";	// Only instances deployed with end after this date
-	}
-	*/
 
 	dol_syslog("sellyoursaas_calculate_stats begin", LOG_DEBUG, 1);
 
@@ -672,12 +667,12 @@ function sellyoursaas_calculate_stats($db, $datelim, $datefirstday)
 								}
 							}
 
-							if (! $atleastonenotsuspended) {	// Really a paying customer if template invoice not suspended
+							if (! $atleastonenotsuspended) {	// Really a paying customer if template invoice is not suspended
 								if (empty($listofcustomerspayingwithoutrecinvoice[$obj->customer_id])) {
 									$listofcustomerspayingwithoutrecinvoice[$obj->customer_id] = 0;
 								}
 								$listofcustomerspayingwithoutrecinvoice[$obj->customer_id]++;
-								$listofinstancespayingwithoutrecinvoice[$object->id]=array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
+								$listofinstancespayingwithoutrecinvoice[$object->id] = array('thirdparty_id'=>$obj->customer_id, 'thirdparty_name'=>$obj->name, 'contract_ref'=>$object->ref);
 								$totalinstancespayingwithoutrecinvoice++;
 							}
 

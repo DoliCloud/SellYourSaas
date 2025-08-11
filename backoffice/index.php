@@ -188,8 +188,10 @@ if ($mode == 'refreshstats') {
 	$totalinstancesexpiredpaying=$rep['totalinstancesexpiredpaying'];
 	$totalinstances=$rep['totalinstances'];
 	$totalusers=$rep['totalusers'];
+
 	$newinstances=count($rep['listofnewinstances']);
 	$lostinstances=count($rep['listoflostinstances']);
+	$listofinstancespayingwithoutrecinvoice = $rep['listofinstancespayingwithoutrecinvoice'];
 
 	$_SESSION['stats_total']=$total;
 	$_SESSION['stats_totalcommissions']=$totalcommissions;
@@ -205,6 +207,7 @@ if ($mode == 'refreshstats') {
 	$_SESSION['stats_totalusers']=$totalusers;
 	$_SESSION['stats_newinstances']=$newinstances;
 	$_SESSION['stats_lostinstances']=$lostinstances;
+	//$_SESSION['stats_listofinstancespayingwithoutrecinvoice']=$listofinstancespayingwithoutrecinvoice;
 } else {
 	$total = isset($_SESSION['stats_total']) ? $_SESSION['stats_total'] : '';
 	$totalcommissions = isset($_SESSION['stats_totalcommissions']) ? $_SESSION['stats_totalcommissions'] : '';
@@ -361,9 +364,11 @@ if (!empty($rep) && is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
 	}
 }
 print $form->textwithpicto($langs->trans("NbOfInstancesActivePaying"), $texthelp);
-$texthelp = $langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
-if ($stringlistofinstancespayingwithoutrecinvoice) {
-	$texthelp.=' ('.$stringlistofinstancespayingwithoutrecinvoice.')';
+if ($mode == 'refreshstats') {	// Info not saved into session (too large), so we show it only after a refresh
+	$texthelp = $langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
+	if ($stringlistofinstancespayingwithoutrecinvoice) {
+		$texthelp.=' ('.$stringlistofinstancespayingwithoutrecinvoice.')';
+	}
 }
 print ' | '.$form->textwithpicto($langs->trans("NbOfInstancesActivePayingAll"), $texthelp).' | '.$langs->trans("NbOfActiveInstances").' ';
 print '</td><td align="right">';
