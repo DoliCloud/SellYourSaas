@@ -212,13 +212,13 @@ if (empty($db)) {
 if (empty($server) || empty($mode)) {
 	print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 	print "This script must be ran as 'admin' user from master server.\n";
-	print "Usage:   $script_file  deploymentserverip  (dbcreate|dbusercreate|dbuserresetpass|sellyoursaasuserupdate)  [instance]\n";
-	print "Example: $script_file  1.2.3.4             dbuserresetpass\n";
+	print "Usage:   $script_file  deploymentserverip  (dbcreate|dbusercreate|dbuserresetpass|sellyoursaasrebuildredirect|sellyoursaasuserupdate)  [instance.withX.mydomain.com]\n";
+	print "Example: $script_file  1.2.3.4             dbuserresetpass    To generate SQL to reset password from field password_db.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	exit(-1);
 }
 
-if (! in_array($mode, array('dbcreate', 'dbusercreate', 'dbuserresetpass', 'all', 'sellyoursaasuserupdate'))) {
+if (! in_array($mode, array('dbcreate', 'dbusercreate', 'dbuserresetpass', 'all', 'sellyoursaasuserupdate', 'sellyoursaasrebuildredirect'))) {
 	print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 	print "Error: Bad value for last parameter (action must be dbcreate|usercreate|userresetpass|all).\n";
 	exit(-2);
@@ -323,11 +323,30 @@ while ($i < $num_rows) {
 		print "GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON ".$object->database_db.".* TO '".$dbmaster->escape($object->username_db)."'@'%';\n";
 	}
 	if ($mode == 'dbuserresetpass' || $mode == 'all') {
-		print "ALTER USER ".$dbmaster->escape($object->username_db)." IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($object->password_db)."';\n";
+		print '-- Process instance '.$dbmaster->escape($object->instance).', ID '.$object->id.' --'."\n";
+		$newpassword = dolDecrypt($object->password_db);
+		print "ALTER USER ".$dbmaster->escape($object->username_db)." IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($newpassword)."';\n";
+	}
+
+	if ($mode == 'sellyoursaasrebuildredirect') {
+		$mask = preg_replace('/^([\w\-]+\.)(\w+)(\.dolicloud\.com)$/', '\1.*\3', $object->instance);
+		print '-- Process instance '.$dbmaster->escape($object->instance).', ID '.$object->id.' by searching another instance with name '.$mask.' --'."\n";
+		if (!empty($object->array_options['options_suspendmaintenance_message'])) {
+			print '-- Already a suspend message'."\n";
+		} else {
+			$sqlsearch = "SELECT c.rowid, c.ref_customer, ce.custom_url FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE ce.fk_object = c.rowid AND (ce.custom_url LIKE '".$dbmaster->escape($mask)."' OR c.ref_customer LIKE '".$dbmaster->escape($mask)."') AND c.ref_customer <> '".$dbmaster->escape($object->instance)."';";
+			//print $sqlsearch."\n";
+			$resqlsearch = $dbmaster->query($sqlsearch);
+			$objsearch = $dbmaster->fetch_object($resqlsearch);
+			if ($objsearch) {
+				$redirectlink = $objsearch->ref_customer;
+				print "UPDATE llx_contrat_extrafields SET suspendmaintenance_message = 'https://".$dbmaster->escape($redirectlink)."' WHERE fk_object = ".((int) $object->id)." AND suspendmaintenance_message = ''; -- custom_url=".$objsearch->custom_url."\n";
+			}
+		}
 	}
 
 	if ($mode == 'sellyoursaasuserupdate') {
-		print '-- Process instance '.$dbmaster->escape($object->instance).'--'."\n";
+		print '-- Process instance '.$dbmaster->escape($object->instance).', ID '.$object->id.' --'."\n";
 		print "UPDATE llx_contrat_extrafields SET password_os = '".$dbmaster->escape($object->password_os)."', password_db = '".$dbmaster->escape($object->password_db)."', password_ro_db = '".$dbmaster->escape($object->password_ro_db)."' WHERE username_db = '".$dbmaster->escape($object->username_db)."' AND database_db = '".$dbmaster->escape($object->database_db)."' AND password_os like 'Error%';\n";
 	}
 
