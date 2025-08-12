@@ -171,9 +171,16 @@ if (empty($user->id)) {
 	$user->getrights();
 
 	// Add more permissions
-	$user->rights->societe->lire = 1;
-	$user->rights->societe->creer = 1;
-	$user->rights->societe->client->voir = 1;
+	if (!isset($user->rights->societe->lire) || empty($user->rights->societe->lire)) {
+		$user->rights->societe->lire = 1;
+	}
+	if (!isset($user->rights->societe->creer) || empty($user->rights->societe->creer)) {
+		$user->rights->societe->creer = 1;
+	}
+	if (!isset($user->rights->societe->client->voir) || empty($user->rights->societe->client->voir)) {
+		$user->rights->societe->client = new stdClass();
+		$user->rights->societe->client->voir = 1;
+	}
 }
 
 $action = GETPOST('action', 'alpha');
