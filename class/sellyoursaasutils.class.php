@@ -670,6 +670,9 @@ class SellYourSaasUtils
 
 						// TODO Add an event in agenda for contract/thirdparty
 
+						// Delay for email
+						sleep(1);
+
 						$contractprocessed[$object->id]=$object->ref;
 					} else {
 					}
@@ -862,6 +865,10 @@ class SellYourSaasUtils
 						}
 
 						// TODO Add an event in agenda for contract/thirdparty
+
+
+						// Delay for email
+						sleep(1);
 
 						$contractprocessed[$object->id]=$object->ref;
 					} else {
@@ -3452,6 +3459,7 @@ class SellYourSaasUtils
 									}
 								}
 
+								// Add a delay because the closeAll may have triggered a suspend remote action and we want to be sure the apache reload is complete
 								sleep(1);
 							}
 						}
