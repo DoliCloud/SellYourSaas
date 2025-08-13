@@ -21,13 +21,13 @@
       path: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php
     register: sellyoursaas_installed_rules
 
-  - name: Get user main public ip into a variable
+  - name: Get the user main public ip into the variable command_for_userip
     command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php ip {{login}}"
     register: command_for_userip
     when: sellyoursaas_installed_rules.stat.exists == True
     changed_when: false
 
-  - name: Get public key into a variable
+  - name: Get the user public key into the variable command_for_userpublickey if userpublickey not provided as parameter
     command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php public_key {{login}}"
     register: command_for_userpublickey
     when: 
@@ -42,7 +42,7 @@
       - sellyoursaas_installed_rules.stat.exists == True
       - userip is not defined
 
-  - name: Set var userpublickey if not defined
+  - name: Set var userpublickey if not provided as parameter
     set_fact:
       userpublickey: "{{ command_for_userpublickey.stdout }}"
     when: 
