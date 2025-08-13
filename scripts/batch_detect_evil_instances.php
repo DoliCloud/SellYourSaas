@@ -228,7 +228,7 @@ if (0 != posix_getuid()) {
 
 if (! isset($argv[1])) {	// Check parameters
 	print "Script to detect evils instances by scanning inside its data for blacklist content.\n";
-	print "Usage on deployment servers: ".$script_file." (test|testemail|remove) [instancefilter]\n";
+	print "Usage on deployment servers: ".$script_file." (test|testemail|remove) [maxageinsecond|instancenamefilter]\n";
 	print "\n";
 	print "Options are:\n";
 	print "- test          Do a test scan\n";
@@ -269,7 +269,7 @@ if (isset($argv[2])) {
 		$instancefilter = $argv[2];
 	}
 }
-$instancefiltercomplete=$instancefilter;
+$instancefiltercomplete = $instancefilter;
 
 // Forge complete name of instance
 if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomplete) && ! preg_match('/\.home\.lan$/', $instancefiltercomplete)) {
@@ -702,7 +702,7 @@ if ($ok) {
 
 dol_delete_file('/tmp/batch_detect_evil_instance.tmp');
 
-print "----- Loop among recent trial instances to check if file signature (".count($instancestrial)." instances)\n";
+print "----- Loop among recent trial instances to check the file signatures (".count($instancestrial)." instances)\n";
 foreach ($instancestrial as $instanceid => $instancearray) {
 	$error = 0;		// error for this instance
 
