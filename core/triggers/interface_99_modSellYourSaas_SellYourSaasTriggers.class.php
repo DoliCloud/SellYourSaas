@@ -99,65 +99,41 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 		$remoteaction = '';
 
 		switch ($action) {
-			case 'CATEGORY_LINK':
-				// Test if this is a partner. If yes, send an email
-				include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
-				$categorytype = $object->type;
-				if (is_numeric($categorytype)) {	// For backward compatibility
-					$categorytype = Categorie::$MAP_ID_TO_CODE[$categorytype];
-				}
-				if ($categorytype === Categorie::TYPE_SUPPLIER) {
-					// We link a supplier categorie to a thirdparty
-					if ($object->id == getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG')) {
-						$reseller = $object->context['linkto'];
+			case 'CATEGORY_MODIFY':
+				if (isset($object->context['linkto'])) {
+					// Test if this is a partner. If yes, we make some checks
+					include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+					$categoryid = (int) $object->type;
 
-						// $object->context['linkto'] is Societe object
-						/*if (empty($reseller->name_alias))	// Used to generate the partnerkey
-						{
-							$this->errors[] = $langs->trans("CompanyAliasIsRequiredWhenWeSetResellerTag");
-							return -1;
-						}*/
-						if (empty($reseller->array_options['options_commission']) && $reseller->array_options['options_commission'] != '0') {
-							$this->errors[] = $langs->trans("CommissionIsRequiredWhenWeSetResellerTag");
-							return -1;
+					$MAP_ID_TO_CODE = array_flip($object->MAP_ID);
+					$categorytype = $MAP_ID_TO_CODE[$categoryid];
+
+					if ($categorytype === Categorie::TYPE_SUPPLIER) {
+						// We link a supplier categorie to a thirdparty
+						if ($object->id == getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG')) {
+							$reseller = $object->context['linkto'];
+							// $object->context['linkto'] is Societe object
+							/*if (empty($reseller->name_alias))	// Used to generate the partnerkey
+							{
+								$this->errors[] = $langs->trans("CompanyAliasIsRequiredWhenWeSetResellerTag");
+								return -1;
+							}*/
+							if (empty($reseller->array_options['options_commission']) && $reseller->array_options['options_commission'] != '0') {
+								$this->errors[] = $langs->trans("CommissionIsRequiredWhenWeSetResellerTag");
+								return -1;
+							}
+
+							// If password not set yet, we set it
+							if (empty($reseller->array_options['options_password'])) {
+								$password = dol_string_nospecial(dol_string_unaccent(strtolower($reseller->name)));
+
+								$reseller->oldcopy = dol_clone($reseller, 0);
+
+								$reseller->array_options['options_password'] = dol_hash($password);
+
+								$reseller->update($reseller->id, $user, 0);
+							}
 						}
-
-						// If password not set yet, we set it
-						if (empty($reseller->array_options['options_password'])) {
-							$password = dol_string_nospecial(dol_string_unaccent(strtolower($reseller->name)));
-
-							$reseller->oldcopy = dol_clone($reseller, 0);
-
-							$reseller->array_options['options_password']=dol_hash($password);
-
-							$reseller->update($reseller->id, $user, 0);
-						}
-
-						// No email, can be done manually.
-						/*
-						// Send deployment email
-						include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
-						include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-						$formmail=new FormMail($db);
-
-						$arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, '(ChannelPartnerCreated)');
-
-						$substitutionarray=getCommonSubstitutionArray($langs, 0, null, $contract);
-						complete_substitutions_array($substitutionarray, $langs, $contract);
-
-						$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $langs);
-						$msg     = make_substitutions($arraydefaultmessage->content, $substitutionarray, $langs);
-						$from = $conf->global->SELLYOURSAAS_NOREPLY_EMAIL;
-						$to = $contract->thirdparty->email;
-
-						$cmail = new CMailFile($subject, $to, $from, $msg, array(), array(), array(), '', '', 0, 1);
-						$result = $cmail->sendfile();
-						if (! $result)
-						{
-							$error++;
-							$this->errors += $cmail->errors;
-						}
-						*/
 					}
 				}
 				break;
