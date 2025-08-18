@@ -2036,7 +2036,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		exit();
 	}
 } elseif ($action == 'deploycustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL') && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0) {
-	// TODO
+	// SELLYOURSAAS_ENABLE_CUSTOMURL is on to mean "allow custom url set by the customer himself"
+	// TODO Test and debug
 	$error = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$contractid = GETPOST('contractid', 'int');
@@ -2143,7 +2144,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		if (!$error) {
 			//$object->context["options_websitename"] = $website->ref;
 			$object->array_options['options_custom_url'] = urlencode($custom_url);
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction("rename", $object);
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction("rename", $object);	// Why "rename" and not "deploycustomurl" ?
 			if ($result <= 0) {
 				$error++;
 			}

@@ -15,7 +15,7 @@
 # undeploy     remove only instance (must be easy to restore) - rest can be done later with clean.sh
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
-export nowlog=`date +'%Y%m%d-%H%M%S'`
+export nowfile=`date +'%Y%m%d-%H%M%S'`
 
 echo
 echo
@@ -619,8 +619,8 @@ if [[ "$dnsserver" == "1" ]]; then
 				exit 16
 			fi
 			
-			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog"
-			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowfile"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowfile
 			
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
@@ -694,8 +694,8 @@ if [[ "$dnsserver" == "1" ]]; then
 				exit 18
 			fi
 			
-			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog"
-			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowfile"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowfile
 			
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
@@ -1310,7 +1310,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	fi
 	
 	
-	# Deploy also the php fpm pool file from the scripts/templates/osuxxx.conf
+	# Deploy also the php fpm pool file from the scripts/templates/osuxxx.template
 	# A link will also be created into /etc/php/$phpversion/fpm/pool.d/$fqn.conf to this fpm pool file $fqn.conf
 	export phpfpmconf="/etc/php/$phpversion/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf"
 	export phpfpmservicename="sellyoursaas-php$phpversion-fpm-$fqn.service"
@@ -1658,11 +1658,11 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
 	if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$nowlog.sql.zst"
-		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > "$archivedir/$osusername/dump.$dbname.$nowlog.sql.zst"
+		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$nowfile.sql.zst"
+		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > "$archivedir/$osusername/dump.$dbname.$nowfile.sql.zst"
 	else
-		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$nowlog.sql.gz"
-		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > "$archivedir/$osusername/dump.$dbname.$nowlog.sql.gz"
+		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$nowfile.sql.gz"
+		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > "$archivedir/$osusername/dump.$dbname.$nowfile.sql.gz"
 	fi
 
 	if [[ "x$?" == "x0" ]]; then

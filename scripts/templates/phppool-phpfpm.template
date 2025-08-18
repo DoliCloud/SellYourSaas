@@ -1,7 +1,8 @@
 ;----------------------------------------------------
-; php-fpm config file for a pool for sellyoursaas instances
+; php-fpm config file for a pool for sellyoursaas osuxxx instances
 ;
 ; All apache virtual hosts of user osuxxx will use this same pool
+; Used when phpfpm option is enabled (apache-php not used)
 ;----------------------------------------------------
 
 [__fqn__]

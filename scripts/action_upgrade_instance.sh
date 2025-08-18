@@ -10,7 +10,6 @@
 
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
-export nowlog=`date +'%Y%m%d-%H%M%S'`
 
 echo
 echo

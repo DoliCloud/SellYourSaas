@@ -10,7 +10,6 @@
 
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
-export nowlog=`date +'%Y%m%d-%H%M%S'`
 
 echo
 echo
@@ -49,15 +48,15 @@ if [[ "x$templatesdir" != "x" ]]; then
   fi
 elif [[ "x$phpfpm" != "x" ]]; then
   export vhostfile="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas.template"
-	export vhostfilesuspended="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-suspended.template"
-	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
-	export fpmpoolfiletemplate="$scriptdir/templates/phppool-phpfpm.template"
-	export fpmservicefiletemplate="$scriptdir/templates/poolservice-phpfpm.template"
+  export vhostfilesuspended="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-suspended.template"
+  export vhostfilemaintenance="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
+  export fpmpoolfiletemplate="$scriptdir/templates/phppool-phpfpm.template"
+  export fpmservicefiletemplate="$scriptdir/templates/poolservice-phpfpm.template"
 else
-	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
-	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
-	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
-	export fpmpoolfiletemplate="$scriptdir/templates/osuxxx.template"
+  export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
+  export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+  export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+  export fpmpoolfiletemplate="$scriptdir/templates/osuxxx.template"
 fi
 
 if [ "$(id -u)" != "0" ]; then
@@ -174,7 +173,7 @@ export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
 export CRONHEAD=${VIRTUALHOSTHEAD/php_value date.timezone /TZ=}
 
-# possibility to change the ssl certificates name
+# set the generic ssl certificate name
 export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateCRT" == "x" ]]; then
 	export webSSLCertificateCRT=with.sellyoursaas.com.crt
@@ -267,12 +266,13 @@ if [[ "$mode" == "rename" ]]; then
 	echo mkdir -p $targetdir/$osusername/$dbname to be sure apache can create its error log file
 	mkdir -p $targetdir/$osusername/$dbname
 
+	# Delete old custom conf file
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new apache conf $apacheconf from $vhostfile"
 
 	if [[ -s $apacheconf ]]
 	then
-		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
 		rm -f $apacheconf
 	fi
 
@@ -408,9 +408,10 @@ if [[ "$mode" == "rename" ]]; then
 				export webCustomSSLCertificateIntermediate="/etc/apache2/$webSSLCertificateIntermediate"
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 
-				# We do not use SSL for thi temporary virtual host
+				# We do not use SSL for this temporary virtual host
 				SSLON="Off"
 				
+				# Delete old custom conf file
 				export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
 				echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new temporary apache conf $apacheconf from $vhostfile"
 	
@@ -496,16 +497,21 @@ if [[ "$mode" == "rename" ]]; then
 					sleep 1
 				fi
 
+				# Create directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt if it does not exists
+				if [[ ! -d $pathforcertiflocal ]]; then
+					echo "Create cert directory with mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;"
+					mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;
+				fi
 
 				# Generate the letsencrypt certificate
-                echo "Generate letsencrypt certificate for a custom URL";
+                echo `date +'%Y-%m-%d %H:%M:%S'`" Generate letsencrypt certificate for a custom URL";
                 echo "certbot certonly -v --webroot -w $instancedir/htdocs -d $customurl"
                 certbot certonly -v --webroot -w $instancedir/htdocs -d $customurl
 
 				# Test result of the certbot
 				certbotresult=$?
 				
-				# Vérifier le code de retour et afficher un message approprié
+				# Vérify return code and show appropriate message
 				if [ $certbotresult -eq 0 ]; then
 					echo "certbot command seems to succeed"
 				else

@@ -359,8 +359,8 @@ if ($mode == 'set') {
 	}
 
 	// Archive old file
-	$nowlog = dol_print_date(dol_now("gmt"), "%Y%m%d-%H%M%S", "gmt");
-	$archivefile = "/etc/bind/archives/".$dnszonefile."-".$nowlog;
+	$nowfile = dol_print_date(dol_now("gmt"), "%Y%m%d-%H%M%S", "gmt");
+	$archivefile = "/etc/bind/archives/".$dnszonefile."-".$nowfile;
 	if (!$quiet) {
 		print "Copy the old DNS zone file ".$fullpathdnszonefile." into ".$archivefile."\n";
 	}
