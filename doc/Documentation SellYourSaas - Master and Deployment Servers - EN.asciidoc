@@ -3441,7 +3441,7 @@ You can use the solution 1 (recommended as free and with no manual update requir
 certbot certonly --manual --preferred-challenges=dns -d "admin.<your_domain>"
 ---------------
 
-* On the *deployment servers*, to create automatically renewable wildcard *.withX.mysaasdomainname.com certificates :
+* On the *deployment servers*, to create automatically a renewable wildcard *.withX.mysaasdomainname.com certificate :
 
 Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
 
@@ -3450,7 +3450,7 @@ Run cerbot with the following command line (you can test it beforehand by adding
 certbot certonly -n --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" [--expand]
 ---------------
 
-The option [--expand] is to concate the result to the existing certificate when you want to add another domain.
+The option [--expand] is to concate the result to an already existing certificate when you want to add another domain.
  
 For example, you can use *supervision@mysaasdomainname.com* as the email for letsencrypt account.
 
@@ -3487,7 +3487,7 @@ certbot renew -v [--dry-run]
 or
 certbot renew --force-renewal
 or 
-certbot renew --cert-name admin.mysellyoursaasdomain.com --dry-run
+certbot renew --cert-name admin.<mysaasdomainname.com> --dry-run
 ---------------
 
 * To renew a certificate on the *deployment servers*:
@@ -3500,7 +3500,7 @@ certbot renew -v [--dry-run]
 or
 certbot renew --force-renewal
 or
-certbot certonly -n [--manual-public-ip-logging-ok] --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<your_domain>,with<X>.<your_domain>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
+certbot certonly -n [--manual-public-ip-logging-ok] --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<mysaasdomainname.com>,with<X>.<mysaasdomainname.com>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
 ---------------
 
 Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file 
@@ -3514,7 +3514,7 @@ or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
 [source,bash]
 ---------------
-find /etc/letsencrypt/ -name "*with<X>.<your_domain>*" -exec rm -fr {} \;
+find /etc/letsencrypt/ -name "*with<X>.<mysaasdomainname>*" -exec rm -fr {} \;
 ---------------
 
 ===== Solution 2: From a SSL provider (non free, need manual update)
