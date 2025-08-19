@@ -1225,11 +1225,11 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
 			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
 			
-			# We must create it using letsencrypt if not yet created
+			# TODO We must create it using letsencrypt if not yet created. NOTE: This is done in action "rename" (suspen_unsuspend.sh), not sure we must also do it  on deploy.
 			#if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn.crt ]]; then
 					# Generate the letsencrypt certificate
 					
-					# certbot certonly --webroot -w $instancedir -d $customurl 
+					# certbot certonly -n -v --webroot -w $instancedir -d $customurl 
 					# create links					
 
 					# If links does not exists, we disable SSL

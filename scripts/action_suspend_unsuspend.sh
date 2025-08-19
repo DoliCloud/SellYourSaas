@@ -505,8 +505,8 @@ if [[ "$mode" == "rename" ]]; then
 
 				# Generate the letsencrypt certificate
                 echo `date +'%Y-%m-%d %H:%M:%S'`" Generate letsencrypt certificate for a custom URL";
-                echo "certbot certonly -v --webroot -w $instancedir/htdocs -d $customurl"
-                certbot certonly -v --webroot -w $instancedir/htdocs -d $customurl
+                echo "certbot certonly -n -v --webroot -w $instancedir/htdocs -d $customurl"
+                certbot certonly -n -v --webroot -w $instancedir/htdocs -d $customurl
 
 				# Test result of the certbot
 				certbotresult=$?

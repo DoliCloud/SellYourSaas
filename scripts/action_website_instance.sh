@@ -289,12 +289,12 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin:admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
 
 	if [[ ${46} == www.* ]]; then
-		echo certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
-		certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
+		echo certbot certonly -n -v --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
+		certbot certonly -n -v --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
 		export certko=$?
 	else
-		echo certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
-		certbot certonly --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
+		echo certbot certonly -n -v --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
+		certbot certonly -n -v --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
 		export certko=$?
 	fi
 	
