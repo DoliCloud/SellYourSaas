@@ -182,15 +182,8 @@ print '<form enctype="multipart/form-data" method="POST" action="'.$_SERVER["PHP
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="set">';
 
-print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
-print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
-print "</tr>\n";
 
-print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM"), 'Set to yes if you want your customers being able to apply to become resellers').'</td>';
-print '<td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_ALLOW_RESELLER_PROGRAM"), 'Set to yes if you want your customers being able to apply to become resellers');
 if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', array(), null, 0, 0, 1);
 } else {
@@ -200,13 +193,18 @@ if ($conf->use_javascript_ajax) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
-//print $form->selectyesno('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', $allowresellerprogram, 1);
-print '</td>';
-print '<td><span class="opacitymedium small"></span></td>';
-print '</tr>';
+print '<br><br>';
+
 
 $allowresellerprogram = getDolGlobalInt('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM');
 if ($allowresellerprogram) {
+	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
+	print '<table class="noborder centpercent">';
+	print '<tr class="liste_titre">';
+	print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
+	print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+	print "</tr>\n";
+
 	print '<tr class="oddeven"><td>'.$langs->trans("DefaultCommission");
 	print '</td>';
 	print '<td>';
@@ -277,10 +275,10 @@ if ($allowresellerprogram) {
 	print '</td>';
 	print '<td><span class="opacitymedium small">4</span></td>';
 	print '</tr>';
-}
 
-print '</table>';
-print '</div>';
+	print '</table>';
+	print '</div>';
+}
 
 print "</form>\n";
 

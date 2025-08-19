@@ -140,8 +140,6 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG", GETPOST("SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG"), 'chaine', 0, '', $conf->entity);
 
-		//dolibarr_set_const($db, "SELLYOURSAAS_REFS_URL", GETPOST("SELLYOURSAAS_REFS_URL"), 'chaine', 0, '', $conf->entity);
-
 		dolibarr_set_const($db, "SELLYOURSAAS_ACCOUNT_URL", GETPOST("SELLYOURSAAS_ACCOUNT_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
 		foreach ($arrayofsuffixfound as $suffix) {
 			dolibarr_set_const($db, "SELLYOURSAAS_PRICES_URL".$suffix, GETPOST("SELLYOURSAAS_PRICES_URL".$suffix), 'chaine', 0, '', $conf->entity);
@@ -190,7 +188,7 @@ if ($action == 'removelogoblack') {
 	if (getDolGlobalString($constname) != '') {
 		dol_delete_file($logofile);
 	}
-	dolibarr_del_const($db, "$constname", $conf->entity);
+	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_SMALL_BLACK'.GETPOST('suffix', 'aZ09');
 	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);

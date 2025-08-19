@@ -181,94 +181,107 @@ print '<form enctype="multipart/form-data" method="POST" action="'.$_SERVER["PHP
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="set">';
 
-print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
-print '<table class="noborder centpercent">';
-print '<tr class="liste_titre">';
-print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
-print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
-print "</tr>\n";
-
-// Allow Custom URL
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL").'</td>';
-print '<td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC"), $langs->transnoentities('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFICHelp'));
 if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ENABLE_CUSTOMURL', array(), null, 0, 0, 1);
+	print ajax_constantonoff('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC', array(), null, 0, 0, 1);
 } else {
-	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	if (!getDolGlobalString('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
-print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to allow customer to set a custom URL.</td>';
-print '</tr>';
+print '<br><br>';
 
-// Allow Custom URL for specific thirdparty ID ?
-if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID").'</td>';
+
+$allowdolibarrspecific = getDolGlobalInt('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC');
+if ($allowdolibarrspecific) {
+	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
+	print '<table class="noborder centpercent">';
+	print '<tr class="liste_titre">';
+	print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
+	print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+	print "</tr>\n";
+
+	// Allow Custom URL
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL").'</td>';
 	print '<td>';
-	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', '').'">';
-	print '</td>';
-	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
-	print '</tr>';
-}
-
-// Product ID for custom URL
-if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'</td>';
-	print '<td>';
-	print img_picto('', 'product', 'class="pictofixedwidth"');
-	print $form->select_produits(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500 widthcentpercentminusx');
-	print '</td>';
-	print '<td><span class="opacitymedium small"></span></td>';
-	print '</tr>';
-}
-
-// Allow deployment of Dolibarr website
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES").'</td>';
-print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES', array(), null, 0, 0, 1);
-} else {
-	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('SELLYOURSAAS_ENABLE_CUSTOMURL', array(), null, 0, 0, 1);
 	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		if (!getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		} else {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_CUSTOMURL">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		}
 	}
-}
-print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
-print '</tr>';
-
-
-// Allow deployment of Dolibarr website for specific thirdparty ID ?
-if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID").'</td>';
-	print '<td>';
-	print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', '').'">';
 	print '</td>';
-	print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
+	print '<td><span class="opacitymedium small">Set to yes to allow customer to set a custom URL.</td>';
 	print '</tr>';
-}
 
-// Product ID for website deployment
-if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT").'</td>';
+	// Allow Custom URL for specific thirdparty ID ?
+	if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
+		print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID").'</td>';
+		print '<td>';
+		print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID', '').'">';
+		print '</td>';
+		print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
+		print '</tr>';
+	}
+
+	// Product ID for custom URL
+	if (getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
+		print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'</td>';
+		print '<td>';
+		print img_picto('', 'product', 'class="pictofixedwidth"');
+		print $form->select_produits(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL'), "SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL", '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500 widthcentpercentminusx');
+		print '</td>';
+		print '<td><span class="opacitymedium small"></span></td>';
+		print '</tr>';
+	}
+
+	// Allow deployment of Dolibarr website
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES").'</td>';
 	print '<td>';
-	print img_picto('', 'product', 'class="pictofixedwidth"');
-	print $form->select_produits(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500 widthcentpercentminusx');
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES', array(), null, 0, 0, 1);
+	} else {
+		if (!getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		} else {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		}
+	}
 	print '</td>';
-	print '<td><span class="opacitymedium small"></span></td>';
+	print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
 	print '</tr>';
+
+
+	// Allow deployment of Dolibarr website for specific thirdparty ID ?
+	if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
+		print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID").'</td>';
+		print '<td>';
+		print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID" value="'.getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES_FOR_THIRDPARTYID', '').'">';
+		print '</td>';
+		print '<td><span class="opacitymedium small">12345,12346,... (keep empty to allow for everybody)</span></td>';
+		print '</tr>';
+	}
+
+	// Product ID for website deployment
+	if (getDolGlobalString('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES')) {
+		print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT").'</td>';
+		print '<td>';
+		print img_picto('', 'product', 'class="pictofixedwidth"');
+		print $form->select_produits(getDolGlobalString('SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT'), "SELLYOURSAAS_PRODUCT_ID_FOR_WEBSITE_DEPLOYMENT", '', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'maxwidth500 widthcentpercentminusx');
+		print '</td>';
+		print '<td><span class="opacitymedium small"></span></td>';
+		print '</tr>';
+	}
+
+
+	print '</table>';
+	print '</div>';
 }
-
-
-print '</table>';
-print '</div>';
-
-print '</table>';
-print '</div>';
 
 print "</form>\n";
 
