@@ -30,9 +30,13 @@ export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+htdocsdir=`grep '^htdocsdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$htdocsdir" != "x" ]]; then
+	export htdocsdir="/htdocs"
+fi
 if [[ "x$templatesdir" != "x" ]]; then
   if [[ "x$phpfpm" != "x" ]]; then
     export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"

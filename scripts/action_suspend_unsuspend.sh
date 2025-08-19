@@ -30,9 +30,13 @@ export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+htdocsdir=`grep '^htdocsdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$htdocsdir" != "x" ]]; then
+	export htdocsdir="/htdocs"
+fi
 if [[ "x$templatesdir" != "x" ]]; then
   if [[ "x$phpfpm" != "x" ]]; then
     export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
@@ -385,18 +389,18 @@ if [[ "$mode" == "rename" ]]; then
 				# When we rename, it may be because we change abc.with... into def.with..., or
 				# because we added a custom url.
 
-				if [[ ! -d $instancedir/htdocs/.well-known ]]; then
-                	echo "mkdir $instancedir/htdocs/.well-known"
-                	mkdir $instancedir/htdocs/.well-known
-                	echo "chown $osusername:$osusername $instancedir/htdocs/.well-known"
-					chown $osusername:$osusername $instancedir/htdocs/.well-known
+				if [[ ! -d $instancedir$htdocsdir/.well-known ]]; then
+                	echo "mkdir $instancedir$htdocsdir/.well-known"
+                	mkdir $instancedir$htdocsdir/.well-known
+                	echo "chown $osusername:$osusername $instancedir$htdocsdir/.well-known"
+					chown $osusername:$osusername $instancedir$htdocsdir/.well-known
 				fi
 
-				if [[ ! -d $instancedir/htdocs/.well-known/acme-challenge ]]; then
-                	echo "mkdir $instancedir/htdocs/.well-known/acme-challenge"
-                	mkdir $instancedir/htdocs/.well-known/acme-challenge
-                	echo "chown $osusername:$osusername $instancedir/htdocs/.well-known/acme-challenge"
-					chown $osusername:$osusername $instancedir/htdocs/.well-known/acme-challenge
+				if [[ ! -d $instancedir$htdocsdir/.well-known/acme-challenge ]]; then
+                	echo "mkdir $instancedir$htdocsdir/.well-known/acme-challenge"
+                	mkdir $instancedir$htdocsdir/.well-known/acme-challenge
+                	echo "chown $osusername:$osusername $instancedir$htdocsdir/.well-known/acme-challenge"
+					chown $osusername:$osusername $instancedir$htdocsdir/.well-known/acme-challenge
 				fi
 
 
@@ -505,8 +509,8 @@ if [[ "$mode" == "rename" ]]; then
 
 				# Generate the letsencrypt certificate
                 echo `date +'%Y-%m-%d %H:%M:%S'`" Generate letsencrypt certificate for a custom URL";
-                echo "certbot certonly -n -v --webroot -w $instancedir/htdocs -d $customurl"
-                certbot certonly -n -v --webroot -w $instancedir/htdocs -d $customurl
+                echo "certbot certonly -n -v --webroot -w $instancedir$htdocsdir -d $customurl"
+                certbot certonly -n -v --webroot -w $instancedir$htdocsdir -d $customurl
 
 				# Test result of the certbot
 				certbotresult=$?
