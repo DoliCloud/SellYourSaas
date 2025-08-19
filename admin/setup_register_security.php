@@ -543,8 +543,9 @@ print '<tr class="liste_titre"><td colspan="3">Security for communication from m
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY").'</td>';
 print '<td>';
-print '<input type="text" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" id="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
+print '<input type="text" class="width300" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" id="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
 if (!empty($conf->use_javascript_ajax)) {
+	// TODO Set the type of input in password and add a button "show"
 	print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token" class="linkobject"');
 	// Add button to autosuggest a key
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';

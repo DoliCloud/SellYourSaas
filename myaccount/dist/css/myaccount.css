@@ -156,6 +156,9 @@ a.btnalreadyanaccount {
 	min-height: 220px;
 	background-color: #fff;
 }
+portlet.nominheight {
+	min-height: unset;
+}
 
 .portlet input[type='submit'] {
 	width: auto;

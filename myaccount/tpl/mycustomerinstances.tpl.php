@@ -44,7 +44,7 @@ if (empty($conf) || ! is_object($conf)) {
 
 
 	//print $langs->trans("Filters").' : ';
-	print '<div class="row"><div class="col-md-12"><div class="portlet light">';
+	print '<div class="row"><div class="col-md-12"><div class="portlet light nominheight">';
 
 	print '<form name="refresh" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -788,7 +788,7 @@ if (count($listofcontractidreseller) == 0) {
 	$selectofthirdparties = $form->select_company('', 'reusesocid', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'centpercent');
 
 if ($form->result['nbofthirdparties'] == 0) {
-	print $langs->trans("YouDontHaveCustomersYet").'...<br>';
+	print '<span class="opacitymedium">'.$langs->trans("YouDontHaveCustomersYet").'...</span><br>';
 } else {
 	print '<a href="#addanotherinstance" id="addanotherinstance" class="valignmiddle">';
 	print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-right: 4px;"></span><span class="valignmiddle text-plus-circle">'.$langs->trans("AddAnotherInstance").'...</span><br>';
