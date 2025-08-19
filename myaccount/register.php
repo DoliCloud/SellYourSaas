@@ -708,7 +708,7 @@ if ($reshook == 0) {
 			if (empty($mythirdparty->id)) {
 				?>
 			<div class="control-group  required">
-				<label class="control-label" for="username" trans="1"><span class="fas fa-at opacityhigh"></span> <?php echo $langs->trans("Email") ?></label>
+				<label class="control-label" for="username"><span class="fas fa-at opacityhigh"></span> <?php echo $langs->trans("Email") ?></label>
 				<div class="controls">
 					<input type="text"<?php echo $disabled; ?> name="username" id="username" autocomplete="true" spellcheck="false" maxlength="255" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="required" />
 
@@ -718,8 +718,7 @@ if ($reshook == 0) {
 			<div class="group">
 				<div class="horizontal-fld">
 					<div class="control-group  required">
-						<label class="control-label" for="orgName"
-							   trans="1"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
+						<label class="control-label" for="orgName"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
 						<div class="controls">
 							<input type="text"<?php echo $disabled; ?> name="orgName" id="orgName" spellcheck="false" maxlength="250"
 								   value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="required" id="orgName"/>
@@ -758,10 +757,10 @@ if ($reshook == 0) {
 				<div class="horizontal-fld">
 
 				<div class="control-group  required">
-					<label class="control-label" for="password" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("Password") ?></label>
+					<label class="control-label" for="password"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("Password") ?></label>
 					<div class="controls">
 
-						<input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform; ?>" />
+						<input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="password" name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform; ?>" />
 
 					</div>
 				</div>
@@ -769,9 +768,9 @@ if ($reshook == 0) {
 				</div>
 				<div class="horizontal-fld">
 				  <div class="control-group required">
-					<label class="control-label" for="password2" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("PasswordRetype") ?></label>
+					<label class="control-label" for="password2"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("PasswordRetype") ?></label>
 					<div class="controls">
-					  <input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" name="password2" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform2; ?>" />
+					  <input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="password2" name="password2" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform2; ?>" />
 					</div>
 				  </div>
 				</div>
@@ -784,7 +783,7 @@ if ($reshook == 0) {
 				?>
 
 			<div class="control-group  ">
-				<label class="control-label" for="country"><span class="fa fa-globe opacityhigh"></span> <?php echo $langs->trans("Country") ?></label>
+				<label class="control-label" for="selectcountry"><span class="fa fa-globe opacityhigh"></span> <?php echo $langs->trans("Country") ?></label>
 				<div class="controls">
 				<?php
 				$countryuser=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
@@ -818,7 +817,7 @@ if ($reshook == 0) {
 			  <!-- Selection of domain to create instance -->
 			  <section id="selectDomain">
 				<div class="fld select-domain required">
-				  <label trans="1"><?php echo $langs->trans("ChooseANameForYourApplication") ?></label>
+				  <label><?php echo $langs->trans("ChooseANameForYourApplication") ?></label>
 				  <div class="linked-flds">
 					  <span class="nowraponall sldAndSubdomaininput">
 					<span class="opacitymedium">https://</span>
@@ -1098,7 +1097,7 @@ if ($reshook == 0) {
 			}
 			if ($urlfortermofuse) {
 				?>
-			  <p class="termandcondition small center" style="color:#444; margin:10px 3px;" trans="1"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
+			  <p class="termandcondition small center" style="color:#444; margin:10px 3px;"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
 				<?php
 			}
 			?>
