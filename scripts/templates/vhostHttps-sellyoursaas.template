@@ -188,14 +188,14 @@
 		# To enable this section, you must edit /etc/apache2/envvars to set 
 		# export APACHE_ARGUMENTS='-DUSEIFFILE'
 		# You can do it only if Apache is 2.4.35+
-		# This section is required if you want/need to use customer custom certificates
-		<IfDefine USEIFFILE>
-        <IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
-			SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt
-			SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.key
-			SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
-			SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
-        </IfFile>
-        </IfDefine>
+		# This section can be removed, the SSL certificate is already set previously (to the custom certiticate for custom virtual host or to the generic one for standard virtual host or if custom cert not found).
+		#<IfDefine USEIFFILE>
+        #<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
+		#	SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt
+		#	SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.key
+		#	SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
+		#	SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__-intermediate.crt
+        #</IfFile>
+        #</IfDefine>
 
 </VirtualHost>
