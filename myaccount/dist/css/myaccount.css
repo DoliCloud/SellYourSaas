@@ -156,7 +156,7 @@ a.btnalreadyanaccount {
 	min-height: 220px;
 	background-color: #fff;
 }
-portlet.nominheight {
+.portlet.nominheight {
 	min-height: unset;
 }
 
