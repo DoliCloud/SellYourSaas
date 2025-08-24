@@ -759,11 +759,11 @@ if ($mythirdpartyaccount->isInEEC()) {
 	}
 } else {
 	print '<br>';
-	print $langs->trans("SEPAPaymentModeAvailableForCeeOnly", $mythirdpartyaccount->country);
+	print '<span class="alert">'.$langs->trans("SEPAPaymentModeAvailableForCeeOnly", $mythirdpartyaccount->country).'</span>';
 	print '<br><br>';
 	print ' ';
 	//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
-	print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
+	//print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 }
 
 print '
