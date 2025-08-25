@@ -6462,7 +6462,7 @@ Resolving changelogs.ubuntu.com (changelogs.ubuntu.com)... 2620:2d:4000:1::2b, 2
 Connecting to changelogs.ubuntu.com (changelogs.ubuntu.com)|2620:2d:4000:1::2b|:443...
 ---------------
 
-It may mean that your IPv6 connection is wrong. Disable the firewall, and try to disable the IPv6 interface
+It may mean that your IPv6 connection is wrong. Disable the firewall, and try to disable the IPv6 interface like this
 
 [source,bash]
 ---------------
@@ -6492,8 +6492,8 @@ clamdscan --fdpass -v /home/jail/home/osu*/dbn...
 
 TODO Add command for local antivirus
 
-If you confirm, this is a false positive, you can report it to the Antivirus provider.
-For example for AVAST: https://www.avast.com/report-false-positive#pc (need the report ID)
+If you confirm this is a false positive, you can report it to the Antivirus provider.
+For example, for AVAST: https://www.avast.com/report-false-positive#pc (need the report ID)
 
 
 ==== Upload blocked by the clamd antivirus. Error is reported as Heuristics.Structured.CreditCardNumber FOUND.
