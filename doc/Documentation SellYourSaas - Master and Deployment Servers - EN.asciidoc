@@ -712,7 +712,6 @@ ln -fs /mnt/diskhome/backup /mnt/diskbackup
 mkdir /home/jail; mkdir /mnt/diskhome/home;
 
 mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
-mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
 chown admin:root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskhome/home /home/jail/home
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
@@ -3212,6 +3211,7 @@ Create the sample files that will be used for antispam internal features of Sell
 
 [source,bash]
 ---------------
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
 echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail;
 echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip;
 echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom;
