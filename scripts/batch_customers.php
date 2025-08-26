@@ -525,7 +525,7 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 $today=dol_now();
 
 $error=0; $errors=array();
-$servicetouse=strtolower($conf->global->SELLYOURSAAS_NAME);
+$servicetouse = strtolower(getDolGlobalString('SELLYOURSAAS_NAME'));
 
 if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'updatecountsonly') {	// updatedatabase = updatestatsonly + updatecountsonly
 	print "----- Start updatedatabase\n";
@@ -652,7 +652,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 					$rep = sellyoursaas_calculate_stats($dbmaster, $datelastday, $datefirstday);	// Get qty and amount into all template invoices linked to active contracts deployed before the $datelastday
 
-					$part = (!getDolGlobalString('SELLYOURSAAS_PERCENTAGE_FEE') ? 0 : $conf->global->SELLYOURSAAS_PERCENTAGE_FEE);
+					$part = getDolGlobalFloat('SELLYOURSAAS_PERCENTAGE_FEE');
 
 					foreach ($statkeylist as $statkey) {
 						if (! isset($stats[$statkey][$x]) || ($today <= $datelastday)) {	// If metric does not exist yet or if we are current month.
@@ -664,8 +664,8 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 								$totalcommissions = $rep['totalcommissions'];
 								$totalnewinstances = $rep['totalnewinstances'];
 								$totallostinstances = $rep['totallostinstances'];
-								$totalinstancespaying = $rep['totalinstancespaying'];
-								$totalinstancespayingall = $rep['totalinstancespayingall'];
+								$totalinstancespaying = $rep['totalinstancespaying'];			// total good standing instances (list of contracts with status done, not redirect, one service not suspended, not expired + recurring payment active)
+								$totalinstancespayingall = $rep['totalinstancespayingall'];		// total paying instance (list of contracts with status done, not redirect)
 								$totalinstances = $rep['totalinstances'];		// total trial only instances
 								$totalusers = $rep['totalusers'];
 								$totalcustomerspaying = $rep['totalcustomerspaying'];

@@ -367,7 +367,8 @@ print $form->textwithpicto($langs->trans("NbOfInstancesActivePaying"), $texthelp
 if ($mode == 'refreshstats') {	// Info not saved into session (too large), so we show it only after a refresh
 	$texthelp = $langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
 	if ($stringlistofinstancespayingwithoutrecinvoice) {
-		$texthelp.=' ('.$stringlistofinstancespayingwithoutrecinvoice.')';
+		$texthelp .= '<br>';
+		$texthelp .= $stringlistofinstancespayingwithoutrecinvoice;
 	}
 }
 print ' | '.$form->textwithpicto($langs->trans("NbOfInstancesActivePayingAll"), $texthelp).' | '.$langs->trans("NbOfActiveInstances").' ';
