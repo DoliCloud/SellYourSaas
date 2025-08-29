@@ -988,7 +988,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					// If there is a package, test if module already depoyed on instance
 					$productalreadyininstance = 0;
 					foreach ($arrayoflines as $keyline => $line) {
-						if ($tmpproduct->id == $line->id) {
+						if ($tmpproduct->id == $line->fk_product) {
 							$productalreadyininstance = 1;
 							break;
 						}
