@@ -939,3 +939,5 @@ HelpOnDaysForFreePeriod=When the service has type "Application", enter the numbe
 OnlyThoseServers=Only on those servers
 HelpOnOnlyThoseServers=Keep empty to allow deployment on any qualified server. Enter the name of one or several servers if you want to force the deployment of this service on a given server.
 DolibarrDeployment=Dolibarr specific
+OnlyForCountry=Only for Country
+OnlyForCountryHelp=Country code list allowing installation of the product or service.To have several countries, add a comma between the country codes.<br>Exemple : fr,us,es

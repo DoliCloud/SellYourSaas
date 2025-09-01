@@ -77,6 +77,14 @@ if ($resqlproducts) {
 			$priceinstance['user'] = 0;
 			$priceinstance_ttc['user'] = 0;
 
+			if (!empty($tmpprod->array_options["options_only_for_country"])) {
+				$optioncountries = preg_split("/[\s,;]+/", $tmpprod->array_options["options_only_for_country"]);
+				if (!in_array(dol_strtolower($mythirdpartyaccount->country_code), $optioncountries)) {
+					// Thirdparty country code isn't in options_only_for_country array so we don't show plan
+					continue;
+				}
+			}
+
 			if (count($tmparray) > 0) {
 				foreach ($tmparray as $key => $value) {
 					$tmpprodchild->fetch($value['id']);
