@@ -43,7 +43,7 @@ $arrayofplansfull=array();
 $arrayofoptionsfull=array();
 
 // List of available plans/products
-$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pe.onlyserver, pa.restrict_domains, ';
+$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pe.onlyserver, pa.restrict_domains';
 $sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 $sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
 $sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
