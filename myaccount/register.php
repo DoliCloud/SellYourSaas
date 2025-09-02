@@ -106,19 +106,19 @@ if ($langs->defaultlang == 'en_US') {
 }
 
 
-$partner=GETPOST('partner', 'int');
-$partnerkey=GETPOST('partnerkey', 'alpha');
-$plan=GETPOST('plan', 'alpha');
-$sldAndSubdomain=strtolower(GETPOST('sldAndSubdomain', 'alpha'));
-$tldid=GETPOST('tldid', 'alpha');
+$partner = GETPOST('partner', 'int');
+$partnerkey = GETPOST('partnerkey', 'alpha');
+$plan = GETPOST('plan', 'alpha');
+$sldAndSubdomain = strtolower(GETPOST('sldAndSubdomain', 'alpha'));
+$tldid = GETPOST('tldid', 'alpha');
 $origin = GETPOST('origin', 'aZ09');
 
-$socid=GETPOST('socid', 'int') ? GETPOST('socid', 'int') : GETPOST('reusesocid', 'int');
+$socid = GETPOST('socid', 'int') ? GETPOST('socid', 'int') : GETPOST('reusesocid', 'int');
 $reusecontractid = GETPOST('reusecontractid', 'int');
 $reusesocid = GETPOST('reusesocid', 'int');
 $fromsocid = GETPOST('fromsocid', 'int');
 $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
-$extcss=GETPOST('extcss', 'alpha');
+$extcss = GETPOST('extcss', 'alpha');
 if (empty($extcss)) {
 	$extcss = getDolGlobalString('SELLYOURSAAS_EXTCSS', 'dist/css/myaccount.css');
 } elseif ($extcss == 'generic') {
@@ -673,8 +673,8 @@ if ($reshook == 0) {
 				</script>
 				';
 			}
-
 			?>
+
 			  <section id="enterUserAccountDetails">
 
 			<?php

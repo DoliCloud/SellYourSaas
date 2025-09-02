@@ -30,6 +30,11 @@
 
 
 
+--update llx_societe_rib set card_type = 'mastercard' where card_type = 'MasterCard';
+--update llx_societe_rib set card_type = 'amex' where card_type = 'American express';
+--update llx_societe_rib set card_type = 'visa' where card_type = 'Visa';
+
+
 ALTER TABLE llx_packages ADD COLUMN cliafterpaid text;
 ALTER TABLE llx_packages ADD COLUMN sqlafterpaid text;
 ALTER TABLE llx_packages ADD COLUMN sqlpasswordreset text;
@@ -179,3 +184,6 @@ ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN label varchar(64);
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN hostname varchar(64);
 
 UPDATE llx_actioncomm set code = 'AC_PAYMENT_STRIPE_IPN_SEPA_KO' where code = 'AC_IPN' and label like 'Payment error (SEPA%';
+
+
+

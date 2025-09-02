@@ -27,6 +27,13 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE instances.tpl.php -->
 <?php
 
+$plan = GETPOST('plan', 'alpha');
+
+$planarray = preg_split('/(,|;)/',$plan);
+if (!empty($planarray[1])) {
+	$productref = 'array';
+}
+
 // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 $forcesubdomain = GETPOST('forcesubdomain', 'alpha');
@@ -36,20 +43,24 @@ $arrayofplansfull=array();
 $arrayofoptionsfull=array();
 
 // List of available plans/products
-$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pa.restrict_domains';
+$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pe.onlyserver, pa.restrict_domains, ';
 $sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 $sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
 $sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
 $sqlproducts.= " AND pe.availabelforresellers > 0";		// available in dashboard (customers + resellers)
 $sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
-$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
-$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
-$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
-$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname).",%'"; // can be the first or the middle domain of [with.mydomain1.com,with.mydomain2.com,mydomain3.com]
-$sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; // can be the first domain of [mydomain1.com,mydomain2.com]
-$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
-$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
-$sqlproducts.= ")";
+if ($productref == 'array') {	// If ref of product was forced via plan=... parameter
+
+} else {
+	$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restrict_domains can be empty (it's ok)
+	$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
+	$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
+	$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname).",%'"; // can be the first or the middle domain of [with.mydomain1.com,with.mydomain2.com,mydomain3.com]
+	$sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; // can be the first domain of [mydomain1.com,mydomain2.com]
+	$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
+	$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
+	$sqlproducts.= ")";
+}
 $sqlproducts.= " ORDER BY pe.position ASC";
 
 $resqlproducts = $db->query($sqlproducts);
@@ -133,6 +144,7 @@ if ($resqlproducts) {
 			$arrayofplansfull[$obj->rowid]['label'] = $arrayofplans[$obj->rowid];
 			$arrayofplansfull[$obj->rowid]['data-html'] = $label.' <span class="opacitymedium">'.$priceforlabel.'</span>';
 			$arrayofplansfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
+			$arrayofplansfull[$obj->rowid]['onlyserver'] = $obj->onlyserver;
 		}
 		$i++;
 	}
@@ -142,7 +154,7 @@ if ($resqlproducts) {
 
 
 // List of available options
-$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pa.restrict_domains';
+$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pe.onlyserver, pa.restrict_domains';
 $sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 $sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
 $sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
@@ -234,9 +246,10 @@ if ($resqloptions) {
 
 			$arrayofoptionsfull[$obj->rowid]['id'] = $obj->rowid;
 			$arrayofoptionsfull[$obj->rowid]['label'] = $label;
-			$arrayofoptionsfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
 			$arrayofoptionsfull[$obj->rowid]['product'] = $tmpprod;
 			$arrayofoptionsfull[$obj->rowid]['labelprice'] =($pricetoshow ? $labelprice : '');
+			$arrayofoptionsfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
+			$arrayofoptionsfull[$obj->rowid]['onlyserver'] = $obj->onlyserver;
 		}
 		$i++;
 	}
@@ -1921,10 +1934,10 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 								var pid = jQuery("#service option:selected").val();
 								console.log("We select product id = "+pid);
 							';
-		foreach ($arrayofplansfull as $key => $plan) {
-			if (!empty($plan['restrict_domains'])) {
-				$restrict_domains = explode(",", $plan['restrict_domains']);
-				print "/* Code if we select pid = ".$key." so plan = ".$plan['label']." with restrict_domains = ".$plan['restrict_domains']." */\n";
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			if (!empty($tmpplan['restrict_domains'])) {
+				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
+				print "/* Code if we select pid = ".$key." so plan = ".$tmpplan['label']." with restrict_domains = ".$tmpplan['restrict_domains']." */\n";
 				foreach ($restrict_domains as $domain) {
 					print " if (pid == ".$key.") { disable_combo_if_not('".trim($domain)."'); }\n";
 					break;	// We keep only the first domain in list as the domain to keep possible for deployment
@@ -1939,8 +1952,8 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 							jQuery("#service").trigger("change");
 						});'."\n";
 
-		foreach ($arrayofplansfull as $key => $plan) {
-			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			print '/* pid='.$key.' => '.$tmpplan['label'].' - '.$tmpplan['id'].' - '.$tmpplan['restrict_domains'].' */'."\n";
 		}
 		print '</script>';
 

@@ -25,7 +25,14 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE mycustomerinstances.tpl.php -->
 <?php
 
-	print '
+$plan = GETPOST('plan', 'alpha');
+
+$planarray = preg_split('/(,|;)/',$plan);
+if (!empty($planarray[1])) {
+	$productref = 'array';
+}
+
+print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
 
@@ -43,25 +50,25 @@ if (empty($conf) || ! is_object($conf)) {
 	<!-- END PAGE HEADER-->';
 
 
-	//print $langs->trans("Filters").' : ';
-	print '<div class="row"><div class="col-md-12"><div class="portlet light nominheight">';
+//print $langs->trans("Filters").' : ';
+print '<div class="row"><div class="col-md-12"><div class="portlet light nominheight">';
 
-	print '<form name="refresh" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-	print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<form name="refresh" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
+print '<input type="hidden" name="token" value="'.newToken().'">';
 
-	print $langs->trans("InstanceName").' : <input type="text" name="search_instance_name" value="'.$search_instance_name.'"><br>';
-	//$savsocid = $user->socid;	// Save socid of user
-	//$user->socid = 0;
-	print $langs->trans("Customer").'/'.$langs->trans("Email").' : <input type="text" name="search_customer_name" value="'.$search_customer_name.'"><br>';
-	//.$form->select_company(GETPOST('search_customer_name', 'search_customer_name'), 'search_customer_name', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'inline-block').'</div><br>';
-	//$user->socid = $savsocid;	// Restore socid of user
+print $langs->trans("InstanceName").' : <input type="text" name="search_instance_name" value="'.$search_instance_name.'"><br>';
+//$savsocid = $user->socid;	// Save socid of user
+//$user->socid = 0;
+print $langs->trans("Customer").'/'.$langs->trans("Email").' : <input type="text" name="search_customer_name" value="'.$search_customer_name.'"><br>';
+//.$form->select_company(GETPOST('search_customer_name', 'search_customer_name'), 'search_customer_name', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'inline-block').'</div><br>';
+//$user->socid = $savsocid;	// Restore socid of user
 
-	print '<input type="hidden" name="mode" value="'.$mode.'">';
-	print '<div style="padding-top: 10px; padding-bottom: 10px">';
-	print '<input type="submit" name="submit" value="'.$langs->trans("Refresh").'">';
-	print ' &nbsp; ';
-	print '<input type="submit" name="reset" value="'.$langs->trans("Reset").'"><br>';
-	print '</div>';
+print '<input type="hidden" name="mode" value="'.$mode.'">';
+print '<div style="padding-top: 10px; padding-bottom: 10px">';
+print '<input type="submit" name="submit" value="'.$langs->trans("Refresh").'">';
+print ' &nbsp; ';
+print '<input type="submit" name="reset" value="'.$langs->trans("Reset").'"><br>';
+print '</div>';
 
 if (count($listofcontractidreseller) > 0) {
 	print $langs->trans("FirstRecord").' <input type="text" name="firstrecord" class="width50 right" value="'.$firstrecord.'">';
@@ -71,10 +78,10 @@ if (count($listofcontractidreseller) > 0) {
 	print count($listofcontractidreseller) .'</span><br>';
 }
 
-	print '</form>';
-	print '</div></div></div>';
+print '</form>';
+print '</div></div></div>';
 
-	print '<br>';
+print '<br>';
 
 if (count($listofcontractidreseller) == 0) {
 	//print '<span class="opacitymedium">'.$langs->trans("NoneF").'</span>';
@@ -464,7 +471,7 @@ if (count($listofcontractidreseller) == 0) {
 			$arrayofplanstoswitch=array();
 			$sqlproducts = 'SELECT p.rowid, p.ref, p.label FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 			$sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
-			$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
+			$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
 			$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 			$sqlproducts.= " AND pe.availabelforresellers > 0";		// available in dashboard (customers + resellers)
 			$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
@@ -979,9 +986,9 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 						console.log("We select product id = "+pid);
 					';
 	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
-		foreach ($arrayofplansfull as $key => $plan) {
-			if (!empty($plan['restrict_domains'])) {
-				$restrict_domains = explode(",", $plan['restrict_domains']);
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			if (!empty($tmpplan['restrict_domains'])) {
+				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
 				foreach ($restrict_domains as $domain) {
 					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
 					break;
@@ -998,8 +1005,8 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 			});'."\n";
 
 	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
-		foreach ($arrayofplansfull as $key => $plan) {
-			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			print '/* pid='.$key.' => '.$tmpplan['label'].' - '.$tmpplan['id'].' - '.$tmpplan['restrict_domains'].' */'."\n";
 		}
 	}
 	print '</script>';
@@ -1013,18 +1020,17 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 	print '<br><input type="submit" class="btn btn-warning default change-plan-link" name="changeplan" value="'.$langs->trans("Create").'">';
 }
 
-	print '</div></div></div>';
+print '</div></div></div>';
 
-	print '</form>';
+print '</form>';
 
-	print '</div>';	// end Add a new instance
+print '</div>';	// end Add a new instance
 
 
-
-	print '
+print '
     		</div>
 			</div>
-    	';
+   	';
 
 if (GETPOST('tab', 'alpha')) {
 	print '<script type="text/javascript" language="javascript">
