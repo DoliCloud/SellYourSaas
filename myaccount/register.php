@@ -135,7 +135,7 @@ $productref = (GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') :
 
 $defaultproduct = '';
 
-$planarray = preg_split('/(,|;)/',$plan);
+$planarray = preg_split('/(,|;)/', $plan);
 if (!empty($planarray[1])) {
 	$productref = 'array';
 }
@@ -823,7 +823,8 @@ if ($reshook == 0) {
 					<span class="opacitymedium">https://</span>
 					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" spellcheck="false" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" required="" />
 					</span>
-					<select<?php echo $disabled; ?> name="tldid" id="tldid">
+
+					<select name="tldid" id="tldid"<?php echo ' '.$disabled; ?>>
 						<?php
 						// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 						$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
@@ -835,7 +836,7 @@ if ($reshook == 0) {
 							$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));   // This is list of all sub domains to show into combo list
 						} else {
 							$staticdeploymentserver = new Deploymentserver($db);
-							$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND', 1);
+							$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND', 1);	// Return array
 						}
 
 						// Get the country of the user
@@ -854,7 +855,7 @@ if ($reshook == 0) {
 						//$conf->global->SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL = 1;
 
 						foreach ($listofdomain as $val) {
-							$newval = $val['fullstring'];
+							$newval = (is_array($val) ? $val['fullstring'] : $val);
 
 							if (empty($newval)) {
 								continue;
@@ -862,7 +863,13 @@ if ($reshook == 0) {
 
 							$reg = array();
 							if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+								$tmpnewval = explode(':', $newval);
+								$newval = $tmpnewval[0];        // the part before the : that we use to compare the forcesubdomain parameter.
+								if (!empty($tmpnewval[1]) && $tmpnewval[1] == 'closed') {
+									if ($newval != GETPOST('forcesubdomain', 'alpha') || !in_array(getUserRemoteIP(), explode(',', getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
+										continue;
+									}
+								}
 
 								$domainqualified = false;
 								$tmpdomains = explode('+', $reg[1]);

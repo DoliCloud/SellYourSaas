@@ -27,7 +27,7 @@ if (empty($conf) || ! is_object($conf)) {
 
 $plan = GETPOST('plan', 'alpha');
 
-$planarray = preg_split('/(,|;)/',$plan);
+$planarray = preg_split('/(,|;)/', $plan);
 if (!empty($planarray[1])) {
 	$productref = 'array';
 }
@@ -910,7 +910,9 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
     		<div class="linked-flds">
     		<span class="opacitymedium">https://</span>
     		<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
-    		<select name="tldid" id="tldid" >';
+    		';
+
+	print '<select name="tldid" id="tldid">';
 	// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 	$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
