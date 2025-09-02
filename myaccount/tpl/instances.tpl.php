@@ -1655,6 +1655,7 @@ if ($action == "confirmundeploy") {
     		jQuery("#addanotherinstance").click(function() {
     			console.log("Click on addanotherinstance");
     			jQuery("#formaddanotherinstance").toggle();
+				jQuery("#tldid").select2();		/* Force relaod of select2 */
     		});
 
 			/* Code to toggle the show of the option section */
