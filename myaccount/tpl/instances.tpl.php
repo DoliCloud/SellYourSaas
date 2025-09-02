@@ -1655,7 +1655,12 @@ if ($action == "confirmundeploy") {
     		jQuery("#addanotherinstance").click(function() {
     			console.log("Click on addanotherinstance");
     			jQuery("#formaddanotherinstance").toggle();
-				jQuery("#tldid").select2();		/* Force relaod of select2 */
+				/* Reinit select2 */
+				var inst = jQuery("#tldid").data("select2");
+				if (inst) {
+					var opts = $.extend(true, {}, inst.options.options);
+					jQuery("#tldid").select2(opts);
+				}
     		});
 
 			/* Code to toggle the show of the option section */
@@ -1783,7 +1788,6 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		print $form->selectarray('service', $arrayofplansfull, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
 		print '<br>';
 		print '</div>';
-		//print ajax_combobox('service');
 
 		print '
 			        			<div class="horizontal-fld clearboth margintoponly">
@@ -1950,7 +1954,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			foreach ($domainstosuggest as $val) {
 				$valwithoutfirstdot = preg_replace('/^\./', '', $val);
 				if (preg_match('/selectaserver/i', $val)) {
-					print '<option value="" class="opacitymedium" data-html="'.dol_escape_htmltag('<span class="opacitymedium">'.$langs->trans("SelectAServer").'</span>').'">'.$langs->trans("SelectAServer").'</option>';
+					print '<option value="" class="opacitymedium" data-html="'.dolPrintHTMLForAttribute('<span class="opacitymedium">'.$langs->trans("SelectAServer").'</span>').'">'.$langs->trans("SelectAServer").'</option>';
 				} else {
 					$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium small">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
 
@@ -1958,8 +1962,8 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 					foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
 						print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
 					}
-					print '" value="'.dol_escape_htmltag($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
-					print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
+					print '" value="'.dolPrintHTMLForAttribute($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
+					print ' data-html="'.dolPrintHTMLForAttribute($valtoshow).'"';
 					print '>';
 					print $valtoshow;
 					print '</option>';
