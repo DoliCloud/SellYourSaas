@@ -1948,17 +1948,21 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		if (!empty($domainstosuggest)) {
 			foreach ($domainstosuggest as $val) {
 				$valwithoutfirstdot = preg_replace('/^\./', '', $val);
-				$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium small">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
+				if (preg_match('/selectaserver/i', $val)) {
+					print '<option value="" class="opacitymedium" data-html="'.dol_escape_htmltag('<span class="opacitymedium">'.$langs->trans("SelectAServer").'</span>').'">'.$langs->trans("SelectAServer").'</option>';
+				} else {
+					$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium small">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
 
-				print '<option class="optionfordomain';
-				foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
-					print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
+					print '<option class="optionfordomain';
+					foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
+						print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
+					}
+					print '" value="'.dol_escape_htmltag($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
+					print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
+					print '>';
+					print $valtoshow;
+					print '</option>';
 				}
-				print '" value="'.dol_escape_htmltag($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
-				print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
-				print '>';
-				print $valtoshow;
-				print '</option>';
 			}
 		} else {
 			print '<option value="">No deployent server defined. Go on bak office to complete list</option>';
