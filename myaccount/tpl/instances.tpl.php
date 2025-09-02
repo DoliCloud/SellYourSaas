@@ -1954,8 +1954,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 				foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
 					print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
 				}
-				print '" value="'.dol_escape_htmltag($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '').'>';
+				print '" value="'.dol_escape_htmltag($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
 				print ' data-html="'.dol_escape_htmltag($valtoshow).'"';
+				print '>';
 				print $valtoshow;
 				print '</option>';
 			}
