@@ -519,9 +519,13 @@ if ($reshook == 0) {
 				print '</div>'."\n";
 				print '</div>'."\n";
 			}
+
+			$selectnametoselectplan = 'planselect';
+			$formname = 'formregister';
+
 			?>
 
-		  <form action="register_instance.php" name="formregister" method="post" id="formregister">
+		  <form action="register_instance.php" name="<?php echo $formname; ?>" id="<?php echo $formname; ?>" method="post">
 			<div class="form-content">
 			  <input type="hidden" name="token" value="<?php echo newToken(); ?>" />
 			  <input type="hidden" name="forcesubdomain" value="<?php echo dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')); ?>" />
@@ -549,7 +553,7 @@ if ($reshook == 0) {
 				print '<label class="control-label" for="plan">'.$langs->trans("ChooseAProductForYourApplication").'</label>';
 				print '<div class="control">';
 
-				print '<select class="minwidth400" required="required" id="planselect" name="plan">';
+				print '<select class="minwidth400" required="required" id="'.$selectnametoselectplan.'" name="plan">';
 				print '<option value="">&nbsp;</option>';
 				foreach ($planarray as $tmpkey => $tmpplanref) {
 					$tmpplan = new Product($db);
@@ -571,7 +575,7 @@ if ($reshook == 0) {
 					var initialValueSelectedInTldid = jQuery("#tldid").val();
 					console.log("Initial value selected in tldid = "+initialValueSelectedInTldid);
 
-				    $("#planselect").change(function() {
+				    $("#'.$selectnametoselectplan.'").change(function() {
 						console.log("We update a mandatory field");
 
 						var selectedOption = this.options[this.selectedIndex];
@@ -648,21 +652,21 @@ if ($reshook == 0) {
 						setButtonDisabled();
 				    });
 
-					jQuery("#formregister").on("change keyup", "#username", function() {
+					jQuery("#'.$formname.'").on("change keyup", "#username", function() {
 						console.log("We update a mandatory field");
 						setButtonDisabled();
 					});
-					jQuery("#formregister").on("change keyup", "#orgName", function() {
+					jQuery("#'.$formname.'").on("change keyup", "#orgName", function() {
 						console.log("We update a mandatory field");
 						setButtonDisabled();
 					});
-					jQuery("#formregister").on("change keyup", "#sldAndSubdomain", function() {
+					jQuery("#'.$formname.'").on("change keyup", "#sldAndSubdomain", function() {
 						console.log("We update a mandatory field");
 						setButtonDisabled();
 					});
 
 					function setButtonDisabled() {
-				        if (jQuery("#planselect").val() && jQuery("#username").val() && jQuery("#orgName").val() && jQuery("#sldAndSubdomain").val()) {
+				        if (jQuery("#'.$selectnametoselectplan.'").val() && jQuery("#username").val() && jQuery("#orgName").val() && jQuery("#sldAndSubdomain").val()) {
 				            $(\'#newinstance\').prop(\'disabled\', false);
 				        } else {
 				            $(\'#newinstance\').prop(\'disabled\', true);

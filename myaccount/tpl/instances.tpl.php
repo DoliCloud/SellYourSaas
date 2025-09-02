@@ -1967,8 +1967,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		} else {
 			print '<option value="">No deployent server defined. Go on bak office to complete list</option>';
 		}
-		print '</select>
-			        			<br class="unfloat" />
+		print '</select>';
+		print ajax_combobox('tldid');
+		print '      			<br class="unfloat" />
 			        			</div>
 			        			</div>
 			        			</section>'."\n";
