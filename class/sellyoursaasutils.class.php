@@ -1298,8 +1298,8 @@ class SellYourSaasUtils
 					} else {
 						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
 
-						if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
-							dol_syslog("The invoice is flagged as invoicepaymentdisputed so we discard it for any other payment");
+						if (!empty($invoice->dispute_status)) {
+							dol_syslog("The invoice is flagged as dispute_status so we discard it for any other payment");
 							$invoiceprocessedko[$obj->rowid] = $invoice->ref;
 						} else {
 							$result = $this->doTakePaymentStripeForThirdparty($service, $servicestatus, $obj->socid, $companypaymentmode, $invoice, 0, $noemailtocustomeriferror);
@@ -2301,10 +2301,10 @@ class SellYourSaasUtils
 					} else {
 						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
 
-						if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
+						if (!empty($invoice->dispute_status)) {
 							$errorforinvoice++;
-							dol_syslog("The invoice is flagged as invoicepaymentdisputed so we discard it for any other payment");
-							$this->errors[] = "The invoice is flagged as invoicepaymentdisputed so we discard it for any other payment";
+							dol_syslog("The invoice is flagged as dispute_status so we discard it for any other payment");
+							$this->errors[] = "The invoice is flagged as dispute_status so we discard it for any other payment";
 						} else {
 							// Create a direct debit payment request (if none already exists)
 							$result = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture', 1);

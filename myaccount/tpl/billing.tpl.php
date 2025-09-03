@@ -202,7 +202,7 @@ if (count($listofcontractid) > 0) {
 					$statusstring .= $s;
 
 					// If invoice is in dispute, we show it here
-					if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
+					if (!empty($invoice->dispute_status)) {
 						$statusstring .= ' <span class="badge badge-warning badge-status" title="'.$langs->trans("InvoicePaymentDisputedMessage", $invoice->ref, dol_print_date($invoice->date, 'day')).'">';
 						$statusstring .= $langs->trans("Canceled").'</span>';
 					}
@@ -243,9 +243,9 @@ if (count($listofcontractid) > 0) {
 								<!-- Price -->
 					            <div class="col-6 col-md-2">
 									';
-				print (empty($invoice->array_options['options_invoicepaymentdisputed']) ? '' : '<strike>');
+				print (empty($invoice->dispute_status) ? '' : '<strike>');
 				print price(price2num($invoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency);
-				print (empty($invoice->array_options['options_invoicepaymentdisputed']) ? '' : '</strike>');
+				print (empty($invoice->dispute_status) ? '' : '</strike>');
 
 				print '
 					            </div>
