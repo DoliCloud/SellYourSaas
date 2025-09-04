@@ -1242,7 +1242,7 @@
       mode: '0644'  
 
       
-  # TODO Create a symlink for PHP config
+  # TODO Create a symlink for PHP version directory
   # ln -fs /etc/php/sellyoursaas.ini /etc/php/8.2/apache2/conf.d/sellyoursaas.ini
   
   
@@ -1363,17 +1363,21 @@
         patterns: '*.conf'
       register: dolibarr_fail2ban_files
 
-    - name: Create links to fail2ban filter files
+    - name: Create links to fail2ban filter files only if they do not exist
       ansible.builtin.file:
         src: "{{ item.path }}"
         dest: "/etc/fail2ban/filter.d/{{ item.path | basename }}"  
         state: link
       loop: "{{ dolibarr_fail2ban_files.files }}"      
+      args:
+        force: no   # do not overwrite if existing 
+      when: not ("/etc/fail2ban/filter.d/" ~ (item.path | basename )) is exists
 
     - name: Search all fail2ban rules into jail.d directory
       ansible.builtin.find:
         paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d
         patterns: '*.conf'
+        file_type: file
       register: dolibarr_fail2ban_files2
 
     - name: Create links to fail2ban jail files only if they do not exist
@@ -1381,8 +1385,10 @@
         src: "{{ item.path }}"
         dest: "/etc/fail2ban/jail.d/{{ item.path | basename }}"  
         state: link
-      loop: "{{ dolibarr_fail2ban_files2.files }}"      
-      when: not ("/etc/fail2ban/jail.d/{{ item.path | basename }}" | ansible.builtin.stat).islnk)
+      loop: "{{ dolibarr_fail2ban_files2.files }}"
+      args:
+        force: no   # do not overwrite if existing 
+      when: not ("/etc/fail2ban/jail.d/" ~ (item.path | basename )) is exists
 
     - name: Update /etc/afick.conf to remove /var/log/datadog Logs* 
       lineinfile:
