@@ -1408,6 +1408,8 @@
 
     - name: Activates config file Apache with a2enconf custom-server-tokens
       command: a2enconf custom-server-tokens
+      args:
+        creates: /etc/apache2/conf-enabled/custom-server-tokens.conf
 
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
       ignore_errors: true
