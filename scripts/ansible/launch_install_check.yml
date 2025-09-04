@@ -1458,7 +1458,7 @@
 
     - name: Compare file checksums of /bin/dash and /bin/secureBash
       fail:
-        msg: "The files secureBash and dash are not the same"
+        msg: "The files secureBash and dash are not the same. Fix this with: cp /usr/bin/dash /usr/bin/secureBash"
       when: file1_stat.stat.checksum != file2_stat.stat.checksum
 
 
