@@ -2020,6 +2020,8 @@ exclude_suffix := tmp old bak
 
 [source,bash]
 ---------------
+########## put your local config below ####################
+
 /snap/bin all
 
 !/var/log/mysql
@@ -2044,6 +2046,10 @@ exclude_suffix := tmp old bak
 !/etc/subuid
 !/etc/subuid-
 
+!/etc/letsencrypt/csr
+!/etc/letsencrypt/keys
+!/etc/letsencrypt/renewal
+
 /home MyRule
 /home/admin/logs Logs
 !/home/admin/backup
@@ -2055,14 +2061,15 @@ exclude_suffix := tmp old bak
 !/home/admin/.bash_history
 !/home/admin/.viminfo
 !/home/admin/.mysql_history
-!/home/myfirstnamelastname/.bash_history
-!/home/myfirstnamelastname/.viminfo
-!/home/myfirstnamelastname/.mysql_history
+!/home/myunixlogin/.bash_history
+!/home/myunixlogin/.viminfo
+!/home/myunixlogin/.mysql_history
 !/root/.bash_history
-!/root/.viminfo
+!/root/.config/rclone
 !/root/.mysql_history
+!/root/.viminfo
 
-exclude_suffix := cache
+exclude_suffix := cache swp
 ---------------
 
 Now, init the afick database
