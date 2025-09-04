@@ -1737,7 +1737,7 @@ print '<br>';
 // Form to add an instance
 
 print '<!-- Form to add an instance -->'."\n";
-print '<form id="formaddanotherinstance" class="form-group reposition" style="'.(GETPOST('addanotherinstance', 'int') ? '' : 'display: none;').'" action="register_instance.php" method="POST">';
+print '<form id="formaddanotherinstance" name="formaddanotherinstance" class="form-group reposition" style="'.(GETPOST('addanotherinstance', 'int') ? '' : 'display: none;').'" action="register_instance.php" method="POST">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="deployall" />';
 if (GETPOSTISSET('forcesubdomain')) {
@@ -1978,6 +1978,95 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			        			</div>
 			        			</div>
 			        			</section>'."\n";
+
+
+		$selectnametoselectplan = 'service';
+
+		// Add dynamic code to disable/enable the submit button
+				print '<script>
+				$(document).ready(function() {
+					var initialValueSelectedInTldid = jQuery("#tldid").val();
+					console.log("Initial value selected in tldid = "+initialValueSelectedInTldid);
+
+				    $("#'.$selectnametoselectplan.'").change(function() {
+						console.log("We update a product/service/plan field");
+
+						var selectedOption = this.options[this.selectedIndex];
+						var value = selectedOption.value;
+    					var dataOnlyServer = selectedOption.getAttribute("data-onlyserver");
+
+						if (dataOnlyServer) {
+							/* We also refresh the combo list tldid */
+							let arrayDataOnlyServer = dataOnlyServer.split(",");
+							console.log("arrayDataOnlyServer="+arrayDataOnlyServer);
+
+							jQuery("#tldid option").each(function() {
+								var valueOfSubDomain = $(this).val();
+        						var text = $(this).text();
+								var newSelectedInTldid = initialValueSelectedInTldid;
+								/* console.log("Process line for value="+valueOfSubDomain+" text="+text); */
+
+								var qualified = 0;
+								arrayDataOnlyServer.forEach(function(onlyServer) {
+		        					if (valueOfSubDomain.includes(onlyServer)) {
+		            					/* console.log("This subdomain line match the rule "+onlyServer); */
+										qualified = 1;
+		        					}
+								});
+
+								mustChangeSelectedValue = 0;
+								initialValueIsQualified = 0;
+								currentSelectedValue = jQuery("#tldid").val();
+
+								if (qualified) {
+									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+
+									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+									jQuery("#tldid").val(valueOfSubDomain);
+
+									if (valueOfSubDomain == initialValueSelectedInTldid) {
+										initialValueIsQualified = 1;
+									}
+									newSelectedInTldid = valueOfSubDomain;
+								} else {
+									console.log("The subdomain line "+valueOfSubDomain+" is NOT qualified");
+
+									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", true);
+
+									if (valueOfSubDomain == currentSelectedValue) {
+										mustChangeSelectedValue = 1;
+									}
+								}
+
+								if (mustChangeSelectedValue) {	/* select a new qualified value */
+									if (initialValueIsQualified) {
+										newSelectedInTldid = initialValueSelectedInTldid;
+									}
+
+									jQuery("#tldid").val(newSelectedInTldid);
+								}
+
+								jQuery("#tldid").trigger("change.select2");
+							});
+						} else {
+							/* We enable all choices in combo list tldid */
+							jQuery("#tldid option").each(function() {
+								var valueOfSubDomain = $(this).val();
+        						var text = $(this).text();
+
+								console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+								jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+								jQuery("#tldid").val(initialValueSelectedInTldid);
+
+								jQuery("#tldid").trigger("change.select2");
+							});
+						}
+				    });
+				});
+
+				</script>
+				';
+
 
 		// Add code to make constraints on deployment servers
 		print '<!-- JS Code to force plan -->';

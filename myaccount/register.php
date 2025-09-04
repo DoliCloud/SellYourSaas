@@ -576,7 +576,7 @@ if ($reshook == 0) {
 					console.log("Initial value selected in tldid = "+initialValueSelectedInTldid);
 
 				    $("#'.$selectnametoselectplan.'").change(function() {
-						console.log("We update a mandatory field");
+						console.log("We update a product/service/plan field");
 
 						var selectedOption = this.options[this.selectedIndex];
 						var value = selectedOption.value;
@@ -649,6 +649,7 @@ if ($reshook == 0) {
 							});
 						}
 
+						console.log("We update a mandatory field");
 						setButtonDisabled();
 				    });
 
