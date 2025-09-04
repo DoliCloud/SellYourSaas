@@ -67,7 +67,7 @@
   - name: Launch apt for misc packages
     apt:
       pkg:
-      - ntp 
+      - systemd-timesyncd 
       - git
       - ghostscript 
       - gzip 
