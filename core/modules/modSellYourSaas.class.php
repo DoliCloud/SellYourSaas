@@ -149,7 +149,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->dictionaries = array(
 			'langs' => 'sellyoursaas@sellyoursaas',
 			'tabname' => array('c_source_choice'),
-			'tablib' => array('LeadSourceDictionary'),
+			'tablib' => array('SourceChoiceDictionary'),
 			'tabsql' => array('SELECT c.rowid as rowid, c.code, c.label, c.pos, c.active FROM '.MAIN_DB_PREFIX.'c_source_choice as c'),
 			'tabsqlsort' => array("pos ASC"),
 			'tabfield' => array("code,label,pos"),
@@ -911,7 +911,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('ip_confirm_email', "IPConfirmEmail", 'ip', 180, '', 'thirdparty', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('source', "Source", 'varchar', 104, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax200'));
 		$resultx=$extrafields->addExtraField('source_utm', "SourceUtm", 'varchar', 104, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
-		$resultx=$extrafields->addExtraField('source_choice', 'SourceChoice', 'chkbxlst', 104, '', 'thirdparty', 0, 0, '', array('options' => array('c_lead_source:label:code' => null)), 1, 'isModEnabled("sellyoursaas")', 1, '', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('source_choice', 'SourceChoice', 'chkbxlst', 104, '', 'thirdparty', 0, 0, '', array('options' => array('c_source_choice:label:code' => null)), 1, 'isModEnabled("sellyoursaas")', 1, '', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('firstname', "FirstName", 'varchar', 105, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax120'));
 		$resultx=$extrafields->addExtraField('lastname', "LastName", 'varchar', 106, '64', 'thirdparty', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax120'));
 		$param=array('options'=>array('auto'=>null));	// Must use a non reversible password.
