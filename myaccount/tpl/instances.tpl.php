@@ -2089,9 +2089,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 								}
 							});
 						}
-				    });
 
-					jQuery("#tldid").trigger("change.select2");
+						jQuery("#tldid").trigger("change.select2");
+				    });
 
 
 					jQuery("#service").trigger("change");
