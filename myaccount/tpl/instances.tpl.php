@@ -2077,8 +2077,6 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 									jQuery("#tldid").val(newSelectedInTldid);
 								}
 							});
-
-							jQuery("#tldid").trigger("change.select2");
 						} else {
 							/* We enable all choices in combo list tldid */
 							jQuery("#tldid option").each(function() {
@@ -2090,10 +2088,10 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 									jQuery("#tldid").val(initialValueSelectedInTldid);
 								}
 							});
-
-							jQuery("#tldid").trigger("change.select2");
 						}
 				    });
+
+					jQuery("#tldid").trigger("change.select2");
 
 
 					jQuery("#service").trigger("change");

@@ -638,8 +638,6 @@ if ($reshook == 0) {
 									jQuery("#tldid").val(newSelectedInTldid);
 								}
 							});
-
-							jQuery("#tldid").trigger("change.select2");
 						} else {
 							/* We enable all choices in combo list tldid */
 							jQuery("#tldid option").each(function() {
@@ -652,9 +650,18 @@ if ($reshook == 0) {
 									jQuery("#tldid").val(initialValueSelectedInTldid);
 								}
 							});
-
-							jQuery("#tldid").trigger("change.select2");
 						}
+
+						';
+
+						if (getDolGlobalString('SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL')) {
+							print ' jQuery("#tldid").val("");';
+						}
+
+						print '
+
+						jQuery("#tldid").trigger("change.select2");
+
 
 						console.log("We update a mandatory field");
 						setButtonDisabled();
