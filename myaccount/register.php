@@ -635,21 +635,23 @@ if ($reshook == 0) {
 
 									jQuery("#tldid").val(newSelectedInTldid);
 								}
-
-								jQuery("#tldid").trigger("change.select2");
 							});
+
+							jQuery("#tldid").trigger("change.select2");
 						} else {
 							/* We enable all choices in combo list tldid */
 							jQuery("#tldid option").each(function() {
 								var valueOfSubDomain = $(this).val();
         						var text = $(this).text();
 
-								console.log("The subdomain line "+valueOfSubDomain+" is qualified");
-								jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
-								jQuery("#tldid").val(initialValueSelectedInTldid);
-
-								jQuery("#tldid").trigger("change.select2");
+								if (valueOfSubDomain) {
+									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+									jQuery("#tldid").val(initialValueSelectedInTldid);
+								}
 							});
+
+							jQuery("#tldid").trigger("change.select2");
 						}
 
 						console.log("We update a mandatory field");
