@@ -608,23 +608,25 @@ if ($reshook == 0) {
 								initialValueIsQualified = 0;
 								currentSelectedValue = jQuery("#tldid").val();
 
-								if (qualified) {
-									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+								if (valueOfSubDomain) {
+									if (qualified) {
+										console.log("The subdomain line "+valueOfSubDomain+" is qualified");
 
-									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
-									jQuery("#tldid").val(valueOfSubDomain);
+										jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+										jQuery("#tldid").val(valueOfSubDomain);
 
-									if (valueOfSubDomain == initialValueSelectedInTldid) {
-										initialValueIsQualified = 1;
-									}
-									newSelectedInTldid = valueOfSubDomain;
-								} else {
-									console.log("The subdomain line "+valueOfSubDomain+" is NOT qualified");
+										if (valueOfSubDomain == initialValueSelectedInTldid) {
+											initialValueIsQualified = 1;
+										}
+										newSelectedInTldid = valueOfSubDomain;
+									} else {
+										console.log("The subdomain line "+valueOfSubDomain+" is NOT qualified");
 
-									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", true);
+										jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", true);
 
-									if (valueOfSubDomain == currentSelectedValue) {
-										mustChangeSelectedValue = 1;
+										if (valueOfSubDomain == currentSelectedValue) {
+											mustChangeSelectedValue = 1;
+										}
 									}
 								}
 
