@@ -2085,8 +2085,10 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 								var valueOfSubDomain = $(this).val();
         						var text = $(this).text();
 
-								console.log("The subdomain line "+valueOfSubDomain+" is qualified");
-								jQuery("#tldid").val(initialValueSelectedInTldid);
+								if (valueOfSubDomain) {
+									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+									jQuery("#tldid").val(initialValueSelectedInTldid);
+								}
 							});
 
 							jQuery("#tldid").trigger("change.select2");
