@@ -705,13 +705,15 @@ mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
 ln -fs /mnt/diskhome/backup /mnt/diskbackup
 ---------------
 
-* Create the other directories on the deployment server:
+* Create the other directories on the *Deployment* servers:
 
 [source, bash]
 ---------------
 mkdir /home/jail; mkdir /mnt/diskhome/home;
 
 mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt;
 chown admin:root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskhome/home /home/jail/home
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
