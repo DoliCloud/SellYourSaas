@@ -884,6 +884,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('email_template_trialsuspended', "EmailTemplateSuspendedTrial", 'int', 137, '', 'product', 0, 0, '', '', 1, '', -1, 'EmailTemplateSuspendedTrialHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('position', "Position", 'int', 150, '5', 'product', 0, 0, '', '', 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		//$resultx=$extrafields->addExtraField('separatorproductend',                   "Other", 'separate',   199,     '',  'product', 0, 1,   '',     '', 1, '',  1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('only_for_country', "OnlyForCountry", 'varchar', 160, '5', 'product', 0, 0, '', '', 1, '', 1, 'OnlyForCountryHelp', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
 		// Extrafields for Thirdparties
 		$param=array('options'=>array(1=>1));

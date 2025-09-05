@@ -95,6 +95,14 @@ if ($resqlproducts) {
 			$priceinstance['user'] = 0;
 			$priceinstance_ttc['user'] = 0;
 
+			if (!empty($tmpprod->array_options["options_only_for_country"])) {
+				$optioncountries = preg_split("/[\s,;]+/", $tmpprod->array_options["options_only_for_country"]);
+				if (!in_array(dol_strtolower($mythirdpartyaccount->country_code), $optioncountries)) {
+					// Thirdparty country code isn't in options_only_for_country array so we don't show plan
+					continue;
+				}
+			}
+
 			if (count($tmparray) > 0) {
 				foreach ($tmparray as $key => $value) {
 					$tmpprodchild->fetch($value['id']);
@@ -1011,18 +1019,18 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					// If there is a package, test if module already depoyed on instance
 					$productalreadyininstance = 0;
 					foreach ($arrayoflines as $keyline => $line) {
-						if ($tmpproduct->id == $line->id) {
+						if ($tmpproduct->id == $line->fk_product) {
 							$productalreadyininstance = 1;
 							break;
 						}
 					}
 					print '<div class="divforbutton">';
-					if ($productalreadyininstance) {
+					if (!$productalreadyininstance) {
 						// Show link to subscribe
-						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" target="_blank" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" target="_blank" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 					} else {
 						// Show link to unsubscribe
-						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'#tab_domain_'.$contract->id.'" target="_blank" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'#tab_domain_'.$contract->id.'" target="_blank" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
 					}
 					print '</div>';
 				} else {
