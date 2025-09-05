@@ -52,6 +52,7 @@ $logfile = '/var/log/smtp_watchdog1.log';
 $logphpsendmail = '/var/log/phpsendmail.log';
 $WDLOGFILE='/var/log/ufw.log';
 $outputfile='/tmp/outputforexecutecli.out';
+$pathtospamdir='/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
 
 
 $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');

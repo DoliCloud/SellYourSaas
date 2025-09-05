@@ -157,7 +157,7 @@ if (empty($emailsupervision)) {
 // Read /etc/sellyoursaas-public.conf file
 $maxemailperday = 0;
 $maxemailperdaypaid = 0;
-$pathtospamdir = '/tmp/spam';
+$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
 $fp = @fopen('/etc/sellyoursaas-public.conf', 'r');
 // Add each line to an array
 if ($fp) {
