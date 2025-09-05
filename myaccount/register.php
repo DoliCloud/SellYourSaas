@@ -576,12 +576,15 @@ if ($reshook == 0) {
 					console.log("Initial value selected in tldid = "+initialValueSelectedInTldid);
 
 				    $("#'.$selectnametoselectplan.'").change(function() {
-						console.log("We update a product/service/plan field");
+						var pid = jQuery("#'.$selectnametoselectplan.' option:selected").val();
+						console.log("We update a product/service/plan field by selecting product id = "+pid);
 
 						var selectedOption = this.options[this.selectedIndex];
 						var value = selectedOption.value;
     					var dataOnlyServer = selectedOption.getAttribute("data-onlyserver");
 
+						/* Now disable according to onlyserver */
+						console.log("Now, disable servers according to onlyserver");
 						if (dataOnlyServer) {
 							/* We also refresh the combo list tldid */
 							let arrayDataOnlyServer = dataOnlyServer.split(",");
@@ -892,7 +895,8 @@ if ($reshook == 0) {
 							// $newval is subdomain (with.mysaasdomainname.com for example)
 
 							// Restriction defined on package
-							if (! empty($tmppackage->restrict_domains)) {   // There is a restriction on some domains for this package
+							// If $tmppackage is defined, check if there is a restriction on some domains for this package (if not, $tmppackage->restrict_domains is empty and no restriction is done here)
+							if (! empty($tmppackage->restrict_domains)) {
 								$restrictfound = false;
 								$tmparray=explode(',', $tmppackage->restrict_domains);
 								foreach ($tmparray as $tmprestrictdomain) {
@@ -908,7 +912,8 @@ if ($reshook == 0) {
 								}
 							}
 
-							// Restriction on onlyhost of the service
+							// Restriction on onlyserver of the service
+							// If $productonlyserver is set (when we are on a given service, if not, $productonlyserver is empty and no restriction is done here)
 							if ($productonlyserver) {
 								// Check if domain is allowed by $productref
 								$arrayofonlyserver = explode(',', $productonlyserver);
@@ -929,9 +934,6 @@ if ($reshook == 0) {
 							// Restriction on country
 							if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 								$servercountriesstring = $val['servercountries'];
-								//var_dump($servercountries);
-								//$deploymentserver = new Deploymentserver($db);
-								//$deploymentserver->fetch(0, $newval);
 
 								if (!empty($servercountriesstring)) {
 									$servercountries = explode(',', $servercountriesstring);

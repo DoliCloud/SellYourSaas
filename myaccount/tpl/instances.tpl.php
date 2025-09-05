@@ -1876,13 +1876,11 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			}
 			// $newval is subdomain (with.mysaasdomainname.com for example)
 
-			// Restriction defined on package
+
+			// Restriction on counties on package
 			// Managed later with the "optionvisible..." css
 			if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 				$servercountriesstring = $val['servercountries'];
-				//var_dump($servercountries);
-				//$deploymentserver = new Deploymentserver($db);
-				//$deploymentserver->fetch(0, $newval);
 
 				if (!empty($servercountriesstring)) {
 					$servercountries = explode(',', $servercountriesstring);
@@ -1970,7 +1968,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 				}
 			}
 		} else {
-			print '<option value="">No deployent server defined. Go on bak office to complete list</option>';
+			print '<option value="">No deployent server defined. Go on back office to complete list</option>';
 		}
 		print '</select>';
 		print ajax_combobox('tldid');
@@ -1982,19 +1980,52 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 
 		$selectnametoselectplan = 'service';
 
+		print '<script>';
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			print '/* pid='.$key.' => '.$tmpplan['label'].' - '.$tmpplan['id'].' - '.$tmpplan['restrict_domains'].' - '.$tmpplan['onlyserver']." */\n";
+		}
+		print '</script>';
+
+
 		// Add dynamic code to disable/enable the submit button
-				print '<script>
+		print '<script>
 				$(document).ready(function() {
 					var initialValueSelectedInTldid = jQuery("#tldid").val();
 					console.log("Initial value selected in tldid = "+initialValueSelectedInTldid);
 
 				    $("#'.$selectnametoselectplan.'").change(function() {
-						console.log("We update a product/service/plan field");
+						var pid = jQuery("#'.$selectnametoselectplan.' option:selected").val();
+						console.log("We update a product/service/plan field by selecting product id = "+pid);
 
 						var selectedOption = this.options[this.selectedIndex];
 						var value = selectedOption.value;
     					var dataOnlyServer = selectedOption.getAttribute("data-onlyserver");
 
+						/* First we enable all servers in list */
+						console.log("First, we enable all servers in list");
+						jQuery("#tldid option").each(function() {
+							var valueOfSubDomain = $(this).val();
+							jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+						});
+
+						/* Now disable according to restrict_domains */
+						console.log("Now, disable servers according to restrict_domains");'."\n";
+						foreach ($arrayofplansfull as $key => $tmpplan) {
+							if (!empty($tmpplan['restrict_domains'])) {
+								$restrict_domains = explode(",", $tmpplan['restrict_domains']);
+								print "/* Code if we select pid = ".$key." so plan = ".$tmpplan['label']." with restrict_domains = ".$tmpplan['restrict_domains']." */\n";
+								foreach ($restrict_domains as $domain) {
+									print " if (pid == ".$key.") { disable_tld_if_not('".trim($domain)."'); }\n";
+									break;	// We keep only the first domain in list as the domain to keep possible for deployment
+								}
+							} else {
+								print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname." */\n";
+							}
+						}
+		print '
+
+						/* Now disable according to onlyserver */
+						console.log("Now, disable servers according to onlyserver");
 						if (dataOnlyServer) {
 							/* We also refresh the combo list tldid */
 							let arrayDataOnlyServer = dataOnlyServer.split(",");
@@ -2045,9 +2076,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 
 									jQuery("#tldid").val(newSelectedInTldid);
 								}
-
-								jQuery("#tldid").trigger("change.select2");
 							});
+
+							jQuery("#tldid").trigger("change.select2");
 						} else {
 							/* We enable all choices in combo list tldid */
 							jQuery("#tldid option").each(function() {
@@ -2055,64 +2086,33 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
         						var text = $(this).text();
 
 								console.log("The subdomain line "+valueOfSubDomain+" is qualified");
-								jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
 								jQuery("#tldid").val(initialValueSelectedInTldid);
-
-								jQuery("#tldid").trigger("change.select2");
 							});
+
+							jQuery("#tldid").trigger("change.select2");
 						}
 				    });
+
+
+					jQuery("#service").trigger("change");
+
+
+					function disable_tld_if_not(s) {
+						console.log("Disable combo choice except if s="+s);
+						$("#tldid > option").each(function() {
+							if (!this.value.endsWith(s)) {
+								console.log("We disable the option "+this.value);
+								$(this).attr("disabled", "disabled");
+								$(this).removeAttr("selected");
+							}
+						});
+					}
+
+
 				});
-
 				</script>
-				';
+		';
 
-
-		// Add code to make constraints on deployment servers
-		print '<!-- JS Code to force plan -->';
-		print '<script type="text/javascript" language="javascript">
-						function disable_combo_if_not(s) {
-							console.log("Disable combo choice except if s="+s);
-							$("#tldid > option").each(function() {
-								if (this.value.endsWith(s)) {
-									console.log("We enable the option "+this.value);
-									$(this).removeAttr("disabled");
-									$(this).attr("selected", "selected");
-								} else {
-									console.log("We disable the option "+this.value);
-									$(this).attr("disabled", "disabled");
-									$(this).removeAttr("selected");
-								}
-							});
-						}
-
-			    		jQuery(document).ready(function() {
-							jQuery("#service").change(function () {
-								var pid = jQuery("#service option:selected").val();
-								console.log("We select product id = "+pid);
-							';
-		foreach ($arrayofplansfull as $key => $tmpplan) {
-			if (!empty($tmpplan['restrict_domains'])) {
-				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
-				print "/* Code if we select pid = ".$key." so plan = ".$tmpplan['label']." with restrict_domains = ".$tmpplan['restrict_domains']." */\n";
-				foreach ($restrict_domains as $domain) {
-					print " if (pid == ".$key.") { disable_combo_if_not('".trim($domain)."'); }\n";
-					break;	// We keep only the first domain in list as the domain to keep possible for deployment
-				}
-			} else {
-				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
-			}
-		}
-
-		print '
-							});
-							jQuery("#service").trigger("change");
-						});'."\n";
-
-		foreach ($arrayofplansfull as $key => $tmpplan) {
-			print '/* pid='.$key.' => '.$tmpplan['label'].' - '.$tmpplan['id'].' - '.$tmpplan['restrict_domains'].' - '.$tmpplan['onlyserver'].' */'."\n";
-		}
-		print '</script>';
 
 		if (GETPOST('admin', 'alpha')) {
 			print '<div class="horizontal-fld clearboth margintoponly">';
