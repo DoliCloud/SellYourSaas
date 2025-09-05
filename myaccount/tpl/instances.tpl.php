@@ -2100,7 +2100,7 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 					function disable_tld_if_not(s) {
 						console.log("Disable combo choice except if s="+s);
 						$("#tldid > option").each(function() {
-							if (!this.value.endsWith(s)) {
+							if (this.value && !this.value.endsWith(s)) {
 								console.log("We disable the option "+this.value);
 								$(this).attr("disabled", "disabled");
 								$(this).removeAttr("selected");
