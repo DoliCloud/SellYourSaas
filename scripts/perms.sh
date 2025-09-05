@@ -154,6 +154,8 @@ echo find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 
 echo "Check files for antispam system and create them if not found"
+# TODO We should set the var pathtospamdir=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam  into the file /etc/sellyoursaas-public.conf of deployment
+# or modify here to use the $pathtospamdir.
 [ -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam ] || mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
 [ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
 [ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
