@@ -193,9 +193,22 @@ if ($conf->use_javascript_ajax) {
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
-print '<br><br>';
+print '<br>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM"), 'Set to yes if you want to enable module reseller features. External modules providers will be able to see the sales of their modules');
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM', array(), null, 0, 0, 1);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '<br>';
+print '<br>';
 
 
+// SELLYOURSAAS_ALLOW_RESELLER_PROGRAM
 $allowresellerprogram = getDolGlobalInt('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM');
 if ($allowresellerprogram) {
 	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
@@ -279,6 +292,30 @@ if ($allowresellerprogram) {
 	print '</table>';
 	print '</div>';
 }
+
+
+// SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM
+$allowmoduleproviderprogram = getDolGlobalInt('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM');
+if ($allowmoduleproviderprogram) {
+	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
+	print '<table class="noborder centpercent">';
+	print '<tr class="liste_titre">';
+	print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
+	print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+	print "</tr>\n";
+
+	print '<tr class="oddeven"><td>'.$langs->trans("TODO");
+	print '</td>';
+	print '<td>';
+	print '<input class="width50 right" type="text" name="TODO" value="'.getDolGlobalString('TODO').'">';
+	print '</td>';
+	print '<td><span class="opacitymedium small">...</span></td>';
+	print '</tr>';
+
+	print '</table>';
+	print '</div>';
+}
+
 
 print "</form>\n";
 

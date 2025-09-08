@@ -361,6 +361,8 @@ CommandToMoveInstanceOnAnotherDeploymentServer=Commande pour déplacer plusieurs
 InstanceWasDeployed=L'instance a été déployée
 YourPaymentModeWillExpireFixItSoon=Votre mode de paiement a expiré ou est sur le point d'expirer. Veuillez <a href="%s">mettre à jour votre mode de paiement</a> pour éviter toute interruption de service.
 YouAreAReseller=Vous êtes un revendeur
+ResellerArea=Reseller area
+ModuleProviderArea=Module provider area
 YourURLToCreateNewInstance=Pour avoir de nouveaux utilisateurs liés à votre compte revendeur et apparaissant dans votre tableau de bord, il faut utiliser l'URL suivante lors de l'inscription
 YourCommissionsAppearsInMenu=Vos commissions (taux actuel <strong>%s%%</strong>) sont visibles dans le menu %s
 InvoicingSuspended=Facturation suspendue
@@ -436,6 +438,7 @@ Resellers=Revendeurs
 SummaryOld=Résumé (DoliCloud old)
 BecomeReseller=Devenir revendeur
 SELLYOURSAAS_ALLOW_RESELLER_PROGRAM=Activer les fonctions "Revendeurs"
+SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM=Activer les fonctions "Fournisseurs externes de modules"
 SELLYOURSAAS_INFRA_COST=Montant du coût mensuel de l'infrastructure (utilisé pour calculer le bénéfice)
 SELLYOURSAAS_PERCENTAGE_FEE=Pourcentage des frais par transaction (utilisé pour calculer le profit)
 BecomeResellerDesc=Vous allez postuler pour devenir Revendeur %s. Vérifiez d'abord dans le menu 'Mon compte' que vous avez renseigné toutes les informations. Puis veuillez lire la page suivante pour être certain de comprendre ce que cela signifie: <a href="%s" target="_blank">Devenir revendeur %s</a>

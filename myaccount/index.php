@@ -303,6 +303,7 @@ if ($resql) {
 	dol_print_error($db);
 }
 
+// Define if the thirdparty is a reseller
 $mythirdpartyaccount->isareseller = 0;
 if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 	$categorie=new Categorie($db);
@@ -311,6 +312,14 @@ if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 		$mythirdpartyaccount->isareseller = 1;
 	}
 }
+
+// Define if the thirdparty is a module provider
+$mythirdpartyaccount->isamoduleprovider = array();
+if (getDolGlobalInt('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM') > 0) {
+	// TODO Read if there is some product prices in supplier tab of the thirdparty. If yes it is a module provider and we have the list of provided modules
+	$mythirdpartyaccount->isamoduleprovider = array('aa', 'bbb');
+}
+$mythirdpartyaccount->isamoduleprovider = array('aa', 'bbb');
 
 $nbtotalofrecords = 0;
 $listofcontractidresellerall = array();
@@ -2376,27 +2385,54 @@ if (!$freemodeinstance) {
 }
 if ($mythirdpartyaccount->isareseller) {
 	print '
-			<li class="nav-item'.($mode == 'mycustomerinstances' ? ' active' : '').'">
-			<a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances"><i class="fa fa-server"></i> '.$langs->trans("MyCustomersInstances").'</a>
-			</li>
-			<li class="nav-item'.($mode == 'mycustomerbilling' ? ' active' : '').'">
-			<a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerbilling"><i class="fa fa-usd"></i> '.$langs->trans("MyCustomersBilling").'</a>
-			</li>';
+	<li class="nav-item'.(($mode == 'mycustomerinstances' || $mode == 'mycustomerbilling') ? ' active' : '').' dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-suitcase"></i> '.$langs->trans("ResellerArea").'</a>
+        <ul class="dropdown-menu">';
+	// My customers instance
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances"><i class="fa fa-server pictofixedwidth"></i> '.$langs->trans("MyCustomersInstances").'</a></li>';
+	// Divider
+	print '<li class="dropdown-divider"></li>';
+	// My customers invoices
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerbilling"><i class="fa fa-usd"></i> '.$langs->trans("MyCustomersBilling").'</a></li>';
+	print '
+		</ul>
+	</li>
+	';
 }
 
-		print '<li class="nav-item'.($mode == 'support' ? ' active' : '').' dropdown">
+if (count($mythirdpartyaccount->isamoduleprovider) > 0) {
+	print '
+	<li class="nav-item'.($mode == 'moduleprovider' ? ' active' : '').' dropdown">
+        <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-suitcase"></i> '.$langs->trans("ModuleProviderArea").'</a>
+        <ul class="dropdown-menu">';
+	// Module provider stats
+	//print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances"><i class="fa fa-server pictofixedwidth"></i> '.$langs->trans("MyCustomersInstances").'</a></li>';
+	// Divider
+	//print '<li class="dropdown-divider"></li>';
+	// Customers ofmy module area
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerbilling"><i class="fa fa-usd"></i> '.$langs->trans("MyModuleCustomersBilling").'</a></li>';
+	print '
+		</ul>
+	</li>
+	';
+}
+
+// Support
+print '<li class="nav-item'.(($mode == 'support' || $mode == 'faq') ? ' active' : '').' dropdown">
             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-gear"></i> '.$langs->trans("Support").'</a>
             <ul class="dropdown-menu">';
-		// FAQ
-		print '<li><a class="dropdown-item" href="'.$urlfaq.'" target="_newfaq"><i class="fa fa-question pictofixedwidth"></i> '.$langs->trans("FAQs").'</a></li>';
-		// Support
-		print '<li class="dropdown-divider"></li>';
-		print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=support"><i class="fa fa-hands-helping pictofixedwidth"></i> '.$langs->trans("ContactUs").'</a></li>';
-
-		print '
+	// FAQ
+	print '<li><a class="dropdown-item" href="'.$urlfaq.'" target="_newfaq"><i class="fa fa-question pictofixedwidth"></i> '.$langs->trans("FAQs").'</a></li>';
+	// Divider
+	print '<li class="dropdown-divider"></li>';
+	// Support
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=support"><i class="fa fa-hands-helping pictofixedwidth"></i> '.$langs->trans("ContactUs").'</a></li>';
+	print '
             </ul>
-          </li>
+</li>';
 
+// My account
+print '
           <li class="nav-item'.($mode == 'myaccount' ? ' active' : '').' dropdown">
              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#socid='.$mythirdpartyaccount->id.'"><i class="fa fa-user"></i> '.$langs->trans("MyAccount").' ('.$mythirdpartyaccount->email.')</a>
              <ul class="dropdown-menu">

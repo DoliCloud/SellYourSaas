@@ -369,7 +369,7 @@ ErrorYouDontOwnTheInstanceYouTryToDelete=Error, you don't own the instance <stro
 FirstRecord=First record
 LastRecord=Last record
 InstanceName=Instance name
-ResellerProgram=Reseller features
+ResellerProgram=Reseller or module provider features
 Reseller=Reseller
 PartnerCommission=Commission as a reseller (%%)
 PartnerCommissionForThisInvoice=Reseller commission for this invoice
@@ -436,6 +436,7 @@ Resellers=Resellers
 SummaryOld=Summary (DoliCloud old)
 BecomeReseller=Apply to be a reseller
 SELLYOURSAAS_ALLOW_RESELLER_PROGRAM=Enable the "Resellers" feature
+SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM=Enable the "External providers of modules" feature
 SELLYOURSAAS_INFRA_COST=Amount for infrastructure monthly cost (used to calculate profit)
 SELLYOURSAAS_PERCENTAGE_FEE=Percentage of fee per transaction (used to calculate profit)
 BecomeResellerDesc=You will apply to become a %s Reseller. First check into menu 'My account' that all data are correctly filled. Then please read the following page to be sure you understand what this means: <a href="%s" target="_blank">Become a %s reseller</a>
