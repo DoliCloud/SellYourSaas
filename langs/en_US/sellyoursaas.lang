@@ -11,6 +11,7 @@ DateDeployment=Deployment date (UTC)
 DateNextBilling=Next billing date
 DateEndFreePeriod=End trial date
 DateEndCurrentPeriod=End current period
+DateEndCommitment=End date of commitment
 DateLastCheck=Refresh
 NbOfUsers=Nb users
 LastLogin=Last login
