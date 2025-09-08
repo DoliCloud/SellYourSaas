@@ -319,7 +319,6 @@ if (getDolGlobalInt('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM') > 0) {
 	// TODO Read if there is some product prices in supplier tab of the thirdparty. If yes it is a module provider and we have the list of provided modules
 	$mythirdpartyaccount->isamoduleprovider = array('aa', 'bbb');
 }
-$mythirdpartyaccount->isamoduleprovider = array('aa', 'bbb');
 
 $nbtotalofrecords = 0;
 $listofcontractidresellerall = array();
