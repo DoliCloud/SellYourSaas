@@ -314,7 +314,7 @@ while ($i < $num_rows) {
 	$now = dol_now();
 
 	if ($mode == 'dbcreate' || $mode == 'all') {
-		print "CREATE DATABASE IF NOT EXISTS ".$dbmaster->escape($object->database_db).";\n";
+		print "CREATE DATABASE IF NOT EXISTS ".$dbmaster->sanitize($object->database_db).";\n";
 	}
 	if ($mode == 'dbusercreate' || $mode == 'all') {
 		print "CREATE USER '".$dbmaster->escape($object->username_db)."'@'localhost' IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($object->password_db)."';\n";
@@ -325,7 +325,7 @@ while ($i < $num_rows) {
 	if ($mode == 'dbuserresetpass' || $mode == 'all') {
 		print '-- Process instance '.$dbmaster->escape($object->instance).', ID '.$object->id.' --'."\n";
 		$newpassword = dolDecrypt($object->password_db);
-		print "ALTER USER ".$dbmaster->escape($object->username_db)." IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($newpassword)."';\n";
+		print "ALTER USER ".$dbmaster->sanitize($object->username_db)." IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($newpassword)."';\n";
 	}
 
 	if ($mode == 'sellyoursaasrebuildredirect') {
