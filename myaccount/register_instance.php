@@ -191,6 +191,7 @@ $domainemail = preg_replace('/^.*@/', '', $email);
 $password = dol_trunc(trim(GETPOST('password', 'alpha')), 128, 'right', 'UTF-8', 1);
 $password2 = dol_trunc(trim(GETPOST('password2', 'alpha')), 128, 'right', 'UTF-8', 1);
 $country_code = trim(GETPOST('country', 'alpha'));
+
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid = trim(GETPOST('tldid', 'alpha'));
 $optinmessages = (GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0);
@@ -211,6 +212,12 @@ $productid=GETPOST('service', 'int');
 $plan=GETPOST('plan', 'alpha');
 $productref=(GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : ($plan ? $plan : ''));
 $extcss=GETPOST('extcss', 'alpha');
+$lead_sources_array = array();
+if (GETPOSTISARRAY('options_source_choiceextrafields_societe')) {
+	// 2. Si c'est le cas, ALORS on le RÉCUPÈRE
+	$lead_sources_array = GETPOST('options_source_choiceextrafields_societe', 'array');
+}
+$lead_sources_string = implode(',', $lead_sources_array);
 if (empty($extcss)) {
 	$extcss = getDolGlobalString('SELLYOURSAAS_EXTCSS', 'dist/css/myaccount.css');
 } elseif ($extcss == 'generic') {
@@ -1100,6 +1107,9 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 	$tmpthirdparty->array_options['options_source'] = 'REGISTERFORM'.($origin ? '-'.$origin : '');
 	$tmpthirdparty->array_options['options_source_utm'] = (empty($_COOKIE['utm_source_cookie']) ? '' : $_COOKIE['utm_source_cookie']);
+
+	$tmpthirdparty->array_options['options_source_choice'] = $lead_sources_string;
+
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
 	$tmpthirdparty->array_options['options_checkboxnonprofitorga'] = $checkboxnonprofitorga;
