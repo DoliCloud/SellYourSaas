@@ -1356,7 +1356,26 @@
       file:
         path: /etc/update-motd.d/92-unattended-upgrades
         state: absent
-      
+
+    # Disable the unattended upgrades
+    - name: Check if disableunattendedupgrade=1 is present
+      ansible.builtin.shell: "grep -q '^disableunattendedupgrade=1' /etc/sellyoursaas.conf"
+      register: disableunattendedupgrade
+      ignore_errors: true
+      failed_when: false
+      changed_when: false
+
+    - name: Disable apt unattended-upgrades in conf file
+      ansible.builtin.lineinfile:
+        path: /etc/apt/apt.conf.d/20auto-upgrades
+        regexp: '^APT::Periodic::Unattended-Upgrade'
+        line: 'APT::Periodic::Unattended-Upgrade "0";'
+        state: present
+        create: no
+        backrefs: yes
+      when: disableunattendedupgrade.rc == 0
+
+    # Fail2ban rules
     - name: Search all fail2ban rules into filter.d directory
       ansible.builtin.find:
         paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d
