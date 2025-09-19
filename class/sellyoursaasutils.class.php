@@ -2771,14 +2771,22 @@ class SellYourSaasUtils
 
 					if (empty($contractcanceled[$object->id]) && $expirationdate && $expirationdate < $enddatetoscan) {
 						dol_syslog("Define the newdate of end of services from expirationdate=".$expirationdate);
-						$newdate = $expirationdate;
+
+						$newdate = $expirationdate;	// Current expiration date
+
+						if ($duration_value <= 0) {
+							$error++;
+							$this->error = "doRenewalContracts: Can't calculate the new expiration date of service, bad value for duration of service in contract".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
+							dol_syslog($this->error, LOG_ERR);
+						}
+
 						$protecti=0;	//$protecti is to avoid infinite loop
-						while ($newdate < $enddatetoscan && $protecti < 1000) {
+						while (!$error && $newdate < $enddatetoscan && $protecti < 1000) {
 							$newdate = dol_time_plus_duree($newdate, $duration_value, $duration_unit);
 							$protecti++;
 						}
 
-						if ($protecti < 1000) {	// If not, there is a pb
+						if (!$error && $protecti < 1000) {	// If not, there is a pb
 							// We will update the end of date of contrat, so first we refresh contract data
 							dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
 
@@ -2824,7 +2832,8 @@ class SellYourSaasUtils
 									$actioncomm->socid        = $object->socid;
 									$actioncomm->authorid     = $user->id;   // User saving action
 									$actioncomm->userownerid  = $user->id;	// Owner of action
-									$actioncomm->fk_element   = $object->id;
+									$actioncomm->fk_element   = $object->id;	// deprecated
+									$actioncomm->elementid    = $object->id;
 									$actioncomm->elementtype  = 'contract';
 									$actioncomm->note_private = $comment;
 
@@ -2845,7 +2854,7 @@ class SellYourSaasUtils
 							}
 						} else {
 							$error++;
-							$this->error = "Bad value for newdate in doRenewalContracts ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
+							$this->error = "doRenewalContracts: Failed to get the new expiration date for contract ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_unit;
 							dol_syslog($this->error, LOG_ERR);
 						}
 					}
