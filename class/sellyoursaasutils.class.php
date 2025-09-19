@@ -2738,20 +2738,21 @@ class SellYourSaasUtils
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
 					$duration_unit = $tmparray['duration_unit'];
+					$appproductid = $tmparray['appproductid'];
 					//var_dump($expirationdate.' '.$enddatetoscan);
 
-					// Load linked ->linkedObjects (objects linked)
-					// @TODO Comment this line and then make the search if there is n open invoice(s) by doing a dedicated SQL COUNT request to fill $contractcanceled.
-					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
-
 					// Test if there is at least 1 open invoice
+					$someinvoicenotpaid=0;
 					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
+
+					// Load linked ->linkedObjects (objects linked)
+					// @TODO Comment this line and then make the search if there is n open invoice(s) by doing a dedicated SQL COUNT request to fill $contractcanceled to avoid the fetch with load of all objects
+					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 					if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
 						// Sort on ascending date
 						usort($object->linkedObjects['facture'], "sellyoursaasCmpDate");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
-						$someinvoicenotpaid=0;
 						foreach ($object->linkedObjects['facture'] as $idinvoice => $invoice) {
 							if ($invoice->statut == Facture::STATUS_DRAFT) {
 								continue;	// Draft invoice are not invoice not paid
@@ -2764,9 +2765,10 @@ class SellYourSaasUtils
 								$someinvoicenotpaid++;
 							}
 						}
-						if ($someinvoicenotpaid) {
-							$contractcanceled[$object->id] = array('ref'=>$object->ref, 'someinvoicenotpaid'=>$someinvoicenotpaid);
-						}
+					}
+
+					if ($someinvoicenotpaid) {
+						$contractcanceled[$object->id] = array('ref'=>$object->ref, 'someinvoicenotpaid'=>$someinvoicenotpaid);
 					}
 
 					if (empty($contractcanceled[$object->id]) && $expirationdate && $expirationdate < $enddatetoscan) {
@@ -2774,9 +2776,14 @@ class SellYourSaasUtils
 
 						$newdate = $expirationdate;	// Current expiration date
 
+						if (empty($appproductid)) {
+							$error++;
+							$this->error = "doRenewalContracts: Can't calculate the new expiration date of services, there is no service with type application in the contract ".$object->ref;
+							dol_syslog($this->error, LOG_ERR);
+						}
 						if ($duration_value <= 0) {
 							$error++;
-							$this->error = "doRenewalContracts: Can't calculate the new expiration date of service, bad value for duration of service in contract".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
+							$this->error = "doRenewalContracts: Can't calculate the new expiration date of services, bad value for duration of service in contract".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
 							dol_syslog($this->error, LOG_ERR);
 						}
 
@@ -2854,7 +2861,7 @@ class SellYourSaasUtils
 							}
 						} else {
 							$error++;
-							$this->error = "doRenewalContracts: Failed to get the new expiration date for contract ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_unit;
+							$this->error = "doRenewalContracts: Failed to get the new expiration date of services for contract ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_unit;
 							dol_syslog($this->error, LOG_ERR);
 						}
 					}
