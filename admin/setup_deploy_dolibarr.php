@@ -206,8 +206,9 @@ if ($allowdolibarrspecific) {
 	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 	print '<table class="noborder centpercent">';
 	print '<tr class="liste_titre">';
-	print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
-	print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+	print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td>';
+	print '<td></td>';
+	print '<td><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 	print "</tr>\n";
 
 	// Auto migrate
