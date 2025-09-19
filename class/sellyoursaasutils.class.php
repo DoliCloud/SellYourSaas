@@ -938,7 +938,7 @@ class SellYourSaasUtils
 		}
 
 		$servicestatus = 0;
-		if (! empty($conf->stripe->enabled)) {
+		if (isModEnabled('stripe')) {
 			$service = 'StripeTest';
 			$servicestatus = 0;
 			if (getDolGlobalString('STRIPE_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
@@ -1252,8 +1252,8 @@ class SellYourSaasUtils
 		$idpaiementcard = dol_getIdFromCode($this->db, 'CB', 'c_paiement', 'code', 'id', 1);
 		$idpaiementstripe = dol_getIdFromCode($this->db, 'STRIPE', 'c_paiement', 'code', 'id', 1);
 
-		// Get all payement to DO
-		$sql = 'SELECT f.rowid, se.fk_object as socid, sr.rowid as companypaymentmodeid';
+		// Get all payement to DO. Lines may be duplicated if there is several payment mode. Never mind, we will exclude duplicated invoice later.
+		$sql = 'SELECT f.rowid, f.ref, se.fk_object as socid, sr.rowid as companypaymentmodeid';
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
 		$sql .= ' WHERE sr.fk_soc = f.fk_soc';
 		$sql .= " AND (f.fk_mode_reglement IS NULL OR f.fk_mode_reglement IN (0, ".((int) $idpaiementcard).", ".((int) $idpaiementstripe)."))";
@@ -1263,7 +1263,7 @@ class SellYourSaasUtils
 		$sql .= " AND sr.type = 'card'";						// mode="card", this exclude payment mode of other types
 		// sr.card_type = 'visa', 'mastercard', 'amex', '' ...
 		$sql .= " AND sr.stripe_card_ref IS NOT NULL";			// Only if a payment mode card is known
-		//$sql .= " AND sr.stripe_card_account IS NOT NULL";	// Only if a payment mode account is known (may be emptysometimes)
+		//$sql .= " AND sr.stripe_card_account IS NOT NULL";	// Only if a payment mode account is known (may be empty sometimes)
 		$sql .= " AND sr.ext_payment_site = '".$this->db->escape($service)."'";		// Only Stripe Live or Test
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";		// Lines may be duplicated if there is several payment mode. Never mind, we will exclude duplicated invoice later.
