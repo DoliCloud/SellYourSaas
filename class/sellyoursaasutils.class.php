@@ -2786,82 +2786,84 @@ class SellYourSaasUtils
 							dol_syslog($this->error, LOG_ERR);
 						}
 
-						$protecti=0;	//$protecti is to avoid infinite loop
-						while (!$error && $newdate < $enddatetoscan && $protecti < 1000) {
-							$newdate = dol_time_plus_duree($newdate, $duration_value, $duration_unit);
-							$protecti++;
-						}
-
-						if (!$error && $protecti < 1000) {	// If not, there is a pb
-							// We will update the end of date of contrat, so first we refresh contract data
-							dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
-
-							$this->db->begin();
-
-							$errorforlocaltransaction = 0;
-
-							$label = 'Renewal of contrat '.$object->ref;
-							$comment = 'Renew date of contract '.$object->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doRenewalContracts';
-
-							// First launch update of resources if it is not a redirect contract:
-							$result = 1;
-							if (empty($object->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
-								// This update qty of contract lines + qty into linked template invoice.
-								$result = $this->sellyoursaasRemoteAction('refreshmetrics', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
+						if (!$error) {
+							$protecti=0;	//$protecti is to avoid infinite loop
+							while (!$error && $newdate < $enddatetoscan && $protecti < 1000) {
+								$newdate = dol_time_plus_duree($newdate, $duration_value, $duration_unit);
+								$protecti++;
 							}
 
-							if ($result <= 0) {
-								$contracterror[$object->id] = $object->ref;
+							if ($protecti < 1000) {	// If not, there is a pb
+								// We will update the end of date of contrat, so first we refresh contract data
+								dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
 
-								$error++;
-								$errorforlocaltransaction++;
-								$this->error = $this->error;
-								$this->errors = $this->errors;
-							} else {
-								$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
-								$sqlupdate.= ' WHERE fk_contrat = '.((int) $object->id);
-								$resqlupdate = $this->db->query($sqlupdate);
-								if ($resqlupdate) {
-									$contractprocessed[$object->id]=$object->ref;
+								$this->db->begin();
 
-									$actioncode = 'RENEW_CONTRACT';
-									$now = dol_now();
+								$errorforlocaltransaction = 0;
 
-									// Create an event
-									$actioncomm = new ActionComm($this->db);
-									$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-									$actioncomm->code         = 'AC_'.$actioncode;
-									$actioncomm->label        = $label;
-									$actioncomm->datep        = $now;
-									$actioncomm->datef        = $now;
-									$actioncomm->percentage   = -1;   // Not applicable
-									$actioncomm->socid        = $object->socid;
-									$actioncomm->authorid     = $user->id;   // User saving action
-									$actioncomm->userownerid  = $user->id;	// Owner of action
-									$actioncomm->fk_element   = $object->id;	// deprecated
-									$actioncomm->elementid    = $object->id;
-									$actioncomm->elementtype  = 'contract';
-									$actioncomm->note_private = $comment;
+								$label = 'Renewal of contrat '.$object->ref;
+								$comment = 'Renew date of contract '.$object->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doRenewalContracts';
 
-									$ret = $actioncomm->create($user);       // User creating action
-								} else {
-									$contracterror[$object->id]=$object->ref;
+								// First launch update of resources if it is not a redirect contract:
+								$result = 1;
+								if (empty($object->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
+									// This update qty of contract lines + qty into linked template invoice.
+									$result = $this->sellyoursaasRemoteAction('refreshmetrics', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
+								}
+
+								if ($result <= 0) {
+									$contracterror[$object->id] = $object->ref;
 
 									$error++;
 									$errorforlocaltransaction++;
-									$this->error = $this->db->lasterror();
-								}
-							}
+									$this->error = $this->error;
+									$this->errors = $this->errors;
+								} else {
+									$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
+									$sqlupdate.= ' WHERE fk_contrat = '.((int) $object->id);
+									$resqlupdate = $this->db->query($sqlupdate);
+									if ($resqlupdate) {
+										$contractprocessed[$object->id]=$object->ref;
 
-							if (! $errorforlocaltransaction) {
-								$this->db->commit();
+										$actioncode = 'RENEW_CONTRACT';
+										$now = dol_now();
+
+										// Create an event
+										$actioncomm = new ActionComm($this->db);
+										$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+										$actioncomm->code         = 'AC_'.$actioncode;
+										$actioncomm->label        = $label;
+										$actioncomm->datep        = $now;
+										$actioncomm->datef        = $now;
+										$actioncomm->percentage   = -1;   // Not applicable
+										$actioncomm->socid        = $object->socid;
+										$actioncomm->authorid     = $user->id;   // User saving action
+										$actioncomm->userownerid  = $user->id;	// Owner of action
+										$actioncomm->fk_element   = $object->id;	// deprecated
+										$actioncomm->elementid    = $object->id;
+										$actioncomm->elementtype  = 'contract';
+										$actioncomm->note_private = $comment;
+
+										$ret = $actioncomm->create($user);       // User creating action
+									} else {
+										$contracterror[$object->id]=$object->ref;
+
+										$error++;
+										$errorforlocaltransaction++;
+										$this->error = $this->db->lasterror();
+									}
+								}
+
+								if (! $errorforlocaltransaction) {
+									$this->db->commit();
+								} else {
+									$this->db->rollback();
+								}
 							} else {
-								$this->db->rollback();
+								$error++;
+								$this->error = "doRenewalContracts: Failed to get the new expiration date of services for contract ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_unit;
+								dol_syslog($this->error, LOG_ERR);
 							}
-						} else {
-							$error++;
-							$this->error = "doRenewalContracts: Failed to get the new expiration date of services for contract ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_unit;
-							dol_syslog($this->error, LOG_ERR);
 						}
 					}
 				}
