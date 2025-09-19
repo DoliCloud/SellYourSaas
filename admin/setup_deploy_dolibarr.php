@@ -222,9 +222,9 @@ if ($allowdolibarrspecific) {
 	print '<td class="nowraponall" colspan="2">';
 	print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
 	print ' &nbsp; ';
-	print '<input class="minwidth50 maxwidth75" type="text" name="SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR" value="'.getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR', '').'" placeholder="'.$langs->trans("Version").'">';
+	print '<input class="minwidth50 maxwidth75" type="text" name="SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR" value="'.getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR', '').'" placeholder="'.$langs->trans("Version").'" spellcheck="false">';
 	print ' &nbsp; ';
-	print '<input class="minwidth150 maxwidth300" type="text" name="SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE" value="'.getDolGlobalString('SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE', '').'" placeholder="'.$langs->trans("ModulesToIgnoreForAutoUpgrade").'">';
+	print '<input class="minwidth150 maxwidth300" type="text" name="SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE" value="'.getDolGlobalString('SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE', '').'" placeholder="'.$langs->trans("ModulesToIgnoreForAutoUpgrade").'" spellcheck="false">';
 	print '</td>';
 	print '</tr>';
 
