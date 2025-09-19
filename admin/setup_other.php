@@ -152,11 +152,6 @@ if ($action == 'set') {
 		dolibarr_set_const($db, 'SELLYOURSAAS_INFRA_COST', GETPOST("SELLYOURSAAS_INFRA_COST", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, 'SELLYOURSAAS_PERCENTAGE_FEE', GETPOST("SELLYOURSAAS_PERCENTAGE_FEE", 'int'), 'chaine', 0, '', $conf->entity);
 
-		dolibarr_set_const($db, "SELLYOURSAAS_AUTOMIGRATION_CODE", GETPOST("SELLYOURSAAS_AUTOMIGRATION_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_AUTOUPGRADE_CODE", GETPOST("SELLYOURSAAS_AUTOUPGRADE_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
-
-		dolibarr_set_const($db, "SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", GETPOST("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
-
 		foreach ($arrayofsuffixfound as $suffix) {
 			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".$suffix, GETPOST("SELLYOURSAAS_SUPPORT_URL".$suffix), 'chaine', 0, '', $conf->entity);
 		}
@@ -297,7 +292,6 @@ if ($action == 'removelogoblack') {
 
 $formother=new FormOther($db);
 $form=new Form($db);
-$formticket = new FormTicket($db);
 
 $help_url="";
 llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
@@ -561,22 +555,6 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 		print '</tr>';
 	}
 }
-
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOMIGRATION_CODE").'</td>';
-print '<td class="nowraponall">';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
-print '</td>';
-print '<td></td>';
-print '</tr>';
-
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOUPGRADE_CODE").'</td>';
-print '<td class="nowraponall">';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
-print ' &nbsp; ';
-print '<input class="maxwidth100" type="text" name="SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR" value="'.getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR', '').'">';
-print '</td>';
-print '<td></td>';
-print '</tr>';
 
 print '</table>';
 print '</div>';

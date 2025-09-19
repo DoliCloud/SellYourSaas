@@ -884,7 +884,7 @@ while ($i < $imaxinloop) {
 			$html .= '">';
 			$html .= '</div>';
 
-			if (getDolGlobalString("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR")) {	// Specific to Dolibarr app
+			if (getDolGlobalString("SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC")) {	// Specific to Dolibarr app
 				$html .= '<br>';
 				$html .= $langs->trans("CommandToSwithInstanceInReadOnlyMode").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 				$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
