@@ -2780,8 +2780,7 @@ class SellYourSaasUtils
 							$error++;
 							$this->error = "doRenewalContracts: Can't calculate the new expiration date of services, there is no service with type application in the contract ".$object->ref;
 							dol_syslog($this->error, LOG_ERR);
-						}
-						if ($duration_value <= 0) {
+						} elseif ($duration_value <= 0) {
 							$error++;
 							$this->error = "doRenewalContracts: Can't calculate the new expiration date of services, bad value for duration of service in contract".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
 							dol_syslog($this->error, LOG_ERR);
