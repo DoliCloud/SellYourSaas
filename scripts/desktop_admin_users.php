@@ -88,7 +88,7 @@ if (! isset($argv[4])) {	// Check parameters
 	print "- To add a sysadmin user (root not allowed):\n";
 	print "  ".$script_file.' hostfile master,deployment,web create logintocreate userroot=0 userip=ipofuser userpassword=... userpublickey="ABC..."'."\n";
 	print "- To update a user (for example to change root access, change password or change public ip or SSH certificate):\n";
-	print "  ".$script_file.' hostfile withX.sellyoursaasdomain.com update logintoupdate userroot=X userpassword=...'."\n";
+	print "  ".$script_file.' hostfile withX.sellyoursaasdomain.com update logintoupdate userroot=0|1 userpassword=...'."\n";
 	print "- To remove a disable/reenable a user:\n";
 	print "  ".$script_file.' hostfile master,deployment,web deactivate logintodeactivate'."\n";
 	print "- To remove a user:\n";

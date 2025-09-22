@@ -15,8 +15,8 @@ $sendmail_bin = '/usr/sbin/sendmail';
 $logfile = '/var/log/phpsendmail.log';
 
 // The directory $pathtospamdir must have permission rwxrwxrwx and not rwxrwxrwt
-//$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
-$pathtospamdir = '/tmp/spam';
+$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
+//$pathtospamdir = '/tmp/spam';
 
 //* Get the email content
 $mail='';

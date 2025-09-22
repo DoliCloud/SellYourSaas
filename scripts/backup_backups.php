@@ -42,11 +42,11 @@ $script_file = basename(__FILE__);
 $path=dirname(__FILE__).'/';
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
-	echo "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
+	print  "Error: You are using PHP for CGI. To execute ".$script_file." from command line, you must use PHP for CLI mode.\n";
 	exit(-1);
 }
 if (0 != posix_getuid()) {
-	echo "Script must be ran with root.\n";
+	print  "Script must be ran with root.\n";
 	print "\n";
 	exit(-1);
 }
@@ -290,23 +290,23 @@ if ($testorconfirm != "confirm") {
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." (".$testorconfirm.") *****\n";
 if (empty($argv[1])) {
-	echo "Usage: ".$argv[0]." (test|confirm) [month|week|none] [osuX] [--delete]\n";
-	echo "With  month (default) is to keep 1 month of backup using --backup option of rsync\n";
-	echo "      week is to keep 1 week of backup using --backup option of rsync\n";
-	echo "      none is to not archive old versions using the --backup option of rsync. For example when you already do it using snapshots on backup server (recommended).\n";
-	echo "You can also set a group of 4 first letters on username to backup the backup of a limited number of users.\n";
+	print  "Usage: ".$argv[0]." (test|confirm) [month|week|none] [osuX|instancename] [--delete]\n";
+	print  "With  month (default) is to keep 1 month of backup using --backup option of rsync\n";
+	print  "      week is to keep 1 week of backup using --backup option of rsync\n";
+	print  "      none is to not archive old versions using the --backup option of rsync. For example when you already do it using snapshots on backup server (recommended).\n";
+	print  "You can also set a group of 4 first letters on username to backup the backup of a limited number of users.\n";
 	exit(-1);
 }
 
 if (empty($SERVDESTI)) {
 	print "Can't find name of remote backup server (remotebackupserver=) in /etc/sellyoursaas.conf\n";
-	print "Usage: ".$argv[0]." (test|confirm) [osuX]\n";
+	print  "Usage: ".$argv[0]." (test|confirm) [month|week|none] [osuX|instancename] [--delete]\n";
 	exit(-1);
 }
 
 if (empty($DOMAIN)) {
 	print "Value for domain seems to not be set into /etc/sellyoursaas.conf\n";
-	print "Usage: ".$argv[0]." (test|confirm) [osuX]\n";
+	print  "Usage: ".$argv[0]." (test|confirm) [month|week|none] [osuX|instancename] [--delete]\n";
 	exit(-1);
 }
 
@@ -415,7 +415,11 @@ if (!empty($instanceserver)) {
 	$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 	$sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 	if (isset($argv[3]) && $argv[3] != "--delete") {
-		$sql.= " AND c.ref_customer IN (".$dbmaster->escape($argv[3]).")";
+		if (preg_match('/^osu[0-9a-z]+/i', $argv[3])) {
+			$sql.= " AND ce.username_os like '".$dbmaster->escape($argv[3])."%'";
+		} else {
+			$sql.= " AND c.ref_customer IN ('".$dbmaster->escape($argv[3])."')";
+		}
 	} else {
 		$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
 	}

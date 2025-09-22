@@ -1436,6 +1436,14 @@ if ($reusecontractid) {
 		foreach ($prodschild as $prodid => $arrayprodid) {
 			$tmpsubproduct->fetch($prodid);	// To load the price
 
+			if (!empty($tmpsubproduct->array_options["options_only_for_country"])) {
+				$optioncountries = preg_split("/[\s,;]+/", $tmpsubproduct->array_options["options_only_for_country"]);
+				if (!in_array(dol_strtolower($object->country_code), $optioncountries)) {
+					// Thirdparty country code isn't in options_only_for_country array so we don't add product to contract
+					continue;
+				}
+			}
+
 			$qty = 1;
 			//if (! empty($contract->array_options['options_nb_users'])) $qty = $contract->array_options['options_nb_users'];
 			$vat = get_default_tva($mysoc, $object, $prodid);

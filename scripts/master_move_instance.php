@@ -151,6 +151,13 @@ if (! $res) {
 }
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var Societe $soc
+ * @var Translate $langs
+ * @var User $user
+ */
 
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once('/sellyoursaas/class/packages.class.php');

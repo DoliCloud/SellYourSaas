@@ -705,14 +705,15 @@ mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
 ln -fs /mnt/diskhome/backup /mnt/diskbackup
 ---------------
 
-* Create the other directories on the deployment server:
+* Create the other directories on the *Deployment* servers:
 
 [source, bash]
 ---------------
 mkdir /home/jail; mkdir /mnt/diskhome/home;
 
 mkdir /mnt/diskbackup/archives-test; mkdir /mnt/diskbackup/archives-paid
-mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt;
 chown admin:root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskhome/home /home/jail/home
 ln -fs /mnt/diskbackup/backup /home/jail/backup 
@@ -893,7 +894,7 @@ maxemailperday=50
 maxemailperdaypaid=500
 
 # Option to use a different path for spam (for public script)
-#pathtospamdir=/tmp/spam
+#pathtospamdir=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam
 ---------------
 
 
@@ -1063,25 +1064,6 @@ chown admin:admin /home/admin/.ssh/config
 === Installation of packages
 
 There are two scenarios depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
-
-* Installation of the 18.04- Ubuntu packages
-
-[source,bash]
----------------
-sudo apt update
-sudo apt install -y ntp git gzip zip zstd memcached ncdu duc iotop acl ufw sudo
-sudo apt install -y mariadb-server mariadb-client
-sudo apt install -y apache2 apache2-bin lynx
-sudo apt install -y php php-cli libapache2-mod-php php-fpm php-gd php-imap php-json php-ldap php-mysqlnd php-curl php-memcached php-imagick php-geoip php-mcrypt php-intl php-xml php-zip php-bz2 php-ssh2 php-mbstring php-soap php-tidy
-sudo apt install -y php-readline php-xmlrpc
-sudo apt install -y php-pear
-sudo apt install -y watchdog cpulimit libapache2-mpm-itk libapache2-mod-apparmor apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
-sudo apt install -y bind9
-sudo apt install -y spamc spamassassin clamdscan clamav-daemon
-sudo apt install -y fail2ban
-sudo apt install -y soffice libreoffice-common libreoffice-writer
-sudo apt install -y mailutils postfix
----------------
 
 * Installation of the 20.04+ Ubuntu packages
 
@@ -2020,6 +2002,8 @@ exclude_suffix := tmp old bak
 
 [source,bash]
 ---------------
+########## put your local config below ####################
+
 /snap/bin all
 
 !/var/log/mysql
@@ -2044,6 +2028,10 @@ exclude_suffix := tmp old bak
 !/etc/subuid
 !/etc/subuid-
 
+!/etc/letsencrypt/csr
+!/etc/letsencrypt/keys
+!/etc/letsencrypt/renewal
+
 /home MyRule
 /home/admin/logs Logs
 !/home/admin/backup
@@ -2055,14 +2043,15 @@ exclude_suffix := tmp old bak
 !/home/admin/.bash_history
 !/home/admin/.viminfo
 !/home/admin/.mysql_history
-!/home/myfirstnamelastname/.bash_history
-!/home/myfirstnamelastname/.viminfo
-!/home/myfirstnamelastname/.mysql_history
+!/home/myunixlogin/.bash_history
+!/home/myunixlogin/.viminfo
+!/home/myunixlogin/.mysql_history
 !/root/.bash_history
-!/root/.viminfo
+!/root/.config/rclone
 !/root/.mysql_history
+!/root/.viminfo
 
-exclude_suffix := cache
+exclude_suffix := cache swp
 ---------------
 
 Now, init the afick database
@@ -3212,6 +3201,7 @@ Create the sample files that will be used for antispam internal features of Sell
 
 [source,bash]
 ---------------
+mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam;
 echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail;
 echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip;
 echo >> /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom;

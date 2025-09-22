@@ -134,6 +134,12 @@ if ($action == 'set') {
 	$error=0;
 
 	if (! $error) {
+		dolibarr_set_const($db, "SELLYOURSAAS_AUTOMIGRATION_CODE", GETPOST("SELLYOURSAAS_AUTOMIGRATION_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_AUTOUPGRADE_CODE", GETPOST("SELLYOURSAAS_AUTOUPGRADE_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+
+		dolibarr_set_const($db, "SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", GETPOST("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE", GETPOST("SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+
 		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_CUSTOMURL', GETPOST("SELLYOURSAAS_ENABLE_CUSTOMURL", 'int'), 'chaine', 0, '', $conf->entity);
 		}
@@ -165,6 +171,7 @@ if ($action == 'set') {
  */
 
 $form = new Form($db);
+$formticket = new FormTicket($db);
 
 $help_url="";
 llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
@@ -199,13 +206,33 @@ if ($allowdolibarrspecific) {
 	print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 	print '<table class="noborder centpercent">';
 	print '<tr class="liste_titre">';
-	print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
-	print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+	print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td>';
+	print '<td></td>';
+	print '<td><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
 	print "</tr>\n";
 
+	// Auto migrate
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOMIGRATION_CODE").'</td>';
+	print '<td class="nowraponall" colspan="2">';
+	print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
+	print '</td>';
+	print '</tr>';
+
+	// Auto upgrade
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOUPGRADE_CODE").'</td>';
+	print '<td class="nowraponall" colspan="2">';
+	print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
+	print ' &nbsp; ';
+	print '<input class="minwidth50 maxwidth75" type="text" name="SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR" value="'.getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR', '').'" placeholder="'.$langs->trans("Version").'" spellcheck="false">';
+	print ' &nbsp; ';
+	print '<input class="minwidth150 maxwidth300" type="text" name="SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE" value="'.getDolGlobalString('SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE', '').'" placeholder="'.$langs->trans("ModulesToIgnoreForAutoUpgrade").'" spellcheck="false">';
+	print '</td>';
+	print '</tr>';
+
+
 	// Allow Custom URL
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL").'</td>';
-	print '<td>';
+	print '<tr class="oddeven trforbreakperms trforbreaknobg"><td class="tdforbreakperms">'.$langs->trans("SELLYOURSAAS_ENABLE_CUSTOMURL").'</td>';
+	print '<td class="tdforbreakperms">';
 	if ($conf->use_javascript_ajax) {
 		print ajax_constantonoff('SELLYOURSAAS_ENABLE_CUSTOMURL', array(), null, 0, 0, 1);
 	} else {
@@ -216,7 +243,7 @@ if ($allowdolibarrspecific) {
 		}
 	}
 	print '</td>';
-	print '<td><span class="opacitymedium small">Set to yes to allow customer to set a custom URL.</td>';
+	print '<td class="tdforbreakperms"><span class="opacitymedium small">Set to yes to allow customer to set a custom URL.</td>';
 	print '</tr>';
 
 	// Allow Custom URL for specific thirdparty ID ?
@@ -241,8 +268,8 @@ if ($allowdolibarrspecific) {
 	}
 
 	// Allow deployment of Dolibarr website
-	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES").'</td>';
-	print '<td>';
+	print '<tr class="oddeven trforbreakperms trforbreaknobg"><td class="tdforbreakperms">'.$langs->trans("SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES").'</td>';
+	print '<td class="tdforbreakperms">';
 	if ($conf->use_javascript_ajax) {
 		print ajax_constantonoff('SELLYOURSAAS_ENABLE_DOLIBARR_WEBSITES', array(), null, 0, 0, 1);
 	} else {
@@ -253,7 +280,7 @@ if ($allowdolibarrspecific) {
 		}
 	}
 	print '</td>';
-	print '<td><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
+	print '<td class="tdforbreakperms"><span class="opacitymedium small">Set to yes to allow customer to set a website online.</td>';
 	print '</tr>';
 
 
@@ -277,7 +304,6 @@ if ($allowdolibarrspecific) {
 		print '<td><span class="opacitymedium small"></span></td>';
 		print '</tr>';
 	}
-
 
 	print '</table>';
 	print '</div>';

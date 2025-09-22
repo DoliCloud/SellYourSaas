@@ -938,7 +938,7 @@ class SellYourSaasUtils
 		}
 
 		$servicestatus = 0;
-		if (! empty($conf->stripe->enabled)) {
+		if (isModEnabled('stripe')) {
 			$service = 'StripeTest';
 			$servicestatus = 0;
 			if (getDolGlobalString('STRIPE_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
@@ -1252,8 +1252,8 @@ class SellYourSaasUtils
 		$idpaiementcard = dol_getIdFromCode($this->db, 'CB', 'c_paiement', 'code', 'id', 1);
 		$idpaiementstripe = dol_getIdFromCode($this->db, 'STRIPE', 'c_paiement', 'code', 'id', 1);
 
-		// Get all payement to DO
-		$sql = 'SELECT f.rowid, se.fk_object as socid, sr.rowid as companypaymentmodeid';
+		// Get all payement to DO. Lines may be duplicated if there is several payment mode. Never mind, we will exclude duplicated invoice later.
+		$sql = 'SELECT f.rowid, f.ref, se.fk_object as socid, sr.rowid as companypaymentmodeid';
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
 		$sql .= ' WHERE sr.fk_soc = f.fk_soc';
 		$sql .= " AND (f.fk_mode_reglement IS NULL OR f.fk_mode_reglement IN (0, ".((int) $idpaiementcard).", ".((int) $idpaiementstripe)."))";
@@ -1263,7 +1263,7 @@ class SellYourSaasUtils
 		$sql .= " AND sr.type = 'card'";						// mode="card", this exclude payment mode of other types
 		// sr.card_type = 'visa', 'mastercard', 'amex', '' ...
 		$sql .= " AND sr.stripe_card_ref IS NOT NULL";			// Only if a payment mode card is known
-		//$sql .= " AND sr.stripe_card_account IS NOT NULL";	// Only if a payment mode account is known (may be emptysometimes)
+		//$sql .= " AND sr.stripe_card_account IS NOT NULL";	// Only if a payment mode account is known (may be empty sometimes)
 		$sql .= " AND sr.ext_payment_site = '".$this->db->escape($service)."'";		// Only Stripe Live or Test
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";		// Lines may be duplicated if there is several payment mode. Never mind, we will exclude duplicated invoice later.
@@ -1297,8 +1297,8 @@ class SellYourSaasUtils
 					} else {
 						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
 
-						if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
-							dol_syslog("The invoice is flagged as invoicepaymentdisputed so we discard it for any other payment");
+						if (!empty($invoice->dispute_status)) {
+							dol_syslog("The invoice is flagged as dispute_status so we discard it for any other payment");
 							$invoiceprocessedko[$obj->rowid] = $invoice->ref;
 						} else {
 							$result = $this->doTakePaymentStripeForThirdparty($service, $servicestatus, $obj->socid, $companypaymentmode, $invoice, 0, $noemailtocustomeriferror);
@@ -2300,10 +2300,10 @@ class SellYourSaasUtils
 					} else {
 						dol_syslog("* Process invoice id=".$invoice->id." ref=".$invoice->ref);
 
-						if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
+						if (!empty($invoice->dispute_status)) {
 							$errorforinvoice++;
-							dol_syslog("The invoice is flagged as invoicepaymentdisputed so we discard it for any other payment");
-							$this->errors[] = "The invoice is flagged as invoicepaymentdisputed so we discard it for any other payment";
+							dol_syslog("The invoice is flagged as dispute_status so we discard it for any other payment");
+							$this->errors[] = "The invoice is flagged as dispute_status so we discard it for any other payment";
 						} else {
 							// Create a direct debit payment request (if none already exists)
 							$result = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture', 1);
@@ -2737,20 +2737,21 @@ class SellYourSaasUtils
 					$expirationdate = $tmparray['expirationdate'];
 					$duration_value = $tmparray['duration_value'];
 					$duration_unit = $tmparray['duration_unit'];
+					$appproductid = $tmparray['appproductid'];
 					//var_dump($expirationdate.' '.$enddatetoscan);
 
-					// Load linked ->linkedObjects (objects linked)
-					// @TODO Comment this line and then make the search if there is n open invoice(s) by doing a dedicated SQL COUNT request to fill $contractcanceled.
-					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
-
 					// Test if there is at least 1 open invoice
+					$someinvoicenotpaid=0;
 					dol_syslog('Search if there is at least one open invoice', LOG_DEBUG);
+
+					// Load linked ->linkedObjects (objects linked)
+					// @TODO Comment this line and then make the search if there is n open invoice(s) by doing a dedicated SQL COUNT request to fill $contractcanceled to avoid the fetch with load of all objects
+					$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 					if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture']) && count($object->linkedObjects['facture']) > 0) {
 						// Sort on ascending date
 						usort($object->linkedObjects['facture'], "sellyoursaasCmpDate");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
-						$someinvoicenotpaid=0;
 						foreach ($object->linkedObjects['facture'] as $idinvoice => $invoice) {
 							if ($invoice->statut == Facture::STATUS_DRAFT) {
 								continue;	// Draft invoice are not invoice not paid
@@ -2763,89 +2764,105 @@ class SellYourSaasUtils
 								$someinvoicenotpaid++;
 							}
 						}
-						if ($someinvoicenotpaid) {
-							$contractcanceled[$object->id] = array('ref'=>$object->ref, 'someinvoicenotpaid'=>$someinvoicenotpaid);
-						}
+					}
+
+					if ($someinvoicenotpaid) {
+						$contractcanceled[$object->id] = array('ref'=>$object->ref, 'someinvoicenotpaid'=>$someinvoicenotpaid);
 					}
 
 					if (empty($contractcanceled[$object->id]) && $expirationdate && $expirationdate < $enddatetoscan) {
 						dol_syslog("Define the newdate of end of services from expirationdate=".$expirationdate);
-						$newdate = $expirationdate;
-						$protecti=0;	//$protecti is to avoid infinite loop
-						while ($newdate < $enddatetoscan && $protecti < 1000) {
-							$newdate = dol_time_plus_duree($newdate, $duration_value, $duration_unit);
-							$protecti++;
+
+						$newdate = $expirationdate;	// Current expiration date
+
+						if (empty($appproductid)) {
+							$error++;
+							$this->error = "doRenewalContracts: Can't calculate the new expiration date of services, there is no service with type application in the contract ".$object->ref;
+							dol_syslog($this->error, LOG_ERR);
+						} elseif ($duration_value <= 0) {
+							$error++;
+							$this->error = "doRenewalContracts: Can't calculate the new expiration date of services, bad value for duration of service in contract".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
+							dol_syslog($this->error, LOG_ERR);
 						}
 
-						if ($protecti < 1000) {	// If not, there is a pb
-							// We will update the end of date of contrat, so first we refresh contract data
-							dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
-
-							$this->db->begin();
-
-							$errorforlocaltransaction = 0;
-
-							$label = 'Renewal of contrat '.$object->ref;
-							$comment = 'Renew date of contract '.$object->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doRenewalContracts';
-
-							// First launch update of resources if it is not a redirect contract:
-							$result = 1;
-							if (empty($object->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
-								// This update qty of contract lines + qty into linked template invoice.
-								$result = $this->sellyoursaasRemoteAction('refreshmetrics', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
+						if (!$error) {
+							$protecti=0;	//$protecti is to avoid infinite loop
+							while (!$error && $newdate < $enddatetoscan && $protecti < 1000) {
+								$newdate = dol_time_plus_duree($newdate, $duration_value, $duration_unit);
+								$protecti++;
 							}
 
-							if ($result <= 0) {
-								$contracterror[$object->id] = $object->ref;
+							if ($protecti < 1000) {	// If not, there is a pb
+								// We will update the end of date of contrat, so first we refresh contract data
+								dol_syslog("We will update the end of date of contract with newdate = ".dol_print_date($newdate, 'dayhourrfc')." but first, we update qty of resources by a remote action refresh.");
 
-								$error++;
-								$errorforlocaltransaction++;
-								$this->error = $this->error;
-								$this->errors = $this->errors;
-							} else {
-								$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
-								$sqlupdate.= ' WHERE fk_contrat = '.((int) $object->id);
-								$resqlupdate = $this->db->query($sqlupdate);
-								if ($resqlupdate) {
-									$contractprocessed[$object->id]=$object->ref;
+								$this->db->begin();
 
-									$actioncode = 'RENEW_CONTRACT';
-									$now = dol_now();
+								$errorforlocaltransaction = 0;
 
-									// Create an event
-									$actioncomm = new ActionComm($this->db);
-									$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
-									$actioncomm->code         = 'AC_'.$actioncode;
-									$actioncomm->label        = $label;
-									$actioncomm->datep        = $now;
-									$actioncomm->datef        = $now;
-									$actioncomm->percentage   = -1;   // Not applicable
-									$actioncomm->socid        = $object->socid;
-									$actioncomm->authorid     = $user->id;   // User saving action
-									$actioncomm->userownerid  = $user->id;	// Owner of action
-									$actioncomm->fk_element   = $object->id;
-									$actioncomm->elementtype  = 'contract';
-									$actioncomm->note_private = $comment;
+								$label = 'Renewal of contrat '.$object->ref;
+								$comment = 'Renew date of contract '.$object->ref.' to '.dol_print_date($newdate, 'dayhourrfc').' by doRenewalContracts';
 
-									$ret = $actioncomm->create($user);       // User creating action
-								} else {
-									$contracterror[$object->id]=$object->ref;
+								// First launch update of resources if it is not a redirect contract:
+								$result = 1;
+								if (empty($object->array_options['options_suspendmaintenance_message']) || !preg_match('/^http/i', $object->array_options['options_suspendmaintenance_message'])) {
+									// This update qty of contract lines + qty into linked template invoice.
+									$result = $this->sellyoursaasRemoteAction('refreshmetrics', $object, 'admin', '', '', '0', $comment);	// This includes the creation of an event if the qty has changed
+								}
+
+								if ($result <= 0) {
+									$contracterror[$object->id] = $object->ref;
 
 									$error++;
 									$errorforlocaltransaction++;
-									$this->error = $this->db->lasterror();
-								}
-							}
+									$this->error = $this->error;
+									$this->errors = $this->errors;
+								} else {
+									$sqlupdate = 'UPDATE '.MAIN_DB_PREFIX."contratdet SET date_fin_validite = '".$this->db->idate($newdate)."'";
+									$sqlupdate.= ' WHERE fk_contrat = '.((int) $object->id);
+									$resqlupdate = $this->db->query($sqlupdate);
+									if ($resqlupdate) {
+										$contractprocessed[$object->id]=$object->ref;
 
-							if (! $errorforlocaltransaction) {
-								$this->db->commit();
+										$actioncode = 'RENEW_CONTRACT';
+										$now = dol_now();
+
+										// Create an event
+										$actioncomm = new ActionComm($this->db);
+										$actioncomm->type_code    = 'AC_OTH_AUTO';		// Type of event ('AC_OTH', 'AC_OTH_AUTO', 'AC_XXX'...)
+										$actioncomm->code         = 'AC_'.$actioncode;
+										$actioncomm->label        = $label;
+										$actioncomm->datep        = $now;
+										$actioncomm->datef        = $now;
+										$actioncomm->percentage   = -1;   // Not applicable
+										$actioncomm->socid        = $object->socid;
+										$actioncomm->authorid     = $user->id;   // User saving action
+										$actioncomm->userownerid  = $user->id;	// Owner of action
+										$actioncomm->fk_element   = $object->id;	// deprecated
+										$actioncomm->elementid    = $object->id;
+										$actioncomm->elementtype  = 'contract';
+										$actioncomm->note_private = $comment;
+
+										$ret = $actioncomm->create($user);       // User creating action
+									} else {
+										$contracterror[$object->id]=$object->ref;
+
+										$error++;
+										$errorforlocaltransaction++;
+										$this->error = $this->db->lasterror();
+									}
+								}
+
+								if (! $errorforlocaltransaction) {
+									$this->db->commit();
+								} else {
+									$this->db->rollback();
+								}
 							} else {
-								$this->db->rollback();
+								$error++;
+								$this->error = "doRenewalContracts: Failed to get the new expiration date of services for contract ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_unit;
+								dol_syslog($this->error, LOG_ERR);
 							}
-						} else {
-							$error++;
-							$this->error = "Bad value for newdate in doRenewalContracts ".$object->ref." - expirationdate=".$expirationdate." enddatetoscan=".$enddatetoscan." duration_value=".$duration_value." duration_unit=".$duration_value;
-							dol_syslog($this->error, LOG_ERR);
 						}
 					}
 				}

@@ -128,7 +128,7 @@ class ActionsSellyoursaas
 				if ($url) {
 					$this->resprints = '<!-- Added by getNomUrl hook of SellYourSaas -->';
 					//$this->resprints .= (empty($parameters['notiret']) ? ' -' : '');
-					$this->resprints .= '<a href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft paddingright pictofixedwidth"></span></a>';
+					$this->resprints .= '<a class="valignmiddle" href="'.$url.'" target="_myaccount" alt="'.$sellyoursaasname.' '.$langs->trans("Dashboard").'"><span class="fa fa-desktop paddingleft paddingright pictofixedwidth"></span></a>';
 				}
 
 				if (!empty($parameters['getnomurl'])) {

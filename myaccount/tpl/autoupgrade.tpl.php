@@ -128,7 +128,7 @@ if ($action == "instanceverification") {
 				}
 
 				// List of module that should not block installation
-				$arrayofexternalmodulesallowed = array('MEMCACHED', 'BILLEDONORDERS');
+				$arrayofexternalmodulesallowed = explode(',', getDolGlobalString('SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE'));
 
 				foreach ($confinstance->global as $key => $val) {
 					if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && !empty($val)) {	// This is a constant of a module
