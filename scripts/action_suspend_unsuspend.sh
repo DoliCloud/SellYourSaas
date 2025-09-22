@@ -246,6 +246,13 @@ echo "CRONHEAD = $CRONHEAD"
 testorconfirm="confirm"
 
 
+# Create target directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt if it does not exists
+export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+if [[ ! -d $pathforcertiflocal ]]; then
+	echo "Create cert directory with mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;"
+	mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;
+fi
+
 
 # Rename
 
@@ -500,13 +507,6 @@ if [[ "$mode" == "rename" ]]; then
 					exit 20
 				else
 					sleep 1
-				fi
-
-				# Create target directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt if it does not exists
-				export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
-				if [[ ! -d $pathforcertiflocal ]]; then
-					echo "Create cert directory with mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;"
-					mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;
 				fi
 
 				# Generate the letsencrypt certificate
