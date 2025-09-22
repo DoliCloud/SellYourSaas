@@ -887,54 +887,11 @@ if ($return_var) {
 
 // We load the backup on target database
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
-//print "If the mysql fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
-
-// Drop llx_accounting_account (if it exists)
-$fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
-$output=array();
-$return_var=0;
-print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropa."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
-	$outputfile = $conf->admin->dir_temp.'/out.tmp';
-	$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
-
-	$return_var = $resultarray['result'];
-	$content_grabbed = $resultarray['output'];
-
-	print $content_grabbed."\n";
-	// If table already not exist, return_var is 1
-	// If technical error, return_var is also 1, so we disable this test
-	/*if ($return_var) {
-		print "Error on droping table into the new instance\n";
-		exit(-2);
-	}*/
-}
-
-// Drop llx_accounting_system (if it exists)
-$fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
-$output=array();
-$return_var=0;
-print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropb."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
-	$outputfile = $conf->admin->dir_temp.'/out.tmp';
-	$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
-
-	$return_var = $resultarray['result'];
-	$content_grabbed = $resultarray['output'];
-
-	print $content_grabbed."\n";
-	// If table already not exist, return_var is 1
-	// If technical error, return_var is also 1, so we disable this test
-	/*if ($return_var) {
-		print "Error on droping table into the new instance\n";
-		exit(-2);
-	}*/
-}
-
 $dnschangedone = 0;
 
 // Load dump
-$fullcommand="cat ".$tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql | mysql -A -h ".$newserverbase." -u ".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
+$dumpfile = $tmptargetdir."/mysqldump_".$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql";
+$fullcommand = "(echo 'SET FOREIGN_KEY_CHECKS=0;'; cat ".$dumpfile."; echo 'SET FOREIGN_KEY_CHECKS=1;') | mysql -A -h ".$newserverbase." -u ".$newloginbase." -p".$newpasswordbase." -D ".$newdatabasedb;
 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." Load dump with ".$fullcommand."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 	$output=array();
