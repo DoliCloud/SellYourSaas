@@ -287,12 +287,17 @@ if (!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON')) {
 	$enabledisableannounce.='</a>';
 }
 print $enabledisableannounce;
-print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
-print '<br>';
-print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_5.'"'.(!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') ? ' disabled="disabled"' : '').'>';
-print getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
-print '</textarea>';
-print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'"></div>';
+if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON')) {
+	print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
+	print '<br>';
+	print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_5.'"'.(!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') ? ' disabled="disabled"' : '').'>';
+	print getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
+	print '</textarea>';
+	print '<br>';
+	print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'"></div>';
+} else {
+	print $langs->trans("AnnounceOnCustomerDashboard");
+}
 print '</td></tr>';
 print "</table></form><br>";
 
