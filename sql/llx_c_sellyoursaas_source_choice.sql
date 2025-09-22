@@ -1,4 +1,4 @@
-CREATE TABLE llx_c_source_choice (
+CREATE TABLE llx_c_sellyoursaas_source_choice (
      rowid INT(11) AUTO_INCREMENT PRIMARY KEY,
      code VARCHAR(255) NOT NULL,
      label VARCHAR(255) NOT NULL,

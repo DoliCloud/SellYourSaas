@@ -148,9 +148,9 @@ class modSellYourSaas extends DolibarrModules
 		// Dictionaries
 		$this->dictionaries = array(
 			'langs' => 'sellyoursaas@sellyoursaas',
-			'tabname' => array('c_source_choice'),
+			'tabname' => array('c_sellyoursaas_source_choice'),
 			'tablib' => array('SourceChoiceDictionary'),
-			'tabsql' => array('SELECT c.rowid as rowid, c.code, c.label, c.pos, c.active FROM '.MAIN_DB_PREFIX.'c_source_choice as c'),
+			'tabsql' => array('SELECT c.rowid as rowid, c.code, c.label, c.pos, c.active FROM '.MAIN_DB_PREFIX.'c_sellyoursaas_source_choice as c'),
 			'tabsqlsort' => array("pos ASC"),
 			'tabfield' => array("code,label,pos"),
 			'tabfieldvalue' => array("code,label,pos"),
