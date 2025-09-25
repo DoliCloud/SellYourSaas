@@ -3224,10 +3224,6 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 							print $langs->trans("BeforeEndOfPeriodInstanceSuspendedFree", $contract->ref_customer, $delaybeforeundeployment);
 						} else {
 							print $langs->trans("BeforeEndOfPeriodInstanceSuspended", $contract->ref_customer, $delaybeforeundeployment);
-							if (str_contains($contract->ref_customer, '.saas1')) {
-								$url = str_replace('.saas1.', $contract->ref_customer, '.saas4.');
-								print '<div class="note note-warning">Votre serveur a peut être fermé, essayer de vous connecté sur  '.$url.'</div>';
-							}
 						}
 					}
 					if (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
