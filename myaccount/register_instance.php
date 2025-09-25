@@ -214,7 +214,6 @@ $productref=(GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : (
 $extcss=GETPOST('extcss', 'alpha');
 $lead_sources_array = array();
 if (GETPOSTISARRAY('options_source_choiceextrafields_societe')) {
-	// 2. Si c'est le cas, ALORS on le RÉCUPÈRE
 	$lead_sources_array = GETPOST('options_source_choiceextrafields_societe', 'array');
 }
 $lead_sources_string = implode(',', $lead_sources_array);

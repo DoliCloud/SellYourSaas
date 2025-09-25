@@ -145,10 +145,6 @@ top_htmlhead('', 'Suspension Page');
 <?php
 print $langs->trans("SorryInstanceSuspended", dol_escape_htmltag($instance));
 print '<br>';
-if (strpos(dol_escape_htmltag($instance), '.saas1.') !== false) {
-	$url = str_replace('.saas1.', '.saas4.', $contract->ref_customer);
-	print '<div class="note note-warning">Votre serveur a peut-être fermé, essayez de vous connecter sur <a href="https://'.$url.'">'.$url.'</a></div>';
-}
 print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
 print '<br>';
 print '<br>';
