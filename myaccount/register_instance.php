@@ -213,8 +213,8 @@ $plan=GETPOST('plan', 'alpha');
 $productref=(GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : ($plan ? $plan : ''));
 $extcss=GETPOST('extcss', 'alpha');
 $lead_sources_array = array();
-if (GETPOSTISARRAY('options_source_choiceextrafields_societe')) {
-	$lead_sources_array = GETPOST('options_source_choiceextrafields_societe', 'array');
+if (GETPOSTISARRAY('options_source_choice')) {
+	$lead_sources_array = GETPOST('options_source_choice', 'array');
 }
 $lead_sources_string = implode(',', $lead_sources_array);
 if (empty($extcss)) {

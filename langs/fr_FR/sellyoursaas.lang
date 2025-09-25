@@ -939,3 +939,5 @@ HelpOnAvailableForSale=Si le service est de type « Application », cochez cet
 HelpOnDaysForFreePeriod=Lorsque le service est de type « Application », saisissez le nombre de jours pendant lesquels vous souhaitez avoir le service gratuit avant de demander un paiement ou une validation pour conserver l'instance
 OnlyThoseServers=Only on those servers
 HelpOnOnlyThoseServers=Laissez ce champ vide pour autoriser le déploiement sur n'importe quel serveur qualifié. Saisissez le nom d'un ou plusieurs serveurs si vous souhaitez forcer le déploiement de ce service sur un serveur donné.
+SourceChoiceDictionary = Sources du client sur la page d'inscription
+HowDidYouHearAboutUs = Comment nous avez vous connu ?
