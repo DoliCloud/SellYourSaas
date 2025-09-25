@@ -816,7 +816,6 @@ if ($reshook == 0) {
 					</label>
 					<div class="controls-select2">
 						<?php
-						// On peut maintenant afficher le champ en toute sécurité
 						print $extrafields->showInputField('source_choice', '', '', '', '', '', 0, 'societe');
 						?>
 					</div>

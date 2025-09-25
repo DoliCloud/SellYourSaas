@@ -940,4 +940,4 @@ HelpOnDaysForFreePeriod=Lorsque le service est de type « Application », sais
 OnlyThoseServers=Only on those servers
 HelpOnOnlyThoseServers=Laissez ce champ vide pour autoriser le déploiement sur n'importe quel serveur qualifié. Saisissez le nom d'un ou plusieurs serveurs si vous souhaitez forcer le déploiement de ce service sur un serveur donné.
 SourceChoiceDictionary = Sources du client sur la page d'inscription
-HowDidYouHearAboutUs = Comment nous avez vous connu ?
+HowDidYouHearAboutUs = Comment nous avez-vous connu ?
