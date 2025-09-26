@@ -797,7 +797,31 @@ if ($reshook == 0) {
 				<?php
 			}
 
-
+			global $db, $extrafields;
+			$extrafields->fetch_name_optionals_label('societe');
+			$numActiveEntries = 0;
+			$sql = "SELECT COUNT(rowid) as nb FROM " . $db->prefix() . "c_sellyoursaas_source_choice WHERE active = 1";
+			$resql = $db->query($sql);
+			if ($resql) {
+				$obj = $db->fetch_object($resql);
+				if ($obj) {
+					$numActiveEntries = (int) $obj->nb;
+				}
+			}
+			if ($numActiveEntries > 0) {
+				?>
+				<div class="control-group-select2 required">
+					<label class="control-label-select2" for="options_sellyoursaas_source_choice">
+						<span class="fa fa-question-circle opacityhigh"></span> <?= $langs->trans("HowDidYouHearAboutUs") ?>
+					</label>
+					<div class="controls-select2">
+						<?php
+						print $extrafields->showInputField('source_choice', '', '', '', '', '', 0, 'societe');
+						?>
+					</div>
+				</div>
+				<?php
+			}
 			if (empty($mythirdparty->id)) {
 				?>
 

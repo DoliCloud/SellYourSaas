@@ -3013,7 +3013,6 @@ $atleastoneinvoicedisputed = 0;
 
 // Show warnings
 
-
 if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'autoupgrade'))) {
 	$companypaymentmode = new CompanyPaymentMode($db);
 	$result = $companypaymentmode->fetch(0, null, $mythirdpartyaccount->id);
