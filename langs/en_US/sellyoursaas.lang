@@ -943,3 +943,6 @@ HelpOnOnlyThoseServers=Keep empty to allow deployment on any qualified server. E
 DolibarrDeployment=Dolibarr specific
 OnlyForCountry=Only for Country
 OnlyForCountryHelp=Country code list allowing installation of the product or service.To have several countries, add a comma between the country codes.<br>Exemple : fr,us,es
+MyModuleCustomersInstances=My module customer instances
+MyModuleCustomersBilling=My module customer billing
+SupplierModule=Module

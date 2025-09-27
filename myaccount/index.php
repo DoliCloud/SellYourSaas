@@ -151,6 +151,7 @@ $firstrecord=GETPOST('firstrecord', 'int');
 $lastrecord=GETPOST('lastrecord', 'int');
 $search_instance_name=GETPOST('search_instance_name', 'alphanohtml');
 $search_customer_name=GETPOST('search_customer_name', 'alphanohtml');
+$search_module_name=GETPOST('search_module_name', 'alphanohtml');
 $reasonundeploy=GETPOST('reasonundeploy', 'alpha');
 $commentundeploy=GETPOST('commentundeploy', 'alpha');
 
@@ -186,6 +187,7 @@ if ($firstrecord < 1) {
 if (GETPOSTISSET('reset')) {
 	$search_instance_name = '';
 	$search_customer_name = '';
+	$search_module_name = '';
 }
 $fromsocid=GETPOST('fromsocid', 'int');
 
@@ -318,6 +320,24 @@ $mythirdpartyaccount->isamoduleprovider = array();
 if (getDolGlobalInt('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM') > 0) {
 	// TODO Read if there is some product prices in supplier tab of the thirdparty. If yes it is a module provider and we have the list of provided modules
 	//$mythirdpartyaccount->isamoduleprovider = array('aa', 'bbb');
+	$sql = "SELECT p.rowid FROM ".MAIN_DB_PREFIX."product as p";
+	$sql.= " JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp";
+	$sql.= " ON pfp.fk_product = p.rowid";
+	$sql.= " WHERE pfp.fk_soc = ".$mythirdpartyaccount->id;
+	$resql=$db->query($sql);
+	if ($resql) {
+		$num_rows = $db->num_rows($resql);
+		$i = 0;
+		while ($i < $num_rows) {
+			$obj = $db->fetch_object($resql);
+			if ($obj) {
+				$mythirdpartyaccount->isamoduleprovider[] = $obj->rowid;
+			}
+			$i++;
+		}
+	} else {
+		dol_print_error($db);
+	}
 }
 
 $nbtotalofrecords = 0;
@@ -400,6 +420,48 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myc
 	}
 }
 //var_dump(array_keys($listofcontractidreseller));
+
+$listofcontractidmodulesupplier = array();
+// Load list of child instance for module supplier
+if (!empty($mythirdpartyaccount->isamoduleprovider) && in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
+	$sql = 'SELECT DISTINCT c.rowid';
+	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
+	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contratdet as d ON d.fk_contrat = c.rowid';
+	$sql.= ', '.MAIN_DB_PREFIX.'product as p';
+	$sql.= " WHERE d.fk_product = p.rowid";
+	$sql.= " AND d.fk_product IN (".(implode(",", $mythirdpartyaccount->isamoduleprovider)).")";
+	$sql.= " AND d.statut = 4";
+
+	if ($search_instance_name) {
+		$sql.=natural_search(array('c.ref_customer'), $search_instance_name);
+	}
+	if ($search_module_name) {
+		$sql.=natural_search(array('p.ref','p.label'), $search_module_name);
+	}
+
+	$resql=$db->query($sql);
+	if ($resql) {
+		$num_rows = $db->num_rows($resql);
+		$i = 0;
+		while ($i < $num_rows) {
+			$obj = $db->fetch_object($resql);
+			if ($obj) {
+				if (empty($listofcontractidmodulesupplier[$obj->rowid])) {
+					$contract=new Contrat($db);
+					$contract->fetch($obj->rowid);					// This load also lines
+					$listofcontractidmodulesupplier[$obj->rowid] = $contract;
+				}
+			}
+			$i++;
+		}
+		if (empty($lastrecord) || $lastrecord > $num_rows) {
+			$lastrecord = $num_rows;
+		}
+	} else {
+		dol_print_error($db);
+	}
+
+}
 
 // Define environment of payment modes
 $servicestatusstripe = 0;
@@ -2401,13 +2463,13 @@ if ($mythirdpartyaccount->isareseller) {
 
 if (count($mythirdpartyaccount->isamoduleprovider) > 0) {
 	print '
-	<li class="nav-item'.($mode == 'moduleprovider' ? ' active' : '').' dropdown">
+	<li class="nav-item'.(($mode == 'mymodulecustomerinstances' || $mode == 'mymodulecustomerbilling') ? ' active' : '').' dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-suitcase"></i> '.$langs->trans("ModuleProviderArea").'</a>
         <ul class="dropdown-menu">';
 	// Module provider stats
-	//print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances"><i class="fa fa-server pictofixedwidth"></i> '.$langs->trans("MyCustomersInstances").'</a></li>';
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerinstances"><i class="fa fa-server pictofixedwidth"></i> '.$langs->trans("MyModuleCustomersInstances").'</a></li>';
 	// Divider
-	//print '<li class="dropdown-divider"></li>';
+	print '<li class="dropdown-divider"></li>';
 	// Customers ofmy module area
 	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerbilling"><i class="fa fa-usd"></i> '.$langs->trans("MyModuleCustomersBilling").'</a></li>';
 	print '
