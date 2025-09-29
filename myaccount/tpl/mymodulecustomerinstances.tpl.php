@@ -294,7 +294,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 				} else {
 					$total_ht = 0;
 					foreach ($templateinvoice->lines as $key => $templateline) {
-						if (in_array($templateline->fk_product, $mythirdpartyaccount->context['isamoduleprovider'])) {
+						if (array_key_exists($templateline->fk_product, $mythirdpartyaccount->context['isamoduleprovider'])) {
 							$total_ht += $templateline->total_ht;
 						}
 					}
@@ -351,7 +351,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 						            <div class="areaforresources" style="padding-bottom: 12px;">';
 		foreach ($contract->lines as $keyline => $line) {
 			//var_dump($line);
-			if ($line->fk_product > 0 && !in_array($line->fk_product, $mythirdpartyaccount->context['isamoduleprovider'])) {
+			if ($line->fk_product > 0 && !array_key_exists($line->fk_product, $mythirdpartyaccount->context['isamoduleprovider'])) {
 				continue;
 			}
 

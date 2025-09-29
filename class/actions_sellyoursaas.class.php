@@ -1542,7 +1542,7 @@ class ActionsSellyoursaas
 	 */
 	public function loadDataForCustomReports($parameters, &$action, $hookmanager)
 	{
-		global $langs;
+		global $db, $langs;
 
 		$langs->load("sellyoursaas@sellyoursaas");
 
@@ -1558,18 +1558,40 @@ class ActionsSellyoursaas
 			$head[$h][2] = 'home';
 			$h++;
 
+			// Count nb of deployment servers
+			$object = new Deploymentserver($db);
+			$sql = 'SELECT count(rowid) as nbtotalofrecords FROM '.MAIN_DB_PREFIX.'sellyoursaas_deploymentserver';
+			if ($object->ismultientitymanaged == 1) {
+				$sql .= " WHERE t.entity IN (".getEntity($object->element, (GETPOSTINT('search_current_entity') ? 0 : 1)).")";
+			} else {
+				$sql .= " WHERE 1 = 1";
+			}
+			// Count total nb of records
+			$nbtotalofrecords = '';
+			$resql = $db->query($sql);
+			if ($resql) {
+				$objforcount = $db->fetch_object($resql);
+				$nbtotalofrecords = $objforcount->nbtotalofrecords;
+				$db->free($resql);
+			} else {
+			    dol_print_error($db);
+			}
+
 			if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 				$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/deployment_servers.php', 1);
 				$head[$h][1] = $langs->trans("DeploymentServers");
+				$head[$h][1] .= '<span class="badge marginleftonlyshort">'.$nbtotalofrecords.'</span>';
 				$head[$h][2] = 'deploymentservers';
 				$h++;
 			} else {
 				$head[$h][0] = '/custom/sellyoursaas/deploymentserver_list.php';
 				$head[$h][0] = dol_buildpath('/sellyoursaas/deploymentserver_list.php', 1);
 				$head[$h][1] = $langs->trans("DeploymentServers");
+				$head[$h][1] .= '<span class="badge marginleftonlyshort">'.$nbtotalofrecords.'</span>';
 				$head[$h][2] = 'deploymentservers';
 				$h++;
 			}
+
 
 			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/setup_antispam.php', 1);
 			$head[$h][1] = $langs->trans("AntiSpam");
@@ -1581,16 +1603,16 @@ class ActionsSellyoursaas
 		}
 
 		if ($parameters['tabfamily'] == 'sellyoursaas') {
-			$head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily']) ? '' : '&tabfamily='.$parameters['tabfamily']);
-			$head[$h][1] = $langs->trans("CustomReports");
-			$head[$h][2] = 'customreports';
+			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
+			$head[$h][1] = $langs->trans("Notes");
+			$head[$h][2] = 'notes';
 			$h++;
 		}
 
 		if ($parameters['tabfamily'] == 'sellyoursaas') {
-			$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
-			$head[$h][1] = $langs->trans("Notes");
-			$head[$h][2] = 'notes';
+			$head[$h][0] = 'customreports.php?objecttype='.$parameters['objecttype'].(empty($parameters['tabfamily']) ? '' : '&tabfamily='.$parameters['tabfamily']);
+			$head[$h][1] = $langs->trans("CustomReports");
+			$head[$h][2] = 'customreports';
 			$h++;
 		}
 

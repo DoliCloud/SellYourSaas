@@ -129,7 +129,7 @@ if (empty($mode) && empty($welcomecid)) {
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09') ? GETPOST('lang', 'aZ09') : 'auto');
-$langs->loadLangs(array("main","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other','admin','website'));
+$langs->loadLangs(array("main","companies","bills","sellyoursaas@sellyoursaas","other","products","errors",'mails','paypal','paybox','stripe','withdrawals','other','admin','website'));
 
 if ($langs->defaultlang == 'en_US') {
 	$langsen = $langs;
@@ -316,7 +316,7 @@ if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 }
 
 // Define if the thirdparty is a module provider
-$mythirdpartyaccount->context['isamoduleprovider'] = array();		// TODO Use $mythirdpartyaccount->context['isamoduleprovider']
+$mythirdpartyaccount->context['isamoduleprovider'] = array();
 if (getDolGlobalInt('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM') > 0) {
 	$sql = "SELECT p.rowid FROM ".MAIN_DB_PREFIX."product as p";
 	$sql.= " JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp";
@@ -429,7 +429,7 @@ if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && in_array($mode
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contratdet as d ON d.fk_contrat = c.rowid';
 	$sql.= ', '.MAIN_DB_PREFIX.'product as p';
 	$sql.= " WHERE d.fk_product = p.rowid";
-	$sql.= " AND d.fk_product IN (".(implode(",", $mythirdpartyaccount->context['isamoduleprovider'])).")";
+	$sql.= " AND d.fk_product IN (".$db->sanitize(implode(",", array_keys($mythirdpartyaccount->context['isamoduleprovider']))).")";
 	$sql.= " AND d.statut = 4";
 
 	if ($search_instance_name) {
@@ -2817,8 +2817,8 @@ if ($resqlproducts) {
 }
 
 
-// Show partner links
-if ($mythirdpartyaccount->isareseller) {
+// Show resellection section
+if ($mythirdpartyaccount->isareseller && !in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
 	print '
 		<!-- Info reseller -->
 		<div class="note note-info">
@@ -2963,6 +2963,21 @@ if ($mythirdpartyaccount->isareseller) {
 }
 
 
+// Show module provider section
+if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && !in_array($mode, array('mycustomerinstances', 'mycustomerbilling'))) {
+	print '
+		<!-- Info module provider -->
+		<div class="note note-info">
+		<h4 class="block"><span class="fa fa-briefcase"></span> '.$langs->trans("YouAreAModuleProvider").'.</h4>
+		';
+	print '<span class="opacitymedium">'.$langs->trans("YouAreTheProviderOfTheFollowingModules").':</span><br>';
+	foreach ($mythirdpartyaccount->context['isamoduleprovider'] as $id => $val) {
+		$tmpproduct = new Product($db);
+		$tmpproduct->fetch($id);
+		print '- '.$tmpproduct->ref.($tmpproduct->label != $tmpproduct->ref ? ' '.$tmpproduct->label : '').' &nbsp; - &nbsp; <span class="small opacitymedium">'.$langs->trans("SellingPriceHT").'</span> = '.price($tmpproduct->price, 0, '', 1, -1, -1, $conf->currency).' / '.$langs->trans("month").'<br>';
+	}
+	print '</div>';
+}
 
 // Fill array of company payment modes
 $arrayofcompanypaymentmode = array();
@@ -3073,18 +3088,18 @@ $atleastonecontractwithtrialended = 0;
 $atleastonepaymentinerroronopeninvoice = 0;
 $atleastoneinvoicedisputed = 0;
 
-// Show warnings
 
+// Show warnings
 
 if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'autoupgrade'))) {
 	$companypaymentmode = new CompanyPaymentMode($db);
 	$result = $companypaymentmode->fetch(0, null, $mythirdpartyaccount->id);
 
 	foreach ($listofcontractid as $contractid => $contract) {
-		if ($mode == 'mycustomerbilling') {
+		if (in_array($mode, array('mycustomerinstances', 'mycustomerbilling'))) {
 			continue;
 		}
-		if ($mode == 'mycustomerinstances') {
+		if (in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
 			continue;
 		}
 		if ($contract->array_options['options_deployment_status'] == 'undeployed') {
