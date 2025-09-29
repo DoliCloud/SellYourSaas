@@ -294,7 +294,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 				} else {
 					$total_ht = 0;
 					foreach ($templateinvoice->lines as $key => $templateline) {
-						if (in_array($templateline->fk_product, $mythirdpartyaccount->isamoduleprovider)) {
+						if (in_array($templateline->fk_product, $mythirdpartyaccount->context['isamoduleprovider'])) {
 							$total_ht += $templateline->total_ht;
 						}
 					}
@@ -351,7 +351,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 						            <div class="areaforresources" style="padding-bottom: 12px;">';
 		foreach ($contract->lines as $keyline => $line) {
 			//var_dump($line);
-			if ($line->fk_product > 0 && !in_array($line->fk_product, $mythirdpartyaccount->isamoduleprovider)) {
+			if ($line->fk_product > 0 && !in_array($line->fk_product, $mythirdpartyaccount->context['isamoduleprovider'])) {
 				continue;
 			}
 
@@ -359,7 +359,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 			$resourceformula='';
 			$tmpproduct = new Product($db);
 			if ($line->fk_product > 0) {
-				
+
 				$tmpproduct->fetch($line->fk_product);
 
 				$maxHeight=40;

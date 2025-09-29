@@ -306,7 +306,7 @@ if ($resql) {
 }
 
 // Define if the thirdparty is a reseller
-$mythirdpartyaccount->isareseller = 0;
+$mythirdpartyaccount->isareseller = 0;		// TODO Use $mythirdpartyaccount->context['isareseller']
 if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 	$categorie=new Categorie($db);
 	$categorie->fetch(getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG'));
@@ -316,22 +316,22 @@ if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 }
 
 // Define if the thirdparty is a module provider
-$mythirdpartyaccount->isamoduleprovider = array();
+$mythirdpartyaccount->context['isamoduleprovider'] = array();		// TODO Use $mythirdpartyaccount->context['isamoduleprovider']
 if (getDolGlobalInt('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM') > 0) {
-	// TODO Read if there is some product prices in supplier tab of the thirdparty. If yes it is a module provider and we have the list of provided modules
-	//$mythirdpartyaccount->isamoduleprovider = array('aa', 'bbb');
 	$sql = "SELECT p.rowid FROM ".MAIN_DB_PREFIX."product as p";
 	$sql.= " JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp";
 	$sql.= " ON pfp.fk_product = p.rowid";
-	$sql.= " WHERE pfp.fk_soc = ".$mythirdpartyaccount->id;
+	$sql.= " WHERE pfp.fk_soc = ".((int) $mythirdpartyaccount->id);
+
 	$resql=$db->query($sql);
+
 	if ($resql) {
 		$num_rows = $db->num_rows($resql);
 		$i = 0;
 		while ($i < $num_rows) {
 			$obj = $db->fetch_object($resql);
 			if ($obj) {
-				$mythirdpartyaccount->isamoduleprovider[] = $obj->rowid;
+				$mythirdpartyaccount->context['isamoduleprovider'][$obj->rowid] = $obj->rowid;
 			}
 			$i++;
 		}
@@ -423,13 +423,13 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myc
 
 $listofcontractidmodulesupplier = array();
 // Load list of child instance for module supplier
-if (!empty($mythirdpartyaccount->isamoduleprovider) && in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
+if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
 	$sql = 'SELECT DISTINCT c.rowid';
 	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contratdet as d ON d.fk_contrat = c.rowid';
 	$sql.= ', '.MAIN_DB_PREFIX.'product as p';
 	$sql.= " WHERE d.fk_product = p.rowid";
-	$sql.= " AND d.fk_product IN (".(implode(",", $mythirdpartyaccount->isamoduleprovider)).")";
+	$sql.= " AND d.fk_product IN (".(implode(",", $mythirdpartyaccount->context['isamoduleprovider'])).")";
 	$sql.= " AND d.statut = 4";
 
 	if ($search_instance_name) {
@@ -2461,7 +2461,7 @@ if ($mythirdpartyaccount->isareseller) {
 	';
 }
 
-if (count($mythirdpartyaccount->isamoduleprovider) > 0) {
+if (count($mythirdpartyaccount->context['isamoduleprovider']) > 0) {
 	print '
 	<li class="nav-item'.(($mode == 'mymodulecustomerinstances' || $mode == 'mymodulecustomerbilling') ? ' active' : '').' dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-suitcase"></i> '.$langs->trans("ModuleProviderArea").'</a>
