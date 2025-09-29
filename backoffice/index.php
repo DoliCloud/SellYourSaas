@@ -54,6 +54,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php";
+require_once __DIR__.'/../class/deploymentserver.class.php';
 dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
@@ -133,9 +134,26 @@ $form=new Form($db);
 
 llxHeader('', $langs->transnoentitiesnoconv('DoliCloudCustomers'), '');
 
-//print_fiche_titre($langs->trans("DoliCloudArea"));
+// Count nb of deployment servers
+$object = new Deploymentserver($db);
+$sql = 'SELECT count(rowid) as nbtotalofrecords FROM '.MAIN_DB_PREFIX.'sellyoursaas_deploymentserver';
+if ($object->ismultientitymanaged == 1) {
+	$sql .= " WHERE t.entity IN (".getEntity($object->element, (GETPOSTINT('search_current_entity') ? 0 : 1)).")";
+} else {
+	$sql .= " WHERE 1 = 1";
+}
+// Count total nb of records
+$nbtotalofrecords = '';
+$resql = $db->query($sql);
+if ($resql) {
+	$objforcount = $db->fetch_object($resql);
+	$nbtotalofrecords = $objforcount->nbtotalofrecords;
+	$db->free($resql);
+} else {
+    dol_print_error($db);
+}
 
-$head = sellYourSaasBackofficePrepareHead();
+$head = sellYourSaasBackofficePrepareHead($nbtotalofrecords);
 
 //$head = commande_prepare_head(null);
 dol_fiche_head($head, 'home', $langs->trans("DoliCloudArea"), -1, 'sellyoursaas@sellyoursaas');

@@ -263,7 +263,7 @@ print '
 		$sql.= ' WHERE fd.fk_facture = f.rowid';
 		$sql.= ' AND fd.fk_product = p.rowid';
 		$sql.= ' AND fpf.fk_product = p.rowid';
-		$sql.= ' AND fd.fk_product IN ('.implode(",", $mythirdpartyaccount->context['isamoduleprovider']).')';
+		$sql.= ' AND fd.fk_product IN ('.$db->sanitize(implode(",", array_keys($mythirdpartyaccount->context['isamoduleprovider']))).')';
 
 		$sql.=$db->order($sortfield2, $sortorder2);
 
@@ -407,7 +407,7 @@ print '
 		//$sql.=' WHERE fe.reseller IN ('.join(',', $listofcustomeridreseller).')';
 		$sql.= ', '.MAIN_DB_PREFIX.'facturedet as fd';
 		$sql.= ' WHERE fd.fk_facture = f.rowid';
-		$sql.=' AND fd.fk_product IN ('.implode(",", $mythirdpartyaccount->context['isamoduleprovider']).')';
+		$sql.=' AND fd.fk_product IN ('.$db->sanitize(implode(",", array_keys($mythirdpartyaccount->context['isamoduleprovider']))).')';
 		$sql.=' AND fk_statut <> '.Facture::STATUS_DRAFT;
 		$sql.=' AND paye = 1';
 

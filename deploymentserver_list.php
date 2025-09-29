@@ -277,8 +277,6 @@ if (empty($reshook)) {
 
 $form = new Form($db);
 
-$now = dol_now();
-
 $title = $langs->trans("DeploymentServers");
 //$help_url = "EN:Module_Deploymentserver|FR:Module_Deploymentserver_FR|ES:Módulo_Deploymentserver";
 $help_url = '';
