@@ -44,8 +44,11 @@ if (empty($conf) || ! is_object($conf)) {
 	<!-- END PAGE HEADER-->
 
 
-	    <div class="row">
-	      <div class="col-md-6">
+	    <div class="row">';
+
+
+if ($mythirdpartyaccount->client > 0) {
+	print '<div class="col-md-6">
 
 	        <div class="portlet light" id="planSection">
 
@@ -67,8 +70,8 @@ if (empty($conf) || ! is_object($conf)) {
 	            </div> <!-- END ROW -->
 
 				';
-if ($nbofinstancessuspended) {
-	print '
+	if ($nbofinstancessuspended) {
+		print '
 			            <div class="row">
 			              <div class="col-md-9">
 							'.$langs->trans("NbOfSuspendedInstances").'
@@ -78,20 +81,20 @@ if ($nbofinstancessuspended) {
 			              </div>
 			            </div> <!-- END ROW -->
 					';
-}
+	}
 
-				print '
+	print '
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
 						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'</a>
 					</div></div>';
 
-			print '
+	print '
 				</div>';		// end protlet-body
 
-if ($mythirdpartyaccount->isareseller) {
-	print '
+	if ($mythirdpartyaccount->isareseller) {
+		print '
 				<div class="portlet-title">
 				<div class="caption"><br><br>
 				<i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesOfMyCustomers").'</span>
@@ -107,38 +110,41 @@ if ($mythirdpartyaccount->isareseller) {
 				<div class="col-md-3 right">
 				<h2>'.$nbofinstancesdonereseller.'</h2>
 				</div>
-				</div> <!-- END ROW -->
+			</div> <!-- END ROW -->
 
 				';
-	if ($nbofinstancessuspendedreseller) {
+		if ($nbofinstancessuspendedreseller) {
+			print '
+						<div class="row">
+						<div class="col-md-9">
+						'.$langs->trans("NbOfSuspendedInstances").'
+						</div>
+						<div class="col-md-3 right">
+						<h2 style="color:orange">'.$nbofinstancessuspendedreseller.'</h2>
+						</div>
+						</div> <!-- END ROW -->
+						';
+		}
+
 		print '
-					<div class="row">
-					<div class="col-md-9">
-					'.$langs->trans("NbOfSuspendedInstances").'
-					</div>
-					<div class="col-md-3 right">
-					<h2 style="color:orange">'.$nbofinstancessuspendedreseller.'</h2>
-					</div>
-					</div> <!-- END ROW -->
-					';
+						<div class="row">
+						<div class="center col-md-12">
+							<br>
+							<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'</a>
+						</div></div>';
+
+		print '</div>';		// end portlet-body
 	}
 
 	print '
-					<div class="row">
-					<div class="center col-md-12">
-						<br>
-						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'</a>
-					</div></div>';
-
-	print '</div>';		// end protlet-body
-}
-
-			print '
 
 	        </div> <!-- END PORTLET -->
 
-	      </div> <!-- END COL -->
+	      </div> <!-- END COL MY INSTANCES-->';
+}
 
+
+print '
 			<!-- My profile -->
 	      <div class="col-md-6">
 	        <div class="portlet light" id="myProfile">
@@ -195,7 +201,10 @@ if (empty($welcomecid)) {		// If we just created an instance, we don't show warn
 
 	print '
 	    <div class="row">
+	';
 
+if ($mythirdpartyaccount->client > 0) {
+	print '
 			<!-- Box of payment balance -->
 	      <div class="col-md-6">
 	        <div class="portlet light" id="paymentBalance">
@@ -282,6 +291,7 @@ if ($amountdue > 0) {
 
 	        </div> <!-- END PORTLET -->
 	      </div><!-- END COL -->';
+}
 
 			$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])

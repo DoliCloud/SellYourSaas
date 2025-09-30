@@ -2433,17 +2433,23 @@ print '
           <li class="nav-item'.($mode == 'dashboard' ? ' active' : '').'">
             <a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=dashboard"><i class="fa fa-tachometer"></i> '.$langs->trans("Dashboard").'</a>
           </li>
+';
+
+if ($mythirdpartyaccount->client > 0) {
+	print '
           <li class="nav-item'.($mode == 'instances' ? ' active' : '').'">
             <a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=instances"><i class="fa fa-server"></i> '.$langs->trans("MyInstances").'</a>
           </li>';
 
-$freemodeinstance = ((empty($mythirdpartyaccount->array_options['options_checkboxnonprofitorga']) || $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit') && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE"));
-if (!$freemodeinstance) {
-	print '
-          <li class="nav-item'.($mode == 'billing' ? ' active' : '').'">
-            <a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=billing"><i class="fa fa-usd"></i> '.$langs->trans("MyBilling").'</a>
-          </li>';
+	$freemodeinstance = ((empty($mythirdpartyaccount->array_options['options_checkboxnonprofitorga']) || $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit') && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE"));
+	if (!$freemodeinstance) {
+		print '
+	          <li class="nav-item'.($mode == 'billing' ? ' active' : '').'">
+	            <a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=billing"><i class="fa fa-usd"></i> '.$langs->trans("MyBilling").'</a>
+	          </li>';
+	}
 }
+
 if ($mythirdpartyaccount->isareseller) {
 	print '
 	<li class="nav-item'.(($mode == 'mycustomerinstances' || $mode == 'mycustomerbilling') ? ' active' : '').' dropdown">
