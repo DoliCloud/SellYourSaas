@@ -690,19 +690,19 @@ Create directories required to store data, backups and archives:
 
 * Create the directory */mnt/diskbackup/backup*:
 
-If an optional dedicated disk was created for the backup (different than disk for home):
-
-[source, bash]
----------------
-mkdir /mnt/diskbackup/backup
----------------
-
 If you have not a dedicated disk for backup:
 
 [source, bash]
 ---------------
 mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
 ln -fs /mnt/diskhome/backup /mnt/diskbackup
+---------------
+
+And if an optional dedicated disk was created for the backup (different than disk for home):
+
+[source, bash]
+---------------
+mkdir /mnt/diskbackup/backup
 ---------------
 
 * Create the other directories on the *Deployment* servers:
@@ -3676,7 +3676,7 @@ You must have inside the cron of user *admin* (You can view the cron with *cront
 ---------------
 # m h  dom mon dow   command
 # cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> anonymousbatch >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log 2>&1
+*/10 * * * * [ "$(hostname -I | awk '{print $1}')" = "ip.of.master.server" ] && /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> anonymousbatch >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log 2>&1
 5 5 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 # cron master and deployment admin
@@ -3684,7 +3684,7 @@ You must have inside the cron of user *admin* (You can view the cron with *cront
 5 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
-Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *anonymousbatch* is the user dedicated for batch processing. You will set them
+Note: *ip.of.master.server* is the IP of the server so if you clone the server on another instance with another IP, you are sure the batch won't be executed on the new server without a manual change here, *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *anonymousbatch* is the user dedicated for batch processing. You will set them
 later on the Dolibarr master.
 
 
@@ -3711,6 +3711,26 @@ You must have inside the cron of user *admin* (You can view the cron with *cront
 # cron master and deployment admin
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
+---------------
+
+
+==== On master and deployment server
+
+Add a protection to disable cron tasks if IP of server has changed so if you clone the server on another instance with another IP, you are sure the batch won't be executed on the new server without a manual change here.
+
+Create a copy of the cron service override file */etc/systemd/system/cron.service.d/override.conf*:
+
+[source,bash]
+---------------
+mkdir /etc/systemd/system/cron.service.d;
+cp /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/etc/systemd/system/cron.service.d/override.conf /etc/systemd/system/cron.service.d/override.conf
+---------------
+
+Then edit the file to change the allowed IP
+
+[source,bash]
+---------------
+vi /etc/systemd/system/cron.service.d/override.conf
 ---------------
 
 
@@ -4792,6 +4812,35 @@ glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-
    ou   openstack image save --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
 
+To make image smaller
+
+[source,bash]
+---------------
+qemu-img info image-myfile-server1.qcow2
+
+modprobe nbd max_part=16
+qemu-nbd -c /dev/nbd0 image-myfile-server1.qcow2
+
+fdisk -l /dev/nbd0
+mkdir /mnt/myimg; 
+
+mount /dev/nbd0p1 /mnt/myimg
+rm -rf /mnt/myimg/tmp/*
+rm -f /mnt/myimg/var/log/*.gz /mnt/myimg/var/log/*.log /mnt/myimg/var/log/journal/*
+umount /mnt/myimg
+
+zerofree -v /dev/nbd0p1
+
+mount /dev/nbd0p1 /mnt/myimg
+ls /mnt/myimg
+umount /mnt/myimg
+
+qemu-nbd -d /dev/nbd0
+qemu-img convert -O qcow2 -c image-myfile-server1.qcow2 image-myfile-server1-compacted.qcow2
+qemu-img info image-myfile-server1.qcow2
+---------------
+
+
 To push an instance's image on a project:
 
 [source,bash]
@@ -4799,6 +4848,7 @@ To push an instance's image on a project:
 source openrctarget.sh
 export OS_REGION_NAME=SBG1
 glance image-create --name nom_image_snaphot_new_server --disk-format qcow2 --container-format bare --file mon_fichier_snap_serveur1.qcow2
+   ou    openstack image create --disk-format qcow2 --container-format bare --file votre_image_compacte.qcow2 --public "Nom de votre image"
 ---------------
 
 To build a volume image, you need to create it from the detached volume (can't use a snapshot)
@@ -4825,6 +4875,7 @@ To push an image on a project:
 
 
 - To restore
+
 openstack server create --flavor FLAVOR_ID --image BACKUP_IMAGE_ID --nic net-id=NETWORK_ID INSTANCE_NAME
 
 
