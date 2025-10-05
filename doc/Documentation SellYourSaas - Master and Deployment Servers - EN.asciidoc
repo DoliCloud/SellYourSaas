@@ -4813,7 +4813,7 @@ glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-
    ou   openstack image save --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
 
-To make image smaller
+To make image smaller we will run zerofree the rebuild image file with qemu-img convert.
 
 [source,bash]
 ---------------
@@ -4901,6 +4901,8 @@ Warning: Reducing size of a filesystem does not work on OVH Public Cloud boot sy
 
 When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
 or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
+
+If you need netwrok, start network with: systemctl restart networking
 
 Find attached disks to identify the system partition disk.
 
