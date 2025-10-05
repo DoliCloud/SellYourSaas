@@ -3726,11 +3726,13 @@ mkdir /etc/systemd/system/cron.service.d;
 cp /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/etc/systemd/system/cron.service.d/override.conf /etc/systemd/system/cron.service.d/override.conf
 ---------------
 
-Then edit the file to change the allowed IP
+Then edit the file to change the allowed IP:
 
 [source,bash]
 ---------------
 vi /etc/systemd/system/cron.service.d/override.conf
+systemctl daemon-reload
+/etc/init.d/cron restart
 ---------------
 
 
