@@ -1,0 +1,16 @@
+[Unit]
+Description=Disable cron if IP is not allowed
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c '
+IP=$(hostname -I | awk "{print \$1}");
+if [ "$IP" != "1.2.3.4" ]; then
+  systemctl stop cron;
+  echo "Cron stopped by service /etc/systemd/system/sellyoursaas-disable-cron-if-wrong-ip.service due to wrong IP: $IP" >> /var/log/cron_disabled.log;
+fi
+'
+
+[Install]
+WantedBy=multi-user.target
