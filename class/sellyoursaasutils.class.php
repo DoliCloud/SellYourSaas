@@ -61,7 +61,7 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler for job SellYourSaasValidateDraftInvoices
-	 * Search draft invoices on sellyoursaas customers and check they are linked to a not closed contract. Validate it if not, do nothing if closed.
+	 * Search draft invoices on sellyoursaas customers and check they are linked to a not closed contract. Validate it if not closed, do nothing if closed.
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$restrictonthirdpartyid		0=All qualified draft invoices, >0 = Restrict on qualified draft invoice of thirdparty.
@@ -352,7 +352,7 @@ class SellYourSaasUtils
 										$msg = '';
 										if ($invoice->mode_reglement_code == $codepaiementtransfer) {
 											$sendemailtocustomer = 1;
-											$labeltouse = 'InvoicePaymentWaitingCreditTransfer';
+											$labeltouse = 'YourLinkForYourPayment';
 										}
 
 										$object = $invoice;
@@ -380,88 +380,93 @@ class SellYourSaasUtils
 												$msg     = $arraydefaultmessage->content;
 											}
 
-											$substitutionarray = getCommonSubstitutionArray($outputlangs, 0, null, $object);
-
-											complete_substitutions_array($substitutionarray, $outputlangs, $object);
-
-											// Set the property ->ref_customer with ref_customer of contract so __REF_CLIENT__ will be replaced in email content
-											// Search contract linked to invoice
-											$foundcontract = null;
-											$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
-
-											if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
-												//dol_sort_array($object->linkedObjects['facture'], 'date');
-												foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-													$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
-													$substitutionarray['__REFCLIENT__']=$contract->ref_customer;	// For backward compatibility
-													$substitutionarray['__REF_CLIENT__']=$contract->ref_customer;
-													$substitutionarray['__REF_CUSTOMER__']=$contract->ref_customer;
-													$foundcontract = $contract;
-													break;
-												}
-											}
-
-											dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-
-											$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
-											if ($urlforsellyoursaasaccount) {
-												$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-												if ($tmpforurl) {
-													$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount.'/source/document.php'.$tmpforurl;
-												} else {
-													$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
-												}
-											}
-
-											$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
-											$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
-
-											// Attach a file ?
-											$file='';
-											$listofpaths=array();
-											$listofnames=array();
-											$listofmimes=array();
-											if (is_object($invoice)) {
-												$invoicediroutput = $conf->facture->dir_output;
-												$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
-												$file = $fileparams['fullname'];
-												$file = '';		// Disable attachment of invoice in emails
-
-												if ($file) {
-													$listofpaths=array($file);
-													$listofnames=array(basename($file));
-													$listofmimes=array(dol_mimetype($file));
-												}
-											}
-											$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
-
-											$trackid = 'inv'.$invoice->id;
-											$moreinheader = 'X-Dolibarr-Info: doValidateInvoice'."\r\n";
-											$addr_cc = '';
-											if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
-												dol_syslog("We add the recipient ".$invoice->thirdparty->array_options['options_emailccinvoice']." as CC to warn about invoice availability (direct debit or credit transfer case)", LOG_DEBUG);
-												$addr_cc = $invoice->thirdparty->array_options['options_emailccinvoice'];
-											}
-
-											// Send email (substitutionarray must be done just before this)
-											include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-											$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, $addr_cc, '', 0, -1, '', '', $trackid, $moreinheader);
-											if (empty($mailfile->error) && $mailfile->sendfile()) {
-												$result = 1;
+											if (empty($subject)) {
+												dol_syslog("Can't send email to inform about invoice availability because template ".$labeltouse." not found", LOG_WARNING);
 											} else {
-												$errmsg = $langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).'. '.$mailfile->error;
+												$substitutionarray = getCommonSubstitutionArray($outputlangs, 0, null, $object);
 
-												dol_syslog($errmsg, LOG_WARNING);
+												complete_substitutions_array($substitutionarray, $outputlangs, $object);
 
-												$this->errors[] = $errmsg;
-												$result = -1;
-											}
+												// Set the property ->ref_customer with ref_customer of contract so __REF_CLIENT__ will be replaced in email content
+												// Search contract linked to invoice
+												$foundcontract = null;
+												$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
-											if ($result > 0) {
-												// TODO Add an event to say email was sent or the event invoice validate is enough ?
+												if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
+													//dol_sort_array($object->linkedObjects['facture'], 'date');
+													foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
+														$substitutionarray['__CONTRACT_REF__'] = $contract->ref_customer;
+														$substitutionarray['__REFCLIENT__'] = $contract->ref_customer;	// For backward compatibility
+														$substitutionarray['__REF_CLIENT__'] = $contract->ref_customer;
+														$substitutionarray['__REF_CUSTOMER__'] = $contract->ref_customer;
+														$foundcontract = $contract;
+														break;
+													}
+												}
+
+												dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
+
+												$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
+												if ($urlforsellyoursaasaccount) {
+													$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
+													if ($tmpforurl) {
+														$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount.'/source/document.php'.$tmpforurl;
+													} else {
+														$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
+													}
+												}
+
+												$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
+												$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
+
+												// Attach a file ?
+												$file='';
+												$listofpaths=array();
+												$listofnames=array();
+												$listofmimes=array();
+												if (is_object($invoice)) {
+													$invoicediroutput = $conf->facture->dir_output;
+													$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
+													$file = $fileparams['fullname'];
+													$file = '';		// Disable attachment of invoice in emails
+
+													if ($file) {
+														$listofpaths=array($file);
+														$listofnames=array(basename($file));
+														$listofmimes=array(dol_mimetype($file));
+													}
+												}
+												$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
+
+												$trackid = 'inv'.$invoice->id;
+												$moreinheader = 'X-Dolibarr-Info: doValidateInvoice'."\r\n";
+												$addr_cc = '';
+												if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
+													dol_syslog("We add the recipient ".$invoice->thirdparty->array_options['options_emailccinvoice']." as CC to warn about invoice availability (direct debit or credit transfer case)", LOG_DEBUG);
+													$addr_cc = $invoice->thirdparty->array_options['options_emailccinvoice'];
+												} else {
+													dol_syslog("We do NOT found recipient to add as CC to warn about invoice availability (direct debit or credit transfer case)", LOG_DEBUG);
+												}
+
+												// Send email (substitutionarray must be done just before this)
+												include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+												$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, $addr_cc, '', 0, -1, '', '', $trackid, $moreinheader);
+												if (empty($mailfile->error) && $mailfile->sendfile()) {
+													$result = 1;
+												} else {
+													$errmsg = $langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).($addr_cc ? '. CC='.$addr_cc : '').'. '.$mailfile->error;
+
+													dol_syslog($errmsg, LOG_WARNING);
+
+													$this->errors[] = $errmsg;
+													$result = -1;
+												}
+
+												if ($result > 0) {
+													// TODO Add an event to say email was sent or the event invoice validate is enough ?
+												}
 											}
 										}
-
 									}
 								}
 							}
@@ -490,6 +495,7 @@ class SellYourSaasUtils
 			$this->errors[] = $this->error;
 		}
 
+		// Set output of cron job
 		$this->output = count($draftinvoiceprocessed).' invoice(s) validated on '.$num_rows.' draft invoice(s) found'.(count($draftinvoiceprocessed)>0 ? ' : '.join(',', $draftinvoiceprocessed) : '').' (search done on invoices of SellYourSaas customers only)';
 
 		if (!empty($this->errors)) {
