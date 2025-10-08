@@ -3098,6 +3098,40 @@ $atleastoneinvoicedisputed = 0;
 // Show warnings
 
 if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'autoupgrade'))) {
+	// Show warnings on invoice dispute
+	$sql = 'SELECT f.rowid, f.ref, f.datef, f.datec, f.date_lim_reglement as date_due, f.dispute_status, fe.invoicepaymentdisputed';
+	$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
+	$sql .= ' WHERE fe.fk_object = f.rowid AND f.fk_soc = '.((int) $mythirdpartyaccount->id);
+	$sql .= ' AND dispute_status = 1';
+	$sql .= ' ORDER BY f.datef';
+	$sql .= ' LIMIT 100';
+
+	$resql = $db->query($sql);
+	if ($resql) {
+		$num_rows = $db->num_rows($resql);
+		$i=0;
+		if ($num_rows) {
+			$atleastoneinvoicedisputed++;
+			$listofreftoshow = '';
+
+			while ($obj = $db->fetch_object($resql)) {
+				$listofreftoshow .= ($listofreftoshow ? ', ' : $listofreftoshow).$obj->ref.' ('.dol_print_date($db->jdate($obj->datec), 'day', 'gmt').')';
+			}
+
+			if ($listofreftoshow) {
+				print '
+					<!-- Warnings disputed -->
+					<div class="note note-warning note-disputed">
+					<h4 class="block">'.$langs->trans("InvoicePaymentDisputedMessage", $listofreftoshow).'</h4>
+					</div>
+				';
+			}
+		}
+	} else {
+		dol_print_error($db);
+	}
+
+
 	$companypaymentmode = new CompanyPaymentMode($db);
 	$result = $companypaymentmode->fetch(0, null, $mythirdpartyaccount->id);
 
@@ -3391,33 +3425,6 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 						<h4 class="block">'.$langs->trans("SomeOfYourPaymentFailed", $labelerror).'</h4>
 						</div>
 					';
-			}
-		}
-	} else {
-		dol_print_error($db);
-	}
-
-	// Test if there is one invoice disputed
-	$sql = 'SELECT f.rowid, f.ref, f.datef, f.datec, f.date_lim_reglement as date_due, f.dispute_status, fe.invoicepaymentdisputed';
-	$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
-	$sql .= ' WHERE fe.fk_object = f.rowid AND f.fk_soc = '.((int) $mythirdpartyaccount->id);
-	$sql .= ' AND dispute_status = 1';
-	$sql .= ' ORDER BY f.datef';
-	$sql .= ' LIMIT 1';
-
-	$resql = $db->query($sql);
-	if ($resql) {
-		$num_rows = $db->num_rows($resql);
-		$i=0;
-		if ($num_rows) {
-			$atleastoneinvoicedisputed++;
-
-			while ($obj = $db->fetch_object($resql)) {
-				print '
-					<div class="note note-warning note-disputed">
-					<h4 class="block">'.$langs->trans("InvoicePaymentDisputedMessage", $obj->ref, dol_print_date($db->jdate($obj->datec), 'day', 'gmt')).'</h4>
-					</div>
-				';
 			}
 		}
 	} else {

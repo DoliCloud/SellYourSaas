@@ -4827,7 +4827,7 @@ mkdir /mnt/myimg;
 
 mount /dev/nbd0p1 /mnt/myimg
 rm -rf /mnt/myimg/tmp/*
-rm -f /mnt/myimg/var/log/*.gz /mnt/myimg/var/log/*.log /mnt/myimg/var/log/journal/*
+rm -fr /mnt/myimg/var/log/*.gz /mnt/myimg/var/log/*.log /mnt/myimg/var/log/journal/*
 umount /mnt/myimg
 
 zerofree -v /dev/nbd0p1
