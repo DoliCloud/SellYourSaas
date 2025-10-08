@@ -4810,7 +4810,7 @@ nova image-create ID_OF_SERVER image-myfile-server1
 glance image-list   
    ou   openstack image list --long
 glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a   
-   ou   openstack image save --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
+   ou   openstack image save --file ~/Téléchargements/image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
 
 To make image smaller we will run zerofree the rebuild image file with qemu-img convert.
