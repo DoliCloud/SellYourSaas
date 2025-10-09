@@ -778,7 +778,7 @@ class ActionsSellyoursaas
 
 		$error = 0;
 
-		dol_syslog(get_class($this).'::doActions action='.$action);
+		dol_syslog(get_class($this).'::doMassActions action='.$action);
 		$langs->load("sellyoursaas@sellyoursaas");
 
 		$toselect = $parameters['toselect'];
@@ -979,7 +979,7 @@ class ActionsSellyoursaas
 	{
 		global $langs, $form;
 
-		dol_syslog(get_class($this).'::doActions action='.$action);
+		dol_syslog(get_class($this).'::formConfirm action='.$action);
 		$langs->load("sellyoursaas@sellyoursaas");
 
 		if ($action == 'changecustomer') {
