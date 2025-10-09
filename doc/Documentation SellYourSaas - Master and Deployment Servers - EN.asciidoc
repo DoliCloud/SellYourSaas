@@ -4847,12 +4847,12 @@ To push an instance's image on a project:
 [source,bash]
 ---------------
 source openrctarget.sh
-export OS_REGION_NAME=SBG1
+export OS_REGION_NAME=SBG1  or  GRA1, GRA7 ...
 glance image-create --name nom_image_snaphot_new_server --disk-format qcow2 --container-format bare --file mon_fichier_snap_serveur1.qcow2
-   ou    openstack image create --disk-format qcow2 --container-format bare --file votre_image_compacte.qcow2 --public "Nom de votre image"
+   ou    openstack image create --disk-format qcow2 --container-format bare --file ~/votre_image_compacte.qcow2 "Nom de votre image"
 ---------------
 
-To build a volume image, you need to create it from the detached volume (can't use a snapshot)
+To build a volume image from a volume, you need to create it from the detached volume (can't use a snapshot):
 
 [source,bash]
 ---------------
@@ -4861,7 +4861,12 @@ openstack volume list
 openstack image create --disk-format qcow2 --container-format bare --volume 673b0ad9-1fca-485c-ae2b-8ee271b71dc7 nom_image_snaphot_new_volume
 
 ...wait until the copy is finished...
+---------------
 
+To restore a volume image onto a volume:
+
+[source,bash]
+---------------
 openstack image list
 
 openstack image save --file nom_image_snaphot_new_volume.qcow2 8625f87e-8248-4e62-a0ce-a89c7bd1a9be
