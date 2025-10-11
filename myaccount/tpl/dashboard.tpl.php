@@ -167,7 +167,7 @@ if (empty($welcomecid)) {		// If we just created an instance, we don't show warn
 	if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
 		$missing++;
 	}
-	if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra)) {
+	if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
 		$missing++;
 	}
 
