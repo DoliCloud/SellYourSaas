@@ -120,7 +120,7 @@ if ($sellyoursaassupporturl) {
 
 				      <div class="portlet-title">
 				        <div class="caption">';
-	if ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra))
+	if ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE'))
 		|| empty($mythirdpartyaccount->array_options['options_firstname'])
 		|| empty($mythirdpartyaccount->array_options['options_lastname'])) {
 		print '<br>';
