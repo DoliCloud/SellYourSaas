@@ -3,8 +3,9 @@
 
 ## Unreleased
 
-* NEW Add badge of number of deployment server.
-* NEW Add tab for events info on a deployment serer card.
+* NEW Add warning on support page if contact info are not complete
+* NEW Add badge with number of deployment server on tab title of deployment servers.
+* NEW Add the tab for histori of events info on a deployment server card.
 * NEW Options to disable the apt unattended-upgrade. Such silent upgrade changes system files on disk making fight against intrusion detection more difficult.
 * NEW Can for a server on a service.
 * NEW Search on firstname and last name of thirdparty with global search on contract.  
