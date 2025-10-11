@@ -21,6 +21,8 @@ if (empty($conf) || ! is_object($conf)) {
 	exit(1);
 }
 
+$langs->load("ticket");
+
 ?>
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
