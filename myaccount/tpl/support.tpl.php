@@ -123,9 +123,10 @@ if ($sellyoursaassupporturl) {
 	if ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra))
 		|| empty($mythirdpartyaccount->array_options['options_firstname'])
 		|| empty($mythirdpartyaccount->array_options['options_lastname'])) {
-		print $langs->trans('BeforeAskForSupport', img_warning('', '', '')).' ';
+		print '<br>';
+		print $langs->trans('BeforeAskForSupport', img_warning('', '', '')).'<br>';
 		print '<a href="/index.php?mode=myaccount">'.$langs->trans('BeforeAskForSupport2').'</a>';
-		print '<br><br>';
+		print '<br>';
 	}
 
 	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
