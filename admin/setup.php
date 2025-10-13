@@ -109,6 +109,9 @@ foreach ($tmpservices as $key => $tmpservice) {
 	}
 	$arrayofsuffixfound[$tmpservice] = $suffix;
 }
+if (empty($arrayofsuffixfound)) {
+	$arrayofsuffixfound[] = '';
+}
 
 
 /*
