@@ -120,18 +120,23 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	ref varchar(128) NOT NULL,
+	hostname varchar(64),
+	label varchar(64),
 	entity integer DEFAULT 1 NOT NULL,  -- multi company id
 	note_private text, 
-	note_public text, 
+	note_public text,
 	date_creation datetime NOT NULL,
 	date_modification timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	status integer DEFAULT 0 NOT NULL,
+	status integer NOT NULL,
 	fk_country integer,
 	fromdomainname varchar(128),
 	ipaddress varchar(128) NOT NULL,
-	servercountries text,
+	servercountries varchar(128),
+	servercustomerannouncestatus integer,
 	servercustomerannounce text,
-	servercustomerannouncestatus integer
+	serversignaturekey varchar(128),
+	fk_user_creat int DEFAULT NULL,
+	fk_user_modif int DEFAULT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
 
@@ -177,6 +182,7 @@ ALTER TABLE llx_sellyoursaas_whitelistip ADD UNIQUE INDEX uk_sellyoursaas_whitel
 
 ALTER TABLE llx_dolicloud_stats RENAME TO llx_sellyoursaas_stats;
 
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN fk_user_creat integer;
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN fk_user_modif integer;
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN note_public text;
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN serversignaturekey varchar(128);

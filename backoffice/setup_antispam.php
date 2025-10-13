@@ -124,9 +124,26 @@ $form=new Form($db);
 
 llxHeader('', $langs->transnoentitiesnoconv('AntiSpam'), '');
 
-//print_fiche_titre($langs->trans("DoliCloudArea"));
+// Count nb of deployment servers
+$object = new Deploymentserver($db);
+$sql = 'SELECT count(rowid) as nbtotalofrecords FROM '.MAIN_DB_PREFIX.'sellyoursaas_deploymentserver';
+if ($object->ismultientitymanaged == 1) {
+	$sql .= " WHERE t.entity IN (".getEntity($object->element, (GETPOSTINT('search_current_entity') ? 0 : 1)).")";
+} else {
+	$sql .= " WHERE 1 = 1";
+}
+// Count total nb of records
+$nbtotalofrecords = '';
+$resql = $db->query($sql);
+if ($resql) {
+	$objforcount = $db->fetch_object($resql);
+	$nbtotalofrecords = $objforcount->nbtotalofrecords;
+	$db->free($resql);
+} else {
+    dol_print_error($db);
+}
 
-$head = sellYourSaasBackofficePrepareHead();
+$head = sellYourSaasBackofficePrepareHead($nbtotalofrecords);
 
 
 //$head = commande_prepare_head(null);

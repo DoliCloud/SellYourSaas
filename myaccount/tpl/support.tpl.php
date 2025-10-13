@@ -21,6 +21,12 @@ if (empty($conf) || ! is_object($conf)) {
 	exit(1);
 }
 
+$langs->load("ticket");
+
+/**
+ * @var Societe $mythirdpartyaccount
+ * @var Conf $conf
+ */
 ?>
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
@@ -114,10 +120,20 @@ if ($sellyoursaassupporturl) {
 
 				      <div class="portlet-title">
 				        <div class="caption">';
+	if ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE'))
+		|| empty($mythirdpartyaccount->array_options['options_firstname'])
+		|| empty($mythirdpartyaccount->array_options['options_lastname'])) {
+		print '<br>';
+		print $langs->trans('BeforeAskForSupport', img_warning('', '', '')).'<br>';
+		print '<a href="/index.php?mode=myaccount">'.$langs->trans('BeforeAskForSupport2').'</a>';
+		print '<br>';
+	}
+
 	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
 		print '<span>'.$langs->trans(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')).'</span><br><br>';
 	} else {
-		print '<span class="opacitymedium"><br>'.$langs->trans("AskForSupport").'...</span><br><br>';
+		print '<span class="opacitymedium"><br>'.$langs->trans("AskForSupport").'...</span><br>';
+		print '<br>';
 	}
 
 	print '<!-- form to select channel -->'."\n";

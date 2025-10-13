@@ -54,6 +54,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php";
+require_once __DIR__.'/../class/deploymentserver.class.php';
 dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
@@ -133,9 +134,26 @@ $form=new Form($db);
 
 llxHeader('', $langs->transnoentitiesnoconv('DoliCloudCustomers'), '');
 
-//print_fiche_titre($langs->trans("DoliCloudArea"));
+// Count nb of deployment servers
+$object = new Deploymentserver($db);
+$sql = 'SELECT count(rowid) as nbtotalofrecords FROM '.MAIN_DB_PREFIX.'sellyoursaas_deploymentserver';
+if ($object->ismultientitymanaged == 1) {
+	$sql .= " WHERE t.entity IN (".getEntity($object->element, (GETPOSTINT('search_current_entity') ? 0 : 1)).")";
+} else {
+	$sql .= " WHERE 1 = 1";
+}
+// Count total nb of records
+$nbtotalofrecords = '';
+$resql = $db->query($sql);
+if ($resql) {
+	$objforcount = $db->fetch_object($resql);
+	$nbtotalofrecords = $objforcount->nbtotalofrecords;
+	$db->free($resql);
+} else {
+    dol_print_error($db);
+}
 
-$head = sellYourSaasBackofficePrepareHead();
+$head = sellYourSaasBackofficePrepareHead($nbtotalofrecords);
 
 //$head = commande_prepare_head(null);
 dol_fiche_head($head, 'home', $langs->trans("DoliCloudArea"), -1, 'sellyoursaas@sellyoursaas');
@@ -287,12 +305,17 @@ if (!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON')) {
 	$enabledisableannounce.='</a>';
 }
 print $enabledisableannounce;
-print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
-print '<br>';
-print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_5.'"'.(!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') ? ' disabled="disabled"' : '').'>';
-print getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
-print '</textarea>';
-print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'"></div>';
+if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON')) {
+	print $form->textwithpicto($langs->trans("AnnounceOnCustomerDashboard"), $langs->trans("Example").':<br>(AnnounceMajorOutage)<br>(AnnounceMinorOutage)<br>(AnnounceMaintenanceInProgress)<br>Any custom text...</span>', 1, 'help', '', 1, 3, 'tooltipfortext');
+	print '<br>';
+	print '<textarea class="flat inputsearch  inline-block" type="text" name="SELLYOURSAAS_ANNOUNCE" rows="'.ROWS_5.'"'.(!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') ? ' disabled="disabled"' : '').'>';
+	print getDolGlobalString('SELLYOURSAAS_ANNOUNCE');
+	print '</textarea>';
+	print '<br>';
+	print '<div class="center valigntop inline-block"><input type="submit" name="saveannounce" class="button smallpaddingimp" value="'.$langs->trans("Save").'"></div>';
+} else {
+	print $langs->trans("AnnounceOnCustomerDashboard");
+}
 print '</td></tr>';
 print "</table></form><br>";
 

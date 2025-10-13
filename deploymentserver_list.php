@@ -277,8 +277,6 @@ if (empty($reshook)) {
 
 $form = new Form($db);
 
-$now = dol_now();
-
 $title = $langs->trans("DeploymentServers");
 //$help_url = "EN:Module_Deploymentserver|FR:Module_Deploymentserver_FR|ES:Módulo_Deploymentserver";
 $help_url = '';
@@ -427,7 +425,7 @@ if ($num == 1 && getDolGlobalInt('MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE') && $sear
 
 llxHeader('', $title, $help_url, '', 0, 0, $morejs, $morecss, '', 'bodyforlist');
 
-$head = sellYourSaasBackofficePrepareHead();
+$head = sellYourSaasBackofficePrepareHead($nbtotalofrecords);
 
 //$head = commande_prepare_head(null);
 dol_fiche_head($head, 'deploymentservers', $langs->trans("DoliCloudArea"), -1, 'sellyoursaas@sellyoursaas');

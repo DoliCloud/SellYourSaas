@@ -129,7 +129,7 @@ if (empty($mode) && empty($welcomecid)) {
 
 //$langs=new Translate('', $conf);
 //$langs->setDefaultLang(GETPOST('lang', 'aZ09') ? GETPOST('lang', 'aZ09') : 'auto');
-$langs->loadLangs(array("main","companies","bills","sellyoursaas@sellyoursaas","other","errors",'mails','paypal','paybox','stripe','withdrawals','other','admin','website'));
+$langs->loadLangs(array("main","companies","bills","sellyoursaas@sellyoursaas","other","products","errors",'mails','paypal','paybox','stripe','withdrawals','other','admin','website'));
 
 if ($langs->defaultlang == 'en_US') {
 	$langsen = $langs;
@@ -151,6 +151,7 @@ $firstrecord=GETPOST('firstrecord', 'int');
 $lastrecord=GETPOST('lastrecord', 'int');
 $search_instance_name=GETPOST('search_instance_name', 'alphanohtml');
 $search_customer_name=GETPOST('search_customer_name', 'alphanohtml');
+$search_module_name=GETPOST('search_module_name', 'alphanohtml');
 $reasonundeploy=GETPOST('reasonundeploy', 'alpha');
 $commentundeploy=GETPOST('commentundeploy', 'alpha');
 
@@ -186,6 +187,7 @@ if ($firstrecord < 1) {
 if (GETPOSTISSET('reset')) {
 	$search_instance_name = '';
 	$search_customer_name = '';
+	$search_module_name = '';
 }
 $fromsocid=GETPOST('fromsocid', 'int');
 
@@ -304,7 +306,7 @@ if ($resql) {
 }
 
 // Define if the thirdparty is a reseller
-$mythirdpartyaccount->isareseller = 0;
+$mythirdpartyaccount->isareseller = 0;		// TODO Use $mythirdpartyaccount->context['isareseller']
 if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 	$categorie=new Categorie($db);
 	$categorie->fetch(getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG'));
@@ -314,10 +316,28 @@ if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 }
 
 // Define if the thirdparty is a module provider
-$mythirdpartyaccount->isamoduleprovider = array();
+$mythirdpartyaccount->context['isamoduleprovider'] = array();
 if (getDolGlobalInt('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM') > 0) {
-	// TODO Read if there is some product prices in supplier tab of the thirdparty. If yes it is a module provider and we have the list of provided modules
-	//$mythirdpartyaccount->isamoduleprovider = array('aa', 'bbb');
+	$sql = "SELECT p.rowid FROM ".MAIN_DB_PREFIX."product as p";
+	$sql.= " JOIN ".MAIN_DB_PREFIX."product_fournisseur_price as pfp";
+	$sql.= " ON pfp.fk_product = p.rowid";
+	$sql.= " WHERE pfp.fk_soc = ".((int) $mythirdpartyaccount->id);
+
+	$resql=$db->query($sql);
+
+	if ($resql) {
+		$num_rows = $db->num_rows($resql);
+		$i = 0;
+		while ($i < $num_rows) {
+			$obj = $db->fetch_object($resql);
+			if ($obj) {
+				$mythirdpartyaccount->context['isamoduleprovider'][$obj->rowid] = $obj->rowid;
+			}
+			$i++;
+		}
+	} else {
+		dol_print_error($db);
+	}
 }
 
 $nbtotalofrecords = 0;
@@ -400,6 +420,48 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myc
 	}
 }
 //var_dump(array_keys($listofcontractidreseller));
+
+$listofcontractidmodulesupplier = array();
+// Load list of child instance for module supplier
+if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
+	$sql = 'SELECT DISTINCT c.rowid';
+	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
+	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contratdet as d ON d.fk_contrat = c.rowid';
+	$sql.= ', '.MAIN_DB_PREFIX.'product as p';
+	$sql.= " WHERE d.fk_product = p.rowid";
+	$sql.= " AND d.fk_product IN (".$db->sanitize(implode(",", array_keys($mythirdpartyaccount->context['isamoduleprovider']))).")";
+	$sql.= " AND d.statut = 4";
+
+	if ($search_instance_name) {
+		$sql.=natural_search(array('c.ref_customer'), $search_instance_name);
+	}
+	if ($search_module_name) {
+		$sql.=natural_search(array('p.ref','p.label'), $search_module_name);
+	}
+
+	$resql=$db->query($sql);
+	if ($resql) {
+		$num_rows = $db->num_rows($resql);
+		$i = 0;
+		while ($i < $num_rows) {
+			$obj = $db->fetch_object($resql);
+			if ($obj) {
+				if (empty($listofcontractidmodulesupplier[$obj->rowid])) {
+					$contract=new Contrat($db);
+					$contract->fetch($obj->rowid);					// This load also lines
+					$listofcontractidmodulesupplier[$obj->rowid] = $contract;
+				}
+			}
+			$i++;
+		}
+		if (empty($lastrecord) || $lastrecord > $num_rows) {
+			$lastrecord = $num_rows;
+		}
+	} else {
+		dol_print_error($db);
+	}
+
+}
 
 // Define environment of payment modes
 $servicestatusstripe = 0;
@@ -2371,17 +2433,23 @@ print '
           <li class="nav-item'.($mode == 'dashboard' ? ' active' : '').'">
             <a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=dashboard"><i class="fa fa-tachometer"></i> '.$langs->trans("Dashboard").'</a>
           </li>
+';
+
+if ($mythirdpartyaccount->client > 0) {
+	print '
           <li class="nav-item'.($mode == 'instances' ? ' active' : '').'">
             <a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=instances"><i class="fa fa-server"></i> '.$langs->trans("MyInstances").'</a>
           </li>';
 
-$freemodeinstance = ((empty($mythirdpartyaccount->array_options['options_checkboxnonprofitorga']) || $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit') && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE"));
-if (!$freemodeinstance) {
-	print '
-          <li class="nav-item'.($mode == 'billing' ? ' active' : '').'">
-            <a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=billing"><i class="fa fa-usd"></i> '.$langs->trans("MyBilling").'</a>
-          </li>';
+	$freemodeinstance = ((empty($mythirdpartyaccount->array_options['options_checkboxnonprofitorga']) || $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit') && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE"));
+	if (!$freemodeinstance) {
+		print '
+	          <li class="nav-item'.($mode == 'billing' ? ' active' : '').'">
+	            <a class="nav-link" href="'.$_SERVER["PHP_SELF"].'?mode=billing"><i class="fa fa-usd"></i> '.$langs->trans("MyBilling").'</a>
+	          </li>';
+	}
 }
+
 if ($mythirdpartyaccount->isareseller) {
 	print '
 	<li class="nav-item'.(($mode == 'mycustomerinstances' || $mode == 'mycustomerbilling') ? ' active' : '').' dropdown">
@@ -2399,15 +2467,15 @@ if ($mythirdpartyaccount->isareseller) {
 	';
 }
 
-if (count($mythirdpartyaccount->isamoduleprovider) > 0) {
+if (count($mythirdpartyaccount->context['isamoduleprovider']) > 0) {
 	print '
-	<li class="nav-item'.($mode == 'moduleprovider' ? ' active' : '').' dropdown">
+	<li class="nav-item'.(($mode == 'mymodulecustomerinstances' || $mode == 'mymodulecustomerbilling') ? ' active' : '').' dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-suitcase"></i> '.$langs->trans("ModuleProviderArea").'</a>
         <ul class="dropdown-menu">';
 	// Module provider stats
-	//print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances"><i class="fa fa-server pictofixedwidth"></i> '.$langs->trans("MyCustomersInstances").'</a></li>';
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerinstances"><i class="fa fa-server pictofixedwidth"></i> '.$langs->trans("MyModuleCustomersInstances").'</a></li>';
 	// Divider
-	//print '<li class="dropdown-divider"></li>';
+	print '<li class="dropdown-divider"></li>';
 	// Customers ofmy module area
 	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerbilling"><i class="fa fa-usd"></i> '.$langs->trans("MyModuleCustomersBilling").'</a></li>';
 	print '
@@ -2755,8 +2823,8 @@ if ($resqlproducts) {
 }
 
 
-// Show partner links
-if ($mythirdpartyaccount->isareseller) {
+// Show resellection section
+if ($mythirdpartyaccount->isareseller && !in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
 	print '
 		<!-- Info reseller -->
 		<div class="note note-info">
@@ -2901,6 +2969,21 @@ if ($mythirdpartyaccount->isareseller) {
 }
 
 
+// Show module provider section
+if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && !in_array($mode, array('mycustomerinstances', 'mycustomerbilling'))) {
+	print '
+		<!-- Info module provider -->
+		<div class="note note-info">
+		<h4 class="block"><span class="fa fa-briefcase"></span> '.$langs->trans("YouAreAModuleProvider").'.</h4>
+		';
+	print '<span class="opacitymedium">'.$langs->trans("YouAreTheProviderOfTheFollowingModules").':</span><br>';
+	foreach ($mythirdpartyaccount->context['isamoduleprovider'] as $id => $val) {
+		$tmpproduct = new Product($db);
+		$tmpproduct->fetch($id);
+		print '- '.$tmpproduct->ref.($tmpproduct->label != $tmpproduct->ref ? ' '.$tmpproduct->label : '').' &nbsp; - &nbsp; <span class="small opacitymedium">'.$langs->trans("SellingPriceHT").'</span> = '.price($tmpproduct->price, 0, '', 1, -1, -1, $conf->currency).' / '.$langs->trans("month").'<br>';
+	}
+	print '</div>';
+}
 
 // Fill array of company payment modes
 $arrayofcompanypaymentmode = array();
@@ -3011,17 +3094,52 @@ $atleastonecontractwithtrialended = 0;
 $atleastonepaymentinerroronopeninvoice = 0;
 $atleastoneinvoicedisputed = 0;
 
+
 // Show warnings
 
 if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'autoupgrade'))) {
+	// Show warnings on invoice dispute
+	$sql = 'SELECT f.rowid, f.ref, f.datef, f.datec, f.date_lim_reglement as date_due, f.dispute_status, fe.invoicepaymentdisputed';
+	$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
+	$sql .= ' WHERE fe.fk_object = f.rowid AND f.fk_soc = '.((int) $mythirdpartyaccount->id);
+	$sql .= ' AND dispute_status = 1';
+	$sql .= ' ORDER BY f.datef';
+	$sql .= ' LIMIT 100';
+
+	$resql = $db->query($sql);
+	if ($resql) {
+		$num_rows = $db->num_rows($resql);
+		$i=0;
+		if ($num_rows) {
+			$atleastoneinvoicedisputed++;
+			$listofreftoshow = '';
+
+			while ($obj = $db->fetch_object($resql)) {
+				$listofreftoshow .= ($listofreftoshow ? ', ' : $listofreftoshow).$obj->ref.' ('.dol_print_date($db->jdate($obj->datec), 'day', 'gmt').')';
+			}
+
+			if ($listofreftoshow) {
+				print '
+					<!-- Warnings disputed -->
+					<div class="note note-warning note-disputed">
+					<h4 class="block">'.$langs->trans("InvoicePaymentDisputedMessage", $listofreftoshow).'</h4>
+					</div>
+				';
+			}
+		}
+	} else {
+		dol_print_error($db);
+	}
+
+
 	$companypaymentmode = new CompanyPaymentMode($db);
 	$result = $companypaymentmode->fetch(0, null, $mythirdpartyaccount->id);
 
 	foreach ($listofcontractid as $contractid => $contract) {
-		if ($mode == 'mycustomerbilling') {
+		if (in_array($mode, array('mycustomerinstances', 'mycustomerbilling'))) {
 			continue;
 		}
-		if ($mode == 'mycustomerinstances') {
+		if (in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
 			continue;
 		}
 		if ($contract->array_options['options_deployment_status'] == 'undeployed') {
@@ -3307,33 +3425,6 @@ if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'aut
 						<h4 class="block">'.$langs->trans("SomeOfYourPaymentFailed", $labelerror).'</h4>
 						</div>
 					';
-			}
-		}
-	} else {
-		dol_print_error($db);
-	}
-
-	// Test if there is one invoice disputed
-	$sql = 'SELECT f.rowid, f.ref, f.datef, f.datec, f.date_lim_reglement as date_due, f.dispute_status, fe.invoicepaymentdisputed';
-	$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
-	$sql .= ' WHERE fe.fk_object = f.rowid AND f.fk_soc = '.((int) $mythirdpartyaccount->id);
-	$sql .= ' AND dispute_status = 1';
-	$sql .= ' ORDER BY f.datef';
-	$sql .= ' LIMIT 1';
-
-	$resql = $db->query($sql);
-	if ($resql) {
-		$num_rows = $db->num_rows($resql);
-		$i=0;
-		if ($num_rows) {
-			$atleastoneinvoicedisputed++;
-
-			while ($obj = $db->fetch_object($resql)) {
-				print '
-					<div class="note note-warning note-disputed">
-					<h4 class="block">'.$langs->trans("InvoicePaymentDisputedMessage", $obj->ref, dol_print_date($db->jdate($obj->datec), 'day', 'gmt')).'</h4>
-					</div>
-				';
 			}
 		}
 	} else {

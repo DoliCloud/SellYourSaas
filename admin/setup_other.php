@@ -122,6 +122,9 @@ foreach ($tmpservices as $key => $tmpservice) {
 	}
 	$arrayofsuffixfound[$tmpservice] = $suffix;
 }
+if (empty($arrayofsuffixfound)) {
+	$arrayofsuffixfound[] = '';
+}
 // $arrayofsuffixfound should be now array('mysaasdomain'=>'', mysaasdomainalt'=>'_MYSAASDOMAINALT_COM', ...)
 //var_dump($arrayofsuffixfound);
 
@@ -312,7 +315,8 @@ print '<div class="div-table-responsive">'; // You can use div-table-responsive-
 print '<table class="noborder centpercent">';
 print '<tr class="liste_titre">';
 print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
-print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright">';
+print '</div></td>';
 print "</tr>\n";
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasStatusUrl").'</td>';
@@ -371,13 +375,13 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoWhiteBackground").' (png,jpg)</label></td><td>';
 	print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
 	print '<input type="file" class="flat class=minwidth200" name="logo'.$suffix.'" id="logo'.$suffix.'">';
-	print '</td><td class="nocellnopadd" valign="middle">';
+	print '</td><td class="nocellnopadd valignmiddle">';
 	$constname = 'SELLYOURSAAS_LOGO_MINI'.$suffix;
 	print '<!-- constname = '.$constname.' -->';
 	if (getDolGlobalString($constname)) {
 		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogo&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
 		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
-			print ' &nbsp; ';
+			print '</td></td>';
 			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/' . getDolGlobalString($constname)).'">';
 		}
 	} else {
@@ -391,12 +395,12 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoBlackBackground").' (png,jpg)</label></td><td>';
 	print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
 	print '<input type="file" class="flat class=minwidth200" name="logoblack'.$suffix.'" id="logoblack'.$suffix.'">';
-	print '</td><td class="nocellnopadd" valign="middle">';
+	print '</td><td class="nocellnopadd valignmiddle">';
 	$constname = 'SELLYOURSAAS_LOGO_MINI_BLACK'.$suffix;
 	if (getDolGlobalString($constname)) {
 		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
 		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
-			print ' &nbsp; ';
+			print '</td></td>';
 			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/' . getDolGlobalString($constname)).'">';
 		}
 	} else {
@@ -521,7 +525,8 @@ print '</tr>';
 
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans("SupportFeatures").'</td><td></td>';
-print '<td></td>';
+print '<td>';
+print '</td>';
 print "</tr>\n";
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
@@ -559,8 +564,7 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 print '</table>';
 print '</div>';
 
-print '</table>';
-print '</div>';
+print '<center><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></center>';
 
 print "</form>\n";
 

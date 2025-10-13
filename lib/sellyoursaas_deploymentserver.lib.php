@@ -36,7 +36,7 @@ function deploymentserverPrepareHead($object)
 	$showtabofpagecontact = 0;
 	$showtabofpagenote = 1;
 	$showtabofpagedocument = 0;
-	$showtabofpageagenda = 0;
+	$showtabofpageagenda = 1;
 
 	$h = 0;
 	$head = array();

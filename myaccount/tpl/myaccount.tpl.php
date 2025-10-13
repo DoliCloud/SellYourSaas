@@ -106,7 +106,7 @@ print '
 						print '<div class="form-group">
 	                                  <label>'.$langs->trans("VATIntra").'</label> ';
 						if (! empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra)) {
-							print img_warning($langs->trans("Mandatory"), 'class="hideifnonassuj"');
+							print img_warning($langs->trans("Mandatory"), '', 'hideifnonassuj');
 						}
 
 						$placeholderforvat='';
@@ -196,9 +196,12 @@ print '<script type="text/javascript" language="javascript">
 		jQuery(document).ready(function() {
 			jQuery("#vatassuj").click(function() {
 				console.log("Click on vatassuj "+jQuery("#vatassuj").is(":checked"));
-				jQuery(".hideifnonassuj").hide();
-				jQuery(".hideifnonassuj").show();
-				jQuery("#vatnumber").focus();
+				if (jQuery("#vatassuj").is(":checked")) {
+					jQuery(".hideifnonassuj").show();
+					jQuery("#vatnumber").focus();
+				} else {
+					jQuery(".hideifnonassuj").hide();
+				}
 			});
 		});
 		</script>';

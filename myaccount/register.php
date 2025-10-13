@@ -293,9 +293,9 @@ if ($favicon) {
 	}
 	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
-$head .= '<!-- Bootstrap core CSS -->';
-$head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
-$head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
+$head .= '<!-- Bootstrap core CSS -->'."\n";
+$head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">'."\n";
+$head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">'."\n";
 
 if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON')) {
 	$head .= '<script src="https://www.google.com/recaptcha/api.js"></script>';
