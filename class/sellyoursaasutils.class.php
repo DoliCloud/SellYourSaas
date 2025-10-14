@@ -1273,7 +1273,6 @@ class SellYourSaasUtils
 		$sql .= " AND sr.ext_payment_site = '".$this->db->escape($service)."'";		// Only Stripe Live or Test
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";		// Lines may be duplicated if there is several payment mode. Never mind, we will exclude duplicated invoice later.
-		//print $sql;exit;
 
 		$resql = $this->db->query($sql);
 		if ($resql) {
