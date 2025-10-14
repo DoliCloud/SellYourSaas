@@ -109,6 +109,6 @@ INSERT INTO llx_c_email_templates (module,type_template,label,lang,position,topi
 --INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-TECHISSUE-SLOW',45,'The application responds slowly',1,0,NULL,4,NULL,1);
 --INSERT INTO llx_c_ticket_category (code,pos,label,active,use_default,description,fk_parent,force_severity,public) VALUES ('TIGRP-TECHISSUE-OTHER',46,'Other (bug, error, access broken, ...)',1,0,NULL,4,NULL,1);
 
-INSERT INTO llx_c_sellyoursaas_source_choice (code, label, pos, active) VALUES ('SITE',  'DOLIBARR WEB SITE', 10, 0);
-INSERT INTO llx_c_sellyoursaas_source_choice (code, label, pos, active) VALUES ('MTM',   'MOUTH TO MOUTH',    20, 0);
-INSERT INTO llx_c_sellyoursaas_source_choice (code, label, pos, active) VALUES ('OTHER', 'OTHER',             30, 0);
+INSERT INTO llx_c_sellyoursaas_source_choice (code, label, pos, active) VALUES ('SITE',  'WEB SITE',       10, 0);
+INSERT INTO llx_c_sellyoursaas_source_choice (code, label, pos, active) VALUES ('MTM',   'MOUTH TO MOUTH', 20, 0);
+INSERT INTO llx_c_sellyoursaas_source_choice (code, label, pos, active) VALUES ('OTHER', 'OTHER',          30, 0);
