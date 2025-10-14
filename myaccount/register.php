@@ -810,7 +810,7 @@ if ($reshook == 0) {
 			}
 			if ($numActiveEntries > 0) {
 				?>
-				<div class="control-group-select2 required">
+				<div class="control-group-select2 control-group required">
 					<label class="control-label-select2" for="options_sellyoursaas_source_choice">
 						<span class="fa fa-question-circle opacityhigh"></span> <?= $langs->trans("HowDidYouHearAboutUs") ?>
 					</label>
