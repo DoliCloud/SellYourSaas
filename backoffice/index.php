@@ -110,6 +110,14 @@ if (GETPOST('saveannounce', 'alpha')) {
 	dolibarr_set_const($db, "SELLYOURSAAS_ANNOUNCE", GETPOST("SELLYOURSAAS_ANNOUNCE", 'none'), 'chaine', 0, '', $conf->entity);
 }
 
+if ($action == 'setSELLYOURSAAS_DASHBOARD_OFF') {
+	if (GETPOST('value')) {
+		dolibarr_set_const($db, 'SELLYOURSAAS_DASHBOARD_OFF', 1, 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 1, 'chaine', 0, '', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'SELLYOURSAAS_DASHBOARD_OFF', 0, 'chaine', 0, '', $conf->entity);
+	}
+}
 if ($action == 'setSELLYOURSAAS_DISABLE_NEW_INSTANCES') {
 	if (GETPOST('value')) {
 		dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 1, 'chaine', 0, '', $conf->entity);
@@ -266,6 +274,23 @@ print '<td>';
 print $langs->trans('Website').' & '.$langs->trans('CustomerAccountArea');
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
+$enabledisabledashboard='';
+if (!getDolGlobalString('SELLYOURSAAS_DASHBOARD_OFF')) {
+	// Button off, click to enable
+	$enabledisabledashboard.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DASHBOARD_OFF&token='.newToken().'&value=1'.$param.'">';
+	$enabledisabledashboard.=img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
+	$enabledisabledashboard.='</a>';
+} else {
+	// Button on, click to disable
+	$enabledisabledashboard.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DASHBOARD_OFF&token='.newToken().'&value=0'.$param.'">';
+	$enabledisabledashboard.=img_picto($langs->trans('Disabled'), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
+	$enabledisabledashboard.='</a>';
+}
+print $enabledisabledashboard;
+print $langs->trans("EnableDashboards");
+print '</td></tr>';
+
+print '<tr class="oddeven"><td>';
 $enabledisablehtml='';
 if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 	// Button off, click to enable
@@ -291,6 +316,7 @@ if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 }
 
 print '</td></tr>';
+
 print '<tr class="oddeven"><td>';
 $enabledisableannounce='';
 if (!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON')) {

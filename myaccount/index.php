@@ -94,7 +94,12 @@ if (! $res && file_exists("../../../main.inc.php")) {
 if (! $res) {
 	die("Include of main fails. Try to create a link from mydolibarr/htdocs/main.inc.php to .../sellyoursaas/myaccount/main.inc.php");
 }
-
+/**
+ * @var Conf		$conf
+ * @var DoliDB		$db
+ * @var	Translate 	$langs
+ * @var Societe		$mysoc
+ */
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
@@ -213,7 +218,7 @@ if ($idforfetch <= 0 || empty($mythirdpartyaccount->status)) {
 	}
 
 	$_SESSION=array();
-	$_SESSION['dol_loginmesg']=$langs->trans("SorryAccountDeleted", $sellyoursaasemail);
+	$_SESSION['dol_loginmesg'] = $langs->trans("SorryAccountDeleted", $sellyoursaasemail);
 	//header("Location: index.php?username=".urlencode(GETPOST('username','alpha')));
 	header("Location: index.php?usernamebis=".urlencode(GETPOST('username', 'alpha')));
 	exit;
@@ -2309,6 +2314,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 $form = new Form($db);
 
+
 if ($welcomecid > 0) {
 	// Here $_POST is empty, $GET has just welcomecid=..., $_SESSION['dol_loginsellyoursaas'] is socid =382
 	/*var_dump($_POST);
@@ -2377,6 +2383,19 @@ var select2arrayoflanguage = {
 
 
 llxHeader($head, $langs->trans("MyAccount"), '', '', 0, 0, $arrayofjs, $arrayofcss, '', 'myaccount');
+
+
+// Test if dashboard is allowed or not
+if (getDolGlobalString('SELLYOURSAAS_DASHBOARD_OFF')) {
+	print '<center><div class="warning"><br><br><br>';
+	print $langs->trans("DashboardServiceIsTemporarlyOffline");
+	print '<br>';
+	print $langs->trans("PleaseGoBackInFewHours");
+	print '<br><br><br></div></center>';
+
+	llxFooter();
+	exit;
+}
 
 ?>
 
