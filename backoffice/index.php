@@ -402,7 +402,16 @@ print '</td><td align="right">';
 print '<font size="+2">'.$totalresellers.'</font>';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
-$texthelp = $langs->trans("NbOfInstancesActivePayingDesc");
+
+$transkeyforactivepayinghelp = "NbOfInstancesActivePayingDesc";
+$transkeyfornbinstanceactivepaying = "NbOfInstancesActivePaying";
+$transkeyfornbinstanceactivepayingall = "NbOfInstancesActivePayingAll";
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+	$transkeyfornbinstanceactivepaying = "NbOfInstancesActiveFree";
+	$transkeyfornbinstanceactivepayingall = "NbOfInstancesActiveFreeAll";
+}
+
+$texthelp = $langs->trans($transkeyforactivepayinghelp);
 $stringlistofinstancespayingwithoutrecinvoice = '';
 $nboflistofinstancespayingwithoutrecinvoice = 0;
 if (!empty($rep) && is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
@@ -412,7 +421,7 @@ if (!empty($rep) && is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
 		$stringlistofinstancespayingwithoutrecinvoice .= ($stringlistofinstancespayingwithoutrecinvoice ? ', ' : '').$arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
 	}
 }
-print $form->textwithpicto($langs->trans("NbOfInstancesActivePaying"), $texthelp);
+print $form->textwithpicto($langs->trans($transkeyfornbinstanceactivepaying), $texthelp);
 if ($mode == 'refreshstats') {	// Info not saved into session (too large), so we show it only after a refresh
 	$texthelp = $langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
 	if ($stringlistofinstancespayingwithoutrecinvoice) {
@@ -420,7 +429,7 @@ if ($mode == 'refreshstats') {	// Info not saved into session (too large), so we
 		$texthelp .= $stringlistofinstancespayingwithoutrecinvoice;
 	}
 }
-print ' | '.$form->textwithpicto($langs->trans("NbOfInstancesActivePayingAll"), $texthelp).' | '.$langs->trans("NbOfActiveInstances").' ';
+print ' | '.$form->textwithpicto($langs->trans($transkeyfornbinstanceactivepayingall), $texthelp).' | '.$langs->trans("NbOfActiveInstances").' ';
 print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) {
 	print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstancespayingall.' | '.$totalinstances.'</font>';
@@ -501,7 +510,7 @@ print '</table>';
 print '</div></div></div>';
 
 //$servicetouse='old';
-$servicetouse=strtolower($conf->global->SELLYOURSAAS_NAME);
+$servicetouse=strtolower(getDolGlobalString('SELLYOURSAAS_NAME'));
 $regs = array();
 
 // array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn))
