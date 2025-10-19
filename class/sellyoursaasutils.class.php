@@ -3429,12 +3429,23 @@ class SellYourSaasUtils
 								$contractprocessed[$object->id]=$object->ref;
 
 								// Send an email to warn customer of suspension
-								if ($mode == 'test') {
-									$labeltemplate = 'CustomerAccountSuspendedTrial';
+
+								if ($object->thirdparty->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+									if ($mode == 'test') {
+										$labeltemplate = 'CustomerAccountSuspendedTrialFreeInstance';
+									}
+									if ($mode == 'paid') {
+										$labeltemplate = 'CustomerAccountSuspended';	// TODO When this case occurs ? Do we have to use another mesaage key ?
+									}
+								} else {
+									if ($mode == 'test') {
+										$labeltemplate = 'CustomerAccountSuspendedTrial';
+									}
+									if ($mode == 'paid') {
+										$labeltemplate = 'CustomerAccountSuspended';
+									}
 								}
-								if ($mode == 'paid') {
-									$labeltemplate = 'CustomerAccountSuspended';
-								}
+
 
 								dol_syslog("Now we will send an email to customer id=".$object->thirdparty->id." with label ".$labeltemplate);
 
