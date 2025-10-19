@@ -15,6 +15,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var Translate $langs
+ * @var Societe $mythirdpartyaccount
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -254,14 +260,19 @@ if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
 	                      <input type="text" class="inline-block" value="'.$mythirdpartyaccount->array_options['options_lastname'].'" name="lastName">
 	                    </div>
 	                  </div>
-	                </div>
+	                </div>';
+
+// Add input for the CC invoice
+if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'nonprofit' || !getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+					print '
 	                <div class="form-group">
 	                  <label>'.img_picto('', 'email', 'class="paddingright opacitymedium"').$form->textwithpicto($langs->trans("EmailCCInvoices"), $langs->trans("KeepEmptyToUseMainEmail"), 1, 'help', 'opacitymedium').'</label>
 	                  <input type="text" class="form-control" value="'.(GETPOSTISSET('emailccinvoice') ? GETPOST('emailccinvoice') : $mythirdpartyaccount->array_options['options_emailccinvoice']).'" name="emailccinvoice">
 	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->array_options['options_emailccinvoice'].'" name="oldemailccinvoice">
 					</div>
-
 					';
+}
+
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_OPTINMESSAGES')) {
 	print '
 		                <div class="form-group paddingtop">
