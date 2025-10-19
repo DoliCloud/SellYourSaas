@@ -835,8 +835,15 @@ class SellYourSaasUtils
 						$outputlangs->loadLangs(array('main'));
 
 						// @TODO Save in cache $arraydefaultmessage for each $object->thirdparty->default_lang and reuse it to avoid getEMailTemplate called each time
-						dol_syslog("We will call getEMailTemplate for type 'contract', label 'HardTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
-						$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminder');
+						if ($object->thirdparty->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+							dol_syslog("We will call getEMailTemplate for type 'contract', label 'HardTrialExpiringReminderFreeInstance', outputlangs->defaultlang=".$outputlangs->defaultlang);
+							$arraydefaultmessage = $formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminderFreeInstance');
+							dol_syslog("Topic found is ".$arraydefaultmessage->topic);
+						} else {
+							dol_syslog("We will call getEMailTemplate for type 'contract', label 'HardTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
+							$arraydefaultmessage = $formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminder');
+							dol_syslog("Topic found is ".$arraydefaultmessage->topic);
+						}
 
 						$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
 						$substitutionarray['__SELLYOURSAAS_EXPIRY_DATE__']=dol_print_date($expirationdate, 'day', 'tzserver', $outputlangs);
