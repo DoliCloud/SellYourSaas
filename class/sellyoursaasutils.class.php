@@ -4266,7 +4266,7 @@ class SellYourSaasUtils
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
 				continue;
 			}
-			dol_syslog("** Process contract line id=".$tmpobject->id." to know which action to do");
+			dol_syslog("** Process contract line id=".$tmpobject->id." to know which action to do and define remoteaction to 0, 1 (most action like deploy, deployoption, rename, ...) or 2 (refesh)");
 
 			$producttmp = new Product($this->db);
 			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
@@ -4301,7 +4301,13 @@ class SellYourSaasUtils
 
 		$listoflinesqualified = dol_sort_array($listoflinesqualified, 'position', 'asc');
 
-		// Now loop on each lines qualified for action
+
+		$tmp = explode('.', $contract->ref_customer, 2);
+		$sldAndSubdomain = $tmp[0];
+		$domainname = $tmp[1];
+
+		
+		// Now loop on each lines qualified for action and call remote URL
 		foreach ($listoflinesqualified as $tmparrayoflinesqualified) {
 			$tmpobject = $tmparrayoflinesqualified['tmpobject'];
 			$doremoteaction = $tmparrayoflinesqualified['doremoteaction'];
@@ -4325,10 +4331,7 @@ class SellYourSaasUtils
 				}
 
 				$ispaidinstance = sellyoursaasIsPaidInstance($contract);
-
-				$tmp=explode('.', $contract->ref_customer, 2);
-				$sldAndSubdomain=$tmp[0];
-				$domainname=$tmp[1];
+				
 				if (! empty($contract->array_options['options_deployment_host'])) {
 					$serverdeployment = $contract->array_options['options_deployment_host'];
 				} else {
@@ -4484,14 +4487,14 @@ class SellYourSaasUtils
 				}
 				$substitarray['__SMTP_SPF_STRING__'] = '_spf'.$sldAndSubdomain.'.'.$domainname;
 
-
+				
 				$dirfortmpfiles = DOL_DATA_ROOT.'/sellyoursaas/temp';
 				dol_mkdir($dirfortmpfiles, '', '0775');
 				$tmppackage->srcconffile1 = $dirfortmpfiles.'/conf.php.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccronfile  = $dirfortmpfiles.'/cron.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccliafter  = $dirfortmpfiles.'/cliafter.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccliafterpaid  = $dirfortmpfiles.'/cliafterpaid.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
-
+				
 				$conffile = make_substitutions($tmppackage->conffile1, $substitarray);
 				$cronfile = make_substitutions($tmppackage->crontoadd, $substitarray);
 				$cliafter = make_substitutions($tmppackage->cliafter, $substitarray);
@@ -4543,21 +4546,25 @@ class SellYourSaasUtils
 					}
 
 					if ($tmppackage->srccliafter && $cliafter) {
-						dol_syslog("Create cli file ".$tmppackage->srccliafter);
+						dol_syslog("Create cli after file ".$tmppackage->srccliafter);
+
 						dol_delete_file($tmppackage->srccliafter, 0, 1, 0, null, false, 0);
+
 						$result = file_put_contents($tmppackage->srccliafter, str_replace("\r", '', $cliafter));
 						@chmod($tmppackage->srccliafter, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
 					} else {
-						dol_syslog("No cli file to create or no content");
+						dol_syslog("No cli adter file to create or no content");
 					}
 
 					if ($tmppackage->cliafterpaid && $cliafterpaid) {
-						dol_syslog("Create cli file ".$tmppackage->srccliafter);
+						dol_syslog("Create cli afterpaid file ".$tmppackage->srccliafterpaid);
+
 						dol_delete_file($tmppackage->srccliafterpaid, 0, 1, 0, null, false, 0);
+
 						$result = file_put_contents($tmppackage->srccliafterpaid, str_replace("\r", '', $cliafterpaid));
 						@chmod($tmppackage->srccliafterpaid, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
 					} else {
-						dol_syslog("No cli after paid file to create or no content");
+						dol_syslog("No cli afterpaid file to create or no content");
 					}
 				}
 				if (in_array($remoteaction, array("deploy", "deployall"))) {
@@ -4691,10 +4698,6 @@ class SellYourSaasUtils
 				// Update resource count
 				if (! empty($producttmp->array_options['options_resource_formula'])) {
 					$targetdir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
-
-					$tmp=explode('.', $contract->ref_customer, 2);
-					$sldAndSubdomain=$tmp[0];
-					$domainname=$tmp[1];
 
 					$generatedunixlogin   = $contract->array_options['options_username_os'];
 					$generatedunixpassword= $contract->array_options['options_password_os'];
