@@ -406,7 +406,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 	}
 
 	$txt_file = file_get_contents($scriptfile); //Get the file
-	$rows = preg_split('/\r\n|\r|\n/', $txt_file); //Split the file by each line
+	$rows = preg_split('/\r\n|\r|\n/', $txt_file); //Split the file by each line TODO Split also on ";" so list of allowed is easier to manage
 
 	$linenotvalid = 0;
 	$i = 0;
@@ -469,7 +469,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?php \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install$/i', $newline)) {
+		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/?$/i', $newline)) {
 			continue;
 		}
 		// TODO enhance list of allowed patterns
