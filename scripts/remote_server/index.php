@@ -466,6 +466,12 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+$/i', $newline)) {
 			continue;
 		}
+		if (preg_match('/^#?php \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install$/i', $newline)) {
+			continue;
+		}
 		// TODO enhance list of allowed patterns
 		// ...
 
@@ -474,11 +480,11 @@ function checkScriptFile($scriptfile, $fh, $params)
 	}
 
 	if ($linenotvalid > 0) {
-		fwrite($fh, date('Y-m-d H:i:s')." script file contains instructions line ".$linenotvalid." that does not match an allowed pattern.\n");
+		fwrite($fh, date('Y-m-d H:i:s')." script file contains instructions line #".$linenotvalid." that does not match an allowed pattern.\n");
 
 		// CLI file is not valid
 		http_response_code(599);
-		print 'The CLI file '.$scriptfile.' contains instructions line '.$linenotvalid.' that does not match an allowed pattern.'."\n";
+		print 'The CLI file '.$scriptfile.' contains instructions line #'.$linenotvalid.' that does not match an allowed pattern.'."\n";
 		exit();
 	} else {
 		fwrite($fh, date('Y-m-d H:i:s')." script file is valid.\n");
