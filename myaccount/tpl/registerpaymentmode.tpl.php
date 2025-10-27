@@ -741,7 +741,8 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<div class="opacitymedium small justify">'.$langs->trans("SEPALegalText", $mysoc->name, $mysoc->name).'</div>';
 
 		print '<br><br>';
-		print '<input type="submit" name="submitsepa" value="'.$langs->trans("Save").'" class="btn btn-info btn-circle">';
+		// Replace Save by Pay ?
+		print '<input type="submit" name="submitsepa" value="'.$langs->trans("SaveAndPay").'" class="btn btn-info btn-circle">';
 		print ' ';
 		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 	} else {
