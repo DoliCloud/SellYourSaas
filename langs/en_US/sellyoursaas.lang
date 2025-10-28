@@ -958,3 +958,4 @@ DashboardServiceIsTemporarlyOffline=Dashboard access is temporarly offline for m
 PleaseGoBackInFewHours=Please go back in few hours...
 SubscriptionFormAndDashboard=Subscription form and customers/resellers dashboard
 SaveAndPay=Save and pay
+ModulesToIgnoreForAutoUpgrade=Modules to ignore for auto-upgrade
