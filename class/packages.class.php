@@ -279,6 +279,14 @@ class Packages extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
+		// Clean parameters to remove ending / on directories
+		$this->srcfile1 = preg_replace('/\/+$/', '', $this->srcfile1);
+		$this->srcfile2 = preg_replace('/\/+$/', '', $this->srcfile2);
+		$this->srcfile3 = preg_replace('/\/+$/', '', $this->srcfile3);
+		$this->targetsrcfile1 = preg_replace('/\/+$/', '', $this->targetsrcfile1);
+		$this->targetsrcfile2 = preg_replace('/\/+$/', '', $this->targetsrcfile2);
+		$this->targetsrcfile3 = preg_replace('/\/+$/', '', $this->targetsrcfile3);
+
 		return $this->updateCommon($user, $notrigger);
 	}
 

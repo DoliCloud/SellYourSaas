@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Remove automatically ending / in directory name in setup of package(this avoid errors and headach in setup phase)
 * NEW Reorganize menu for reseller and module providers
 * NEW Add option SELLYOURSAAS_DASHBOARD_OFF to disallow login/access to dashboard
 * NEW Add warning on support page if contact info are not complete
