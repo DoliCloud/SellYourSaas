@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2011-2018 Laurent Destailleur <eldy@users.sourceforge.net>
+/* Copyright (C) 2011-2025 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,6 +122,11 @@ if ($sellyoursaassupporturl) {
 
 	print '</div></div></div>';
 } else {
+	// Define if mandatory contact info are set
+	$mandatoryInfoAreNotSet = ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE'))
+		|| empty($mythirdpartyaccount->array_options['options_firstname'])
+		|| empty($mythirdpartyaccount->array_options['options_lastname']));
+
 	print '
 			    <div class="row" id="choosechannel">
 			      <div class="col-md-12">
@@ -130,13 +135,12 @@ if ($sellyoursaassupporturl) {
 
 				      <div class="portlet-title">
 				        <div class="caption">';
-	if ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE'))
-		|| empty($mythirdpartyaccount->array_options['options_firstname'])
-		|| empty($mythirdpartyaccount->array_options['options_lastname'])) {
+	if ($mandatoryInfoAreNotSet) {
 		print '<br>';
 		print $langs->trans('BeforeAskForSupport', img_warning('', '', '')).'<br>';
-		print '<a href="/index.php?mode=myaccount">'.$langs->trans('BeforeAskForSupport2').'</a>';
-		print '<br>';
+		print '<center class="margintop">';
+		print img_picto('', 'url').' <a href="/index.php?mode=myaccount">'.$langs->trans('BeforeAskForSupport2').'</a>';
+		print '</center><br>';
 	}
 
 	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
@@ -273,7 +277,13 @@ if ($sellyoursaassupporturl) {
 	print '</select>';
 	print ajax_combobox("supportchannel");
 
-	print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition">';
+	print ' &nbsp; <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'"';
+	print ' class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition"';
+	if ($mandatoryInfoAreNotSet) {
+		print ' disabled="disabled"';
+		print ' title="'.$langs->trans("PleaseFillContactInfoFirst").'"';
+	}
+	print '>';
 
 	print '</form>';
 
@@ -556,10 +566,10 @@ if ($sellyoursaassupporturl) {
 		print '<div class="hideforautomigration">';
 
 		// From
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' class="minwidth300" id="from" name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'" placeholder="email@domain.com"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" class="minwidth300" id="from" name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'" placeholder="email@domain.com"><br><br>';
 
 		// Topic
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject"'.(GETPOST('addfile') ? '' : ' autofocus').' value="'.$subject.'"><br><br>';
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';
@@ -569,6 +579,12 @@ if ($sellyoursaassupporturl) {
 
 		print '<br>';
 		// Description
+		/* Not yet available, ckeditor js path is source/... and should be /source/...
+		include_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
+		$doleditor = new DolEditor('content', GETPOST('content', 'none'), '95%', 200, 'dolibarr_details', 'NU');
+		print $doleditor->Create();
+		print '<br>';
+		*/
 		print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
 
 		// Button to send ticket/email

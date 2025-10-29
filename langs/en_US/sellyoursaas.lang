@@ -363,7 +363,11 @@ CommandToPutInstancesOnOffline=Command to put all instances online/offline
 CommandToMoveInstanceOnAnotherDeploymentServer=Command to move several or all instances into another deployment server
 InstanceWasDeployed=Instance has been deployed
 YourPaymentModeWillExpireFixItSoon=Your payment mode has expired or is about to expire. Please <a href="%s">update your payment mode</a> to avoid any interruption of service.
+ResellerArea=Reseller Area
 YouAreAReseller=You are a reseller
+ModuleProviderArea=Module provider area
+MyResellerTools=My reseller tools
+MyModuleProviderTools=My module provider tools
 YourURLToCreateNewInstance=To have new users being linked to your account and appear in your dashboard, you or they must use the following URL to register
 YourCommissionsAppearsInMenu=Your commissions (current rate <strong>%s%%</strong>) are visible into menu %s
 InvoicingSuspended=Billing suspended
@@ -959,3 +963,5 @@ PleaseGoBackInFewHours=Please go back in few hours...
 SubscriptionFormAndDashboard=Subscription form and customers/resellers dashboard
 SaveAndPay=Save and pay
 ModulesToIgnoreForAutoUpgrade=Modules to ignore for auto-upgrade
+PleaseFillContactInfoFirst=Please fill your contact information first
+GoToYourResellerMenuTogetInformation=Go to menu "%s" for more information

@@ -2474,6 +2474,10 @@ if ($mythirdpartyaccount->isareseller) {
 	<li class="nav-item'.(($mode == 'mycustomerinstances' || $mode == 'mycustomerbilling') ? ' active' : '').' dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-suitcase"></i> '.$langs->trans("ResellerArea").'</a>
         <ul class="dropdown-menu">';
+	// My reseller tools
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myresellertools"><i class="fa fa-tools pictofixedwidth"></i> '.$langs->trans("MyResellerTools").'</a></li>';
+	// Divider
+	print '<li class="dropdown-divider"></li>';
 	// My customers instance
 	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances"><i class="fa fa-server pictofixedwidth"></i> '.$langs->trans("MyCustomersInstances").'</a></li>';
 	// Divider
@@ -2491,6 +2495,10 @@ if (count($mythirdpartyaccount->context['isamoduleprovider']) > 0) {
 	<li class="nav-item'.(($mode == 'mymodulecustomerinstances' || $mode == 'mymodulecustomerbilling') ? ' active' : '').' dropdown">
         <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-suitcase"></i> '.$langs->trans("ModuleProviderArea").'</a>
         <ul class="dropdown-menu">';
+	// My module provider tools
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymoduleprovidertools"><i class="fa fa-tools pictofixedwidth"></i> '.$langs->trans("MyModuleProviderTools").'</a></li>';
+	// Divider
+	print '<li class="dropdown-divider"></li>';
 	// Module provider stats
 	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerinstances"><i class="fa fa-server pictofixedwidth"></i> '.$langs->trans("MyModuleCustomersInstances").'</a></li>';
 	// Divider
@@ -2842,140 +2850,144 @@ if ($resqlproducts) {
 }
 
 
-// Show resellection section
-if ($mythirdpartyaccount->isareseller && !in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
+// Show reseller section
+if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myresellertools'))) {
 	print '
 		<!-- Info reseller -->
 		<div class="note note-info">
 		<h4 class="block"><span class="fa fa-briefcase"></span> '.$langs->trans("YouAreAReseller").'.</h4>
 		';
-	print '<span class="opacitymedium">'.$langs->trans("YourURLToCreateNewInstance").':</span><br>';
 
-	$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
-	$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL(getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL'), 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
+	if (in_array($mode, array('myresellertools'))) {
+		print '<span class="opacitymedium">'.$langs->trans("YourURLToCreateNewInstance").':</span><br>';
 
-	$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);
-	print '<input type="text" class="quatrevingtpercent" id="urlforpartner" name="urlforpartner" value="'.$urlforpartner.'" spellcheck="false">';
-	print ajax_autoselect("urlforpartner");
+		$sellyoursaasaccounturl = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
+		$sellyoursaasaccounturl = preg_replace('/'.preg_quote(getDomainFromURL(getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL'), 1), '/').'/', getDomainFromURL($_SERVER["SERVER_NAME"], 1), $sellyoursaasaccounturl);
 
-	print '<script type="text/javascript" language="javascript">
-	jQuery(document).ready(function() {
-		jQuery("#spanmorereselleroptions").click(function() {
-			console.log("Click on spanmorereselleroptions");
-			jQuery("#divmorereselleroptions").toggle();
+		$urlforpartner = $sellyoursaasaccounturl.'/register.php?partner='.$mythirdpartyaccount->id.'&partnerkey='.md5($mythirdpartyaccount->name_alias);
+		print '<input type="text" class="quatrevingtpercent" id="urlforpartner" name="urlforpartner" value="'.$urlforpartner.'" spellcheck="false">';
+		print ajax_autoselect("urlforpartner");
+
+		print '<script type="text/javascript" language="javascript">
+		jQuery(document).ready(function() {
+			jQuery("#spanmorereselleroptions").click(function() {
+				console.log("Click on spanmorereselleroptions");
+				jQuery("#divmorereselleroptions").toggle();
+			});
+	        jQuery("#divmorereselleroptions").toggle();
 		});
-        jQuery("#divmorereselleroptions").toggle();
-	});
-		</script>';
+			</script>';
 
-	print '<br><a class="small" id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
-	print '<div id="divmorereselleroptions" style="display: hidden" class="small">';
-	if (is_array($arrayofplans) && count($arrayofplans) > 1) {
-		print '&plan=XXX : ';
-		print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span><br>';
-	}
-	print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'. '.$langs->trans("AnExampleIsAvailableWith").' &extcss='.$sellyoursaasaccounturl.'/dist/css/alt-myaccount-example.css</span><br>';
-	print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
+		print '<br><a class="small" id="spanmorereselleroptions" href="#" style="color: #888">'.$langs->trans("OtherOptionsAndParameters").'... <span class="fa fa-angle-down"></span></a><br>';
+		print '<div id="divmorereselleroptions" style="display: hidden" class="small">';
+		if (is_array($arrayofplans) && count($arrayofplans) > 1) {
+			print '&plan=XXX : ';
+			print '<span class="opacitymedium">'.$langs->trans("ToForcePlan").', '.$langs->trans("whereXXXcanbe").' '.join(', ', $arrayofplanscode).'</span><br>';
+		}
+		print '&extcss=mycssurl : <span class="opacitymedium">'.$langs->trans("YouCanUseCSSParameter").'. '.$langs->trans("AnExampleIsAvailableWith").' &extcss='.$sellyoursaasaccounturl.'/dist/css/alt-myaccount-example.css</span><br>';
+		print '&disablecustomeremail=1 : <span class="opacitymedium">'.$langs->trans("ToDisableEmailThatConfirmsRegistration").'</span>';
 
-	print '</div>';
+		print '</div>';
 
-	if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE")) {
-		print '<br>';
-		print '<span class="opacitymedium small">'.$langs->trans("ForcePricesOfInstances").'</span>';
-		print '<form action="'.$_SERVER["PHP_SELF"].'" name="modifyresellerprices" method="POST" >';
-		print '<input type="hidden" name="action" value="updateforcepriceinstance">';
-		print '<input type="hidden" name="token" value="'.newToken().'">';
-		print '<div class="div-table-responsive">';
-		print '<table class="noborder small centpercent background-white padding">';
-		print '<tr class="liste_titre"><th>';
-		print $langs->trans("Label");
-		print '</th>';
-		print '<th>';
-		print $langs->trans("FixPrice");
-		print ' ('.$langs->trans("HT").')';
-		print '</th>';
-		print '<th>';
-		print $langs->trans("PricePerUsers");
-		print ' ('.$langs->trans("HT").')';
-		print '</th>';
-		for ($i=0; $i < $maxcptoptions; $i++) {
-			print '<th>';
-			print $langs->trans("OptionForcePrice", $i+1);
+		if (getDolGlobalInt("SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE")) {
+			print '<br>';
+			print '<span class="opacitymedium small">'.$langs->trans("ForcePricesOfInstances").'</span>';
+			print '<form action="'.$_SERVER["PHP_SELF"].'" name="modifyresellerprices" method="POST" >';
+			print '<input type="hidden" name="action" value="updateforcepriceinstance">';
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<div class="div-table-responsive">';
+			print '<table class="noborder small centpercent background-white padding">';
+			print '<tr class="liste_titre"><th>';
+			print $langs->trans("Label");
 			print '</th>';
-		}
-		print '<th>';
-		print '</th>';
-		print '</tr>';
-
-		// Ajout Options price change
-		foreach ($arrayofplansmodifyprice as $key => $value) {
-			print '<tr class="field_'.$key.' oddeven">';
-			print '<td class="maxwidth150 tdoverflowmax200" title="'.dol_escape_htmltag($value['label']).'">';
-			print $value["label"];
-			print '</td> ';
-			if ($action == 'editproperty' && $key == $propertykey) {
-				print '<input type="hidden" name="priceproductid" value="'.$key.'">';
-				print '<td>';
-				print '<input class="flat field_price maxwidth50" type="text" id="field_price_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_'.$mythirdpartyaccount->id."_".$key.'" value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ?: $value["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'<span>';
-				print '</td>';
-				print '<td>';
-				if (isset($value["priceuser"])) {
-					print '<input class="flat field_price maxwidth50" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ?: $value["priceuser"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
-				}
-				print '</td>';
-				if (isset($value["options"])) {
-					foreach ($value["options"] as $id => $data) {
-						print '<td>';
-						print '<input class="flat field_price maxwidth50" type="text" id="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ?: $data["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
-						print '</td>';
-					}
-				} else {
-					for ($i=0; $i < $maxcptoptions; $i++) {
-						print '<td></td>';
-					}
-				}
-				print '<td class="center maxwidth100">';
-				print '<input class="button smallpaddingimp btn green-haze btn-circle" type="submit" name="edit" value="'.$langs->trans("Save").'" style="margin: 2px;">';
-				print '<input class="button button-cancel smallpaddingimp btn green-haze btn-circle" type="submit" name="cancel" value="'.$langs->trans("Cancel").'">';
-				print '</td>';
-			} else {
-				print '<td>';
-				print '<span>';
-				print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ?: $value["price"])).$langs->getCurrencySymbol($conf->currency).'&nbsp;';
-				print '</span>';
-				print '</td>';
-				print '<td>';
-				if (isset($value["priceuser"])) {
-					print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ?: $value["priceuser"])).$langs->getCurrencySymbol($conf->currency);
-				}
-				print '</td>';
-				if (isset($value["options"])) {
-					foreach ($value["options"] as $id => $data) {
-						print '<td>';
-						print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ?: $data["price"])).$langs->getCurrencySymbol($conf->currency);
-						print '</td>';
-					}
-				} else {
-					for ($i=0; $i < $maxcptoptions; $i++) {
-						print '<td></td>';
-					}
-				}
-				print '<td class="center">';
-				print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
-				print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
-				print '</td>';
+			print '<th>';
+			print $langs->trans("FixPrice");
+			print ' ('.$langs->trans("HT").')';
+			print '</th>';
+			print '<th>';
+			print $langs->trans("PricePerUsers");
+			print ' ('.$langs->trans("HT").')';
+			print '</th>';
+			for ($i=0; $i < $maxcptoptions; $i++) {
+				print '<th>';
+				print $langs->trans("OptionForcePrice", $i+1);
+				print '</th>';
 			}
+			print '<th>';
+			print '</th>';
 			print '</tr>';
+
+			// Ajout Options price change
+			foreach ($arrayofplansmodifyprice as $key => $value) {
+				print '<tr class="field_'.$key.' oddeven">';
+				print '<td class="maxwidth150 tdoverflowmax200" title="'.dol_escape_htmltag($value['label']).'">';
+				print $value["label"];
+				print '</td> ';
+				if ($action == 'editproperty' && $key == $propertykey) {
+					print '<input type="hidden" name="priceproductid" value="'.$key.'">';
+					print '<td>';
+					print '<input class="flat field_price maxwidth50" type="text" id="field_price_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_'.$mythirdpartyaccount->id."_".$key.'" value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ?: $value["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'<span>';
+					print '</td>';
+					print '<td>';
+					if (isset($value["priceuser"])) {
+						print '<input class="flat field_price maxwidth50" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ?: $value["priceuser"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
+					}
+					print '</td>';
+					if (isset($value["options"])) {
+						foreach ($value["options"] as $id => $data) {
+							print '<td>';
+							print '<input class="flat field_price maxwidth50" type="text" id="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ?: $data["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
+							print '</td>';
+						}
+					} else {
+						for ($i=0; $i < $maxcptoptions; $i++) {
+							print '<td></td>';
+						}
+					}
+					print '<td class="center maxwidth100">';
+					print '<input class="button smallpaddingimp btn green-haze btn-circle" type="submit" name="edit" value="'.$langs->trans("Save").'" style="margin: 2px;">';
+					print '<input class="button button-cancel smallpaddingimp btn green-haze btn-circle" type="submit" name="cancel" value="'.$langs->trans("Cancel").'">';
+					print '</td>';
+				} else {
+					print '<td>';
+					print '<span>';
+					print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ?: $value["price"])).$langs->getCurrencySymbol($conf->currency).'&nbsp;';
+					print '</span>';
+					print '</td>';
+					print '<td>';
+					if (isset($value["priceuser"])) {
+						print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ?: $value["priceuser"])).$langs->getCurrencySymbol($conf->currency);
+					}
+					print '</td>';
+					if (isset($value["options"])) {
+						foreach ($value["options"] as $id => $data) {
+							print '<td>';
+							print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ?: $data["price"])).$langs->getCurrencySymbol($conf->currency);
+							print '</td>';
+						}
+					} else {
+						for ($i=0; $i < $maxcptoptions; $i++) {
+							print '<td></td>';
+						}
+					}
+					print '<td class="center">';
+					print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
+					print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
+					print '</td>';
+				}
+				print '</tr>';
+			}
+			print '</table></div>';
+
+			print '</form>';
 		}
-		print '</table></div>';
 
-		print '</form>';
+		print '<br>';
+		$urformycustomerinstances = '<strong>'.$langs->transnoentitiesnoconv("MyCustomersBilling").'</strong>';
+		print str_replace('{s1}', $urformycustomerinstances, $langs->trans("YourCommissionsAppearsInMenu", $mythirdpartyaccount->array_options['options_commission'], '{s1}'));
+	} else {
+		print '<span class="opacitymedium">'.$langs->trans("GoToYourResellerMenuTogetInformation", $langs->transnoentitiesnoconv("ResellerArea")).'.</span><br>';
 	}
-
-	print '<br>';
-	$urformycustomerinstances = '<strong>'.$langs->transnoentitiesnoconv("MyCustomersBilling").'</strong>';
-	print str_replace('{s1}', $urformycustomerinstances, $langs->trans("YourCommissionsAppearsInMenu", $mythirdpartyaccount->array_options['options_commission'], '{s1}'));
-
 
 	print '
 		</div>
@@ -2989,7 +3001,7 @@ if ($mythirdpartyaccount->isareseller && !in_array($mode, array('mymodulecustome
 
 
 // Show module provider section
-if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && !in_array($mode, array('mycustomerinstances', 'mycustomerbilling'))) {
+if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && in_array($mode, array('mymoduleprovidertools'))) {
 	print '
 		<!-- Info module provider -->
 		<div class="note note-info">
@@ -3115,8 +3127,9 @@ $atleastoneinvoicedisputed = 0;
 
 
 // Show warnings
-
-if (empty($welcomecid) && ! in_array($action, array('instanceverification', 'autoupgrade'))) {
+if (empty($welcomecid)
+	&& !in_array($mode, array('myresellertools', 'mycustomerinstances', 'mycustomerbilling', 'mymoduleprovidertools', 'mymodulecustomerinstances', 'mymodulecustomerbilling'))
+	&& !in_array($action, array('instanceverification', 'autoupgrade'))) {
 	// Show warnings on invoice dispute
 	$sql = 'SELECT f.rowid, f.ref, f.datef, f.datec, f.date_lim_reglement as date_due, f.dispute_status, fe.invoicepaymentdisputed';
 	$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
