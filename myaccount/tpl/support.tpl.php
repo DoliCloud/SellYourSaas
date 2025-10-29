@@ -105,6 +105,7 @@ if ($sellyoursaassupporturl) {
 	// If there is an external dedicated support URL defined, we use it
 	$supportkey = strtoupper(dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5, 'right', 'UTF-8', 1));
 	$sellyoursaassupporturlorigin = $sellyoursaassupporturl;
+	print '<!-- sellyoursaassupporturlorigin = '.$sellyoursaassupporturlorigin.' -->'."\n";
 
 	$sellyoursaassupporturl = str_replace('__EMAIL__', urlencode($mythirdpartyaccount->email), $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__FIRSTNAME__', urlencode($mythirdpartyaccount->array_options['options_firstname']), $sellyoursaassupporturl);
