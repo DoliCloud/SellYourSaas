@@ -114,8 +114,8 @@ if ($sellyoursaassupporturl) {
 	$sellyoursaassupporturl = str_replace('__PHONE__', urlencode($mythirdpartyaccount->phone), $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__SUPPORTKEY__', urlencode($supportkey), $sellyoursaassupporturl);
 
-	print '<br>'."\n";
 	print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';
+	print '<br>'."\n";
 	print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br>'."\n";
 
 	if (preg_match('/__SUPPORTKEY__/', $sellyoursaassupporturlorigin)) {	// A __SUPPORTKEY__ is defined so we show it
