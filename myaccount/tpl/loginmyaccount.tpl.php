@@ -16,12 +16,18 @@
  */
 
 // Need global variable to be defined by caller (like dol_loginfunction)
-// $conf
 // $title
 // $urllogo
 // $focus_element
 // $captcha_refresh
 // Caller can also set 	$morelogincontent = array(['options']=>array('js'=>..., 'table'=>...);
+
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ */
 
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {

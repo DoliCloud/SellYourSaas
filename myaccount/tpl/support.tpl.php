@@ -15,6 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
+ * @var string $urlfaq
+ * @var string $urlstatus
+ * @var array $listofcontractid
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -23,10 +35,6 @@ if (empty($conf) || ! is_object($conf)) {
 
 $langs->load("ticket");
 
-/**
- * @var Societe $mythirdpartyaccount
- * @var Conf $conf
- */
 ?>
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
 <?php
@@ -83,7 +91,8 @@ print '
 	<!-- END PAGE HEAD -->
 	<!-- END PAGE HEADER-->';
 
-	$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
+// Get the URL for support
+$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 	$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
@@ -93,6 +102,7 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 }
 
 if ($sellyoursaassupporturl) {
+	// If there is an external dedicated support URL defined, we use it
 	$supportkey = strtoupper(dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5, 'right', 'UTF-8', 1));
 	$sellyoursaassupporturlorigin = $sellyoursaassupporturl;
 
