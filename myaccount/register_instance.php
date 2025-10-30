@@ -226,14 +226,14 @@ if (empty($extcss)) {
 // If ran from command line
 if (substr($sapi_type, 0, 3) == 'cli') {
 	$productref = $argv[1];
-	$instancefullname = $argv[2];
+	$instancefullname = $argv[2];	// New name of instance
 	$instancefullnamearray = explode('.', $instancefullname);
 	$sldAndSubdomain = $instancefullnamearray[0];
 	unset($instancefullnamearray[0]);
 	$tldid = '.'.join('.', $instancefullnamearray);
 	$password = $argv[3];
-	$reusesocid = $argv[4];
-	$customurl = $argv[5];
+	$reusesocid = $argv[4];			// Thirdparty id to reuse
+	$customurl = $argv[5];			// Old instance name or Custom url
 	if (empty($productref) || empty($sldAndSubdomain) || empty($tldid) || empty($password) || empty($reusesocid)) {
 		print "***** ".$script_file." *****\n";
 		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
@@ -329,7 +329,7 @@ if ($reusecontractid) {
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.((int) $reusecontractid);
 } elseif ($reusesocid) {	// Can be >= 0, but also -1
-	// When we use the "Add another instance" from the "myaccount" dashboard
+	// When we use the "Add another instance" from the "myaccount" dashboard or using the master_move_instance.php
 
 	// Check we are logged and that reusesocid is not forged
 	if (substr($sapi_type, 0, 3) != 'cli') {
@@ -1357,6 +1357,33 @@ if ($reusecontractid) {
 		$contract->array_options['options_deployment_emailquality'] = dol_trunc($contract->array_options['options_deployment_emailquality'], 250);
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
 		//dol_syslog("options_deployment_emailquality = ".$contract->array_options['options_deployment_emailquality'], LOG_DEBUG);
+
+
+		// If we have a customurl, it may be an alias or an old instance name we plan to move.
+		if ($customurl) {
+			// We scan database to find old instance
+			$sqltogetoldinstanceid = "SELECT ce.instance_unique_id FROM ".MAIN_DB_PREFIX."contrat_extrafields as ce, ".MAIN_DB_PREFIX."contrat as c";
+			$sqltogetoldinstanceid .= " WHERE c.rowid = ce.fk_object AND c.ref_customer = '".$db->escape($customurl)."'";
+			$sqltogetoldinstanceid .= " LIMIT 1";	// We should always have only 1.
+
+			$resqltogetoldinstanceid = $db->query($sqltogetoldinstanceid);
+			if ($resqltogetoldinstanceid) {
+				$objtogetoldinstanceid = $db->fetch_object($resqltogetoldinstanceid);
+				if ($objtogetoldinstanceid) {
+					$old_instance_unique_id = $objtogetoldinstanceid->instance_unique_id;
+
+					$contract->array_options['options_instance_unique_id'] = $old_instance_unique_id;
+				}
+			} else {
+				print "SQL error when trying to find the options_instance_unique_id of old instance";
+				exit(-89);
+			}
+
+			dol_syslog("We will reuse the options_instance_unique_id = ".$contract->array_options['options_instance_unique_id']." from ".$customurl, LOG_DEBUG);
+		} else {
+			dol_syslog("No custom url provided or url is not an oldinstance so we won't reuse an existing value for options_instance_unique_id", LOG_DEBUG);
+		}
+
 
 		if ($abusetest) {
 			$db->rollback();

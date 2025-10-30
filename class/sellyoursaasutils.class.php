@@ -4306,7 +4306,7 @@ class SellYourSaasUtils
 		$sldAndSubdomain = $tmp[0];
 		$domainname = $tmp[1];
 
-		
+
 		// Now loop on each lines qualified for action and call remote URL
 		foreach ($listoflinesqualified as $tmparrayoflinesqualified) {
 			$tmpobject = $tmparrayoflinesqualified['tmpobject'];
@@ -4331,7 +4331,7 @@ class SellYourSaasUtils
 				}
 
 				$ispaidinstance = sellyoursaasIsPaidInstance($contract);
-				
+
 				if (! empty($contract->array_options['options_deployment_host'])) {
 					$serverdeployment = $contract->array_options['options_deployment_host'];
 				} else {
@@ -4390,7 +4390,7 @@ class SellYourSaasUtils
 				$generateddbprefix     = (empty($contract->array_options['options_prefix_db']) ? 'llx_' : $contract->array_options['options_prefix_db']);
 				$generatedunixhostname = $contract->array_options['options_hostname_os'];
 				$generateddbhostname   = $contract->array_options['options_hostname_db'];
-				$generateduniquekey    = getRandomPassword(true);
+				$generateduniquekey    = empty($contract->array_options['options_instance_unique_id']) ? getRandomPassword(true) : $contract->array_options['options_instance_unique_id'];
 
 				$sshaccesstype         = (empty($contract->array_options['options_sshaccesstype']) ? 0 : $contract->array_options['options_sshaccesstype']);
 				$customurl             = (empty($contract->array_options['options_custom_url']) ? '' : $contract->array_options['options_custom_url']);
@@ -4487,14 +4487,14 @@ class SellYourSaasUtils
 				}
 				$substitarray['__SMTP_SPF_STRING__'] = '_spf'.$sldAndSubdomain.'.'.$domainname;
 
-				
+
 				$dirfortmpfiles = DOL_DATA_ROOT.'/sellyoursaas/temp';
 				dol_mkdir($dirfortmpfiles, '', '0775');
 				$tmppackage->srcconffile1 = $dirfortmpfiles.'/conf.php.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccronfile  = $dirfortmpfiles.'/cron.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccliafter  = $dirfortmpfiles.'/cliafter.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccliafterpaid  = $dirfortmpfiles.'/cliafterpaid.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
-				
+
 				$conffile = make_substitutions($tmppackage->conffile1, $substitarray);
 				$cronfile = make_substitutions($tmppackage->crontoadd, $substitarray);
 				$cliafter = make_substitutions($tmppackage->cliafter, $substitarray);
@@ -4708,7 +4708,7 @@ class SellYourSaasUtils
 					$generateddbprefix    = ($contract->array_options['options_prefix_db'] ? $contract->array_options['options_prefix_db'] : 'llx_');
 					$generatedunixhostname= $contract->array_options['options_hostname_os'];
 					$generateddbhostname  = $contract->array_options['options_hostname_db'];
-					$generateduniquekey   = getRandomPassword(true);
+					$generateduniquekey   = empty($contract->array_options['options_instance_unique_id']) ? getRandomPassword(true) : $contract->array_options['options_instance_unique_id'];
 
 					$sshaccesstype        = (empty($contract->array_options['options_sshaccesstype']) ? 0 : $contract->array_options['options_sshaccesstype']);
 					$customurl            = $contract->array_options['options_custom_url'];

@@ -523,6 +523,7 @@ if (empty($overwriteexistinginstance)) {
 		$newpass = getRandomPassword(true, array('I'), 16);
 	}
 
+	// Create virgin envelop for the new instance. The register_instance will use the $oldinstance name
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
 	$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
 	$command.=" ".escapeshellarg($oldinstance);
