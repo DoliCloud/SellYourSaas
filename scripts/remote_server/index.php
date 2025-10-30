@@ -463,10 +463,10 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^\/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/cloud\/init.sh \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+$/i', $newline)) {
+		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z0-9_,]+$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^#?php \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+$/i', $newline)) {
+		if (preg_match('/^#?php \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/upgrade2\.php 0\.0\.0 0\.0\.0 [a-z0-9_,]+$/i', $newline)) {
 			continue;
 		}
 		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/?$/i', $newline)) {
