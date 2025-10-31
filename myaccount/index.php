@@ -430,7 +430,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myc
 
 $listofcontractidmodulesupplier = array();
 // Load list of child instance for module supplier
-if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && in_array($mode, array('mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
+if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && in_array($mode, array('dashboard', 'mymodulecustomerinstances', 'mymodulecustomerbilling'))) {
 	$sql = 'SELECT DISTINCT c.rowid';
 	$sql.= ' FROM '.MAIN_DB_PREFIX.'contrat as c';
 	$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'contratdet as d ON d.fk_contrat = c.rowid';
