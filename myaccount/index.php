@@ -1163,7 +1163,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$db->rollback();
 	}
 } elseif ($action == 'createpaymentmode') {		// Create credit card stripe or sepa record
-	if (GETPOST("submitsepa", 'aZ09')) {
+	if (GETPOST("submitsepa")) {	// This contains the label of the button
 		// Case of SEPA payment mode
 		$langs->load("banks");
 		include_once DOL_DOCUMENT_ROOT.'/societe/class/companybankaccount.class.php';
