@@ -3,8 +3,12 @@
 
 ## Unreleased
 
-* NEW Add badge of number of deployment server.
-* NEW Add tab for events info on a deployment serer card.
+* NEW Remove automatically ending / in directory name in setup of package(this avoid errors and headach in setup phase)
+* NEW Reorganize menu for reseller and module providers
+* NEW Add option SELLYOURSAAS_DASHBOARD_OFF to disallow login/access to dashboard
+* NEW Add warning on support page if contact info are not complete
+* NEW Add badge with number of deployment server on tab title of deployment servers.
+* NEW Add the tab for histori of events info on a deployment server card.
 * NEW Options to disable the apt unattended-upgrade. Such silent upgrade changes system files on disk making fight against intrusion detection more difficult.
 * NEW Can for a server on a service.
 * NEW Search on firstname and last name of thirdparty with global search on contract.  
@@ -46,6 +50,7 @@
 * FIX Redirection instances must not appear in the count of backuped instances.
 * FIX letsencrypt for wildcard are now using 2 passes and needs 2 TXT entry in DNS.
 * FIX Debug master_move_instance.php - Price of old instance is kept/reused.
+* FIX code for email template to use to send email for credit transfer payment.
 * SEC When using ssh, a user can't see the OS and package information.
 
 

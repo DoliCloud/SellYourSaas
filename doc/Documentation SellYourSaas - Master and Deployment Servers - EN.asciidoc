@@ -690,19 +690,19 @@ Create directories required to store data, backups and archives:
 
 * Create the directory */mnt/diskbackup/backup*:
 
-If an optional dedicated disk was created for the backup (different than disk for home):
-
-[source, bash]
----------------
-mkdir /mnt/diskbackup/backup
----------------
-
 If you have not a dedicated disk for backup:
 
 [source, bash]
 ---------------
 mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
 ln -fs /mnt/diskhome/backup /mnt/diskbackup
+---------------
+
+And if an optional dedicated disk was created for the backup (different than disk for home):
+
+[source, bash]
+---------------
+mkdir /mnt/diskbackup/backup
 ---------------
 
 * Create the other directories on the *Deployment* servers:
@@ -3684,8 +3684,7 @@ You must have inside the cron of user *admin* (You can view the cron with *cront
 5 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
-Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. And *anonymousbatch* is the user dedicated for batch processing. You will set them
-later on the Dolibarr master.
+Note: *securitykeydefinedinscheduledjobsetup* is the value of a key you have choosen. And *anonymousbatch* is the user dedicated for batch processing. Remember the 2 value you use hare, you will set them later on the Dolibarr master.
 
 
 ==== On deployment servers
@@ -3708,9 +3707,31 @@ You must have inside the cron of user *admin* (You can view the cron with *cront
 [source,bash]
 ---------------
 # m h  dom mon dow   command
-# cron master and deployment root
+# cron master and deployment admin
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 20 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
+---------------
+
+
+==== On master and deployment server
+
+Add a protection to disable cron tasks if IP of server has changed so if you clone the server on another instance with another IP, you are sure the batch won't be executed on the new server without a manual change here.
+
+Create a copy of the cron service override file */etc/systemd/system/cron.service.d/override.conf*:
+
+[source,bash]
+---------------
+mkdir /etc/systemd/system/cron.service.d;
+cp /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/etc/systemd/system/cron.service.d/override.conf /etc/systemd/system/cron.service.d/override.conf
+---------------
+
+Then edit the file to change the allowed IP:
+
+[source,bash]
+---------------
+vi /etc/systemd/system/cron.service.d/override.conf
+systemctl daemon-reload
+/etc/init.d/cron restart
 ---------------
 
 
@@ -4627,18 +4648,22 @@ apt dist-upgrade or do-release-upgrade
 
 # if you move from 18.04 to 20.04, you must also delete old repository of ondrej/php and and reinstall it with
 sudo add-apt-repository ppa:ondrej/php
+apt update
 apt install php-mysql
 a2enmod php7.4
 apt remove php-fpm php7-fpm
 
 # if you move from 20.04 to 22.04, you must enable the correct php version
-a2dismod php7.4; a2enmod php8.1;
-or apt install php7.4
+sudo add-apt-repository ppa:ondrej/php
+apt update
+a2dismod php7.4; a2enmod php8.4;
+a2enmod apparmor
+or apt install php8.4 php8.4-mysql php8.4-zip php8.4-imap
 # You must also remove an old apache2 UFW profile that is a duplicate with apache2-utils.ufw.profile
 rm -fr /etc/ufw/.../apache2.2-common
 # You must also remove old apparmor lxc profiles
 apt remove lxc
-rm -fr /etc/apparmor.d/lxc*
+
 # Fix the script to stop apparmor:
 vi /lib/apparmor/rc.apparmor.functions
   # FIX LDR
@@ -4649,8 +4674,9 @@ vi /lib/apparmor/rc.apparmor.functions
 
 
 # if you move from 22.04 to 24.04, you must enable the correct php version
-apt install apache2; apt install libapache2-mod-apparmor; apt install php-tidy;
-a2enmod php8.3; a2enmod apparmor
+apt install apache2; apt install libapache2-mod-apparmor; apt install php8.4-tidy;
+a2dismod php7.4; a2enmod php8.4;
+a2enmod apparmor
 a2disconf php8.3-fpm; a2enconf php8.3-fpm; 
 # You must also remove an old apache2 UFW profile that is duplicate with apache2-utils.ufw.profile
 rm -fr apache2.2-common
@@ -4789,19 +4815,49 @@ nova image-create ID_OF_SERVER image-myfile-server1
 glance image-list   
    ou   openstack image list --long
 glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a   
-   ou   openstack image save --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
+   ou   openstack image save --file ~/Téléchargements/image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
+
+To make image smaller we will run zerofree the rebuild image file with qemu-img convert.
+
+[source,bash]
+---------------
+qemu-img info image-myfile-server1.qcow2
+
+modprobe nbd max_part=16
+qemu-nbd -c /dev/nbd0 image-myfile-server1.qcow2
+
+fdisk -l /dev/nbd0
+mkdir /mnt/myimg; 
+
+mount /dev/nbd0p1 /mnt/myimg
+rm -rf /mnt/myimg/tmp/*
+rm -fr /mnt/myimg/var/log/*.gz /mnt/myimg/var/log/*.log /mnt/myimg/var/log/journal/*
+umount /mnt/myimg
+
+zerofree -v /dev/nbd0p1
+
+mount /dev/nbd0p1 /mnt/myimg
+ls /mnt/myimg
+umount /mnt/myimg
+
+qemu-nbd -d /dev/nbd0
+qemu-img convert -O qcow2 -c image-myfile-server1.qcow2 image-myfile-server1-compacted.qcow2
+qemu-img info image-myfile-server1.qcow2
+---------------
+
 
 To push an instance's image on a project:
 
 [source,bash]
 ---------------
 source openrctarget.sh
-export OS_REGION_NAME=SBG1
+export OS_REGION_NAME=SBG1  or  GRA1, GRA7 ...
 glance image-create --name nom_image_snaphot_new_server --disk-format qcow2 --container-format bare --file mon_fichier_snap_serveur1.qcow2
+   ou    openstack image create --disk-format qcow2 --container-format bare --file ~/votre_image_compacte.qcow2 "Nom de votre image"
 ---------------
 
-To build a volume image, you need to create it from the detached volume (can't use a snapshot)
+To build a volume image from a volume, you need to create it from the detached volume (can't use a snapshot):
 
 [source,bash]
 ---------------
@@ -4810,7 +4866,12 @@ openstack volume list
 openstack image create --disk-format qcow2 --container-format bare --volume 673b0ad9-1fca-485c-ae2b-8ee271b71dc7 nom_image_snaphot_new_volume
 
 ...wait until the copy is finished...
+---------------
 
+To restore a volume image onto a volume:
+
+[source,bash]
+---------------
 openstack image list
 
 openstack image save --file nom_image_snaphot_new_volume.qcow2 8625f87e-8248-4e62-a0ce-a89c7bd1a9be
@@ -4825,6 +4886,7 @@ To push an image on a project:
 
 
 - To restore
+
 openstack server create --flavor FLAVOR_ID --image BACKUP_IMAGE_ID --nic net-id=NETWORK_ID INSTANCE_NAME
 
 
@@ -4849,6 +4911,8 @@ Warning: Reducing size of a filesystem does not work on OVH Public Cloud boot sy
 
 When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
 or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
+
+If you need netwrok, start network with: systemctl restart networking
 
 Find attached disks to identify the system partition disk.
 

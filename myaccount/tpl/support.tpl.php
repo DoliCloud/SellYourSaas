@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2011-2018 Laurent Destailleur <eldy@users.sourceforge.net>
+/* Copyright (C) 2011-2025 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
+ * @var string $urlfaq
+ * @var string $urlstatus
+ * @var array $listofcontractid
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
 	exit(1);
 }
+
+$langs->load("ticket");
 
 ?>
 <!-- BEGIN PHP TEMPLATE support.tpl.php -->
@@ -77,7 +91,8 @@ print '
 	<!-- END PAGE HEAD -->
 	<!-- END PAGE HEADER-->';
 
-	$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
+// Get the URL for support
+$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 	&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
 	$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
@@ -87,8 +102,10 @@ if (! empty($mythirdpartyaccount->array_options['options_domain_registration_pag
 }
 
 if ($sellyoursaassupporturl) {
+	// If there is an external dedicated support URL defined, we use it
 	$supportkey = strtoupper(dol_trunc(dol_hash($mythirdpartyaccount->email, 'md5'), 5, 'right', 'UTF-8', 1));
 	$sellyoursaassupporturlorigin = $sellyoursaassupporturl;
+	print '<!-- sellyoursaassupporturlorigin = '.$sellyoursaassupporturlorigin.' -->'."\n";
 
 	$sellyoursaassupporturl = str_replace('__EMAIL__', urlencode($mythirdpartyaccount->email), $sellyoursaassupporturl);
 	$sellyoursaassupporturl = str_replace('__FIRSTNAME__', urlencode($mythirdpartyaccount->array_options['options_firstname']), $sellyoursaassupporturl);
@@ -98,6 +115,7 @@ if ($sellyoursaassupporturl) {
 	$sellyoursaassupporturl = str_replace('__SUPPORTKEY__', urlencode($supportkey), $sellyoursaassupporturl);
 
 	print '<div class="row" id="supporturl"><div class="col-md-12"><div class="portlet light">';
+	print '<br>'."\n";
 	print $langs->trans("SupportURLExternal", $sellyoursaassupporturl).'<br>'."\n";
 
 	if (preg_match('/__SUPPORTKEY__/', $sellyoursaassupporturlorigin)) {	// A __SUPPORTKEY__ is defined so we show it
@@ -106,6 +124,11 @@ if ($sellyoursaassupporturl) {
 
 	print '</div></div></div>';
 } else {
+	// Define if mandatory contact info are set
+	$mandatoryInfoAreNotSet = ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE'))
+		|| empty($mythirdpartyaccount->array_options['options_firstname'])
+		|| empty($mythirdpartyaccount->array_options['options_lastname']));
+
 	print '
 			    <div class="row" id="choosechannel">
 			      <div class="col-md-12">
@@ -114,10 +137,19 @@ if ($sellyoursaassupporturl) {
 
 				      <div class="portlet-title">
 				        <div class="caption">';
+	if ($mandatoryInfoAreNotSet) {
+		print '<br>';
+		print $langs->trans('BeforeAskForSupport', img_warning('', '', '')).'<br>';
+		print '<center class="margintop">';
+		print img_picto('', 'url').' <a href="/index.php?mode=myaccount">'.$langs->trans('BeforeAskForSupport2').'</a>';
+		print '</center><br>';
+	}
+
 	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')) {
 		print '<span>'.$langs->trans(getDolGlobalString('SELLYOURSAAS_SUPPORT_SHOW_MESSAGE')).'</span><br><br>';
 	} else {
-		print '<span class="opacitymedium"><br>'.$langs->trans("AskForSupport").'...</span><br><br>';
+		print '<span class="opacitymedium"><br>'.$langs->trans("AskForSupport").'...</span><br>';
+		print '<br>';
 	}
 
 	print '<!-- form to select channel -->'."\n";
@@ -247,7 +279,13 @@ if ($sellyoursaassupporturl) {
 	print '</select>';
 	print ajax_combobox("supportchannel");
 
-	print ' <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition">';
+	print ' &nbsp; <input type="submit" name="choosechannel" value="'.$langs->trans("Choose").'"';
+	print ' class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition"';
+	if ($mandatoryInfoAreNotSet) {
+		print ' disabled="disabled"';
+		print ' title="'.$langs->trans("PleaseFillContactInfoFirst").'"';
+	}
+	print '>';
 
 	print '</form>';
 
@@ -530,10 +568,10 @@ if ($sellyoursaassupporturl) {
 		print '<div class="hideforautomigration">';
 
 		// From
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text"'.(GETPOST('addfile') ? '' : ' autofocus').' class="minwidth300" id="from" name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'" placeholder="email@domain.com"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" class="minwidth300" id="from" name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'" placeholder="email@domain.com"><br><br>';
 
 		// Topic
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject" value="'.$subject.'"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject"'.(GETPOST('addfile') ? '' : ' autofocus').' value="'.$subject.'"><br><br>';
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';
@@ -543,6 +581,12 @@ if ($sellyoursaassupporturl) {
 
 		print '<br>';
 		// Description
+		/* Not yet available, ckeditor js path is source/... and should be /source/...
+		include_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
+		$doleditor = new DolEditor('content', GETPOST('content', 'none'), '95%', 200, 'dolibarr_details', 'NU');
+		print $doleditor->Create();
+		print '<br>';
+		*/
 		print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
 
 		// Button to send ticket/email

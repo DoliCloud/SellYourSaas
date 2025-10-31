@@ -15,6 +15,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -106,7 +115,7 @@ print '
 						print '<div class="form-group">
 	                                  <label>'.$langs->trans("VATIntra").'</label> ';
 						if (! empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra)) {
-							print img_warning($langs->trans("Mandatory"), 'class="hideifnonassuj"');
+							print img_warning($langs->trans("Mandatory"), '', 'hideifnonassuj');
 						}
 
 						$placeholderforvat='';
@@ -196,9 +205,12 @@ print '<script type="text/javascript" language="javascript">
 		jQuery(document).ready(function() {
 			jQuery("#vatassuj").click(function() {
 				console.log("Click on vatassuj "+jQuery("#vatassuj").is(":checked"));
-				jQuery(".hideifnonassuj").hide();
-				jQuery(".hideifnonassuj").show();
-				jQuery("#vatnumber").focus();
+				if (jQuery("#vatassuj").is(":checked")) {
+					jQuery(".hideifnonassuj").show();
+					jQuery("#vatnumber").focus();
+				} else {
+					jQuery(".hideifnonassuj").hide();
+				}
 			});
 		});
 		</script>';
@@ -251,14 +263,19 @@ if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
 	                      <input type="text" class="inline-block" value="'.$mythirdpartyaccount->array_options['options_lastname'].'" name="lastName">
 	                    </div>
 	                  </div>
-	                </div>
+	                </div>';
+
+// Add input for the CC invoice
+if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'nonprofit' || !getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+					print '
 	                <div class="form-group">
 	                  <label>'.img_picto('', 'email', 'class="paddingright opacitymedium"').$form->textwithpicto($langs->trans("EmailCCInvoices"), $langs->trans("KeepEmptyToUseMainEmail"), 1, 'help', 'opacitymedium').'</label>
 	                  <input type="text" class="form-control" value="'.(GETPOSTISSET('emailccinvoice') ? GETPOST('emailccinvoice') : $mythirdpartyaccount->array_options['options_emailccinvoice']).'" name="emailccinvoice">
 	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->array_options['options_emailccinvoice'].'" name="oldemailccinvoice">
 					</div>
-
 					';
+}
+
 if (getDolGlobalString('SELLYOURSAAS_ENABLE_OPTINMESSAGES')) {
 	print '
 		                <div class="form-group paddingtop">

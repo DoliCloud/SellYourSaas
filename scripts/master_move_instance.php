@@ -523,6 +523,8 @@ if (empty($overwriteexistinginstance)) {
 		$newpass = getRandomPassword(true, array('I'), 16);
 	}
 
+	// Create virgin envelop for the new instance. The register_instance will use the $oldinstance name
+	// Note that if the old instance had a value into instance_unique_id, the creation of the new one should reuse it.
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
 	$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
 	$command.=" ".escapeshellarg($oldinstance);
@@ -697,7 +699,7 @@ print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' SFTP connect stri
 //print 'SFTP old password '.$oldospass."\n";
 
 
-// First we get the files of the source to move
+// STEP 1 of synchro - We get the files of the source to move
 $command = "rsync";
 $param = array();
 //if (! in_array($mode, array('confirm', 'confirmredirect', 'confirmmaintenance'))) $param[]="-n";
@@ -761,7 +763,8 @@ if ($return_var) {
 print $content_grabbed."\n";
 
 
-// Now we copy files on the target directory
+// STEP 2 of synchro - Now we copy files on the target directory
+
 $sourcedir = $tmptargetdir;
 $targetdir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$newlogin.'/'.$newdatabasedb;
 
@@ -837,12 +840,47 @@ print "\n";
 print $content_grabbed."\n";
 
 
+// STEP 3 of synchro - We should update the value of $dolibarr_main_instance_unique_id in case
+// it was not done during creation of instance.
+$value_of_dolibarr_main_instance_unique_id = '';
+if (file_exists($sourcedir.'/htdocs/conf/conf.php')) {
+	$tmpfilecontent = file_get_contents($sourcedir.'/htdocs/conf/conf.php');
+	foreach (explode("\n", $tmpfilecontent) as $line) {
+	    if (strpos($line, '=') === false) continue;
+	    if (preg_match('/^#/', $line)) continue;
+	    if (preg_match('/^\//', $line)) continue;
+	    [$key, $val] = explode('=', $line, 2);
+	    if (trim($key) === $param) {
+	        $value_of_dolibarr_main_instance_unique_id = str_replace("'", "", trim($val));
+	        break;
+	    }
+	}
+
+	if (empty($nointeractive)) {
+		print "Press ENTER to continue by running the ssh command to update the dolibarr_main_instance_unique_id on remote target host...\n";
+		$input = trim(fgets(STDIN));
+	}
+
+	$fullcommand = 'ssh '.$newlogin.'@'.$newserver.' "sed -i \'s/^param=.*/param='.$value_of_dolibarr_main_instance_unique_id.'/\' '.$targetdir.'/htdocs/conf/conf.php"';
+
+	print $fullcommand."\n";
+
+	$outputfile = $conf->admin->dir_temp.'/outsshsed.tmp';
+	$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0);
+}
+
+
 // Now we copy database from source to target
+
+if (empty($nointeractive)) {
+	print "Press ENTER to continue by running the dump/load of database...\n";
+	$input = trim(fgets(STDIN));
+}
 
 print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 
 
-// First we backup the source database
+// STEP 1 of database copy - we backup the source database
 $command="mysqldump";
 $param=array();
 $param[]=$olddbname;
@@ -885,7 +923,7 @@ if ($return_var) {
 }
 
 
-// We load the backup on target database
+// STEP 2 of database copy - We load the backup on target database
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 //print "If the mysql fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 

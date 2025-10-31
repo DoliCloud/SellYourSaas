@@ -54,6 +54,7 @@ require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/class/doleditor.class.php";
+require_once __DIR__.'/../class/deploymentserver.class.php';
 dol_include_once("/sellyoursaas/backoffice/lib/refresh.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 dol_include_once("/sellyoursaas/backoffice/lib/backoffice.lib.php");		// do not use dol_buildpath to keep global of var into refresh.lib.php working
 
@@ -109,6 +110,14 @@ if (GETPOST('saveannounce', 'alpha')) {
 	dolibarr_set_const($db, "SELLYOURSAAS_ANNOUNCE", GETPOST("SELLYOURSAAS_ANNOUNCE", 'none'), 'chaine', 0, '', $conf->entity);
 }
 
+if ($action == 'setSELLYOURSAAS_DASHBOARD_OFF') {
+	if (GETPOST('value')) {
+		dolibarr_set_const($db, 'SELLYOURSAAS_DASHBOARD_OFF', 1, 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 1, 'chaine', 0, '', $conf->entity);
+	} else {
+		dolibarr_set_const($db, 'SELLYOURSAAS_DASHBOARD_OFF', 0, 'chaine', 0, '', $conf->entity);
+	}
+}
 if ($action == 'setSELLYOURSAAS_DISABLE_NEW_INSTANCES') {
 	if (GETPOST('value')) {
 		dolibarr_set_const($db, 'SELLYOURSAAS_DISABLE_NEW_INSTANCES', 1, 'chaine', 0, '', $conf->entity);
@@ -133,9 +142,26 @@ $form=new Form($db);
 
 llxHeader('', $langs->transnoentitiesnoconv('DoliCloudCustomers'), '');
 
-//print_fiche_titre($langs->trans("DoliCloudArea"));
+// Count nb of deployment servers
+$object = new Deploymentserver($db);
+$sql = 'SELECT count(rowid) as nbtotalofrecords FROM '.MAIN_DB_PREFIX.'sellyoursaas_deploymentserver';
+if ($object->ismultientitymanaged == 1) {
+	$sql .= " WHERE t.entity IN (".getEntity($object->element, (GETPOSTINT('search_current_entity') ? 0 : 1)).")";
+} else {
+	$sql .= " WHERE 1 = 1";
+}
+// Count total nb of records
+$nbtotalofrecords = '';
+$resql = $db->query($sql);
+if ($resql) {
+	$objforcount = $db->fetch_object($resql);
+	$nbtotalofrecords = $objforcount->nbtotalofrecords;
+	$db->free($resql);
+} else {
+    dol_print_error($db);
+}
 
-$head = sellYourSaasBackofficePrepareHead();
+$head = sellYourSaasBackofficePrepareHead($nbtotalofrecords);
 
 //$head = commande_prepare_head(null);
 dol_fiche_head($head, 'home', $langs->trans("DoliCloudArea"), -1, 'sellyoursaas@sellyoursaas');
@@ -248,6 +274,23 @@ print '<td>';
 print $langs->trans('Website').' & '.$langs->trans('CustomerAccountArea');
 print '</td></tr>';
 print '<tr class="oddeven"><td>';
+$enabledisabledashboard='';
+if (!getDolGlobalString('SELLYOURSAAS_DASHBOARD_OFF')) {
+	// Button off, click to enable
+	$enabledisabledashboard.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DASHBOARD_OFF&token='.newToken().'&value=1'.$param.'">';
+	$enabledisabledashboard.=img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
+	$enabledisabledashboard.='</a>';
+} else {
+	// Button on, click to disable
+	$enabledisabledashboard.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DASHBOARD_OFF&token='.newToken().'&value=0'.$param.'">';
+	$enabledisabledashboard.=img_picto($langs->trans('Disabled'), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
+	$enabledisabledashboard.='</a>';
+}
+print $enabledisabledashboard;
+print $langs->trans("EnableDashboards");
+print '</td></tr>';
+
+print '<tr class="oddeven"><td>';
 $enabledisablehtml='';
 if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 	// Button off, click to enable
@@ -273,6 +316,7 @@ if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 }
 
 print '</td></tr>';
+
 print '<tr class="oddeven"><td>';
 $enabledisableannounce='';
 if (!getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON')) {
@@ -358,7 +402,16 @@ print '</td><td align="right">';
 print '<font size="+2">'.$totalresellers.'</font>';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
-$texthelp = $langs->trans("NbOfInstancesActivePayingDesc");
+
+$transkeyforactivepayinghelp = "NbOfInstancesActivePayingDesc";
+$transkeyfornbinstanceactivepaying = "NbOfInstancesActivePaying";
+$transkeyfornbinstanceactivepayingall = "NbOfInstancesActivePayingAll";
+if (getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+	$transkeyfornbinstanceactivepaying = "NbOfInstancesActiveFree";
+	$transkeyfornbinstanceactivepayingall = "NbOfInstancesActiveFreeAll";
+}
+
+$texthelp = $langs->trans($transkeyforactivepayinghelp);
 $stringlistofinstancespayingwithoutrecinvoice = '';
 $nboflistofinstancespayingwithoutrecinvoice = 0;
 if (!empty($rep) && is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
@@ -368,7 +421,7 @@ if (!empty($rep) && is_array($rep['listofinstancespayingwithoutrecinvoice'])) {
 		$stringlistofinstancespayingwithoutrecinvoice .= ($stringlistofinstancespayingwithoutrecinvoice ? ', ' : '').$arrayofcontract['thirdparty_name'].' - '.$arrayofcontract['contract_ref']."\n";
 	}
 }
-print $form->textwithpicto($langs->trans("NbOfInstancesActivePaying"), $texthelp);
+print $form->textwithpicto($langs->trans($transkeyfornbinstanceactivepaying), $texthelp);
 if ($mode == 'refreshstats') {	// Info not saved into session (too large), so we show it only after a refresh
 	$texthelp = $langs->trans("NbOfInstancesActivePayingWithoutRecInvoice", $nboflistofinstancespayingwithoutrecinvoice);
 	if ($stringlistofinstancespayingwithoutrecinvoice) {
@@ -376,7 +429,7 @@ if ($mode == 'refreshstats') {	// Info not saved into session (too large), so we
 		$texthelp .= $stringlistofinstancespayingwithoutrecinvoice;
 	}
 }
-print ' | '.$form->textwithpicto($langs->trans("NbOfInstancesActivePayingAll"), $texthelp).' | '.$langs->trans("NbOfActiveInstances").' ';
+print ' | '.$form->textwithpicto($langs->trans($transkeyfornbinstanceactivepayingall), $texthelp).' | '.$langs->trans("NbOfActiveInstances").' ';
 print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) {
 	print '<font size="+2">'.$totalinstancespaying.' | '.$totalinstancespayingall.' | '.$totalinstances.'</font>';
@@ -457,7 +510,7 @@ print '</table>';
 print '</div></div></div>';
 
 //$servicetouse='old';
-$servicetouse=strtolower($conf->global->SELLYOURSAAS_NAME);
+$servicetouse=strtolower(getDolGlobalString('SELLYOURSAAS_NAME'));
 $regs = array();
 
 // array(array(0=>'labelxA',1=>yA1,...,n=>yAn), array('labelxB',yB1,...yBn))

@@ -29,7 +29,7 @@ if (empty($conf) || ! is_object($conf)) {
 }
 
 ?>
-<!-- BEGIN PHP TEMPLATE mycustomerinstances.tpl.php -->
+<!-- BEGIN PHP TEMPLATE mymodulecustomerinstances.tpl.php -->
 <?php
 
 $plan = GETPOST('plan', 'alpha');
@@ -49,7 +49,7 @@ print '
 	<div class="page-head">
 	  <!-- BEGIN PAGE TITLE -->
 	<div class="page-title">
-	  <h1>'.$langs->trans("MyCustomersInstances").'</h1>
+	  <h1>'.$langs->trans("MyModuleCustomersInstances").'</h1>
 	</div>
 	<!-- END PAGE TITLE -->
 	</div>
@@ -66,7 +66,7 @@ print '<input type="hidden" name="token" value="'.newToken().'">';
 print $langs->trans("InstanceName").' : <input type="text" name="search_instance_name" value="'.$search_instance_name.'"><br>';
 //$savsocid = $user->socid;	// Save socid of user
 //$user->socid = 0;
-print $langs->trans("Customer").'/'.$langs->trans("Email").' : <input type="text" name="search_customer_name" value="'.$search_customer_name.'"><br>';
+print $langs->trans("SupplierModule").' : <input type="text" name="search_module_name" value="'.$search_module_name.'"><br>';
 //.$form->select_company(GETPOST('search_customer_name', 'search_customer_name'), 'search_customer_name', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'inline-block').'</div><br>';
 //$user->socid = $savsocid;	// Restore socid of user
 
@@ -77,12 +77,12 @@ print ' &nbsp; ';
 print '<input type="submit" name="reset" value="'.$langs->trans("Reset").'"><br>';
 print '</div>';
 
-if (count($listofcontractidreseller) > 0) {
+if (count($listofcontractidmodulesupplier) > 0) {
 	print $langs->trans("FirstRecord").' <input type="text" name="firstrecord" class="width50 right" value="'.$firstrecord.'">';
 	print ' - ';
 	print $langs->trans("LastRecord").' <input type="text" name="lastrecord" class="width50 right" value="'.$lastrecord.'">';
 	print '<span class="opacitymedium"> / ';
-	print count($listofcontractidreseller) .'</span><br>';
+	print count($listofcontractidmodulesupplier) .'</span><br>';
 }
 
 print '</form>';
@@ -90,13 +90,13 @@ print '</div></div></div>';
 
 print '<br>';
 
-if (count($listofcontractidreseller) == 0) {
+if (count($listofcontractidmodulesupplier) == 0) {
 	//print '<span class="opacitymedium">'.$langs->trans("NoneF").'</span>';
 } else {
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 
 	$arrayforsort = array();
-	foreach ($listofcontractidreseller as $id => $contract) {
+	foreach ($listofcontractidmodulesupplier as $id => $contract) {
 		$position = 20;
 		if ($contract->array_options['options_deployment_status'] == 'processing') {
 			$position = 1;
@@ -179,7 +179,6 @@ if (count($listofcontractidreseller) == 0) {
 			$displayforinstance='display:none;';
 		}
 
-
 		// Update resources of instance
 		/*
 		if (in_array($statuslabel, array('suspended', 'done')) && ! in_array($initialaction, array('changeplan')) && !preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
@@ -250,8 +249,6 @@ if (count($listofcontractidreseller) == 0) {
 
 		// Customer (link to login on customer dashboard)
 		print '<span class="opacitymedium">'.$langs->trans("Customer").' : </span>'.$tmpcustomer->name;
-		$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $tmpcustomer->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
-		print ' &nbsp;-&nbsp; <a target="_blankcustomer" href="'.$_SERVER["PHP_SELF"].'?mode=logout_dashboard&username='.urlencode($tmpcustomer->email).'&password=&login_hash='.urlencode($dol_login_hash).'"><span class="fa fa-desktop"></span><span class="hideonsmartphone"> '.$langs->trans("LoginWithCustomerAccount").'</span></a>';
 		print '<br>';
 
 		// URL
@@ -302,17 +299,23 @@ if (count($listofcontractidreseller) == 0) {
 				if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] == 'undeployed') {
 					$pricetoshow = '';
 				} else {
+					$total_ht = 0;
+					foreach ($templateinvoice->lines as $key => $templateline) {
+						if (array_key_exists($templateline->fk_product, $mythirdpartyaccount->context['isamoduleprovider'])) {
+							$total_ht += $templateline->total_ht;
+						}
+					}
 					if ($templateinvoice->unit_frequency == 'm' && $templateinvoice->frequency == 1) {
-						$pricetoshow = price($templateinvoice->total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT").' / '.$langs->trans("Month");
-						$priceinvoicedht = $templateinvoice->total_ht;
+						$pricetoshow = price($total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT").' / '.$langs->trans("Month");
+						$priceinvoicedht = $total_ht;
 					} elseif ($templateinvoice->unit_frequency == 'y' && $templateinvoice->frequency == 1) {
-						$pricetoshow = price($templateinvoice->total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT").' / '.$langs->trans("Year");
-						$priceinvoicedht = $templateinvoice->total_ht;
+						$pricetoshow = price($total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT").' / '.$langs->trans("Year");
+						$priceinvoicedht = $total_ht;
 					} else {
 						$pricetoshow  = $templateinvoice->frequency.' '.$freqlabel[$templateinvoice->unit_frequency];
 						$pricetoshow .= ', ';
-						$pricetoshow .= price($templateinvoice->total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT");
-						$priceinvoicedht = $templateinvoice->total_ht;
+						$pricetoshow .= price($total_ht, 1, $langs, 0, -1, -1, $conf->currency).' '.$langs->trans("HT");
+						$priceinvoicedht = $total_ht;
 					}
 					if ($templateinvoice->suspended && $contract->array_options['options_deployment_status'] != 'done') {
 						$pricetoshow = $langs->trans("InvoicingSuspended");
@@ -355,11 +358,15 @@ if (count($listofcontractidreseller) == 0) {
 						            <div class="areaforresources" style="padding-bottom: 12px;">';
 		foreach ($contract->lines as $keyline => $line) {
 			//var_dump($line);
-			print '<div class="resource inline-block boxresource">';
+			if ($line->fk_product > 0 && !array_key_exists($line->fk_product, $mythirdpartyaccount->context['isamoduleprovider'])) {
+				continue;
+			}
 
+			print '<div class="resource inline-block boxresource">';
 			$resourceformula='';
 			$tmpproduct = new Product($db);
 			if ($line->fk_product > 0) {
+
 				$tmpproduct->fetch($line->fk_product);
 
 				$maxHeight=40;
@@ -550,7 +557,7 @@ if (count($listofcontractidreseller) == 0) {
 
 					print ' <span style="color:'.$color.'">';
 					if ($contract->array_options['options_date_endfreeperiod'] > 0) {
-						if ($action == "editfreeperiod" && GETPOST("idcontract", "int") == $contract->id) {
+						/*if ($action == "editfreeperiod" && GETPOST("idcontract", "int") == $contract->id) {
 							print '<form name="formupdatefreedate">';
 							print '<input type="hidden" name="token" value="'.newToken().'">';
 							print '<input type="hidden" name="action" value="confirmeditfreeperiod">';
@@ -565,7 +572,8 @@ if (count($listofcontractidreseller) == 0) {
 						} else {
 							print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
 							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=editfreeperiod&idcontract='.$contract->id.'&token='.newToken().'#contractid'.$contract->id.'"> '.img_edit().'</a>';
-						}
+						}*/
+						print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
 					} else {
 						print $langs->trans("Trial");
 					}
@@ -576,15 +584,15 @@ if (count($listofcontractidreseller) == 0) {
 						}
 						//else print ' - <span style="color: orange">'.$langs->trans("SuspendWillBeDoneSoon").'</span>';
 					}
-					if ($statuslabel == 'suspended') {
-						/*if (empty($atleastonepaymentmode))
+					/*if ($statuslabel == 'suspended') {
+						if (empty($atleastonepaymentmode))
 						 {
 						 print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("AddAPaymentModeToRestoreInstance").'</a>';
 						 }
 						 else
 						 {
 						 print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'">'.$langs->trans("FixPaymentModeToRestoreInstance").'</a>';
-						 }*/
+						 }
 					} else {
 						// Fill array of company payment modes
 						$arrayofcompanypaymentmodeforthiscustomer = array();
@@ -636,7 +644,7 @@ if (count($listofcontractidreseller) == 0) {
 								}
 							}
 						}
-					}
+					}*/
 				}
 			}
 			print '</span>';
@@ -788,253 +796,6 @@ if (count($listofcontractidreseller) == 0) {
 			    </div> <!-- END ROW -->';
 	}		// End loop contract
 }
-
-
-	// Section to add/create a new instance
-	print '
-    	<!-- Add a new instance -->
-    	<div class="portlet-body" style=""><br>
-    	';
-
-	// Force flag to not be an external use to be able to see all thirdparties
-	$user->socid = 0;
-
-	$selectofthirdparties = $form->select_company('', 'reusesocid', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'centpercent');
-
-if ($form->result['nbofthirdparties'] == 0) {
-	print '<span class="opacitymedium">'.$langs->trans("YouDontHaveCustomersYet").'...</span><br>';
-} else {
-	print '<a href="#addanotherinstance" id="addanotherinstance" class="valignmiddle">';
-	print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-right: 4px;"></span><span class="valignmiddle text-plus-circle">'.$langs->trans("AddAnotherInstance").'...</span><br>';
-	print '</a>';
-}
-
-	print '<script type="text/javascript" language="javascript">
-        function applyDomainConstraints( domain )
-        {
-            domain = domain.replace(/ /g,"");
-            domain = domain.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            // allow  "a-z", "A-Z", "0-9" and "-"
-            domain = domain.replace(/[^\w\-]/g,"");
-            domain = domain.replace(/\_/g,"");
-            domain = domain.replace(/^[^a-z0-9\-]+/ig, "");		// We accept the - at start during input to avoid to have it to be removed automatically during typing
-            domain = domain.replace(/[^a-z0-9\-]+$/ig, "");		// We accept the - at end during input to avoid to have it to be removed automatically during typing
-            domain = domain.toLowerCase();
-            if (!isNaN(domain)) {
-              return ""
-            }
-            while ( domain.length > 1 && !isNaN( domain.charAt(0))  ){
-              domain=domain.substr(1)
-            }
-			if (domain.length > 29) {
-			  domain = domain.substring(0, 28);
-			}
-            return domain
-        }
-    	jQuery(document).ready(function() {
-	        /* Apply constraints in sldAndSubdomain field */
-	        jQuery("#formaddanotherinstance").on("change keyup", "#sldAndSubdomain", function() {
-	            console.log("Update sldAndSubdomain field in mycustomerinstances.tpl.php");
-	            $(this).val( applyDomainConstraints( $(this).val() ) );
-	        });
-    		jQuery("#addanotherinstance").click(function() {
-    			console.log("Click on addanotherinstance");
-    			jQuery("#formaddanotherinstance").toggle();
-    		});
-
-            jQuery("#formaddanotherinstance").submit(function() {
-                console.log("We clicked on submit on instance.tpl.php")
-
-                jQuery(document.body).css({ \'cursor\': \'wait\' });
-                jQuery("div#waitMask").show();
-                jQuery("#waitMask").css("opacity"); // must read it first
-                jQuery("#waitMask").css("opacity", "0.7");
-
-				return true;	/* Use return false to show the hourglass without submitting the page (for debug) */
-            });
-		});
-    		</script>';
-
-	print '<br>';
-
-	print '<!-- Form to add an instance -->'."\n";
-	print '<form id="formaddanotherinstance" class="form-group reposition" style="display: none;" action="register_instance.php" method="POST">';
-	print '<input type="hidden" name="token" value="'.newToken().'">';
-	print '<input type="hidden" name="action" value="deployall" />';
-	print '<input type="hidden" name="fromsocid" value="'.$mythirdpartyaccount->id.'" />';
-	print '<input type="hidden" name="mode" value="mycustomerinstances" />';
-	print '<!-- thirdpartyidinsession = '.dol_escape_htmltag($_SESSION['dol_loginsellyoursaas']).' -->';
-
-	print '<div class="row">
-    	<div class="col-md-12">
-
-    	<div class="portlet light">';
-
-	//var_dump($arrayofplans);
-	//natcasesort($arrayofplans);
-
-if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRemoteIP(), explode(',', getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
-	print '<!-- RegistrationSuspendedForTheMomentPleaseTryLater -->'."\n";
-	print '<div class="alert alert-warning" style="margin-bottom: 0px">';
-	if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRemoteIP(), explode(',', getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
-		print getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_MESSAGE');
-	} else {
-		print $langs->trans("RegistrationSuspendedForTheMomentPleaseTryLater");
-	}
-	print '</div>';
-} else {
-	print '<div class="group">';
-
-	print '<div class="horizontal-fld centpercent marginbottomonly">';
-
-	$savsocid = $user->socid;	// Save socid of user
-	$user->socid = 0;
-	print $langs->trans("Customer").' '.$selectofthirdparties.'<br><br>';
-	$user->socid = $savsocid;	// Restore socid of user
-
-	print '<strong>'.$langs->trans("Plan").'</strong> ';
-	print $form->selectarray('service', $arrayofplans, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
-	print '<br>';
-	print '</div>';
-	//print ajax_combobox('service');
-
-	print '
-    		<div class="horizontal-fld clearboth margintoponly">
-    		<div class="control-group required">
-    		<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" spellcheck="false" autocapitalize="off" />
-    		</div>
-    		</div>
-    		<div class="horizontal-fld margintoponly">
-    		<div class="control-group required">
-    		<label class="control-label" for="password2" trans="1">'.$langs->trans("PasswordRetype").'</label><input name="password2" type="password" minlength="8" maxlength="128" autocomplete="new-password" spellcheck="false" autocapitalize="off" />
-    		</div>
-    		</div>
-    		</div> <!-- end group -->
-
-    		<section id="selectDomain" style="margin-top: 20px;">
-    		<div class="fld select-domain required">
-    		<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
-    		<div class="linked-flds">
-    		<span class="opacitymedium">https://</span>
-    		<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
-    		';
-
-	print '<select name="tldid" id="tldid">';
-	// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
-	$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
-
-	// listofdomain can be:  with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
-	if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
-		$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
-	} else {
-		$staticdeploymentserver = new Deploymentserver($db);
-		$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND');
-	}
-	foreach ($listofdomain as $val) {
-		$newval=$val;
-		$reg = array();
-		$tmpdomains = array();
-		if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-			$tmpnewval = explode(':', $newval);
-			if (!empty($tmpnewval[1]) && $tmpnewval[1] == 'closed') {
-				continue;
-			}
-			$newval = $tmpnewval[0];        // the part before the : that we use to compare the forcesubdomain parameter.
-			$domainqualified = false;
-			$tmpdomains = explode('+', $reg[1]);
-			foreach ($tmpdomains as $tmpdomain) {
-				if ($tmpdomain == $domainname || $newval == GETPOST('forcesubdomain', 'alpha')) {
-					$domainqualified = true;
-					break;
-				}
-			}
-			if (! $domainqualified) {
-				continue;
-			}
-		}
-		// $newval is subdomain (with.mysaasdomainname.com for example)
-
-		if (! preg_match('/^\./', $newval)) {
-			$newval='.'.$newval;
-		}
-		print '<option class="optionfordomain';
-		foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
-			print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
-		}
-		print '" value="'.$newval.'"'.(($newval == '.'.GETPOST('forcesubdomain', 'alpha')) ? ' selected="selected"' : '').'>';
-		print $newval;
-		print '</option>';
-	}
-	print '</select>
-	    		<br class="unfloat" />
-	    		</div>
-	    		</div>
-	    		</section>'."\n";
-
-	// Add code to make constraints on deployment servers
-	print '<!-- JS Code to force plan -->';
-	print '<script type="text/javascript" language="javascript">
-				function disable_combo_if_not(s) {
-					console.log("Disable combo choice except if s="+s);
-					$("#tldid > option").each(function() {
-						if (this.value.endsWith(s)) {
-							console.log("We enable the option "+this.value);
-							$(this).removeAttr("disabled");
-							$(this).attr("selected", "selected");
-						} else {
-							console.log("We disable the option "+this.value);
-							$(this).attr("disabled", "disabled");
-							$(this).removeAttr("selected");
-						}
-					});
-				}
-
-	    		jQuery(document).ready(function() {
-					jQuery("#service").change(function () {
-						var pid = jQuery("#service option:selected").val();
-						console.log("We select product id = "+pid);
-					';
-	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
-		foreach ($arrayofplansfull as $key => $tmpplan) {
-			if (!empty($tmpplan['restrict_domains'])) {
-				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
-				foreach ($restrict_domains as $domain) {
-					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
-					break;
-				}
-			} else {
-				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
-			}
-		}
-	}
-
-	print '
-				});
-				jQuery("#service").trigger("change");
-			});'."\n";
-
-	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
-		foreach ($arrayofplansfull as $key => $tmpplan) {
-			print '/* pid='.$key.' => '.$tmpplan['label'].' - '.$tmpplan['id'].' - '.$tmpplan['restrict_domains'].' */'."\n";
-		}
-	}
-	print '</script>';
-
-	if (GETPOST('admin', 'alpha')) {
-		print '<div class="horizontal-fld clearboth margintoponly">';
-		print '<input type="checkbox" name="disablecustomeremail" /> '.$langs->trans("DisableEmailToCustomer");
-		print '</div>';
-	}
-
-	print '<br><input type="submit" class="btn btn-warning default change-plan-link" name="changeplan" value="'.$langs->trans("Create").'">';
-}
-
-print '</div></div></div>';
-
-print '</form>';
-
-print '</div>';	// end Add a new instance
-
 
 print '
     		</div>

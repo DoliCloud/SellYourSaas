@@ -124,7 +124,9 @@ foreach ($tmpservices as $key => $tmpservice) {
 }
 // $arrayofsuffixfound should be now array('mysaasdomain'=>'', mysaasdomainalt'=>'_MYSAASDOMAINALT_COM', ...)
 //var_dump($arrayofsuffixfound);
-
+if (empty($arrayofsuffixfound)) {
+	$arrayofsuffixfound[] = '';
+}
 
 
 /*

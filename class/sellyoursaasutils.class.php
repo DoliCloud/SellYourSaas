@@ -61,7 +61,7 @@ class SellYourSaasUtils
 
 	/**
 	 * Action executed by scheduler for job SellYourSaasValidateDraftInvoices
-	 * Search draft invoices on sellyoursaas customers and check they are linked to a not closed contract. Validate it if not, do nothing if closed.
+	 * Search draft invoices on sellyoursaas customers and check they are linked to a not closed contract. Validate it if not closed, do nothing if closed.
 	 * CAN BE A CRON TASK
 	 *
 	 * @param	int		$restrictonthirdpartyid		0=All qualified draft invoices, >0 = Restrict on qualified draft invoice of thirdparty.
@@ -352,7 +352,7 @@ class SellYourSaasUtils
 										$msg = '';
 										if ($invoice->mode_reglement_code == $codepaiementtransfer) {
 											$sendemailtocustomer = 1;
-											$labeltouse = 'InvoicePaymentWaitingCreditTransfer';
+											$labeltouse = 'YourLinkForYourPayment';
 										}
 
 										$object = $invoice;
@@ -380,88 +380,93 @@ class SellYourSaasUtils
 												$msg     = $arraydefaultmessage->content;
 											}
 
-											$substitutionarray = getCommonSubstitutionArray($outputlangs, 0, null, $object);
-
-											complete_substitutions_array($substitutionarray, $outputlangs, $object);
-
-											// Set the property ->ref_customer with ref_customer of contract so __REF_CLIENT__ will be replaced in email content
-											// Search contract linked to invoice
-											$foundcontract = null;
-											$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
-
-											if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
-												//dol_sort_array($object->linkedObjects['facture'], 'date');
-												foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
-													$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
-													$substitutionarray['__REFCLIENT__']=$contract->ref_customer;	// For backward compatibility
-													$substitutionarray['__REF_CLIENT__']=$contract->ref_customer;
-													$substitutionarray['__REF_CUSTOMER__']=$contract->ref_customer;
-													$foundcontract = $contract;
-													break;
-												}
-											}
-
-											dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-
-											$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
-											if ($urlforsellyoursaasaccount) {
-												$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
-												if ($tmpforurl) {
-													$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount.'/source/document.php'.$tmpforurl;
-												} else {
-													$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
-												}
-											}
-
-											$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
-											$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
-
-											// Attach a file ?
-											$file='';
-											$listofpaths=array();
-											$listofnames=array();
-											$listofmimes=array();
-											if (is_object($invoice)) {
-												$invoicediroutput = $conf->facture->dir_output;
-												$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
-												$file = $fileparams['fullname'];
-												$file = '';		// Disable attachment of invoice in emails
-
-												if ($file) {
-													$listofpaths=array($file);
-													$listofnames=array(basename($file));
-													$listofmimes=array(dol_mimetype($file));
-												}
-											}
-											$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
-
-											$trackid = 'inv'.$invoice->id;
-											$moreinheader = 'X-Dolibarr-Info: doValidateInvoice'."\r\n";
-											$addr_cc = '';
-											if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
-												dol_syslog("We add the recipient ".$invoice->thirdparty->array_options['options_emailccinvoice']." as CC to warn about invoice availability (direct debit or credit transfer case)", LOG_DEBUG);
-												$addr_cc = $invoice->thirdparty->array_options['options_emailccinvoice'];
-											}
-
-											// Send email (substitutionarray must be done just before this)
-											include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-											$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, $addr_cc, '', 0, -1, '', '', $trackid, $moreinheader);
-											if (empty($mailfile->error) && $mailfile->sendfile()) {
-												$result = 1;
+											if (empty($subject)) {
+												dol_syslog("Can't send email to inform about invoice availability because template ".$labeltouse." not found", LOG_WARNING);
 											} else {
-												$errmsg = $langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).'. '.$mailfile->error;
+												$substitutionarray = getCommonSubstitutionArray($outputlangs, 0, null, $object);
 
-												dol_syslog($errmsg, LOG_WARNING);
+												complete_substitutions_array($substitutionarray, $outputlangs, $object);
 
-												$this->errors[] = $errmsg;
-												$result = -1;
-											}
+												// Set the property ->ref_customer with ref_customer of contract so __REF_CLIENT__ will be replaced in email content
+												// Search contract linked to invoice
+												$foundcontract = null;
+												$invoice->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
-											if ($result > 0) {
-												// TODO Add an event to say email was sent or the event invoice validate is enough ?
+												if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
+													//dol_sort_array($object->linkedObjects['facture'], 'date');
+													foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
+														$substitutionarray['__CONTRACT_REF__'] = $contract->ref_customer;
+														$substitutionarray['__REFCLIENT__'] = $contract->ref_customer;	// For backward compatibility
+														$substitutionarray['__REF_CLIENT__'] = $contract->ref_customer;
+														$substitutionarray['__REF_CUSTOMER__'] = $contract->ref_customer;
+														$foundcontract = $contract;
+														break;
+													}
+												}
+
+												dol_syslog('__DIRECTDOWNLOAD_URL_INVOICE__='.$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
+
+												$urlforsellyoursaasaccount = getRootUrlForAccount($foundcontract);
+												if ($urlforsellyoursaasaccount) {
+													$tmpforurl=preg_replace('/.*document.php/', '', $substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']);
+													if ($tmpforurl) {
+														$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount.'/source/document.php'.$tmpforurl;
+													} else {
+														$substitutionarray['__DIRECTDOWNLOAD_URL_INVOICE__']=$urlforsellyoursaasaccount;
+													}
+												}
+
+												$subjecttosend = make_substitutions($subject, $substitutionarray, $outputlangs);
+												$texttosend = make_substitutions($msg, $substitutionarray, $outputlangs);
+
+												// Attach a file ?
+												$file='';
+												$listofpaths=array();
+												$listofnames=array();
+												$listofmimes=array();
+												if (is_object($invoice)) {
+													$invoicediroutput = $conf->facture->dir_output;
+													$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
+													$file = $fileparams['fullname'];
+													$file = '';		// Disable attachment of invoice in emails
+
+													if ($file) {
+														$listofpaths=array($file);
+														$listofnames=array(basename($file));
+														$listofmimes=array(dol_mimetype($file));
+													}
+												}
+												$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
+
+												$trackid = 'inv'.$invoice->id;
+												$moreinheader = 'X-Dolibarr-Info: doValidateInvoice'."\r\n";
+												$addr_cc = '';
+												if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
+													dol_syslog("We add the recipient ".$invoice->thirdparty->array_options['options_emailccinvoice']." as CC to warn about invoice availability (direct debit or credit transfer case)", LOG_DEBUG);
+													$addr_cc = $invoice->thirdparty->array_options['options_emailccinvoice'];
+												} else {
+													dol_syslog("We do NOT found recipient to add as CC to warn about invoice availability (direct debit or credit transfer case)", LOG_DEBUG);
+												}
+
+												// Send email (substitutionarray must be done just before this)
+												include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+												$mailfile = new CMailFile($subjecttosend, $invoice->thirdparty->email, $from, $texttosend, $listofpaths, $listofmimes, $listofnames, $addr_cc, '', 0, -1, '', '', $trackid, $moreinheader);
+												if (empty($mailfile->error) && $mailfile->sendfile()) {
+													$result = 1;
+												} else {
+													$errmsg = $langs->trans("ErrorFailedToSendMail", $from, $invoice->thirdparty->email).($addr_cc ? '. CC='.$addr_cc : '').'. '.$mailfile->error;
+
+													dol_syslog($errmsg, LOG_WARNING);
+
+													$this->errors[] = $errmsg;
+													$result = -1;
+												}
+
+												if ($result > 0) {
+													// TODO Add an event to say email was sent or the event invoice validate is enough ?
+												}
 											}
 										}
-
 									}
 								}
 							}
@@ -490,6 +495,7 @@ class SellYourSaasUtils
 			$this->errors[] = $this->error;
 		}
 
+		// Set output of cron job
 		$this->output = count($draftinvoiceprocessed).' invoice(s) validated on '.$num_rows.' draft invoice(s) found'.(count($draftinvoiceprocessed)>0 ? ' : '.join(',', $draftinvoiceprocessed) : '').' (search done on invoices of SellYourSaas customers only)';
 
 		if (!empty($this->errors)) {
@@ -829,8 +835,15 @@ class SellYourSaasUtils
 						$outputlangs->loadLangs(array('main'));
 
 						// @TODO Save in cache $arraydefaultmessage for each $object->thirdparty->default_lang and reuse it to avoid getEMailTemplate called each time
-						dol_syslog("We will call getEMailTemplate for type 'contract', label 'HardTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
-						$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminder');
+						if ($object->thirdparty->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+							dol_syslog("We will call getEMailTemplate for type 'contract', label 'HardTrialExpiringReminderFreeInstance', outputlangs->defaultlang=".$outputlangs->defaultlang);
+							$arraydefaultmessage = $formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminderFreeInstance');
+							dol_syslog("Topic found is ".$arraydefaultmessage->topic);
+						} else {
+							dol_syslog("We will call getEMailTemplate for type 'contract', label 'HardTrialExpiringReminder', outputlangs->defaultlang=".$outputlangs->defaultlang);
+							$arraydefaultmessage = $formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, 'HardTrialExpiringReminder');
+							dol_syslog("Topic found is ".$arraydefaultmessage->topic);
+						}
 
 						$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
 						$substitutionarray['__SELLYOURSAAS_EXPIRY_DATE__']=dol_print_date($expirationdate, 'day', 'tzserver', $outputlangs);
@@ -1267,7 +1280,6 @@ class SellYourSaasUtils
 		$sql .= " AND sr.ext_payment_site = '".$this->db->escape($service)."'";		// Only Stripe Live or Test
 		// We must add a sort on sr.default_rib to get the default first, and then the last recent if no default found.
 		$sql .= " ORDER BY f.datef ASC, f.rowid ASC, sr.default_rib DESC, sr.tms DESC";		// Lines may be duplicated if there is several payment mode. Never mind, we will exclude duplicated invoice later.
-		//print $sql;exit;
 
 		$resql = $this->db->query($sql);
 		if ($resql) {
@@ -3417,12 +3429,23 @@ class SellYourSaasUtils
 								$contractprocessed[$object->id]=$object->ref;
 
 								// Send an email to warn customer of suspension
-								if ($mode == 'test') {
-									$labeltemplate = 'CustomerAccountSuspendedTrial';
+
+								if ($object->thirdparty->array_options['options_checkboxnonprofitorga'] == 'nonprofit' && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+									if ($mode == 'test') {
+										$labeltemplate = 'CustomerAccountSuspendedTrialFreeInstance';
+									}
+									if ($mode == 'paid') {
+										$labeltemplate = 'CustomerAccountSuspended';	// TODO When this case occurs ? Do we have to use another mesaage key ?
+									}
+								} else {
+									if ($mode == 'test') {
+										$labeltemplate = 'CustomerAccountSuspendedTrial';
+									}
+									if ($mode == 'paid') {
+										$labeltemplate = 'CustomerAccountSuspended';
+									}
 								}
-								if ($mode == 'paid') {
-									$labeltemplate = 'CustomerAccountSuspended';
-								}
+
 
 								dol_syslog("Now we will send an email to customer id=".$object->thirdparty->id." with label ".$labeltemplate);
 
@@ -4243,7 +4266,7 @@ class SellYourSaasUtils
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
 				continue;
 			}
-			dol_syslog("** Process contract line id=".$tmpobject->id." to know which action to do");
+			dol_syslog("** Process contract line id=".$tmpobject->id." to know which action to do and define remoteaction to 0, 1 (most action like deploy, deployoption, rename, ...) or 2 (refesh)");
 
 			$producttmp = new Product($this->db);
 			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
@@ -4278,7 +4301,13 @@ class SellYourSaasUtils
 
 		$listoflinesqualified = dol_sort_array($listoflinesqualified, 'position', 'asc');
 
-		// Now loop on each lines qualified for action
+
+		$tmp = explode('.', $contract->ref_customer, 2);
+		$sldAndSubdomain = $tmp[0];
+		$domainname = $tmp[1];
+
+
+		// Now loop on each lines qualified for action and call remote URL
 		foreach ($listoflinesqualified as $tmparrayoflinesqualified) {
 			$tmpobject = $tmparrayoflinesqualified['tmpobject'];
 			$doremoteaction = $tmparrayoflinesqualified['doremoteaction'];
@@ -4303,9 +4332,6 @@ class SellYourSaasUtils
 
 				$ispaidinstance = sellyoursaasIsPaidInstance($contract);
 
-				$tmp=explode('.', $contract->ref_customer, 2);
-				$sldAndSubdomain=$tmp[0];
-				$domainname=$tmp[1];
 				if (! empty($contract->array_options['options_deployment_host'])) {
 					$serverdeployment = $contract->array_options['options_deployment_host'];
 				} else {
@@ -4364,7 +4390,7 @@ class SellYourSaasUtils
 				$generateddbprefix     = (empty($contract->array_options['options_prefix_db']) ? 'llx_' : $contract->array_options['options_prefix_db']);
 				$generatedunixhostname = $contract->array_options['options_hostname_os'];
 				$generateddbhostname   = $contract->array_options['options_hostname_db'];
-				$generateduniquekey    = getRandomPassword(true);
+				$generateduniquekey    = empty($contract->array_options['options_instance_unique_id']) ? getRandomPassword(true) : $contract->array_options['options_instance_unique_id'];
 
 				$sshaccesstype         = (empty($contract->array_options['options_sshaccesstype']) ? 0 : $contract->array_options['options_sshaccesstype']);
 				$customurl             = (empty($contract->array_options['options_custom_url']) ? '' : $contract->array_options['options_custom_url']);
@@ -4520,21 +4546,25 @@ class SellYourSaasUtils
 					}
 
 					if ($tmppackage->srccliafter && $cliafter) {
-						dol_syslog("Create cli file ".$tmppackage->srccliafter);
+						dol_syslog("Create cli after file ".$tmppackage->srccliafter);
+
 						dol_delete_file($tmppackage->srccliafter, 0, 1, 0, null, false, 0);
+
 						$result = file_put_contents($tmppackage->srccliafter, str_replace("\r", '', $cliafter));
 						@chmod($tmppackage->srccliafter, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
 					} else {
-						dol_syslog("No cli file to create or no content");
+						dol_syslog("No cli adter file to create or no content");
 					}
 
 					if ($tmppackage->cliafterpaid && $cliafterpaid) {
-						dol_syslog("Create cli file ".$tmppackage->srccliafter);
+						dol_syslog("Create cli afterpaid file ".$tmppackage->srccliafterpaid);
+
 						dol_delete_file($tmppackage->srccliafterpaid, 0, 1, 0, null, false, 0);
+
 						$result = file_put_contents($tmppackage->srccliafterpaid, str_replace("\r", '', $cliafterpaid));
 						@chmod($tmppackage->srccliafterpaid, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
 					} else {
-						dol_syslog("No cli after paid file to create or no content");
+						dol_syslog("No cli afterpaid file to create or no content");
 					}
 				}
 				if (in_array($remoteaction, array("deploy", "deployall"))) {
@@ -4669,10 +4699,6 @@ class SellYourSaasUtils
 				if (! empty($producttmp->array_options['options_resource_formula'])) {
 					$targetdir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
 
-					$tmp=explode('.', $contract->ref_customer, 2);
-					$sldAndSubdomain=$tmp[0];
-					$domainname=$tmp[1];
-
 					$generatedunixlogin   = $contract->array_options['options_username_os'];
 					$generatedunixpassword= $contract->array_options['options_password_os'];
 					$generateddbname      = $contract->array_options['options_database_db'];
@@ -4682,7 +4708,7 @@ class SellYourSaasUtils
 					$generateddbprefix    = ($contract->array_options['options_prefix_db'] ? $contract->array_options['options_prefix_db'] : 'llx_');
 					$generatedunixhostname= $contract->array_options['options_hostname_os'];
 					$generateddbhostname  = $contract->array_options['options_hostname_db'];
-					$generateduniquekey   = getRandomPassword(true);
+					$generateduniquekey   = empty($contract->array_options['options_instance_unique_id']) ? getRandomPassword(true) : $contract->array_options['options_instance_unique_id'];
 
 					$sshaccesstype        = (empty($contract->array_options['options_sshaccesstype']) ? 0 : $contract->array_options['options_sshaccesstype']);
 					$customurl            = $contract->array_options['options_custom_url'];

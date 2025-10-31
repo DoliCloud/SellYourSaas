@@ -15,7 +15,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// $initialaction can be set
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var Translate $langs
+ *
+ * @var string $initialaction can be set
+ * @var Societe $mythirdpartyaccount
+ */
 
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
@@ -1250,8 +1257,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 									</div></div>
 
 							  	</form>
-				            </div>
+				            </div>';
 
+		// Tab for SSH/SFTP
+		print '
 							<!-- tab ssh/sftp -->
 				            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc");
@@ -1321,7 +1330,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		}
 
 		print '
-				              </div> <!-- END TAB SSH PANE -->
+				              </div> <!-- END TAB SSH PANE -->';
+
+		// Tab for DB access
+		print '
 
 							  <!-- tab db -->
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
@@ -1436,32 +1448,47 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 			}
 		}
-		print '				<!-- tab upgrade -->
-							<div class="tab-pane" id="tab_upgrade_'.$contract->id.'">';
-		if ($lastversiondolibarrinstance < $newversiondolibarr) {
-		print '				<form class="form-upgrade" action="'.$_SERVER["PHP_SELF"].'" method="POST">
-							<input type="hidden" name="token" value="'.newToken().'">
-							<input type="hidden" name="mode" value="autoupgrade">
-							<input type="hidden" name="backtopagesupport" value="'.$_SERVER["PHP_SELF"].'?mode=instances">
-							<input type="hidden" name="instanceselect" value="'.$priority.'_'.$contract->id.'">
-							<p class="opacitymediumbis" style="padding: 15px">
-								'.$langs->trans("NewerVersionAvailable", $lastversiondolibarrinstance, $newversiondolibarr).'
-							</p>
-							<p class="center" style="padding-bottom: 15px">
-								<input type="submit" class="btn" name="undeploy" value="'.$langs->trans("Upgrade").'">
-							</p>
-							</form>';
-		}else {
-			print '			<p class="opacitymediumbis" style="padding: 15px">
-								'.$langs->trans("AlreadyToLastVersionUpgrade", $newversiondolibarr).'
-							</p>
-			';
+
+		// Get the URL for support
+		$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
+		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
+			$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
+			if (getDolGlobalString($newnamekey)) {
+				$sellyoursaassupporturl = getDolGlobalString($newnamekey);
+			}
 		}
 
-		print '				</div>
-							<!-- END tab upgrade -->
-';
-print '						<!-- tab destroy -->
+		// Tab for upgrade
+		if (empty($sellyoursaassupporturl)) {
+			print '				<!-- tab upgrade -->
+								<div class="tab-pane" id="tab_upgrade_'.$contract->id.'">';
+			if ($lastversiondolibarrinstance < $newversiondolibarr) {
+				print '				<form class="form-upgrade" action="'.$_SERVER["PHP_SELF"].'" method="POST">
+								<input type="hidden" name="token" value="'.newToken().'">
+								<input type="hidden" name="mode" value="autoupgrade">
+								<input type="hidden" name="backtopagesupport" value="'.$_SERVER["PHP_SELF"].'?mode=instances">
+								<input type="hidden" name="instanceselect" value="'.$priority.'_'.$contract->id.'">
+								<p class="opacitymediumbis" style="padding: 15px">
+									'.$langs->trans("NewerVersionAvailable", $lastversiondolibarrinstance, $newversiondolibarr).'
+								</p>
+								<p class="center" style="padding-bottom: 15px">
+									<input type="submit" class="btn" name="undeploy" value="'.$langs->trans("Upgrade").'">
+								</p>
+								</form>';
+			} else {
+				print '			<p class="opacitymediumbis" style="padding: 15px">
+									'.$langs->trans("AlreadyToLastVersionUpgrade", $newversiondolibarr).'
+								</p>';
+			}
+
+			print "\n".'				</div>
+								<!-- END tab upgrade -->';
+		}
+
+		// Tab de destroy/cancel instance
+		print '
+							<!-- tab destroy -->
 				            <div class="tab-pane" id="tab_danger_'.$contract->id.'">
 
 							<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST">

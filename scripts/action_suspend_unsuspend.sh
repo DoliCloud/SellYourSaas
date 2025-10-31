@@ -1088,7 +1088,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 				export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 				export webCustomSSLCertificateCRT="$fqn-custom.crt"
 				export webCustomSSLCertificateKEY="$fqn-custom.key"
-				export webCustomSSLCertificateIntermediate="$fqn-custom-intermediate.key"
+				export webCustomSSLCertificateIntermediate="$fqn-custom-intermediate.crt"
 				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
 			fi
 		fi	

@@ -59,14 +59,14 @@ function sellYourSaasBackofficePrepareHead($nbtotalofrecords = 0)
 	$head[$h][2] = 'antispam';
 	$h++;
 
-	$head[$h][0] = DOL_URL_ROOT.'/core/customreports.php?objecttype=contract&tabfamily=sellyoursaas';
-	$head[$h][1] = $langs->trans("CustomReports");
-	$head[$h][2] = 'customreports';
-	$h++;
-
 	$head[$h][0] = dol_buildpath('/sellyoursaas/backoffice/notes.php', 1);
 	$head[$h][1] = $langs->trans("Notes");
 	$head[$h][2] = 'notes';
+	$h++;
+
+	$head[$h][0] = DOL_URL_ROOT.'/core/customreports.php?objecttype=contract&tabfamily=sellyoursaas';
+	$head[$h][1] = $langs->trans("CustomReports");
+	$head[$h][2] = 'customreports';
 	$h++;
 
 	return $head;

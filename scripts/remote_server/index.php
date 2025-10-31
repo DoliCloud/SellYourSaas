@@ -102,9 +102,9 @@ $output='';
 $return_var=0;
 
 if ($DEBUG) {
-	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0].' by '.$_SERVER['REMOTE_ADDR'].' URI='.$_SERVER['REQUEST_URI']."\n");
+	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> index.php Call for action '.$tmparray[0].' by '.$_SERVER['REMOTE_ADDR'].' URI='.$_SERVER['REQUEST_URI']."\n");
 } else {
-	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> Call for action '.$tmparray[0]." by ".$_SERVER['REMOTE_ADDR']."\n");
+	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> index.php Call for action '.$tmparray[0]." by ".$_SERVER['REMOTE_ADDR']."\n");
 }
 
 fwrite($fh, date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
@@ -406,7 +406,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 	}
 
 	$txt_file = file_get_contents($scriptfile); //Get the file
-	$rows = preg_split('/\r\n|\r|\n/', $txt_file); //Split the file by each line
+	$rows = preg_split('/\r\n|\r|\n/', $txt_file); //Split the file by each line TODO Split also on ";" so list of allowed is easier to manage
 
 	$linenotvalid = 0;
 	$i = 0;
@@ -466,6 +466,9 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z0-9_,]+$/i', $newline)) {
 			continue;
 		}
+		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/?$/i', $newline)) {
+			continue;
+		}
 		// TODO enhance list of allowed patterns
 		// ...
 
@@ -474,11 +477,11 @@ function checkScriptFile($scriptfile, $fh, $params)
 	}
 
 	if ($linenotvalid > 0) {
-		fwrite($fh, date('Y-m-d H:i:s')." script file contains instructions line ".$linenotvalid." that does not match an allowed pattern.\n");
+		fwrite($fh, date('Y-m-d H:i:s')." script file contains instructions line #".$linenotvalid." that does not match an allowed pattern.\n");
 
 		// CLI file is not valid
 		http_response_code(599);
-		print 'The CLI file '.$scriptfile.' contains instructions line '.$linenotvalid.' that does not match an allowed pattern.'."\n";
+		print 'The CLI file '.$scriptfile.' contains instructions line #'.$linenotvalid.' that does not match an allowed pattern.'."\n";
 		exit();
 	} else {
 		fwrite($fh, date('Y-m-d H:i:s')." script file is valid.\n");

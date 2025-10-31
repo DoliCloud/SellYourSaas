@@ -116,6 +116,11 @@ foreach ($tmpservices as $key => $tmpservice) {
 	}
 	$arrayofsuffixfound[$tmpservice] = $suffix;
 }
+if (empty($arrayofsuffixfound)) {
+	$arrayofsuffixfound[] = '';
+}
+// $arrayofsuffixfound should be now array('mysaasdomain'=>'', mysaasdomainalt'=>'_MYSAASDOMAINALT_COM', ...)
+//var_dump($arrayofsuffixfound);
 
 
 /*
@@ -542,7 +547,7 @@ if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON') || getDolGlobalString('SELL
 print '<tr class="liste_titre"><td colspan="3">Security for communication from master to deployment servers (Deprecated. Use instead a different key on each deployment server)</td></tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY").'</td>';
-print '<td>';
+print '<td class="nowraponall">';
 print '<input type="text" class="width300" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" id="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
 if (!empty($conf->use_javascript_ajax)) {
 	// TODO Set the type of input in password and add a button "show"

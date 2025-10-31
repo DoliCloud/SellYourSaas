@@ -229,15 +229,15 @@ if (! isset($argv[1])) {	// Check parameters
 	print "\n";
 	print "action can be:\n";
 	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance)\n";
-	print "- updatestatsonly     updates stats only (only table sellyoursaas_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
+	print "- updatestatsonly     updates stats only (only table sellyoursaas_stats) and send data to Datagog if enabled <<<<< Used by cron on master server >>>>>\n";
 	print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats table.\n";
 	print "- backuptest          test rsync+database backup\n";
 	print "- backuptestrsync     test rsync backup\n";
 	print "- backuptestdatabase  test database backup\n";
 	print "- backuprsync         creates backup (rsync)\n";
 	print "- backupdatabase      creates backup (mysqldump)\n";
-	print "- backup              creates backup (rsync + database) ***** Used by cron on deployment servers *****\n";
-	print "- backupdelete        creates backup (rsync with delete + database)\n";
+	print "- backup              creates backup (rsync + database)\n";
+	print "- backupdelete        creates backup (rsync with delete + database) <<<<< Used by cron on deployment servers >>>>>\n";
 	print "- backupdeleteexclude creates backup (rsync with delete excluded + database)\n";
 	print "\n";
 	print "with a backup... action, you can also add the option --force to execute backup even if done recently.\n";

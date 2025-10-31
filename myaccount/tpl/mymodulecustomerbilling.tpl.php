@@ -53,7 +53,7 @@ print '
 	<div class="page-head">
 	  <!-- BEGIN PAGE TITLE -->
 	<div class="page-title">
-	  <h1>'.$langs->trans("MyCustomersBilling").'</h1>
+	  <h1>'.$langs->trans("MyModuleCustomersBilling").'</h1>
 	</div>
 	<!-- END PAGE TITLE -->
 	</div>
@@ -101,7 +101,6 @@ print '
 				$sql.=' WHERE f.fk_soc = '.((int) $mythirdpartyaccount->id);
 
 				$sql.=$db->order($sortfield, $sortorder);
-
 				// Count total nb of records
 				$nbtotalofrecords = '';
 				$resql = $db->query($sql);
@@ -128,6 +127,8 @@ print '
 				}
 
 				include_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
+				include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+				include_once DOL_DOCUMENT_ROOT.'/contrat/class/contratligne.class.php';
 
 				$tmpthirdparty = new Societe($db);
 				$tmpinvoice = new FactureFournisseur($db);
@@ -225,6 +226,9 @@ print '
 	              <td>
 	                '.$langs->trans("Invoice").'
 	              </td>
+				  <td>
+	                '.$langs->trans("SupplierModule").'
+	              </td>
 	              <td style="min-width: 100px">
 	                '.$langs->trans("Date").'
 	              </td>
@@ -258,9 +262,15 @@ print '
 		$sortfield2 = 'f.datef,f.rowid';
 		$sortorder2 = 'DESC';
 
-		$sql ='SELECT f.rowid, f.ref as ref, f.fk_soc, f.datef, total_ht, total_ttc, f.paye, f.fk_statut, fe.commission';
+		$sql ='SELECT f.rowid, f.ref as ref, f.fk_soc, f.datef, fd.total_ht, fd.total_ttc, f.paye, f.fk_statut, fe.commission, fpf.ref_fourn';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'facture as f LEFT JOIN '.MAIN_DB_PREFIX.'facture_extrafields as fe ON fe.fk_object = f.rowid';
-		$sql.=' WHERE fe.reseller = '.((int) $mythirdpartyaccount->id);
+		$sql.= ', '.MAIN_DB_PREFIX.'facturedet as fd';
+		$sql.= ', '.MAIN_DB_PREFIX.'product as p';
+		$sql.= ', '.MAIN_DB_PREFIX.'product_fournisseur_price as fpf';
+		$sql.= ' WHERE fd.fk_facture = f.rowid';
+		$sql.= ' AND fd.fk_product = p.rowid';
+		$sql.= ' AND fpf.fk_product = p.rowid';
+		$sql.= ' AND fd.fk_product IN ('.$db->sanitize(implode(",", array_keys($mythirdpartyaccount->context['isamoduleprovider']))).')';
 
 		$sql.=$db->order($sortfield2, $sortorder2);
 
@@ -347,6 +357,9 @@ print '
 
 			print '
 				              </td>
+								<td>
+								'.$obj->ref_fourn.'
+								</td>
 				                      <td>
 				                        '.dol_print_date($obj->datef, 'dayrfc', $langs).'
 				                      </td>
@@ -396,10 +409,12 @@ print '
 		// Get total of commissions earned
 		$totalamountcommission='ERROR';
 
-		$sql ='SELECT SUM(fe.commission * f.total_ht / 100) as total';
+		$sql ='SELECT SUM(fe.commission * fd.total_ht / 100) as total';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'facture as f LEFT JOIN '.MAIN_DB_PREFIX.'facture_extrafields as fe ON fe.fk_object = f.rowid';
 		//$sql.=' WHERE fe.reseller IN ('.join(',', $listofcustomeridreseller).')';
-		$sql.=' WHERE fe.reseller = '.((int) $mythirdpartyaccount->id);
+		$sql.= ', '.MAIN_DB_PREFIX.'facturedet as fd';
+		$sql.= ' WHERE fd.fk_facture = f.rowid';
+		$sql.=' AND fd.fk_product IN ('.$db->sanitize(implode(",", array_keys($mythirdpartyaccount->context['isamoduleprovider']))).')';
 		$sql.=' AND fk_statut <> '.Facture::STATUS_DRAFT;
 		$sql.=' AND paye = 1';
 
@@ -412,7 +427,7 @@ print '
 		}
 
 		print '<!-- Total of commissions earned -->';
-		print '<tr class="liste_total"><td colspan="6">'.$langs->trans("Total").'</td>';
+		print '<tr class="liste_total"><td colspan="7">'.$langs->trans("Total").'</td>';
 		print '<td align="right"><strong>'.price($commoldystem + $totalamountcommission).'</strong></td>';
 		print '</tr>';
 
@@ -423,12 +438,14 @@ print '
 			print '<td></td>';
 			print '<td></td>';
 			print '<td></td>';
+			print '<td></td>';
 			print '<td align="right">'.price($totalpaidht).'</td>';
 			print '</tr>';
 		}
 
 		print '<tr style="background-color: #f0f0F0;">';
 		print '<td colspan="2">'.$langs->trans("RemainderToBill").'</td>';
+		print '<td></td>';
 		print '<td></td>';
 		print '<td></td>';
 		print '<td></td>';

@@ -15,6 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -142,7 +149,7 @@ if ($totalInvoiced == 0) {
 		// Show input text for the discount code
 		if ($acceptdiscountcode) {
 			print '<br>';
-			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'" class="maxwidth200"><br>';
+			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'" class="maxwidth200" spellcheck="false"><br>';
 			print '<div class="discountcodetext margintoponly" id="discountcodetext" autocomplete="off"></div>';
 			//var_dump($listofcontractid);
 			print '<script type="text/javascript" language="javascript">'."\n";
@@ -741,7 +748,8 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<div class="opacitymedium small justify">'.$langs->trans("SEPALegalText", $mysoc->name, $mysoc->name).'</div>';
 
 		print '<br><br>';
-		print '<input type="submit" name="submitsepa" value="'.$langs->trans("Save").'" class="btn btn-info btn-circle">';
+		// Replace Save by Pay ?
+		print '<input type="submit" name="submitsepa" value="'.$langs->trans("SaveAndPay").'" class="btn btn-info btn-circle">';
 		print ' ';
 		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 	} else {
