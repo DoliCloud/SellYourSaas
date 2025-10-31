@@ -102,10 +102,14 @@ print '
 				</div>';		// end protlet-body
 	}
 
+	if ($mythirdpartyaccount->client > 0 && $mythirdpartyaccount->isareseller) {
+		print '<br><br>';
+	}
+
 	if ($mythirdpartyaccount->isareseller) {
 		print '
 				<div class="portlet-title">
-				<div class="caption"><br><br>
+				<div class="caption">
 				<i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesOfMyCustomers").'</span>
 				</div>
 				</div>
@@ -146,11 +150,14 @@ print '
 		print '</div>';		// end portlet-body
 	}
 
+	if (($mythirdpartyaccount->client > 0 || $mythirdpartyaccount->isareseller) && !empty($mythirdpartyaccount->context['isamoduleprovider'])) {
+		print '<br><br>';
+	}
 
 	if (!empty($mythirdpartyaccount->context['isamoduleprovider'])) {
 		print '
 				<div class="portlet-title">
-				<div class="caption"><br><br>
+				<div class="caption">
 				<i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesWithMyModules").'</span>
 				</div>
 				</div>
