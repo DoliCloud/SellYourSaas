@@ -427,7 +427,7 @@ print '
 		}
 
 		print '<!-- Total of commissions earned -->';
-		print '<tr class="liste_titre"><td colspan="7">'.$langs->trans("Total").'</td>';
+		print '<tr class="liste_total"><td colspan="7">'.$langs->trans("Total").'</td>';
 		print '<td align="right"><strong>'.price($commoldystem + $totalamountcommission).'</strong></td>';
 		print '</tr>';
 
@@ -457,7 +457,7 @@ print '
 
 		print '<br>';
 		print $langs->trans("YouCanClainAmountWhen", price(getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM', 100), 0, $langs, 1, -1, -1, $conf->currency)).'<br>';
-		$labelforcompany = $mysoc->name. ' ('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Country").': '.$langs->trans("Country".$mysoc->country_code).')';
+		$labelforcompany = $mysoc->name. ' <span class="opacitymedium">('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Address").': '.$mysoc->getFullAddress(1, ',').')</span>';
 
 		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
