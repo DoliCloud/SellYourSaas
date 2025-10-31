@@ -311,12 +311,14 @@ if ($resql) {
 }
 
 // Define if the thirdparty is a reseller
-$mythirdpartyaccount->isareseller = 0;		// TODO Use $mythirdpartyaccount->context['isareseller']
+$mythirdpartyaccount->isareseller = 0;		// @deprecated Use $mythirdpartyaccount->context['isareseller']
+$mythirdpartyaccount->context['isareseller'] = 0;
 if (getDolGlobalInt('SELLYOURSAAS_DEFAULT_RESELLER_CATEG') > 0) {
 	$categorie=new Categorie($db);
 	$categorie->fetch(getDolGlobalString('SELLYOURSAAS_DEFAULT_RESELLER_CATEG'));
 	if ($categorie->containsObject('supplier', $mythirdpartyaccount->id) > 0) {
 		$mythirdpartyaccount->isareseller = 1;
+		$mythirdpartyaccount->context['isareseller'] = 1;
 	}
 }
 
@@ -2483,7 +2485,7 @@ if ($mythirdpartyaccount->isareseller) {
 	// Divider
 	print '<li class="dropdown-divider"></li>';
 	// My customers invoices
-	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerbilling"><i class="fa fa-usd"></i> '.$langs->trans("MyCustomersBilling").'</a></li>';
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerbilling"><i class="fa fa-usd pictofixedwidth"></i> '.$langs->trans("MyCustomersBilling").'</a></li>';
 	print '
 		</ul>
 	</li>
@@ -2504,7 +2506,7 @@ if (count($mythirdpartyaccount->context['isamoduleprovider']) > 0) {
 	// Divider
 	print '<li class="dropdown-divider"></li>';
 	// Customers ofmy module area
-	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerbilling"><i class="fa fa-usd"></i> '.$langs->trans("MyModuleCustomersBilling").'</a></li>';
+	print '<li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerbilling"><i class="fa fa-usd pictofixedwidth"></i> '.$langs->trans("MyModuleCustomersBilling").'</a></li>';
 	print '
 		</ul>
 	</li>
@@ -3049,7 +3051,7 @@ $atleastonepaymentmode = (count($arrayofcompanypaymentmode) > 0 ? 1 : 0);
 $nbpaymentmodeok = count($arrayofcompanypaymentmode);
 
 
-// Fill var to count nb of instances
+// Fill var to count nb of customer instances
 $nbofinstances = 0;
 $nbofinstancesinprogress = 0;
 $nbofinstancesdone = 0;
@@ -3084,6 +3086,7 @@ foreach ($listofcontractid as $contractid => $contract) {
 
 $nboftickets = $langs->trans("SoonAvailable");
 
+
 // Analyse list of child instances for resellers
 $nbofinstancesreseller = 0;
 $nbofinstancesinprogressreseller = 0;
@@ -3115,6 +3118,42 @@ if ($mythirdpartyaccount->isareseller && count($listofcontractidreseller)) {
 		} else {
 			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 				$nbofinstancesdonereseller++;
+			}
+		}
+	}
+}
+
+// Analyse list of child instances for module providers
+$nbofinstancesmodules = 0;
+$nbofinstancesinprogressmodules = 0;
+$nbofinstancesdonemodules = 0;
+$nbofinstancessuspendedmodules = 0;
+if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && count($listofcontractidmodulesupplier)) {
+	// Fill var to count nb of instances
+	foreach ($listofcontractidmodulesupplier as $contractid => $contract) {
+		if ($contract->array_options['options_deployment_status'] == 'undeployed') {
+			continue;
+		}
+		if ($contract->array_options['options_deployment_status'] == 'processing') {
+			$nbofinstancesmodules++;
+			$nbofinstancesinprogressmodules++;
+			continue;
+		}
+
+		$suspended = 0;
+		foreach ($contract->lines as $keyline => $line) {
+			if ($line->statut == ContratLigne::STATUS_CLOSED && $contract->array_options['options_deployment_status'] != 'undeployed') {
+				$suspended = 1;
+				break;
+			}
+		}
+
+		$nbofinstancesmodules++;
+		if ($suspended) {
+			$nbofinstancessuspendedmodules++;
+		} else {
+			if (!preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+				$nbofinstancesdonemodules++;
 			}
 		}
 	}

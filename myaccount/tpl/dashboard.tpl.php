@@ -31,33 +31,34 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE dashboard.tpl.php -->
 <?php
 
-	print '
+print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
 
-	     <!-- BEGIN PAGE HEADER-->
+    <!-- BEGIN PAGE HEADER-->
 	<!-- BEGIN PAGE HEAD -->
 	<div class="page-head">
-	  <!-- BEGIN PAGE TITLE -->
-	<div class="page-title">
-	  <h1>'.$langs->trans("Dashboard").'</h1>
-	</div>
-	<!-- END PAGE TITLE -->
-
-
+		<!-- BEGIN PAGE TITLE -->
+		<div class="page-title">
+		  <h1>'.$langs->trans("Dashboard").'</h1>
+		</div>
+		<!-- END PAGE TITLE -->
 	</div>
 	<!-- END PAGE HEAD -->
 	<!-- END PAGE HEADER-->
 
 
-	    <div class="row">';
+	<div class="row">';
 
 
-if ($mythirdpartyaccount->client > 0) {
-	print '<div class="col-md-6">
+	print '
+	<!-- BEGIN COL MY INSTANCES -->
+	<div class="col-md-6">
+	<!-- BEGIN PORTLET id=planSection -->
+	<div class="portlet light" id="planSection">';
 
-	        <div class="portlet light" id="planSection">
-
+	if ($mythirdpartyaccount->client > 0) {
+		print '
 	          <div class="portlet-title">
 	            <div class="caption">
 	              <i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("MyInstances").'</span>
@@ -73,31 +74,33 @@ if ($mythirdpartyaccount->client > 0) {
 	              <div class="col-md-4 right">
 	                <h2>'.$nbofinstancesdone.'</h2>
 	              </div>
-	            </div> <!-- END ROW -->
+	            </div>
 
 				';
-	if ($nbofinstancessuspended) {
-		print '
-			            <div class="row">
-			              <div class="col-md-8">
-							'.$langs->trans("NbOfSuspendedInstances").'
-			              </div>
-			              <div class="col-md-4 right">
-			                <h2 style="color:orange">'.$nbofinstancessuspended.'</h2>
-			              </div>
-			            </div> <!-- END ROW -->
-					';
-	}
+		if ($nbofinstancessuspended) {
+			print '
+				            <div class="row">
+				              <div class="col-md-8">
+								'.$langs->trans("NbOfSuspendedInstances").'
+				              </div>
+				              <div class="col-md-4 right">
+				                <h2 style="color:orange">'.$nbofinstancessuspended.'</h2>
+				              </div>
+				            </div>
+						';
+		}
 
-	print '
+		print '
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
 						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'</a>
-					</div></div>';
+					</div>
+					</div>';
 
-	print '
+		print '
 				</div>';		// end protlet-body
+	}
 
 	if ($mythirdpartyaccount->isareseller) {
 		print '
@@ -116,7 +119,7 @@ if ($mythirdpartyaccount->client > 0) {
 				<div class="col-md-4 right">
 				<h2>'.$nbofinstancesdonereseller.'</h2>
 				</div>
-			</div> <!-- END ROW -->
+				</div>
 
 				';
 		if ($nbofinstancessuspendedreseller) {
@@ -128,7 +131,7 @@ if ($mythirdpartyaccount->client > 0) {
 						<div class="col-md-4 right">
 						<h2 style="color:orange">'.$nbofinstancessuspendedreseller.'</h2>
 						</div>
-						</div> <!-- END ROW -->
+						</div>
 						';
 		}
 
@@ -137,17 +140,63 @@ if ($mythirdpartyaccount->client > 0) {
 						<div class="center col-md-12">
 							<br>
 							<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'</a>
-						</div></div>';
+						</div>
+						</div>';
 
 		print '</div>';		// end portlet-body
 	}
 
-	print '
 
-	        </div> <!-- END PORTLET -->
+	if (!empty($mythirdpartyaccount->context['isamoduleprovider'])) {
+		print '
+				<div class="portlet-title">
+				<div class="caption"><br><br>
+				<i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesWithMyModules").'</span>
+				</div>
+				</div>
 
-	      </div> <!-- END COL MY INSTANCES-->';
-}
+				<div class="portlet-body">
+
+				<div class="row">
+				<div class="col-md-8">
+				'.$langs->trans("NbOfActiveInstances").'
+				</div>
+				<div class="col-md-4 right">
+				<h2>'.$nbofinstancesdonemodules.'</h2>
+				</div>
+				</div>
+
+				';
+		if ($nbofinstancessuspendedmodules) {
+			print '
+						<div class="row">
+						<div class="col-md-8">
+						'.$langs->trans("NbOfSuspendedInstances").'
+						</div>
+						<div class="col-md-4 right">
+						<h2 style="color:orange">'.$nbofinstancessuspendedmodules.'</h2>
+						</div>
+						</div>
+						';
+		}
+
+		print '
+						<div class="row">
+						<div class="center col-md-12">
+							<br>
+							<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfInstancesWithMyModules").'</a>
+						</div>
+						</div>';
+
+		print '</div>';		// end portlet-body
+	}
+
+
+
+print '
+
+     </div> <!-- END PORTLET id=planSection -->
+	 </div> <!-- END COL MY INSTANCES-->';
 
 
 print '
