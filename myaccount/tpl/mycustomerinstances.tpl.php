@@ -268,8 +268,8 @@ if (count($listofcontractidreseller) == 0) {
 			}
 			print ' : </span>';
 			print '<a class="font-green-sharp linktoinstance" href="https://'.$contract->ref_customer.'" target="blankinstance">';
+			print img_picto($langs->trans("YourURLToGoOnYourAppInstance"), 'globe', 'class="paddingright"');
 			print 'https://'.$contract->ref_customer;
-			print img_picto($langs->trans("YourURLToGoOnYourAppInstance"), 'globe', 'class="paddingleft"');
 			print '</a>';
 			print '</span><br>';
 		}
