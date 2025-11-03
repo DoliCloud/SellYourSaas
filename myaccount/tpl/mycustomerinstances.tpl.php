@@ -251,6 +251,7 @@ if (count($listofcontractidreseller) == 0) {
 		// Customer (link to login on customer dashboard)
 		print '<span class="opacitymedium">'.$langs->trans("Customer").' : </span>'.$tmpcustomer->name;
 		print ' &nbsp; - &nbsp; '.dol_print_email($tmpcustomer->email, 0, 0, 1, 0, 1, 1);
+		print ' &nbsp; - &nbsp; '.dol_print_phone($tmpcustomer->phone, $tmpcustomer->country_code, 0, $tmpcustomer->id, '', '&nbsp;', 'phone');
 		// Add link to login to dashboard with customer account
 		/*
 		$dol_login_hash = dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $tmpcustomer->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
