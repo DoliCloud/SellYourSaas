@@ -19,7 +19,10 @@
  * @var Conf $conf
  * @var DoliDB $db
  * @var HookManager $hookmanager
+ * @var Societe $mythirdpartyaccount
  * @var Translate $langs
+ *
+ * @var string $initialaction
  */
 
 // Protection to avoid direct call of template
@@ -32,12 +35,14 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE mymodulecustomerinstances.tpl.php -->
 <?php
 
+/*
 $plan = GETPOST('plan', 'alpha');
 
 $planarray = preg_split('/(,|;)/', $plan);
 if (!empty($planarray[1])) {
 	$productref = 'array';
 }
+*/
 
 print '
 	<div class="page-content-wrapper">
@@ -249,6 +254,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 
 		// Customer (link to login on customer dashboard)
 		print '<span class="opacitymedium">'.$langs->trans("Customer").' : </span>'.$tmpcustomer->name;
+		print ' &nbsp; '.dol_print_email($tmpcustomer->email);
 		print '<br>';
 
 		// URL
@@ -652,9 +658,14 @@ if (count($listofcontractidmodulesupplier) == 0) {
 
 		print '
     								  </div>
-    				              </div>
-                            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
-				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc");
+    				              </div>';
+
+		print '
+        <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
+			<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc");
+
+		print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("AccessIsReservedTofinalCustomerOnly").'</p>';
+		/*
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && !empty($foundtemplate))) {
 			// Show message "To connect, you will need the following information:"
 			print '<br>'.$langs->trans("SSHFTPDesc2").' :';
@@ -704,12 +715,18 @@ if (count($listofcontractidmodulesupplier) == 0) {
 				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
 			}
 		}
+		*/
 
 		print '
-				              </div> <!-- END TAB SSH PANE -->
+				              </div> <!-- END TAB SSH PANE -->';
 
-				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
-				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc");
+		print '
+        <div class="tab-pane" id="tab_db_'.$contract->id.'">
+			<p class="opacitymedium" style="padding: 15px">'.$langs->trans("DBDesc");
+
+		print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("AccessIsReservedTofinalCustomerOnly").'</p>';
+
+		/*
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && !empty($foundtemplate))) {
 			// Show message "To connect, you will need the following information:"
 			print '<br>'.$langs->trans("DBDesc2").' :';
@@ -780,6 +797,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 				print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("SorryFeatureNotAvailableInYourPlan").'</p>';
 			}
 		}
+		*/
 
 		print '
                             </div> <!-- END TAB DB PANE -->

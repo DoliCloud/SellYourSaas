@@ -967,3 +967,4 @@ SaveAndPay=Save and pay
 ModulesToIgnoreForAutoUpgrade=Modules to ignore for auto-upgrade
 PleaseFillContactInfoFirst=Please fill your contact an dorganization information first
 GoToYourResellerMenuTogetInformation=Go to menu "%s" for more information
+AccessIsReservedTofinalCustomerOnly=Access is reserved to final customer only (ask him if yo need it)
