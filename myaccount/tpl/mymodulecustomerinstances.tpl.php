@@ -255,7 +255,9 @@ if (count($listofcontractidmodulesupplier) == 0) {
 		// Customer (link to login on customer dashboard)
 		print '<span class="opacitymedium">'.$langs->trans("Customer").' : </span>'.$tmpcustomer->name;
 		print ' &nbsp; - &nbsp; '.dol_print_email($tmpcustomer->email, 0, 0, 1, 0, 1, 1);
-		print ' &nbsp; - &nbsp; '.dol_print_phone($tmpcustomer->phone, $tmpcustomer->country_code, 0, $tmpcustomer->id, '', '&nbsp;', 'phone');
+		if ($tmpcustomer->phone) {
+			print ' &nbsp; - &nbsp; '.dol_print_phone($tmpcustomer->phone, $tmpcustomer->country_code, 0, $tmpcustomer->id, '', '&nbsp;', 'phone');
+		}
 		print '<br>';
 
 		// URL
