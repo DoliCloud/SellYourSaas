@@ -17,6 +17,12 @@ label.nobold {
     display: inline-grid;
 }
 
+
+.paddingrightonly {
+	padding-right: 4px;
+}
+
+
 .jnotify-container {
 	position: fixed !important;
     text-align: center;
