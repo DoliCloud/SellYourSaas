@@ -84,8 +84,8 @@ do
 	        echo "Found generate_filelist_xml.php from ".`pwd`
 	        php build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
 	        if [ $? -ne 0 ]; then
-	        	echo "Failed to generate the signature file"
-	        	exit 1;
+	        	echo "!!!!! ERROR Failed to generate the signature file"
+	        	#exit 1;		# We disable exit so we continue with next dir, so only dir in error is not built
 	        fi
 	    fi
 	
