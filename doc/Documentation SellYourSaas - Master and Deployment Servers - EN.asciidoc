@@ -3277,14 +3277,6 @@ cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /ho
 cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent;
 chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
 
-
-mkdir /tmp/spam;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail /tmp/spam/;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip /tmp/spam/;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom /tmp/spam/;
-cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent /tmp/spam/;
-chmod a+rwx /tmp/spam; chmod a+rw /tmp/spam/*
-chown admin:www-data /tmp/spam/*
 ---------------
 
 
@@ -5947,7 +5939,7 @@ Check in file */etc/apparmor.d/usr.sbin.apache2* that */etc/passwd* is not denie
 
 If you got this error 
 	
-	ERROR /tmp/spam/... can't be read.
+	ERROR /tmp/... can't be read.
 	
 Check that the PrivateTmp mode is false into the launcher of apache2.
 

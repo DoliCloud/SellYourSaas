@@ -170,7 +170,7 @@ if ($fp) {
 		if ($tmpline[0] == 'maxemailperdaypaid') {
 			$maxemailperdaypaid = $tmpline[1];
 		}
-		if ($tmpline[0] == 'pathtospamdir') {
+		if ($tmpline[0] == 'pathtospamdir' && !empty($tmpline[1])) {
 			$pathtospamdir = $tmpline[1];
 		}
 	}

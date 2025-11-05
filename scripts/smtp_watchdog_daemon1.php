@@ -70,7 +70,7 @@ if ($fp) {
 		if ($tmpline[0] == 'maxemailperdaypaid') {
 			$maxemailperdaypaid = $tmpline[1];
 		}
-		if ($tmpline[0] == 'pathtospamdir') {
+		if ($tmpline[0] == 'pathtospamdir' && !empty($tmpline[1])) {
 			$pathtospamdir = $tmpline[1];
 		}
 	}
@@ -182,9 +182,6 @@ if (empty($EMAILFROM)) {
 }
 if (empty($EMAILTO)) {
 	$EMAILTO='supervision@'.$DOMAIN;
-}
-if (empty($pathtospamdir)) {
-	$pathtospamdir="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam";
 }
 
 $PID=getmypid();
