@@ -72,7 +72,7 @@ if [ "x$1" == "xstart" ]; then
 		fi
 		echo "smtp_watchdog_daemon1 started"
 	else
-		echo smtp_watchdog_daemon1 is already running with PID $pid
+		echo smtp_watchdog_daemon1 is already running with PID $pid - found among running processes
 	fi
 fi
 
@@ -101,7 +101,7 @@ if [ "x$1" == "xstatus" ]; then
 	if [ "x$pid" == "x" ]; then
 		echo smtp_watchdog_daemon1 not started
 	else
-		echo smtp_watchdog_daemon1 run with PID $pid
+		echo smtp_watchdog_daemon1 run with PID $pid - found among running processes
 	fi
 	
 fi
