@@ -184,7 +184,7 @@ if (empty($EMAILTO)) {
 	$EMAILTO='supervision@'.$DOMAIN;
 }
 if (empty($pathtospamdir)) {
-	$pathtospamdir="/tmp/spam";
+	$pathtospamdir="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam";
 }
 
 $PID=getmypid();
@@ -197,10 +197,10 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . " PID=$PID\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . " Now event captured will be logged into ".$logphpsendmail."\n", FILE_APPEND);
 
 // Load $instanceofuser
-$instanceofuser = getInstancesOfUser($pathtospamdir);
+$instanceofuser = getInstancesOfUser($pathtospamdir, $logfile);
 
 // Load $blacklistips
-$blacklistips = getBlackListIps($pathtospamdir);
+$blacklistips = getBlackListIps($pathtospamdir, $logfile);
 
 $datelastload = dol_now();
 
@@ -249,7 +249,7 @@ while (!feof($handle)) {
 
 
 	if ($datelastload < (dol_now() - 3600)) {
-		file_put_contents($logfile, date('Y-m-d H:i:s') . " reload cached files\n", FILE_APPEND);
+		file_put_contents($logfile, date('Y-m-d H:i:s') . " reload cached files (at least once per hour)\n", FILE_APPEND);
 
 		// Call this sometimes to refresh list of paid instances
 		$instanceofuser = getInstancesOfUser($pathtospamdir);
@@ -475,7 +475,7 @@ while (!feof($handle)) {
 					}
 				}
 
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Nb of processes found with ".$commandresexec." = ".$resexec." (we accept ".$MAXALLOWED.")\n", FILE_APPEND);
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Nb of processes found with ".$commandresexec." = ".$resexec." (we accept mailquota ".$MAXALLOWED.")\n", FILE_APPEND);
 
 				if ($resexec > $MAXALLOWED) {
 					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko quota reached. User has reached its quota of ".$MAXALLOWED."\n", FILE_APPEND);
@@ -541,10 +541,13 @@ pclose($handle);
  * getInstancesOfUser()
  *
  * @param	string	$pathtospamdir		Spam directory
+ * @param	string	$logfile			File name for log
  * @return	array						Array of instances in mailquota (so paid instances). Key is osu... user. Value is an array.
  */
-function getInstancesOfUser($pathtospamdir)
+function getInstancesOfUser($pathtospamdir, $logfile)
 {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " Load file with mail quota ".$pathtospamdir."/mailquota\n", FILE_APPEND);
+
 	$instanceofuser = array();
 	// Loop on each line of $pathtospamdir/mailquota
 	$fp = @fopen($pathtospamdir."/mailquota", "r");
@@ -567,10 +570,13 @@ function getInstancesOfUser($pathtospamdir)
  * getBlackListIps()
  *
  * @param	string	$pathtospamdir		Spam directory
+ * @param	string	$logfile			File name for log
  * @return	array						Array of blacklisted IPs. Key and value are the IP.
  */
-function getBlackListIps($pathtospamdir)
+function getBlackListIps($pathtospamdir, $logfile)
 {
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " Load file with list of IP ".$pathtospamdir."/blaklistip\n", FILE_APPEND);
+
 	$blacklistips = array();
 	// Loop on each line of $pathtospamdir/mailquota
 	$fp = @fopen($pathtospamdir."/blacklistip", "r");
