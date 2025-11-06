@@ -518,7 +518,7 @@ print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) f
 if (empty($overwriteexistinginstance)) {
 	print '--- Create new container for new instance (need sql create/write access on master database with master database user)'."\n";
 
-	$newpass = $oldobject->array_options['options_deployment_initial_password'];
+	$newpass = empty($oldobject->array_options['options_deployment_initial_password']) ? '' : $oldobject->array_options['options_deployment_initial_password'];
 	if (empty($newpass)) {
 		$newpass = getRandomPassword(true, array('I'), 16);
 	}
@@ -568,15 +568,15 @@ if (empty($overwriteexistinginstance)) {
 
 // Reload contract to get all values up to date
 $newobject = new SellYourSaasContract($dbmaster);
-$result=$newobject->fetch('', '', $newinstance);
+$result = $newobject->fetch('', '', $newinstance);
 
-$newserver=$newobject->array_options['options_hostname_os'];
-$newlogin=$newobject->array_options['options_username_os'];
-$newpassword=$newobject->array_options['options_password_os'];
-$newserverbase=$newobject->array_options['options_hostname_db'];
-$newloginbase=$newobject->array_options['options_username_db'];
-$newpasswordbase=$newobject->array_options['options_password_db'];
-$newdatabasedb=$newobject->array_options['options_database_db'];
+$newserver = empty($newobject->array_options['options_hostname_os']) ? '' : $newobject->array_options['options_hostname_os'];
+$newlogin = empty($newobject->array_options['options_username_os']) ? '' : $newobject->array_options['options_username_os'];
+$newpassword = empty($newobject->array_options['options_password_os']) ? '' : $newobject->array_options['options_password_os'];
+$newserverbase = empty($newobject->array_options['options_hostname_db']) ? '' : $newobject->array_options['options_hostname_db'];
+$newloginbase = empty($newobject->array_options['options_username_db']) ? '' : $newobject->array_options['options_username_db'];
+$newpasswordbase = empty($newobject->array_options['options_password_db']) ? '' : $newobject->array_options['options_password_db'];
+$newdatabasedb = empty($newobject->array_options['options_database_db']) ? '' : $newobject->array_options['options_database_db'];
 
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
@@ -840,7 +840,7 @@ print "\n";
 print $content_grabbed."\n";
 
 
-// STEP 3 of synchro - We should update the value of $dolibarr_main_instance_unique_id in case
+// STEP 3 of synchro - We should update the value of $dolibarr_main_instance_unique_id if
 // it was not done during creation of instance.
 $value_of_dolibarr_main_instance_unique_id = '';
 if (file_exists($sourcedir.'/htdocs/conf/conf.php')) {
