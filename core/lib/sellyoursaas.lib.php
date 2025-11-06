@@ -423,10 +423,11 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	// Mysql command to block remote ip access (allow only master) or allow any ip.
 	$ipofmaster = $_SERVER['SERVER_ADDR'];
-	$mysqlblockallowremoteip = '';
+	$mysqlblockallowremoteip = '-- Make db login usable from master only'."\n";
 	$mysqlblockallowremoteip .= "CREATE USER '".$object->username_db."'@'".$ipofmaster."' IDENTIFIED BY '".$object->password_db."'; GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON ".$object->database_db.".* TO '".$object->username_db."'@'".$ipofmaster."';";
 	$mysqlblockallowremoteip .= " DROP USER '".$object->username_db."'@'%';";
-	$mysqlblockallowremoteip .= "\n\n";
+	$mysqlblockallowremoteip .= "\n";
+	$mysqlblockallowremoteip .= "-- Allow db login from any remote ip\n";
 	$mysqlblockallowremoteip .= "CREATE USER '".$object->username_db."'@'%' IDENTIFIED BY '".$object->password_db."'; GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON ".$object->database_db.".* TO '".$object->username_db."'@'%';";
 	$mysqlblockallowremoteip .= " DROP USER '".$object->username_db."'@'".$ipofmaster."';";
 	$links.='<span class="fa fa-database"></span> ';
