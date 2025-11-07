@@ -54,7 +54,7 @@ echo "Search local cert files to relink with: ls /home/admin/wwwroot/dolibarr_do
 for fic in `ls /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/*.key | grep $2`
 do
 	newfic="${fic%.key}"
-	echo "* Process files $newfic.(key|crt|-intermediate.crt).."
+	echo "* Process files $newfic(.key|.crt|-intermediate.crt)"
 	#echo "ls -l $newfic.key | grep $1"
 	islink=`ls -l $newfic.key | grep $1 | cut -c1`
 	#echo "islink=$islink"
