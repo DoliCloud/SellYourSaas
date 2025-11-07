@@ -825,7 +825,7 @@ print '</tr>';
 
 // Authorized key file
 print '<tr>';
-print '<td>'.$langs->trans("Authorized_keyInstalled").'</td><td>'.($object->array_options['options_fileauthorizekey'] ? $langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel') : $langs->trans("No")).'</span>';
+print '<td>'.$form->textwithpicto($langs->trans("Authorized_keyInstalled"), $langs->trans("Authorized_keyInstalledDesc")).'</td><td>'.($object->array_options['options_fileauthorizekey'] ? $langs->trans("Yes").' - <span class="opacitymedium">'.dol_print_date($object->array_options['options_fileauthorizekey'], '%Y-%m-%d %H:%M:%S', 'tzuserrel') : $langs->trans("No")).'</span>';
 if ($object->array_options['options_deployment_status'] !== 'undeployed') {
 	print ' &nbsp; (<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=addauthorizedkey&token='.newToken().'">'.$langs->trans("Create").'</a>)';
 }

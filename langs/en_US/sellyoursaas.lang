@@ -44,6 +44,7 @@ NbLostInstances=Nb of lost instances
 AmountNewInstances=Amount of new instances
 AmountLostInstances=Amount of lost instances
 Authorized_keyInstalled=File authorized_keys_support installed
+Authorized_keyInstalledDesc=This file is generated during deployment of an instance but you regenerate it when you want. It contains all the public keys defined into the setup of SellYourSass module (SELLYOURSAAS_PUBLIC_KEY) so you can define the list of public keys allowed to connect to customer instance in your setup and all owners of the private keys will be able to connect using SSH to the customer instance for maintenance purpose. 
 LockfileInstalled=File install.lock installed
 UnlockfileInstalled=File upgrade.unlock installed
 InstallModulesLockfileInstalled=File installmodules.lock installed
