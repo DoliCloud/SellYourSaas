@@ -385,6 +385,7 @@ if ($mode != 'test') {
 		$actioncomm->label = 'Upgrade from CLI rsync_instance.php, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
 		$actioncomm->note_private = $actioncomm->label;
 		$actioncomm->fk_element = $object->id;
+		$actioncomm->elementid = $object->id;
 		$actioncomm->elementtype = 'contract';
 		$actioncomm->type_code = 'AC_OTH_AUTO';
 		$actioncomm->userassigned[$user->id] = array('id'=>$user->id);
