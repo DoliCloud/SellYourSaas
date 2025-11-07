@@ -855,14 +855,13 @@ if (file_exists($sourcedir.'/htdocs/conf/conf.php')) {
 	    if (strpos($line, '=') === false) continue;
 	    if (preg_match('/^#/', $line)) continue;
 	    if (preg_match('/^\//', $line)) continue;
-	    if (preg_match('/;/', $line)) continue;
 	    [$key, $val] = explode('=', $line, 2);
 	    if (trim($key) === '$dolibarr_main_instance_unique_id') {
-	        $value_of_dolibarr_main_instance_unique_id = str_replace("'", "", trim($val));
+	        $value_of_dolibarr_main_instance_unique_id = str_replace(array("'",";"), "", trim($val));
 			break;
 	    }
 	    if (trim($key) === '$dolibarr_main_cookie_cryptkey') {
-	        $value_of_dolibarr_main_cookie_cryptkey = str_replace("'", "", trim($val));
+	        $value_of_dolibarr_main_cookie_cryptkey = str_replace(array("'",";"), "", trim($val));
 	    }
 	}
 
