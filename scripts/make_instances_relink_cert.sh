@@ -75,4 +75,8 @@ do
 	fi
 done
 
+if [ "x$3" == "xconfirm" ]; then
+	echo "You must restart web server with: /etc/init.d/apache2 reload"
+fi
+
 echo "Finished."
