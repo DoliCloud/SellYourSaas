@@ -621,14 +621,16 @@ if ($dateendperiod > 0) {
 		}
 	}
 }
-print "--- Set end date of trial on new contract to the same value than the old contract.\n";
-$sql = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields set date_endfreeperiod = '".$db->idate($oldobject->array_options['options_date_endfreeperiod'])."'";
+print "--- Update fields on new contract to the same value than the old contract (end date of trial, timezone).\n";
+$sql = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields";
+$sql .= " SET date_endfreeperiod = '".$db->idate($oldobject->array_options['options_date_endfreeperiod'])."',";
+$sql .= " timezone = '".$db->escape($oldobject->array_options['options_timezone'])."'";
 $sql .= " WHERE fk_object = ".((int) $newobject->id);
 print $sql."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 	$resql = $db->query($sql);
 	if (!$resql) {
-		print 'Failed to set end date of trial period'."\n";
+		print 'Failed to set end date of trial period or timezone'."\n";
 		exit(-1);
 	}
 }
@@ -722,7 +724,7 @@ $param[] = "--exclude .gitignore";
 $param[] = "--exclude .settings";
 $param[] = "--exclude .project";
 $param[] = "--exclude *.pdf_preview.png";
-$param[] = "--exclude htdocs/conf/conf.php";
+//$param[] = "--exclude htdocs/conf/conf.php";		// We want the conf file so we can also update param from this files later
 $param[] = "--exclude glpi_config/config_db.php";
 $param[] = "--exclude htdocs/inc/downstream.php";
 
@@ -843,17 +845,29 @@ print $content_grabbed."\n";
 // STEP 3 of synchro - We should update the value of $dolibarr_main_instance_unique_id if
 // it was not done during creation of instance.
 $value_of_dolibarr_main_instance_unique_id = '';
+$value_of_dolibarr_main_cookie_cryptkey = '';
 if (file_exists($sourcedir.'/htdocs/conf/conf.php')) {
-	$tmpfilecontent = file_get_contents($sourcedir.'/htdocs/conf/conf.php');
+	chmod($sourcedir.'/htdocs/conf', 0700);
+	dol_move($sourcedir.'/htdocs/conf/conf.php', $sourcedir.'/htdocs/conf/conf.php.mastermove', '0', 1, 0, 0);
+
+	$tmpfilecontent = file_get_contents($sourcedir.'/htdocs/conf/conf.php.mastermove');
 	foreach (explode("\n", $tmpfilecontent) as $line) {
 	    if (strpos($line, '=') === false) continue;
 	    if (preg_match('/^#/', $line)) continue;
 	    if (preg_match('/^\//', $line)) continue;
+	    if (preg_match('/;/', $line)) continue;
 	    [$key, $val] = explode('=', $line, 2);
-	    if (trim($key) === $param) {
+	    if (trim($key) === '$dolibarr_main_instance_unique_id') {
 	        $value_of_dolibarr_main_instance_unique_id = str_replace("'", "", trim($val));
-	        break;
+			break;
 	    }
+	    if (trim($key) === '$dolibarr_main_cookie_cryptkey') {
+	        $value_of_dolibarr_main_cookie_cryptkey = str_replace("'", "", trim($val));
+	    }
+	}
+
+	if (empty($value_of_dolibarr_main_instance_unique_id)) {
+		$value_of_dolibarr_main_instance_unique_id = $value_of_dolibarr_main_cookie_cryptkey;
 	}
 
 	if (empty($nointeractive)) {
@@ -861,12 +875,21 @@ if (file_exists($sourcedir.'/htdocs/conf/conf.php')) {
 		$input = trim(fgets(STDIN));
 	}
 
-	$fullcommand = 'ssh '.$newlogin.'@'.$newserver.' "sed -i \'s/^param=.*/param='.$value_of_dolibarr_main_instance_unique_id.'/\' '.$targetdir.'/htdocs/conf/conf.php"';
+	$fullcommand = 'ssh -o StrictHostKeyChecking=accept-new '.$newlogin.'@'.$newserver;
+	$fullcommand .= ' "';
+	$fullcommand .= 'chmod u+w '.$targetdir.'/htdocs/conf; ';
+	if ($value_of_dolibarr_main_instance_unique_id) {
+		$fullcommand .= 'sed -i \'s/^\$dolibarr_main_instance_unique_id=.*/\$dolibarr_main_instance_unique_id=\"'.$value_of_dolibarr_main_instance_unique_id.'\";/\' '.$targetdir.'/htdocs/conf/conf.php; ';
+	}
+	$fullcommand .= 'chmod u-w '.$targetdir.'/htdocs/conf; ';
+	$fullcommand .= '"';
 
 	print $fullcommand."\n";
 
 	$outputfile = $conf->admin->dir_temp.'/outsshsed.tmp';
-	$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0);
+	$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, null, 1);
+
+	var_dump($resultarray);
 }
 
 
