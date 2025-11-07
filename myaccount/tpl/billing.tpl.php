@@ -139,9 +139,11 @@ if (count($listofcontractid) > 0) {
 
 			//var_dump($contract->linkedObjects['facture']);
 			//dol_sort_array($contract->linkedObjects['facture'], 'date');
+			$draftinvoices = array();
 			foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 				/* @var Facture $invoice */
 				if ($invoice->status == Facture::STATUS_DRAFT) {
+					$draftinvoices [] = $invoice;
 					continue;
 				}
 
@@ -264,6 +266,43 @@ if (count($listofcontractid) > 0) {
 
 					            </div>
 							';
+			}
+			if (!empty($draftinvoices)) {
+				print '			<div class="row" style="margin-top:20px">
+								<span class="opacitymedium">'.($langs->trans("UpcomingPayments")).'</span>
+								</div>';
+				foreach ($draftinvoices as $key => $draftinvoice) {
+					print '
+					            <div class="row" style="margin-top:20px">
+									<!-- Ref invoice -->
+									<div class="col-12 col-md-4 nowraponall">
+									'.($langs->trans("UpcomingPaymentNumber", $key+1)).'
+									</div>
+									
+									<!-- Date -->
+									<div class="col-6 col-md-2">
+									&nbsp;
+									</div>
+
+									<!-- Price -->
+					            <div class="col-6 col-md-2">
+									';
+					print (empty($draftinvoice->dispute_status) ? '' : '<strike>');
+					print price(price2num($draftinvoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency);
+					print (empty($draftinvoice->dispute_status) ? '' : '</strike>');
+
+					print '
+								</div>
+								<!-- Payment mode -->
+								<div class="col-6 col-md-2 tdoverflowmax150" title="'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'">
+									'.($draftinvoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'
+					            </div>
+
+					            <div class="col-6 col-md-2 nowrap">
+									'.(dolGetStatus($langs->transnoentitiesnoconv("UpcomingPayment"), $langs->transnoentitiesnoconv("UpcomingPayment"), '', 'status2', 2)).'
+					            </div>
+								';
+				}
 			}
 		} else {
 			print '
