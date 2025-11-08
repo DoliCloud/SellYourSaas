@@ -14,7 +14,8 @@ export YELLOW='\033[0;33m'
 echo "***** $0 *****"
 
 if [ "x$2" == "x" ]; then
-   echo "Relink local certificates found into /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt to link to specific cert files"
+   echo "Relink local certificates found into /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt to link to the provided specific cert files."
+   echo "If local certificates are already links, nothing is done, only hard files are replaced by a link."
    echo
    echo "Usage:   $0  root_of_cert_to_link_to  regex_of_files_to_replace  test|confirm"
    echo "Example: $0  /etc/apache2/all.with.dolicloud.com  xxx.dolicloud.com  test|confirm"
@@ -80,3 +81,4 @@ if [ "x$3" == "xconfirm" ]; then
 fi
 
 echo "Finished."
+echo
