@@ -324,6 +324,7 @@ mylastnamefirstname ALL=(ALL) ALL
 # This allows to switch to admin or osu* with "sudo su - admin" or "sudo su - osu..."
 #mylastnamefirstname ALL=(ALL) /usr/bin/su - admin
 #mylastnamefirstname ALL=(ALL) /usr/bin/su - osu*
+#myadminunixlogin ALL=(ALL) /usr/bin/fail2ban-client
 ---------------
 
 This allows you to switch to *admin* or *osu...* without typing your password too:
