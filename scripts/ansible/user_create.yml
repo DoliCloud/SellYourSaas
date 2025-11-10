@@ -49,12 +49,12 @@
       - sellyoursaas_installed_rules.stat.exists == True
       - userpublickey is not defined
 
-  - name: Print return information from the previous task
+  - name: Print value of userip found from the previous task
     ansible.builtin.debug:
       var: userip
       verbosity: 1
 
-  - name: Print return information from the previous task
+  - name: Print value of userpublickey found from the previous task
     ansible.builtin.debug:
       var: userpublickey
       verbosity: 1
