@@ -591,6 +591,22 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	}
 }
 
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SUPPORT_TICKET_CREATE").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_SUPPORT_TICKET_CREATE', array(), null, 0, 0, 0);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_CREATE')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_SUPPORT_TICKET_CREATE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_SUPPORT_TICKET_CREATE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td><span class="opacitymedium small"></span></td>';
+print '</tr>';
+
+
 print '</table>';
 print '</div>';
 

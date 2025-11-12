@@ -110,6 +110,7 @@ require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticket.class.php';
 //require_once DOL_DOCUMENT_ROOT.'/website/class/website.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societeaccount.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/companybankaccount.class.php';
@@ -903,6 +904,24 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$trackid = 'thi'.$mythirdpartyaccount->id;
 		if (is_object($tmpcontract)) {
 			$trackid = 'con'.$tmpcontract->id;
+		}
+		if (getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREATE")) {
+			$tickettocreate = new Ticket($db);
+			$tickettocreate->ref = $tickettocreate->getDefaultRef();
+			$tickettocreate->subject = $topic;
+			$tickettocreate->message = $content;
+			$tickettocreate->fk_soc = $mythirdpartyaccount->id;
+			$tickettocreate->socid = $mythirdpartyaccount->id;
+			$tickettocreate->origin_replyto = $replyto;
+			$tickettocreate->origin_email = $emailfrom;
+			$tickettocreate->ip = $ipaddress;
+			if (is_object($tmpcontract)) {
+				$tickettocreate->fk_contract = $tmpcontract->id;
+			}
+			$res = $tickettocreate->create($user);
+			if ($res > 0) {
+				$trackid = $tickettocreate->track_id;
+			}
 		}
 
 		// Send email
