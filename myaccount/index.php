@@ -2306,7 +2306,182 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	header("Location: ".$backtourl);
 	exit;
+} elseif ($action == 'uninstall') {
+	$error = 0;
+	$deletedlinecontract = 0; $deletedlinefacturerec = 0;
+	$contractid = GETPOSTINT("instanceid");
+	$productid = GETPOSTINT("productid");
+	if ($contractid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($productid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("ProductId")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	$tmpproduct = new Product($db);
+	$res = $tmpproduct->fetch($productid);
+	if ($res <= 0) {
+		setEventMessages($tmpproduct->error, null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($tmpproduct->array_options["options_app_or_option"] != "option") {
+		setEventMessages($langs->trans("ServiceCannotBeUninstalled"), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+
+	// TODO: Call to remoteaction to remove option
+
+	$db->begin();
+	$tmpcontract = new Contrat($db);
+	$res = $tmpcontract->fetch($contractid);
+	if ($res <= 0) {
+		setEventMessages($tmpcontract->error, null, 'errors');
+		$error++;
+	}
+	if (!$error) {
+		foreach ($tmpcontract->lines as $key => $line) {
+			// Remove service line(s) from contract
+			if ($line->fk_product == $productid) {
+				$res = $tmpcontract->deleteLine($line->id, $user);
+				if ($res <= 0) {
+					setEventMessages($tmpcontract->error, null, 'errors');
+					$error++;
+				} else {
+					$deletedlinecontract ++;
+				}
+			}
+		}
+
+		if (!$error) {
+			// Remove service line(s) from recurring invoice
+			$tmpcontract->fetchObjectLinked();
+			$arrayfacturerec = array_values($tmpcontract->linkedObjects["facturerec"]);
+
+			if (count($arrayfacturerec) != 1) {
+				// TODO: Send mail auto to inform admins of multiples faturerec contract
+				$error ++;
+			} else {
+				$facturerec = $arrayfacturerec[0];
+				foreach ($facturerec->lines as $key => $line) {
+					if ($line->fk_product == $productid) {
+						$res = $line->delete($user);
+						if ($res <= 0) {
+							setEventMessages($line->error, null, 'errors');
+							$error++;
+						} else {
+							$deletedlinefacturerec ++;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (!$deletedlinecontract || !$deletedlinefacturerec) {
+		$error ++;
+		setEventMessages("FailedToUninstallOption", null, 'errors');
+	}
+
+	if ($error) {
+		$db->rollback();
+	} else {
+		$db->commit();
+		setEventMessages($langs->trans("OptionSuccessfullyUninstalled"), null, 'mesgs');
+	}
+
+	header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
+	exit();
+} elseif ($action == 'install') {
+	$error = 0;
+	$contractid = GETPOSTINT("instanceid");
+	$productid = GETPOSTINT("productid");
+	if ($contractid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($productid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("ProductId")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	$tmpproduct = new Product($db);
+	$res = $tmpproduct->fetch($productid);
+	if ($res <= 0) {
+		setEventMessages($tmpproduct->error, null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($tmpproduct->array_options["options_app_or_option"] != "option") {
+		setEventMessages($langs->trans("ServiceCannotBeInstalled"), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+
+	// TODO: Call to remoteaction to create option
+
+	$db->begin();
+	$tmpcontract = new Contrat($db);
+	$res = $tmpcontract->fetch($contractid);
+	if ($res <= 0) {
+		setEventMessages($tmpcontract->error, null, 'errors');
+		$error++;
+	}
+	if (!$error) {
+		$tmparray = sellyoursaasGetExpirationDate($tmpcontract, 0);
+		$duration_value = $tmparray['duration_value'];
+		$duration_unit = $tmparray['duration_unit'];
+		$date_start = dol_now();
+		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
+		// Create service line(s) from contract
+		$idlinecontract = $tmpcontract->addline($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, $date_start, $date_end);
+		if ($idlinecontract <= 0) {
+			setEventMessages($contract->error, null, 'errors');
+			$error++;
+		}
+		if (!$error) {
+			$tmpcontract->fetch($contractid);
+			$result = $tmpcontract->active_line($user, $idlinecontract, $date_start, '', 'Activation after option deployment');
+			if (!$result) {
+				// TODO: Send mail auto to inform admins of error activation line
+				$error ++;
+			}
+		}
+		if (!$error) {
+			// create service line(s) from recurring invoice
+			$tmpcontract->fetchObjectLinked();
+			$arrayfacturerec = array_values($tmpcontract->linkedObjects["facturerec"]);
+
+			if (count($arrayfacturerec) != 1) {
+				// TODO: Send mail auto to inform admins of multiples faturerec contract
+				$error ++;
+			} else {
+				$facturerec = $arrayfacturerec[0];
+				$result = $facturerec->addLine($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+				if (!$result) {
+					// TODO: Send mail auto to inform admins of error line creation facturRec
+					$error ++;
+				}
+			}
+		}
+	}
+
+	if ($error) {
+		$db->rollback();
+	} else {
+		$db->commit();
+		setEventMessages($langs->trans("OptionSuccessfullyInstalled"), null, 'mesgs');
+	}
+
+	header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
+	exit();
 }
+
 
 
 

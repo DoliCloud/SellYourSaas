@@ -988,8 +988,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print $htmlforphoto;
 				}
 
-				$label = $tmpprod->label;
-				$desc = $tmpprod->description;
+				$label = $tmpproduct->label;
+				$desc = $tmpproduct->description;
 				$producturl = $tmpproduct->url;
 				if (!empty($tmpproduct->multilangs[$langs->defaultlang])) {
 					$label = $tmpproduct->multilangs[$langs->defaultlang]['label'];
@@ -1034,10 +1034,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<div class="divforbutton">';
 					if (!$productalreadyininstance) {
 						// Show link to subscribe
-						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" target="_blank" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 					} else {
 						// Show link to unsubscribe
-						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'#tab_domain_'.$contract->id.'" target="_blank" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
 					}
 					print '</div>';
 				} else {
