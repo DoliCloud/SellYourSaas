@@ -965,3 +965,4 @@ SaveAndPay=Économisez et payez
 ModulesToIgnoreForAutoUpgrade=Modules à ignorer pour la mise à jour automatique
 PleaseFillContactInfoFirst=Veuillez d'abord remplir vos coordonnées.
 GoToYourResellerMenuTogetInformation=Accédez au menu « %s » pour plus d'informations.
+SELLYOURSAAS_SUPPORT_TICKET_CREATE=Activer la création automatique de tickets lorsque le formulaire de contact est utilisé
