@@ -2327,6 +2327,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	exit;
 } elseif ($action == 'uninstall') {
 	$error = 0;
+	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$deletedlinecontract = 0; $deletedlinefacturerec = 0;
 	$contractid = GETPOSTINT("instanceid");
 	$productid = GETPOSTINT("productid");
@@ -2352,8 +2353,6 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		header("Location: ".$backtourl);
 		exit;
 	}
-
-	// TODO: Call to remoteaction to remove option
 
 	$db->begin();
 	$tmpcontract = new Contrat($db);
@@ -2398,6 +2397,44 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 					}
 				}
 			}
+		}
+	}
+
+	// Call to remoteaction to undeploy option
+	if (!$error) {
+		$object = $tmpcontract;
+		$type_db = $conf->db->type;
+		$hostname_db  = $object->array_options['options_hostname_db'];
+		$username_db  = $object->array_options['options_username_db'];
+		$password_db  = $object->array_options['options_password_db'];
+		$database_db  = $object->array_options['options_database_db'];
+		$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+		$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
+		$hostname_os  = $object->array_options['options_hostname_os'];
+		$username_os  = $object->array_options['options_username_os'];
+		$password_os  = $object->array_options['options_password_os'];
+		$username_web = $object->thirdparty->email;
+		$password_web = $object->thirdparty->array_options['options_password'];
+
+		$tmp = explode('.', $object->ref_customer, 2);
+		$object->instance = $tmp[0];
+
+		$object->hostname_db  = $hostname_db;
+		$object->username_db  = $username_db;
+		$object->password_db  = $password_db;
+		$object->database_db  = $database_db;
+		$object->port_db      = $port_db;
+		$object->prefix_db    = $prefix_db;
+		$object->username_os  = $username_os;
+		$object->password_os  = $password_os;
+		$object->hostname_os  = $hostname_os;
+		$object->username_web = $username_web;
+		$object->password_web = $password_web;
+
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction("undeployoption", $object);
+		if ($result <= 0) {
+			$error++;
+			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
 		}
 	}
 
@@ -2489,6 +2526,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 
+	// Call to remoteaction to deploy option
 	if (!$error) {
 		$object = $tmpcontract;
 		$type_db = $conf->db->type;
