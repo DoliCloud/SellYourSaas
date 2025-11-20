@@ -122,7 +122,7 @@ if ($signature != $recalculatedsignature) {
 	exit();
 }
 
-if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployall', 'undeployall'))) {
+if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployall', 'undeployall', 'undeployoption'))) {
 	if ($DEBUG) {
 		fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace."\n");
 	} else {
