@@ -96,6 +96,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$sql .= " FROM ".$this->db->prefix()."contrat as c, ".$this->db->prefix()."contrat_extrafields as ce";
 				$sql .= " WHERE ce.fk_object = c.rowid";
 				$sql .= " AND ce.deployment_status IN ('done', 'processing')";
+				$sql .= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Not a redirection instance
 				$sql .= " AND ce.latestbackup".$mode."_status = 'KO'";
 
 				$resql = $this->db->query($sql);
