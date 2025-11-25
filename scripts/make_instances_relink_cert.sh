@@ -14,7 +14,8 @@ export YELLOW='\033[0;33m'
 echo "***** $0 *****"
 
 if [ "x$2" == "x" ]; then
-   echo "Relink local certificates found into /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt to link to specific cert files"
+   echo "Relink local certificates found into /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt to link to the provided specific cert files."
+   echo "If local certificates are already links, nothing is done, only hard files are replaced by a link."
    echo
    echo "Usage:   $0  root_of_cert_to_link_to  regex_of_files_to_replace  test|confirm"
    echo "Example: $0  /etc/apache2/all.with.dolicloud.com  xxx.dolicloud.com  test|confirm"
@@ -54,7 +55,7 @@ echo "Search local cert files to relink with: ls /home/admin/wwwroot/dolibarr_do
 for fic in `ls /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/*.key | grep $2`
 do
 	newfic="${fic%.key}"
-	echo "* Process files $newfic.(key|crt|-intermediate.crt).."
+	echo "* Process files $newfic(.key|.crt|-intermediate.crt)"
 	#echo "ls -l $newfic.key | grep $1"
 	islink=`ls -l $newfic.key | grep $1 | cut -c1`
 	#echo "islink=$islink"
@@ -75,4 +76,9 @@ do
 	fi
 done
 
+if [ "x$3" == "xconfirm" ]; then
+	echo "You must restart web server with: /etc/init.d/apache2 reload"
+fi
+
 echo "Finished."
+echo

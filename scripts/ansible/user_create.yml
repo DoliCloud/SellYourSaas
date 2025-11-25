@@ -49,12 +49,12 @@
       - sellyoursaas_installed_rules.stat.exists == True
       - userpublickey is not defined
 
-  - name: Print return information from the previous task
+  - name: Print value of userip found from the previous task
     ansible.builtin.debug:
       var: userip
       verbosity: 1
 
-  - name: Print return information from the previous task
+  - name: Print value of userpublickey found from the previous task
     ansible.builtin.debug:
       var: userpublickey
       verbosity: 1
@@ -88,7 +88,7 @@
       - userroot is defined
       - userroot|length > 0
 
-  - name: Process line into file /etc/sudoers.d/{{login}} for su admin
+  - name: Process line into file /etc/sudoers.d/{{login}} for sudo su - admin
     lineinfile:
       path: /etc/sudoers.d/{{ login }}
       line: "{{ login }} ALL=(ALL) /usr/bin/su - admin"
@@ -102,7 +102,7 @@
       - userpublickey|length > 0
       - userroot is not defined
 
-  - name: Process line into file /etc/sudoers.d/{{login}} for su osu
+  - name: Process line into file /etc/sudoers.d/{{login}} for sudo su - osu
     lineinfile:
       path: /etc/sudoers.d/{{ login }}
       line: "{{ login }} ALL=(ALL) /usr/bin/su - osu*"
@@ -116,7 +116,21 @@
       - userpublickey|length > 0
       - userroot is not defined
 
-  - name: Remove deprecated line into file /etc/sudoers.d/{{login}} for su admin
+  - name: Process line into file /etc/sudoers.d/{{login}} for sudo fail2ban
+    lineinfile:
+      path: /etc/sudoers.d/{{ login }}
+      line: "{{ login }} ALL=(ALL) /usr/bin/fail2ban-client"
+      owner: root
+      group: root
+      mode: '0440'
+      create: yes
+      state: present
+    when:
+      - userpublickey is defined
+      - userpublickey|length > 0
+      - userroot is not defined
+
+  - name: Remove deprecated line into file /etc/sudoers.d/{{login}} for sudo su - admin
     lineinfile:
       path: /etc/sudoers.d/{{ login }}
       line: "{{ login }} ALL=(ALL) NOPASSWD:/bin/su - admin"
@@ -129,7 +143,7 @@
       - userpublickey is defined
       - userpublickey|length > 0
 
-  - name: Remove deprecated line into file /etc/sudoers.d/{{login}} for su osu
+  - name: Remove deprecated line into file /etc/sudoers.d/{{login}} for sudo su - osu
     lineinfile:
       path: /etc/sudoers.d/{{ login }}
       line: "{{ login }} ALL=(ALL) NOPASSWD:/bin/su - osu*"
