@@ -134,6 +134,9 @@ class SellYourSaasUtils
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
 							$errorforinvoice = 0;
 
+							$codepaiementdirectdebit = 'PRE';
+							$codepaiementtransfer = 'VIR';
+
 							$this->db->begin();
 
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
@@ -225,6 +228,11 @@ class SellYourSaasUtils
 									}
 
 									$invoice->context['actionmsgmore'] = 'Invoice id = '.$invoice->id.' validated by doValidateDraftInvoices()';
+									if ($invoice->mode_reglement_code == $codepaiementtransfer) {
+										$invoice->context['actionmsgmore'] .= '. Payment mode is a credit transfer ('.$invoice->mode_reglement_code.') so we will send an email to the customer after validation to inform it about invoice availability.';
+									} else {
+										$invoice->context['actionmsgmore'] .= '. Payment mode is NOT a credit transfer ('.$invoice->mode_reglement_code.') so no email is sent after the invoice validation. May be done later by another process.';
+									}
 
 									$result = $invoice->validate($user);	// Validate invoice (does not regenerate the PDF)
 
@@ -258,9 +266,6 @@ class SellYourSaasUtils
 
 								if (!$errorforinvoice) {
 									dol_syslog("-- Check if invoice payment mode is a differed mode (direct debit or credit transfer): mode_reglement_code=".$invoice->mode_reglement_code);
-
-									$codepaiementdirectdebit = 'PRE';
-									$codepaiementtransfer = 'VIR';
 
 									if ($invoice->mode_reglement_code == $codepaiementdirectdebit || $invoice->mode_reglement_code == $codepaiementtransfer) {
 										// If customer invoice is an invoice to pay with a direct debit or is waiting a credit transfer
@@ -439,7 +444,7 @@ class SellYourSaasUtils
 												$from = getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL');
 
 												$trackid = 'inv'.$invoice->id;
-												$moreinheader = 'X-Dolibarr-Info: doValidateInvoice'."\r\n";
+												$moreinheader = 'X-Dolibarr-Info: doValidateInvoice invoice is available'."\r\n";
 												$addr_cc = '';
 												if (!empty($invoice->thirdparty->array_options['options_emailccinvoice'])) {
 													dol_syslog("We add the recipient ".$invoice->thirdparty->array_options['options_emailccinvoice']." as CC to warn about invoice availability (direct debit or credit transfer case)", LOG_DEBUG);
