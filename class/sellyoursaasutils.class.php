@@ -2065,7 +2065,7 @@ class SellYourSaasUtils
 						$formmail=new FormMail($this->db);
 
 						if (! empty($labeltouse)) {
-							$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, 0, 1, $labeltouse);
+							$arraydefaultmessage = $formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, 0, 1, $labeltouse);
 						}
 
 						if (! empty($labeltouse) && is_object($arraydefaultmessage) && $arraydefaultmessage->id > 0) {
@@ -2073,7 +2073,7 @@ class SellYourSaasUtils
 							$msg     = $arraydefaultmessage->content;
 						}
 
-						$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
+						$substitutionarray = getCommonSubstitutionArray($outputlangs, 0, null, $object);
 
 						$substitutionarray['__SELLYOURSAAS_PAYMENT_ERROR_DESC__']=$stripefailurecode.' '.$stripefailuremessage;
 
