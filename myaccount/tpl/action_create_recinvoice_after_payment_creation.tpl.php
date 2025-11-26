@@ -461,6 +461,17 @@ if (! $error) {
 					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
 				}
 			}
+
+			// Activate all lines of a contract if freemode is enabled
+			if (!$error && $isfreemodeenabled) {
+				dol_syslog("--- Now we activate contact lines of contract".$contract->id." for freemode instance", LOG_DEBUG, 0);
+
+				$result = $contract->activateAll($user);
+				if ($result <= 0) {
+					$error++;
+					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+				}
+			}
 		}
 		if (! $error && !$thirdpartyhadalreadyapaymentmode) {
 			$comment = 'Execute remote script on '.$contract->ref.' after the creation of a first payment method';
