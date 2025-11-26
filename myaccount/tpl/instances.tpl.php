@@ -974,6 +974,25 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					continue;
 				}
 
+				$productalreadyininstance = 0;
+				if (!empty($tmpproduct->array_options['options_package'])) {
+					// If there is a package, test if module already depoyed on instance
+					foreach ($arrayoflines as $keyline => $line) {
+						if ($tmpproduct->id == $line->fk_product) {
+							$productalreadyininstance = 1;
+							break;
+						}
+					}
+				}
+
+				if (!$productalreadyininstance && !empty($tmpproduct->array_options["options_only_for_country"])) {
+					$optioncountries = preg_split("/[\s,;]+/", $tmpproduct->array_options["options_only_for_country"]);
+					if (!in_array(dol_strtolower($mythirdpartyaccount->country_code), $optioncountries)) {
+						// Thirdparty country code isn't in options_only_for_country array so we don't show option
+						continue;
+					}
+				}
+
 				print '<div class="tagtable centpercent divdolibarroptionfromservices"><div class="tagtr">';
 				print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
 
