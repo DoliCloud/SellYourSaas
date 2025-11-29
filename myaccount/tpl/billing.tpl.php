@@ -142,10 +142,6 @@ if (count($listofcontractid) > 0) {
 			$draftinvoices = array();
 			foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 				/* @var Facture $invoice */
-				if ($invoice->status == Facture::STATUS_DRAFT) {
-					$draftinvoices [] = $invoice;
-					continue;
-				}
 
 				// Set $statusstring
 				$statusstring = '';
@@ -211,6 +207,9 @@ if (count($listofcontractid) > 0) {
 						$statusstring .= ' <span class="badge badge-warning badge-status" title="'.$langs->trans("InvoicePaymentDisputedMessage", $invoice->ref, dol_print_date($invoice->date, 'day')).'">';
 						$statusstring .= $langs->trans("Canceled").'</span>';
 					}
+					if ($invoice->status == Facture::STATUS_DRAFT) {
+						$statusstring = '<span class="opacitymedium">'.$langs->trans('WaitingInvoice')."</span>";
+					}
 					// TODO Add details of payments
 					//$htmltext = 'Soon here: Details of payment...';
 					//print $form->textwithpicto('', $htmltext);
@@ -230,19 +229,24 @@ if (count($listofcontractid) > 0) {
 								if ($reshook > 0) {
 									print $hookmanager->resPrint;
 								} else {
-									$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
-									if ($url) {
-										print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
+									if ($invoice->status == 0) {
+										print $langs->trans("UpcomingInvoice");
 									} else {
-										print $invoice->ref.' <span class="small opacitymedium">('.$langs->trans("InvoicePDFNotYetAvailable").')</span>';
+										$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
+										if ($url) {
+											print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
+										} else {
+											print $invoice->ref.' <span class="small opacitymedium">('.$langs->trans("InvoicePDFNotYetAvailable").')</span>';
+										}
 									}
+
 								}
 
 								print '</div>
 
 								<!-- Date -->
 					            <div class="col-6 col-md-2">
-									'.dol_print_date($invoice->date, 'dayrfc', $langs).'
+									'.($invoice->status != Facture::STATUS_DRAFT ? (dol_print_date($invoice->date, 'dayrfc', $langs)) : '').'
 					            </div>
 
 								<!-- Price -->
@@ -267,7 +271,7 @@ if (count($listofcontractid) > 0) {
 					            </div>
 							';
 			}
-			if (!empty($draftinvoices)) {
+			/*if (!empty($draftinvoices)) {
 				print '			<div class="row" style="margin-top:20px">
 								<span class="opacitymedium">'.($langs->trans("UpcomingPayments")).'</span>
 								</div>';
@@ -303,7 +307,7 @@ if (count($listofcontractid) > 0) {
 					            </div>
 								';
 				}
-			}
+			}*/
 		} else {
 			print '
 					            <div class="row" style="margin-top:20px">
