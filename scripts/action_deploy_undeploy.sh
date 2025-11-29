@@ -942,11 +942,18 @@ if [[ "$mode" == "undeployoption" ]]; then
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Undeploy option files"
 
 	if [[ "x$targetdirwithsources1" != "x" ]]; then
-		echo rm -r $targetdirwithsources1 2>/dev/null
-		if [[ $testorconfirm == "confirm" ]]
+		dirtargetdirwithsources1=$(dirname $targetdirwithsources1)
+		nametargetdirwithsources1=$(basename $dirtargetdirwithsources1)
+		if [[ $nametargetdirwithsources1 == "custom" ]];
 		then
-			rm -r $targetdirwithsources1 2>/dev/null
-		fi	
+			echo rm -r $targetdirwithsources1 2>/dev/null
+			if [[ $testorconfirm == "confirm" ]]
+			then
+				rm -r $targetdirwithsources1 2>/dev/null
+			fi
+		else
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Target $targetdirwithsources1 isn't in custom directory so we do not delete"
+		fi
 	fi
 fi
 
