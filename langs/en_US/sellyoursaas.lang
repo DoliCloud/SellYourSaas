@@ -975,3 +975,5 @@ ServiceCannotBeInstalled=This service cannot be installed
 OptionSuccessfullyUninstalled=The option has been successfully uninstalled 
 OptionSuccessfullyInstalled=The option has been successfully installed
 SELLYOURSAAS_SUPPORT_TICKET_CREATE=Enable automatic ticket creation when the contact form is used
+UpcomingInvoice=Upcoming invoice
+WaitingInvoice=Waiting invoice

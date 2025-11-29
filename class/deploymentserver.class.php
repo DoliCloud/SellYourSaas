@@ -1139,7 +1139,7 @@ class Deploymentserver extends CommonObject
 	}
 
 	/**
-	 * Return info about last backups on the server
+	 * Return info about last backups of non-redirection instances for the server
 	 *
 	 * @param	string		$mode		'' = Request data for common backup, 'remote' = data for remote backup
 	 * @return	array					Array with info
@@ -1156,6 +1156,7 @@ class Deploymentserver extends CommonObject
 		$sql .= " WHERE ce.fk_object = c.rowid";
 		$sql .= " AND ce.deployment_status IN ('done', 'processing')";
 		$sql .= " AND ce.deployment_host = '".$this->db->escape($this->ipaddress)."'";
+		$sql .= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Not a redirection instance
 		$sql .= " GROUP BY ce.latestbackup".$mode."_status";
 
 		$resql = $this->db->query($sql);
