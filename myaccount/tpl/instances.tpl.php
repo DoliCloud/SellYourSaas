@@ -974,6 +974,25 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					continue;
 				}
 
+				$productalreadyininstance = 0;
+				if (!empty($tmpproduct->array_options['options_package'])) {
+					// If there is a package, test if module already depoyed on instance
+					foreach ($arrayoflines as $keyline => $line) {
+						if ($tmpproduct->id == $line->fk_product) {
+							$productalreadyininstance = 1;
+							break;
+						}
+					}
+				}
+
+				if (!$productalreadyininstance && !empty($tmpproduct->array_options["options_only_for_country"])) {
+					$optioncountries = preg_split("/[\s,;]+/", $tmpproduct->array_options["options_only_for_country"]);
+					if (!in_array(dol_strtolower($mythirdpartyaccount->country_code), $optioncountries)) {
+						// Thirdparty country code isn't in options_only_for_country array so we don't show option
+						continue;
+					}
+				}
+
 				print '<div class="tagtable centpercent divdolibarroptionfromservices"><div class="tagtr">';
 				print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
 
@@ -988,8 +1007,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print $htmlforphoto;
 				}
 
-				$label = $tmpprod->label;
-				$desc = $tmpprod->description;
+				$label = $tmpproduct->label;
+				$desc = $tmpproduct->description;
 				$producturl = $tmpproduct->url;
 				if (!empty($tmpproduct->multilangs[$langs->defaultlang])) {
 					$label = $tmpproduct->multilangs[$langs->defaultlang]['label'];
@@ -1034,10 +1053,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<div class="divforbutton">';
 					if (!$productalreadyininstance) {
 						// Show link to subscribe
-						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" target="_blank" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 					} else {
 						// Show link to unsubscribe
-						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'#tab_domain_'.$contract->id.'" target="_blank" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
 					}
 					print '</div>';
 				} else {

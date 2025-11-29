@@ -41,6 +41,7 @@ CREATE TABLE llx_packages(
 	sqlafter text,
 	sqlpasswordreset text,
 	sqlafterpaid text,
+	sqlafterundeployoption text,
 	crontoadd text,
 	version_formula text,
 	allowoverride varchar(255), 

@@ -937,6 +937,25 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 	chmod -R go-rwxs $targetdir/$osusername/$dbname
 fi
 
+# Undeploy option files
+if [[ "$mode" == "undeployoption" ]]; then
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Undeploy option files"
+
+	if [[ "x$targetdirwithsources1" != "x" ]]; then
+		dirtargetdirwithsources1=$(dirname $targetdirwithsources1)
+		nametargetdirwithsources1=$(basename $dirtargetdirwithsources1)
+		if [[ $nametargetdirwithsources1 == "custom" ]];
+		then
+			echo rm -r $targetdirwithsources1 2>/dev/null
+			if [[ $testorconfirm == "confirm" ]]
+			then
+				rm -r $targetdirwithsources1 2>/dev/null
+			fi
+		else
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Target $targetdirwithsources1 isn't in custom directory so we do not delete"
+		fi
+	fi
+fi
 
 # Undeploy config file
 

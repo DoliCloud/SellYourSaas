@@ -4302,6 +4302,12 @@ class SellYourSaasUtils
 				$doremoteaction = 2;
 				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => $doremoteaction, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
 			}
+			if (in_array($remoteaction, array('undeployoption')) &&
+				($producttmp->array_options['options_app_or_option'] == 'option') && $tmppackage->id > 0) {
+				$doremoteaction = 1;
+				$newremoteaction = 'undeployoption';		// force on deployoption for options services
+				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 20, 'doremoteaction' => $doremoteaction, 'remoteaction' => $newremoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
+			}
 		}
 
 		$listoflinesqualified = dol_sort_array($listoflinesqualified, 'position', 'asc');
@@ -4649,7 +4655,7 @@ class SellYourSaasUtils
 				}
 
 				// Execute personalized SQL requests (sqlafter), (sqlafterpaid)
-				if (! $error && in_array($remoteaction, array('deploy', 'deployall', 'deployoption', 'actionafterpaid'))) {
+				if (! $error && in_array($remoteaction, array('deploy', 'deployall', 'deployoption', 'actionafterpaid', 'undeployoption'))) {
 					if (! $error) {
 						dol_syslog("Try to connect to customer instance database to execute personalized requests");
 
@@ -4678,6 +4684,9 @@ class SellYourSaasUtils
 
 							if ($remoteaction == 'actionafterpaid') {
 								$sqltoexecute = make_substitutions($tmppackage->sqlafterpaid, $substitarrayforsql);
+							}
+							if ($remoteaction == 'undeployoption') {
+								$sqltoexecute = make_substitutions($tmppackage->sqlafterundeployoption, $substitarrayforsql);
 							}
 
 							$arrayofsql=explode(';', $sqltoexecute);
