@@ -339,7 +339,7 @@ if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {	// Us
 
 
 print '<div class="row"><div class="col-md-12"><label class="valignmiddle" style="margin-bottom: 20px">'.$langs->trans("NameOnCard").':</label> ';
-print '<input id="cardholder-name" class="minwidth200 valignmiddle" style="margin-bottom: 15px" type="text" name="proprio" value="'.GETPOST('proprio', 'alpha').'" autocomplete="off" autofocus>';
+print '<input id="cardholder-name" class="minwidth200 valignmiddle" style="margin-bottom: 15px" type="text" name="proprio" value="'.GETPOST('proprio', 'alpha').'" autocomplete="off" spellcheck="false" autofocus>';
 print '</div></div>';
 
 require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
