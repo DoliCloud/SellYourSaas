@@ -20,6 +20,9 @@
  * @var DoliDB $db
  * @var HookManager $hookmanager
  * @var Translate $langs
+ *
+ * @var string $backtourl
+ * @var Societe $mythirdpartyaccount
  */
 
 // Protection to avoid direct call of template
@@ -750,7 +753,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<br><br>';
 		// Replace Save by Pay ?
 		print '<input type="submit" name="submitsepa" value="'.$langs->trans("SaveAndPay").'" class="btn btn-info btn-circle">';
-		print ' ';
+		print ' &nbsp; ';
 		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 	} else {
 		if (! $foundban) {
