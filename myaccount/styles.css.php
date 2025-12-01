@@ -313,6 +313,17 @@ body.bodylogin {
 	padding-top: 0px !important;
 }
 
+header.register2 {
+    background-color: #334;
+    color: #eee;
+    padding: 10px;
+    text-align: center;
+}
+header.register2 h1 {
+	margin-bottom: 0 !important;
+}
+
+
 body.register {
 background: #fff;
 }
