@@ -366,9 +366,9 @@ print '<br>';
 
 if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION') && is_object($setupintent)) {
 	print '<input type="hidden" name="setupintentid" value="'.$setupintent->id.'">'."\n";
-	print '<button class="btn btn-info btn-circle" id="buttontopay" data-secret="'.$setupintent->client_secret.'">'.$langs->trans("Save").'</button>';
+	print '<button class="btn btn-info btn-circle" id="buttontopay" data-secret="'.$setupintent->client_secret.'">'.$langs->trans("SaveAndPay").'</button>';
 } else {
-	print '<button class="btn btn-info btn-circle" id="buttontopay">'.$langs->trans("Save").'</button>';
+	print '<button class="btn btn-info btn-circle" id="buttontopay">'.$langs->trans("SaveAndPay").'</button>';
 }
 
 print '<img id="hourglasstopay" class="hidden" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/working.gif">';
@@ -751,7 +751,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<div class="opacitymedium small justify">'.$langs->trans("SEPALegalText", $mysoc->name, $mysoc->name).'</div>';
 
 		print '<br><br>';
-		// Replace Save by Pay ?
+
 		print '<input type="submit" name="submitsepa" value="'.$langs->trans("SaveAndPay").'" class="btn btn-info btn-circle">';
 		print ' &nbsp; ';
 		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
