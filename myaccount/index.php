@@ -2549,7 +2549,7 @@ print '<li class="nav-item'.(($mode == 'support' || $mode == 'faq') ? ' active' 
 // My account
 print '
           <li class="nav-item'.($mode == 'myaccount' ? ' active' : '').' dropdown">
-             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#socid='.$mythirdpartyaccount->id.'"><i class="fa fa-user"></i> '.$langs->trans("MyAccount").' ('.$mythirdpartyaccount->email.')</a>
+             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#socid='.$mythirdpartyaccount->id.'"><i class="fa fa-user"></i> '.$langs->trans("MyAccount").' <span class="small">('.$mythirdpartyaccount->email.')</span></a>
              <ul class="dropdown-menu">
                  <li><a class="dropdown-item" href="'.$_SERVER["PHP_SELF"].'?mode=myaccount"><i class="fa fa-user pictofixedwidth"></i> '.$langs->trans("MyAccount").'</a></li>';
 		// Reseler request
