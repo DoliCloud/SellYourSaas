@@ -19,7 +19,10 @@
  * @var Conf $conf
  * @var DoliDB $db
  * @var HookManager $hookmanager
+ * @var Societe $mysoc
  * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
  */
 
 // Protection to avoid direct call of template
@@ -457,7 +460,8 @@ print '
 
 		print '<br>';
 		print $langs->trans("YouCanClainAmountWhen", price(getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM', 100), 0, $langs, 1, -1, -1, $conf->currency)).'<br>';
-		$labelforcompany = $mysoc->name. ' <span class="opacitymedium">('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Address").': '.$mysoc->getFullAddress(1, ',').')</span>';
+		$labelforcompany = $mysoc->name;
+		$labelforcompany .= ' <span class="opacitymedium">('.$langs->transcountry("ProfId1", $mysoc->country_code).': '.$mysoc->idprof1.', '.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Address").': '.$mysoc->getFullAddress(1, ',').')</span>';
 
 		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
