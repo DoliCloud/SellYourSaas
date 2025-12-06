@@ -632,7 +632,7 @@ if ($sellyoursaassupporturl) {
 			';
 }
 
-if (isModEnabled("ticket") && empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
+if (isModEnabled("ticket") && getDolGlobalInt("TICKET_ENABLE_PUBLIC_INTERFACE") && empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
 	print '
     				<!-- BEGIN PAGE HEADER-->
     				<!-- BEGIN PAGE HEAD -->
@@ -670,7 +670,7 @@ if (isModEnabled("ticket") && empty($sellyoursaassupporturl) && ($action != 'pre
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticketstats.class.php';
 	$staticticket = new Ticket($db);
 
-	$sql = "SELECT t.rowid, t.ref, t.track_id, t.datec, t.subject, t.fk_statut";
+	$sql = "SELECT t.rowid, t.ref, t.track_id, t.datec, t.subject, t.fk_statut, t.origin_email, t.track_id";
 	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
 	$sql .= " WHERE t.fk_soc = '".$db->escape($socid)."'";		// $socid is id of third party account
 	$sql .= $db->order('t.fk_statut', 'ASC');
@@ -688,7 +688,6 @@ if (isModEnabled("ticket") && empty($sellyoursaassupporturl) && ($action != 'pre
 				$staticticket->id = $obj->rowid;
 				$staticticket->ref = $obj->ref;
 				$staticticket->track_id = $obj->track_id;
-				$staticticket->fk_statut = $obj->fk_statut;
 				$staticticket->status = $obj->fk_statut;
 				$staticticket->progress = $obj->progress;
 				$staticticket->subject = $obj->subject;
@@ -697,7 +696,7 @@ if (isModEnabled("ticket") && empty($sellyoursaassupporturl) && ($action != 'pre
 
 				// Ref
 				print '<td class="nowraponall">';
-				print $staticticket->getNomUrl(1);
+				print img_object("", $staticticket->picto, 'class="paddingright"'). $staticticket->ref;
 				print "</td>\n";
 
 				// Creation date
