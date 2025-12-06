@@ -147,7 +147,9 @@ if ($action == 'set') {
 		if (GETPOSTISSET("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", GETPOST("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", 'alpha'), 'chaine', 0, '', $conf->entity);
 		}
-
+		if (getDolGlobalInt("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY", GETPOST("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
 
 		// Google recaptcha
 		if (GETPOSTISSET("SELLYOURSAAS_GOOGLE_RECAPTCHA_ON")) {
