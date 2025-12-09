@@ -52,6 +52,7 @@
 * FIX letsencrypt for wildcard are now using 2 passes and needs 2 TXT entry in DNS.
 * FIX Debug master_move_instance.php - Price of old instance is kept/reused.
 * FIX code for email template to use to send email for credit transfer payment.
+* FIX exclusion of modules for upgrade feature was not using the setup.
 * SEC When using ssh, a user can't see the OS and package information.
 
 

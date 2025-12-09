@@ -49,7 +49,12 @@ if (! $res && file_exists("../../../main.inc.php")) {
 if (! $res) {
 	die("Include of main fails");
 }
-
+/**
+ * @var	DoliDB $db
+ * @var Hookmanager $hookmanager
+ * @var Translate $langs
+ * @var User $user
+ */
 require_once DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php";
 require_once DOL_DOCUMENT_ROOT."/contact/class/contact.class.php";
 require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
@@ -638,7 +643,7 @@ if ($id > 0) {
 }
 
 
-// If value was not already loaded, we do it now (value may have been calculated into refresh.lib.php)
+// If properties for $object was not already loaded, we do it now (values may have been calculated into refresh.lib.php)
 if (empty($object->nbofusers)) {
 	// Try to get data
 	if (is_object($newdb) && $newdb->connected) {
@@ -889,6 +894,7 @@ print "</table>";
 
 print "</div>";	//  End fiche=center
 
+
 if (! $user->socid) {
 	$listmodules = dol_dir_list(DOL_DOCUMENT_ROOT."/core/modules/", "files");
 	foreach ($listmodules as $key => $module) {
@@ -899,7 +905,7 @@ if (! $user->socid) {
 	}
 
 	// List of module that should not block installation
-	$arrayofexternalmodulesallowed = array('MEMCACHED', 'BILLEDONORDERS');
+	$arrayofexternalmodulesallowed = explode(',', getDolGlobalString('SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE'));
 	$arraymoduleok = array_merge($arraycoremodules, $arrayofexternalmodulesallowed);
 
 	$listmoduletotest = explode(', ', $object->modulesenabled);
