@@ -185,7 +185,7 @@ print '
 
 						print '<div class="form-group"><br>
 	                                  <label>'.$langs->transcountry("ProfId1Short", $mythirdpartyaccount->country_code).'</label> ';
-						if ($mandatoryprofid && ! empty($mythirdpartyaccount->idprof1) && empty($mythirdpartyaccount->idprof1)) {
+						if ($mandatoryprofid && empty($mythirdpartyaccount->idprof1)) {
 							print img_warning($langs->trans("Mandatory"), '', 'hideifnoprof');
 						}
 

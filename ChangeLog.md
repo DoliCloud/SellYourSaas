@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Add Profid (SIRET) in company profile. Ask to fill it if mandatory (For France).
 * NEW Remove automatically ending / in directory name in setup of package(this avoid errors and headach in setup phase)
 * NEW Reorganize menu for reseller and module providers
 * NEW Add option SELLYOURSAAS_DASHBOARD_OFF to disallow login/access to dashboard
