@@ -913,7 +913,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$tickettocreate->fk_soc = $mythirdpartyaccount->id;
 			$tickettocreate->socid = $mythirdpartyaccount->id;
 			$tickettocreate->origin_replyto = $replyto;
-			$tickettocreate->origin_email = $emailfrom;
+			$tickettocreate->origin_email = $replyto;
 			$tickettocreate->ip = $ipaddress;
 			if (is_object($tmpcontract)) {
 				$tickettocreate->fk_contract = $tmpcontract->id;
@@ -2325,7 +2325,257 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	header("Location: ".$backtourl);
 	exit;
+} elseif ($action == 'uninstall') {
+	$error = 0;
+	$sellyoursaasutils = new SellYourSaasUtils($db);
+	$deletedlinecontract = 0; $deletedlinefacturerec = 0;
+	$contractid = GETPOSTINT("instanceid");
+	$productid = GETPOSTINT("productid");
+	if ($contractid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($productid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("ProductId")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	$tmpproduct = new Product($db);
+	$res = $tmpproduct->fetch($productid);
+	if ($res <= 0) {
+		setEventMessages($tmpproduct->error, null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($tmpproduct->array_options["options_app_or_option"] != "option") {
+		setEventMessages($langs->trans("ServiceCannotBeUninstalled"), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+
+	$db->begin();
+	$tmpcontract = new Contrat($db);
+	$res = $tmpcontract->fetch($contractid);
+	if ($res <= 0) {
+		setEventMessages($tmpcontract->error, null, 'errors');
+		$error++;
+	}
+	if (!$error) {
+		foreach ($tmpcontract->lines as $key => $line) {
+			// Remove service line(s) from contract
+			if ($line->fk_product == $productid) {
+				$res = $tmpcontract->deleteLine($line->id, $user);
+				if ($res <= 0) {
+					setEventMessages($tmpcontract->error, null, 'errors');
+					$error++;
+				} else {
+					$deletedlinecontract ++;
+				}
+			}
+		}
+
+		if (!$error) {
+			// Remove service line(s) from recurring invoice
+			$tmpcontract->fetchObjectLinked();
+			$arrayfacturerec = array_values($tmpcontract->linkedObjects["facturerec"]);
+
+			if (count($arrayfacturerec) != 1) {
+				// TODO: Send mail auto to inform admins of multiples faturerec contract
+				$error ++;
+			} else {
+				$facturerec = $arrayfacturerec[0];
+				foreach ($facturerec->lines as $key => $line) {
+					if ($line->fk_product == $productid) {
+						$res = $line->delete($user);
+						if ($res <= 0) {
+							setEventMessages($line->error, null, 'errors');
+							$error++;
+						} else {
+							$deletedlinefacturerec ++;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Call to remoteaction to undeploy option
+	if (!$error) {
+		$object = $tmpcontract;
+		$type_db = $conf->db->type;
+		$hostname_db  = $object->array_options['options_hostname_db'];
+		$username_db  = $object->array_options['options_username_db'];
+		$password_db  = $object->array_options['options_password_db'];
+		$database_db  = $object->array_options['options_database_db'];
+		$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+		$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
+		$hostname_os  = $object->array_options['options_hostname_os'];
+		$username_os  = $object->array_options['options_username_os'];
+		$password_os  = $object->array_options['options_password_os'];
+		$username_web = $object->thirdparty->email;
+		$password_web = $object->thirdparty->array_options['options_password'];
+
+		$tmp = explode('.', $object->ref_customer, 2);
+		$object->instance = $tmp[0];
+
+		$object->hostname_db  = $hostname_db;
+		$object->username_db  = $username_db;
+		$object->password_db  = $password_db;
+		$object->database_db  = $database_db;
+		$object->port_db      = $port_db;
+		$object->prefix_db    = $prefix_db;
+		$object->username_os  = $username_os;
+		$object->password_os  = $password_os;
+		$object->hostname_os  = $hostname_os;
+		$object->username_web = $username_web;
+		$object->password_web = $password_web;
+
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction("undeployoption", $object);
+		if ($result <= 0) {
+			$error++;
+			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+		}
+	}
+
+	if (!$deletedlinecontract || !$deletedlinefacturerec) {
+		$error ++;
+		setEventMessages("FailedToUninstallOption", null, 'errors');
+	}
+
+	if ($error) {
+		$db->rollback();
+	} else {
+		$db->commit();
+		setEventMessages($langs->trans("OptionSuccessfullyUninstalled"), null, 'mesgs');
+	}
+
+	header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
+	exit();
+} elseif ($action == 'install') {
+	$error = 0;
+	$sellyoursaasutils = new SellYourSaasUtils($db);
+	$contractid = GETPOSTINT("instanceid");
+	$productid = GETPOSTINT("productid");
+	if ($contractid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($productid <= 0) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("ProductId")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	$tmpproduct = new Product($db);
+	$res = $tmpproduct->fetch($productid);
+	if ($res <= 0) {
+		setEventMessages($tmpproduct->error, null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+	if ($tmpproduct->array_options["options_app_or_option"] != "option") {
+		setEventMessages($langs->trans("ServiceCannotBeInstalled"), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+
+	$db->begin();
+	$tmpcontract = new Contrat($db);
+	$res = $tmpcontract->fetch($contractid);
+	if ($res <= 0) {
+		setEventMessages($tmpcontract->error, null, 'errors');
+		$error++;
+	}
+	if (!$error) {
+		$tmparray = sellyoursaasGetExpirationDate($tmpcontract, 0);
+		$duration_value = $tmparray['duration_value'];
+		$duration_unit = $tmparray['duration_unit'];
+		$date_start = dol_now();
+		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
+		// Create service line(s) from contract
+		$idlinecontract = $tmpcontract->addline($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, $date_start, $date_end);
+		if ($idlinecontract <= 0) {
+			setEventMessages($contract->error, null, 'errors');
+			$error++;
+		}
+		if (!$error) {
+			$tmpcontract->fetch($contractid);
+			$result = $tmpcontract->active_line($user, $idlinecontract, $date_start, '', 'Activation after option deployment');
+			if (!$result) {
+				// TODO: Send mail auto to inform admins of error activation line
+				$error ++;
+			}
+		}
+		if (!$error) {
+			// create service line(s) from recurring invoice
+			$tmpcontract->fetchObjectLinked();
+			$arrayfacturerec = array_values($tmpcontract->linkedObjects["facturerec"]);
+
+			if (count($arrayfacturerec) != 1) {
+				// TODO: Send mail auto to inform admins of multiples faturerec contract
+				$error ++;
+			} else {
+				$facturerec = $arrayfacturerec[0];
+				$result = $facturerec->addLine($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+				if (!$result) {
+					// TODO: Send mail auto to inform admins of error line creation facturRec
+					$error ++;
+				}
+			}
+		}
+	}
+
+	// Call to remoteaction to deploy option
+	if (!$error) {
+		$object = $tmpcontract;
+		$type_db = $conf->db->type;
+		$hostname_db  = $object->array_options['options_hostname_db'];
+		$username_db  = $object->array_options['options_username_db'];
+		$password_db  = $object->array_options['options_password_db'];
+		$database_db  = $object->array_options['options_database_db'];
+		$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+		$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
+		$hostname_os  = $object->array_options['options_hostname_os'];
+		$username_os  = $object->array_options['options_username_os'];
+		$password_os  = $object->array_options['options_password_os'];
+		$username_web = $object->thirdparty->email;
+		$password_web = $object->thirdparty->array_options['options_password'];
+
+		$tmp = explode('.', $object->ref_customer, 2);
+		$object->instance = $tmp[0];
+
+		$object->hostname_db  = $hostname_db;
+		$object->username_db  = $username_db;
+		$object->password_db  = $password_db;
+		$object->database_db  = $database_db;
+		$object->port_db      = $port_db;
+		$object->prefix_db    = $prefix_db;
+		$object->username_os  = $username_os;
+		$object->password_os  = $password_os;
+		$object->hostname_os  = $hostname_os;
+		$object->username_web = $username_web;
+		$object->password_web = $password_web;
+
+		//$object->context["options_websitename"] = $website->ref;
+		$result = $sellyoursaasutils->sellyoursaasRemoteAction("deployoption", $object);	// Why "rename" and not "deploycustomurl" ?
+		if ($result <= 0) {
+			$error++;
+			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+		}
+	}
+
+	if ($error) {
+		$db->rollback();
+	} else {
+		$db->commit();
+		setEventMessages($langs->trans("OptionSuccessfullyInstalled"), null, 'mesgs');
+	}
+
+	header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
+	exit();
 }
+
 
 
 
