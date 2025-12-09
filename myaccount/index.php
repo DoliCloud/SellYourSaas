@@ -913,7 +913,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$tickettocreate->fk_soc = $mythirdpartyaccount->id;
 			$tickettocreate->socid = $mythirdpartyaccount->id;
 			$tickettocreate->origin_replyto = $replyto;
-			$tickettocreate->origin_email = $emailfrom;
+			$tickettocreate->origin_email = $replyto;
 			$tickettocreate->ip = $ipaddress;
 			if (is_object($tmpcontract)) {
 				$tickettocreate->fk_contract = $tmpcontract->id;
