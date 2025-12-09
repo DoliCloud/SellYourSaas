@@ -632,7 +632,7 @@ if ($sellyoursaassupporturl) {
 			';
 }
 
-if (isModEnabled("ticket") && getDolGlobalInt("TICKET_ENABLE_PUBLIC_INTERFACE") && empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
+if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREATE") && empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
 	print '
     				<!-- BEGIN PAGE HEADER-->
     				<!-- BEGIN PAGE HEAD -->
@@ -642,8 +642,6 @@ if (isModEnabled("ticket") && getDolGlobalInt("TICKET_ENABLE_PUBLIC_INTERFACE") 
 					<h1>'.$langs->trans("OldTickets").' <small>'.$langs->trans("OldTicketsDesc").'</small></h1>
     				</div>
     				<!-- END PAGE TITLE -->
-
-
     				</div>
     				<!-- END PAGE HEAD -->
     				<!-- END PAGE HEADER-->';
