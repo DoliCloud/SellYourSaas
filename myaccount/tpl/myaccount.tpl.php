@@ -81,24 +81,24 @@ print '
 
 	                <div class="form-group">
 	                  <label>'.$langs->trans("NameOfCompany").'</label>
-	                  <input type="text" class="form-control" placeholder="'.$langs->trans("NameOfYourOrganization").'" value="'.$mythirdpartyaccount->name.'" name="orgName">
+	                  <input type="text" class="form-control" placeholder="'.$langs->trans("NameOfYourOrganization").'" value="'.$mythirdpartyaccount->name.'" name="orgName" spellcheck="false">
 	                </div>
 
 	                <div class="form-group">
 	                  <label>'.$langs->trans("AddressLine").'</label>
-	                  <textarea class="form-control" placeholder="'.$langs->trans("HouseNumberAndStreet").'" name="address">'.$mythirdpartyaccount->address.'</textarea>
+	                  <textarea class="form-control" placeholder="'.$langs->trans("HouseNumberAndStreet").'" name="address" spellcheck="false" >'.$mythirdpartyaccount->address.'</textarea>
 	                </div>
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Town").'</label>
-	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->town.'" name="town">
+	                  <input type="text" class="form-control" value="'.$mythirdpartyaccount->town.'" name="town" spellcheck="false">
 	                </div>
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Zip").'</label>
-	                  <input type="text" class="form-control input-small" value="'.$mythirdpartyaccount->zip.'" name="zip">
+	                  <input type="text" class="form-control input-small" value="'.$mythirdpartyaccount->zip.'" name="zip" spellcheck="false">
 	                </div>
 	                <div class="form-group">
 	                  <label>'.$langs->trans("StateOrCounty").'</label>
-	                  <input type="text" class="form-control" name="stateorcounty" value="">
+	                  <input type="text" class="form-control" name="stateorcounty" value="" spellcheck="false">
 	                </div>
 	                <div class="form-group">
 	                  <label>'.$langs->trans("Country").'</label> &nbsp; ';
@@ -137,7 +137,7 @@ print '
 		                  <input type="checkbox" style="margin-bottom: 3px;" class="inline-block valignmiddle"'.($mythirdpartyaccount->tva_assuj ? ' checked="checked"' : '').' id="vatassuj" name="vatassuj"> <label for="vatassuj" class="valignmiddle nobold">'.$langs->trans("IHaveAVATID").'</label>
 							<br>
 		                  <input type="hidden" name="vatnumber_old" value="'.$mythirdpartyaccount->tva_intra.'">
-		                  <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" id="vatnumber" placeholder="'.$placeholderforvat.'">
+		                  <input type="text" class="input-small quatrevingtpercent hideifnonassuj" value="'.$mythirdpartyaccount->tva_intra.'" name="vatnumber" id="vatnumber" spellcheck="false" placeholder="'.$placeholderforvat.'">
 		                    ';
 						print "\n";
 						print '<script>';
@@ -192,7 +192,7 @@ print '
 						print '
 							<br>
 		                  <input type="hidden" name="profid_old" value="'.$mythirdpartyaccount->idprof1.'">
-		                  <input type="text" class="input-small quatrevingtpercent" value="'.$mythirdpartyaccount->idprof1.'" name="profid" id="profid" placeholder="'.$placeholderforprofid.'">
+		                  <input type="text" class="input-small quatrevingtpercent" value="'.$mythirdpartyaccount->idprof1.'" name="profid" id="profid" spellcheck="false" placeholder="'.$placeholderforprofid.'">
 		                    ';
 						print "\n";
 						/*
