@@ -23,6 +23,8 @@
  *
  * @var string $backtourl
  * @var Societe $mythirdpartyaccount
+ * @var int $nowyear
+ * @var int $nowmonth
  */
 
 // Protection to avoid direct call of template
@@ -270,6 +272,7 @@ if (!empty($arraycontracttransfer)) {
 	print '</div>';
 }
 print '
+		<hr>
 		<div class="linkcard">';
 
 
@@ -278,7 +281,6 @@ $foundcard=0;
 foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 	if ($companypaymentmodetemp->type == 'card') {
 		$foundcard++;
-		print '<hr>';
 		print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->card_type, 'marginrightonlyimp');
 		print '<span class="opacitymedium">'.$langs->trans("CurrentCreditOrDebitCard").'</span></div>';
 		print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
@@ -295,7 +297,7 @@ foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 }
 if ($foundcard) {
 	print '<hr>';
-	print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->card_type, 'marginrightonlyimp');
+	print '<div class="marginbottomonly">'.img_credit_card('', 'marginrightonlyimp');
 	print '<span class="opacitymedium">'.$langs->trans("NewCreditOrDebitCard").'</span></div>';
 }
 
