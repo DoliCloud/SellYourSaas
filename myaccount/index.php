@@ -99,6 +99,7 @@ if (! $res) {
  * @var DoliDB		$db
  * @var	Translate 	$langs
  * @var Societe		$mysoc
+ * @var User 		$user
  */
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
@@ -1027,6 +1028,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$country_code = GETPOST('country_id', 'aZ09');
 	$vatassuj = (GETPOST('vatassuj', 'alphanohtml') == 'on' ? 1 : 0);
 	$vatnumber = GETPOST('vatnumber', 'alphanohtml');
+	$profid = GETPOST('profid', 'alphanohtml');
 
 	if (empty($orgname)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("NameOfCompany")), null, 'errors');
@@ -1053,6 +1055,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	}
 	$mythirdpartyaccount->tva_assuj = $vatassuj;
 	$mythirdpartyaccount->tva_intra = preg_replace('/\s/', '', $vatnumber);
+	$mythirdpartyaccount->idprof1 = $profid;
 
 	if ($mythirdpartyaccount->tva_assuj && $mythirdpartyaccount->tva_intra) {
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';

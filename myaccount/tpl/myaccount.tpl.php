@@ -71,7 +71,7 @@ print '
 	            <div class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("Organization").' <small>('.$langs->trans("Code").' '.dolPrintHTML($mythirdpartyaccount->code_client).')</small></div>
 	          </div>
 	          <div class="portlet-body">
-
+				<!-- form for company profile -->
 	            <form action="'.$_SERVER["PHP_SELF"].'" method="post" name="formsoc">
 	            <input type="hidden" name="token" value="'.newToken().'">
 				<input type="hidden" name="action" value="updatemythirdpartyaccount">
@@ -101,7 +101,7 @@ print '
 	                  <input type="text" class="form-control" name="stateorcounty" value="">
 	                </div>
 	                <div class="form-group">
-	                  <label>'.$langs->trans("Country").'</label><br>';
+	                  <label>'.$langs->trans("Country").'</label> &nbsp; ';
 					$countryselected = (GETPOSTISSET('country_id') ? GETPOST('country_id', 'aZ09') : $mythirdpartyaccount->country_id);
 					$exclude_country_code = array();
 					if (getDolGlobalString('SELLYOURSAAS_EXCLUDE_COUNTRY_CODES')) {
@@ -111,7 +111,9 @@ print '
 					print $form->select_country($countryselected, 'country_id', '', 0, 'minwidth300', 'code2', 0, 1, 0, $exclude_country_code);
 					print '</div>'."\n";
 
+
 					if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
+						// VAT Section
 						print '<div class="form-group">
 	                                  <label>'.$langs->trans("VATIntra").'</label> ';
 						if (! empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra)) {
@@ -130,8 +132,8 @@ print '
 						}
 
 						print '
-							<br>
-		                  <input type="hidden" name="vatassuj_old" value="'.($mythirdpartyaccount->tva_assuj).'">
+							<br><br>
+		                  <input type="hidden" name="vatassuj_old" value="'.$mythirdpartyaccount->tva_assuj.'">
 		                  <input type="checkbox" style="margin-bottom: 3px;" class="inline-block valignmiddle"'.($mythirdpartyaccount->tva_assuj ? ' checked="checked"' : '').' id="vatassuj" name="vatassuj"> <label for="vatassuj" class="valignmiddle nobold">'.$langs->trans("IHaveAVATID").'</label>
 							<br>
 		                  <input type="hidden" name="vatnumber_old" value="'.$mythirdpartyaccount->tva_intra.'">
@@ -164,6 +166,47 @@ print '
 							}
 							print $s;
 						}
+						print '</div>'."\n";
+
+
+						// ID Prof section
+						$placeholderforprofid = '';
+						$mandatoryprofid = 0;
+						if ($mythirdpartyaccount->country_code == 'FR') {
+							//$placeholderforprofid='Exemple: FR12345678';
+							$mandatoryprofid = 1;
+						} elseif ($mythirdpartyaccount->country_code == 'BE') {
+							//$placeholderforprofid='Exemple: BE12345678';
+						} elseif ($mythirdpartyaccount->country_code == 'ES') {
+							//$placeholderforprofid='Exemple: ES12345678';
+						} else {
+							//$placeholderforprofid=$langs->trans("EnterVATHere");
+						}
+
+						print '<div class="form-group">
+	                                  <label>'.$langs->transcountry("ProfId", $mythirdpartyaccount->country_code).'</label> ';
+						if ($mandatoryprofid && ! empty($mythirdpartyaccount->idprof1) && empty($mythirdpartyaccount->idprof1)) {
+							print img_warning($langs->trans("Mandatory"), '', 'hideifnoprof');
+						}
+
+						print '
+							<br><br>
+		                  <input type="hidden" name="profid_old" value="'.$mythirdpartyaccount->idprof1.'">
+		                  <input type="text" class="input-small quatrevingtpercent" value="'.$mythirdpartyaccount->idprof1.'" name="profid" id="profid" placeholder="'.$placeholderforprofid.'">
+		                    ';
+						print "\n";
+						/*
+						print '<script>';
+						print '$( document ).ready(function() {'."\n";
+						print '$("#profid").keyup(function() {'."\n";
+						print "   console.log('We change the profid='+$('#profid').val());\n";
+						print "   if ($('#profid').val() != '')  { $('#profid').prop('checked', true ); }\n";
+						print '});'."\n";
+						print '});'."\n";
+						print '</script>';
+						print "\n";
+						*/
+
 						print '</div>'."\n";
 					}
 
