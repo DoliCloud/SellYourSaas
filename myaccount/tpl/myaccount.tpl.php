@@ -114,7 +114,7 @@ print '
 
 					if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
 						// VAT Section
-						print '<div class="form-group">
+						print '<div class="form-group"><br>
 	                                  <label>'.$langs->trans("VATIntra").'</label> ';
 						if (! empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra)) {
 							print img_warning($langs->trans("Mandatory"), '', 'hideifnonassuj');
@@ -132,7 +132,7 @@ print '
 						}
 
 						print '
-							<br><br>
+							<br>
 		                  <input type="hidden" name="vatassuj_old" value="'.$mythirdpartyaccount->tva_assuj.'">
 		                  <input type="checkbox" style="margin-bottom: 3px;" class="inline-block valignmiddle"'.($mythirdpartyaccount->tva_assuj ? ' checked="checked"' : '').' id="vatassuj" name="vatassuj"> <label for="vatassuj" class="valignmiddle nobold">'.$langs->trans("IHaveAVATID").'</label>
 							<br>
@@ -183,14 +183,14 @@ print '
 							//$placeholderforprofid=$langs->trans("EnterVATHere");
 						}
 
-						print '<div class="form-group">
-	                                  <label>'.$langs->transcountry("ProfId", $mythirdpartyaccount->country_code).'</label> ';
+						print '<div class="form-group"><br>
+	                                  <label>'.$langs->transcountry("ProfId1Short", $mythirdpartyaccount->country_code).'</label> ';
 						if ($mandatoryprofid && ! empty($mythirdpartyaccount->idprof1) && empty($mythirdpartyaccount->idprof1)) {
 							print img_warning($langs->trans("Mandatory"), '', 'hideifnoprof');
 						}
 
 						print '
-							<br><br>
+							<br>
 		                  <input type="hidden" name="profid_old" value="'.$mythirdpartyaccount->idprof1.'">
 		                  <input type="text" class="input-small quatrevingtpercent" value="'.$mythirdpartyaccount->idprof1.'" name="profid" id="profid" placeholder="'.$placeholderforprofid.'">
 		                    ';
