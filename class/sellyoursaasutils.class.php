@@ -139,6 +139,7 @@ class SellYourSaasUtils
 
 							$this->db->begin();
 
+							// Loop on all contracts linked to the invoices
 							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
 								if (!empty($draftinvoiceprocessed[$invoice->id]) || !empty($draftinvoicecanceled[$invoice->id])) {
 									continue;	// If already processed because of a previous contract line, do nothing more
@@ -146,17 +147,32 @@ class SellYourSaasUtils
 
 								dol_syslog("-- Process validation of invoices for the contract ".$contract->ref, LOG_DEBUG);
 
-								if (!empty($tmparray['refsopened'])) {	// If there is other invoices
-									// Try to avoid validation of the current $invoice if another invoice is open on the same contract !!!
-									$sqltocheckcontratnotlinkedtoanopeninvoice = "SELECT COUNT(rowid) FROM ".MAIN_DB_PREFIX."element_element";
-									$sqltocheckcontratnotlinkedtoanopeninvoice .= " WHERE sourcetype = 'contrat' AND fk_source = ".((int) $idcontract);
-									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND target_type = 'facture' AND fk_target IN (".$this->db->sanitize(join(',', array_keys($tmparray['refsopened']))).")";
-									dol_syslog("We check sql = ".$sqltocheckcontratnotlinkedtoanopeninvoice);
-									// If we found some record, we discard validation of this invoice
-									$nbfound = 0;
-									// TODO
+								if (!empty($tmparray['refsopened'])) {	// If there is other invoices for the same customer
+									dol_syslog("We check if an older open invoice exists");
 
-									if ($nbfound > 0) {
+									// Try to avoid validation of the current $invoice if another invoice, older, is open on the same contract !!!
+									$sqltocheckcontratnotlinkedtoanopeninvoice = "SELECT rowid FROM ".MAIN_DB_PREFIX."facture as f";
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " WHERE f.rowid IN (".$this->db->sanitize(join(',', array_keys($tmparray['refsopened']))).")";
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND f.rowid <> ".((int) $invoice->id);
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND f.datef < '".$this->db->idate($invoice->date)."'";
+									// This condition should be a duplicate of the one defined into f.rowid IN..., but we keep it to be sure.
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."element_element";
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " WHERE sourcetype = 'contrat' AND fk_source = ".((int) $idcontract);
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND targettype = 'facture' AND fk_target = f.rowid)";
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " LIMIT 1";
+
+									$rowidfound = 0;
+
+									$resqlcheckolderinvoices = $this->db->query($sqltocheckcontratnotlinkedtoanopeninvoice);
+									if ($resqlcheckolderinvoices) {
+										$objcheckolderinvoices = $this->db->fetch_object($resqlcheckolderinvoices);
+										if ($objcheckolderinvoices) {
+											$rowidfound = $objcheckolderinvoices->rowid;
+										}
+									}
+									// If we found some record, we discard validation of this invoice
+									if ($rowidfound > 0) {
+										dol_syslog("We found an older invoice with id ".$rowidfound." on same contract, so we discard the validation of this invoice id ".$invoice->id);
 										continue;
 									}
 								}
@@ -227,6 +243,7 @@ class SellYourSaasUtils
 										}
 									}
 
+									// Validate invoice
 									$invoice->context['actionmsgmore'] = 'Invoice id = '.$invoice->id.' validated by doValidateDraftInvoices()';
 									if ($invoice->mode_reglement_code == $codepaiementtransfer) {
 										$invoice->context['actionmsgmore'] .= '. Payment mode is a credit transfer ('.$invoice->mode_reglement_code.') so we will send an email to the customer after validation to inform it about invoice availability.';
