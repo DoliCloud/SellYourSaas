@@ -307,6 +307,21 @@ if ($allowdolibarrspecific) {
 		print '</tr>';
 	}
 
+	// Allow deployment of options for trial
+	print '<tr class="oddeven trforbreakperms trforbreaknobg"><td class="tdforbreakperms">'.$langs->trans("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL").'</td>';
+	print '<td class="tdforbreakperms">';
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL', array(), null, 0, 0, 1);
+	} else {
+		if (!getDolGlobalString('SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL')) {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		} else {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		}
+	}
+	print '</td>';
+	print '<td class="tdforbreakperms"><span class="opacitymedium small">Set to yes to allow trial customer to deploy options.</td>';
+	print '</tr>';
 	print '</table>';
 	print '</div>';
 }
