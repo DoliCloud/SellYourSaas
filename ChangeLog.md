@@ -3,6 +3,7 @@
 
 ## Unreleased
 
+* NEW Add Profid (SIRET) in company profile. Ask to fill it if mandatory (For France).
 * NEW Remove automatically ending / in directory name in setup of package(this avoid errors and headach in setup phase)
 * NEW Reorganize menu for reseller and module providers
 * NEW Add option SELLYOURSAAS_DASHBOARD_OFF to disallow login/access to dashboard
@@ -52,6 +53,7 @@
 * FIX letsencrypt for wildcard are now using 2 passes and needs 2 TXT entry in DNS.
 * FIX Debug master_move_instance.php - Price of old instance is kept/reused.
 * FIX code for email template to use to send email for credit transfer payment.
+* FIX exclusion of modules for upgrade feature was not using the setup.
 * SEC When using ssh, a user can't see the OS and package information.
 
 

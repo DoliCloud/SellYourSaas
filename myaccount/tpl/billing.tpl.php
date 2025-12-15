@@ -282,7 +282,7 @@ if (count($listofcontractid) > 0) {
 									<div class="col-12 col-md-4 nowraponall">
 									'.($langs->trans("UpcomingPaymentNumber", $key+1)).'
 									</div>
-									
+
 									<!-- Date -->
 									<div class="col-6 col-md-2">
 									&nbsp;
@@ -361,7 +361,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 
 	if ($nbpaymentmodeok > 0) {
 		print '<table class="centpercent">';
-		print '<!-- '.$companypaymentmodetemp->id.' -->';
+		print '<!-- company payment mode id = '.$companypaymentmodetemp->id.' -->';
 
 		$i = 0;
 		foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
@@ -372,8 +372,8 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 				print '<tr>';
 				print '<td colspan="3" class="wordbreak">';
 				print '<!-- '.$companypaymentmodetemp->id.' -->';
-				print img_credit_card($companypaymentmodetemp->type_card);
-				print $langs->trans("CreditCard");
+				print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonly');
+				print '<span class="inine-block valignmiddle">'.$langs->trans("CreditCard").'</span>';
 				print '</td>';
 				print '</tr>';
 				print '<tr>';

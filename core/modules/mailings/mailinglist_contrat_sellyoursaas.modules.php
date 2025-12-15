@@ -74,7 +74,7 @@ class mailing_mailinglist_contrat_sellyoursaas extends MailingTargets
 		*/
 		$s .= '<br>';
 
-		$s .= img_picto('', 'product');
+		$s .= img_picto('', 'product', 'class="pictofixedwidth"');
 		$s .= $form->select_produits(GETPOST('contract_sellyoursaas_productid', 'int'), 'contract_sellyoursaas_productid', '', 20, 0, 1, 2, '', 0, array(), 0, '1', 0, '', 0, '', array(), 1);
 		$s .= '<br>';
 

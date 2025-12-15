@@ -135,11 +135,11 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		// Filter on contract ref
 		$s .= img_picto('', 'contract', 'class="pictofixedwidth"').$langs->trans("Instance");
 		$s .= ' <input type="text" class="flat maxwidth200" value="'.GETPOST("instanceref").'" placeholder="abc*" name="instanceref">';
-		
+
 		$s .= "<br>";
-		
+
 		// Filter on line of contracts
-		$s .= img_picto('', 'product');
+		$s .= img_picto('', 'product', 'class="pictofixedwidth"');
 		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, 'Contracts with at least one line with this product...', 0, 'maxwidth500', 0, '', array(), 1);
 
 		/*
@@ -234,7 +234,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		if (GETPOST('instanceref')) {
 			$sql .= " AND co.ref_customer LIKE '".$this->db->escape(str_replace('*', '%', GETPOST('instanceref')))."'";
 		}
-		
+
 		if (GETPOST('filter') && GETPOST('filter') != 'none') {
 			$sql.= " AND coe.deployment_status = '".$this->db->escape(GETPOST('filter'))."'";
 		}

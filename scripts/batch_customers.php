@@ -27,7 +27,7 @@
 
 if (!defined('NOREQUIREDB')) {
 	define('NOREQUIREDB', '1');
-}					// Do not create database handler $db
+}					// Do not create database handler $db, so not $mysoc, we will use instead later a $dbmaster
 if (!defined('NOSESSION')) {
 	define('NOSESSION', '1');
 }
@@ -206,7 +206,11 @@ if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
 if (empty($db)) {
-	$db=$dbmaster;
+	$db = $dbmaster;
+	$hookmanager->db = $db;
+	if (empty($mysoc)) {
+		$mysoc = new Societe($db);
+	}
 }
 
 // Set serverprice with the param from $conf of the $dbmaster server.

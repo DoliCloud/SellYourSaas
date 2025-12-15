@@ -477,7 +477,7 @@ $arrayofmassactions = array(
 	//'presend'=>img_picto('', 'email', 'class="pictofixedwidth"').$langs->trans("SendByMail"),
 );
 if (!empty($permissiontodelete)) {
-	$arrayofmassactions['predelete'] = img_picto('', 'delete', 'class="pictofixedwidth"').$langs->trans("Delete");
+	//$arrayofmassactions['predelete'] = img_picto('', 'delete', 'class="pictofixedwidth"').$langs->trans("Delete");		// Disabled, too dangerous
 }
 if (GETPOST('nomassaction', 'int') || in_array($massaction, array('presend', 'predelete'))) {
 	$arrayofmassactions = array();
@@ -908,7 +908,7 @@ while ($i < $imaxinloop) {
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToMoveInstanceOnAnotherDeploymentServer").' <span class="opacitymedium">(to run as admin from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
-			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_move_several_instances.php afilter*.'.$object->ref.' withX.mysaaasdomain.com test|confirm';
+			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_move_several_instances.php afilter*.'.$object->ref.' withX.mysaaasdomain.com test|confirmredirect';
 			$html .= '">';
 			$html .= '</div>';
 
