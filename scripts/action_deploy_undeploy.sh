@@ -940,7 +940,8 @@ fi
 # Undeploy option files
 if [[ "$mode" == "undeployoption" ]]; then
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Undeploy option files"
-
+	
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Uninstall targetdirwithsources1=$targetdirwithsources1"
 	if [[ "x$targetdirwithsources1" != "x" ]]; then
 		dirtargetdirwithsources1=$(dirname $targetdirwithsources1)
 		nametargetdirwithsources1=$(basename $dirtargetdirwithsources1)
@@ -953,6 +954,38 @@ if [[ "$mode" == "undeployoption" ]]; then
 			fi
 		else
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Target $targetdirwithsources1 isn't in custom directory so we do not delete"
+		fi
+	fi
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Uninstall targetdirwithsources2=$targetdirwithsources2"
+	if [[ "x$targetdirwithsources2" != "x" ]]; then
+		dirtargetdirwithsources2=$(dirname $targetdirwithsources2)
+		nametargetdirwithsources2=$(basename $dirtargetdirwithsources2)
+		if [[ $nametargetdirwithsources2 == "custom" ]];
+		then
+			echo rm -r $targetdirwithsources2 2>/dev/null
+			if [[ $testorconfirm == "confirm" ]]
+			then
+				rm -r $targetdirwithsources2 2>/dev/null
+			fi
+		else
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Target $targetdirwithsources2 isn't in custom directory so we do not delete"
+		fi
+	fi
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Uninstall targetdirwithsources3=$targetdirwithsources3"
+	if [[ "x$targetdirwithsources3" != "x" ]]; then
+		dirtargetdirwithsources3=$(dirname $targetdirwithsources3)
+		nametargetdirwithsources3=$(basename $dirtargetdirwithsources3)
+		if [[ $nametargetdirwithsources3 == "custom" ]];
+		then
+			echo rm -r $targetdirwithsources3 2>/dev/null
+			if [[ $testorconfirm == "confirm" ]]
+			then
+				rm -r $targetdirwithsources3 2>/dev/null
+			fi
+		else
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Target $targetdirwithsources3 isn't in custom directory so we do not delete"
 		fi
 	fi
 fi
