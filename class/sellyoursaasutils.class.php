@@ -2240,6 +2240,8 @@ class SellYourSaasUtils
 		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/societe/class/companypaymentmode.class.php';
 
+		$now = dol_now();
+
 		$error = 0;
 		$this->output = '';
 		$this->error = '';
@@ -2248,7 +2250,7 @@ class SellYourSaasUtils
 		$invoiceprocessedok = array();
 		$invoiceprocessedko = array();
 
-		if (empty($conf->stripe->enabled)) {
+		if (!isModEnabled("stripe")) {
 			$this->error = 'Error, stripe module not enabled';
 
 			$conf->global->SYSLOG_FILE = $savlog;
@@ -2272,7 +2274,7 @@ class SellYourSaasUtils
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
 		$sql .= ' WHERE sr.fk_soc = f.fk_soc';
 		$sql .= " AND f.fk_mode_reglement = ".((int) $idpaiementdebit);
-		$sql .= " AND f.paye = 0 AND f.type = 0 AND f.fk_statut = ".Facture::STATUS_VALIDATED;
+		$sql .= " AND f.paye = 0 AND f.type = ".((int) Facture::TYPE_STANDARD)." AND f.fk_statut = ".((int) Facture::STATUS_VALIDATED);
 		$sql .= " AND f.fk_soc = se.fk_object AND se.dolicloud = 'yesv2'";
 		$sql .= " AND sr.status = ".((int) $servicestatus);	// Test or production
 		$sql .= " AND sr.type = 'ban'";						// This exclude payment mode of other types
@@ -2320,8 +2322,14 @@ class SellYourSaasUtils
 
 						if (!empty($invoice->dispute_status)) {
 							$errorforinvoice++;
+							//$error++;		// This case should not generate a global error
 							dol_syslog("The invoice is flagged as dispute_status so we discard it for any other payment");
 							$this->errors[] = "The invoice is flagged as dispute_status so we discard it for any other payment";
+						} elseif (!empty($invoice->array_options['options_delayautopayment']) && $invoice->array_options['options_delayautopayment'] > $now) {
+							$errorforinvoice++;
+							//$error++;		// This case should not generate a global error
+							dol_syslog("The invoice has a date 'delay automatic payment' higher than the current date so we discard it for payment");
+							$this->errors[] = "The invoice has a date 'delay automatic payment' higher than the current date so we discard it for payment";
 						} else {
 							// Create a direct debit payment request (if none already exists)
 							$result = $invoice->demande_prelevement($user, 0, 'direct-debit', 'facture', 1);
@@ -2333,8 +2341,8 @@ class SellYourSaasUtils
 							} elseif ($result < 0) {
 								$errorforinvoice++;
 								$error++;
-								dol_syslog('Failed to create withdrawal request for a direct debit order for the invoice id='.$obj->rowid, LOG_ERR);
-								$this->errors[] = 'Failed to create withdrawal request for a direct debit order for the invoice '.$obj->ref;
+								dol_syslog('Failed to create request for a direct debit order for the invoice id='.$obj->rowid, LOG_ERR);
+								$this->errors[] = 'Failed to create request for a direct debit order for the invoice '.$obj->ref;
 							}
 						}
 					}
