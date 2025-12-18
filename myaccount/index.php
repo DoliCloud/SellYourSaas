@@ -2381,23 +2381,29 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		if (!$error) {
 			// Remove service line(s) from recurring invoice
 			$tmpcontract->fetchObjectLinked();
-			$arrayfacturerec = array_values($tmpcontract->linkedObjects["facturerec"]);
+			if (!empty($tmpcontract->linkedObjects["facturerec"])) {
+				$arrayfacturerec = array_values($tmpcontract->linkedObjects["facturerec"]);
 
-			if (count($arrayfacturerec) != 1) {
-				// TODO: Send mail auto to inform admins of multiples faturerec contract
-				$error ++;
-			} else {
-				$facturerec = $arrayfacturerec[0];
-				foreach ($facturerec->lines as $key => $line) {
-					if ($line->fk_product == $productid) {
-						$res = $line->delete($user);
-						if ($res <= 0) {
-							setEventMessages($line->error, null, 'errors');
-							$error++;
-						} else {
-							$deletedlinefacturerec ++;
+				if (count($arrayfacturerec) != 1) {
+					// TODO: Send mail auto to inform admins of multiples faturerec contract
+					$error ++;
+				} else {
+					$facturerec = $arrayfacturerec[0];
+					foreach ($facturerec->lines as $key => $line) {
+						if ($line->fk_product == $productid) {
+							$res = $line->delete($user);
+							if ($res <= 0) {
+								setEventMessages($line->error, null, 'errors');
+								$error++;
+							} else {
+								$deletedlinefacturerec ++;
+							}
 						}
 					}
+				}
+			}  else {
+				if (!getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL")) {
+					// TODO: Send mail auto to inform admins of missing recinvoice
 				}
 			}
 		}
@@ -2441,13 +2447,14 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 
-	if (!$deletedlinecontract || !$deletedlinefacturerec) {
+	if (!$deletedlinecontract || (!$deletedlinefacturerec && !empty($tmpcontract->linkedObjects["facturerec"]))) {
 		$error ++;
 		setEventMessages("FailedToUninstallOption", null, 'errors');
 	}
 
 	if ($error) {
 		$db->rollback();
+		setEventMessages($langs->trans("OptionUninstallationError"), null, 'errors');
 	} else {
 		$db->commit();
 		setEventMessages($langs->trans("OptionSuccessfullyUninstalled"), null, 'mesgs');
@@ -2513,17 +2520,24 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		if (!$error) {
 			// create service line(s) from recurring invoice
 			$tmpcontract->fetchObjectLinked();
-			$arrayfacturerec = array_values($tmpcontract->linkedObjects["facturerec"]);
+			if (!empty($tmpcontract->linkedObjects["facturerec"])) {
+				$arrayfacturerec = array_values($tmpcontract->linkedObjects["facturerec"]);
 
-			if (count($arrayfacturerec) != 1) {
-				// TODO: Send mail auto to inform admins of multiples faturerec contract
-				$error ++;
-			} else {
-				$facturerec = $arrayfacturerec[0];
-				$result = $facturerec->addLine($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
-				if (!$result) {
-					// TODO: Send mail auto to inform admins of error line creation facturRec
+				if (count($arrayfacturerec) != 1) {
+					// TODO: Send mail auto to inform admins of multiples faturerec contract
 					$error ++;
+				} else {
+					$facturerec = $arrayfacturerec[0];
+					$result = $facturerec->addLine($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+					if (!$result) {
+						// TODO: Send mail auto to inform admins of error line creation facturRec
+						$error ++;
+					}
+				}
+			} else {
+				if (!getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL")) {
+					// TODO: Send mail auto to inform admins of missing recinvoice
+					$error++;
 				}
 			}
 		}
@@ -2570,6 +2584,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	if ($error) {
 		$db->rollback();
+		setEventMessages($langs->trans("OptionInstallationError"), null, 'errors');
 	} else {
 		$db->commit();
 		setEventMessages($langs->trans("OptionSuccessfullyInstalled"), null, 'mesgs');
