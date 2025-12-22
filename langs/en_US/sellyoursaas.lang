@@ -977,3 +977,6 @@ OptionSuccessfullyInstalled=The option has been successfully installed
 SELLYOURSAAS_SUPPORT_TICKET_CREATE=Enable automatic ticket creation when the contact form is used
 UpcomingInvoice=Upcoming invoice
 WaitingInvoice=Waiting invoice
+SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL=Enable option deployment for trial mode customers
+OptionInstallationError=Error while trying to install the option
+OptionUninstallationError=Error while trying to unistall the option
