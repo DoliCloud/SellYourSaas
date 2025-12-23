@@ -214,7 +214,7 @@ if ($action == 'automigration') {
 	$result = array();
 	$result["result"] = preg_match('/table `([a-zA-Z0-9]+_)/i', $sqlcontent, $matches);
 	if ($result["result"] <= 0) {
-		setEventMessages($langs->trans("ErrorOnSqlPrefixProcess"), null, "errors");
+		setEventMessages($langs->trans("ErrorOnSqlPrefixProcess").' file '.basename($sqlfilepath), null, "errors");
 	} else {
 		if ($matches[1] != $prefix_db) {
 			$oldprefix = $matches[1];
