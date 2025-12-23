@@ -20,6 +20,8 @@
  * @var DoliDB $db
  * @var HookManager $hookmanager
  * @var Translate $langs
+ *
+ * @var string $action
  */
 
 // Protection to avoid direct call of template
@@ -27,6 +29,8 @@ if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
 	exit(1);
 }
+
+$erroronmigration = 0;
 
 ?>
 <!-- BEGIN PHP TEMPLATE automigration.tpl.php -->
@@ -206,123 +210,131 @@ if ($action == 'automigration') {
 	$dirfiletomigrate = GETPOST('dirfilename', 'alpha');
 	$object->array_options['automigrationdocumentarchivename'] = $dirfiletomigrate;
 	$exitcode = 0;
-
-	//Sql prefix process To test
-	$sqlfilepath = dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate);
-	$sqlcontent = file_get_contents($sqlfilepath);
-	$matches = array();
 	$result = array();
-	$result["result"] = preg_match('/table `([a-zA-Z0-9]+_)/i', $sqlcontent, $matches);
-	if ($result["result"] <= 0) {
-		setEventMessages($langs->trans("ErrorOnSqlPrefixProcess").' file '.basename($sqlfilepath), null, "errors");
-	} else {
-		if ($matches[1] != $prefix_db) {
-			$oldprefix = $matches[1];
-			$sqlcontentnew = preg_replace('/`'.$oldprefix.'/i', '`'.$prefix_db, $sqlcontent);
-			if (empty($sqlcontentnew) || $sqlcontentnew == $sqlcontent) {
-				$result["result"] = -1;
-				$result["output"] = $langs->trans("ErrorOnSqlPrefixProcessReplace");
-				setEventMessages($langs->trans("ErrorOnSqlPrefixProcessReplace"), null, "errors");
-			} else {
-				$fhandle = @fopen($sqlfilepath, 'w');
-				if ($fhandle) {
-					$result["result"] = fwrite($fhandle, $sqlcontentnew);
-					fclose($fhandle);
-				} else {
+
+	// Check that $sqlfiletomigrate is ending with .sql
+	if (!preg_match('/\.sql$/i', $sqlfiletomigrate)) {
+        setEventMessages($langs->trans("WrongFileExtension", '', $sqlfiletomigrate), null, "errors");
+        $erroronmigration = 1;
+    }
+
+	// Sql prefix process To test
+	if (!$erroronmigration) {
+		$sqlfilepath = dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate);
+		$sqlcontent = file_get_contents($sqlfilepath);
+		$matches = array();
+		$result["result"] = preg_match('/table `([a-zA-Z0-9]+_)/i', $sqlcontent, $matches);
+		if ($result["result"] <= 0) {
+			setEventMessages($langs->trans("ErrorOnSqlPrefixProcess").' file '.basename($sqlfilepath), null, "errors");
+		} else {
+			if ($matches[1] != $prefix_db) {
+				$oldprefix = $matches[1];
+				$sqlcontentnew = preg_replace('/`'.$oldprefix.'/i', '`'.$prefix_db, $sqlcontent);
+				if (empty($sqlcontentnew) || $sqlcontentnew == $sqlcontent) {
 					$result["result"] = -1;
-					$result["output"] = $langs->trans("ErrorOnSqlPrefixProcessWrite");
-					setEventMessages($langs->trans("ErrorOnSqlPrefixProcessWrite"), null, "errors");
+					$result["output"] = $langs->trans("ErrorOnSqlPrefixProcessReplace");
+					setEventMessages($langs->trans("ErrorOnSqlPrefixProcessReplace"), null, "errors");
+				} else {
+					$fhandle = @fopen($sqlfilepath, 'w');
+					if ($fhandle) {
+						$result["result"] = fwrite($fhandle, $sqlcontentnew);
+						fclose($fhandle);
+					} else {
+						$result["result"] = -1;
+						$result["output"] = $langs->trans("ErrorOnSqlPrefixProcessWrite");
+						setEventMessages($langs->trans("ErrorOnSqlPrefixProcessWrite"), null, "errors");
+					}
 				}
 			}
-		}
-		//Backup old database
-		$mysqlbackupfilename=$upload_dir.'/mysqldump_'.$database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
-		$param = array();
+			//Backup old database
+			$mysqlbackupfilename=$upload_dir.'/mysqldump_'.$database_db.'_'.dol_print_date(dol_now(), 'dayhourlog').'.sql';
+			$param = array();
 
-		$commandtestmysqldumpversion = "mysqldump --version";
-		$resultversion = $utils->executeCLI($commandtestmysqldumpversion, "", 0);
-		$mysqldumpversionarr = array();
-		preg_match('/Ver (\d+)(?:\.\d+)*/',$resultversion["output"], $mysqldumpversionarr);
-		$mysqldumpversion = $mysqldumpversionarr[1];
+			$commandtestmysqldumpversion = "mysqldump --version";
+			$resultversion = $utils->executeCLI($commandtestmysqldumpversion, "", 0);
+			$mysqldumpversionarr = array();
+			preg_match('/Ver (\d+)(?:\.\d+)*/',$resultversion["output"], $mysqldumpversionarr);
+			$mysqldumpversion = $mysqldumpversionarr[1];
 
-		$command = "mysqldump";
-		if ($mysqldumpversion == "8") {
-			$param[] = "--column-statistics=0"; // Remove a new flag with mysqldump v8
-		}
-		$param[] = "--no-tablespaces";
-		$param[] = "-C";
-		$param[] = "-h";
-		$param[] = $hostname_db;
-		$param[] = "-P";
-		$param[] = (! empty($port_db) ? $port_db : "3306");
-		$param[] = "-u";
-		$param[] = $username_db;
-		$param[] = '-p"'.str_replace(array('"','`'), array('\"','\`'), $password_db).'"';
-		$param[] = $database_db;
-		$mysqlbackupcommand=$command." ".join(" ", $param);
-
-		$result = $utils->executeCLI($mysqlbackupcommand, "", 0, $mysqlbackupfilename);
-
-		if ($result["result"] != 0) {
-			if (empty($result["output"])) {
-				$result["output"] = $langs->trans("ErrorOnDatabaseBackup");
+			$command = "mysqldump";
+			if ($mysqldumpversion == "8") {
+				$param[] = "--column-statistics=0"; // Remove a new flag with mysqldump v8
 			}
-		}
+			$param[] = "--no-tablespaces";
+			$param[] = "-C";
+			$param[] = "-h";
+			$param[] = $hostname_db;
+			$param[] = "-P";
+			$param[] = (! empty($port_db) ? $port_db : "3306");
+			$param[] = "-u";
+			$param[] = $username_db;
+			$param[] = '-p"'.str_replace(array('"','`'), array('\"','\`'), $password_db).'"';
+			$param[] = $database_db;
+			$mysqlbackupcommand=$command." ".join(" ", $param);
 
-		//Drop llx_accounting_system and llx_accounting_account to prevent load error
-		if ($result["result"] == 0) {
-			$mysqlcommand='echo "drop table llx_accounting_system;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
-			$result = $utils->executeCLI($mysqlcommand, "", 0, null);
+			$result = $utils->executeCLI($mysqlbackupcommand, "", 0, $mysqlbackupfilename);
+
 			if ($result["result"] != 0) {
 				if (empty($result["output"])) {
 					$result["output"] = $langs->trans("ErrorOnDatabaseBackup");
 				}
-				setEventMessages($langs->trans("ErrorOnDropingTables"), null, "errors");
-			} else {
-				$mysqlcommand='echo "drop table llx_accounting_account;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
+			}
+
+			//Drop llx_accounting_system and llx_accounting_account to prevent load error
+			if ($result["result"] == 0) {
+				$mysqlcommand='echo "drop table llx_accounting_system;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
 				$result = $utils->executeCLI($mysqlcommand, "", 0, null);
 				if ($result["result"] != 0) {
 					if (empty($result["output"])) {
-						$result["output"] = $langs->trans("ErrorOnDropingTables");
+						$result["output"] = $langs->trans("ErrorOnDatabaseBackup");
 					}
 					setEventMessages($langs->trans("ErrorOnDropingTables"), null, "errors");
 				} else {
-					$mysqlcommand='echo "drop table llx_accounting_account;" | mysql -A -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db;
+					$mysqlcommand='echo "drop table llx_accounting_account;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
 					$result = $utils->executeCLI($mysqlcommand, "", 0, null);
 					if ($result["result"] != 0) {
 						if (empty($result["output"])) {
 							$result["output"] = $langs->trans("ErrorOnDropingTables");
 						}
 						setEventMessages($langs->trans("ErrorOnDropingTables"), null, "errors");
+					} else {
+						$mysqlcommand='echo "drop table llx_accounting_account;" | mysql -A -C -u '.$object->username_db.' -p\''.$object->password_db.'\' -h '.$object->hostname_db.' '.$object->database_db;
+						$result = $utils->executeCLI($mysqlcommand, "", 0, null);
+						if ($result["result"] != 0) {
+							if (empty($result["output"])) {
+								$result["output"] = $langs->trans("ErrorOnDropingTables");
+							}
+							setEventMessages($langs->trans("ErrorOnDropingTables"), null, "errors");
+						}
 					}
-				}
-			}
-
-			if ($result["result"] == 0) {
-				$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.escapeshellcmd(dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate));
-				$result = $utils->executeCLI($mysqlcommand, "", 0, null, 1);
-				if ($result["result"] != 0) {
-					if (empty($result["output"])) {
-						$result["output"] = $langs->trans("ErrorOnDatabaseMigration");
-					}
-					setEventMessages($langs->trans("ErrorOnDatabaseMigration"), null, "errors");
 				}
 
 				if ($result["result"] == 0) {
-					$comment = 'Call of sellyoursaasRemoteAction(migrate) on contract ref='.$object->ref;
-					$notused = '';
-					$timeoutmigrate = 240;
-					$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("migrate", $object, 'admin', $notused, $notused, 1, $comment, $timeoutmigrate);
-					if ($exitcode < 0) {
-						$result["result"] = $exitcode;
-						$result["output"] = $langs->trans("ErrorOnDocumentMigration");
-						setEventMessages($langs->trans("ErrorOnDocumentMigration"), null, "errors");
+					$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.escapeshellcmd(dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate));
+					$result = $utils->executeCLI($mysqlcommand, "", 0, null, 1);
+					if ($result["result"] != 0) {
+						if (empty($result["output"])) {
+							$result["output"] = $langs->trans("ErrorOnDatabaseMigration");
+						}
+						setEventMessages($langs->trans("ErrorOnDatabaseMigration"), null, "errors");
 					}
-				}
 
-				if ($result["result"] != 0) {
-					$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.$mysqlbackupfilename;
-					$utils->executeCLI($mysqlcommand, "", 0, null, 1);
+					if ($result["result"] == 0) {
+						$comment = 'Call of sellyoursaasRemoteAction(migrate) on contract ref='.$object->ref;
+						$notused = '';
+						$timeoutmigrate = 240;
+						$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("migrate", $object, 'admin', $notused, $notused, 1, $comment, $timeoutmigrate);
+						if ($exitcode < 0) {
+							$result["result"] = $exitcode;
+							$result["output"] = $langs->trans("ErrorOnDocumentMigration");
+							setEventMessages($langs->trans("ErrorOnDocumentMigration"), null, "errors");
+						}
+					}
+
+					if ($result["result"] != 0) {
+						$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.$mysqlbackupfilename;
+						$utils->executeCLI($mysqlcommand, "", 0, null, 1);
+					}
 				}
 			}
 		}
@@ -850,7 +862,7 @@ if ($action == 'view') {
 }
 if ($action == "automigration") {
 	print '<div class="portlet light">';
-	if ($result["result"] != 0) {
+	if ($result["result"] != 0 || $erroronmigration) {
 		print '<div class="center" style="color:red">';
 		print '<h2>'.$langs->trans("MigrationError").'</h2><br><br><strong>';
 		print $langs->trans("ErrorOnMigration");
