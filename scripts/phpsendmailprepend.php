@@ -26,6 +26,7 @@ foreach ($arrayofstreamtodisable as $streamtodisable) {
 if (preg_match('/^send_/', $tmpactionprepend) || in_array($tmpactionprepend, array('send', 'sendallconfirmed', 'relance'))) {
 	$tmpfile='/tmp/phpsendmailprepend-'.posix_getuid().'-'.getmypid().'.tmp';
 	@unlink($tmpfile);
+	file_put_contents($tmpfile, '#phpsendmailprepend.php is called by any php page but here we keep a log because page has a param action="send..." on '.date('Y-m-d H:i:s')."\n");
 	file_put_contents($tmpfile, var_export($_SERVER, true));
 	chmod($tmpfile, 0660);
 }
