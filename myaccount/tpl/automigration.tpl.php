@@ -208,7 +208,7 @@ if ($action == 'automigration') {
 
 	$sqlfiletomigrate = GETPOST('sqlfilename', 'alpha');
 	$dirfiletomigrate = GETPOST('dirfilename', 'alpha');
-	$object->array_options['automigrationdocumentarchivename'] = $dirfiletomigrate;
+	$object->array_options['automigrationdocumentarchivename'] = $dirfiletomigrate;	// Store name of archive file so that sellyoursaasRemoteAction can use it
 	$exitcode = 0;
 	$result = array();
 
@@ -321,10 +321,11 @@ if ($action == 'automigration') {
 					}
 
 					if ($result["result"] == 0) {
-						dol_syslog("automigration.tpl.php mysql load ok, so we try now to run remote migrate");
+						dol_syslog("automigration.tpl.php mysql load ok, so we try now to run remote 'migrate' action (unzip of archive file)");
 						$comment = 'Call of sellyoursaasRemoteAction(migrate) on contract ref='.$object->ref;
 						$notused = '';
 						$timeoutmigrate = 240;
+						// Note sellyoursasRemoteAction wil use $object->array_options to find parameters
 						$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("migrate", $object, 'admin', $notused, $notused, 1, $comment, $timeoutmigrate);
 						if ($exitcode < 0) {
 							$result["result"] = $exitcode;
