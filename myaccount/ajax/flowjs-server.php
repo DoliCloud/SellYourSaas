@@ -90,8 +90,8 @@ $action = GETPOST('action', 'aZ09');
 $module = GETPOST('module', 'aZ09arobase');
 $uploaddirname = dol_sanitizeFileName(GETPOST('uploaddirname', 'alpha'));
 
-$flowFilename = GETPOST('flowFilename', 'alpha');
-$flowIdentifier = GETPOST('flowIdentifier', 'alpha');
+$flowFilename = GETPOST('flowFilename', 'alpha');			// flowFilename is like "123456-file.tar (1).gz"
+$flowIdentifier = GETPOST('flowIdentifier', 'alpha');		// flowIdentifiers is like "123456-filetargz"
 $flowChunkNumber = GETPOST('flowChunkNumber', 'alpha');
 $flowChunkSize = GETPOST('flowChunkSize', 'alpha');
 $flowTotalSize = GETPOST('flowTotalSize', 'alpha');
@@ -120,10 +120,10 @@ top_httphead();
 $result = false;
 
 if (!empty($upload_dir)) {
-	$temp_dir = $upload_dir.'/'.$flowIdentifier;
+	$temp_dir = dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($flowIdentifier);
 } else {
-	$temp_dir = DOL_DATA_ROOT.'/'.$module.'/temp/'.$flowIdentifier;
-	$upload_dir = DOL_DATA_ROOT.'/'.$module.'/temp/';
+	$temp_dir = DOL_DATA_ROOT.'/'.dol_sanitizePathName($module).'/temp/'.dol_sanitizeFileName($flowIdentifier);
+	$upload_dir = DOL_DATA_ROOT.'/'.dol_sanitizePathName($module).'/temp/';
 }
 
 if ($module != "test" && !isModEnabled($module)) {

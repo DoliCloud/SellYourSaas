@@ -280,7 +280,7 @@ if ($action == 'automigration') {
 				}
 			}
 
-			//Drop llx_accounting_system and llx_accounting_account to prevent load error
+			// Drop llx_accounting_system and llx_accounting_account to prevent load error
 			if ($result["result"] == 0) {
 				$mysqlcommand='echo "drop table llx_accounting_system;" | mysql -A -C -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' '.$database_db;
 				$result = $utils->executeCLI($mysqlcommand, "", 0, null);
@@ -310,9 +310,10 @@ if ($action == 'automigration') {
 				}
 
 				if ($result["result"] == 0) {
-					$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.escapeshellcmd(dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate));
+					$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < \''.dol_sanitizePathName($upload_dir).'/'.dol_sanitizeFileName($sqlfiletomigrate).'\'';
 					$result = $utils->executeCLI($mysqlcommand, "", 0, null, 1);
 					if ($result["result"] != 0) {
+						dol_syslog("automigration.tpl.php error on mysql load");
 						if (empty($result["output"])) {
 							$result["output"] = $langs->trans("ErrorOnDatabaseMigration");
 						}
@@ -320,6 +321,7 @@ if ($action == 'automigration') {
 					}
 
 					if ($result["result"] == 0) {
+						dol_syslog("automigration.tpl.php mysql load ok, so we try now to run remote migrate");
 						$comment = 'Call of sellyoursaasRemoteAction(migrate) on contract ref='.$object->ref;
 						$notused = '';
 						$timeoutmigrate = 240;
@@ -332,7 +334,10 @@ if ($action == 'automigration') {
 					}
 
 					if ($result["result"] != 0) {
-						$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < '.$mysqlbackupfilename;
+						// If error, restore old database backup
+						dol_syslog("automigration.tpl.php we got an error in mysql load or into remote action migrate, so we restore the old database from backup");
+
+						$mysqlcommand='mysql -C -A -u '.$username_db.' -p\''.$password_db.'\' -h '.$hostname_db.' -D '.$database_db.' < \''.dol_sanitizePathName($mysqlbackupfilename).'\'';
 						$utils->executeCLI($mysqlcommand, "", 0, null, 1);
 					}
 				}
@@ -367,22 +372,23 @@ if ($action == 'fileverification') {
 	print '<!-- BEGIN STEP5-->';
 	print '<div class="portlet light" id="Step5">
         <h2>'.$langs->trans("Step", 5).' - '.$langs->trans("FileVerification").'</h2><br>
+		<br>
         <div style="display:flex;justify-content:space-evenly;">';
 	for ($i=0; $i < 2; $i++) {
 		if ($i == 0) {
-			print '<div style="width:50%;margin-right:20px">';
+			print '<div style="width:50%;margin-right:20px; text-align:center;">';
 		} else {
-			print '<div style="width:50%;margin-left:20px">';
+			print '<div style="width:50%;margin-left:20px; text-align:center;">';
 		}
 
 		if ($i == 0) {
-			print $langs->trans('DatabaseFile').':<br> '.$filenames[$i];
+			print $langs->trans('DatabaseFile').'<br> '.$filenames[$i];
 		} else {
-			print $langs->trans('DirectoryFile').':<br> '.$filenames[$i];
+			print $langs->trans('DirectoryFile').'<br> '.$filenames[$i];
 		}
 		if (empty($fileverification[$i]['error'])) {
 			print '<div class="center" style="color:green">';
-			print $langs->trans('Success');
+			print $langs->trans('FileSeemsValid');
 			print '</div>';
 		} else {
 			print '<div class="center" style="color:red">';
@@ -412,7 +418,8 @@ if ($action == 'fileverification') {
 		print '<input type="hidden" name="subject" value="'.GETPOST('subject', 'alpha').'">';
 		print '<input type="hidden" name="token" value="'.newToken().'">';
 
-		print '<br><div class="center">
+		print '<br><br><br>
+			<div class="center">
             <h4 style="color:red;"><strong>
             '.$langs->trans("AutomigrationStep3Warning").'
             </strong></h4><br>
@@ -692,7 +699,7 @@ if ($action == 'view') {
 
 			<div id="sumbmitfiles" class="containerflexautomigration" style="display:none;">
 				<div class="right containerflexautomigrationitem" style="margin-right:10px">
-                	<input type="submit" name="addfile" value="'.$langs->trans("SubmitFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
+                	<input type="submit" name="addfile" value="'.$langs->trans("TestFiles").'" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">
 				</div>
 				<div class="left containerflexautomigrationitem">
 					<a href="'.$backtopagesupport.'"><button type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright">'.$langs->trans("CancelAutomigrationAndBacktoSupportPage").'</button></a>
@@ -767,7 +774,7 @@ if ($action == 'view') {
 				});
 			});
 			flow.on("fileSuccess", function(file,message){
-				console.log("The file has been uploaded successfully",file,message);
+				console.log("The file has been uploaded successfully", file, message);
 				filessubmitted++;
 				if(filessubmitted >= 2){
 					$("#sumbmitfiles").show();
