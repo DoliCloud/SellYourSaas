@@ -67,20 +67,21 @@ $param = preg_replace('/^\//', '', $_SERVER['REQUEST_URI']);
 $tmparray = explode('?', $param, 2);
 
 $contentsigned = '';
-$paramspace='';
-$paramarray=array();
+$paramspace = '';			// The string to use as parameter for CLI scripts
+$paramarray = array();
 if (! empty($tmparray[1])) {
 	// Remove last param that is the signature to get the message signed
 	$contentsigned = preg_replace('/&[a-z0-9]+$/i', '', urldecode($tmparray[1]));
 	// Generate array of parameters
 	$paramarray = explode('&', urldecode($tmparray[1]));
 	foreach ($paramarray as $val) {
-		$paramspace.=($val != '' ? $val : '-').' ';
+		$paramspace .= escapeshellarg($val != '' ? $val : '-');	// Use ' to avoid problems with spaces in parameters, and replace '' by '-'
+		$paramspace .= " ";
 	}
 }
 
 // Set variables
-$tmpparam = preg_split('/\s/', $paramspace);
+$tmpparam = preg_split('/\s/', $paramspace);		// $tmpparam is now array of parameters, like $paramarray but with '' replaced by '-'
 $osusername = $tmpparam[0];
 $dbname = $tmpparam[4];
 $dbusername = $tmpparam[6];

@@ -4620,11 +4620,12 @@ class SellYourSaasUtils
 					}
 				}
 				// Parameters for remote action
+				// TODO add a function to encode parameters to avoid & and space issuesinstead of the str_replace done below
 				$commandurl = $generatedunixlogin.'&'.$generatedunixpassword.'&'.$sldAndSubdomain.'&'.$domainname;
 				$commandurl.= '&'.$generateddbname.'&'.$generateddbport.'&'.$generateddbusername.'&'.$generateddbpassword;
-				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srcconffile1);
-				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->targetconffile1);
-				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->datafile1);
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srcconffile1);
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->targetconffile1);
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->datafile1);
 				$commandurl.= '&'.$tmppackage->srcfile1.'&'.$tmppackage->targetsrcfile1.'&'.$tmppackage->srcfile2.'&'.$tmppackage->targetsrcfile2.'&'.$tmppackage->srcfile3.'&'.$tmppackage->targetsrcfile3;
 				$commandurl.= '&'.$tmppackage->srccronfile.'&'.$tmppackage->srccliafter.'&'.$targetdir;
 				$commandurl.= '&'.getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL');	// Param 22 in .sh
@@ -4632,32 +4633,33 @@ class SellYourSaasUtils
 				$commandurl.= '&'.$urlforsellyoursaasaccount;			            	// Param 24 in .sh
 				$commandurl.= '&'.$sldAndSubdomainold;
 				$commandurl.= '&'.$domainnameold;
-				$commandurl.= '&'.str_replace(' ', '£', $customurl);
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $customurl);
 				$commandurl.= '&'.$tmpobject->id;		// ID of line of contract
-				$commandurl.= '&'.str_replace(' ', '£', $conf->global->SELLYOURSAAS_NOREPLY_EMAIL);
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL'));
 				$commandurl.= '&'.$CERTIFFORCUSTOMDOMAIN;
 				$commandurl.= '&'.$archivedir;
 				$commandurl.= '&'.$SSLON;
 				$commandurl.= '&'.(!getDolGlobalString('noapachereload') ? 'apachereload' : 'noapachereload');
-				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->allowoverride);	// Param 34 in .sh: Will replace __AllowOverride__ in virtual host
-				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostline);		// Param 35 in .sh: Will replace __VirtualHostHead__ in virtual host
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->allowoverride);	// Param 34 in .sh: Will replace __AllowOverride__ in virtual host
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $customvirtualhostline);		// Param 35 in .sh: Will replace __VirtualHostHead__ in virtual host
 				$commandurl.= '&'.($ispaidinstance ? 1 : 0);
 				$commandurl.= '&'.getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT');
 				$commandurl.= '&'.$directaccess;        // Param 38 in .sh
 				$commandurl.= '&'.$sshaccesstype;       // Param 39 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $customvirtualhostdir);       	// Param 40 in .sh: Will replace __IncludeFromContract__ in virtual host
-				$commandurl.= '&'.str_replace(' ', '£', $automigrationtmpdir);			// Param 41 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $automigrationdocumentarchivename); // Param 42 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $dirforexampleforsources); 		// Param 43 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $laststableupgradeversion); 	// Param 44 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $lastversiondolibarrinstance); 	// Param 45 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $domainnamewebsite); 			// Param 46 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $websitenamedeploy); 			// Param 47 in .sh
-				$commandurl.= '&'.str_replace(' ', '£', $tmppackage->srccliafterpaid); 	// Param 48 in .sh src for cli after paid
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $customvirtualhostdir);       	// Param 40 in .sh: Will replace __IncludeFromContract__ in virtual host
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $automigrationtmpdir);			// Param 41 in .sh
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $automigrationdocumentarchivename); // Param 42 in .sh
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $dirforexampleforsources); 		// Param 43 in .sh
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $laststableupgradeversion); 	// Param 44 in .sh
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $lastversiondolibarrinstance); 	// Param 45 in .sh
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $domainnamewebsite); 			// Param 46 in .sh
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $websitenamedeploy); 			// Param 47 in .sh
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterpaid); 	// Param 48 in .sh src for cli after paid
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
 				$signaturekey = $this->getRemoteServerSignatureKey($domainname);
+
 				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymetric signature.
 				$commandurl.= '&'.md5($commandurl.$signaturekey);
 
