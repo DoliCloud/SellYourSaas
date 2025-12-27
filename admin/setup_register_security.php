@@ -55,7 +55,14 @@ if (! $res && file_exists("../../../main.inc.php")) {
 if (! $res) {
 	die("Include of main fails");
 }
-
+/**
+ * The main.inc.php has been included so the following variable are now defined:
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ * @var User $user
+ */
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/images.lib.php";
@@ -109,6 +116,11 @@ foreach ($tmpservices as $key => $tmpservice) {
 	}
 	$arrayofsuffixfound[$tmpservice] = $suffix;
 }
+if (empty($arrayofsuffixfound)) {
+	$arrayofsuffixfound[] = '';
+}
+// $arrayofsuffixfound should be now array('mysaasdomain'=>'', mysaasdomainalt'=>'_MYSAASDOMAINALT_COM', ...)
+//var_dump($arrayofsuffixfound);
 
 
 /*
@@ -135,7 +147,9 @@ if ($action == 'set') {
 		if (GETPOSTISSET("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", GETPOST("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED", 'alpha'), 'chaine', 0, '', $conf->entity);
 		}
-
+		if (getDolGlobalInt("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY", GETPOST("SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_API_KEY", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
 
 		// Google recaptcha
 		if (GETPOSTISSET("SELLYOURSAAS_GOOGLE_RECAPTCHA_ON")) {
@@ -535,9 +549,10 @@ if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON') || getDolGlobalString('SELL
 print '<tr class="liste_titre"><td colspan="3">Security for communication from master to deployment servers (Deprecated. Use instead a different key on each deployment server)</td></tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY").'</td>';
-print '<td>';
-print '<input type="text" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" id="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
+print '<td class="nowraponall">';
+print '<input type="text" class="width300" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" id="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
 if (!empty($conf->use_javascript_ajax)) {
+	// TODO Set the type of input in password and add a button "show"
 	print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token" class="linkobject"');
 	// Add button to autosuggest a key
 	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';

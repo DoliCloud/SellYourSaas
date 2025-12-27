@@ -106,19 +106,19 @@ if ($langs->defaultlang == 'en_US') {
 }
 
 
-$partner=GETPOST('partner', 'int');
-$partnerkey=GETPOST('partnerkey', 'alpha');
-$plan=GETPOST('plan', 'alpha');
-$sldAndSubdomain=strtolower(GETPOST('sldAndSubdomain', 'alpha'));
-$tldid=GETPOST('tldid', 'alpha');
+$partner = GETPOST('partner', 'int');
+$partnerkey = GETPOST('partnerkey', 'alpha');
+$plan = GETPOST('plan', 'alpha');
+$sldAndSubdomain = strtolower(GETPOST('sldAndSubdomain', 'alpha'));
+$tldid = GETPOST('tldid', 'alpha');
 $origin = GETPOST('origin', 'aZ09');
 
-$socid=GETPOST('socid', 'int') ? GETPOST('socid', 'int') : GETPOST('reusesocid', 'int');
+$socid = GETPOST('socid', 'int') ? GETPOST('socid', 'int') : GETPOST('reusesocid', 'int');
 $reusecontractid = GETPOST('reusecontractid', 'int');
 $reusesocid = GETPOST('reusesocid', 'int');
 $fromsocid = GETPOST('fromsocid', 'int');
 $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
-$extcss=GETPOST('extcss', 'alpha');
+$extcss = GETPOST('extcss', 'alpha');
 if (empty($extcss)) {
 	$extcss = getDolGlobalString('SELLYOURSAAS_EXTCSS', 'dist/css/myaccount.css');
 } elseif ($extcss == 'generic') {
@@ -135,7 +135,7 @@ $productref = (GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') :
 
 $defaultproduct = '';
 
-$planarray = preg_split('/(,|;)/',$plan);
+$planarray = preg_split('/(,|;)/', $plan);
 if (!empty($planarray[1])) {
 	$productref = 'array';
 }
@@ -293,9 +293,9 @@ if ($favicon) {
 	}
 	$head.='<link rel="icon" href="'.$href.'">'."\n";
 }
-$head .= '<!-- Bootstrap core CSS -->';
-$head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
-$head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">';
+$head .= '<!-- Bootstrap core CSS -->'."\n";
+$head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">'."\n";
+$head .= '<link href="'.$extcss.'" type="text/css" rel="stylesheet">'."\n";
 
 if (getDolGlobalString('SELLYOURSAAS_GOOGLE_RECAPTCHA_ON')) {
 	$head .= '<script src="https://www.google.com/recaptcha/api.js"></script>';
@@ -519,9 +519,13 @@ if ($reshook == 0) {
 				print '</div>'."\n";
 				print '</div>'."\n";
 			}
+
+			$selectnametoselectplan = 'planselect';
+			$formname = 'formregister';
+
 			?>
 
-		  <form action="register_instance.php" name="formregister" method="post" id="formregister">
+		  <form action="register_instance.php" name="<?php echo $formname; ?>" id="<?php echo $formname; ?>" method="post">
 			<div class="form-content">
 			  <input type="hidden" name="token" value="<?php echo newToken(); ?>" />
 			  <input type="hidden" name="forcesubdomain" value="<?php echo dol_escape_htmltag(GETPOST('forcesubdomain', 'alpha')); ?>" />
@@ -549,7 +553,7 @@ if ($reshook == 0) {
 				print '<label class="control-label" for="plan">'.$langs->trans("ChooseAProductForYourApplication").'</label>';
 				print '<div class="control">';
 
-				print '<select class="minwidth400" required="required" id="planselect" name="plan">';
+				print '<select class="minwidth400" required="required" id="'.$selectnametoselectplan.'" name="plan">';
 				print '<option value="">&nbsp;</option>';
 				foreach ($planarray as $tmpkey => $tmpplanref) {
 					$tmpplan = new Product($db);
@@ -571,13 +575,16 @@ if ($reshook == 0) {
 					var initialValueSelectedInTldid = jQuery("#tldid").val();
 					console.log("Initial value selected in tldid = "+initialValueSelectedInTldid);
 
-				    $("#planselect").change(function() {
-						console.log("We update a mandatory field");
+				    $("#'.$selectnametoselectplan.'").change(function() {
+						var pid = jQuery("#'.$selectnametoselectplan.' option:selected").val();
+						console.log("We update a product/service/plan field by selecting product id = "+pid);
 
 						var selectedOption = this.options[this.selectedIndex];
 						var value = selectedOption.value;
     					var dataOnlyServer = selectedOption.getAttribute("data-onlyserver");
 
+						/* Now disable according to onlyserver */
+						console.log("Now, disable servers according to onlyserver");
 						if (dataOnlyServer) {
 							/* We also refresh the combo list tldid */
 							let arrayDataOnlyServer = dataOnlyServer.split(",");
@@ -601,23 +608,25 @@ if ($reshook == 0) {
 								initialValueIsQualified = 0;
 								currentSelectedValue = jQuery("#tldid").val();
 
-								if (qualified) {
-									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+								if (valueOfSubDomain) {
+									if (qualified) {
+										console.log("The subdomain line "+valueOfSubDomain+" is qualified");
 
-									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
-									jQuery("#tldid").val(valueOfSubDomain);
+										jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+										jQuery("#tldid").val(valueOfSubDomain);
 
-									if (valueOfSubDomain == initialValueSelectedInTldid) {
-										initialValueIsQualified = 1;
-									}
-									newSelectedInTldid = valueOfSubDomain;
-								} else {
-									console.log("The subdomain line "+valueOfSubDomain+" is NOT qualified");
+										if (valueOfSubDomain == initialValueSelectedInTldid) {
+											initialValueIsQualified = 1;
+										}
+										newSelectedInTldid = valueOfSubDomain;
+									} else {
+										console.log("The subdomain line "+valueOfSubDomain+" is NOT qualified");
 
-									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", true);
+										jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", true);
 
-									if (valueOfSubDomain == currentSelectedValue) {
-										mustChangeSelectedValue = 1;
+										if (valueOfSubDomain == currentSelectedValue) {
+											mustChangeSelectedValue = 1;
+										}
 									}
 								}
 
@@ -628,8 +637,6 @@ if ($reshook == 0) {
 
 									jQuery("#tldid").val(newSelectedInTldid);
 								}
-
-								jQuery("#tldid").trigger("change.select2");
 							});
 						} else {
 							/* We enable all choices in combo list tldid */
@@ -637,32 +644,44 @@ if ($reshook == 0) {
 								var valueOfSubDomain = $(this).val();
         						var text = $(this).text();
 
-								console.log("The subdomain line "+valueOfSubDomain+" is qualified");
-								jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
-								jQuery("#tldid").val(initialValueSelectedInTldid);
-
-								jQuery("#tldid").trigger("change.select2");
+								if (valueOfSubDomain) {
+									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+									jQuery("#tldid").val(initialValueSelectedInTldid);
+								}
 							});
 						}
 
+						';
+
+						if (getDolGlobalString('SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL')) {
+							print ' jQuery("#tldid").val("");';
+						}
+
+						print '
+
+						jQuery("#tldid").trigger("change.select2");
+
+
+						console.log("We update a mandatory field");
 						setButtonDisabled();
 				    });
 
-					jQuery("#formregister").on("change keyup", "#username", function() {
+					jQuery("#'.$formname.'").on("change keyup", "#username", function() {
 						console.log("We update a mandatory field");
 						setButtonDisabled();
 					});
-					jQuery("#formregister").on("change keyup", "#orgName", function() {
+					jQuery("#'.$formname.'").on("change keyup", "#orgName", function() {
 						console.log("We update a mandatory field");
 						setButtonDisabled();
 					});
-					jQuery("#formregister").on("change keyup", "#sldAndSubdomain", function() {
+					jQuery("#'.$formname.'").on("change keyup", "#sldAndSubdomain", function() {
 						console.log("We update a mandatory field");
 						setButtonDisabled();
 					});
 
 					function setButtonDisabled() {
-				        if (jQuery("#planselect").val() && jQuery("#username").val() && jQuery("#orgName").val() && jQuery("#sldAndSubdomain").val()) {
+				        if (jQuery("#'.$selectnametoselectplan.'").val() && jQuery("#username").val() && jQuery("#orgName").val() && jQuery("#sldAndSubdomain").val()) {
 				            $(\'#newinstance\').prop(\'disabled\', false);
 				        } else {
 				            $(\'#newinstance\').prop(\'disabled\', true);
@@ -673,8 +692,8 @@ if ($reshook == 0) {
 				</script>
 				';
 			}
-
 			?>
+
 			  <section id="enterUserAccountDetails">
 
 			<?php
@@ -708,7 +727,7 @@ if ($reshook == 0) {
 			if (empty($mythirdparty->id)) {
 				?>
 			<div class="control-group  required">
-				<label class="control-label" for="username" trans="1"><span class="fas fa-at opacityhigh"></span> <?php echo $langs->trans("Email") ?></label>
+				<label class="control-label" for="username"><span class="fas fa-at opacityhigh"></span> <?php echo $langs->trans("Email") ?></label>
 				<div class="controls">
 					<input type="text"<?php echo $disabled; ?> name="username" id="username" autocomplete="true" spellcheck="false" maxlength="255" autofocus value="<?php echo GETPOST('username', 'alpha'); ?>" required="required" />
 
@@ -718,8 +737,7 @@ if ($reshook == 0) {
 			<div class="group">
 				<div class="horizontal-fld">
 					<div class="control-group  required">
-						<label class="control-label" for="orgName"
-							   trans="1"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
+						<label class="control-label" for="orgName"><span class="fa fa-building opacityhigh"></span> <?php echo $langs->trans("NameOfCompany") ?></label>
 						<div class="controls">
 							<input type="text"<?php echo $disabled; ?> name="orgName" id="orgName" spellcheck="false" maxlength="250"
 								   value="<?php echo GETPOST('orgName', 'alpha'); ?>" required="required" id="orgName"/>
@@ -758,10 +776,10 @@ if ($reshook == 0) {
 				<div class="horizontal-fld">
 
 				<div class="control-group  required">
-					<label class="control-label" for="password" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("Password") ?></label>
+					<label class="control-label" for="password"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("Password") ?></label>
 					<div class="controls">
 
-						<input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform; ?>" />
+						<input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="password" name="password" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform; ?>" />
 
 					</div>
 				</div>
@@ -769,9 +787,9 @@ if ($reshook == 0) {
 				</div>
 				<div class="horizontal-fld">
 				  <div class="control-group required">
-					<label class="control-label" for="password2" trans="1"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("PasswordRetype") ?></label>
+					<label class="control-label" for="password2"><span class="fa fa-lock opacityhigh"></span> <?php echo $langs->trans("PasswordRetype") ?></label>
 					<div class="controls">
-					  <input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" name="password2" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform2; ?>" />
+					  <input<?php echo $disabled; ?> title="<?php echo dol_escape_htmltag($langs->trans("RuleForPassword", 8)) ?>" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" id="password2" name="password2" type="password" minlength="8" maxlength="128" required autocomplete="new-password" spellcheck="false" autocapitalize="off" value="<?php echo $tmppassinform2; ?>" />
 					</div>
 				  </div>
 				</div>
@@ -779,12 +797,36 @@ if ($reshook == 0) {
 				<?php
 			}
 
-
+			global $db, $extrafields;
+			$extrafields->fetch_name_optionals_label('societe');
+			$numActiveEntries = 0;
+			$sql = "SELECT COUNT(rowid) as nb FROM " . $db->prefix() . "c_sellyoursaas_source_choice WHERE active = 1";
+			$resql = $db->query($sql);
+			if ($resql) {
+				$obj = $db->fetch_object($resql);
+				if ($obj) {
+					$numActiveEntries = (int) $obj->nb;
+				}
+			}
+			if ($numActiveEntries > 0) {
+				?>
+				<div class="control-group-select2 control-group required">
+					<label class="control-label-select2" for="options_sellyoursaas_source_choice">
+						<span class="fa fa-question-circle opacityhigh"></span> <?= $langs->trans("HowDidYouHearAboutUs") ?>
+					</label>
+					<div class="controls-select2">
+						<?php
+						print $extrafields->showInputField('source_choice', '', '', '', '', '', 0, 'societe');
+						?>
+					</div>
+				</div>
+				<?php
+			}
 			if (empty($mythirdparty->id)) {
 				?>
 
 			<div class="control-group  ">
-				<label class="control-label" for="country"><span class="fa fa-globe opacityhigh"></span> <?php echo $langs->trans("Country") ?></label>
+				<label class="control-label" for="selectcountry"><span class="fa fa-globe opacityhigh"></span> <?php echo $langs->trans("Country") ?></label>
 				<div class="controls">
 				<?php
 				$countryuser=strtoupper(dolGetCountryCodeFromIp(getUserRemoteIP()));
@@ -818,13 +860,14 @@ if ($reshook == 0) {
 			  <!-- Selection of domain to create instance -->
 			  <section id="selectDomain">
 				<div class="fld select-domain required">
-				  <label trans="1"><?php echo $langs->trans("ChooseANameForYourApplication") ?></label>
+				  <label><?php echo $langs->trans("ChooseANameForYourApplication") ?></label>
 				  <div class="linked-flds">
 					  <span class="nowraponall sldAndSubdomaininput">
 					<span class="opacitymedium">https://</span>
 					<input<?php echo $disabled; ?> class="sldAndSubdomain" type="text" spellcheck="false" name="sldAndSubdomain" id="sldAndSubdomain" value="<?php echo $sldAndSubdomain; ?>" maxlength="29" required="" />
 					</span>
-					<select<?php echo $disabled; ?> name="tldid" id="tldid">
+
+					<select name="tldid" id="tldid"<?php echo ' '.$disabled; ?>>
 						<?php
 						// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 						$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
@@ -836,7 +879,7 @@ if ($reshook == 0) {
 							$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));   // This is list of all sub domains to show into combo list
 						} else {
 							$staticdeploymentserver = new Deploymentserver($db);
-							$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND', 1);
+							$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND', 1);	// Return array
 						}
 
 						// Get the country of the user
@@ -855,7 +898,7 @@ if ($reshook == 0) {
 						//$conf->global->SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL = 1;
 
 						foreach ($listofdomain as $val) {
-							$newval = $val['fullstring'];
+							$newval = (is_array($val) ? $val['fullstring'] : $val);
 
 							if (empty($newval)) {
 								continue;
@@ -863,7 +906,13 @@ if ($reshook == 0) {
 
 							$reg = array();
 							if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
-								$newval = preg_replace('/:.*$/', '', $newval);	// the part before the : that we use to compare the forcesubdomain parameter.
+								$tmpnewval = explode(':', $newval);
+								$newval = $tmpnewval[0];        // the part before the : that we use to compare the forcesubdomain parameter.
+								if (!empty($tmpnewval[1]) && $tmpnewval[1] == 'closed') {
+									if ($newval != GETPOST('forcesubdomain', 'alpha') || !in_array(getUserRemoteIP(), explode(',', getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
+										continue;
+									}
+								}
 
 								$domainqualified = false;
 								$tmpdomains = explode('+', $reg[1]);
@@ -881,7 +930,8 @@ if ($reshook == 0) {
 							// $newval is subdomain (with.mysaasdomainname.com for example)
 
 							// Restriction defined on package
-							if (! empty($tmppackage->restrict_domains)) {   // There is a restriction on some domains for this package
+							// If $tmppackage is defined, check if there is a restriction on some domains for this package (if not, $tmppackage->restrict_domains is empty and no restriction is done here)
+							if (! empty($tmppackage->restrict_domains)) {
 								$restrictfound = false;
 								$tmparray=explode(',', $tmppackage->restrict_domains);
 								foreach ($tmparray as $tmprestrictdomain) {
@@ -897,7 +947,8 @@ if ($reshook == 0) {
 								}
 							}
 
-							// Restriction on onlyhost of the service
+							// Restriction on onlyserver of the service
+							// If $productonlyserver is set (when we are on a given service, if not, $productonlyserver is empty and no restriction is done here)
 							if ($productonlyserver) {
 								// Check if domain is allowed by $productref
 								$arrayofonlyserver = explode(',', $productonlyserver);
@@ -918,9 +969,6 @@ if ($reshook == 0) {
 							// Restriction on country
 							if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 								$servercountriesstring = $val['servercountries'];
-								//var_dump($servercountries);
-								//$deploymentserver = new Deploymentserver($db);
-								//$deploymentserver->fetch(0, $newval);
 
 								if (!empty($servercountriesstring)) {
 									$servercountries = explode(',', $servercountriesstring);
@@ -1098,7 +1146,7 @@ if ($reshook == 0) {
 			}
 			if ($urlfortermofuse) {
 				?>
-			  <p class="termandcondition small center" style="color:#444; margin:10px 3px;" trans="1"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
+			  <p class="termandcondition small center" style="color:#444; margin:10px 3px;"><?php echo $langs->trans("WhenRegisteringYouAccept", $urlfortermofuse) ?></p>
 				<?php
 			}
 			?>

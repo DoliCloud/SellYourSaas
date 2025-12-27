@@ -167,7 +167,13 @@ if (empty($db)) {
 if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "Update an instance on remote server with new ref version.\n";
 	print "Usage: $script_file source_root_dir sellyoursaas_instance (test|confirm|confirmunlock|diff|diffadd|diffchange|testclean|confirmclean|confirmwithtestdir)\n";
+	print "\n";
+	print $script_file." source_root_dir sellyoursaas_instance diff|diffadd|diffchange to compare current instance with target to update\n";
+	print $script_file." source_root_dir sellyoursaas_instance confirmclean to make update and clean old files not into new repository\n";
+	print $script_file." source_root_dir sellyoursaas_instance confirmwithtest to make update including the directory /test\n";
+
 	print "Return code: 0 if success, <>0 if error\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -331,7 +337,7 @@ if ($mode == 'confirmunlock') {
 	if ($connection) {
 		//print $object->instance." ".$object->username_os." ".$object->password_os."<br>\n";
 		if (! @ssh2_auth_password($connection, $object->username_os, $object->password_os)) {
-			dol_syslog("Could not authenticate with username ".$username." . and password ".preg_replace('/./', '*', $password), LOG_ERR);
+			dol_syslog("Could not authenticate with username ".$object->username_os." . and password ".preg_replace('/./', '*', $object->password_os), LOG_ERR);
 			exit(-5);
 		} else {
 			$sftp = ssh2_sftp($connection);
@@ -379,6 +385,7 @@ if ($mode != 'test') {
 		$actioncomm->label = 'Upgrade from CLI rsync_instance.php, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
 		$actioncomm->note_private = $actioncomm->label;
 		$actioncomm->fk_element = $object->id;
+		$actioncomm->elementid = $object->id;
 		$actioncomm->elementtype = 'contract';
 		$actioncomm->type_code = 'AC_OTH_AUTO';
 		$actioncomm->userassigned[$user->id] = array('id'=>$user->id);

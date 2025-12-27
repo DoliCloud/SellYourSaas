@@ -10,7 +10,6 @@
 
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
-export nowlog=`date +'%Y%m%d-%H%M%S'`
 
 echo
 echo
@@ -31,9 +30,13 @@ export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+htdocsdir=`grep '^htdocsdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$htdocsdir" == "x" ]]; then
+	export htdocsdir="/htdocs"
+fi
 if [[ "x$templatesdir" != "x" ]]; then
   if [[ "x$phpfpm" != "x" ]]; then
     export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
@@ -49,15 +52,15 @@ if [[ "x$templatesdir" != "x" ]]; then
   fi
 elif [[ "x$phpfpm" != "x" ]]; then
   export vhostfile="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas.template"
-	export vhostfilesuspended="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-suspended.template"
-	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
-	export fpmpoolfiletemplate="$scriptdir/templates/phppool-phpfpm.template"
-	export fpmservicefiletemplate="$scriptdir/templates/poolservice-phpfpm.template"
+  export vhostfilesuspended="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-suspended.template"
+  export vhostfilemaintenance="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
+  export fpmpoolfiletemplate="$scriptdir/templates/phppool-phpfpm.template"
+  export fpmservicefiletemplate="$scriptdir/templates/poolservice-phpfpm.template"
 else
-	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
-	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
-	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
-	export fpmpoolfiletemplate="$scriptdir/templates/osuxxx.template"
+  export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
+  export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+  export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+  export fpmpoolfiletemplate="$scriptdir/templates/osuxxx.template"
 fi
 
 if [ "$(id -u)" != "0" ]; then
@@ -174,7 +177,7 @@ export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
 export CRONHEAD=${VIRTUALHOSTHEAD/php_value date.timezone /TZ=}
 
-# possibility to change the ssl certificates name
+# set the generic ssl certificate name
 export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateCRT" == "x" ]]; then
 	export webSSLCertificateCRT=with.sellyoursaas.com.crt
@@ -243,6 +246,13 @@ echo "CRONHEAD = $CRONHEAD"
 testorconfirm="confirm"
 
 
+# Create target directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt if it does not exists
+export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+if [[ ! -d $pathforcertiflocal ]]; then
+	echo "Create cert directory with mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;"
+	mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;
+fi
+
 
 # Rename
 
@@ -267,12 +277,13 @@ if [[ "$mode" == "rename" ]]; then
 	echo mkdir -p $targetdir/$osusername/$dbname to be sure apache can create its error log file
 	mkdir -p $targetdir/$osusername/$dbname
 
+	# Delete old custom conf file
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new apache conf $apacheconf from $vhostfile"
 
 	if [[ -s $apacheconf ]]
 	then
-		echo "Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
 		rm -f $apacheconf
 	fi
 
@@ -331,7 +342,7 @@ if [[ "$mode" == "rename" ]]; then
 	rm -f /etc/apache2/sellyoursaas-available/$fqn.custom.conf
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
 	if [[ "x$customurl" != "x" ]]; then
-		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and more=rename, we will create a new custom virtual name $fqn.custom"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and mode=rename, we will create a new custom virtual name $fqn.custom"
 
 		export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
 		export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
@@ -377,39 +388,42 @@ if [[ "$mode" == "rename" ]]; then
 				fi
 			fi
 		else 
-			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
+			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created/uploaded initially), so we will generate one or reuse an already generated one
 			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
-			# We must create it using letsencrypt if not yet created
+			
+			# We must create the custom CRT file using letsencrypt if not yet created
 			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				# When we rename, it may be because we change abc.with... into def.with..., or
 				# because we added a custom url.
 
-				if [[ ! -d $instancedir/htdocs/.well-known ]]; then
-                	echo "mkdir $instancedir/htdocs/.well-known"
-                	mkdir $instancedir/htdocs/.well-known
-                	echo "chown $osusername:$osusername $instancedir/htdocs/.well-known"
-					chown $osusername:$osusername $instancedir/htdocs/.well-known
+				if [[ ! -d $instancedir$htdocsdir/.well-known ]]; then
+                	echo "mkdir $instancedir$htdocsdir/.well-known"
+                	mkdir $instancedir$htdocsdir/.well-known
+                	echo "chown $osusername:$osusername $instancedir$htdocsdir/.well-known"
+					chown $osusername:$osusername $instancedir$htdocsdir/.well-known
 				fi
 
-				if [[ ! -d $instancedir/htdocs/.well-known/acme-challenge ]]; then
-                	echo "mkdir $instancedir/htdocs/.well-known/acme-challenge"
-                	mkdir $instancedir/htdocs/.well-known/acme-challenge
-                	echo "chown $osusername:$osusername $instancedir/htdocs/.well-known/acme-challenge"
-					chown $osusername:$osusername $instancedir/htdocs/.well-known/acme-challenge
+				if [[ ! -d $instancedir$htdocsdir/.well-known/acme-challenge ]]; then
+                	echo "mkdir $instancedir$htdocsdir/.well-known/acme-challenge"
+                	mkdir $instancedir$htdocsdir/.well-known/acme-challenge
+                	echo "chown $osusername:$osusername $instancedir$htdocsdir/.well-known/acme-challenge"
+					chown $osusername:$osusername $instancedir$htdocsdir/.well-known/acme-challenge
 				fi
 
 
 				# Must generate a temporary custom virtual host BEFORE calling letsencrypt so a server is on and certbot will be able to run
 				# We use generic certificate, and we even try to disable SSL
 				
-				export webCustomSSLCertificateCRT="/etc/apache2/$webSSLCertificateCRT"
-				export webCustomSSLCertificateKEY="/etc/apache2/$webSSLCertificateKEY"
-				export webCustomSSLCertificateIntermediate="/etc/apache2/$webSSLCertificateIntermediate"
+				export pathforcertiflocal="/etc/apache2"
+				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
+				export webCustomSSLCertificateKEY=$webSSLCertificateKEY
+				export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 
-				# We do not use SSL for thi temporary virtual host
+				# We do not use SSL for this temporary virtual host
 				SSLON="Off"
 				
+				# Delete old custom conf file
 				export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
 				echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new temporary apache conf $apacheconf from $vhostfile"
 	
@@ -422,9 +436,9 @@ if [[ "$mode" == "rename" ]]; then
 				echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 						  sed -e 's/__webAppAliases__/$customurl/g' | \
 						  sed -e 's/__webAppLogName__/$instancename/g' | \
-		                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$webCustomSSLCertificateCRT;g' | \
-		                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$webCustomSSLCertificateKEY;g' | \
-		                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$webCustomSSLCertificateIntermediate;g' | \
+		                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
+		                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
+		                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
 						  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 						  sed -e 's/__osUsername__/$osusername/g' | \
 						  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -444,9 +458,9 @@ if [[ "$mode" == "rename" ]]; then
 				cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 						  sed -e "s/__webAppAliases__/$customurl/g" | \
 						  sed -e "s/__webAppLogName__/$instancename/g" | \
-		                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$webCustomSSLCertificateCRT;g" | \
-		                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$webCustomSSLCertificateKEY;g" | \
-		                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$webCustomSSLCertificateIntermediate;g" | \
+		                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
+		                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
+		                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
 						  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 						  sed -e "s/__osUsername__/$osusername/g" | \
 						  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -495,15 +509,28 @@ if [[ "$mode" == "rename" ]]; then
 					sleep 1
 				fi
 
-
 				# Generate the letsencrypt certificate
-                echo "certbot certonly -v --webroot -w $instancedir/htdocs -d $customurl"
-                certbot certonly -v --webroot -w $instancedir/htdocs -d $customurl
+                echo `date +'%Y-%m-%d %H:%M:%S'`" Generate letsencrypt certificate for a custom URL";
+                echo "certbot certonly -n -v --webroot -w $instancedir$htdocsdir -d $customurl"
+                certbot certonly -n -v --webroot -w $instancedir$htdocsdir -d $customurl
 
-                # create links
+				# Test result of the certbot
+				certbotresult=$?
+				
+				# Vérify return code and show appropriate message
+				if [ $certbotresult -eq 0 ]; then
+					echo "certbot command seems to succeed"
+				else
+					echo "certbot command seems to failed"
+				fi				
+
+                # Create links
 				if [[ -e /etc/letsencrypt/live/$customurl/cert.pem ]]; then
+					echo "Date of the cert file cert.pem is..."
+					ls -l "/etc/letsencrypt/live/$customurl/cert.pem"
+
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Link of generated cert file for custom url"
-					echo "Link certificate for virtualhost with
+					echo "Link certificate for the virtualhost of the custom url with
 						ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
 						ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
 						ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
@@ -516,23 +543,27 @@ if [[ "$mode" == "rename" ]]; then
 				fi
 			fi
 			
-			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
-				export webCustomSSLCertificateCRT="/etc/apache2/$webSSLCertificateCRT"
-				export webCustomSSLCertificateKEY="/etc/apache2/$webSSLCertificateKEY"
-				export webCustomSSLCertificateIntermediate="/etc/apache2/$webSSLCertificateIntermediate"
+			if [[ ! -e "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt" ]]; then
+				# If custom cert not found, we fallback on the wildcard one for server (it will generate a warning, but it will works and not hangs !)
+				export pathforcertiflocal="/etc/apache2"
+				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
+				export webCustomSSLCertificateKEY=$webSSLCertificateKEY
+				export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
-				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
-				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
-				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
+				# We will use the custom cert file
+				export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+				export webCustomSSLCertificateCRT="$fqn-custom.crt"
+				export webCustomSSLCertificateKEY="$fqn-custom.key"
+				export webCustomSSLCertificateIntermediate="$fqn-custom-intermediate.crt"
 				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
 			fi
+			echo "We will use the certificate file webCustomSSLCertificateCRT=$pathforcertiflocal/$webCustomSSLCertificateCRT (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 		fi
 		
 		
 		# If the certificate file is not found, we disable SSL
-		if [[ ! -e $webCustomSSLCertificateCRT ]]; then
+		if [[ ! -e "$pathforcertiflocal/$webCustomSSLCertificateCRT" ]]; then
 			SSLON="Off"
 		else
 			SSLON="On"
@@ -550,9 +581,9 @@ if [[ "$mode" == "rename" ]]; then
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$webCustomSSLCertificateCRT;g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$webCustomSSLCertificateKEY;g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$webCustomSSLCertificateIntermediate;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -572,9 +603,9 @@ if [[ "$mode" == "rename" ]]; then
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$webCustomSSLCertificateCRT;g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$webCustomSSLCertificateKEY;g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$webCustomSSLCertificateIntermediate;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -749,9 +780,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
 	ln -fs /etc/apache2/sellyoursaas-available/$fqn.conf /etc/apache2/sellyoursaas-online
 	
-	# We create the virtual host for the custom url
+	# We create also the virtual host for the custom url
 	if [[ "x$customurl" != "x" ]]; then
-		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and more=suspend..., we will create a new custom virtual name $fqn.custom"
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and mode=suspend..., we create also a new custom virtual file named $fqn.custom.conf"
 
         export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
         export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
@@ -801,32 +832,37 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will use existing one or generic one
             export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
 
-			# When we suspend, there is no need to generate the cert for the custom URL. Cert should already exists if a custom url has been defined.
+			# We must create the custom CRT file using letsencrypt if not yet created
+			# Canceled: When we suspend, there is no need to generate the cert for the custom URL. Cert should already exists if a custom url has been defined.
 
-            # If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
 			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
-	            export webCustomSSLCertificateCRT=$webSSLCertificateCRT
-    	        export webCustomSSLCertificateKEY=$webSSLCertificateKEY
-        	    export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
-            	export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
+				# If custom cert not found, we fallback on the wildcard one for server (it will generate a warning, but it will works and not hangs !)
+				export pathforcertiflocal="/etc/apache2"
+				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
+				export webCustomSSLCertificateKEY=$webSSLCertificateKEY
+				export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
+				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
-				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
-				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
-				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.key
+				# We will use the custom cert file
+				export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+				export webCustomSSLCertificateCRT="$fqn-custom.crt"
+				export webCustomSSLCertificateKEY="$fqn-custom.key"
+				export webCustomSSLCertificateIntermediate="$fqn-custom-intermediate.crt"
 				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
 			fi
+			echo "We will use the certificate file webCustomSSLCertificateCRT=$pathforcertiflocal/$webCustomSSLCertificateCRT (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 		fi	
 	
 		
         # If the certificate file is not found, we disable SSL
-        if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+        if [[ ! -e $webCustomSSLCertificateCRT ]]; then
 			SSLON="Off"
         else
 			SSLON="On"
         fi
 
         export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
-        echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new suspended apache conf $apacheconf from $vhostfiletouse"
+        echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new suspended apache custom conf $apacheconf from $vhostfiletouse"
 	
 		if [[ -s $apacheconf ]]
 		then
@@ -837,9 +873,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 		echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's;__webSSLCertificateCRT__;$webSSLCertificateCRT;g' | \
-                  sed -e 's;__webSSLCertificateKEY__;$webSSLCertificateKEY;g' | \
-                  sed -e 's;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -858,9 +894,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s;__webSSLCertificateCRT__;$webSSLCertificateCRT;g" | \
-                  sed -e "s;__webSSLCertificateKEY__;$webSSLCertificateKEY;g" | \
-                  sed -e "s;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -876,8 +912,8 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
-	
-	
+
+
 		#echo Enable conf with a2ensite $fqn.custom.conf
 		#a2ensite $fqn.custom.conf
 		echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
@@ -885,7 +921,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 	
 	fi
 
-	
+
 	echo /usr/sbin/apache2ctl configtest
 	/usr/sbin/apache2ctl configtest
 	if [[ "x$?" != "x0" ]]; then
@@ -1038,25 +1074,28 @@ if [[ "$mode" == "unsuspend" ]]; then
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will use existing one or generic one
             export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
 
-			# When we unsuspend, there is no need to generate the cert for the custom URL. Cert should already exists if a custom url has been defined.
+			# We must create the custom CRT file using letsencrypt if not yet created
+			# Canceled: When we unsuspend, there is no need to generate the cert for the custom URL. Cert should already exists if a custom url has been defined.
 
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt" ]]; then
+				export pathforcertiflocal="/etc/apache2"
 	            export webCustomSSLCertificateCRT=$webSSLCertificateCRT
     	        export webCustomSSLCertificateKEY=$webSSLCertificateKEY
         	    export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
             	export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
-				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
-				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
-				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.key
+				export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+				export webCustomSSLCertificateCRT="$fqn-custom.crt"
+				export webCustomSSLCertificateKEY="$fqn-custom.key"
+				export webCustomSSLCertificateIntermediate="$fqn-custom-intermediate.crt"
 				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
 			fi
 		fi	
 	
 		
         # If the certificate file is not found, we disable SSL
-        if [[ ! -e /etc/apache2/$webCustomSSLCertificateCRT ]]; then
+        if [[ ! -e "$pathforcertiflocal/$webCustomSSLCertificateCRT" ]]; then
 			SSLON="Off"
         else
 			SSLON="On"
@@ -1074,9 +1113,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 		echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's;__webSSLCertificateCRT__;$webSSLCertificateCRT;g' | \
-                  sed -e 's;__webSSLCertificateKEY__;$webSSLCertificateKEY;g' | \
-                  sed -e 's;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
+                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -1094,9 +1133,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s;__webSSLCertificateCRT__;$webSSLCertificateCRT;g" | \
-                  sed -e "s;__webSSLCertificateKEY__;$webSSLCertificateKEY;g" | \
-                  sed -e "s;__webSSLCertificateIntermediate__;$webSSLCertificateIntermediate;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
+                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \

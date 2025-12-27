@@ -17,6 +17,12 @@ label.nobold {
     display: inline-grid;
 }
 
+
+.paddingrightonly {
+	padding-right: 4px;
+}
+
+
 .jnotify-container {
 	position: fixed !important;
     text-align: center;
@@ -155,6 +161,9 @@ a.btnalreadyanaccount {
 	box-shadow: 0px 1px 5px #ddd;
 	min-height: 220px;
 	background-color: #fff;
+}
+.portlet.nominheight {
+	min-height: unset;
 }
 
 .portlet input[type='submit'] {

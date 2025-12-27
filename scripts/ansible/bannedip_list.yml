@@ -11,7 +11,7 @@
   become: yes
   
   tasks:
-    - name: Get whitlisted IP
+    - name: Get whitelisted IP
       ansible.builtin.shell: grep -r "^ignoreip" "/etc/fail2ban/"
       register: whitelist_ips
 

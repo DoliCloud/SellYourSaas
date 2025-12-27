@@ -15,6 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -128,7 +135,7 @@ if ($action == "instanceverification") {
 				}
 
 				// List of module that should not block installation
-				$arrayofexternalmodulesallowed = array('MEMCACHED', 'BILLEDONORDERS');
+				$arrayofexternalmodulesallowed = explode(',', getDolGlobalString('SELLYOURSAAS_IGNORE_MODULES_FOR_AUTOUPGRADE'));
 
 				foreach ($confinstance->global as $key => $val) {
 					if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && !empty($val)) {	// This is a constant of a module

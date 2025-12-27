@@ -16,10 +16,19 @@
  */
 
 // Need global variable to be defined by caller (like dol_loginfunction)
-// $title
 // $urllogo
 // $focus_element
+// $captcha_refresh
 // Caller can also set 	$morelogincontent = array(['options']=>array('js'=>..., 'table'=>...);
+
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ *
+ * @var string $title
+ */
 
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
@@ -207,6 +216,21 @@ if (!GETPOSTINT('noheader')) {
 </div>
 	<?php
 }
+
+
+// Test if dashboard is allowed or not
+if (getDolGlobalString('SELLYOURSAAS_DASHBOARD_OFF')) {
+	print '<center><div class="warning"><br><br><br>';
+	print $langs->trans("DashboardServiceIsTemporarlyOffline");
+	print '<br>';
+	print $langs->trans("PleaseGoBackInFewHours");
+	print '<br><br><br></div></center>';
+
+	print '</body>';
+	print '</html>';
+	exit;
+}
+
 ?>
 
 
@@ -234,6 +258,11 @@ if (!GETPOSTINT('noheader')) {
 <input type="hidden" name="dol_no_mouse_hover" id="dol_no_mouse_hover" value="<?php echo $dol_no_mouse_hover; ?>">
 <input type="hidden" name="dol_use_jmobile" id="dol_use_jmobile" value="<?php echo $dol_use_jmobile; ?>">
 
+<header class="register2">
+			<div class="customregisterheader2">
+				<h1><?php echo dol_escape_htmltag($title); ?></h1>
+			</div>
+</header>
 
 <div class="signup">
 
@@ -264,12 +293,11 @@ if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') && getDolGlobalString('SELLYO
 }
 ?>
 
-<div class="block medium">
+<div class="block medium center signup2">
 
-		<header class="inverse">
-		  <h1><?php echo dol_escape_htmltag($title); ?></h1>
-		  <span class="opacitymedium" style="font-size: 0.85em; margin-top: 4px; line-height: 1;"><?php echo $langs->trans("MyAcountDesc", $homepage, $sellyoursaasname); ?></span>
-		</header>
+		<span class="opacitymedium inline-block" style="display: inline-block; font-size: 0.85em; margin-top: 4px; margin-bottom: 40px; line-height: 1.5em;">
+		<?php echo $langs->trans("MyAcountDesc", $homepage, $sellyoursaasname); ?>
+		</span>
 
 
 <div class="login_table">

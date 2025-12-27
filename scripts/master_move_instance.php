@@ -151,6 +151,13 @@ if (! $res) {
 }
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var Societe $soc
+ * @var Translate $langs
+ * @var User $user
+ */
 
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once('/sellyoursaas/class/packages.class.php');
@@ -209,20 +216,14 @@ if (empty($newinstance) || empty($mode)) {
 	print "Mode is: test                test mode (nothing is done).\n";
 	//print "         confirm             real move of the instance (deprecated, use confirmmaintenance or confirmredirect).\n";
 	print "         confirmmaintenance  real move and replace old instance with a definitive message 'Suspended. Instance has been moved.'.\n";
-	print "         confirmredirect     real move with a mesage 'Move in progress' during transfer, and then, switch old instance into a redirect instance.\n";
-	print "MYPRODUCTREF can be set to force a new hosting application service.\n";
+	print "         confirmredirect     real move with a message 'Move in progress' during transfer, and then, switch old instance into a redirect instance.\n";
+	print "MYPRODUCTREF can be set to force a new main hosting application service.\n";
 	print "Option -y can be added to automatically answer yes to questions.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	print "\n";
 	exit(-1);
 }
 
-/*
-	if (0 != posix_getuid()) {
-		echo "Script must be ran with root.\n";
-		exit(-1);
-	}
-} else {*/
 if (0 == posix_getuid()) {
 	echo "Script must not be ran with root (but with the 'admin' sellyoursaas account).\n";
 	print "\n";
@@ -246,12 +247,12 @@ if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
 if (empty($db)) {
-	$db=$dbmaster;
+	$db = $dbmaster;
 }
 
 
 //$user = new User();
-//$user->fetch($conf->global->SELLYOURSAAS_ANONYMOUSUSER);
+//$user->fetch(getDolGlobalSting('SELLYOURSAAS_ANONYMOUSUSER');
 
 
 // Forge complete name of instance
@@ -339,7 +340,7 @@ dol_include_once("/sellyoursaas/class/sellyoursaascontract.class.php");
 
 $newobject = new SellYourSaasContract($dbmaster);
 $result = $newobject->fetch('', '', $newinstance);
-if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {	// In test mode, we accept to load into existing instance because new one will NOT be created.
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {	// In test mode, we do not check that target instance exists (we won't create it so we don't mind)
 	if ($overwriteexistinginstance) {
 		// We want to overwrite an exsiting instance
 		if ($result > 0) {
@@ -381,6 +382,26 @@ $tmparray = explode('.', $oldinstance);
 $oldshortname = $tmparray[0];
 unset($tmparray[0]);
 $oldwilddomain = join('.', $tmparray);
+
+
+if ($mode == 'moveonlycontractfiles') {
+	// Copy all files linked to instance to the new one
+	$srcdir = $conf->contract->dir_output.'/'.dol_sanitizeFileName($oldobject->ref).'/';
+	$destdir = $conf->contract->dir_output.'/'.dol_sanitizeFileName($newobject->ref).'/';
+	print "--- Copy files linked to contact in old instance (dir ".$srcdir.") into the new instance (into dir ".$destdir.")\n";
+	if (dol_is_dir($srcdir)) {
+		$tmpresult = dolCopyDir($srcdir, $destdir, '0', 0, null, 1);
+		print "dolCopyDir for ".$oldobject->ref." into ".$newobject->ref." result = ".$tmpresult."\n";
+	} else {
+		print "No src dir\n";
+	}
+
+	print "\n";
+	print "Finished.\n";
+	print "\n";
+
+	exit(0);
+}
 
 
 // Switch old instance in maintenance mode
@@ -497,11 +518,13 @@ print '--- Check/copy the certificate files (.key, .crt and -intermediate.crt) f
 if (empty($overwriteexistinginstance)) {
 	print '--- Create new container for new instance (need sql create/write access on master database with master database user)'."\n";
 
-	$newpass = $oldobject->array_options['options_deployment_initial_password'];
+	$newpass = empty($oldobject->array_options['options_deployment_initial_password']) ? '' : $oldobject->array_options['options_deployment_initial_password'];
 	if (empty($newpass)) {
 		$newpass = getRandomPassword(true, array('I'), 16);
 	}
 
+	// Create virgin envelop for the new instance. The register_instance will use the $oldinstance name
+	// Note that if the old instance had a value into instance_unique_id, the creation of the new one should reuse it.
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
 	$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
 	$command.=" ".escapeshellarg($oldinstance);
@@ -545,15 +568,15 @@ if (empty($overwriteexistinginstance)) {
 
 // Reload contract to get all values up to date
 $newobject = new SellYourSaasContract($dbmaster);
-$result=$newobject->fetch('', '', $newinstance);
+$result = $newobject->fetch('', '', $newinstance);
 
-$newserver=$newobject->array_options['options_hostname_os'];
-$newlogin=$newobject->array_options['options_username_os'];
-$newpassword=$newobject->array_options['options_password_os'];
-$newserverbase=$newobject->array_options['options_hostname_db'];
-$newloginbase=$newobject->array_options['options_username_db'];
-$newpasswordbase=$newobject->array_options['options_password_db'];
-$newdatabasedb=$newobject->array_options['options_database_db'];
+$newserver = empty($newobject->array_options['options_hostname_os']) ? '' : $newobject->array_options['options_hostname_os'];
+$newlogin = empty($newobject->array_options['options_username_os']) ? '' : $newobject->array_options['options_username_os'];
+$newpassword = empty($newobject->array_options['options_password_os']) ? '' : $newobject->array_options['options_password_os'];
+$newserverbase = empty($newobject->array_options['options_hostname_db']) ? '' : $newobject->array_options['options_hostname_db'];
+$newloginbase = empty($newobject->array_options['options_username_db']) ? '' : $newobject->array_options['options_username_db'];
+$newpasswordbase = empty($newobject->array_options['options_password_db']) ? '' : $newobject->array_options['options_password_db'];
+$newdatabasedb = empty($newobject->array_options['options_database_db']) ? '' : $newobject->array_options['options_database_db'];
 
 
 if ($result <= 0 || empty($newlogin) || empty($newdatabasedb)) {
@@ -598,14 +621,16 @@ if ($dateendperiod > 0) {
 		}
 	}
 }
-print "--- Set end date of trial on new contract to the same value than the old contract.\n";
-$sql = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields set date_endfreeperiod = '".$db->idate($oldobject->array_options['options_date_endfreeperiod'])."'";
+print "--- Update fields on new contract to the same value than the old contract (end date of trial, timezone).\n";
+$sql = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields";
+$sql .= " SET date_endfreeperiod = '".$db->idate($oldobject->array_options['options_date_endfreeperiod'])."',";
+$sql .= " timezone = '".$db->escape($oldobject->array_options['options_timezone'])."'";
 $sql .= " WHERE fk_object = ".((int) $newobject->id);
 print $sql."\n";
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 	$resql = $db->query($sql);
 	if (!$resql) {
-		print 'Failed to set end date of trial period'."\n";
+		print 'Failed to set end date of trial period or timezone'."\n";
 		exit(-1);
 	}
 }
@@ -635,12 +660,28 @@ if (empty($forceproductref)) {
 					exit(-1);
 				}
 			}
+		} else {
+			// Product was not found in new contract when it was in old one.
+			print "The product id ".$productid." was found into old instance but not into the new one, we must add it.\n";
+			// TODO
+
 		}
 	}
 } else {
 	print "A new product ref was forced, so we do not align prices on old contract.\n";
 }
 
+
+// Copy all files linked to instance to the new one
+$srcdir = $conf->contract->dir_output.'/'.dol_sanitizeFileName($oldobject->ref).'/';
+$destdir = $conf->contract->dir_output.'/'.dol_sanitizeFileName($newobject->ref).'/';
+print "--- Copy files linked to old instance (into dir ".$srcdir.") into the new instance (into dir ".$destdir.")\n";
+if (dol_is_dir($srcdir)) {
+	$tmpresult = dolCopyDir($srcdir, $destdir, '0', 0, null, 1);
+	print "dolCopyDir for ".$oldobject->ref." into ".$newobject->ref." result = ".$tmpresult."\n";
+} else {
+	print "No src dir\n";
+}
 
 $newsftpconnectstring=$newlogin.'@'.$newserver.':' . getDolGlobalString('DOLICLOUD_INSTANCES_PATH').'/'.$newlogin.'/'.preg_replace('/_([a-zA-Z0-9]+)$/', '', $newdatabasedb);
 
@@ -660,7 +701,7 @@ print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' SFTP connect stri
 //print 'SFTP old password '.$oldospass."\n";
 
 
-// First we get the files of the source to move
+// STEP 1 of synchro - We get the files of the source to move
 $command = "rsync";
 $param = array();
 //if (! in_array($mode, array('confirm', 'confirmredirect', 'confirmmaintenance'))) $param[]="-n";
@@ -683,7 +724,7 @@ $param[] = "--exclude .gitignore";
 $param[] = "--exclude .settings";
 $param[] = "--exclude .project";
 $param[] = "--exclude *.pdf_preview.png";
-$param[] = "--exclude htdocs/conf/conf.php";
+//$param[] = "--exclude htdocs/conf/conf.php";		// We want the conf file so we can also update param from this files later
 $param[] = "--exclude glpi_config/config_db.php";
 $param[] = "--exclude htdocs/inc/downstream.php";
 
@@ -724,7 +765,8 @@ if ($return_var) {
 print $content_grabbed."\n";
 
 
-// Now we copy files on the target directory
+// STEP 2 of synchro - Now we copy files on the target directory
+
 $sourcedir = $tmptargetdir;
 $targetdir = getDolGlobalString('DOLICLOUD_INSTANCES_PATH') . '/'.$newlogin.'/'.$newdatabasedb;
 
@@ -800,12 +842,67 @@ print "\n";
 print $content_grabbed."\n";
 
 
+// STEP 3 of synchro - We should update the value of $dolibarr_main_instance_unique_id if
+// it was not done during creation of instance.
+$value_of_dolibarr_main_instance_unique_id = '';
+$value_of_dolibarr_main_cookie_cryptkey = '';
+if (file_exists($sourcedir.'/htdocs/conf/conf.php')) {
+	chmod($sourcedir.'/htdocs/conf', 0700);
+	dol_move($sourcedir.'/htdocs/conf/conf.php', $sourcedir.'/htdocs/conf/conf.php.mastermove', '0', 1, 0, 0);
+
+	$tmpfilecontent = file_get_contents($sourcedir.'/htdocs/conf/conf.php.mastermove');
+	foreach (explode("\n", $tmpfilecontent) as $line) {
+	    if (strpos($line, '=') === false) continue;
+	    if (preg_match('/^#/', $line)) continue;
+	    if (preg_match('/^\//', $line)) continue;
+	    [$key, $val] = explode('=', $line, 2);
+	    if (trim($key) === '$dolibarr_main_instance_unique_id') {
+	        $value_of_dolibarr_main_instance_unique_id = str_replace(array("'",";"), "", trim($val));
+			break;
+	    }
+	    if (trim($key) === '$dolibarr_main_cookie_cryptkey') {
+	        $value_of_dolibarr_main_cookie_cryptkey = str_replace(array("'",";"), "", trim($val));
+	    }
+	}
+
+	if (empty($value_of_dolibarr_main_instance_unique_id)) {
+		$value_of_dolibarr_main_instance_unique_id = $value_of_dolibarr_main_cookie_cryptkey;
+	}
+
+	if (empty($nointeractive)) {
+		print "Press ENTER to continue by running the ssh command to update the dolibarr_main_instance_unique_id on remote target host...\n";
+		$input = trim(fgets(STDIN));
+	}
+
+	$fullcommand = 'ssh -o StrictHostKeyChecking=accept-new '.$newlogin.'@'.$newserver;
+	$fullcommand .= ' "';
+	$fullcommand .= 'chmod u+w '.$targetdir.'/htdocs/conf; ';
+	if ($value_of_dolibarr_main_instance_unique_id) {
+		$fullcommand .= 'sed -i \'s/^\$dolibarr_main_instance_unique_id=.*/\$dolibarr_main_instance_unique_id=\"'.$value_of_dolibarr_main_instance_unique_id.'\";/\' '.$targetdir.'/htdocs/conf/conf.php; ';
+	}
+	$fullcommand .= 'chmod u-w '.$targetdir.'/htdocs/conf; ';
+	$fullcommand .= '"';
+
+	print $fullcommand."\n";
+
+	$outputfile = $conf->admin->dir_temp.'/outsshsed.tmp';
+	$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, null, 1);
+
+	//var_dump($resultarray);
+}
+
+
 // Now we copy database from source to target
+
+if (empty($nointeractive)) {
+	print "Press ENTER to continue by running the dump/load of database...\n";
+	$input = trim(fgets(STDIN));
+}
 
 print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 
 
-// First we backup the source database
+// STEP 1 of database copy - we backup the source database
 $command="mysqldump";
 $param=array();
 $param[]=$olddbname;
@@ -848,7 +945,7 @@ if ($return_var) {
 }
 
 
-// We load the backup on target database
+// STEP 2 of database copy - We load the backup on target database
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 //print "If the mysql fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
@@ -926,8 +1023,8 @@ $sqlb.= ' WHERE fk_source = '.((int) $oldobject->id)." AND sourcetype = 'contrat
 $sqlc = 'UPDATE '.MAIN_DB_PREFIX.'element_element SET fk_target = '.((int) $newobject->id);
 $sqlc.= ' WHERE fk_target = '.((int) $oldobject->id)." AND targettype = 'contrat' AND (sourcetype = 'facturerec' OR sourcetype = 'facture');";
 
-$sqld = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields SET suspendmaintenance_message = '".$dbmaster->escape('https://'.$newobject->ref_customer)."';";
-$sqld.= ' WHERE fk_object = '.((int) $oldobject->id);
+$sqld = 'UPDATE '.MAIN_DB_PREFIX."contrat_extrafields SET suspendmaintenance_message = '".$dbmaster->escape('https://'.$newobject->ref_customer)."'";
+$sqld.= ' WHERE fk_object = '.((int) $oldobject->id).";";
 
 if ($return_var) {
 	print "-> Error during mysql load of instance ".$newobject->ref_customer."\n";

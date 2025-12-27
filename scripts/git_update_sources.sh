@@ -12,7 +12,7 @@ export RED='\033[0;31m'
 export GREEN='\033[0;32m'
 export BLUE='\033[0;34m'
 export YELLOW='\033[0;33m'
-
+export error=0;
 
 if [ "x$1" == "x" ]; then
    echo "Usage:   $0  dir_document_of_git_repositories [subdir|all]"
@@ -84,8 +84,9 @@ do
 	        echo "Found generate_filelist_xml.php from ".`pwd`
 	        php build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
 	        if [ $? -ne 0 ]; then
-	        	echo "Failed to generate the signature file"
-	        	exit 1;
+	        	echo "!!!!! ERROR Failed to generate the signature file"
+	        	error=1
+	        	#exit 1;		# We disable exit so we continue with next dir, so only dir in error is not built
 	        fi
 	    fi
 	
@@ -110,3 +111,4 @@ do
 done
 
 echo "Finished."
+exit $error

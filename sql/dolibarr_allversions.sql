@@ -30,6 +30,11 @@
 
 
 
+--update llx_societe_rib set card_type = 'mastercard' where card_type = 'MasterCard';
+--update llx_societe_rib set card_type = 'amex' where card_type = 'American express';
+--update llx_societe_rib set card_type = 'visa' where card_type = 'Visa';
+
+
 ALTER TABLE llx_packages ADD COLUMN cliafterpaid text;
 ALTER TABLE llx_packages ADD COLUMN sqlafterpaid text;
 ALTER TABLE llx_packages ADD COLUMN sqlpasswordreset text;
@@ -115,18 +120,23 @@ CREATE TABLE llx_sellyoursaas_deploymentserver(
 	-- BEGIN MODULEBUILDER FIELDS
 	rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL,
 	ref varchar(128) NOT NULL,
+	hostname varchar(64),
+	label varchar(64),
 	entity integer DEFAULT 1 NOT NULL,  -- multi company id
 	note_private text, 
-	note_public text, 
+	note_public text,
 	date_creation datetime NOT NULL,
 	date_modification timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	status integer DEFAULT 0 NOT NULL,
+	status integer NOT NULL,
 	fk_country integer,
 	fromdomainname varchar(128),
 	ipaddress varchar(128) NOT NULL,
-	servercountries text,
+	servercountries varchar(128),
+	servercustomerannouncestatus integer,
 	servercustomerannounce text,
-	servercustomerannouncestatus integer
+	serversignaturekey varchar(128),
+	fk_user_creat int DEFAULT NULL,
+	fk_user_modif int DEFAULT NULL
 	-- END MODULEBUILDER FIELDS
 ) ENGINE=innodb;
 
@@ -172,10 +182,23 @@ ALTER TABLE llx_sellyoursaas_whitelistip ADD UNIQUE INDEX uk_sellyoursaas_whitel
 
 ALTER TABLE llx_dolicloud_stats RENAME TO llx_sellyoursaas_stats;
 
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN fk_user_creat integer;
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN fk_user_modif integer;
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN note_public text;
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN serversignaturekey varchar(128);
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN label varchar(64);
 ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN hostname varchar(64);
 
-UPDATE llx_actioncomm set code = 'AC_PAYMENT_STRIPE_IPN_SEPA_KO' where code = 'AC_IPN' and label like 'Payment error (SEPA%';
+UPDATE llx_actioncomm SET code = 'AC_PAYMENT_STRIPE_IPN_SEPA_KO' where code = 'AC_IPN' and label like 'Payment error (SEPA%';
+
+
+UPDATE llx_facture SET dispute_status = 1 WHERE rowid IN (SELECT fe.fk_object FROM llx_facture_extrafields as fe WHERE fe.invoicepaymentdisputed = 1);
+--UPDATE llx_facture_extrafields SET invoicepaymentdisputed = NULL WHERE invoicepaymentdisputed = 1;
+
+
+update llx_societe_rib set ext_payment_site = 'StripeLive' where stripe_account like '%pk_live%' AND ext_payment_site IS NULL;
+update llx_societe_rib set ext_payment_site = 'StripeTest' where stripe_account like '%pk_test%' AND ext_payment_site IS NULL;
+
+update llx_societe_rib set ext_payment_site = 'StripeLive' where type = 'card' AND card_type IN ('visa', 'mastercard', 'amex') AND ext_payment_site IS NULL AND (stripe_card_ref like 'card_%' OR stripe_card_ref LIKE 'pm%');
+
+ALTER TABLE llx_packages ADD COLUMN sqlafterundeployoption text;

@@ -169,6 +169,18 @@ if (empty($user->id)) {
 	}
 
 	$user->getrights();
+
+	// Add more permissions
+	if (!isset($user->rights->societe->lire) || empty($user->rights->societe->lire)) {
+		$user->rights->societe->lire = 1;
+	}
+	if (!isset($user->rights->societe->creer) || empty($user->rights->societe->creer)) {
+		$user->rights->societe->creer = 1;
+	}
+	if (!isset($user->rights->societe->client->voir) || empty($user->rights->societe->client->voir)) {
+		$user->rights->societe->client = new stdClass();
+		$user->rights->societe->client->voir = 1;
+	}
 }
 
 $action = GETPOST('action', 'alpha');
@@ -179,6 +191,7 @@ $domainemail = preg_replace('/^.*@/', '', $email);
 $password = dol_trunc(trim(GETPOST('password', 'alpha')), 128, 'right', 'UTF-8', 1);
 $password2 = dol_trunc(trim(GETPOST('password2', 'alpha')), 128, 'right', 'UTF-8', 1);
 $country_code = trim(GETPOST('country', 'alpha'));
+
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));
 $tldid = trim(GETPOST('tldid', 'alpha'));
 $optinmessages = (GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0);
@@ -199,6 +212,11 @@ $productid=GETPOST('service', 'int');
 $plan=GETPOST('plan', 'alpha');
 $productref=(GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : ($plan ? $plan : ''));
 $extcss=GETPOST('extcss', 'alpha');
+$lead_sources_array = array();
+if (GETPOSTISARRAY('options_source_choice')) {
+	$lead_sources_array = GETPOST('options_source_choice', 'array');
+}
+$lead_sources_string = implode(',', $lead_sources_array);
 if (empty($extcss)) {
 	$extcss = getDolGlobalString('SELLYOURSAAS_EXTCSS', 'dist/css/myaccount.css');
 } elseif ($extcss == 'generic') {
@@ -208,14 +226,14 @@ if (empty($extcss)) {
 // If ran from command line
 if (substr($sapi_type, 0, 3) == 'cli') {
 	$productref = $argv[1];
-	$instancefullname = $argv[2];
+	$instancefullname = $argv[2];	// New name of instance
 	$instancefullnamearray = explode('.', $instancefullname);
 	$sldAndSubdomain = $instancefullnamearray[0];
 	unset($instancefullnamearray[0]);
 	$tldid = '.'.join('.', $instancefullnamearray);
 	$password = $argv[3];
-	$reusesocid = $argv[4];
-	$customurl = $argv[5];
+	$reusesocid = $argv[4];			// Thirdparty id to reuse
+	$customurl = $argv[5];			// Old instance name or Custom url
 	if (empty($productref) || empty($sldAndSubdomain) || empty($tldid) || empty($password) || empty($reusesocid)) {
 		print "***** ".$script_file." *****\n";
 		print "Create an instance from command line. Run this script from the master server. Note: No email are sent to customer.\n";
@@ -311,7 +329,7 @@ if ($reusecontractid) {
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.((int) $reusecontractid);
 } elseif ($reusesocid) {	// Can be >= 0, but also -1
-	// When we use the "Add another instance" from the "myaccount" dashboard
+	// When we use the "Add another instance" from the "myaccount" dashboard or using the master_move_instance.php
 
 	// Check we are logged and that reusesocid is not forged
 	if (substr($sapi_type, 0, 3) != 'cli') {
@@ -1088,6 +1106,9 @@ if ($reusecontractid) {
 	$tmpthirdparty->array_options['options_domain_registration_page'] = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 	$tmpthirdparty->array_options['options_source'] = 'REGISTERFORM'.($origin ? '-'.$origin : '');
 	$tmpthirdparty->array_options['options_source_utm'] = (empty($_COOKIE['utm_source_cookie']) ? '' : $_COOKIE['utm_source_cookie']);
+
+	$tmpthirdparty->array_options['options_source_choice'] = $lead_sources_string;
+
 	$tmpthirdparty->array_options['options_password'] = $password;
 	$tmpthirdparty->array_options['options_optinmessages'] = $optinmessages;
 	$tmpthirdparty->array_options['options_checkboxnonprofitorga'] = $checkboxnonprofitorga;
@@ -1337,6 +1358,33 @@ if ($reusecontractid) {
 		//dol_syslog("options_deployment_ipquality = ".$contract->array_options['options_deployment_ipquality'], LOG_DEBUG);
 		//dol_syslog("options_deployment_emailquality = ".$contract->array_options['options_deployment_emailquality'], LOG_DEBUG);
 
+
+		// If we have a customurl, it may be an alias or an old instance name we plan to move.
+		if ($customurl) {
+			// We scan database to find old instance
+			$sqltogetoldinstanceid = "SELECT ce.instance_unique_id FROM ".MAIN_DB_PREFIX."contrat_extrafields as ce, ".MAIN_DB_PREFIX."contrat as c";
+			$sqltogetoldinstanceid .= " WHERE c.rowid = ce.fk_object AND c.ref_customer = '".$db->escape($customurl)."'";
+			$sqltogetoldinstanceid .= " LIMIT 1";	// We should always have only 1.
+
+			$resqltogetoldinstanceid = $db->query($sqltogetoldinstanceid);
+			if ($resqltogetoldinstanceid) {
+				$objtogetoldinstanceid = $db->fetch_object($resqltogetoldinstanceid);
+				if ($objtogetoldinstanceid) {
+					$old_instance_unique_id = $objtogetoldinstanceid->instance_unique_id;
+
+					$contract->array_options['options_instance_unique_id'] = $old_instance_unique_id;
+				}
+			} else {
+				print "SQL error when trying to find the options_instance_unique_id of old instance";
+				exit(-89);
+			}
+
+			dol_syslog("We will reuse the options_instance_unique_id = ".$contract->array_options['options_instance_unique_id']." from ".$customurl, LOG_DEBUG);
+		} else {
+			dol_syslog("No custom url provided or url is not an oldinstance so we won't reuse an existing value for options_instance_unique_id", LOG_DEBUG);
+		}
+
+
 		if ($abusetest) {
 			$db->rollback();
 
@@ -1413,6 +1461,14 @@ if ($reusecontractid) {
 		$tmpsubproduct = new Product($db);
 		foreach ($prodschild as $prodid => $arrayprodid) {
 			$tmpsubproduct->fetch($prodid);	// To load the price
+
+			if (!empty($tmpsubproduct->array_options["options_only_for_country"])) {
+				$optioncountries = preg_split("/[\s,;]+/", $tmpsubproduct->array_options["options_only_for_country"]);
+				if (!in_array(dol_strtolower($object->country_code), $optioncountries)) {
+					// Thirdparty country code isn't in options_only_for_country array so we don't add product to contract
+					continue;
+				}
+			}
 
 			$qty = 1;
 			//if (! empty($contract->array_options['options_nb_users'])) $qty = $contract->array_options['options_nb_users'];

@@ -42,7 +42,7 @@
         LogLevel info
 
         #ErrorLog __osUserPath__/__webAppLogName___error.log
-        #TransferLog ${APACHE_LOG_DIR}/__webAppLogName___access_log
+        #TransferLog ${APACHE_LOG_DIR}/__webAppLogName___access.log
         CustomLog ${APACHE_LOG_DIR}/other_vhosts_access.log vhost_combined
         CustomLog ${APACHE_LOG_DIR}/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
 
@@ -134,7 +134,7 @@
         LogLevel info
 
         #ErrorLog __osUserPath__/__webAppLogName___error.log
-        #TransferLog ${APACHE_LOG_DIR}/__webAppLogName___access_log
+        #TransferLog ${APACHE_LOG_DIR}/__webAppLogName___access.log
         CustomLog ${APACHE_LOG_DIR}/other_vhosts_access.log vhost_combined
         CustomLog ${APACHE_LOG_DIR}/other_vhosts_pid.log "%v:%p %h %P %t \"%r\" %>s %O"
 
@@ -188,7 +188,7 @@
 		# To enable this section, you must edit /etc/apache2/envvars to set 
 		# export APACHE_ARGUMENTS='-DUSEIFFILE'
 		# You can do it only if Apache is 2.4.35+
-		# TODO Remove this section that was never used and is no more required
+		# This section can be removed, the SSL certificate is already set previously (to the custom certiticate for custom virtual host or to the generic one for standard virtual host or if custom cert not found).
 		#<IfDefine USEIFFILE>
         #<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt">
 		#	SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__webAppDomain__.crt

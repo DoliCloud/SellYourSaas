@@ -15,6 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
+ * @var int $nowmonth
+ * @var int $nowyear
+ */
+
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -127,11 +139,9 @@ if (count($listofcontractid) > 0) {
 
 			//var_dump($contract->linkedObjects['facture']);
 			//dol_sort_array($contract->linkedObjects['facture'], 'date');
+			$draftinvoices = array();
 			foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 				/* @var Facture $invoice */
-				if ($invoice->status == Facture::STATUS_DRAFT) {
-					continue;
-				}
 
 				// Set $statusstring
 				$statusstring = '';
@@ -193,9 +203,12 @@ if (count($listofcontractid) > 0) {
 					$statusstring .= $s;
 
 					// If invoice is in dispute, we show it here
-					if (!empty($invoice->array_options['options_invoicepaymentdisputed'])) {
+					if (!empty($invoice->dispute_status)) {
 						$statusstring .= ' <span class="badge badge-warning badge-status" title="'.$langs->trans("InvoicePaymentDisputedMessage", $invoice->ref, dol_print_date($invoice->date, 'day')).'">';
 						$statusstring .= $langs->trans("Canceled").'</span>';
+					}
+					if ($invoice->status == Facture::STATUS_DRAFT) {
+						$statusstring = '<span class="opacitymedium">'.$langs->trans('WaitingInvoice')."</span>";
 					}
 					// TODO Add details of payments
 					//$htmltext = 'Soon here: Details of payment...';
@@ -216,27 +229,32 @@ if (count($listofcontractid) > 0) {
 								if ($reshook > 0) {
 									print $hookmanager->resPrint;
 								} else {
-									$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
-									if ($url) {
-										print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
+									if ($invoice->status == 0) {
+										print $langs->trans("UpcomingInvoice");
 									} else {
-										print $invoice->ref.' <span class="small opacitymedium">('.$langs->trans("InvoicePDFNotYetAvailable").')</span>';
+										$url = $invoice->getLastMainDocLink($invoice->element, 0, 1);
+										if ($url) {
+											print '<a href="'.DOL_URL_ROOT.'/'.$url.'">'.$invoice->ref.img_mime($invoice->ref.'.pdf', $langs->trans("File").': '.$invoice->ref.'.pdf', 'paddingleft').'</a>';
+										} else {
+											print $invoice->ref.' <span class="small opacitymedium">('.$langs->trans("InvoicePDFNotYetAvailable").')</span>';
+										}
 									}
+
 								}
 
 								print '</div>
 
 								<!-- Date -->
 					            <div class="col-6 col-md-2">
-									'.dol_print_date($invoice->date, 'dayrfc', $langs).'
+									'.($invoice->status != Facture::STATUS_DRAFT ? (dol_print_date($invoice->date, 'dayrfc', $langs)) : '').'
 					            </div>
 
 								<!-- Price -->
 					            <div class="col-6 col-md-2">
 									';
-				print (empty($invoice->array_options['options_invoicepaymentdisputed']) ? '' : '<strike>');
+				print (empty($invoice->dispute_status) ? '' : '<strike>');
 				print price(price2num($invoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency);
-				print (empty($invoice->array_options['options_invoicepaymentdisputed']) ? '' : '</strike>');
+				print (empty($invoice->dispute_status) ? '' : '</strike>');
 
 				print '
 					            </div>
@@ -253,6 +271,43 @@ if (count($listofcontractid) > 0) {
 					            </div>
 							';
 			}
+			/*if (!empty($draftinvoices)) {
+				print '			<div class="row" style="margin-top:20px">
+								<span class="opacitymedium">'.($langs->trans("UpcomingPayments")).'</span>
+								</div>';
+				foreach ($draftinvoices as $key => $draftinvoice) {
+					print '
+					            <div class="row" style="margin-top:20px">
+									<!-- Ref invoice -->
+									<div class="col-12 col-md-4 nowraponall">
+									'.($langs->trans("UpcomingPaymentNumber", $key+1)).'
+									</div>
+
+									<!-- Date -->
+									<div class="col-6 col-md-2">
+									&nbsp;
+									</div>
+
+									<!-- Price -->
+					            <div class="col-6 col-md-2">
+									';
+					print (empty($draftinvoice->dispute_status) ? '' : '<strike>');
+					print price(price2num($draftinvoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency);
+					print (empty($draftinvoice->dispute_status) ? '' : '</strike>');
+
+					print '
+								</div>
+								<!-- Payment mode -->
+								<div class="col-6 col-md-2 tdoverflowmax150" title="'.($invoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'">
+									'.($draftinvoice->mode_reglement_code ? dol_escape_htmltag($langs->transnoentitiesnoconv("PaymentTypeShort".$invoice->mode_reglement_code)) : '').'
+					            </div>
+
+					            <div class="col-6 col-md-2 nowrap">
+									'.(dolGetStatus($langs->transnoentitiesnoconv("UpcomingPayment"), $langs->transnoentitiesnoconv("UpcomingPayment"), '', 'status2', 2)).'
+					            </div>
+								';
+				}
+			}*/
 		} else {
 			print '
 					            <div class="row" style="margin-top:20px">
@@ -306,7 +361,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 
 	if ($nbpaymentmodeok > 0) {
 		print '<table class="centpercent">';
-		print '<!-- '.$companypaymentmodetemp->id.' -->';
+		print '<!-- company payment mode id = '.$companypaymentmodetemp->id.' -->';
 
 		$i = 0;
 		foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
@@ -317,8 +372,8 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 				print '<tr>';
 				print '<td colspan="3" class="wordbreak">';
 				print '<!-- '.$companypaymentmodetemp->id.' -->';
-				print img_credit_card($companypaymentmodetemp->type_card);
-				print $langs->trans("CreditCard");
+				print img_credit_card($companypaymentmodetemp->type_card, 'marginrightonly');
+				print '<span class="inine-block valignmiddle">'.$langs->trans("CreditCard").'</span>';
 				print '</td>';
 				print '</tr>';
 				print '<tr>';
@@ -381,10 +436,29 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 				print '</tr>';
 
 				print '<tr><td colspan="3">';
+				// Show IBAN
 				print $langs->trans("IBAN").': <span class="small" title="'.$companypaymentmodetemp->iban_prefix.'">'.dol_trunc($companypaymentmodetemp->iban_prefix, 12, 'middle').'</span><br>';
+				// Show BIC
+				print $langs->trans("BIC").': <span class="small" title="'.$companypaymentmodetemp->bic.'">'.dol_trunc($companypaymentmodetemp->bic, 12, 'middle').'</span><br>';
+				// Show RUM
 				if ($companypaymentmodetemp->rum) {
-					print $langs->trans("RUM").': <span class="small" title="'.$companypaymentmodetemp->rum.'">'.$companypaymentmodetemp->rum.'</span>';
+					print $langs->trans("RUM").': <span class="small" title="'.$companypaymentmodetemp->rum.'">'.$companypaymentmodetemp->rum.'</span><br>';
 				}
+				// Show ICS
+				$ics = '';
+				$idbankfordirectdebit = getDolGlobalInt('PRELEVEMENT_ID_BANKACCOUNT');
+				if ($idbankfordirectdebit > 0) {
+					$tmpbankfordirectdebit = new Account($db);
+					$tmpbankfordirectdebit->fetch($idbankfordirectdebit);
+					$ics = $tmpbankfordirectdebit->ics;	// ICS for direct debit
+				}
+				if (empty($ics) && getDolGlobalString('PRELEVEMENT_ICS')) {
+					$ics = getDolGlobalString('PRELEVEMENT_ICS');
+				}
+				if ($ics) {
+					print $langs->trans("ICSShort").': <span class="small" title="'.$ics.'">'.$ics.'</span><br>';
+				}
+				// TODO Add link to download the mandate doc
 				print '</td></tr>';
 			} else {
 				print '<tr>';

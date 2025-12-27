@@ -16,10 +16,18 @@
  */
 
 // Need global variable to be defined by caller (like dol_loginfunction)
-// $title
 // $urllogo
 // $focus_element
 // $message
+
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ *
+ * @var string $title
+ */
 
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
@@ -64,15 +72,16 @@ if (! preg_match('/'.constant('DOL_APPLICATION_TITLE').'/', $titleofpage)) {
 	$disablenofollow=0;
 }
 
+if (empty($head)) {
+	$head = '';
+}
+
 $favicon=getDomainFromURL($_SERVER['SERVER_NAME'], 0);
 if (! preg_match('/\.(png|jpg)$/', $favicon)) {
 	$favicon.='.png';
 }
 if (getDolGlobalString('MAIN_FAVICON_URL')) {
 	$favicon=getDolGlobalString('MAIN_FAVICON_URL');
-}
-if (empty($head)) {
-	$head = '';
 }
 if ($favicon) {
 	$href = 'img/'.$favicon;
@@ -209,6 +218,21 @@ if (!GETPOSTINT('noheader')) {
 </div>
 	<?php
 }
+
+
+// Test if dashboard is allowed or not
+if (getDolGlobalString('SELLYOURSAAS_DASHBOARD_OFF')) {
+	print '<center><div class="warning"><br><br><br>';
+	print $langs->trans("DashboardServiceIsTemporarlyOffline");
+	print '<br>';
+	print $langs->trans("PleaseGoBackInFewHours");
+	print '<br><br><br></div></center>';
+
+	print '</body>';
+	print '</html>';
+	exit;
+}
+
 ?>
 
 
@@ -220,17 +244,19 @@ if (!GETPOSTINT('noheader')) {
 <input type="hidden" name="token" value="<?php echo newToken(); ?>">
 <input type="hidden" name="action" value="buildnewpassword">
 
+<header class="register2">
+			<div class="customregisterheader2">
+				<h1><?php echo dol_escape_htmltag($title); ?></h1>
+			</div>
+</header>
 
 <div class="signup">
 
-<div class="block medium">
-
-		<header class="inverse">
-		  <h1><?php echo dol_escape_htmltag($title); ?></h1>
+<div class="block medium center signup2">
 
 <div class="center login_main_home divpasswordmessagedesc paddingtopbottom<?php echo getDolGlobalString('MAIN_LOGIN_BACKGROUND') ? ' backgroundsemitransparent' : ''; ?>">
 <?php if ($mode == 'dolibarr' || ! $disabled) { ?>
-	<span class="passwordmessagedesc opacitymedium">
+	<span class="passwordmessagedesc opacitymedium inline-block" style="display: inline-block; font-size: 0.85em; margin-top: 4px; margin-bottom: 40px; line-height: 1.5em;">
 	<?php
 	if (empty($asknewpass) && !preg_match('/class="(ok|warning)"/', $message)) {
 		echo str_replace('<br>', ' ', $langs->trans('SendNewPasswordDesc'));
@@ -243,9 +269,6 @@ if (!GETPOSTINT('noheader')) {
 	</div>
 <?php } ?>
 </div>
-
-		</header>
-
 
 <div class="login_table">
 

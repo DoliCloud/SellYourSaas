@@ -163,7 +163,7 @@ function sellyoursaasIsPaidInstance($contract, $mode = 0, $loadalsoobjects = 0)
 
 	$foundtemplate=0;
 	if (!empty($contract->linkedObjectsIds['facturerec']) && is_array($contract->linkedObjectsIds['facturerec'])) {
-		foreach ($contract->linkedObjectsIds['facturerec'] as $idelementelement => $templateinvoiceid) {
+		foreach ($contract->linkedObjectsIds['facturerec'] as $templateidelementelement => $templateinvoiceid) {
 			$foundtemplate++;
 			break;
 		}
@@ -373,7 +373,7 @@ function sellyoursaasIsSuspended($contract)
  */
 function getRootUrlForAccount($object)
 {
-	global $db, $conf;
+	global $db;
 
 	$tmpret = explode(',', getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL'));     // By default
 	$ret = $tmpret[0];
@@ -525,7 +525,8 @@ function getRemoteCheck($remoteip, $whitelisted, $email, $checkcaptcha = 1)
 		if (empty($resurl['curl_error_no']) && !empty($resurl['http_code']) && $resurl['http_code'] == 200) {
 			$jsonresult = json_decode($resurl['content']);
 			$keyforerrorcode = 'error-codes';
-			$errorcodes = $jsonresult->$keyforerrorcode;
+
+			$errorcodes = (isset($jsonresult->$keyforerrorcode) && is_array($jsonresult->$keyforerrorcode)) ? $jsonresult->$keyforerrorcode : array();
 
 			if (! $jsonresult->success) {
 				// Output the key "Instance creation blocked for"

@@ -2,6 +2,7 @@
 ; php-fpm config file for a pool for osuxxx instances
 ;
 ; All apache virtual hosts of user osuxxx will use this same pool
+; Used when phpfpm option is not enabled (for bi-usage/transition with apache-php)
 ;----------------------------------------------------
 
 [osuxxx]

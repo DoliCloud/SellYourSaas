@@ -67,7 +67,7 @@
   - name: Launch apt for misc packages
     apt:
       pkg:
-      - ntp 
+      - systemd-timesyncd 
       - git
       - ghostscript 
       - gzip 
@@ -1242,7 +1242,7 @@
       mode: '0644'  
 
       
-  # TODO Create a symlink for PHP config
+  # TODO Create a symlink for PHP version directory
   # ln -fs /etc/php/sellyoursaas.ini /etc/php/8.2/apache2/conf.d/sellyoursaas.ini
   
   
@@ -1356,24 +1356,47 @@
       file:
         path: /etc/update-motd.d/92-unattended-upgrades
         state: absent
-      
+
+    # Disable the unattended upgrades
+    - name: Check if disableunattendedupgrade=1 is present
+      ansible.builtin.shell: "grep -q '^disableunattendedupgrade=1' /etc/sellyoursaas.conf"
+      register: disableunattendedupgrade
+      ignore_errors: true
+      failed_when: false
+      changed_when: false
+
+    - name: Disable apt unattended-upgrades in conf file
+      ansible.builtin.lineinfile:
+        path: /etc/apt/apt.conf.d/20auto-upgrades
+        regexp: '^APT::Periodic::Unattended-Upgrade'
+        line: 'APT::Periodic::Unattended-Upgrade "0";'
+        state: present
+        create: no
+        backrefs: yes
+      when: disableunattendedupgrade.rc == 0
+
+    # Fail2ban rules
     - name: Search all fail2ban rules into filter.d directory
       ansible.builtin.find:
         paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d
         patterns: '*.conf'
       register: dolibarr_fail2ban_files
 
-    - name: Create links to fail2ban filter files
+    - name: Create links to fail2ban filter files only if they do not exist
       ansible.builtin.file:
         src: "{{ item.path }}"
         dest: "/etc/fail2ban/filter.d/{{ item.path | basename }}"  
         state: link
       loop: "{{ dolibarr_fail2ban_files.files }}"      
+      args:
+        force: no   # do not overwrite if existing 
+      when: not ("/etc/fail2ban/filter.d/" ~ (item.path | basename )) is exists
 
     - name: Search all fail2ban rules into jail.d directory
       ansible.builtin.find:
         paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d
         patterns: '*.conf'
+        file_type: file
       register: dolibarr_fail2ban_files2
 
     - name: Create links to fail2ban jail files only if they do not exist
@@ -1381,8 +1404,10 @@
         src: "{{ item.path }}"
         dest: "/etc/fail2ban/jail.d/{{ item.path | basename }}"  
         state: link
-      loop: "{{ dolibarr_fail2ban_files2.files }}"      
-      when: not ("/etc/fail2ban/jail.d/{{ item.path | basename }}" | ansible.builtin.stat).islnk)
+      loop: "{{ dolibarr_fail2ban_files2.files }}"
+      args:
+        force: no   # do not overwrite if existing 
+      when: not ("/etc/fail2ban/jail.d/" ~ (item.path | basename )) is exists
 
     - name: Update /etc/afick.conf to remove /var/log/datadog Logs* 
       lineinfile:
@@ -1402,6 +1427,8 @@
 
     - name: Activates config file Apache with a2enconf custom-server-tokens
       command: a2enconf custom-server-tokens
+      args:
+        creates: /etc/apache2/conf-enabled/custom-server-tokens.conf
 
     - name: Set datadog config files /etc/datadog-agent/conf.d/disk.d/conf.yaml
       ignore_errors: true
@@ -1450,7 +1477,7 @@
 
     - name: Compare file checksums of /bin/dash and /bin/secureBash
       fail:
-        msg: "The files secureBash and dash are not the same"
+        msg: "The files secureBash and dash are not the same. Fix this with: cp /usr/bin/dash /usr/bin/secureBash"
       when: file1_stat.stat.checksum != file2_stat.stat.checksum
 
 

@@ -15,6 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ *
+ * @var string $backtourl
+ * @var Societe $mythirdpartyaccount
+ * @var int $nowyear
+ * @var int $nowmonth
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -142,7 +154,7 @@ if ($totalInvoiced == 0) {
 		// Show input text for the discount code
 		if ($acceptdiscountcode) {
 			print '<br>';
-			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'" class="maxwidth200"><br>';
+			print $langs->trans("DiscountCode").': <input type="text" name="discountcode" id="discountcode" value="'.$defaultdiscountcode.'" class="maxwidth200" spellcheck="false"><br>';
 			print '<div class="discountcodetext margintoponly" id="discountcodetext" autocomplete="off"></div>';
 			//var_dump($listofcontractid);
 			print '<script type="text/javascript" language="javascript">'."\n";
@@ -260,6 +272,7 @@ if (!empty($arraycontracttransfer)) {
 	print '</div>';
 }
 print '
+		<hr>
 		<div class="linkcard">';
 
 
@@ -268,7 +281,6 @@ $foundcard=0;
 foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 	if ($companypaymentmodetemp->type == 'card') {
 		$foundcard++;
-		print '<hr>';
 		print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->card_type, 'marginrightonlyimp');
 		print '<span class="opacitymedium">'.$langs->trans("CurrentCreditOrDebitCard").'</span></div>';
 		print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
@@ -285,7 +297,7 @@ foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 }
 if ($foundcard) {
 	print '<hr>';
-	print '<div class="marginbottomonly">'.img_credit_card($companypaymentmodetemp->card_type, 'marginrightonlyimp');
+	print '<div class="marginbottomonly">'.img_credit_card('', 'marginrightonlyimp');
 	print '<span class="opacitymedium">'.$langs->trans("NewCreditOrDebitCard").'</span></div>';
 }
 
@@ -329,7 +341,7 @@ if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {	// Us
 
 
 print '<div class="row"><div class="col-md-12"><label class="valignmiddle" style="margin-bottom: 20px">'.$langs->trans("NameOnCard").':</label> ';
-print '<input id="cardholder-name" class="minwidth200 valignmiddle" style="margin-bottom: 15px" type="text" name="proprio" value="'.GETPOST('proprio', 'alpha').'" autocomplete="off" autofocus>';
+print '<input id="cardholder-name" class="minwidth200 valignmiddle" style="margin-bottom: 15px" type="text" name="proprio" value="'.GETPOST('proprio', 'alpha').'" autocomplete="off" spellcheck="false" autofocus>';
 print '</div></div>';
 
 require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
@@ -356,9 +368,9 @@ print '<br>';
 
 if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION') && is_object($setupintent)) {
 	print '<input type="hidden" name="setupintentid" value="'.$setupintent->id.'">'."\n";
-	print '<button class="btn btn-info btn-circle" id="buttontopay" data-secret="'.$setupintent->client_secret.'">'.$langs->trans("Save").'</button>';
+	print '<button class="btn btn-info btn-circle" id="buttontopay" data-secret="'.$setupintent->client_secret.'">'.$langs->trans("SaveAndPay").'</button>';
 } else {
-	print '<button class="btn btn-info btn-circle" id="buttontopay">'.$langs->trans("Save").'</button>';
+	print '<button class="btn btn-info btn-circle" id="buttontopay">'.$langs->trans("SaveAndPay").'</button>';
 }
 
 print '<img id="hourglasstopay" class="hidden" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/working.gif">';
@@ -668,11 +680,29 @@ if ($mythirdpartyaccount->isInEEC()) {
 			print '<div class="marginbottomonly">'.img_picto('', 'bank_account', 'class="marginrightonlyimp"');
 			print '<span class="opacitymedium">'.$langs->trans("CurrentBAN").'</span></div>';
 			print '<!-- companypaymentmode id = '.$companypaymentmodetemp->id.' -->';
+			// Show IBAN
 			print '<b>'.$langs->trans("IBAN").'</b>: '.$companypaymentmodetemp->iban.'<br>';
+			// Show BIC
 			print '<b>'.$langs->trans("BIC").'</b>: '.$companypaymentmodetemp->bic.'<br>';
+			// Show RUM
 			if ($companypaymentmodetemp->rum) {
-				print '<b>'.$langs->trans("RUM").'</b>: '.$companypaymentmodetemp->rum;
+				print '<b>'.$langs->trans("RUM").'</b>: '.$companypaymentmodetemp->rum.'<br>';
 			}
+			// Show ICS
+			$ics = '';
+			$idbankfordirectdebit = getDolGlobalInt('PRELEVEMENT_ID_BANKACCOUNT');
+			if ($idbankfordirectdebit > 0) {
+				$tmpbankfordirectdebit = new Account($db);
+				$tmpbankfordirectdebit->fetch($idbankfordirectdebit);
+				$ics = $tmpbankfordirectdebit->ics;	// ICS for direct debit
+			}
+			if (empty($ics) && getDolGlobalString('PRELEVEMENT_ICS')) {
+				$ics = getDolGlobalString('PRELEVEMENT_ICS');
+			}
+			if ($ics) {
+				print '<b>'.$langs->trans("CreditorIdentifier").'</b>: '.$ics.'<br>';
+			}
+			// TODO Add link to download the mandate doc
 			$foundban++;
 
 			//print $langs->trans("FindYourSEPAMandate");
@@ -723,8 +753,9 @@ if ($mythirdpartyaccount->isInEEC()) {
 		print '<div class="opacitymedium small justify">'.$langs->trans("SEPALegalText", $mysoc->name, $mysoc->name).'</div>';
 
 		print '<br><br>';
-		print '<input type="submit" name="submitsepa" value="'.$langs->trans("Save").'" class="btn btn-info btn-circle">';
-		print ' ';
+
+		print '<input type="submit" name="submitsepa" value="'.$langs->trans("SaveAndPay").'" class="btn btn-info btn-circle">';
+		print ' &nbsp; ';
 		print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 	} else {
 		if (! $foundban) {
@@ -741,11 +772,11 @@ if ($mythirdpartyaccount->isInEEC()) {
 	}
 } else {
 	print '<br>';
-	print $langs->trans("SEPAPaymentModeAvailableForCeeOnly", $mythirdpartyaccount->country);
+	print '<span class="alert">'.$langs->trans("SEPAPaymentModeAvailableForCeeOnly", $mythirdpartyaccount->country).'</span>';
 	print '<br><br>';
 	print ' ';
 	//print '<input type="submit" name="cancel" value="'.$langs->trans("Cancel").'" class="btn green-haze btn-circle">';
-	print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
+	//print '<a id="buttontocancel" href="'.($backtourl ? $backtourl : $_SERVER["PHP_SELF"]).'" class="btn green-haze btn-circle">'.$langs->trans("Cancel").'</a>';
 }
 
 print '

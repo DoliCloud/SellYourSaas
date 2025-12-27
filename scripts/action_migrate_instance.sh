@@ -139,7 +139,7 @@ export directaccess=${38}
 export sshaccesstype=${39}
 
 export automigrationtmpdir=${41}
-export automigrationdocumentarchivename=${42}
+export automigrationdocumentarchivename=${42//£/ }
 
 export CUSTOMDOMAIN=${46}
 
@@ -231,7 +231,7 @@ if [[ "$mode" == "migrate" ]]; then
 			case "$automigrationdocumentarchivename" in
 					*.zip)
 							echo "unzip $automigrationdocumentarchivename -r $instancedir/documents/"
-							unzip $automigrationdocumentarchivename -r "$instancedir/"
+							unzip "$automigrationdocumentarchivename" -r "$instancedir/"
 							if [ $? -eq 0 ]
 							then
 									echo "Successfully file migration"
@@ -242,7 +242,7 @@ if [[ "$mode" == "migrate" ]]; then
 							;;
 					*.tbz2|*.tar.bz2)
 							echo "tar -C $instancedir/documents/ -xjvf $automigrationdocumentarchivename"
-							tar -C "$instancedir/" -xjvf $automigrationdocumentarchivename
+							tar -C "$instancedir/" -xjvf "$automigrationdocumentarchivename"
 							if [ $? -eq 0 ]
 							then
 									echo "Successfully file migration"
@@ -253,7 +253,7 @@ if [[ "$mode" == "migrate" ]]; then
 							;;
 					*.tgz|*.tar.gz)
 							echo "tar -C $instancedir/documents/ -zxvf $automigrationdocumentarchivename"
-							tar -C "$instancedir/" -zxvf $automigrationdocumentarchivename
+							tar -C "$instancedir/" -zxvf "$automigrationdocumentarchivename"
 							if [ $? -eq 0 ]
 							then
 									echo "Successfully file migration"
@@ -263,7 +263,7 @@ if [[ "$mode" == "migrate" ]]; then
 							fi
 							;;
 			esac
-			
+
 			# Set user owner instead of root used to copy files
 			echo "chown -R $osusername:$osusername $instancedir/documents"
             chown -R $osusername:$osusername "$instancedir/documents"

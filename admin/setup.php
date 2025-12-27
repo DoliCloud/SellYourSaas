@@ -21,6 +21,10 @@
  *     \brief      Page administration module SellYourSaas
  */
 
+/**
+ * @var	Conf 	$conf
+ * @var	DoliDB 	$db
+ */
 
 if (! defined('NOSCANPOSTFORINJECTION')) {
 	define('NOSCANPOSTFORINJECTION', '1');
@@ -109,6 +113,9 @@ foreach ($tmpservices as $key => $tmpservice) {
 	}
 	$arrayofsuffixfound[$tmpservice] = $suffix;
 }
+if (empty($arrayofsuffixfound)) {
+	$arrayofsuffixfound[] = '';
+}
 
 
 /*
@@ -139,8 +146,6 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_PRODUCT_CATEG", GETPOST("SELLYOURSAAS_DEFAULT_PRODUCT_CATEG"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG", GETPOST("SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG"), 'chaine', 0, '', $conf->entity);
-
-		//dolibarr_set_const($db, "SELLYOURSAAS_REFS_URL", GETPOST("SELLYOURSAAS_REFS_URL"), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_ACCOUNT_URL", GETPOST("SELLYOURSAAS_ACCOUNT_URL", 'alpha'), 'chaine', 0, '', $conf->entity);
 		foreach ($arrayofsuffixfound as $suffix) {
@@ -190,7 +195,7 @@ if ($action == 'removelogoblack') {
 	if (getDolGlobalString($constname) != '') {
 		dol_delete_file($logofile);
 	}
-	dolibarr_del_const($db, "$constname", $conf->entity);
+	dolibarr_del_const($db, $constname, $conf->entity);
 
 	$constname='SELLYOURSAAS_LOGO_SMALL_BLACK'.GETPOST('suffix', 'aZ09');
 	$logosmallfile=$conf->mycompany->dir_output.'/logos/thumbs/'.getDolGlobalString($constname);
@@ -230,12 +235,12 @@ print dol_get_fiche_head($head, "setup", "SellYouSaasSetup", -1, "sellyoursaas@s
 print '<span class="opacitymedium">'.$langs->trans("Prerequisites")." :</span><br>\n";
 print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
 print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
-print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
+print 'Parameter <b>allow_url_fopen</b> is on: '.(ini_get('allow_url_fopen') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1).' (may be used by deployed applications)' : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
 $arrayoffunctionsdisabled = explode(',', ini_get('disable_functions'));
 if (in_array('exec', $arrayoffunctionsdisabled)) {
 	print "Parameter <b>disable_functions</b>: ".img_picto('', 'error', 'class="paddingrightonly"')." Bad. Must not contain 'exec'<br>";
 } else {
-	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec<br>';
+	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: exec (used by Dolibarr)<br>';
 }
 if (in_array('popen', $arrayoffunctionsdisabled)) {
 	print "Parameter <b>disable_functions</b>: ".img_picto('', 'error', 'class="paddingrightonly"')." Bad. Must not contain 'popen'<br>";
@@ -298,28 +303,32 @@ if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 }
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasMainEmail").'</td>';
-print '<td>';
+print '<td class="nowraponall">';
+print img_picto('', 'email', 'class="pictofixedwidth"');
 print '<input type="text" name="SELLYOURSAAS_MAIN_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL').'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium small">contact@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasMainEmail").' (Premium)</td>';
-print '<td>';
+print '<td class="nowraponall">';
+print img_picto('', 'email', 'class="pictofixedwidth"');
 print '<input type="text" name="SELLYOURSAAS_MAIN_EMAIL_PREMIUM" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL_PREMIUM').'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium small">contact+premium@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasSupervisionEmail").'</td>';
-print '<td>';
+print '<td class="nowraponall">';
+print img_picto('', 'email', 'class="pictofixedwidth"');
 print '<input type="text" name="SELLYOURSAAS_SUPERVISION_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_SUPERVISION_EMAIL').'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium small">supervision@mysaasdomainname.com</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasNoReplyEmail").'</td>';
-print '<td>';
+print '<td class="nowraponall">';
+print img_picto('', 'email', 'class="pictofixedwidth"');
 print '<input type="text" name="SELLYOURSAAS_NOREPLY_EMAIL" value="'.getDolGlobalString('SELLYOURSAAS_NOREPLY_EMAIL').'" class="minwidth300">';
 print '</td>';
 print '<td><span class="opacitymedium small">noreply@mysaasdomainname.com</span></td>';
@@ -370,7 +379,14 @@ print '</tr>';
 */
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasAccountUrl").'</td>';
-print '<td>';
+print '<td class="nowraponall">';
+if (getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL')) {
+	print '<a href="'.getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL').'" target="_blank">';
+}
+print img_picto('', 'url', 'class="pictofixedwidth"');
+if (getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL')) {
+	print '</a>';
+}
 print '<input class="minwidth300" type="text" name="SELLYOURSAAS_ACCOUNT_URL" value="'.getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL').'">';
 print '</td>';
 print '<td><span class="opacitymedium small wordbreak">https://myaccount.mysaasdomainname.com<br>Note: The virtual host for this domain must point to <strong>'.dol_buildpath('sellyoursaas/myaccount').'</strong></span></td>';
@@ -380,10 +396,17 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	print '<!-- suffix = '.$suffix.' -->'."\n";
 
 	print '<tr class="oddeven"><td>'.($service ? $service.' - ' : '').$langs->trans("SellYourSaasPricesUrl").'</td>';
-	print '<td>';
+	print '<td class="nowraponall">';
 	$constname = 'SELLYOURSAAS_PRICES_URL'.$suffix;
+	if (getDolGlobalString($constname)) {
+		print '<a href="'.getDolGlobalString($constname).'" target="_blank">';
+	}
+	print img_picto('', 'url', 'class="pictofixedwidth"');
+	if (getDolGlobalString($constname)) {
+		print '</a>';
+	}
 	print '<!-- constname = '.$constname.' -->';
-	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_PRICES_URL'.$suffix.'" value="'.getDolGlobalString('SELLYOURSAAS_PRICES_URL'.$suffix).'">';
+	print '<input class="minwidth300" type="text" name="SELLYOURSAAS_PRICES_URL'.$suffix.'" value="'.getDolGlobalString($constname).'">';
 	print '</td>';
 	print '<td><span class="opacitymedium small">https://myaccount.mysaasdomainname.com/prices.html</span></td>';
 	print '</tr>';

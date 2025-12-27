@@ -423,10 +423,11 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	// Mysql command to block remote ip access (allow only master) or allow any ip.
 	$ipofmaster = $_SERVER['SERVER_ADDR'];
-	$mysqlblockallowremoteip = '';
+	$mysqlblockallowremoteip = '-- Make db login usable from master only'."\n";
 	$mysqlblockallowremoteip .= "CREATE USER '".$object->username_db."'@'".$ipofmaster."' IDENTIFIED BY '".$object->password_db."'; GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON ".$object->database_db.".* TO '".$object->username_db."'@'".$ipofmaster."';";
 	$mysqlblockallowremoteip .= " DROP USER '".$object->username_db."'@'%';";
-	$mysqlblockallowremoteip .= "\n\n";
+	$mysqlblockallowremoteip .= "\n";
+	$mysqlblockallowremoteip .= "-- Allow db login from any remote ip\n";
 	$mysqlblockallowremoteip .= "CREATE USER '".$object->username_db."'@'%' IDENTIFIED BY '".$object->password_db."'; GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON ".$object->database_db.".* TO '".$object->username_db."'@'%';";
 	$mysqlblockallowremoteip .= " DROP USER '".$object->username_db."'@'".$ipofmaster."';";
 	$links.='<span class="fa fa-database"></span> ';
@@ -435,7 +436,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	//if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlblockallowremoteip", 0);
 	$links.='<br><br>';
 
-	// Rsync to Restore Program directory
+	// Rsync to copy Program directory
 	$sftprestorestring='rsync -n -v -a --exclude \'conf.php\' --exclude \'*.cache\' htdocs/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite application dir';
@@ -446,7 +447,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	}
 	$links.='<br>';
 
-	// Rsync to Restore Document directory
+	// Rsync to copy Document directory
 	$sftprestorestring='rsync -n -v -a --exclude \'*.cache\' documents/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/documents';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to copy/overwrite document dir';
@@ -458,10 +459,10 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Rsync to Deploy module
-	$sftpdeploystring='rsync -n -v -a --exclude \'*.cache\' --exclude \'conf\.php\' pathtohtdocsofmodule/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/custom/namemodule';
+	$sftpdeploystring='rsync -n -v -a --exclude \'*.cache\' --exclude \'conf\.php\' '.DOL_DATA_ROOT.'/sellyoursaas/git/dir_namemodule/* '.$object->username_os.'@'.$object->hostname_os.':'.$object->database_db.'/htdocs/custom/namemodule';
 	$links.='<span class="fa fa-terminal"></span> ';
 	$links.='Rsync to install or overwrite module';
-	$links.='<span class="opacitymedium"> (remove -n to execute really)</span>:<br>';
+	$links.='<span class="opacitymedium"> (to run on the master server, remove -n to execute really)</span>:<br>';
 	$links.='<input type="text" id="sftpdeploystring" name="sftpdeploystring" value="'.$sftpdeploystring.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("sftpdeploystring", 0);
@@ -472,7 +473,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$upgradestringtoshow=$upgradestring.' test';
 	$links.='<span class="fa fa-arrow-up"></span> ';
 	$links.='Upgrade version line string';
-	$links.='<span class="opacitymedium"> (remplacer "test" par "confirmunlock" pour exécuter réellement)</span><br>';
+	$links.='<span class="opacitymedium"> (to run on the master server, replace "test" with "confirmunlock" to execute really)</span><br>';
 	$links.='<input type="text" id="upgradestring" name="upgradestring" value="'.$upgradestringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("upgradestring", 0);
@@ -483,7 +484,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$purgestringtoshow=$purgestring;
 	$links.='<span class="fa fa-eraser"></span> ';
 	$links.='Purge command line string';
-	$links.='<span class="opacitymedium"> (remplacer "test" par "confirm" pour exécuter réellement)</span><br>';
+	$links.='<span class="opacitymedium"> (to run on the master server, replace "test" with "confirm" to execute really)</span><br>';
 	$links.='<input type="text" id="purgestring" name="purgestring" value="'.$purgestringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("purgestring", 0);
@@ -527,7 +528,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 /**
  * getvalfromkey
  *
- * @param 	DoliDb	$db		Database handler
+ * @param 	DoliDB	$db		Database handler
  * @param 	string	$param	Param
  * @param	string	$val	Val
  * @return	string			Value

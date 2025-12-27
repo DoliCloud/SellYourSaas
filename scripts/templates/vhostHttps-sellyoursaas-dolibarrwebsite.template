@@ -57,7 +57,7 @@
         LogLevel info
 
         #ErrorLog __osUserPath__/websites_error.log
-        #TransferLog /var/log/apache2/websites_access_log
+        #TransferLog /var/log/apache2/websites_access.log
         CustomLog ${APACHE_LOG_DIR}/websites_vhosts_access.log vhost_combined
         #CustomLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/websites_vhosts_access.log 1G"
         ErrorLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/websites_vhosts_error.log 1G"

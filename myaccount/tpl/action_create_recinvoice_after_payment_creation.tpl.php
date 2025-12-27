@@ -15,6 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -450,6 +457,17 @@ if (! $error) {
 
 				$result = $sellyoursaasutils->doRenewalContracts($mythirdpartyaccount->id);		// A refresh is also done if renewal is done
 				if ($result != 0) {
+					$error++;
+					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+				}
+			}
+
+			// Activate all lines of a contract if freemode is enabled
+			if (!$error && $isfreemodeenabled) {
+				dol_syslog("--- Now we activate contact lines of contract".$contract->id." for freemode instance", LOG_DEBUG, 0);
+
+				$result = $contract->activateAll($user);
+				if ($result <= 0) {
 					$error++;
 					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
 				}

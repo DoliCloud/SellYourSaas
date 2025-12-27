@@ -15,6 +15,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var Translate $langs
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -25,30 +31,34 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE dashboard.tpl.php -->
 <?php
 
-	print '
+print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
 
-	     <!-- BEGIN PAGE HEADER-->
+    <!-- BEGIN PAGE HEADER-->
 	<!-- BEGIN PAGE HEAD -->
 	<div class="page-head">
-	  <!-- BEGIN PAGE TITLE -->
-	<div class="page-title">
-	  <h1>'.$langs->trans("Dashboard").'</h1>
-	</div>
-	<!-- END PAGE TITLE -->
-
-
+		<!-- BEGIN PAGE TITLE -->
+		<div class="page-title">
+		  <h1>'.$langs->trans("Dashboard").'</h1>
+		</div>
+		<!-- END PAGE TITLE -->
 	</div>
 	<!-- END PAGE HEAD -->
 	<!-- END PAGE HEADER-->
 
 
-	    <div class="row">
-	      <div class="col-md-6">
+	<div class="row">';
 
-	        <div class="portlet light" id="planSection">
 
+	print '
+	<!-- BEGIN COL MY INSTANCES -->
+	<div class="col-md-6">
+	<!-- BEGIN PORTLET id=planSection -->
+	<div class="portlet light" id="planSection">';
+
+	if ($mythirdpartyaccount->client > 0) {
+		print '
 	          <div class="portlet-title">
 	            <div class="caption">
 	              <i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("MyInstances").'</span>
@@ -58,42 +68,48 @@ if (empty($conf) || ! is_object($conf)) {
 	          <div class="portlet-body">
 
 	            <div class="row">
-	              <div class="col-md-9">
+	              <div class="col-md-8">
 					'.$langs->trans("NbOfActiveInstances").'
 	              </div>
-	              <div class="col-md-3 right">
+	              <div class="col-md-4 right">
 	                <h2>'.$nbofinstancesdone.'</h2>
 	              </div>
-	            </div> <!-- END ROW -->
+	            </div>
 
 				';
-if ($nbofinstancessuspended) {
-	print '
-			            <div class="row">
-			              <div class="col-md-9">
-							'.$langs->trans("NbOfSuspendedInstances").'
-			              </div>
-			              <div class="col-md-3 right">
-			                <h2 style="color:orange">'.$nbofinstancessuspended.'</h2>
-			              </div>
-			            </div> <!-- END ROW -->
-					';
-}
+		if ($nbofinstancessuspended) {
+			print '
+				            <div class="row">
+				              <div class="col-md-8">
+								'.$langs->trans("NbOfSuspendedInstances").'
+				              </div>
+				              <div class="col-md-4 right">
+				                <h2 style="color:orange">'.$nbofinstancessuspended.'</h2>
+				              </div>
+				            </div>
+						';
+		}
 
-				print '
+		print '
 					<div class="row">
 					<div class="center col-md-12">
 						<br>
 						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=instances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptions").'</a>
-					</div></div>';
+					</div>
+					</div>';
 
-			print '
+		print '
 				</div>';		// end protlet-body
+	}
 
-if ($mythirdpartyaccount->isareseller) {
-	print '
+	if ($mythirdpartyaccount->client > 0 && $mythirdpartyaccount->isareseller) {
+		print '<br><br>';
+	}
+
+	if ($mythirdpartyaccount->isareseller) {
+		print '
 				<div class="portlet-title">
-				<div class="caption"><br><br>
+				<div class="caption">
 				<i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesOfMyCustomers").'</span>
 				</div>
 				</div>
@@ -101,44 +117,96 @@ if ($mythirdpartyaccount->isareseller) {
 				<div class="portlet-body">
 
 				<div class="row">
-				<div class="col-md-9">
+				<div class="col-md-8">
 				'.$langs->trans("NbOfActiveInstances").'
 				</div>
-				<div class="col-md-3 right">
+				<div class="col-md-4 right">
 				<h2>'.$nbofinstancesdonereseller.'</h2>
 				</div>
-				</div> <!-- END ROW -->
+				</div>
 
 				';
-	if ($nbofinstancessuspendedreseller) {
+		if ($nbofinstancessuspendedreseller) {
+			print '
+						<div class="row">
+						<div class="col-md-8">
+						'.$langs->trans("NbOfSuspendedInstances").'
+						</div>
+						<div class="col-md-4 right">
+						<h2 style="color:orange">'.$nbofinstancessuspendedreseller.'</h2>
+						</div>
+						</div>
+						';
+		}
+
 		print '
-					<div class="row">
-					<div class="col-md-9">
-					'.$langs->trans("NbOfSuspendedInstances").'
-					</div>
-					<div class="col-md-3 right">
-					<h2 style="color:orange">'.$nbofinstancessuspendedreseller.'</h2>
-					</div>
-					</div> <!-- END ROW -->
-					';
+						<div class="row">
+						<div class="center col-md-12">
+							<br>
+							<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'</a>
+						</div>
+						</div>';
+
+		print '</div>';		// end portlet-body
 	}
 
-	print '
-					<div class="row">
-					<div class="center col-md-12">
-						<br>
-						<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsAndOptionsOfMyCustomers").'</a>
-					</div></div>';
+	if (($mythirdpartyaccount->client > 0 || $mythirdpartyaccount->isareseller) && !empty($mythirdpartyaccount->context['isamoduleprovider'])) {
+		print '<br><br>';
+	}
 
-	print '</div>';		// end protlet-body
-}
+	if (!empty($mythirdpartyaccount->context['isamoduleprovider'])) {
+		print '
+				<div class="portlet-title">
+				<div class="caption">
+				<i class="fa fa-server font-green-sharp paddingright"></i><span class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("InstancesWithMyModules").'</span>
+				</div>
+				</div>
 
+				<div class="portlet-body">
+
+				<div class="row">
+				<div class="col-md-8">
+				'.$langs->trans("NbOfActiveInstances").'
+				</div>
+				<div class="col-md-4 right">
+				<h2>'.$nbofinstancesdonemodules.'</h2>
+				</div>
+				</div>
+
+				';
+		if ($nbofinstancessuspendedmodules) {
 			print '
+						<div class="row">
+						<div class="col-md-8">
+						'.$langs->trans("NbOfSuspendedInstances").'
+						</div>
+						<div class="col-md-4 right">
+						<h2 style="color:orange">'.$nbofinstancessuspendedmodules.'</h2>
+						</div>
+						</div>
+						';
+		}
 
-	        </div> <!-- END PORTLET -->
+		print '
+						<div class="row">
+						<div class="center col-md-12">
+							<br>
+							<a class="wordbreak btn" href="'.$_SERVER["PHP_SELF"].'?mode=mymodulecustomerinstances" class="btn default btn-xs green-stripe">'.$langs->trans("SeeDetailsOfInstancesWithMyModules").'</a>
+						</div>
+						</div>';
 
-	      </div> <!-- END COL -->
+		print '</div>';		// end portlet-body
+	}
 
+
+
+print '
+
+     </div> <!-- END PORTLET id=planSection -->
+	 </div> <!-- END COL MY INSTANCES-->';
+
+
+print '
 			<!-- My profile -->
 	      <div class="col-md-6">
 	        <div class="portlet light" id="myProfile">
@@ -161,7 +229,7 @@ if (empty($welcomecid)) {		// If we just created an instance, we don't show warn
 	if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
 		$missing++;
 	}
-	if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra)) {
+	if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
 		$missing++;
 	}
 
@@ -195,7 +263,10 @@ if (empty($welcomecid)) {		// If we just created an instance, we don't show warn
 
 	print '
 	    <div class="row">
+	';
 
+if ($mythirdpartyaccount->client > 0) {
+	print '
 			<!-- Box of payment balance -->
 	      <div class="col-md-6">
 	        <div class="portlet light" id="paymentBalance">
@@ -233,7 +304,7 @@ foreach ($listofcontractid as $id => $contract) {
 	          <div class="portlet-body">
 
 				<div class="row">
-				<div class="col-md-9">
+				<div class="col-md-8">
 	            ';
 if ($amountdue > 0 && $atleastonepaymentmode) {
 	print $form->textwithpicto($langs->trans("UnpaidInvoices"), $langs->trans("PaymentWillBeProcessedSoon"));
@@ -242,7 +313,7 @@ if ($amountdue > 0 && $atleastonepaymentmode) {
 }
 				print '
                 				</div>
-                				<div class="col-md-3 right"><h2>';
+                				<div class="col-md-4 right"><h2>';
 if ($nbinvoicenotpayed > 0) {
 	print '<font style="color: orange">';
 }
@@ -253,12 +324,12 @@ if ($nbinvoicenotpayed) {
 				print '<h2></div>
                 	            </div>
                 				<div class="row">
-                				<div class="col-md-9">';
+                				<div class="col-md-8">';
 if (($amountdue > 0 || $nbinvoicenotpayed > 0) && $atleastonepaymentmode) {
 	print $form->textwithpicto($langs->trans("RemainderToPay"), $langs->trans("PaymentWillBeProcessedSoon"));
 }
 				print '</div>
-                				<div class="col-md-3 right"><h2>';
+                				<div class="col-md-4 right"><h2>';
 if ($amountdue > 0) {
 	print '<font style="color: orange; white-space: nowrap;">';
 }
@@ -282,6 +353,7 @@ if ($amountdue > 0) {
 
 	        </div> <!-- END PORTLET -->
 	      </div><!-- END COL -->';
+}
 
 			$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
 if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
@@ -307,18 +379,18 @@ if (!$sellyoursaassupporturl) {
 						</div>
 						<div class="portlet-body">
 							<div class="row">
-								<div class="col-md-9">
+								<div class="col-md-8">
 									'.$langs->trans("NbOfTickets").'
 								</div>
-								<div class="col-md-3 right">
+								<div class="col-md-4 right">
 									<h2>'.$nboftickets.'</h2>
 								</div>
 							</div> <!-- END ROW -->
 							<div class="row">
-								<div class="col-md-9">
+								<div class="col-md-8">
 									'.$langs->trans("NbOfOpenTickets").'
 								</div>
-								<div class="col-md-3 right">
+								<div class="col-md-4 right">
 									<h2>';
 	if ($nbofopentickets > 0) {
 		print '<font style="color: orange;">';

@@ -15,7 +15,7 @@
 # undeploy     remove only instance (must be easy to restore) - rest can be done later with clean.sh
 
 export now=`date +'%Y-%m-%d %H:%M:%S'`
-export nowlog=`date +'%Y%m%d-%H%M%S'`
+export nowfile=`date +'%Y%m%d-%H%M%S'`
 
 echo
 echo
@@ -619,8 +619,8 @@ if [[ "$dnsserver" == "1" ]]; then
 				exit 16
 			fi
 			
-			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog"
-			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowfile"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowfile
 			
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
@@ -694,8 +694,8 @@ if [[ "$dnsserver" == "1" ]]; then
 				exit 18
 			fi
 			
-			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog"
-			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowlog
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowfile"
+			cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$nowfile
 			
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
@@ -780,7 +780,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 						tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources1.tgz .
 					fi			
 				fi
-			fi 
+			fi
 
 			if [[ -f /tmp/cache$dirwithsources1.tar.zst ]]; then
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 1. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
@@ -941,6 +941,58 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 	chmod -R go-rwxs $targetdir/$osusername/$dbname
 fi
 
+# Undeploy option files
+if [[ "$mode" == "undeployoption" ]]; then
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Undeploy option files"
+	
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Uninstall targetdirwithsources1=$targetdirwithsources1"
+	if [[ "x$targetdirwithsources1" != "x" ]]; then
+		dirtargetdirwithsources1=$(dirname $targetdirwithsources1)
+		nametargetdirwithsources1=$(basename $dirtargetdirwithsources1)
+		if [[ $nametargetdirwithsources1 == "custom" ]];
+		then
+			echo rm -r $targetdirwithsources1 2>/dev/null
+			if [[ $testorconfirm == "confirm" ]]
+			then
+				rm -r $targetdirwithsources1 2>/dev/null
+			fi
+		else
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Target $targetdirwithsources1 isn't in custom directory so we do not delete"
+		fi
+	fi
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Uninstall targetdirwithsources2=$targetdirwithsources2"
+	if [[ "x$targetdirwithsources2" != "x" ]]; then
+		dirtargetdirwithsources2=$(dirname $targetdirwithsources2)
+		nametargetdirwithsources2=$(basename $dirtargetdirwithsources2)
+		if [[ $nametargetdirwithsources2 == "custom" ]];
+		then
+			echo rm -r $targetdirwithsources2 2>/dev/null
+			if [[ $testorconfirm == "confirm" ]]
+			then
+				rm -r $targetdirwithsources2 2>/dev/null
+			fi
+		else
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Target $targetdirwithsources2 isn't in custom directory so we do not delete"
+		fi
+	fi
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Uninstall targetdirwithsources3=$targetdirwithsources3"
+	if [[ "x$targetdirwithsources3" != "x" ]]; then
+		dirtargetdirwithsources3=$(dirname $targetdirwithsources3)
+		nametargetdirwithsources3=$(basename $dirtargetdirwithsources3)
+		if [[ $nametargetdirwithsources3 == "custom" ]];
+		then
+			echo rm -r $targetdirwithsources3 2>/dev/null
+			if [[ $testorconfirm == "confirm" ]]
+			then
+				rm -r $targetdirwithsources3 2>/dev/null
+			fi
+		else
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Target $targetdirwithsources3 isn't in custom directory so we do not delete"
+		fi
+	fi
+fi
 
 # Undeploy config file
 
@@ -1228,21 +1280,32 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		else 
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
 			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
-			# We must create it using letsencrypt if not yet created
+			
+			# TODO We must create it using letsencrypt if not yet created. NOTE: This is done in action "rename" (suspen_unsuspend.sh), not sure we must also do it  on deploy.
 			#if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn.crt ]]; then
 					# Generate the letsencrypt certificate
 					
-					# certbot certonly --webroot -w $instancedir -d $customurl 
+					# certbot certonly -n -v --webroot -w $instancedir -d $customurl 
 					# create links					
 
 					# If links does not exists, we disable SSL
 					#SSLON="Off"
 			#fi
 			
-			export webCustomSSLCertificateCRT=$webSSLCertificateCRT
-			export webCustomSSLCertificateKEY=$webSSLCertificateKEY
-			export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
-			export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
+			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+				# If custom cert not found, we fallback on the wildcard one for server (it will generate a warning, but it will works and not hangs !)
+				export webCustomSSLCertificateCRT="/etc/apache2/$webSSLCertificateCRT"
+				export webCustomSSLCertificateKEY="/etc/apache2/$webSSLCertificateKEY"
+				export webCustomSSLCertificateIntermediate="/etc/apache2/$webSSLCertificateIntermediate"
+				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
+			else
+				# We will use the custom cert file
+				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
+				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
+				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
+				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
+			fi
+			echo "We will use the certificate file webCustomSSLCertificateCRT=$webCustomSSLCertificateCRT (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 		fi
 
 		# If the certificate file is not found, we disable SSL
@@ -1303,7 +1366,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	fi
 	
 	
-	# Deploy also the php fpm pool file from the scripts/templates/osuxxx.conf
+	# Deploy also the php fpm pool file from the scripts/templates/osuxxx.template
 	# A link will also be created into /etc/php/$phpversion/fpm/pool.d/$fqn.conf to this fpm pool file $fqn.conf
 	export phpfpmconf="/etc/php/$phpversion/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf"
 	export phpfpmservicename="sellyoursaas-php$phpversion-fpm-$fqn.service"
@@ -1651,11 +1714,11 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	echo "Do a dump of database $dbname - may fails if already removed"
 	mkdir -p $archivedir/$osusername
 	if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
-		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$nowlog.sql.zst"
-		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > "$archivedir/$osusername/dump.$dbname.$nowlog.sql.zst"
+		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | zstd -z -9 -q > $archivedir/$osusername/dump.$dbname.$nowfile.sql.zst"
+		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | zstd -z -9 -q > "$archivedir/$osusername/dump.$dbname.$nowfile.sql.zst"
 	else
-		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$nowlog.sql.gz"
-		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > "$archivedir/$osusername/dump.$dbname.$nowlog.sql.gz"
+		echo "$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX $dbname | gzip > $archivedir/$osusername/dump.$dbname.$nowfile.sql.gz"
+		$MYSQLDUMP --no-tablespaces -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass $dbname | gzip > "$archivedir/$osusername/dump.$dbname.$nowfile.sql.gz"
 	fi
 
 	if [[ "x$?" == "x0" ]]; then

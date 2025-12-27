@@ -27,7 +27,7 @@
 
 if (!defined('NOREQUIREDB')) {
 	define('NOREQUIREDB', '1');
-}					// Do not create database handler $db
+}					// Do not create database handler $db, so not $mysoc, we will use instead later a $dbmaster
 if (!defined('NOSESSION')) {
 	define('NOSESSION', '1');
 }
@@ -206,7 +206,11 @@ if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
 if (empty($db)) {
-	$db=$dbmaster;
+	$db = $dbmaster;
+	$hookmanager->db = $db;
+	if (empty($mysoc)) {
+		$mysoc = new Societe($db);
+	}
 }
 
 // Set serverprice with the param from $conf of the $dbmaster server.
@@ -229,15 +233,15 @@ if (! isset($argv[1])) {	// Check parameters
 	print "\n";
 	print "action can be:\n";
 	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance)\n";
-	print "- updatestatsonly     updates stats only (only table sellyoursaas_stats) and send data to Datagog if enabled ***** Used by cron on master server *****\n";
+	print "- updatestatsonly     updates stats only (only table sellyoursaas_stats) and send data to Datagog if enabled <<<<< Used by cron on master server >>>>>\n";
 	print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats table.\n";
 	print "- backuptest          test rsync+database backup\n";
 	print "- backuptestrsync     test rsync backup\n";
 	print "- backuptestdatabase  test database backup\n";
 	print "- backuprsync         creates backup (rsync)\n";
 	print "- backupdatabase      creates backup (mysqldump)\n";
-	print "- backup              creates backup (rsync + database) ***** Used by cron on deployment servers *****\n";
-	print "- backupdelete        creates backup (rsync with delete + database)\n";
+	print "- backup              creates backup (rsync + database)\n";
+	print "- backupdelete        creates backup (rsync with delete + database) <<<<< Used by cron on deployment servers >>>>>\n";
 	print "- backupdeleteexclude creates backup (rsync with delete excluded + database)\n";
 	print "\n";
 	print "with a backup... action, you can also add the option --force to execute backup even if done recently.\n";
@@ -525,7 +529,7 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 $today=dol_now();
 
 $error=0; $errors=array();
-$servicetouse=strtolower($conf->global->SELLYOURSAAS_NAME);
+$servicetouse = strtolower(getDolGlobalString('SELLYOURSAAS_NAME'));
 
 if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'updatecountsonly') {	// updatedatabase = updatestatsonly + updatecountsonly
 	print "----- Start updatedatabase\n";
@@ -652,7 +656,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 
 					$rep = sellyoursaas_calculate_stats($dbmaster, $datelastday, $datefirstday);	// Get qty and amount into all template invoices linked to active contracts deployed before the $datelastday
 
-					$part = (!getDolGlobalString('SELLYOURSAAS_PERCENTAGE_FEE') ? 0 : $conf->global->SELLYOURSAAS_PERCENTAGE_FEE);
+					$part = getDolGlobalFloat('SELLYOURSAAS_PERCENTAGE_FEE');
 
 					foreach ($statkeylist as $statkey) {
 						if (! isset($stats[$statkey][$x]) || ($today <= $datelastday)) {	// If metric does not exist yet or if we are current month.
@@ -664,8 +668,8 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 								$totalcommissions = $rep['totalcommissions'];
 								$totalnewinstances = $rep['totalnewinstances'];
 								$totallostinstances = $rep['totallostinstances'];
-								$totalinstancespaying = $rep['totalinstancespaying'];
-								$totalinstancespayingall = $rep['totalinstancespayingall'];
+								$totalinstancespaying = $rep['totalinstancespaying'];			// total good standing instances (list of contracts with status done, not redirect, one service not suspended, not expired + recurring payment active)
+								$totalinstancespayingall = $rep['totalinstancespayingall'];		// total paying instance (list of contracts with status done, not redirect)
 								$totalinstances = $rep['totalinstances'];		// total trial only instances
 								$totalusers = $rep['totalusers'];
 								$totalcustomerspaying = $rep['totalcustomerspaying'];

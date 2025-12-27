@@ -30,16 +30,37 @@ export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+htdocsdir=`grep '^htdocsdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$htdocsdir" == "x" ]]; then
+	export htdocsdir="/htdocs"
+fi
 if [[ "x$templatesdir" != "x" ]]; then
+  if [[ "x$phpfpm" != "x" ]]; then
+    export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
+    export vhostfilesuspended="$templatesdir/vhostHttps-phpfpm-sellyoursaas-suspended.template"
+    export vhostfilemaintenance="$templatesdir/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
+    export fpmpoolfiletemplate="$templatesdir/phppool-phpfpm.template"
+    export fpmservicefiletemplate="$templatesdir/poolservice-phpfpm.template"
+  else
 	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
 	export vhostfilemaintenance="$templatesdir/vhostHttps-sellyoursaas-maintenance.template"
-	export vhostfilewebsite="$templatesdir/vhostHttps-sellyoursaas-dolibarrwebsite.template"
+	export fpmpoolfiletemplate="$templatesdir/osuxxx.template"
+  fi
+elif [[ "x$phpfpm" != "x" ]]; then
+  export vhostfile="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas.template"
+  export vhostfilesuspended="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-suspended.template"
+  export vhostfilemaintenance="$scriptdir/templates/vhostHttps-phpfpm-sellyoursaas-maintenance.template"
+  export fpmpoolfiletemplate="$scriptdir/templates/phppool-phpfpm.template"
+  export fpmservicefiletemplate="$scriptdir/templates/poolservice-phpfpm.template"
 else
-	export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
-	export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
-	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
-	export vhostfilewebsite="$scriptdir/templates/vhostHttps-sellyoursaas-dolibarrwebsite.template"
+  export vhostfile="$scriptdir/templates/vhostHttps-sellyoursaas.template"
+  export vhostfilesuspended="$scriptdir/templates/vhostHttps-sellyoursaas-suspended.template"
+  export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
+  export fpmpoolfiletemplate="$scriptdir/templates/osuxxx.template"
 fi
 
 if [ "$(id -u)" != "0" ]; then
@@ -85,6 +106,7 @@ export mode=$1
 export osusername=$2
 export ospassword=$3
 export instancename=$4
+# domainname. Example: withX.mysaasdomain.com
 export domainname=$5
 
 export dbname=$6
@@ -131,6 +153,12 @@ export ispaidinstance=${36}
 export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
 export sshaccesstype=${39}
+export INCLUDEFROMCONTRACT=${40//£/ }
+if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
+	INCLUDEFROMCONTRACT=""
+fi
+
+export CUSTOMDOMAIN=${46}
 
 
 
@@ -139,13 +167,14 @@ export ErrorLog='#ErrorLog'
 export instancedir=$targetdir/$osusername/$dbname
 export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
+export CRONHEAD=${VIRTUALHOSTHEAD/php_value date.timezone /TZ=}
 
 # Define custom certificate filename
 export webSSLCustomCertificateCRT="$fqn-$customurl.crt"
 export webSSLCustomCertificateKEY="$fqn-$customurl.key"
 export webSSLCustomCertificateIntermediate="$fqn-$customurl-intermediate.crt"
 
-
+# set the generic ssl certificate name
 export webSSLCertificateCRT=`grep '^websslcertificatecrt=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$webSSLCertificateCRT" == "x" ]]; then
 	export webSSLCertificateCRT=with.sellyoursaas.com.crt
@@ -213,11 +242,7 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 
 	# Delete old custom conf file
 	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
-	if [[ -s $apacheconf ]]
-	then
-		echo `date +'%Y-%m-%d %H:%M:%S'`" Apache conf $apacheconf already exists, we delete it since it may be a file from an old instance with same name"
-		rm -f $apacheconf
-	fi
+	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create a new apache conf $apacheconf from $vhostfile"
 
 	if [[ -s $apacheconf ]]
 	then
@@ -285,8 +310,8 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"
 
-	echo certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
-	certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
+	echo certbot certonly -n -v --webroot -w $instancedir/htdocs/ -d www.$customurl
+	certbot certonly -n -v --webroot -w $instancedir/htdocs/ -d www.$customurl
 	export certko=$?
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file for custom url = $certko"
 	

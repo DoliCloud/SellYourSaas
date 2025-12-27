@@ -15,6 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -25,7 +32,14 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE mycustomerinstances.tpl.php -->
 <?php
 
-	print '
+$plan = GETPOST('plan', 'alpha');
+
+$planarray = preg_split('/(,|;)/', $plan);
+if (!empty($planarray[1])) {
+	$productref = 'array';
+}
+
+print '
 	<div class="page-content-wrapper">
 			<div class="page-content">
 
@@ -43,25 +57,25 @@ if (empty($conf) || ! is_object($conf)) {
 	<!-- END PAGE HEADER-->';
 
 
-	//print $langs->trans("Filters").' : ';
-	print '<div class="row"><div class="col-md-12"><div class="portlet light">';
+//print $langs->trans("Filters").' : ';
+print '<div class="row"><div class="col-md-12"><div class="portlet light nominheight">';
 
-	print '<form name="refresh" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-	print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<form name="refresh" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
+print '<input type="hidden" name="token" value="'.newToken().'">';
 
-	print $langs->trans("InstanceName").' : <input type="text" name="search_instance_name" value="'.$search_instance_name.'"><br>';
-	//$savsocid = $user->socid;	// Save socid of user
-	//$user->socid = 0;
-	print $langs->trans("Customer").'/'.$langs->trans("Email").' : <input type="text" name="search_customer_name" value="'.$search_customer_name.'"><br>';
-	//.$form->select_company(GETPOST('search_customer_name', 'search_customer_name'), 'search_customer_name', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'inline-block').'</div><br>';
-	//$user->socid = $savsocid;	// Restore socid of user
+print $langs->trans("InstanceName").' : <input type="text" name="search_instance_name" value="'.$search_instance_name.'"><br>';
+//$savsocid = $user->socid;	// Save socid of user
+//$user->socid = 0;
+print $langs->trans("Customer").'/'.$langs->trans("Email").' : <input type="text" name="search_customer_name" value="'.$search_customer_name.'"><br>';
+//.$form->select_company(GETPOST('search_customer_name', 'search_customer_name'), 'search_customer_name', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'inline-block').'</div><br>';
+//$user->socid = $savsocid;	// Restore socid of user
 
-	print '<input type="hidden" name="mode" value="'.$mode.'">';
-	print '<div style="padding-top: 10px; padding-bottom: 10px">';
-	print '<input type="submit" name="submit" value="'.$langs->trans("Refresh").'">';
-	print ' &nbsp; ';
-	print '<input type="submit" name="reset" value="'.$langs->trans("Reset").'"><br>';
-	print '</div>';
+print '<input type="hidden" name="mode" value="'.$mode.'">';
+print '<div style="padding-top: 10px; padding-bottom: 10px">';
+print '<input type="submit" name="submit" value="'.$langs->trans("Refresh").'">';
+print ' &nbsp; ';
+print '<input type="submit" name="reset" value="'.$langs->trans("Reset").'"><br>';
+print '</div>';
 
 if (count($listofcontractidreseller) > 0) {
 	print $langs->trans("FirstRecord").' <input type="text" name="firstrecord" class="width50 right" value="'.$firstrecord.'">';
@@ -71,10 +85,10 @@ if (count($listofcontractidreseller) > 0) {
 	print count($listofcontractidreseller) .'</span><br>';
 }
 
-	print '</form>';
-	print '</div></div></div>';
+print '</form>';
+print '</div></div></div>';
 
-	print '<br>';
+print '<br>';
 
 if (count($listofcontractidreseller) == 0) {
 	//print '<span class="opacitymedium">'.$langs->trans("NoneF").'</span>';
@@ -236,8 +250,15 @@ if (count($listofcontractidreseller) == 0) {
 
 		// Customer (link to login on customer dashboard)
 		print '<span class="opacitymedium">'.$langs->trans("Customer").' : </span>'.$tmpcustomer->name;
-		$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $tmpcustomer->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
-		print ' &nbsp;-&nbsp; <a target="_blankcustomer" href="'.$_SERVER["PHP_SELF"].'?mode=logout_dashboard&username='.urlencode($tmpcustomer->email).'&password=&login_hash='.urlencode($dol_login_hash).'"><span class="fa fa-desktop"></span><span class="hideonsmartphone"> '.$langs->trans("LoginWithCustomerAccount").'</span></a>';
+		print ' &nbsp; - &nbsp; '.dol_print_email($tmpcustomer->email, 0, 0, 1, 0, 1, 1);
+		if ($tmpcustomer->phone) {
+			print ' &nbsp; - &nbsp; '.dol_print_phone($tmpcustomer->phone, $tmpcustomer->country_code, 0, $tmpcustomer->id, '', '&nbsp;', 'phone');
+		}
+		// Add link to login to dashboard with customer account
+		/*
+		$dol_login_hash = dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $tmpcustomer->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
+		print ' &nbsp; - &nbsp; <a target="_blankcustomer" href="'.$_SERVER["PHP_SELF"].'?mode=logout_dashboard&username='.urlencode($tmpcustomer->email).'&password=&login_hash='.urlencode($dol_login_hash).'"><span class="fa fa-desktop"></span><span class="hideonsmartphone"> '.$langs->trans("LoginWithCustomerAccount").'</span></a>';
+		*/
 		print '<br>';
 
 		// URL
@@ -250,8 +271,8 @@ if (count($listofcontractidreseller) == 0) {
 			}
 			print ' : </span>';
 			print '<a class="font-green-sharp linktoinstance" href="https://'.$contract->ref_customer.'" target="blankinstance">';
+			print img_picto($langs->trans("YourURLToGoOnYourAppInstance"), 'globe', 'class="paddingright"');
 			print 'https://'.$contract->ref_customer;
-			print img_picto($langs->trans("YourURLToGoOnYourAppInstance"), 'globe', 'class="paddingleft"');
 			print '</a>';
 			print '</span><br>';
 		}
@@ -464,7 +485,7 @@ if (count($listofcontractidreseller) == 0) {
 			$arrayofplanstoswitch=array();
 			$sqlproducts = 'SELECT p.rowid, p.ref, p.label FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 			$sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
-			$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.$conf->entity;
+			$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
 			$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
 			$sqlproducts.= " AND pe.availabelforresellers > 0";		// available in dashboard (customers + resellers)
 			$sqlproducts.= " AND p.ref NOT LIKE '%DolibarrV1%'";
@@ -788,7 +809,7 @@ if (count($listofcontractidreseller) == 0) {
 	$selectofthirdparties = $form->select_company('', 'reusesocid', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'centpercent');
 
 if ($form->result['nbofthirdparties'] == 0) {
-	print $langs->trans("YouDontHaveCustomersYet").'...<br>';
+	print '<span class="opacitymedium">'.$langs->trans("YouDontHaveCustomersYet").'...</span><br>';
 } else {
 	print '<a href="#addanotherinstance" id="addanotherinstance" class="valignmiddle">';
 	print '<span class="fa fa-plus-circle valignmiddle" style="font-size: 1.5em; padding-right: 4px;"></span><span class="valignmiddle text-plus-circle">'.$langs->trans("AddAnotherInstance").'...</span><br>';
@@ -903,7 +924,9 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
     		<div class="linked-flds">
     		<span class="opacitymedium">https://</span>
     		<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
-    		<select name="tldid" id="tldid" >';
+    		';
+
+	print '<select name="tldid" id="tldid">';
 	// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 	$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
@@ -979,9 +1002,9 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 						console.log("We select product id = "+pid);
 					';
 	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
-		foreach ($arrayofplansfull as $key => $plan) {
-			if (!empty($plan['restrict_domains'])) {
-				$restrict_domains = explode(",", $plan['restrict_domains']);
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			if (!empty($tmpplan['restrict_domains'])) {
+				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
 				foreach ($restrict_domains as $domain) {
 					print " if (pid == ".$key.") { disable_combo_if_not('".$domain."'); }\n";
 					break;
@@ -998,8 +1021,8 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 			});'."\n";
 
 	if (!empty($arrayofplansfull) && is_array($arrayofplansfull)) {
-		foreach ($arrayofplansfull as $key => $plan) {
-			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			print '/* pid='.$key.' => '.$tmpplan['label'].' - '.$tmpplan['id'].' - '.$tmpplan['restrict_domains'].' */'."\n";
 		}
 	}
 	print '</script>';
@@ -1013,18 +1036,17 @@ if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRe
 	print '<br><input type="submit" class="btn btn-warning default change-plan-link" name="changeplan" value="'.$langs->trans("Create").'">';
 }
 
-	print '</div></div></div>';
+print '</div></div></div>';
 
-	print '</form>';
+print '</form>';
 
-	print '</div>';	// end Add a new instance
+print '</div>';	// end Add a new instance
 
 
-
-	print '
+print '
     		</div>
 			</div>
-    	';
+   	';
 
 if (GETPOST('tab', 'alpha')) {
 	print '<script type="text/javascript" language="javascript">

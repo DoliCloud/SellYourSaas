@@ -15,8 +15,7 @@ $sendmail_bin = '/usr/sbin/sendmail';
 $logfile = '/var/log/phpsendmail.log';
 
 // The directory $pathtospamdir must have permission rwxrwxrwx and not rwxrwxrwt
-//$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
-$pathtospamdir = '/tmp/spam';
+$pathtospamdir = '/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam';
 
 //* Get the email content
 $mail='';
@@ -53,7 +52,7 @@ if ($fp) {
 		if ($tmpline[0] == 'maxemailperdaypaid') {
 			$maxemailperdaypaid = $tmpline[1];
 		}
-		if ($tmpline[0] == 'pathtospamdir') {
+		if ($tmpline[0] == 'pathtospamdir' && !empty($tmpline[1])) {
 			$pathtospamdir = $tmpline[1];
 		}
 	}

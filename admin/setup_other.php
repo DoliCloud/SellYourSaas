@@ -55,7 +55,14 @@ if (! $res && file_exists("../../../main.inc.php")) {
 if (! $res) {
 	die("Include of main fails");
 }
-
+/**
+ * The main.inc.php has been included so the following variable are now defined:
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ * @var User $user
+ */
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/images.lib.php";
@@ -115,6 +122,9 @@ foreach ($tmpservices as $key => $tmpservice) {
 	}
 	$arrayofsuffixfound[$tmpservice] = $suffix;
 }
+if (empty($arrayofsuffixfound)) {
+	$arrayofsuffixfound[] = '';
+}
 // $arrayofsuffixfound should be now array('mysaasdomain'=>'', mysaasdomainalt'=>'_MYSAASDOMAINALT_COM', ...)
 //var_dump($arrayofsuffixfound);
 
@@ -144,11 +154,6 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, 'SELLYOURSAAS_INFRA_COST', GETPOST("SELLYOURSAAS_INFRA_COST", 'int'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, 'SELLYOURSAAS_PERCENTAGE_FEE', GETPOST("SELLYOURSAAS_PERCENTAGE_FEE", 'int'), 'chaine', 0, '', $conf->entity);
-
-		dolibarr_set_const($db, "SELLYOURSAAS_AUTOMIGRATION_CODE", GETPOST("SELLYOURSAAS_AUTOMIGRATION_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
-		dolibarr_set_const($db, "SELLYOURSAAS_AUTOUPGRADE_CODE", GETPOST("SELLYOURSAAS_AUTOUPGRADE_CODE", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
-
-		dolibarr_set_const($db, "SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", GETPOST("SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
 
 		foreach ($arrayofsuffixfound as $suffix) {
 			dolibarr_set_const($db, "SELLYOURSAAS_SUPPORT_URL".$suffix, GETPOST("SELLYOURSAAS_SUPPORT_URL".$suffix), 'chaine', 0, '', $conf->entity);
@@ -290,7 +295,6 @@ if ($action == 'removelogoblack') {
 
 $formother=new FormOther($db);
 $form=new Form($db);
-$formticket = new FormTicket($db);
 
 $help_url="";
 llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
@@ -309,26 +313,56 @@ print '<input type="hidden" name="action" value="set">';
 
 print '<div class="div-table-responsive">'; // You can use div-table-responsive-no-min if you dont need reserved height for your table
 print '<table class="noborder centpercent">';
+
 print '<tr class="liste_titre">';
-print '<td class="titlefieldmiddle">'.$langs->trans("Parameters").'</td><td></td>';
-print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright"><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></div></td>';
+print '<td class="titlefieldmiddle">'.$langs->trans("SubscriptionFormAndDashboard").'</td><td></td>';
+print '<td><div class="float">'.$langs->trans("Examples").'</div><div class="floatright">';
+print '</div></td>';
 print "</tr>\n";
 
-print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasStatusUrl").'</td>';
-print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_STATUS_URL" value="'.getDolGlobalString('SELLYOURSAAS_STATUS_URL').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">https://status.mysaasdomainname.com</span></td>';
-print '</tr>';
 
-print '<tr class="oddeven"><td>';
-print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
-print '</td>';
-print '<td>';
-print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL').'">';
-print '</td>';
-print '<td></td>';
-print '</tr>';
+foreach ($arrayofsuffixfound as $service => $suffix) {
+	print '<!-- Edit SELLYOURSAAS_LOGO[|_SMALL|MINI] suffix = '.$suffix.' -->'."\n";
+
+	// Logo
+	print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoWhiteBackground").' (png,jpg)</label></td><td>';
+	print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
+	print '<input type="file" class="flat class=minwidth200" name="logo'.$suffix.'" id="logo'.$suffix.'">';
+	print '</td><td class="nocellnopadd valignmiddle">';
+	$constname = 'SELLYOURSAAS_LOGO_MINI'.$suffix;
+	print '<!-- constname = '.$constname.' -->';
+	if (getDolGlobalString($constname)) {
+		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogo&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
+		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
+			print '</td></td>';
+			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/' . getDolGlobalString($constname)).'">';
+		}
+	} else {
+		print '<img height="30" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png">';
+	}
+	print '</td></tr></table>';
+	print '</td><td>';
+	print '</td></tr>';
+
+	// Logo font black
+	print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoBlackBackground").' (png,jpg)</label></td><td>';
+	print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
+	print '<input type="file" class="flat class=minwidth200" name="logoblack'.$suffix.'" id="logoblack'.$suffix.'">';
+	print '</td><td class="nocellnopadd valignmiddle">';
+	$constname = 'SELLYOURSAAS_LOGO_MINI_BLACK'.$suffix;
+	if (getDolGlobalString($constname)) {
+		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
+		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
+			print '</td></td>';
+			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/' . getDolGlobalString($constname)).'">';
+		}
+	} else {
+		print '<img height="30" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png">';
+	}
+	print '</td></tr></table>';
+	print '</td><td>';
+	print '</td></tr>';
+}
 
 // SELLYOURSAAS_EXTCSS
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EXTCSS").'</td>';
@@ -345,6 +379,7 @@ print '<textarea name="SELLYOURSAAS_CSS" class="quatrevingtpercent" rows="3">'.g
 print '</td>';
 print '<td></td>';
 print '</tr>';
+
 
 // SELLYOURSAAS_ENABLE_OPTINMESSAGES
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_OPTINMESSAGES").'</td>';
@@ -363,64 +398,87 @@ print '<td><span class="opacitymedium small">Set to yes to add a checkbox on reg
 print '</tr>';
 
 
-foreach ($arrayofsuffixfound as $service => $suffix) {
-	print '<!-- Edit SELLYOURSAAS_LOGO[|_SMALL|MINI] suffix = '.$suffix.' -->'."\n";
+print '<tr class="oddeven"><td>'.$langs->trans("SellYourSaasStatusUrl").'</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_STATUS_URL" value="'.getDolGlobalString('SELLYOURSAAS_STATUS_URL').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">https://status.mysaasdomainname.com</span></td>';
+print '</tr>';
 
-	// Logo
-	print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoWhiteBackground").' (png,jpg)</label></td><td>';
-	print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
-	print '<input type="file" class="flat class=minwidth200" name="logo'.$suffix.'" id="logo'.$suffix.'">';
-	print '</td><td class="nocellnopadd" valign="middle">';
-	$constname = 'SELLYOURSAAS_LOGO_MINI'.$suffix;
-	print '<!-- constname = '.$constname.' -->';
-	if (getDolGlobalString($constname)) {
-		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogo&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
-		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
-			print ' &nbsp; ';
-			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/' . getDolGlobalString($constname)).'">';
-		}
-	} else {
-		print '<img height="30" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png">';
-	}
-	print '</td></tr></table>';
-	print '</td><td>';
-	print '</td></tr>';
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_MAIN_FAQ_URL"), $langs->trans("SELLYOURSAAS_MAIN_FAQ_URLHelp"));
+print '</td>';
+print '<td>';
+print '<input class="minwidth300" type="text" name="SELLYOURSAAS_MAIN_FAQ_URL" value="'.getDolGlobalString('SELLYOURSAAS_MAIN_FAQ_URL').'">';
+print '</td>';
+print '<td></td>';
+print '</tr>';
 
-	// Logo font black
-	print '<tr class="oddeven"><td><label for="logo">'.$service.' - '.$langs->trans("LogoBlackBackground").' (png,jpg)</label></td><td>';
-	print '<table width="100%" class="nobordernopadding"><tr class="nocellnopadd"><td valign="middle" class="nocellnopadd">';
-	print '<input type="file" class="flat class=minwidth200" name="logoblack'.$suffix.'" id="logoblack'.$suffix.'">';
-	print '</td><td class="nocellnopadd" valign="middle">';
-	$constname = 'SELLYOURSAAS_LOGO_MINI_BLACK'.$suffix;
-	if (getDolGlobalString($constname)) {
-		print '<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=removelogoblack&suffix='.urlencode($suffix).'">'.img_delete($langs->trans("Delete")).'</a>';
-		if (file_exists($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constname))) {
-			print ' &nbsp; ';
-			print '<img src="'.DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&amp;file='.urlencode('logos/thumbs/' . getDolGlobalString($constname)).'">';
-		}
-	} else {
-		print '<img height="30" src="'.DOL_URL_ROOT.'/public/theme/common/nophoto.png">';
-	}
-	print '</td></tr></table>';
-	print '</td><td>';
-	print '</td></tr>';
-}
+print '<tr class="liste_titre">';
+print '<td class="titlefieldmiddle">'.$langs->trans("Payments").'</td><td></td>';
+print '<td><div class="float"></div><div class="floatright">';
+print '</div></td>';
+print "</tr>\n";
 
-// SELLYOURSAAS_ACCEPT_DISCOUNTCODE
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ACCEPT_DISCOUNTCODE").'</td>';
+// Activate free payment mode
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE").'</td>';
 print '<td>';
 if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ACCEPT_DISCOUNTCODE', array(), null, 0, 0, 0);
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE', array(), null, 0, 0, 1);
 } else {
-	if (!getDolGlobalString('SELLYOURSAAS_ACCEPT_DISCOUNTCODE')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
 print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
+print '<td><span class="opacitymedium small">Set to yes to enable the free mode.</td>';
 print '</tr>';
+
+
+if (!getDolGlobalString("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
+	// SELLYOURSAAS_ACCEPT_DISCOUNTCODE
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ACCEPT_DISCOUNTCODE").'</td>';
+	print '<td>';
+	if ($conf->use_javascript_ajax) {
+		print ajax_constantonoff('SELLYOURSAAS_ACCEPT_DISCOUNTCODE', array(), null, 0, 0, 0);
+	} else {
+		if (!getDolGlobalString('SELLYOURSAAS_ACCEPT_DISCOUNTCODE')) {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		} else {
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ACCEPT_DISCOUNTCODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		}
+	}
+	print '</td>';
+	print '<td><span class="opacitymedium small">Set to yes to add a field "Discount code" on the "Enter payment mode" page. Available discounts can be defined on services with type "Application".</td>';
+	print '</tr>';
+}
+
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE").'</td>';
+print '<td>';
+print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE" value="'.getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', '').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">0=No limit</span></td>';
+print '</tr>';
+
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION', array(), null, 0, 0, 0);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
 
 // Allow SEPA
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_SEPA").'</td>';
@@ -448,43 +506,13 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA')) {
 	print '</tr>';
 }
 
-// Activate free payment mode
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE").'</td>';
-print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE', array(), null, 0, 0, 0);
-} else {
-	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
-print '</td>';
-print '<td><span class="opacitymedium small">Set to yes to enable the free mode.</td>';
-print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE").'</td>';
-print '<td>';
-print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE" value="'.getDolGlobalString('SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE', '').'">';
-print '</td>';
-print '<td><span class="opacitymedium small">0=No limit</span></td>';
-print '</tr>';
+print '<tr class="liste_titre">';
+print '<td class="titlefieldmiddle">'.$langs->trans("Fees").'</td><td></td>';
+print '<td><div class="float"></div><div class="floatright">';
+print '</div></td>';
+print "</tr>\n";
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION").'</td>';
-print '<td>';
-if ($conf->use_javascript_ajax) {
-	print ajax_constantonoff('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION', array(), null, 0, 0, 0);
-} else {
-	if (!getDolGlobalString('SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
-	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_INVOICE_FORCE_DATE_VALIDATION">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
-	}
-}
-print '</td>';
-print '<td></td>';
-print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_INFRA_COST").'</td>';
 print '<td>';
@@ -499,6 +527,13 @@ print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_PERCENTAGE_FEE" 
 print '</td>';
 print '<td><span class="opacitymedium small">0.02</span></td>';
 print '</tr>';
+
+
+print '<tr class="liste_titre">';
+print '<td class="titlefieldmiddle">'.$langs->trans("Cancellation").'</td><td></td>';
+print '<td><div class="float"></div><div class="floatright">';
+print '</div></td>';
+print "</tr>\n";
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_ASK_DESTROY_REASON").'</td>';
 print '<td>';
@@ -520,7 +555,8 @@ print '</tr>';
 
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans("SupportFeatures").'</td><td></td>';
-print '<td></td>';
+print '<td>';
+print '</td>';
 print "</tr>\n";
 
 foreach ($arrayofsuffixfound as $service => $suffix) {
@@ -555,27 +591,26 @@ foreach ($arrayofsuffixfound as $service => $suffix) {
 	}
 }
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOMIGRATION_CODE").'</td>';
-print '<td class="nowraponall">';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE'), 'SELLYOURSAAS_AUTOMIGRATION_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_SUPPORT_TICKET_CREATE").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_SUPPORT_TICKET_CREATE', array(), null, 0, 0, 0);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_CREATE')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_SUPPORT_TICKET_CREATE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_SUPPORT_TICKET_CREATE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
 print '</td>';
-print '<td></td>';
+print '<td><span class="opacitymedium small"></span></td>';
 print '</tr>';
 
-print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_AUTOUPGRADE_CODE").'</td>';
-print '<td class="nowraponall">';
-print $formticket->selectGroupTickets(getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE'), 'SELLYOURSAAS_AUTOUPGRADE_CODE', '', 2, 1, 0, 0, 'maxwidth400 widthcentpercentminusx');
-print ' &nbsp; ';
-print '<input class="maxwidth100" type="text" name="SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR" value="'.getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR', '').'">';
-print '</td>';
-print '<td></td>';
-print '</tr>';
 
 print '</table>';
 print '</div>';
 
-print '</table>';
-print '</div>';
+print '<center><input type="submit" class="button buttongen" value="'.$langs->trans("Save").'"></center>';
 
 print "</form>\n";
 

@@ -15,6 +15,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Societe $mysoc
+ * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
+ */
+
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
@@ -101,7 +111,7 @@ print '
 				$nbtotalofrecords = $db->num_rows($resql);
 
 				// if total resultset is smaller then paging size (filtering), goto and load page 0
-				if (($page * $limit) > $nbtotalofrecords) {
+				if (($page * $limit) > (int) $nbtotalofrecords) {
 					$page = 0;
 					$offset = 0;
 				}
@@ -405,7 +415,7 @@ print '
 		}
 
 		print '<!-- Total of commissions earned -->';
-		print '<tr class="liste_titre"><td colspan="6">'.$langs->trans("Total").'</td>';
+		print '<tr class="liste_total"><td colspan="6">'.$langs->trans("Total").'</td>';
 		print '<td align="right"><strong>'.price($commoldystem + $totalamountcommission).'</strong></td>';
 		print '</tr>';
 
@@ -433,7 +443,8 @@ print '
 
 		print '<br>';
 		print $langs->trans("YouCanClainAmountWhen", price(getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM', 100), 0, $langs, 1, -1, -1, $conf->currency)).'<br>';
-		$labelforcompany = $mysoc->name. ' ('.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Country").': '.$langs->trans("Country".$mysoc->country_code).')';
+		$labelforcompany = $mysoc->name;
+		$labelforcompany .= ' <span class="opacitymedium">('.$langs->transcountry("ProfId1", $mysoc->country_code).': '.$mysoc->idprof1.', '.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Address").': '.$mysoc->getFullAddress(1, ',').')</span>';
 
 		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
 		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])

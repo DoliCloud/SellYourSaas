@@ -55,7 +55,14 @@ if (! $res && file_exists("../../../main.inc.php")) {
 if (! $res) {
 	die("Include of main fails");
 }
-
+/**
+ * The main.inc.php has been included so the following variable are now defined:
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var HookManager $hookmanager
+ * @var Translate $langs
+ * @var User $user
+ */
 require_once DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/files.lib.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/images.lib.php";
@@ -117,7 +124,9 @@ foreach ($tmpservices as $key => $tmpservice) {
 }
 // $arrayofsuffixfound should be now array('mysaasdomain'=>'', mysaasdomainalt'=>'_MYSAASDOMAINALT_COM', ...)
 //var_dump($arrayofsuffixfound);
-
+if (empty($arrayofsuffixfound)) {
+	$arrayofsuffixfound[] = '';
+}
 
 
 /*
@@ -172,7 +181,7 @@ print "</tr>\n";
 // SELLYOURSAAS_DATADOG_ENABLED
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DATADOG_ENABLED").'</td>';
 print '<td>';
-$array = array('0' => 'No', '1' => 'Yes', '2' => 'Yes with detail of remote action errors');
+$array = array('0' => array('label' => yn(0, 1)), '1' => array('label' => yn(1, 1), 'data-html' => yn(1, 1).' <span class="opacitymedium">(GDPR compliant)</span>'), '2' => array('label' => 'Yes with detail of remote action errors', 'data-html' => 'Yes with detail of remote action errors <span class="opacitymedium">(May contain sensitive data)</span>'));
 print $form->selectarray('SELLYOURSAAS_DATADOG_ENABLED', $array, getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED'), 0);
 print '</td>';
 print '<td><span class="opacitymedium small">If a datadog agent is running on each of your server, enable this option so SellyourSaas will send metrics sellyoursaas.* to Datadog.</td>';

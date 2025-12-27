@@ -83,6 +83,13 @@ if (! $res) {
 	die("Include of main fails");
 }
 
+/**
+ * @var Database	$db
+ * @var Conf		$conf
+ * @var Translate 	$langs
+ * @var string 		$urllogo
+ */
+
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
@@ -121,7 +128,7 @@ if ($langs->defaultlang == 'en_US') {
 }
 
 
-if (preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
+if (!empty($contract->array_options['options_suspendmaintenance_message']) && preg_match('/^http/i', $contract->array_options['options_suspendmaintenance_message'])) {
 	dol_syslog("Maintenance mode is on for ".$contract->ref_customer." with a redirect to ".$contract->array_options['options_suspendmaintenance_message']);
 	header("Location: ".$contract->array_options['options_suspendmaintenance_message']);
 	exit;

@@ -15,7 +15,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// $initialaction can be set
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var Translate $langs
+ *
+ * @var string $initialaction can be set
+ * @var Societe $mythirdpartyaccount
+ */
 
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
@@ -27,6 +34,13 @@ if (empty($conf) || ! is_object($conf)) {
 <!-- BEGIN PHP TEMPLATE instances.tpl.php -->
 <?php
 
+$plan = GETPOST('plan', 'alpha');
+
+$planarray = preg_split('/(,|;)/', $plan);
+if (!empty($planarray[1])) {
+	$productref = 'array';
+}
+
 // SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 $forcesubdomain = GETPOST('forcesubdomain', 'alpha');
@@ -36,21 +50,32 @@ $arrayofplansfull=array();
 $arrayofoptionsfull=array();
 
 // List of available plans/products
-$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pa.restrict_domains';
-$sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
-$sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
-$sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
-$sqlproducts.= " AND pe.availabelforresellers > 0";		// available in dashboard (customers + resellers)
-$sqlproducts.= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
-$sqlproducts.= " AND (pa.restrict_domains IS NULL"; // restict_domains can be empty (it's ok)
-$sqlproducts.= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
-$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
-$sqlproducts.= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname).",%'"; // can be the first or the middle domain of [with.mydomain1.com,with.mydomain2.com,mydomain3.com]
-$sqlproducts.= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; // can be the first domain of [mydomain1.com,mydomain2.com]
-$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
-$sqlproducts.= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
-$sqlproducts.= ")";
-$sqlproducts.= " ORDER BY pe.position ASC";
+$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pe.onlyserver, pa.restrict_domains';
+$sqlproducts .= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
+$sqlproducts .= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
+$sqlproducts .= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
+$sqlproducts .= " AND pe.fk_object = p.rowid AND pe.app_or_option = 'app'";
+if (!empty($plan)) {		// If ref of product was forced via plan=... parameter
+	if (empty($productref)) {
+		$productref = $plan;
+	}
+	$listofplanref = '';
+	foreach($planarray as $tmpplanref) {
+		$listofplanref .= ($listofplanref ? "," : "")."'".$db->escape($tmpplanref)."'";
+	}
+	$sqlproducts .= " AND p.ref IN (".$db->sanitize($listofplanref, 1).")";
+} else {
+	$sqlproducts .= " AND pe.availabelforresellers > 0";		// available in dashboard (customers + resellers)
+	$sqlproducts .= " AND (pa.restrict_domains IS NULL"; // restrict_domains can be empty (it's ok)
+	$sqlproducts .= " OR pa.restrict_domains = '".$db->escape($domainname)."'"; // can be mydomain.com
+	$sqlproducts .= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname)."'"; // can be with.mydomain.com or the last domain of [mydomain1.com,with.mydomain2.com]
+	$sqlproducts .= " OR pa.restrict_domains LIKE '%.".$db->escape($domainname).",%'"; // can be the first or the middle domain of [with.mydomain1.com,with.mydomain2.com,mydomain3.com]
+	$sqlproducts .= " OR pa.restrict_domains LIKE '".$db->escape($domainname).",%'"; // can be the first domain of [mydomain1.com,mydomain2.com]
+	$sqlproducts .= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname).",%'"; // can be the middle domain of [mydomain1.com,mydomain2.com,mydomain3.com]
+	$sqlproducts .= " OR pa.restrict_domains LIKE '%,".$db->escape($domainname)."'"; // can be the last domain of [mydomain1.com,mydomain2.com]
+	$sqlproducts .= ")";
+}
+$sqlproducts .= " ORDER BY pe.position ASC";
 
 $resqlproducts = $db->query($sqlproducts);
 if ($resqlproducts) {
@@ -76,6 +101,14 @@ if ($resqlproducts) {
 			$priceinstance_ttc['fix'] = $obj->price_ttc;
 			$priceinstance['user'] = 0;
 			$priceinstance_ttc['user'] = 0;
+
+			if (!empty($tmpprod->array_options["options_only_for_country"])) {
+				$optioncountries = preg_split("/[\s,;]+/", $tmpprod->array_options["options_only_for_country"]);
+				if (!in_array(dol_strtolower($mythirdpartyaccount->country_code), $optioncountries)) {
+					// Thirdparty country code isn't in options_only_for_country array so we don't show plan
+					continue;
+				}
+			}
 
 			if (count($tmparray) > 0) {
 				foreach ($tmparray as $key => $value) {
@@ -132,7 +165,11 @@ if ($resqlproducts) {
 			$arrayofplansfull[$obj->rowid]['id'] = $obj->rowid;
 			$arrayofplansfull[$obj->rowid]['label'] = $arrayofplans[$obj->rowid];
 			$arrayofplansfull[$obj->rowid]['data-html'] = $label.' <span class="opacitymedium">'.$priceforlabel.'</span>';
+			$arrayofplansfull[$obj->rowid]['data-id'] = $obj->rowid;
+			$arrayofplansfull[$obj->rowid]['data-ref'] = $obj->ref;
+			$arrayofplansfull[$obj->rowid]['data-onlyserver'] = $obj->onlyserver;
 			$arrayofplansfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
+			$arrayofplansfull[$obj->rowid]['onlyserver'] = $obj->onlyserver;
 		}
 		$i++;
 	}
@@ -142,7 +179,7 @@ if ($resqlproducts) {
 
 
 // List of available options
-$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pa.restrict_domains';
+$sqlproducts = 'SELECT p.rowid, p.ref, p.label, p.price, p.price_ttc, p.duration, pe.availabelforresellers, pe.onlyserver, pa.restrict_domains';
 $sqlproducts.= ' FROM '.MAIN_DB_PREFIX.'product as p, '.MAIN_DB_PREFIX.'product_extrafields as pe';
 $sqlproducts.= ' LEFT JOIN '.MAIN_DB_PREFIX.'packages as pa ON pe.package = pa.rowid';
 $sqlproducts.= ' WHERE p.tosell = 1 AND p.entity = '.((int) $conf->entity);
@@ -234,9 +271,10 @@ if ($resqloptions) {
 
 			$arrayofoptionsfull[$obj->rowid]['id'] = $obj->rowid;
 			$arrayofoptionsfull[$obj->rowid]['label'] = $label;
-			$arrayofoptionsfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
 			$arrayofoptionsfull[$obj->rowid]['product'] = $tmpprod;
 			$arrayofoptionsfull[$obj->rowid]['labelprice'] =($pricetoshow ? $labelprice : '');
+			$arrayofoptionsfull[$obj->rowid]['restrict_domains'] = $obj->restrict_domains;
+			$arrayofoptionsfull[$obj->rowid]['onlyserver'] = $obj->onlyserver;
 		}
 		$i++;
 	}
@@ -936,6 +974,25 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					continue;
 				}
 
+				$productalreadyininstance = 0;
+				if (!empty($tmpproduct->array_options['options_package'])) {
+					// If there is a package, test if module already depoyed on instance
+					foreach ($arrayoflines as $keyline => $line) {
+						if ($tmpproduct->id == $line->fk_product) {
+							$productalreadyininstance = 1;
+							break;
+						}
+					}
+				}
+
+				if (!$productalreadyininstance && !empty($tmpproduct->array_options["options_only_for_country"])) {
+					$optioncountries = preg_split("/[\s,;]+/", $tmpproduct->array_options["options_only_for_country"]);
+					if (!in_array(dol_strtolower($mythirdpartyaccount->country_code), $optioncountries)) {
+						// Thirdparty country code isn't in options_only_for_country array so we don't show option
+						continue;
+					}
+				}
+
 				print '<div class="tagtable centpercent divdolibarroptionfromservices"><div class="tagtr">';
 				print '<div class="tagtd paddingleft paddingright marginrightonly valignmiddle">';
 
@@ -950,8 +1007,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print $htmlforphoto;
 				}
 
-				$label = $tmpprod->label;
-				$desc = $tmpprod->description;
+				$label = $tmpproduct->label;
+				$desc = $tmpproduct->description;
 				$producturl = $tmpproduct->url;
 				if (!empty($tmpproduct->multilangs[$langs->defaultlang])) {
 					$label = $tmpproduct->multilangs[$langs->defaultlang]['label'];
@@ -988,18 +1045,18 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					// If there is a package, test if module already depoyed on instance
 					$productalreadyininstance = 0;
 					foreach ($arrayoflines as $keyline => $line) {
-						if ($tmpproduct->id == $line->id) {
+						if ($tmpproduct->id == $line->fk_product) {
 							$productalreadyininstance = 1;
 							break;
 						}
 					}
 					print '<div class="divforbutton">';
-					if ($productalreadyininstance) {
+					if (!$productalreadyininstance) {
 						// Show link to subscribe
-						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" target="_blank" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 					} else {
 						// Show link to unsubscribe
-						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'#tab_domain_'.$contract->id.'" target="_blank" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
 					}
 					print '</div>';
 				} else {
@@ -1219,8 +1276,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 									</div></div>
 
 							  	</form>
-				            </div>
+				            </div>';
 
+		// Tab for SSH/SFTP
+		print '
 							<!-- tab ssh/sftp -->
 				            <div class="tab-pane" id="tab_ssh_'.$contract->id.'">
 				                <p class="opacitymedium" style="padding: 15px">'.$langs->trans("SSHFTPDesc");
@@ -1290,7 +1349,10 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		}
 
 		print '
-				              </div> <!-- END TAB SSH PANE -->
+				              </div> <!-- END TAB SSH PANE -->';
+
+		// Tab for DB access
+		print '
 
 							  <!-- tab db -->
 				              <div class="tab-pane" id="tab_db_'.$contract->id.'">
@@ -1405,32 +1467,47 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 			}
 		}
-		print '				<!-- tab upgrade -->
-							<div class="tab-pane" id="tab_upgrade_'.$contract->id.'">';
-		if ($lastversiondolibarrinstance < $newversiondolibarr) {
-		print '				<form class="form-upgrade" action="'.$_SERVER["PHP_SELF"].'" method="POST">
-							<input type="hidden" name="token" value="'.newToken().'">
-							<input type="hidden" name="mode" value="autoupgrade">
-							<input type="hidden" name="backtopagesupport" value="'.$_SERVER["PHP_SELF"].'?mode=instances">
-							<input type="hidden" name="instanceselect" value="'.$priority.'_'.$contract->id.'">
-							<p class="opacitymediumbis" style="padding: 15px">
-								'.$langs->trans("NewerVersionAvailable", $lastversiondolibarrinstance, $newversiondolibarr).'
-							</p>
-							<p class="center" style="padding-bottom: 15px">
-								<input type="submit" class="btn" name="undeploy" value="'.$langs->trans("Upgrade").'">
-							</p>
-							</form>';
-		}else {
-			print '			<p class="opacitymediumbis" style="padding: 15px">
-								'.$langs->trans("AlreadyToLastVersionUpgrade", $newversiondolibarr).'
-							</p>
-			';
+
+		// Get the URL for support
+		$sellyoursaassupporturl = getDolGlobalString('SELLYOURSAAS_SUPPORT_URL');
+		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
+			$newnamekey = 'SELLYOURSAAS_SUPPORT_URL_'.strtoupper(str_replace('.', '_', $mythirdpartyaccount->array_options['options_domain_registration_page']));
+			if (getDolGlobalString($newnamekey)) {
+				$sellyoursaassupporturl = getDolGlobalString($newnamekey);
+			}
 		}
 
-		print '				</div>
-							<!-- END tab upgrade -->
-';
-print '						<!-- tab destroy -->
+		// Tab for upgrade
+		if (empty($sellyoursaassupporturl)) {
+			print '				<!-- tab upgrade -->
+								<div class="tab-pane" id="tab_upgrade_'.$contract->id.'">';
+			if ($lastversiondolibarrinstance < $newversiondolibarr) {
+				print '				<form class="form-upgrade" action="'.$_SERVER["PHP_SELF"].'" method="POST">
+								<input type="hidden" name="token" value="'.newToken().'">
+								<input type="hidden" name="mode" value="autoupgrade">
+								<input type="hidden" name="backtopagesupport" value="'.$_SERVER["PHP_SELF"].'?mode=instances">
+								<input type="hidden" name="instanceselect" value="'.$priority.'_'.$contract->id.'">
+								<p class="opacitymediumbis" style="padding: 15px">
+									'.$langs->trans("NewerVersionAvailable", $lastversiondolibarrinstance, $newversiondolibarr).'
+								</p>
+								<p class="center" style="padding-bottom: 15px">
+									<input type="submit" class="btn" name="undeploy" value="'.$langs->trans("Upgrade").'">
+								</p>
+								</form>';
+			} else {
+				print '			<p class="opacitymediumbis" style="padding: 15px">
+									'.$langs->trans("AlreadyToLastVersionUpgrade", $newversiondolibarr).'
+								</p>';
+			}
+
+			print "\n".'				</div>
+								<!-- END tab upgrade -->';
+		}
+
+		// Tab de destroy/cancel instance
+		print '
+							<!-- tab destroy -->
 				            <div class="tab-pane" id="tab_danger_'.$contract->id.'">
 
 							<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST">
@@ -1632,6 +1709,12 @@ if ($action == "confirmundeploy") {
     		jQuery("#addanotherinstance").click(function() {
     			console.log("Click on addanotherinstance");
     			jQuery("#formaddanotherinstance").toggle();
+				/* Reinit select2 */
+				var inst = jQuery("#tldid").data("select2");
+				if (inst) {
+					var opts = $.extend(true, {}, inst.options.options);
+					jQuery("#tldid").select2(opts);
+				}
     		});
 
 			/* Code to toggle the show of the option section */
@@ -1702,18 +1785,21 @@ if ($action == "confirmundeploy") {
 	</script>
 	';
 
-	print '<br>';
+print '<br>';
 
-	print '<!-- Form to add an instance -->'."\n";
-	print '<form id="formaddanotherinstance" class="form-group reposition" style="'.(GETPOST('addanotherinstance', 'int') ? '' : 'display: none;').'" action="register_instance.php" method="POST">';
-	print '<input type="hidden" name="token" value="'.newToken().'">';
-	print '<input type="hidden" name="action" value="deployall" />';
+
+// Form to add an instance
+
+print '<!-- Form to add an instance -->'."\n";
+print '<form id="formaddanotherinstance" name="formaddanotherinstance" class="form-group reposition" style="'.(GETPOST('addanotherinstance', 'int') ? '' : 'display: none;').'" action="register_instance.php" method="POST">';
+print '<input type="hidden" name="token" value="'.newToken().'">';
+print '<input type="hidden" name="action" value="deployall" />';
 if (GETPOSTISSET('forcesubdomain')) {
 	print '<input type="hidden" name="forcesubdomain" value="'.GETPOST('forcesubdomain', 'alpha').'">';
 }
-	print '<input type="hidden" name="fromsocid" value="0" />';
-	print '<input type="hidden" name="reusesocid" value="'.((int) $socid).'" />';
-	print '
+print '<input type="hidden" name="fromsocid" value="0" />';
+print '<input type="hidden" name="reusesocid" value="'.((int) $socid).'" />';
+print '
 	<!-- Add fields to send local user information -->
 	<input type="hidden" name="tz" id="tz" value="">
 	<input type="hidden" name="tz_string" id="tz_string" value="">
@@ -1724,17 +1810,17 @@ if (GETPOSTISSET('forcesubdomain')) {
 	<input type="hidden" name="screenwidth" id="screenwidth" value="">
 	<input type="hidden" name="screenheight" id="screenheight" value="">
 	';
-	print '<!-- thirdpartyidinsession = '.dol_escape_htmltag($_SESSION['dol_loginsellyoursaas']).' -->';
+print '<!-- thirdpartyidinsession = '.dol_escape_htmltag($_SESSION['dol_loginsellyoursaas']).' -->';
 
-	print '<div class="row">
+print '<div class="row">
     	<div class="col-md-12">
 
     	<div class="portlet light">';
 
-	//var_dump($arrayofplans);
-	//natcasesort($arrayofplans);
+//var_dump($arrayofplans);
+//natcasesort($arrayofplans);
 
-	$MAXINSTANCESPERACCOUNT = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? getDolGlobalInt('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', 4) : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
+$MAXINSTANCESPERACCOUNT = ((empty($mythirdpartyaccount->array_options['options_maxnbofinstances']) && $mythirdpartyaccount->array_options['options_maxnbofinstances'] != '0') ? getDolGlobalInt('SELLYOURSAAS_MAX_INSTANCE_PER_ACCOUNT', 4) : $mythirdpartyaccount->array_options['options_maxnbofinstances']);
 
 if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERACCOUNT) {
 	if (getDolGlobalInt('SELLYOURSAAS_DISABLE_NEW_INSTANCES') && !in_array(getUserRemoteIP(), explode(',', getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_IP')))) {
@@ -1756,10 +1842,8 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		print $form->selectarray('service', $arrayofplansfull, $planid, 0, 0, 0, '', 0, 0, 0, '', 'width500 minwidth500');
 		print '<br>';
 		print '</div>';
-		//print ajax_combobox('service');
 
 		print '
-
 			        			<div class="horizontal-fld clearboth margintoponly">
 			        			<div class="control-group required">
 			        			<label class="control-label" for="password" trans="1">'.$langs->trans("Password").'</label><input name="password" type="password" minlength="8" maxlength="128"'.(GETPOST('addanotherinstance', 'int') ? ' autofocus' : '').' required autocomplete="new-password" spellcheck="false" autocapitalize="off" />
@@ -1779,23 +1863,47 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			        			<label trans="1">'.$langs->trans("ChooseANameForYourApplication").'</label>
 			        			<div class="linked-flds">
 			        			<span class="opacitymedium">https://</span>
-			        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />
-			        			<select name="tldid" id="tldid">';
+			        			<input class="sldAndSubdomain" type="text" name="sldAndSubdomain" id="sldAndSubdomain" value="'.dol_escape_htmltag(GETPOST('sldAndSubdomain')).'" maxlength="29" required />';
+
+		print '
+								<select name="tldid" id="tldid">';
+		$tldid = GETPOST('tldid', 'alpha');
+
 		// SERVER_NAME here is myaccount.mydomain.com (we can exploit only the part mydomain.com)
 		$domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
-		$tldid=GETPOST('tldid', 'alpha');
-
 		$domainstosuggest = array();   // This is list of all sub domains to show into combo list. Can be: with1.mydomain.com,with2.mydomain.com:ondomain1.com+ondomain2.com,...
 		$domainstosuggestcountryfilter = array();
+
 		if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 			$listofdomain = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 		} else {
 			$staticdeploymentserver = new Deploymentserver($db);
-			$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND');
+			$listofdomain = $staticdeploymentserver->fetchAllDomains('', '', 1000, 0, '', 'AND', 1);
 		}
+
+		// Get the country of the user
+		$ipuser = getUserRemoteIP();
+		$countryuser = dolGetCountryCodeFromIp($ipuser);
+		if (GETPOST('country')) {	// Can force a country instead of default autodetected value
+			$countryuser = GETPOST('country');
+		}
+		if (empty($countryuser)) {
+			$countryuser = 'us';
+		}
+		$countryuser = strtolower($countryuser);
+
+		// For tests
+		//$countryuser = 'es';
+		//$conf->global->SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL = 1;
+
 		foreach ($listofdomain as $val) {
-			$newval=$val;
+			$newval = (is_array($val) ? $val['fullstring'] : $val);
+
+			if (empty($newval)) {
+				continue;
+			}
+
 			$reg = array();
 			$tmpdomains = array();
 			if (preg_match('/:(.+)$/', $newval, $reg)) {      // If this domain must be shown only if domain match
@@ -1822,31 +1930,23 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			}
 			// $newval is subdomain (with.mysaasdomainname.com for example)
 
-			// Restriction defined on package
+
+			// Restriction on counties on package
 			// Managed later with the "optionvisible..." css
 			if (getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
-				$deploymentserver = new Deploymentserver($db);
-				$deploymentserver->fetch(0, $newval);
+				$servercountriesstring = $val['servercountries'];
 
-				if (!empty($deploymentserver->servercountries)) {
-					$servercountries = explode(',', $deploymentserver->servercountries);
-					$ipuser = getUserRemoteIP();
-					$countryuser = dolGetCountryCodeFromIp($ipuser);
-					if (GETPOST('country')) {	// Can force a country instead of default autodetected value
-						$countryuser = GETPOST('country');
-					}
-					if (empty($countryuser)) {
-						$countryuser='US';
-					}
-					$countryuser = strtolower($countryuser);
+				if (!empty($servercountriesstring)) {
+					$servercountries = explode(',', $servercountriesstring);
 
 					if (in_array($countryuser, $servercountries)) {
 						if (! preg_match('/^\./', $newval)) {
 							$newval='.'.$newval;
 						}
 						$domainstosuggestcountryfilter[] = $newval; // Servers with user country
+						$domainstosuggest[] = $newval;
 					} else {
-						print '<!-- '.$newval.' disabled. Server country range '.$deploymentserver->servercountries.' does not contain '.$countryuser.' -->';
+						print '<!-- '.$newval.' disabled. Server country list '.$servercountriesstring.' does not contain '.$countryuser.' -->';
 						continue;
 					}
 				} else {
@@ -1862,87 +1962,211 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 				$domainstosuggest[] = $newval;
 			}
 		}
-		if (!empty($domainstosuggestcountryfilter)) {
-			foreach ($domainstosuggest as $key => $value) {
-				print '<!-- '.$value.' disabled. Matching server found with user location -->';
+
+
+		if (getDolGlobalString('SELLYOURSAAS_IF_ONE_SERVER_MATCH_COUNTRY_DO_NOT_SUGGEST_NO_COUNTRY_SERVERS')) {
+			if (!empty($domainstosuggestcountryfilter)) {
+				foreach ($domainstosuggest as $key => $value) {
+					print '<!-- '.$value.' disabled. Matching server found with user location -->';
+				}
+				$domainstosuggest = $domainstosuggestcountryfilter;
 			}
-			$domainstosuggest = $domainstosuggestcountryfilter;
 		}
 
 		// Defined a preselected domain
 		$randomselect = '';
 		$randomindex = 0;
 		if (empty($tldid) && ! GETPOSTISSET('tldid') && ! GETPOSTISSET('forcesubdomain') && count($domainstosuggest) >= 1) {
-			$maxforrandom = (count($domainstosuggest) - 1);
+			if (!empty($domainstosuggestcountryfilter)) {
+				// If there is at least one server that match the country, we make our random choice among them
+				$domainstouseforrandom = $domainstosuggestcountryfilter;
+			} else {
+				// If there is no server matching the country, we make our random choice among all enabled servers
+				$domainstouseforrandom = $domainstosuggest;
+			}
+
+			$maxforrandom = (count($domainstouseforrandom) - 1);
 			$randomindex = mt_rand(0, $maxforrandom);
-			$randomselect = $domainstosuggest[$randomindex];
+			$randomselect = $domainstouseforrandom[$randomindex];
 		}
+
 		// Force selection with no way to change value if SELLYOURSAAS_FORCE_RANDOM_SELECTION is set
 		if (getDolGlobalString('SELLYOURSAAS_FORCE_RANDOM_SELECTION') && !empty($randomselect)) {
 			$domainstosuggest = array();
 			$domainstosuggest[] = $randomselect;
 		}
-		foreach ($domainstosuggest as $val) {
-			print '<option class="optionfordomain';
-			foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
-				print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
-			}
-			print '" value="'.$val.'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '').'>';
-			print $val;
-			print '</option>';
+
+		// If SELLYOURSAAS_FORCE_NO_SELECTION is set, force a human selection (no auto-selection at all)
+		if (getDolGlobalString('SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL') && count($domainstosuggest) > 1) {
+			array_unshift($domainstosuggest, "SelectAServer");
+			$randomselect = null;
 		}
 
-		print '</select>
-			        			<br class="unfloat" />
+		if (!empty($domainstosuggest)) {
+			foreach ($domainstosuggest as $val) {
+				$valwithoutfirstdot = preg_replace('/^\./', '', $val);
+				if (preg_match('/selectaserver/i', $val)) {
+					print '<option value="" class="opacitymedium" data-html="'.dolPrintHTMLForAttribute('<span class="opacitymedium">'.$langs->trans("SelectAServer").'</span>').'">'.$langs->trans("SelectAServer").'</option>';
+				} else {
+					$valtoshow = $val.(empty($listofdomain[$valwithoutfirstdot]['label']) ? '' : ' <span class="opacitymedium small">('.$listofdomain[$valwithoutfirstdot]['label'].')</span>');
+
+					print '<option class="optionfordomain';
+					foreach ($tmpdomains as $tmpdomain) {	// list of restrictions for the deployment server $newval
+						print ' optionvisibleondomain-'.preg_replace('/[^a-z0-9]/i', '', $tmpdomain);
+					}
+					print '" value="'.dolPrintHTMLForAttribute($val).'"'.(($tldid == $val || ($val == '.'.GETPOST('forcesubdomain', 'alpha')) || $val == $randomselect) ? ' selected="selected"' : '');
+					print ' data-html="'.dolPrintHTMLForAttribute($valtoshow).'"';
+					print '>';
+					print $valtoshow;
+					print '</option>';
+				}
+			}
+		} else {
+			print '<option value="">No deployent server defined. Go on back office to complete list</option>';
+		}
+		print '</select>';
+		print ajax_combobox('tldid');
+		print '      			<br class="unfloat" />
 			        			</div>
 			        			</div>
 			        			</section>'."\n";
 
-		// Add code to make constraints on deployment servers
-		print '<!-- JS Code to force plan -->';
-		print '<script type="text/javascript" language="javascript">
-						function disable_combo_if_not(s) {
-							console.log("Disable combo choice except if s="+s);
-							$("#tldid > option").each(function() {
-								if (this.value.endsWith(s)) {
-									console.log("We enable the option "+this.value);
-									$(this).removeAttr("disabled");
-									$(this).attr("selected", "selected");
+
+		$selectnametoselectplan = 'service';
+
+		print '<script>';
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			print '/* pid='.$key.' => '.$tmpplan['label'].' - '.$tmpplan['id'].' - '.$tmpplan['restrict_domains'].' - '.$tmpplan['onlyserver']." */\n";
+		}
+		print '</script>';
+
+
+		// Add dynamic code to disable/enable the submit button
+		print '<script>
+				$(document).ready(function() {
+					var initialValueSelectedInTldid = jQuery("#tldid").val();
+					console.log("Initial value selected in tldid = "+initialValueSelectedInTldid);
+
+				    $("#'.$selectnametoselectplan.'").change(function() {
+						var pid = jQuery("#'.$selectnametoselectplan.' option:selected").val();
+						console.log("We update a product/service/plan field by selecting product id = "+pid);
+
+						var selectedOption = this.options[this.selectedIndex];
+						var value = selectedOption.value;
+    					var dataOnlyServer = selectedOption.getAttribute("data-onlyserver");
+
+						/* First we enable all servers in list */
+						console.log("First, we enable all servers in list");
+						jQuery("#tldid option").each(function() {
+							var valueOfSubDomain = $(this).val();
+							jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+						});
+
+						/* Now disable according to restrict_domains */
+						console.log("Now, disable servers according to restrict_domains");'."\n";
+						foreach ($arrayofplansfull as $key => $tmpplan) {
+							if (!empty($tmpplan['restrict_domains'])) {
+								$restrict_domains = explode(",", $tmpplan['restrict_domains']);
+								print "/* Code if we select pid = ".$key." so plan = ".$tmpplan['label']." with restrict_domains = ".$tmpplan['restrict_domains']." */\n";
+								foreach ($restrict_domains as $domain) {
+									print " if (pid == ".$key.") { disable_tld_if_not('".trim($domain)."'); }\n";
+									break;	// We keep only the first domain in list as the domain to keep possible for deployment
+								}
+							} else {
+								print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname." */\n";
+							}
+						}
+		print '
+
+						/* Now disable according to onlyserver */
+						console.log("Now, disable servers according to onlyserver");
+						if (dataOnlyServer) {
+							/* We also refresh the combo list tldid */
+							let arrayDataOnlyServer = dataOnlyServer.split(",");
+							console.log("arrayDataOnlyServer="+arrayDataOnlyServer);
+
+							jQuery("#tldid option").each(function() {
+								var valueOfSubDomain = $(this).val();
+        						var text = $(this).text();
+								var newSelectedInTldid = initialValueSelectedInTldid;
+								/* console.log("Process line for value="+valueOfSubDomain+" text="+text); */
+
+								var qualified = 0;
+								arrayDataOnlyServer.forEach(function(onlyServer) {
+		        					if (valueOfSubDomain.includes(onlyServer)) {
+		            					/* console.log("This subdomain line match the rule "+onlyServer); */
+										qualified = 1;
+		        					}
+								});
+
+								mustChangeSelectedValue = 0;
+								initialValueIsQualified = 0;
+								currentSelectedValue = jQuery("#tldid").val();
+
+								if (qualified) {
+									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+
+									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", false);
+									jQuery("#tldid").val(valueOfSubDomain);
+
+									if (valueOfSubDomain == initialValueSelectedInTldid) {
+										initialValueIsQualified = 1;
+									}
+									newSelectedInTldid = valueOfSubDomain;
 								} else {
-									console.log("We disable the option "+this.value);
-									$(this).attr("disabled", "disabled");
-									$(this).removeAttr("selected");
+									console.log("The subdomain line "+valueOfSubDomain+" is NOT qualified");
+
+									jQuery("#tldid option[value=\'" + valueOfSubDomain + "\']").prop("disabled", true);
+
+									if (valueOfSubDomain == currentSelectedValue) {
+										mustChangeSelectedValue = 1;
+									}
+								}
+
+								if (mustChangeSelectedValue) {	/* select a new qualified value */
+									if (initialValueIsQualified) {
+										newSelectedInTldid = initialValueSelectedInTldid;
+									}
+
+									jQuery("#tldid").val(newSelectedInTldid);
+								}
+							});
+						} else {
+							/* We enable all choices in combo list tldid */
+							jQuery("#tldid option").each(function() {
+								var valueOfSubDomain = $(this).val();
+        						var text = $(this).text();
+
+								if (valueOfSubDomain) {
+									console.log("The subdomain line "+valueOfSubDomain+" is qualified");
+									jQuery("#tldid").val(initialValueSelectedInTldid);
 								}
 							});
 						}
 
-			    		jQuery(document).ready(function() {
-							jQuery("#service").change(function () {
-								var pid = jQuery("#service option:selected").val();
-								console.log("We select product id = "+pid);
-							';
-		foreach ($arrayofplansfull as $key => $plan) {
-			if (!empty($plan['restrict_domains'])) {
-				$restrict_domains = explode(",", $plan['restrict_domains']);
-				print "/* Code if we select pid = ".$key." so plan = ".$plan['label']." with restrict_domains = ".$plan['restrict_domains']." */\n";
-				foreach ($restrict_domains as $domain) {
-					print " if (pid == ".$key.") { disable_combo_if_not('".trim($domain)."'); }\n";
-					break;	// We keep only the first domain in list as the domain to keep possible for deployment
-				}
-			} else {
-				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname.' */'."\n";
-			}
-		}
+						jQuery("#tldid").trigger("change.select2");
+				    });
 
-		print '
-							});
-							jQuery("#service").trigger("change");
-						});'."\n";
 
-		foreach ($arrayofplansfull as $key => $plan) {
-			print '/* pid='.$key.' => '.$plan['label'].' - '.$plan['id'].' - '.$plan['restrict_domains'].' */'."\n";
-		}
-		print '</script>';
+					jQuery("#service").trigger("change");
+
+
+					function disable_tld_if_not(s) {
+						console.log("Disable combo choice except if s="+s);
+						$("#tldid > option").each(function() {
+							if (this.value && !this.value.endsWith(s)) {
+								console.log("We disable the option "+this.value);
+								$(this).attr("disabled", "disabled");
+								$(this).removeAttr("selected");
+							}
+						});
+					}
+
+
+				});
+				</script>
+		';
+
 
 		if (GETPOST('admin', 'alpha')) {
 			print '<div class="horizontal-fld clearboth margintoponly">';

@@ -114,6 +114,7 @@ class Packages extends CommonObject
 		'sqlafter' => array('type'=>'text', 'label'=>'Sql after deployment', 'visible'=>3, 'enabled'=>1, 'position'=>70, 'notnull'=>-1, 'help'=>'Sql executed after deployment.<br><br>Can use substitution vars like<br>__APPORGNAME__<br>__APPEMAIL__<br>__APPDOMAIN__<br>__APPCOUNTRYIDCODELABEL__<br>__SMTP_SPF_STRING__<br>__OSUSERNAME__<br>__APPPASSWORD0__<br>__APPPASSWORD0SALTED__<br>__APPPASSWORDSHA256__<br>__APPPASSWORDSHA256SALTED__<br>...'),
 		'sqlpasswordreset' => array('type'=>'text', 'label'=>'Sql to reset password of a deployed instance user', 'visible'=>3, 'enabled'=>1, 'position'=>71, 'notnull'=>-1, 'help'=>'Sql executed after clicking on cogs on backoffice/instance_users.php after a deployment <br><br> Can use substitution vars like<br>__REMOTEUSERID__<br>__NEWUSERPASSWORD__<br>__NEWUSERPASSWORDCRYPTED__'),
 		'sqlafterpaid' => array('type'=>'text', 'label'=>'Sql after switch to paid', 'visible'=>3, 'enabled'=>1, 'position'=>72, 'notnull'=>-1, 'help'=>'Sql executed after entering a payment (or after a deployment if customer is already a paying customer)'),
+		'sqlafterundeployoption' => array('type'=>'text', 'label'=>'Sql after option undeployment', 'visible'=>3, 'enabled'=>1, 'position'=>73, 'notnull'=>-1, 'help'=>'Sql executed after an option is undeployed'),
 		'allowoverride' => array('type'=>'varchar(255)', 'label'=>'Option string for virtual host', 'visible'=>-1, 'enabled'=>1, 'position'=>75, 'notnull'=>-1, 'help'=>'Any string to add into the Apache virtual host file. For example, keep empty to not allow apache override<br>Use "AllowOverride All" to allow override.'),
 		'version_formula' => array('type'=>'text', 'label'=>"VersionFormula",  'visible'=>3, 'enabled'=>1, 'position'=>76, 'help'=>'VersionFormulaExamples', 'lang'=>'sellyoursaas@sellyoursaas'),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'visible'=>-2, 'enabled'=>1, 'position'=>500, 'notnull'=>1,),
@@ -150,6 +151,7 @@ class Packages extends CommonObject
 	public $sqlafter;
 	public $sqlpasswordreset;
 	public $sqlafterpaid;
+	public $sqlafterundeployoption;
 	public $allowoverride;
 	public $register_text;
 	public $status;
@@ -158,7 +160,7 @@ class Packages extends CommonObject
 	/**
 	 * Constructor
 	 *
-	 * @param DoliDb $db Database handler
+	 * @param DoliDB $db Database handler
 	 */
 	public function __construct(DoliDB $db)
 	{
@@ -279,6 +281,14 @@ class Packages extends CommonObject
 	 */
 	public function update(User $user, $notrigger = false)
 	{
+		// Clean parameters to remove ending / on directories
+		$this->srcfile1 = preg_replace('/\/+$/', '', $this->srcfile1);
+		$this->srcfile2 = preg_replace('/\/+$/', '', $this->srcfile2);
+		$this->srcfile3 = preg_replace('/\/+$/', '', $this->srcfile3);
+		$this->targetsrcfile1 = preg_replace('/\/+$/', '', $this->targetsrcfile1);
+		$this->targetsrcfile2 = preg_replace('/\/+$/', '', $this->targetsrcfile2);
+		$this->targetsrcfile3 = preg_replace('/\/+$/', '', $this->targetsrcfile3);
+
 		return $this->updateCommon($user, $notrigger);
 	}
 
@@ -473,15 +483,11 @@ class Packages extends CommonObject
 				$obj = $this->db->fetch_object($result);
 				$this->id = $obj->rowid;
 				if ($obj->fk_user_creat) {
-					$cuser = new User($this->db);
-					$cuser->fetch($obj->fk_user_creat);
-					$this->user_creation = $cuser;
+					$this->user_creation_id = $obj->fk_user_creat;
 				}
 
 				if ($obj->fk_user_modif) {
-					$vuser = new User($this->db);
-					$vuser->fetch($obj->fk_user_modif);
-					$this->user_modification = $vuser;
+					$this->user_modification_id = $obj->fk_user_modif;
 				}
 
 				$this->date_creation     = $this->db->jdate($obj->datec);
