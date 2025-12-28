@@ -243,12 +243,14 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $referenceline, FILE_APP
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' PWD=' . (empty($_ENV['PWD']) ? (empty($_SERVER["PWD"]) ? '' : $_SERVER["PWD"]) : $_ENV['PWD'])." - REQUEST_URI=".(empty($_SERVER["REQUEST_URI"]) ? '' : $_SERVER["REQUEST_URI"])."\n", FILE_APPEND);
 
 
-// Check if IP is in blacklist
+// Check if remote user IP is in blacklist
 if (is_array($blacklistips) && in_array($ip, $blacklistips)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko blacklist - exit 2. Blacklisted ip '.$ip." found into file ".$pathtospamdir."/blacklistip\n", FILE_APPEND);
 	exit(3);
 }
 
+
+file_put_contents($logfile, date('Y-m-d H:i:s') . " Load file with list of blacklisted email from ".$pathtospamdir."/blacklistfrom\n", FILE_APPEND);
 
 $blacklistoffroms = @file_get_contents($pathtospamdir.'/blacklistfrom');
 if ($blacklistoffroms === false) {
@@ -260,6 +262,9 @@ if ($blacklistoffroms === false) {
 		exit(4);
 	}
 }
+
+
+file_put_contents($logfile, date('Y-m-d H:i:s') . " Load file with list of blacklisted dir in REQUEST_URI from ".$pathtospamdir."/blacklistdir\n", FILE_APPEND);
 
 $blacklistofdirs = @file_get_contents($pathtospamdir.'/blacklistdir');
 if ($blacklistofdirs === false) {
@@ -275,6 +280,9 @@ if ($blacklistofdirs === false) {
 		}
 	}
 }
+
+
+file_put_contents($logfile, date('Y-m-d H:i:s') . " Load file with list of blacklisted content from ".$pathtospamdir."/blacklistcontent\n", FILE_APPEND);
 
 $blacklistofcontents = @file_get_contents($pathtospamdir.'/blacklistcontent');
 if ($blacklistofcontents === false) {
@@ -374,7 +382,7 @@ function getInstancesOfUser($pathtospamdir, $logfile)
  */
 function getBlackListIps($pathtospamdir, $logfile)
 {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . " Load file with list of IP ".$pathtospamdir."/blaklistip\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " Load file with list of IP ".$pathtospamdir."/blacklistip\n", FILE_APPEND);
 
 	$blacklistips = array();
 	// Loop on each line of $pathtospamdir/mailquota
