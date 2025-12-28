@@ -133,12 +133,14 @@ class ActionsSellyoursaas
 
 				if (!empty($parameters['getnomurl'])) {
 					if (!empty($tmparray['options_spammer'])) {
+						$langs->load("sellyoursaas@sellyoursaas");
 						$this->resprints = $this->resprints.img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$parameters['getnomurl'];
 					} else {
 						$this->resprints = $this->resprints.$parameters['getnomurl'];
 					}
 				} else {
 					if (!empty($tmparray['options_spammer'])) {
+						$langs->load("sellyoursaas@sellyoursaas");
 						$this->resprints .= img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"');
 					}
 				}
@@ -169,6 +171,7 @@ class ActionsSellyoursaas
 				$this->resprints = preg_replace('/title="([^"]+)"/', 'title="'.$newtitle.'"', $parameters['getnomurl']);
 
 				if (!empty($tmparray['options_spammer'])) {
+					$langs->load("sellyoursaas@sellyoursaas");
 					$this->resprints = img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="pictofixedwidth"').$this->resprints;
 				}
 
@@ -233,10 +236,12 @@ class ActionsSellyoursaas
 						$this->results['objref'] .= ' &nbsp; <a href="/aa">'.$langs->trans("SeeChain").'</a>';
 					}*/
 					if (!empty($object->array_options['options_spammer'])) {
+						$langs->load("sellyoursaas@sellyoursaas");
 						$this->results['objref'] = img_picto($langs->trans("EvilInstance"), 'fa-book-dead', 'class="paddingleft"').' '.$this->results['objref'];
 					}
 
 					if (!empty($object->array_options['options_spammer']) && $object->array_options['options_deployment_status'] == 'done') {
+						$langs->load("sellyoursaas@sellyoursaas");
 						$this->results['objref'] = img_warning($langs->trans('ActiveInstanceOfASpammer')).' '.$this->results['objref'];
 					}
 				}
