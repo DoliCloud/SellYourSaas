@@ -1,13 +1,14 @@
 #!/usr/bin/php
 <?php
 /**
-  This script is a sendmail wrapper for php to log calls of the php mail() function.
-  Author: Till Brehm, www.ispconfig.org
-  (Hopefully) secured by David Goodwin <david @ _palepurple_.co.uk>
-
-  Modify your php.ini file to add:
-  sendmail_path = /usr/local/bin/phpsendmail.php
-*/
+ * This script is a sendmail wrapper for php to log calls of the php mail() function.
+ * Author: Till Brehm, www.ispconfig.org
+ * (Hopefully) secured by David Goodwin <david @ _palepurple_.co.uk>
+ * Modified by Laurent Destailleur <eldy@users.sourceforge.net> for SellYourSaas.org project
+ *
+ * Modify your php.ini file to add:
+ * sendmail_path = /usr/local/bin/phpsendmail.php
+ */
 
 //setlocale(LC_CTYPE, "en_US.UTF-8");
 
