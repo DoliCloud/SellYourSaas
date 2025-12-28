@@ -183,7 +183,7 @@ for ($i = 1; $i < $_SERVER['argc']; $i++) {
 }
 
 if (! $optionffound) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . ' option -f not found. Args are '.join(' ', $_SERVER['argv']).'. We get if from the header'."\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' option -f not found. Args are '.join(' ', $_SERVER['argv']).'. We get it from the header'."\n", FILE_APPEND);
 	$command .= "'-f".$emailfrom."'";
 }
 
