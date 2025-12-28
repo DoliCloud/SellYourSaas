@@ -167,6 +167,7 @@ fi
 TARGETLINK="/usr/local/bin/phpsendmail.php"
 SOURCELINK="/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php"
 if [ ! -e "$TARGETLINK" ] || [ "$(stat -c %i "$SOURCELINK")" != "$(stat -c %i "$TARGETLINK")" ]; then
+	rm "$TARGETLINK" >/dev/null 2>&1
     ln "$SOURCELINK" "$TARGETLINK"
     echo "Link $TARGETLINK has been recreated."
 else
