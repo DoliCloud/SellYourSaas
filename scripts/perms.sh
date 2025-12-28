@@ -54,6 +54,7 @@ echo "Set owner and permission on logs and backup directory"
 [ -d /home/admin/backup/conf ] || mkdir /home/admin/backup/conf;
 [ -d /home/admin/backup/mysql ] || mkdir /home/admin/backup/mysql;
 [ -d /home/admin/wwwroot ] || mkdir /home/admin/wwwroot;
+chmod a+x /home/admin;
 chown root:admin /home/admin/logs; chmod 770 /home/admin/logs; 
 chown admin:admin /mnt/diskbackup; 
 chown admin:admin /home/admin/backup; chown admin:admin /home/admin/backup/conf; chown admin:admin /home/admin/backup/mysql; 

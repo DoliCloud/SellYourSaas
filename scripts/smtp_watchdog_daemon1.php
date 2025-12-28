@@ -249,10 +249,10 @@ while (!feof($handle)) {
 		file_put_contents($logfile, date('Y-m-d H:i:s') . " reload cached files (at least once per hour)\n", FILE_APPEND);
 
 		// Call this sometimes to refresh list of paid instances
-		$instanceofuser = getInstancesOfUser($pathtospamdir);
+		$instanceofuser = getInstancesOfUser($pathtospamdir, $logfile);
 
 		// Call this sometimes to refresh list of black listed IPs
-		$blacklistips = getBlackListIps($pathtospamdir);
+		$blacklistips = getBlackListIps($pathtospamdir, $logfile);
 
 		$datelastload = dol_now();
 	}

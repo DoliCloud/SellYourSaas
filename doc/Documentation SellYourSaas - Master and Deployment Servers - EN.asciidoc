@@ -373,6 +373,7 @@ Create the user account *admin*. It will be used to install and administer the s
 useradd admin;
 groupadd admin; 
 useradd -m -s "/usr/bin/bash" -g admin admin;
+chown a+rx /home/admin;
 mkdir -p /home/admin/logs; chown root:admin /home/admin/logs; chmod 770 /home/admin/logs;
 mkdir /mnt/diskbackup; chown admin:admin /mnt/diskbackup
 mkdir /home/admin/backup; chown admin:admin /home/admin/backup;
