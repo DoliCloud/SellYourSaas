@@ -80,14 +80,25 @@ do
 		echo "Clean some files to save disk spaces"
 		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -delete
 		
-	    if [ -s build/generate_filelist_xml.php ]; then
+	    if [ -s dev/build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php from ".`pwd`
-	        php build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
+	        php dev/build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
 	        if [ $? -ne 0 ]; then
 	        	echo "!!!!! ERROR Failed to generate the signature file"
 	        	error=1
 	        	#exit 1;		# We disable exit so we continue with next dir, so only dir in error is not built
 	        fi
+	    else
+	    	# Use old location
+		    if [ -s build/generate_filelist_xml.php ]; then
+		        echo "Found generate_filelist_xml.php from ".`pwd`
+		        php build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
+		        if [ $? -ne 0 ]; then
+		        	echo "!!!!! ERROR Failed to generate the signature file"
+		        	error=1
+		        	#exit 1;		# We disable exit so we continue with next dir, so only dir in error is not built
+		        fi
+		    fi
 	    fi
 	
 		# Create a deployment tar file
