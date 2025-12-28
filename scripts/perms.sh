@@ -154,6 +154,11 @@ echo "Clean old files in /tmp"
 echo find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 
+echo "Recreate link to php prepend files"
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/;
+ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/;
+
+
 echo "Check files for antispam system and create them if not found"
 # Note: just after we redo it using $pathtospamdir variable
 [ -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam ] || mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
@@ -172,7 +177,11 @@ chown admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/*
 chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/* >/dev/null 2>&1
 chown admin:www-data $pathtospamdir/* >/dev/null 2>&1
 
+
+echo "Set permission on sellyoursaas_local dir"
+chmod o+x /home/admin/wwwroot/dolibarr_documents
 chown -R admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local;
+
 
 # Special actions...
 
