@@ -154,9 +154,25 @@ echo "Clean old files in /tmp"
 echo find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 find /tmp -mtime +30 -name 'phpsendmail*.*' -delete
 
+
 echo "Recreate link to php prepend files"
-ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php /usr/local/bin/;
-ln /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php /usr/local/bin/;
+TARGETLINK="/usr/local/bin/phpsendmailprepend.php"
+SOURCELINK="/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php"
+if [ ! -e "$TARGETLINK" ] || [ "$(stat -c %i "$SOURCELINK")" != "$(stat -c %i "$TARGETLINK")" ]; then
+    ln "$SOURCELINK" "$TARGETLINK"
+    echo "Link $TARGETLINK has been recreated."
+else
+    echo "Link $TARGETLINK already exists and point to same inode than source."
+fi
+TARGETLINK="/usr/local/bin/phpsendmail.php"
+SOURCELINK="/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php"
+if [ ! -e "$TARGETLINK" ] || [ "$(stat -c %i "$SOURCELINK")" != "$(stat -c %i "$TARGETLINK")" ]; then
+    ln "$SOURCELINK" "$TARGETLINK"
+    echo "Link $TARGETLINK has been recreated."
+else
+    echo "Link $TARGETLINK already exists and point to same inode than source."
+fi
+
 
 
 echo "Check files for antispam system and create them if not found"
