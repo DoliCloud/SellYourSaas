@@ -74,9 +74,13 @@ do
 		rm -fr htdocs/install/doctemplates/websites/website_template-restaurant*
 		#rm -fr vendor/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* vendor/tecnickcom/tcpdf/fonts/freefont-* vendor/tecnickcom/tcpdf/fonts/ae_fonts_*
 		rm -fr files/_cache/*
+
 		# We remove subdir of build. We need files into build root only.
 		#find build/* -type d -delete
-		find build/* -depth -type d -exec rm -fr {} \;
+		find build/* -depth -type d -exec rm -fr {} +
+		find dev/* -depth -type d ! -name build -exec rm -fr {} +
+		find dev/build/* -depth -type d -exec rm -fr {} +
+
 		echo "Clean some files to save disk spaces"
 		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -delete
 		
