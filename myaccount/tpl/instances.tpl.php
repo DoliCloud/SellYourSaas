@@ -22,6 +22,8 @@
  *
  * @var string $initialaction can be set
  * @var Societe $mythirdpartyaccount
+ * @var array $listofcontractid
+ * @var array $listofcontractidopen
  */
 
 // Protection to avoid direct call of template
