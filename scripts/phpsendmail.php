@@ -190,6 +190,7 @@ if (! $optionffound) {
 $ip = empty($_SERVER["REMOTE_ADDR"]) ? '' : $_SERVER["REMOTE_ADDR"];
 if (empty($ip)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ip unknown. See tmp file '.$tmpfile."\n", FILE_APPEND);
+	$ip = 'unknown';
 	// exit(7);		// We do not exit, this can occurs sometime
 }
 
@@ -208,7 +209,7 @@ $resexec = (int) (empty($resexec) ? 0 : trim($resexec));
 
 $MAXALLOWED = $MAXPERDAYPAID;
 if ($usernamestring) {
-	if ($usernamestring == 'admin') {
+	if ($usernamestring == 'root' || $usernamestring == 'admin') {
 		$MAXALLOWED = $MAXPERDAYFORADMIN;
 	} else {
 		if (in_array($usernamestring, array_keys($instanceofuser))) {
