@@ -342,8 +342,9 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 		$hostname_os  = $contract->array_options['options_hostname_os'];
 		$username_os  = $contract->array_options['options_username_os'];
 		$password_os  = $contract->array_options['options_password_os'];
-		$username_web = $contract->thirdparty->email;
-		$password_web = $contract->thirdparty->array_options['options_password'];
+		// $contract->fetch_thirdparty();
+		//$username_web = $contract->thirdparty->email;
+		//$password_web = $contract->thirdparty->array_options['options_password'];
 		$iphostwebsite = $contract->array_options['options_deployment_host'];
 
 		$websitemodenabled = 0;
