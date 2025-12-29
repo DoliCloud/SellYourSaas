@@ -298,7 +298,7 @@ if ($blacklistofcontents === false) {
 			chmod($pathtospamdir."/blacklistmail", 0666);
 
 			// Add ip to blacklistip
-			if (! empty($ip)) {
+			if (! empty($ip) && $ip != 'unknown') {
 				file_put_contents($pathtospamdir.'/blacklistip', $ip."\n", FILE_APPEND);
 				chmod($pathtospamdir."/blacklistip", 0666);
 			}
@@ -325,14 +325,10 @@ file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' .$command."\n", FILE_APPEN
 // We need 'shell_exec' here that return all the result as string and not only first line like 'exec'
 $resexec =  shell_exec($command);
 
-if (empty($ip)) {
-	file_put_contents($logfile, "--- no ip detected ---", FILE_APPEND);
-}
-if (empty($ip)) {
-	file_put_contents($logfile, var_export($_SERVER, true), FILE_APPEND);
-}
-if (empty($ip)) {
-	file_put_contents($logfile, var_export($_ENV, true), FILE_APPEND);
+if (empty($ip) || $ip == 'unknown') {
+	file_put_contents($logfile, "--- no ip detected ---\n", FILE_APPEND);
+	file_put_contents($logfile, var_export($_SERVER, true)."\n", FILE_APPEND);
+	file_put_contents($logfile, var_export($_ENV, true)."\n", FILE_APPEND);
 }
 
 time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successfull spamming
