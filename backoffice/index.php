@@ -269,25 +269,10 @@ $param = '';
 print '<form method="post" action="'.dol_buildpath('/sellyoursaas/backoffice/index.php', 1).'">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<table class="noborder nohover centpercent">';
+
 print '<tr class="liste_titre">';
 print '<td>';
 print $langs->trans('Website').' & '.$langs->trans('CustomerAccountArea');
-print '</td></tr>';
-print '<tr class="oddeven"><td>';
-$enabledisabledashboard='';
-if (!getDolGlobalString('SELLYOURSAAS_DASHBOARD_OFF')) {
-	// Button off, click to enable
-	$enabledisabledashboard.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DASHBOARD_OFF&token='.newToken().'&value=1'.$param.'">';
-	$enabledisabledashboard.=img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
-	$enabledisabledashboard.='</a>';
-} else {
-	// Button on, click to disable
-	$enabledisabledashboard.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DASHBOARD_OFF&token='.newToken().'&value=0'.$param.'">';
-	$enabledisabledashboard.=img_picto($langs->trans('Disabled'), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
-	$enabledisabledashboard.='</a>';
-}
-print $enabledisabledashboard;
-print $langs->trans("EnableDashboards");
 print '</td></tr>';
 
 print '<tr class="oddeven"><td>';
@@ -315,6 +300,23 @@ if (getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES')) {
 	}
 }
 
+print '</td></tr>';
+
+print '<tr class="oddeven"><td>';
+$enabledisabledashboard='';
+if (!getDolGlobalString('SELLYOURSAAS_DASHBOARD_OFF')) {
+	// Button off, click to enable
+	$enabledisabledashboard.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DASHBOARD_OFF&token='.newToken().'&value=1'.$param.'">';
+	$enabledisabledashboard.=img_picto($langs->trans("Enabled"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
+	$enabledisabledashboard.='</a>';
+} else {
+	// Button on, click to disable
+	$enabledisabledashboard.='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DASHBOARD_OFF&token='.newToken().'&value=0'.$param.'">';
+	$enabledisabledashboard.=img_picto($langs->trans('Disabled'), 'switch_off', '', false, 0, 0, '', 'error valignmiddle paddingright');
+	$enabledisabledashboard.='</a>';
+}
+print $enabledisabledashboard;
+print $langs->trans("EnableDashboards");
 print '</td></tr>';
 
 print '<tr class="oddeven"><td>';
