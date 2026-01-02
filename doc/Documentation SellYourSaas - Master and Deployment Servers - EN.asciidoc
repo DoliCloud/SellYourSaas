@@ -1,4 +1,4 @@
-= Sell-Your-Saas installation and operation document - Master and deployment servers
+= Sell-Your-Saas installation and operation document - Master and Deployment servers
 This document describes the technical and functional implementation of Sell-Your-Saas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, WordPress, GLPI, MediaWiki, PrestaShop, ...) - Laurent Destailleur - www.sellyoursaas.org
 :source-highlighter: red
 :title: Document installation and operation of SellYourSaas
@@ -16,11 +16,11 @@ This document describes the technical and functional implementation of Sell-Your
 
 Sell-Your-Saas is an Open Source project, born out of the need to provide, in real time, Web application instances (like Dolibarr ERP CRM, GLPI, MediaWiki, ...) to end users, for immediate use, with the following requirements:
 
-* Able to manage a very high number of instances and users.
-* Very low costs (must be at least 10x lower than Cloud solutions by containers like Docker or Kubernetes).
+* Allow managing a very large number of instances and users.
+* Keep costs very low (must be at least 10x lower than Cloud solutions by containers like Docker or Kubernetes).
 * Real-time deployment.
 * Offer full and private access to the proposed application, including administration, with full access without restricting functionality or configuration.
-* Offer optionaly a 100% open SaaS, with SSH, SFTP and direct database access to users.
+* Offer optionally a 100% open SaaS, with SSH, SFTP and direct database access to users.
 * Multi-language.
 
 Following the deployment of v1 and at the request of users to perpetuate their instance via a subscription, the platform evolved to add other objectives:
@@ -36,7 +36,7 @@ Following the deployment of v1 and at the request of users to perpetuate their i
 Funded by the Open Source companies https://www.dolicloud.com [DoliCloud] and https://www.teclib.com [TecLib], SellYourSaas v2 has achieved these objectives and is now in production for several companies offering Saas services (https://www.dolicloud.com[DoliCloud], https://www.novafirstcloud.com[NovaFirstCloud], https://www.glpi-network.cloud[GLPI-Network], https://www.doliondemand.fr[DoliOnDemand],...). Here is a summary of its capabilities:
 
 * Deployment of any WAMP application. Management of multiple solutions / different applications at the same time.
-* Free distribution of proceedings without request for confidential information or credit card.
+* Free distribution of proceedings without request for confidential information nor credit card.
 * Distribution of paid instances with different pricing levels.
 * Ready-to-use showcase website (optional) to sell your application.
 * Dedicated customer area (invoicing, ticket, customer account).
@@ -72,28 +72,28 @@ You need to acquire this domain name from a registrar.
 
 == Installation of the machine and OS
 
-The first step is to make one (or more) server available. If we are going on several servers, one will be the *Master* server (management and invoicing) and the others will be the *Deployment servers* (customer instances). The *Master* server can also be *Deployment server*, so it is possible to start with a single server but it is not recommended.
+The first step is to make one (or more) server available. If we are going on several servers, one will be the *Master server* (management and invoicing) and the others will be the *Deployment servers* (customer instances). The *Master* server can also be the *Deployment server*, so it is possible to start with a single server but it is not recommended.
 
-All the command to run on the command line are supposed to be run with the user "root" when no specific user is defined.
+All the commands to run are supposed to be run as user "root" when no specific user is defined.
 
-=== Choice of machine and OS and create it
+=== Choice and creation of machine and OS
 
 * Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximum *24.04*) for the *Master server*.
 
-* Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximu *24.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
+* Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximum *24.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
-_Example with Amazon Standard Medium:_
+_Example with Amazon Web Services (AWS) Standard Medium:_
 
 Server *m1.medium* hosted in EU @ $ 0.18 per hour plus $ 10 for storage and bandwidth then switch to *m1.large* @ $ 0.18 per hour
 
 _Example with OVH Public Cloud:_
  
-For the master server: A 4 GB memory minimum server with 2 CPU minimum.
-For the deployment server(s), for 500 instances: A 8 GB memory minimum server with 4 CPU minimum - Cost in 2020: 30 euros / month.
+For the *Master server*: A 4 GB memory minimum server with 2 CPU minimum.
+For the *Deployment* server(s), for 500 instances: A 8 GB memory minimum server with 4 CPU minimum - Cost in 2020: 30 euros / month.
 
-=== Choice a Hostname for the server(s) and set it
+=== Choice and setup of hostname(s) for the server(s)
 
-* Add an entry for the new server to the DNS provided by the domain provider.
+* Add an entry for the new server to the DNS zone provided by the domain provider.
 This is done by adding an entry into the DNS zone of domain *mysaasdomainname.com*
 
 [source,bash]
@@ -107,7 +107,7 @@ name=nameofserver.mysaasdomainname.com
 ip=ipv6:of:the:server
 ---------------
 
-Where nameofserver can be "admin" for a master server, "withX" for a deployment server but can also be any name of your choice.
+Where nameofserver can be "admin" for the *Master server*, "withX" for a *Deployment server* but can also be any name of your choice.
 
 
 * Go to the server provider management interface, to add this name as the reverse name of the server IP.
@@ -136,11 +136,11 @@ main.ip.of.server nameofserver.mysaasdomainname.com
 
 On *Deployment server* :
 
-We will add, on the *Deployment servers*, an independent disk for user instances and backups. It can be 1 disk for the 2 or 2 different disks.
+We will add a dedicated disk to the *Deployment server(s)* for user instances and backups. It can be 1 disk for the 2 or 2 distinct disks.
 
 With OVH Public Cloud:
 
-* Create the data disk. On a deployment server, you can imagine to reserve 250MB for each customer instance so choose a size in consideration.
+* Create the data disk. On a *Deployment server*, you can imagine to reserve 250MB for each customer instance so pick a size accordingly.
 
 
 * Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
@@ -171,7 +171,7 @@ Whether the disk has just been formatted or whether it is an added disk already 
 blkid
 ---------------
 
-If the disk was created by cloning another one, you must change the UUID of the new disk to avoid to have twice the same UUID on 2 differents disks.
+If the disk was created by cloning another one, you must change the UUID of the new disk to avoid to have twice the same UUID on 2 distinct disks.
 
 [source, bash]
 ---------------
@@ -180,7 +180,7 @@ blkid
 ---------------
 
 
-* Declare the mount point for an automatic mounting at each reboot by adding a line in */etc/fstab*
+* Declare the mount point for an automatic mounting at boot by adding a line in */etc/fstab*
 
 [source, bash]
 ---------------
@@ -355,7 +355,7 @@ ssh-copy-id mylastnamefirstname@x.y.z.a
 ---------------
 
 
-Test that you can connect using *mylastnamefirstname* and you can make a sudo -s to become root.
+Test your ability to connect using *mylastnamefirstname* and sudo -s to become root.
 
 [source,bash]
 ---------------
@@ -400,7 +400,7 @@ Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas.conf* onto the server u
 For Ubuntu 18.04: you can concat the content into file *sshd_config*, but be sure to not have duplicate values.
 
 
-Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow "Match User" rules into the custom file)
+Now add this at end of file */etc/ssh/sshd_config* (OpenSSH does not allow "Match User" rules into the custom file)
 
 [source, conf]
 ---------------
@@ -434,7 +434,7 @@ chmod o-rw /etc/ssh/sshd_config.d/sellyoursaas*.conf
 Please note: check you have replaced *mylastnamefirstname* with the correct values before taking changes into account.
 
 
-Add the following line in the */etc/sudoers* file to reposition the HOME according to the user after a sudo -s:
+Add the following line to your */etc/sudoers* file to reposition the HOME according to the user after a sudo -s:
 
 [source, conf]
 ---------------
@@ -474,7 +474,7 @@ Run *ssh-keygen* for all these acounts : *root*, *admin* and *mylastnamefirstnam
 
 === Deletion of information files at login
 
-In order not to give information to users doing SSH, on the deployment servers:
+In order not to give information to users doing SSH, on the *Deployment servers*:
 
 [source, bash]
 ---------------
@@ -488,10 +488,10 @@ Ignore error on missing files.
 
 === Creation or modification of /etc/skel directory template
 
-Edit the contents of */etc/skel* on the deployment servers in order to fill in the *.ssh/authorized_keys_support* with
+Edit the contents of */etc/skel* on the *Deployment* servers in order to fill in the *.ssh/authorized_keys_support* with
 
-* the ssh public key of the user(s) *myunixlogin*
-* the ssh public key of the user *admin* of the master server
+* the SSH public key of the user(s) *myunixlogin*
+* the SSH public key of the user *admin* of the *Master* server
 
 [source, bash]
 ---------------
@@ -514,7 +514,7 @@ printf '[client]\nprotocol=tcp' >> /etc/skel/.my.cnf
 
 === Add alias
 
-Add at the end of */etc/bash.bashrc*, add alias to get a fast ps result and exclude some commands from the history:
+At the end of */etc/bash.bashrc*, add alias to get a fast ps result and exclude some commands from the history:
 
 [source, bash]
 ---------------
@@ -524,11 +524,11 @@ HISTIGNORE='-*'
 
 
 
-=== Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
+=== Added support for IPv6 (optional, if wanted but not enabled yet)
 
-==== With ifupdown (legacy mode, any Ubuntu)
+==== With ifupdown/iproute (legacy mode, any Ubuntu)
 
-- To add a v6 IP dynamically for testing purposes at first:
+- To dynamically add an IPv6 for testing purposes at first:
 
 [source, bash]
 ---------------
@@ -550,7 +550,7 @@ Example for an IPv6 2002:41d0:1234:1000::1234 with as gateway 2002:41d0:1234:100
 
 [source, conf]
 ---------------
-# To declare a persistent v6 IP (the mask is 128 at OVH in ipv6)
+# To declare a persistent IPv6 (the mask is 128 at OVH in ipv6)
 iface eth0 inet6 static
         address 2002:41d0:1234:1000::1234
         netmask 128
@@ -560,16 +560,16 @@ iface eth0 inet6 static
         pre-down /sbin/ip -6 route del 2002:41d0:1234:1000::1 dev eth0
 ---------------
 
-Rem: *eth0* can be something else, for example *ens3*.
+Note: *eth0* can be something else, for example *ens3*.
 
-To take this into account, try this, otherwise, reboot.
+To take this into account, try the following, or reboot.
 
 [source, bash]
 ---------------
 /etc/init.d/networking restart
 ---------------
 
-To disable manually an interface:
+To manually disable an interface:
 
 [source, bash]
 ---------------
@@ -647,9 +647,9 @@ iface eth0:1 inet static
             broadcast e.f.g.h
 ---------------
 
-Rem: *eth0* can be something else, for example *ens3*.
+Note: *eth0* can be something else, for example *ens3*.
 
-To take this into account, try this, otherwise, reboot.
+To take this into account, try the following, or reboot.
 
 [source, bash]
 ---------------
@@ -668,7 +668,7 @@ Check if swap exists:
 swapon --summary
 ---------------
 
-If no swap is available, add a swap on the non SSD disk */mnt/sdX/swap/swap.img*. If all the disks are SSD, do not add swap.
+If no swap is active, add a swap on the non-SSD disk */mnt/sdX/swap/swap.img*. If all the disks are SSD, do not add any swap.
 
 https://www.digitalocean.com/community/tutorials/how-to-configure-virtual-memory-swap-file-on-a-vps#4
 
@@ -726,7 +726,7 @@ ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 
 === Getting files of Dolibarr and SellYourSaas application
 
-On all servers (*Master and Deployment*):
+On all servers (*Master* and *Deployment*):
 
 * Under the *root* login, install git tool:
 
@@ -755,7 +755,7 @@ git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 
 === Creation of /.conf with credentials
 
-* Create a file */etc/sellyoursaas.conf* on the server (on the server *Master* and the *Deployment servers*)
+* Create a file */etc/sellyoursaas.conf* on the server (on the *Master* and the *Deployment* servers)
 
 [source,bash]
 ---------------
@@ -777,10 +777,10 @@ domain=mysaasdomainname.com
 # If deployment server: url of subdomain for user instances
 subdomain=withX.mysaasdomainname.com
 
-# Set to 1 if this server is the master server and must still have ssh and mysql port open, 
+# Set to 1 if this server is the *Master* server and must still have ssh and mysql port open, 
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip[-ssh|-mysql].conf only
 masterserver=1
-# Set to 1 if this server host instances for the pool (deployment server) and must have ssh and mysql port open, 
+# Set to 1 if this server host instances for the pool (*Deployment* server) and must have ssh and mysql port open, 
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip[-ssh|-mysql].conf only
 instanceserver=1
 
@@ -870,12 +870,12 @@ remotebackupdir=/mnt/diskbackup
 #commonjailtemplatename=commonjail
 ---------------
 
-Put *masterserver* to 1, *dnsserver* and *instanceserver* to 0 on the Master
-Put *masterserver* to 0, *dnsserver* and *instanceserver* to 1 on deployment servers.
+Set *masterserver* to 1, *dnsserver* and *instanceserver* to 0 on the Master server.
+Set *masterserver* to 0, *dnsserver* and *instanceserver* to 1 on Deployment servers.
 Do not forget to set a value for *databasepass*. We will reuse this value later.
 
 
-* Create a file */etc/sellyoursaas-public.conf* on the server (on the server *Master* and the *Deployment servers*)
+* Create a file */etc/sellyoursaas-public.conf* on the server (on the *Master* and *Deployment* servers)
 
 [source,bash]
 ---------------
@@ -908,7 +908,7 @@ mkdir -p /etc/sellyoursaas.d
 ---------------
 
 
-* Optional: If you want to restrict access to some IP (to the web admin on *Master server* or to ssh or mysql to the *Deployment servers*), you can also
+* Optional: If you want to restrict access from specific IP (to the web admin on *Master* server or to SSH or MySQL on the *Deployment* servers), you can also
 create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only) 
 
 Example:
@@ -926,10 +926,9 @@ Require ip ip.user.2
 Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufw.sh* to have the change taken into account on the firewall.
 
 
-=== Installing the nfs share
+=== Installing the NFS share
 
-NFS sharing will allow the *Deployment* servers to recover the application images to be installed which are centralized on the
-*Master* server.
+NFS sharing will allow the *Deployment* servers to recover the application images to be installed which are centralized on the *Master* server.
 
 ==== On the Master server
 
@@ -984,7 +983,7 @@ rpcinfo -p
 You should see mountd on port 33333, portmapper on port 111 and nfs on port 2049. If not, restart server.
 Warning: LISTEN is done on port 2049, so you can see it with "netstat -ultpn | grep 2049" or "ss -ultpn | grep 2049" but not with "lsof -P -i -n" (this is a special kernel embedded service). And you won't see link
 doing a grep on the server even with netstat or ss.
-On the deployment server, you can see when the NFS share is linked on network with "netstat -n | grep ipservermaster" 
+On the *Deployment* server, you can see when the NFS share is linked on network with "netstat -n | grep ipservermaster" 
 
 [source, bash]
 ---------------
@@ -1000,10 +999,10 @@ exportfs
 
 ==== On the Deployment Servers
 
-Be sure to have firewall open between the NFS client (*Deployment server*) and the NFS server (*Master server*). 
+Make sure to have firewall open between the NFS client (*Deployment* server) and the NFS server (*Master* server). 
 Note: The firewall will be installed later.
 
-Install the NFS client and install it manually. Editing is performed by default in NFSv4.
+Install the NFS client and install it manually. Mounting is performed by default in NFSv4.
 
 [source, bash]
 ---------------
@@ -1028,9 +1027,9 @@ mount -a
 
 === Deploy the public key of master admin on deployment admin account
 
-==== On deployment servers
+==== On Deployment servers
 
-On the deployment servers, copy the public and private key of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This couple of key file is the one common for maintenance to access osu... user accounts by admin). Set the right permissions.
+On the Deployment servers, copy the public and private keys of the master's ssh *admin* account to */home/admin/.ssh/id_rsa_sellyoursaas...* (This pair of key files is the one common for maintenance to access osu... user accounts by admin). Set the right permissions.
 
 [source, bash]
 ---------------
@@ -1040,7 +1039,7 @@ chmod a+r /home/admin/.ssh/id_rsa_sellyoursaas.pub
 ---------------
 
 
-Create or complete the file */home/admin/.ssh/config* to indicate to use this public key when accessing to itself or github instead of *id_rsa* by default.
+Create or complete the file */home/admin/.ssh/config* to tell OpenSSH to use this public key when accessing itself or github instead of *id_rsa* by default.
 
 [source, bash]
 ---------------
@@ -1120,7 +1119,7 @@ apt remove unattended-upgrades
 
 === Max size increase UID
 
-On the deployment servers, modify */etc/login.defs* as follows:
+On the Deployment servers, modify */etc/login.defs* as follows:
 
 [source, conf]
 ---------------
@@ -1153,7 +1152,7 @@ a2enmod mpm_itk mpm_prefork
 a2enmod php7.0|php7.2|php7.4|php8.1|php8.3
 ---------------
 
-Remove this not usefull apache modules:
+Remove these unused apache modules:
 ---------------
 a2dismod auth_digest authn_anon asis suexec userdir usertrack authn_dbd dbd ident mime_magic speling
 ---------------
@@ -1171,7 +1170,7 @@ a2enconf charset localized-error-pages other-vhosts-access-log security
 ---------------
 
 
-On the *Deployment servers* only:
+On the *Deployment* servers only:
 
 * Create the directory of the configuration files of the virtual hosts of the instances.
 
@@ -1182,7 +1181,7 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* On Ubuntu 18.04 and +, check that the *PrivateTmp* parameter is *false* in the *apache2.service* launch configuration.
+* On Ubuntu 18.04 and newer, check that the *PrivateTmp* parameter is *false* in the *apache2.service* launch configuration.
 This will make it possible to have a directory */tmp* which is not unique and not isolated to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam.
 It also allows to call the antivirus into a separated process on uploaded files that are stored into this temporary directory.
 
@@ -1215,7 +1214,7 @@ ErrorLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/other_vhosts_error.log 1G"
 
 
 
-On the *Master server*:
+On the *Master* server:
 
 * Create the file */etc/apache2/.htpasswd* with 
 
@@ -1401,7 +1400,7 @@ apparmor_hat = sellyoursaas
 
 === Timeout of server launches
 
-On Ubuntu 18.04+ and when MariaDb has been migrated from a MySql:
+On Ubuntu 18.04+ and when MariaDB has been migrated from a MySQL:
 
 Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. 
 To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
@@ -1470,14 +1469,14 @@ systemctl stop watchdog
 systemctl start watchdog
 ---------------
 
-When load become very high or when memory is very low, the watchdog will launch the repair script that will track status of server into files */var/log/repair...log* and then reboot the server. Note: This should never happen.
+When load gets very high or when memory gets very low, the watchdog will launch the repair script that will track status of server into files */var/log/repair...log* and then reboot the server. Note: This should never happen.
 
 
 === Installation of the Apache watchdog ===
 
 Required to compensate an apache bug making apache dying after a too high number of reload.
 
-On the *Deployment servers* :
+On the *Deployment* servers:
 
 * Installation and activation of the apache watchdogs provided in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/* by creating a link by
 
@@ -1509,7 +1508,7 @@ systemctl status smtp_watchdog_launcher1;
 
 === Installation of the instance deployment agent ===
 
-On the *Deployment servers* :
+On the *Deployment* servers:
 
 * Agent installation and activation in */home/admin/wwwroot/dolibarr_sellyoursaas/scripts/remote_server_launcher.sh* by creating a link by
 
@@ -1577,7 +1576,7 @@ As well as the specific rules for sellyoursaas:
 NOTE: The rules available may vary depending on the version of the OS installed.
 
 
-To do this, first create a */etc/fail2ban/jail.local* file with this content:
+To do this, first create a */etc/fail2ban/jail.local* file with the following content:
 
 
 [source, bash]
@@ -1788,7 +1787,7 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-accessl
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d/web-accesslog-limitapipermin.conf
 ---------------
 
-*Add also this for Master servers only:*
+*Add also this for Master server only:*
 
 [source, bash]
 ---------------
@@ -1844,9 +1843,9 @@ or use the script:
 desktop_bannedip.sh
 ---------------
 
-=== Test spamassassin ===
+=== Test SpamAssassin ===
 
-The process *spamd* must be running. Start it manually if it is not the case the first time. You can start it manually using this command:
+The process *spamd* must be running. Start it manually if not running yet, using this command:
 
 [source,bash]
 ---------------
@@ -1939,13 +1938,13 @@ Note: It seems we must also restart apache to have this effective inside apache.
 [source,bash]
 ---------------
 
-pour Ubuntu 18.04
+On Ubuntu 18.04
 
 wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
 dpkg -i afick.deb
 mv /etc/cron.daily/afick_cron.dpkg-new /etc/cron.daily/afick_cron
 
-ou pour Ubuntu 22.04
+or on Ubuntu 22.04
 
 wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick-3.7.0.tgz/download
 tar -xvf afick.tgz; 
@@ -1955,7 +1954,7 @@ vi /etc/cron.daily/afick_cron to replace lines
   AFICK="/usr/bin/afick.pl" with AFICK="/opt/afick/bin/afick.pl"
   /usr/bin/afick_archive.pl with /opt/afick/bin/afick_archive.pl
   
-ou pour Ubuntu 24.04
+or on Ubuntu 24.04
 
 wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.8.1/afick-3.8.1.tgz/download
 tar -xvf afick.tgz; 
@@ -2063,14 +2062,14 @@ Now, init the afick database
 /opt/afick/bin/afick.pl -i
 ---------------
 
-Then test the execution by crontab works correcly, by running under root:
+Then test whether the execution by crontab works correctly, by running as root:
 
 [source,bash]
 ---------------
 /etc/cron.daily/afick_cron
 ---------------
 
-It may takes several minutes to generate the database into */var/lib/afick* or */opt/afick/database/afick*.
+It may take several minutes to generate the database into */var/lib/afick* or */opt/afick/database/afick*.
 Ignore if you have error when sending emails, sending emails is setup later.
 
 
@@ -2169,7 +2168,7 @@ done
 See script *cpulimit_daemon* to put into */etc/init.d*.
 
 
-=== Adding disk quotas per users (optionnal)
+=== Adding disk quotas per users (optional)
 
 Note: Some global quotas can be set with the *ulimit* tool in */etc/security/limits.conf* (see next chapter on ulimit)
 
@@ -2276,22 +2275,22 @@ message_size_limit = 20480000
 
 #header_checks = regexp:/etc/postfix/header_checks
 
-# Liste des emails virtuelles
-#----------------------------
+# List of virtual email aliases
+#-------------------------------
 #virtual_alias_maps = hash:/etc/postfix/virtual
 
-# Liste des clients bloques
-#-----------------------------
+# List of blocked clients
+#-------------------------
 smtpd_client_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access
 
-# Liste des emetteurs bloques
-#----------------------------
+# List of blocked senders
+#-------------------------
 # Here we declare we want mail from specific email, mail not rejected by rbl, otherwise refused
 #smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access,  check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_rbl_client cbl.abuseat.org, reject_rbl_client bl.spamcop.net, reject_unknown_sender_domain
 smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_unknown_sender_domain
 
-# Liste des recepteurs bloques
-#-----------------------------
+# List of blocked recepients
+#----------------------------
 # Here we declare we want mail to my domain, to specific email with SA filtering, otherwise refuse.
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
 
@@ -2339,11 +2338,11 @@ smtp      inet  n       -       y       -       -       smtpd -v
 
 
 
-=== Setup of Mysql or Mariadb
+=== Setup of MySQL or MariaDB
 
 ==== Setup
 
-On a *Master* only server, change only the listened address of the Mysql/Mariadb server:
+On a *Master* only server, change only the listened address of the MySQL/MariaDB server:
 
 Edit config file 
 */etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
@@ -2360,7 +2359,7 @@ Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 
 
-On *Deployment servers*:
+On *Deployment* servers:
 
 Edit the config file 
 */lib/systemd/system/mysql.service*  or  */lib/systemd/system/mariadb.service*
@@ -2374,7 +2373,7 @@ Restart=no
 #Restart=on-watchdog  # on-watchdog is also possible
 ---------------
 
-This may avoid warning like "Could not increase number of max_open_files to more than".
+This may avoid warnings like "Could not increase number of max_open_files to more than xxxx".
 
 Take the change into account with command:
 
@@ -2477,12 +2476,12 @@ INSTALL PLUGIN auth_socket SONAME 'auth_socket.so';
 SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
 ---------------
 
-For MariaDb: The plugin is *unix_socket* and is set by default on Ubuntu OS.
+For MariaDB: The plugin is *unix_socket* and is set by default on Ubuntu OS.
 
 
 To switch in mode authentification by password / by unix socket account :
 
-For Mysql:
+For MySQL:
 
 [source,sql]
 ---------------
@@ -2493,7 +2492,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
 You must stop/start database server to validate this change !
 
-For MariaDb:
+For MariaDB:
 
 [source,sql]
 ---------------
@@ -2521,7 +2520,7 @@ To see the default value
 SHOW VARIABLES LIKE 'default_authentication_plugin';
 ---------------
 
-Note: To delete active plugins, empty the mysql *plugin* table. See "Starting mysql without permissions" if this blocks the server from starting if necessary.
+Note: To delete active plugins, empty the mysql *plugin* table. See "Starting mysql without permissions" if this prevents the server from starting if necessary.
 
 Note: If there is a crash during upgrade and a need to restart, you may need to remove the redo log bild "id...*".
 
@@ -2543,7 +2542,7 @@ flush privileges;
 [[creer_un_compte_db_sellyoursaas]]
 ==== Create a user sellyoursaas to control databases of user instances
 
-On the *Master* server and on each *Deployment server*, grant access localy to the login *sellyoursaas*:
+On the *Master* server and on each *Deployment* server, grant access locally to the login *sellyoursaas*:
 
 [source,sql]
 ---------------
@@ -2557,7 +2556,7 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-Give permission, on the *Master server*, to the account *sellyoursaas* for each deployment server, on the database *dolibarr* (so the mysql client on the deployment server can connect to the database):
+Give permission, on the *Master* server, to the account *sellyoursaas* for each deployment server, on the database *dolibarr* (so the mysql client on the *Deployment* server can connect to the database):
 
 [source,sql]
 ---------------
@@ -2568,7 +2567,7 @@ GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON databasename_do
 FLUSH PRIVILEGES;
 ---------------
 
-Add instructions to reduce the permissions on the database server to the user sellyoursaas from the deployment server
+Add instructions to reduce the permissions on the database server to the user sellyoursaas from the *Deployment* server
 
 [source,sql]
 ---------------
@@ -2726,7 +2725,7 @@ But remove it after you solve the problem, to have the tables writable again.
 
 === Setup of AppArmor
 
-On *deployment servers*:
+On *Deployment servers*:
 
 * Copy */bin/dash* into */bin/secureBash* (This shell file will be set as the shell for a new user by the deployment process)
 
@@ -2854,7 +2853,7 @@ systemctl daemon-reload
 
 === Jailkit configuration (optional)
 
-On **deployment servers**:
+On **Deployment servers**:
 
 Jailkit is a set of utilities to limit user accounts to specific files using chroot() and or specific commands. Setting up a chroot shell, a shell limited to some specific command, or a daemon inside a chroot jail is a lot easier and can be automated using these utilities.
 
@@ -3057,7 +3056,7 @@ You can also add record *GLUE record* on your register side for:
 
 Note: X is the number of deployment server.
 
-==== On deployment servers
+==== On Deployment servers
 
 We have to create the DNS files that will be used to store the DNS record of each customer *.withX.mysaasdomainname.com.
 Those files will be completed after each new deployment.
@@ -3179,7 +3178,7 @@ include::repository_root/etc/php/sellyoursaas.ini[]
 ---------------
 
 
-==== Disable some functions (optionnal)
+==== Disable some functions (optional)
 
 Complete also the parameter *disable_functions* for the *apache* and *fpm* file (NOT for the *cli*) by adding:
 
@@ -3410,7 +3409,7 @@ The complete logs of certbot are into */var/log/letsencrypt/*...
 === Create a wildcard SSL certificate for user instances
 
 Into the following instructions, we will use X with value 1, 2, 3, ... (digit of pool of instance = digit of the deployment server).
-This must be done on deployment servers only.
+This must be done on Deployment servers only.
 
 ==== Obtain wildcard certificate files for *.withX.mysaasdomainname.com
 
@@ -3425,7 +3424,7 @@ You can use the solution 1 (recommended as free and with no manual update requir
 certbot certonly --manual --preferred-challenges=dns -d "admin.<your_domain>"
 ---------------
 
-* On the *deployment servers*, to create automatically a renewable wildcard *.withX.mysaasdomainname.com certificate :
+* On the *Deployment servers*, to create automatically a renewable wildcard *.withX.mysaasdomainname.com certificate :
 
 Run cerbot with the following command line (you can test it beforehand by adding the option *--dry-run*) :
 
@@ -3474,7 +3473,7 @@ or
 certbot renew --cert-name admin.<mysaasdomainname.com> --dry-run
 ---------------
 
-* To renew a certificate on the *deployment servers*:
+* To renew a certificate on the *Deployment servers*:
 
 You can use the same command as used originally (with --dry-run option first if you want to check, replace value between <>)
 
@@ -3681,7 +3680,7 @@ You must have inside the cron of user *admin* (You can view the cron with *cront
 Note: *securitykeydefinedinscheduledjobsetup* is the value of a key you have choosen. And *anonymousbatch* is the user dedicated for batch processing. Remember the 2 value you use hare, you will set them later on the Dolibarr master.
 
 
-==== On deployment servers
+==== On Deployment servers
 
 You must have inside the cron of user *root* (You can view the cron with *crontab -u root -l*):
 
@@ -4095,7 +4094,7 @@ instances:
 ---------------
 
 
-* On *deployment servers* only, copy the datadog config file to supervize *SSL certificates*.
+* On *Deployment servers* only, copy the datadog config file to supervise *SSL certificates*.
 
 [source,bash]
 ---------------
@@ -4123,7 +4122,7 @@ instances:
 Note: Replace withX by correct prefix of the deployment server.
 
 
-* On *deployment servers* only, copy the datadog config file to supervize *SSL certificates*.
+* On *Deployment servers* only, copy the datadog config file to supervise *SSL certificates*.
 
 [source,bash]
 ---------------
@@ -4491,7 +4490,7 @@ ${IPTABLES} -t filter -A OUTPUT -p tcp -d <deployment.server.IP> --sport nfs -m 
 ${IPTABLES} -t filter -A OUTPUT -p udp -d <deployment.server.IP> --sport nfs -m state --state ESTABLISHED,RELATED -j ACCEPT
 ---------------
 
-And on the *deployment servers*
+And on the *Deployment servers*
 
 If we have two IPs get them like so:
 
@@ -4579,7 +4578,7 @@ FLUSH PRIVILEGES;
   /etc/letsencrypt/live/with*
   /etc/letsencrypt/renewal/with*
 
-- If datadog is used (optionnal), fix the file */etc/datadog-agent/conf.d/http_check.d/conf.yaml* to use the new name of server.
+- If datadog is used (optional), fix the file */etc/datadog-agent/conf.d/http_check.d/conf.yaml* to use the new name of server.
   
 - Destroy the database
 
@@ -4903,10 +4902,10 @@ Warning: Reducing size of a filesystem does not work on OVH Public Cloud boot sy
 
 * Click on the "Reboot in rescue mode" entry and validate.
 
-When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
-or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
+When the server is completely restarted a login and then password prompt will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
+or the root password for the rescue mode will be shown). If you don't receive the password, reboot with a vanilla Ubuntu image and try to SSH using a user owning the private SSH key associated to the public SSH key published on OVH.
 
-If you need netwrok, start network with: systemctl restart networking
+If you need network, start network with: systemctl restart networking
 
 Find attached disks to identify the system partition disk.
 
@@ -5147,7 +5146,7 @@ Launch the script:
 
 === Forensic tools - analysis
 
-Before any forensic anaylisis, you can:
+Before any forensic analysis, you can:
 - block any network access from the Public Cloud service.
 - use the Public Cloud tool to make an image of the instance. 
 
@@ -5164,7 +5163,7 @@ Use the Cloud service interface to switch to rescue mode. The server will be reb
 * Click on the "Reboot in rescue mode" entry and validate.
 
 When the server is completely restarted a login and a password will be displayed, use it to connect to the server. You can also go in the menu VNC console (it will open a console directly connected to the server
-or the root password for the resuce mode will be shown). If you don't received the password, do a reboot with an ubuntu image and try a ssh using the ubuntu from a user owning the private ssh key associated to the public ssh key published on OVH.
+or the root password for the rescue mode will be shown). If you don't receive the password, reboot with a vanilla Ubuntu image and try to SSH using a user owning the private SSH key associated to the public SSH key published on OVH.
 
 Find attached disks to identify the system partition disk.
 
@@ -5815,7 +5814,7 @@ network:
 Then run *netplan try* and apply.
 
 Check by doing an apt update that your network and outgoing connexion are ok. If yes, you can follow this tutorial provided by scaleway https://www.scaleway.com/en/docs/compute/instances/troubleshooting/fix-unreachable-focal-with-two-public-ips/ to
-fix definetly the bad generation of the netplan file during boot. It will add a line *- on-link: true* into the routes section for IPv4 that solve the trouble. You can then remove 
+fix definitively the bad generation of the netplan file during boot. It will add a line *- on-link: true* into the routes section for IPv4 that solve the trouble. You can then remove 
 the file */etc/netplan/fixed-ip.yaml* that was previously added manually and reboot. IPv4 should be available.
 
 
