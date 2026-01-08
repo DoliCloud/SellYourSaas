@@ -3261,8 +3261,8 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 						}
 					}
 					print '<td class="center">';
-					print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&mode=myresellertools&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
-					print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&mode=myresellertools&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
+					print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&mode='.$mode.'&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
+					print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&mode='.$mode.'&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
 					print '</td>';
 				}
 				print '</tr>';
@@ -3284,7 +3284,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 	';
 
 	if ($action == 'resetproperty') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?mode=myresellertoolspropertykey='.$propertykey, $langs->trans('ResetForcedPrice'), $langs->trans('ConfirmResetForcedPrice'), 'resetpropertyconfirm', '', 0, 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?mode='.$mode.'&propertykey='.$propertykey, $langs->trans('ResetForcedPrice'), $langs->trans('ConfirmResetForcedPrice'), 'resetpropertyconfirm', '', 0, 1);
 		print $formconfirm;
 	}
 }
