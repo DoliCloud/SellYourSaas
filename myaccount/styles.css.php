@@ -594,7 +594,7 @@ input.input-field {
 		display: inline-block;
 	}
     img#logo {
-        padding-top: 10px;
+        /* padding-top: 10px; */
     }
 
 	.boxresource {

@@ -204,6 +204,10 @@ textarea {
   overflow: auto;
 }
 
+.justify {
+	text-align: justify;	
+}
+
 [type="checkbox"],
 [type="radio"] {
   -webkit-box-sizing: border-box;

@@ -295,9 +295,9 @@ if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') && getDolGlobalString('SELLYO
 
 <div class="block medium center signup2">
 
-		<span class="opacitymedium inline-block" style="display: inline-block; font-size: 0.85em; margin-top: 4px; margin-bottom: 40px; line-height: 1.5em;">
-		<?php echo $langs->trans("MyAcountDesc", $homepage, $sellyoursaasname); ?>
-		</span>
+	<span class="opacitymedium inline-block justify" style="display: inline-block; font-size: 0.85em; padding-left: 20px; padding-right: 20px; margin-top: 4px; margin-bottom: 40px; line-height: 1.5em;">
+	<?php echo $langs->trans("MyAcountDesc", $homepage, $sellyoursaasname); ?>
+	</span>
 
 
 <div class="login_table">
