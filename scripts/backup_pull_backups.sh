@@ -4,10 +4,16 @@
 # Put the following entry into the cron of a user that can rsync to the remote server with its public key.
 # /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_pull_backups.php  remotelogin  (test|confirm)  [remotebackupserversrc]  [localdirtarget]  >/.../backup_backup_backups.log
 #
-# On a NAS (Synology, ...), the file can be stored into:
+# On a NAS (Synology, ...), after beeing logged in ssh (for example with "ssh -p 1022 -l mylogin ip.of.nas) the file can be stored into:
 # ~/backup_pull_backups.sh
 # and add in the GUI task scheduler from user mylogin, a command
-# "/var/services/homes/mylogin/backup_pull_backups.sh" admin confirm 2>&1 >/volume2/NASBACKUPXXX/backup_pull_backups.log 
+# "/var/services/homes/mylogin/backup_pull_backups.sh" admin confirm 2>&1 >/volume2/NASBACKUPXXX/backup_pull_backups.log
+# A sellyoursaas config file must be created into /etc/sellyoursaas.conf with a content like
+#backupdir=/volume2/NASBACKUPXXX
+#remotebackupserver=name.of.backup.server
+#remotebackupuser=admin
+#emailfrom=noreply@mydomain.com
+#emailsupervision=supervision@mydomain.com 
 
 
 #set -e
@@ -222,6 +228,11 @@ else
 		echo "$command > /tmp/backup_list_dirs"
 		echo "$command > /tmp/backup_list_dirs" >>/var/log/$script.log
 		$command > /tmp/backup_list_dirs
+		if [ "x$?" != "x0" ]; then
+		  	echo "ERROR Failed to make rsync to build /tmp/backup_list_dirs"
+	  		echo
+	   		export ret1=1;
+		fi
 	
 		# Now loop on each backup directory
 		for fic in `cat /tmp/backup_list_dirs | awk ' $1 ~ /^d/ && $5 !~ /^\./ { print $5 } '`; do 
@@ -293,7 +304,7 @@ fi
 echo "Delete very old directories (older than 2 years with no change)"
 cd $backupdir
 #find "$backupdir/" -maxdepth 2 -path "*backup_*/osu*" -type d -mtime +730
-find "$backupdir/" -maxdepth 2 -path "*backup_*/osu*" -type d -mtime +730 -print0 | xargs -0 rm -rf
+find "$backupdir/" -maxdepth 2 -path "*backup_*/osu*" -type d -mtime +730 -exec rm -fr {} +
 
 
 if [ "x$ret1" != "x0" ]; then
