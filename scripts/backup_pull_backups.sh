@@ -2,11 +2,12 @@
 # Catch backups from a remote backup server into a local computer, like a NAS.
 #
 # Put the following entry into the cron of a user that can rsync to the remote server with its public key.
-# /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_backup_backups.php  remotelogin  (test|confirm)  [remotebackupserversrc]  [localdirtarget]  >/.../backup_backup_backups.log
+# /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_pull_backups.php  remotelogin  (test|confirm)  [remotebackupserversrc]  [localdirtarget]  >/.../backup_backup_backups.log
 #
-# On a NAS (Synology, ...), the file can be stored into
+# On a NAS (Synology, ...), the file can be stored into:
 # ~/backup_pull_backups.sh
-#
+# and add in the GUI task scheduler from user mylogin, a command
+# "/var/services/homes/mylogin/backup_pull_backups.sh" admin confirm 2>&1 >/volume2/NASBACKUPXXX/backup_pull_backups.log 
 
 
 #set -e
