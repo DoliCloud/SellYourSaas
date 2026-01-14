@@ -450,7 +450,9 @@ class SellYourSaasUtils
 													$invoicediroutput = $conf->facture->dir_output;
 													$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
 													$file = $fileparams['fullname'];
-													$file = '';		// Disable attachment of invoice in emails
+													if (empty($arraydefaultmessage->joinfiles)) {
+														$file = '';               // Disable attachment of invoice in emails if template joinfiles = 0
+													}
 
 													if ($file) {
 														$listofpaths=array($file);
@@ -2137,7 +2139,9 @@ class SellYourSaasUtils
 							$invoicediroutput = $conf->facture->dir_output;
 							$fileparams = dol_most_recent_file($invoicediroutput . '/' . $invoice->ref, preg_quote($invoice->ref, '/').'[^\-]+');
 							$file = $fileparams['fullname'];
-							$file = '';		// Disable attachment of invoice in emails
+							if (empty($arraydefaultmessage->joinfiles)) {
+								$file = '';               // Disable attachment of invoice in emails if template joinfiles = 0
+							}
 
 							if ($file) {
 								$listofpaths=array($file);
