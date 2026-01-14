@@ -99,7 +99,7 @@ fi
 #	export OPTIONS="$OPTIONS --noatime"
 #fi
 
-if [ "x$testorconfirm" != "xconfirm" ]; then
+if [ "x$testorconfirm" != "xconfirm" ] && [ "x$testorconfirm" != "xconfirmdelete" ]; then
 	export OPTIONS="-n $OPTIONS"
 fi
 if [ "x$USER" == "x" ]; then
