@@ -3214,6 +3214,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 				print '</td> ';
 				if ($action == 'editproperty' && $key == $propertykey) {
 					print '<input type="hidden" name="priceproductid" value="'.$key.'">';
+					print '<input type="hidden" name="mode" value="'.$mode.'">';
 					print '<td>';
 					print '<input class="flat field_price maxwidth50" type="text" id="field_price_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_'.$mythirdpartyaccount->id."_".$key.'" value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_FIX_PRICE_".$mythirdpartyaccount->id."_".$key) ?: $value["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'<span>';
 					print '</td>';
@@ -3260,8 +3261,8 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 						}
 					}
 					print '<td class="center">';
-					print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
-					print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
+					print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&mode='.$mode.'&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
+					print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&mode='.$mode.'&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
 					print '</td>';
 				}
 				print '</tr>';
@@ -3283,7 +3284,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 	';
 
 	if ($action == 'resetproperty') {
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?propertykey='.$propertykey, $langs->trans('ResetForcedPrice'), $langs->trans('ConfirmResetForcedPrice'), 'resetpropertyconfirm', '', 0, 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"].'?mode='.$mode.'&propertykey='.$propertykey, $langs->trans('ResetForcedPrice'), $langs->trans('ConfirmResetForcedPrice'), 'resetpropertyconfirm', '', 0, 1);
 		print $formconfirm;
 	}
 }
