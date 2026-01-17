@@ -38,12 +38,6 @@ init_config:
 ## Every instance is scheduled independent of the others.
 #
 instances:
-  - name: process_apache2
-    search_string: ['apache2']
-    exact_match: False
-    thresholds:
-      critical: [4, 5000]
-
   - name: fail2ban
     search_string: ['fail2ban-server']
     exact_match: False
