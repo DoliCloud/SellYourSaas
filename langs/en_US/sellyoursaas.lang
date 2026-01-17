@@ -982,3 +982,4 @@ SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL=Enable option deployment for trial mode cus
 OptionInstallationError=Error while trying to install the option
 OptionUninstallationError=Error while trying to unistall the option
 FileSeemsValid=File seems valid
+SEPADoesNotUnsupendInstantly=Please note that the SEPA payment method does not allow you to instantly reactivate an instance that has been suspended due to non-payment. The instance will be automatically reactivated after a processing period of 3 to 12 days. For instant reactivation, you can enter a card payment method.

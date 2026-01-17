@@ -258,6 +258,13 @@ print '
 
 		<br>
 ';
+
+if (count(sellyoursaasGetSuspendedContracts($mythirdpartyaccount)) > 0) {
+	print '<div class="note note-warning linksepa justify hidden">';
+	print $langs->trans("SEPADoesNotUnsupendInstantly");
+	print '</div>';
+}
+
 if (!empty($arraycontracttransfer)) {
 	$listcontract = "";
 	foreach ($arraycontracttransfer as $key => $obj) {

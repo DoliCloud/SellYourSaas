@@ -344,7 +344,48 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 	return array('expirationdate'=>$expirationdate, 'status'=>$statusofappline, 'duration_value'=>$duration_value, 'duration_unit'=>$duration_unit, 'nbusers'=>$nbofusers, 'nbofgbs'=>$nbofgbs, 'appproductid'=>$appproductid);
 }
 
+/**
+ * Return an array of all the suspended contracts for thirdparty
+ * 
+ * @param	int	$thirdpatyid	 If of thirdparty
+ * @return  array				 The array with all supended contracts
+ */
+function sellyoursaasGetSuspendedContracts($thirdpatyid)
+{
+	global $conf, $db;
 
+	require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
+	$contractarray = array();
+
+	$sql = "SELECT c.rowid as id";
+	$sql .= " FROM ".MAIN_DB_PREFIX."contrat as c";
+	$sql .= " WHERE c.fk_soc = ".((int) $thirdpatyid);
+	$sql .= " AND c.entity = ".((int) $conf->entity);
+	$sql .= " AND c.statut = 1";
+	$resql=$db->query($sql);
+	if ($resql) {
+		$num = $db->num_rows($resql);
+		if ($num) {
+			$i=0;
+			while ($i < $num) {
+				$objtmp = $db->fetch_object($resql);
+				if (!empty($objtmp->id)) {
+					$contract = new Contrat($db);
+					$res = $contract->fetch($objtmp->id);
+					if ($res > 0) {
+						if (sellyoursaasIsSuspended($contract)) {//DEBUG
+							$contractarray[] = $contract;
+						}
+					}
+				}
+				$i++;
+			}
+		}
+	} else {
+		dol_print_error($db);
+	}
+	return $contractarray;
+}
 
 /**
  * Return if contract is suspenced/close
