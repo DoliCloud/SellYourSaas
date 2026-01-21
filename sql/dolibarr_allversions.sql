@@ -202,3 +202,6 @@ update llx_societe_rib set ext_payment_site = 'StripeTest' where stripe_account 
 update llx_societe_rib set ext_payment_site = 'StripeLive' where type = 'card' AND card_type IN ('visa', 'mastercard', 'amex') AND ext_payment_site IS NULL AND (stripe_card_ref like 'card_%' OR stripe_card_ref LIKE 'pm%');
 
 ALTER TABLE llx_packages ADD COLUMN sqlafterundeployoption text;
+
+UPDATE llx_extrafields SET enabled = 'isModEnabled("sellyoursaas")' WHERE enabled = '$conf->sellyoursaas->enabled';
+
