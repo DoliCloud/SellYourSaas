@@ -127,7 +127,10 @@ if (substr($sapi_type, 0, 3) != 'cli') {
 if (! $res) {
 	die("Include of main fails");
 }
-
+/**
+ * @var DoliDB $db
+ * @var Translate $langs
+ */
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
@@ -198,8 +201,8 @@ $optinmessages = (GETPOST('optinmessages', 'aZ09') == '1' ? 1 : 0);
 $checkboxnonprofitorga = (GETPOSTISSET('checkboxnonprofitorga') ? GETPOST('checkboxnonprofitorga', 'aZ09') : '');
 
 $origin = GETPOST('origin', 'aZ09');
-$partner=GETPOST('partner', 'int');
-$partnerkey=GETPOST('partnerkey', 'alpha');		// md5 of partner name_alias
+$partner = GETPOSTINT('partner');
+$partnerkey = GETPOST('partnerkey', 'alpha');		// md5 of partner name_alias
 $customurl = '';
 
 $fromsocid=GETPOST('fromsocid', 'int');
@@ -789,8 +792,17 @@ if ($reusecontractid) {
 	$tldid = '.'.$domainname;
 	$fqdninstance = $sldAndSubdomain.'.'.$domainname;
 } else {
-	// Check number of instance with same IP deployed (Rem: for partners, ip are the one of their customer)
+	// Check number of instance with same IP deployed
+	// Note: For partners, ip should be the one of their customer. In case of not, we overwrite after with options_maxnbofinstances of partner
 	$MAXDEPLOYMENTPERIP = getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPERIP', 20);
+	if ($partner > 0) {
+		$tmppartner = new Societe($db);
+		$tmppartner->fetch($partner);
+		if (!empty($tmppartner->array_options['options_maxnbofinstances'])) {
+			dol_syslog("Creation is done by partner id ".$tmppartner->id.", with a 'Max nb of instance' that is set, we try to use it for MAXDEPLOYMENTPERIP if higher");
+			$MAXDEPLOYMENTPERIP = max($MAXDEPLOYMENTPERIP, $tmppartner->array_options['options_maxnbofinstances']);
+		}
+	}
 	$MAXDEPLOYMENTPERIPVPN = getDolGlobalString('SELLYOURSAAS_MAXDEPLOYMENTPERIPVPN', 2);
 
 	$nbofinstancewithsameip = -1;
