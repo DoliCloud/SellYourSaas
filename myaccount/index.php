@@ -921,7 +921,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			}
 			$res = $tickettocreate->create($user);
 			if ($res > 0) {
-				$trackid = $tickettocreate->track_id;
+				$trackid = 'tic'.$tickettocreate->id;
 			}
 		}
 
