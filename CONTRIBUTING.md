@@ -33,11 +33,11 @@ Default **language here is English**. So please prepare your contributions in En
 <span id="branches" name="branches"></span>
 ### Branches
 
-Unless you're fixing a bug, all pull requests should be made against the *develop* branch.
+Unless you're fixing a bug, all pull requests should be made against the *master* branch.
 
 If you're fixing a bug, it is preferred that you cook your fix and pull request it against an oldest version affected.
 
-We recommend to push it into N - 2 for N the latest version available, if not possible into version N - 1, and finally into develop.
+We recommend to push it into N - 2 for N the latest version available, if not possible into version N - 1, and finally into master.
 This is just a recommendation, currently, if you push a bug fix on a very old version, it is still merged and propagated into
 higher versions. 
 
