@@ -28,5 +28,5 @@
     register: command_output
     when: 
       - unlock is defined
-      - "'master' in group_names"
+      - ('master' in group_names) or ('web' in group_names)
       
