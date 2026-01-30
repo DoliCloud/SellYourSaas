@@ -2357,7 +2357,7 @@ class SellYourSaasUtils
 							if ($result == 0) {
 								$errorforinvoice++;
 								//$error++;		// This case should not generate a global error
-								dol_syslog('A direct-debit request already exists for invoice id='.$obj->rowid.', so we cancel payment try', LOG_ERR);
+								dol_syslog('A direct-debit request already exists for invoice id='.$obj->rowid.', so we cancel payment try', LOG_WARNING);
 								$this->errors[] = 'A direct-debit request already exists for the invoice '.$invoice->ref.', so we cancel payment try';
 							} elseif ($result < 0) {
 								$errorforinvoice++;
