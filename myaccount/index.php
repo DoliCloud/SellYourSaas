@@ -3461,7 +3461,7 @@ if (empty($welcomecid)
 	$sql = 'SELECT f.rowid, f.ref, f.datef, f.datec, f.date_lim_reglement as date_due, f.dispute_status, fe.invoicepaymentdisputed';
 	$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'facture_extrafields as fe';
 	$sql .= ' WHERE fe.fk_object = f.rowid AND f.fk_soc = '.((int) $mythirdpartyaccount->id);
-	$sql .= ' AND dispute_status = 1';
+	$sql .= ' AND dispute_status = 1';	// dispute open
 	$sql .= ' ORDER BY f.datef';
 	$sql .= ' LIMIT 100';
 

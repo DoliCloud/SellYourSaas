@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2011-2018 Laurent Destailleur <eldy@users.sourceforge.net>
+/* Copyright (C) 2011-2026 Laurent Destailleur <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
  * @var Societe $mythirdpartyaccount
  * @var int $nowmonth
  * @var int $nowyear
+ * @var array<int,Contrat> $listofcontractid
  */
-
 
 // Protection to avoid direct call of template
 if (empty($conf) || ! is_object($conf)) {
@@ -203,7 +203,7 @@ if (count($listofcontractid) > 0) {
 					$statusstring .= $s;
 
 					// If invoice is in dispute, we show it here
-					if (!empty($invoice->dispute_status)) {
+					if (!empty($invoice->dispute_status) && $invoice->dispute_status == 9) {
 						$statusstring .= ' <span class="badge badge-warning badge-status" title="'.$langs->trans("InvoicePaymentDisputedMessage", $invoice->ref, dol_print_date($invoice->date, 'day')).'">';
 						$statusstring .= $langs->trans("Canceled").'</span>';
 					}
@@ -252,9 +252,9 @@ if (count($listofcontractid) > 0) {
 								<!-- Price -->
 					            <div class="col-6 col-md-2">
 									';
-				print (empty($invoice->dispute_status) ? '' : '<strike>');
+				print ((empty($invoice->dispute_status) || $invoice->dispute_status != 9)  ? '' : '<strike>');
 				print price(price2num($invoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency);
-				print (empty($invoice->dispute_status) ? '' : '</strike>');
+				print ((empty($invoice->dispute_status) || $invoice->dispute_status != 9) ? '' : '</strike>');
 
 				print '
 					            </div>
@@ -291,9 +291,9 @@ if (count($listofcontractid) > 0) {
 									<!-- Price -->
 					            <div class="col-6 col-md-2">
 									';
-					print (empty($draftinvoice->dispute_status) ? '' : '<strike>');
+					print ((empty($draftinvoice->dispute_status) || $invoice->dispute_status != 9) ? '' : '<strike>');
 					print price(price2num($draftinvoice->total_ttc), 1, $langs, 0, 0, getDolGlobalString('MAIN_MAX_DECIMALS_TOT'), $conf->currency);
-					print (empty($draftinvoice->dispute_status) ? '' : '</strike>');
+					print ((empty($draftinvoice->dispute_status) || $invoice->dispute_status != 9) ? '' : '</strike>');
 
 					print '
 								</div>
