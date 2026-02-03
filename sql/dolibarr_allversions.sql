@@ -192,7 +192,7 @@ ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN hostname varchar(64);
 UPDATE llx_actioncomm SET code = 'AC_PAYMENT_STRIPE_IPN_SEPA_KO' where code = 'AC_IPN' and label like 'Payment error (SEPA%';
 
 
-UPDATE llx_facture SET dispute_status = 1 WHERE rowid IN (SELECT fe.fk_object FROM llx_facture_extrafields as fe WHERE fe.invoicepaymentdisputed = 1);
+--UPDATE llx_facture SET dispute_status = 1 WHERE rowid IN (SELECT fe.fk_object FROM llx_facture_extrafields as fe WHERE fe.invoicepaymentdisputed = 1) AND dispute_status = 0;
 --UPDATE llx_facture_extrafields SET invoicepaymentdisputed = NULL WHERE invoicepaymentdisputed = 1;
 
 
