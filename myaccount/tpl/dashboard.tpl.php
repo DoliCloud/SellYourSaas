@@ -19,6 +19,8 @@
  * @var Conf $conf
  * @var DoliDB $db
  * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
  */
 
 // Protection to avoid direct call of template
@@ -284,9 +286,10 @@ if ($mythirdpartyaccount->client > 0) {
 foreach ($listofcontractid as $id => $contract) {
 	$contract->fetchObjectLinked();
 	if (isset($contract->linkedObjects['facture']) && is_array($contract->linkedObjects['facture'])) {
+		$contract->linkedObjects['facture'] = dol_sort_array($contract->linkedObjects['facture'], 'ref');
 		foreach ($contract->linkedObjects['facture'] as $idinvoice => $invoice) {
 			print '<!--';
-			print dol_escape_htmltag($invoice->ref.'-'.$invoice->total_ht."-".$invoice->type."-status=".$invoice->statut."-paye=".$invoice->paye)."\n";
+			print dol_escape_htmltag($invoice->ref.'-'.$invoice->total_ht."-".$invoice->type."-status=".$invoice->status."-paye=".$invoice->paye)."\n";
 			print '-->';
 			if ($invoice->statut == $invoice::STATUS_DRAFT) {
 				continue;
@@ -295,7 +298,7 @@ foreach ($listofcontractid as $id => $contract) {
 				$nbinvoicenotpayed++;
 				$alreadypayed = $invoice->getSommePaiement();
 				$amount_credit_notes_included = $invoice->getSumCreditNotesUsed();
-				$amountdue += $invoice->total_ttc - $alreadypayed - $amount_credit_notes_included;
+				$amountdue += ($invoice->total_ttc - $alreadypayed - $amount_credit_notes_included);
 			}
 		}
 	}
