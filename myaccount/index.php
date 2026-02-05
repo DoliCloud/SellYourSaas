@@ -892,6 +892,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$arr_file = array();
 		$arr_mime = array();
 		$arr_name = array();
+		$tickettocreate = new Ticket($db);
 		$upload_dir = $conf->sellyoursaas->dir_temp."/support_thirdparty_id_".$mythirdpartyaccount->id.'.tmp';
 		$listofpaths = dol_dir_list($upload_dir, 'files', 0, '', '', 'name', SORT_ASC, 0);
 		if (count($listofpaths)) {
@@ -907,7 +908,6 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$trackid = 'con'.$tmpcontract->id;
 		}
 		if (getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREATE")) {
-			$tickettocreate = new Ticket($db);
 			$tickettocreate->ref = $tickettocreate->getDefaultRef();
 			$tickettocreate->subject = $topic;
 			$tickettocreate->message = $content;
@@ -948,6 +948,12 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 					$statsd->increment('sellyoursaas.ticketsubmission', 1, $arraytags);
 				} catch (Exception $e) {
 					// Nothing done
+				}
+			}
+			if (getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREATE")) {
+				if (!empty($tickettocreate->id)) {
+					$tickettocreate->email_msgid = $cmailfile->msgid;
+					$tickettocreate->update($user);
 				}
 			}
 		} else {
