@@ -178,7 +178,7 @@ if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
 fi
 
 export CUSTOMDOMAIN=${46}
-export cliafterdeployoption=${49}
+export cliafterdeployoption=${47}
 
 
 
