@@ -178,7 +178,7 @@ if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
 fi
 
 export CUSTOMDOMAIN=${46}
-export cliafterdeployoption=${47}
+export cliafterdeployoption=${49}
 
 
 
@@ -1776,6 +1776,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 		fi
 	fi
 fi
+
+# Execute after deploy option
 
 if [[ "$mode" == "deployoption" ]]; then
 	if [[ "x$cliafterdeployoption" != "x" ]]; then
