@@ -1194,7 +1194,7 @@ systemctl daemon-reload;
 /usr/sbin/apachectl status;
 ---------------
 
-Note: Reload of apache seems not enough so we stop/start it.
+Note: *reload* or *restart* of apache seems not enough, so we completely stop and start it.
 
 * Add the directive to take into account the directory for the *virtual hosts* of the user instances in the config */etc/apache2/apache2.conf*
 

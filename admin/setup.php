@@ -248,9 +248,9 @@ if (in_array('popen', $arrayoffunctionsdisabled)) {
 	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: popen (used by /etc/init.d/smtp_watchdog_daemon1.php)<br>';
 }
 if (in_array('shell_exec', $arrayoffunctionsdisabled)) {
-	print "Parameter <b>disable_functions</b>: ".img_picto('', 'error', 'class="paddingrightonly"')." Bad. Must not contain 'shell_exec'<br>";
+	print "Parameter <b>disable_functions</b>: ".img_picto('', 'tick', 'class="paddingrightonly"')." Good. Must exclude 'shell_exec'<br>";
 } else {
-	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'tick', 'class="paddingrightonly"').' does not contains: shell_exec (used by /usr/local/bin/phpsendmail.php)<br>';
+	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'error', 'class="paddingrightonly"').' Bad. shell_exec is no more used by /usr/local/bin/phpsendmail.php<br>';
 }
 print "<br>\n";
 
