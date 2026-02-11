@@ -85,7 +85,7 @@ if (empty($MAXPERDAYPAID)) {
 
 file_put_contents($logfile, date('Y-m-d H:i:s') . " php.ini file loaded is ".php_ini_loaded_file()."\n", FILE_APPEND);
 
-$EXEC ='shell_exec';	// TODO Switch into $EXEC='exec';
+$EXEC ='exec';
 
 if (function_exists($EXEC)) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . " ".$EXEC." is available. ok\n", FILE_APPEND);
@@ -178,6 +178,7 @@ if (! $optionffound) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' option -f not found. Args are '.join(' ', $_SERVER['argv']).'. We get it from the header'."\n", FILE_APPEND);
 	$command .= "'-f".$emailfrom."'";
 }
+$command .= ' 2>&1';
 
 $ip = empty($_SERVER["REMOTE_ADDR"]) ? '' : $_SERVER["REMOTE_ADDR"];
 if (empty($ip)) {
@@ -341,7 +342,7 @@ if ($EXEC == 'shell_exec') {
 if ($EXEC == 'exec') {
 	$tmpresult = array();
 	$resexec = exec($command, $tmpresult);
-	$resexecstring = implode("\n", $resexec);
+	$resexecstring = implode("\n", $tmpresult);
 }
 
 if (empty($ip) || $ip == 'unknown') {
@@ -349,6 +350,8 @@ if (empty($ip) || $ip == 'unknown') {
 	file_put_contents($logfile, var_export($_SERVER, true)."\n", FILE_APPEND);
 	file_put_contents($logfile, var_export($_ENV, true)."\n", FILE_APPEND);
 }
+
+file_put_contents($logfile, var_export($resexecstring, true)."\n", FILE_APPEND);
 
 time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successfull spamming
 
