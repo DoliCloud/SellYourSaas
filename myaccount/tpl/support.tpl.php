@@ -125,11 +125,15 @@ if ($sellyoursaassupporturl) {
 	print '</div></div></div>';
 } else {
 	// Define if mandatory contact information are complete
-	$mandatoryInfoAreNotSet = ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE'))
-		|| empty($mythirdpartyaccount->array_options['options_firstname'])
-		|| empty($mythirdpartyaccount->array_options['options_lastname'])
-		|| ($mythirdpartyaccount->country_code == 'FR' && empty($mythirdpartyaccount->idprof1))
-	);
+	if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
+		$mandatoryInfoAreNotSet = ((!empty($mythirdpartyaccount->tva_assuj) && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE'))
+			|| empty($mythirdpartyaccount->array_options['options_firstname'])
+			|| empty($mythirdpartyaccount->array_options['options_lastname'])
+			|| ($mythirdpartyaccount->country_code == 'FR' && empty($mythirdpartyaccount->idprof1))
+		);
+	} else {
+		$mandatoryInfoAreNotSet = (empty($mythirdpartyaccount->array_options['options_firstname']) || empty($mythirdpartyaccount->array_options['options_lastname']));
+	}
 
 	print '
 			    <div class="row" id="choosechannel">
