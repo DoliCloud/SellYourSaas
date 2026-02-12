@@ -3197,11 +3197,12 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 			print $langs->trans("PricePerUsers");
 			print ' ('.$langs->trans("HT").')';
 			print '</th>';
+			/*
 			for ($i=0; $i < $maxcptoptions; $i++) {
 				print '<th>';
 				print $langs->trans("OptionForcePrice", $i+1);
 				print '</th>';
-			}
+			}*/
 			print '<th>';
 			print '</th>';
 			print '</tr>';
@@ -3223,7 +3224,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 						print '<input class="flat field_price maxwidth50" type="text" id="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'" name="field_priceuser_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ?: $value["priceuser"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
 					}
 					print '</td>';
-					if (isset($value["options"])) {
+					/*if (isset($value["options"])) {
 						foreach ($value["options"] as $id => $data) {
 							print '<td>';
 							print '<input class="flat field_price maxwidth50" type="text" id="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'" name="field_price_option_'.$id.'_'.$mythirdpartyaccount->id."_".$key.'"value="'.(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ?: $data["price"]).'"><span>').$langs->getCurrencySymbol($conf->currency).'</span>';
@@ -3233,7 +3234,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 						for ($i=0; $i < $maxcptoptions; $i++) {
 							print '<td></td>';
 						}
-					}
+					}*/
 					print '<td class="center maxwidth100">';
 					print '<input class="button smallpaddingimp btn green-haze btn-circle" type="submit" name="edit" value="'.$langs->trans("Save").'" style="margin: 2px;">';
 					print '<input class="button button-cancel smallpaddingimp btn green-haze btn-circle" type="submit" name="cancel" value="'.$langs->trans("Cancel").'">';
@@ -3249,7 +3250,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 						print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_PER_USER_".$mythirdpartyaccount->id."_".$key) ?: $value["priceuser"])).$langs->getCurrencySymbol($conf->currency);
 					}
 					print '</td>';
-					if (isset($value["options"])) {
+					/*if (isset($value["options"])) {
 						foreach ($value["options"] as $id => $data) {
 							print '<td>';
 							print dol_escape_htmltag(price(getDolGlobalString("SELLYOURSAAS_RESELLER_PRICE_OPTION_".$id."_".$mythirdpartyaccount->id."_".$key) ?: $data["price"])).$langs->getCurrencySymbol($conf->currency);
@@ -3259,7 +3260,7 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 						for ($i=0; $i < $maxcptoptions; $i++) {
 							print '<td></td>';
 						}
-					}
+					}*/
 					print '<td class="center">';
 					print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&mode='.$mode.'&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
 					print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&mode='.$mode.'&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
