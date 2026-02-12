@@ -38,6 +38,7 @@
 ALTER TABLE llx_packages ADD COLUMN cliafterpaid text;
 ALTER TABLE llx_packages ADD COLUMN sqlafterpaid text;
 ALTER TABLE llx_packages ADD COLUMN sqlpasswordreset text;
+ALTER TABLE llx_packages ADD COLUMN sqlafterundeployoption text;
 
 
 
