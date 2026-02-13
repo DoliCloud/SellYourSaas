@@ -178,6 +178,7 @@ if [ "x$INCLUDEFROMCONTRACT" == "x-" ]; then
 fi
 
 export CUSTOMDOMAIN=${46}
+export cliafterdeployoption=${49}
 
 
 
@@ -215,6 +216,7 @@ if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
 	dirwithsources3=${dirwithsources3/$olddoldataroot/$newdoldataroot}
 	cronfile=${cronfile/$olddoldataroot/$newdoldataroot}
 	cliafter=${cliafter/$olddoldataroot/$newdoldataroot}
+	cliafterdeployoption=${cliafterdeployoption/$olddoldataroot/$newdoldataroot}
 fi
 
 # For debug
@@ -1770,6 +1772,22 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 				echo Error when running the CLI script $cliafter 
 				echo "Error when running the CLI script $cliafter" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 				exit 26
+			fi
+		fi
+	fi
+fi
+
+# Execute after deploy option
+
+if [[ "$mode" == "deployoption" ]]; then
+	if [[ "x$cliafterdeployoption" != "x" ]]; then
+		if [ -f $cliafterdeployoption ]; then
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Execute script with . $cliafterdeployoption"
+			. $cliafterdeployoption
+			if [[ "x$?" != "x0" ]]; then
+				echo Error when running the CLI script $cliafterdeployoption 
+				echo "Error when running the CLI script $cliafterdeployoption" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
+				exit 27
 			fi
 		fi
 	fi
