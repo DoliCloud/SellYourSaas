@@ -994,6 +994,9 @@ function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextraf
 				//$this->error = 'sellyoursaasRemoteAction: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
 				//$this->errors[] = $this->error;
 			}
+			if ($newqty) {
+				$nbusersql = $newqty;
+			}
 		} else {
 			// If request is a SELECT nb, fieldlogin as comment
 			$num = $dbinstance->num_rows($resql);
