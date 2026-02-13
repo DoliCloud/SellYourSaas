@@ -1542,6 +1542,21 @@ if (! $error && $productref != 'none') {
 	}
 }
 
+if (! $error) {
+	dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
+	$sellyoursaasutils = new SellYourSaasUtils($db);
+
+	$comment = 'Refresh metrics of instance '.$contract->ref;
+
+	$result = $sellyoursaasutils->sellyoursaasRemoteAction('refresh', $contract, 'admin', '', '', '0', $comment);
+	if ($result <= 0) {
+		$error++;
+		$errormessages=$sellyoursaasutils->errors;
+		if ($sellyoursaasutils->error) {
+			$errormessages[]=$sellyoursaasutils->error;
+		}
+	}
+}
 
 // Finish deployall - Activate all lines
 if (! $error && $productref != 'none') {
