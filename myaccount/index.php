@@ -916,6 +916,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$tickettocreate->origin_replyto = $replyto;
 			$tickettocreate->origin_email = $replyto;
 			$tickettocreate->ip = $ipaddress;
+			$tickettocreate->severity_code = strtoupper($priority); //To match code format in database 
+			$tickettocreate->category_code = $groupticket;
+			$tickettocreate->type_code = "OTHER"; //TODO: Add type in Form support to add it to ticket
 			if (is_object($tmpcontract)) {
 				$tickettocreate->fk_contract = $tmpcontract->id;
 			}
