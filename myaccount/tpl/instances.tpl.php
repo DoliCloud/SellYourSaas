@@ -630,6 +630,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 		$arrayoflines = $contract->lines;
 		//var_dump($arrayoflines);
+		$ispaid = sellyoursaasIsPaidInstance($contract);
+		$freemodeinstance = ((empty($mythirdpartyaccount->array_options['options_checkboxnonprofitorga']) || $mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] == 'nonprofit') && getDolGlobalInt("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE"));
 
 		// Loop on each service / option enabled
 		foreach ($arrayoflines as $keyline => $line) {
@@ -1056,7 +1058,12 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<div class="divforbutton">';
 					if (!$productalreadyininstance) {
 						// Show link to subscribe
-						print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+						if ($ispaid || ($freemodeinstance && getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL"))) {
+							print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+						} else {
+							// Show disabled button if not paying or validated
+							print '<input type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" title="'.$langs->trans("SorryOptionsNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'..." disabled="disabled" value="'.$langs->trans("Install").'..."><br>';
+						}
 					} else {
 						// Show link to unsubscribe
 						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
