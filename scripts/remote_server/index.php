@@ -90,12 +90,13 @@ $dbname = $tmpparam[4];
 $dbusername = $tmpparam[6];
 $cliafter = $tmpparam[18];
 $cliafterpaid = $tmpparam[46];
+$cliafterdeployoption = $tmpparam[47];
 
 // Recalculate the signature with message received
 // TODO Replace with hash('sha256', $contentsigned.$signature_key); or use asymetric signature.
 $recalculatedsignature = hash('md5', $contentsigned.$signature_key);
 // Extract the signature received
-$signature = empty($tmpparam[47]) ? '' : $tmpparam[47];
+$signature = empty($tmpparam[48]) ? '' : $tmpparam[48];
 
 
 /*
@@ -139,6 +140,7 @@ if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployal
 	if (!in_array($tmparray[0], array('undeployall'))) {
 		checkScriptFile($cliafter, $fh, $params);
 		checkScriptFile($cliafterpaid, $fh, $params);
+		checkScriptFile($cliafterdeployoption, $fh, $params);
 	}
 
 	exec('./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace.' 2>&1', $output, $return_var);
