@@ -2543,6 +2543,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			} else {
 				if (!getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL")) {
 					// TODO: Send mail auto to inform admins of missing recinvoice
+					setEventMessages($langs->trans("SorryOptionsNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")), null, 'errors');
 					$error++;
 				}
 			}

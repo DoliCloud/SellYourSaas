@@ -969,3 +969,4 @@ SELLYOURSAAS_SUPPORT_TICKET_CREATE=Activer la création automatique de tickets l
 UpcomingInvoice=Prochaine facture
 WaitingInvoice=Facture en attente
 SEPADoesNotUnsupendInstantly=Attention, le mode de paiement SEPA ne permet pas de réactiver instantanément une instance suspendue pour défaut de paiement. L'instance sera réactivée automatiquement après un délai de traitement de 3 à 12 jours. Pour une réactivation instantanée, vous pouvez renseigner un mode de paiement par carte.
+SorryOptionsNotAvailableDuringTestPeriod=Désolé, cette fonctionnalité n'est pas disponible pendant la période de test. Veuillez confirmer votre instance en entrant votre mode de paiement dans le menu <b> %s </b> ou en validant votre application pour permettre d'installer les options
