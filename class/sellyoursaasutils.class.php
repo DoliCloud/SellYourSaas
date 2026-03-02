@@ -4534,11 +4534,13 @@ class SellYourSaasUtils
 				$tmppackage->srccronfile  = $dirfortmpfiles.'/cron.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccliafter  = $dirfortmpfiles.'/cliafter.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 				$tmppackage->srccliafterpaid  = $dirfortmpfiles.'/cliafterpaid.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
+				$tmppackage->srccliafterdeployoption  = $dirfortmpfiles.'/cliafterdeployoption.'.$sldAndSubdomain.'.'.$domainname.'.tmp';
 
 				$conffile = make_substitutions($tmppackage->conffile1, $substitarray);
 				$cronfile = make_substitutions($tmppackage->crontoadd, $substitarray);
 				$cliafter = make_substitutions($tmppackage->cliafter, $substitarray);
 				$cliafterpaid = make_substitutions($tmppackage->cliafterpaid, $substitarray);
+				$cliafterdeployoption = make_substitutions($tmppackage->cliafterdeployoption, $substitarray);
 
 				$tmppackage->targetconffile1 = make_substitutions($tmppackage->targetconffile1, $substitarray);
 				$tmppackage->datafile1 = make_substitutions($tmppackage->datafile1, $substitarray);
@@ -4606,6 +4608,17 @@ class SellYourSaasUtils
 					} else {
 						dol_syslog("No cli afterpaid file to create or no content");
 					}
+
+					if ($tmppackage->cliafterdeployoption && $cliafterdeployoption) {
+						dol_syslog("Create cli afterpaid file ".$tmppackage->srccliafterdeployoption);
+
+						dol_delete_file($tmppackage->srccliafterdeployoption, 0, 1, 0, null, false, 0);
+
+						$result = file_put_contents($tmppackage->srccliafterdeployoption, str_replace("\r", '', $cliafterdeployoption));
+						@chmod($tmppackage->srccliafterdeployoption, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
+					} else {
+						dol_syslog("No cli cliafterdeployoption file to create or no content");
+					}
 				}
 				if (in_array($remoteaction, array("deploy", "deployall"))) {
 					dol_syslog("Create meta file ".$tmppackage->datafile1."/sellyoursaas.deploy.meta");
@@ -4659,6 +4672,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $domainnamewebsite); 			// Param 46 in .sh
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $websitenamedeploy); 			// Param 47 in .sh
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterpaid); 	// Param 48 in .sh src for cli after paid
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterdeployoption); 	// Param 49 in .sh src for cli after deploy option
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
