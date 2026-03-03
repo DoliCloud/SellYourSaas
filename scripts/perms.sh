@@ -159,7 +159,7 @@ echo "Recreate link to php prepend files"
 TARGETLINK="/usr/local/bin/phpsendmailprepend.php"
 SOURCELINK="/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmailprepend.php"
 if [ ! -e "$TARGETLINK" ] || [ "$(stat -c %i "$SOURCELINK")" != "$(stat -c %i "$TARGETLINK")" ]; then
-    ln "$SOURCELINK" "$TARGETLINK"
+    ln -f "$SOURCELINK" "$TARGETLINK"
     echo "Link $TARGETLINK has been recreated."
 else
     echo "Link $TARGETLINK already exists and point to same inode than source."
@@ -167,8 +167,7 @@ fi
 TARGETLINK="/usr/local/bin/phpsendmail.php"
 SOURCELINK="/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/phpsendmail.php"
 if [ ! -e "$TARGETLINK" ] || [ "$(stat -c %i "$SOURCELINK")" != "$(stat -c %i "$TARGETLINK")" ]; then
-	rm "$TARGETLINK" >/dev/null 2>&1
-    ln "$SOURCELINK" "$TARGETLINK"
+    ln -f "$SOURCELINK" "$TARGETLINK"
     echo "Link $TARGETLINK has been recreated."
 else
     echo "Link $TARGETLINK already exists and point to same inode than source."
