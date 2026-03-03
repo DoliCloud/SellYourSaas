@@ -346,12 +346,12 @@ if ($EXEC == 'exec') {
 }
 
 if (empty($ip) || $ip == 'unknown') {
-	file_put_contents($logfile, "--- no ip detected ---\n", FILE_APPEND);
-	file_put_contents($logfile, var_export($_SERVER, true)."\n", FILE_APPEND);
-	file_put_contents($logfile, var_export($_ENV, true)."\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . " --- no ip detected ---\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . var_export($_SERVER, true)."\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' '. var_export($_ENV, true)."\n", FILE_APPEND);
 }
 
-file_put_contents($logfile, var_export($resexecstring, true)."\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . ' resexecstring=' . var_export($resexecstring, true)."\n", FILE_APPEND);
 
 time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successfull spamming
 
