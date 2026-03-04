@@ -1058,7 +1058,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '<div class="divforbutton">';
 					if (!$productalreadyininstance) {
 						// Show link to subscribe
-						if ($ispaid || ($freemodeinstance && getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL"))) {
+						if ($ispaid || $freemodeinstance || getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL")) {
 							print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 						} else {
 							// Show disabled button if not paying or validated
