@@ -64,11 +64,12 @@ class SellYourSaasUtils
 	 * Search draft invoices on sellyoursaas customers and check they are linked to a not closed contract. Validate it if not closed, do nothing if closed.
 	 * CAN BE A CRON TASK
 	 *
-	 * @param	int		$restrictonthirdpartyid		0=All qualified draft invoices, >0 = Restrict on qualified draft invoice of thirdparty.
+	 * @param	int		$restrictonthirdpartyid		0=All qualified draft invoices, >0 = Restrict on qualified draft invoice of a given thirdparty.
 	 * @param	int		$maxtoprocess				0=All, >0 = Nb max of invoices to process
+	 * @param	int		$restrictoninvoiceid		Restrict on invoice ID
 	 * @return	int									0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function doValidateDraftInvoices($restrictonthirdpartyid = 0, $maxtoprocess = 0)
+	public function doValidateDraftInvoices($restrictonthirdpartyid = 0, $maxtoprocess = 0, $restrictoninvoiceid = 0)
 	{
 		global $conf, $langs, $user, $mysoc;
 
@@ -100,6 +101,9 @@ class SellYourSaasUtils
 		$sql.= " AND f.total_ttc > 0";
 		if ($restrictonthirdpartyid > 0) {
 			$sql.=" AND f.fk_soc = ".((int) $restrictonthirdpartyid);
+		}
+		if ($restrictoninvoiceid > 0) {
+			$sql.=" AND f.rowid = ".((int) $restrictoninvoiceid);
 		}
 		$sql.= " ORDER BY f.datef, f.rowid";
 		if ($maxtoprocess > 0) {
