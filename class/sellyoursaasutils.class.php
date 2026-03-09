@@ -2596,7 +2596,7 @@ class SellYourSaasUtils
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
 						$someinvoicenotpaid=0;
-						foreach ($object->linkedObjects['facture'] as $idinvoice => $invoice) {
+						foreach ($object->linkedObjects['facture'] as $idline => $invoice) {
 							if ($invoice->statut == Facture::STATUS_DRAFT) {
 								continue;	// Draft invoice are not unpaid invoices
 							}
@@ -2803,7 +2803,7 @@ class SellYourSaasUtils
 						usort($object->linkedObjects['facture'], "sellyoursaasCmpDate");	// function "cmp" to sort on ->date is inside sellyoursaas.lib.php
 
 						//dol_sort_array($contract->linkedObjects['facture'], 'date');
-						foreach ($object->linkedObjects['facture'] as $idinvoice => $invoice) {
+						foreach ($object->linkedObjects['facture'] as $idline => $invoice) {
 							if ($invoice->statut == Facture::STATUS_DRAFT) {
 								continue;	// Draft invoice are not invoice not paid
 							}
@@ -3784,7 +3784,7 @@ class SellYourSaasUtils
 								$object->fetchObjectLinked(null, '', null, '', 'OR', 1, 'sourcetype', 1);
 
 								if (!empty($object->linkedObjects['facturerec']) && is_array($object->linkedObjects['facturerec'])) {
-									foreach ($object->linkedObjects['facturerec'] as $idtemplateinvoice => $templateinvoice) {
+									foreach ($object->linkedObjects['facturerec'] as $idline => $templateinvoice) {
 										// Disabled this template invoice
 										$res = $templateinvoice->setValueFrom('suspended', 1);
 										if ($res) {
@@ -3795,7 +3795,7 @@ class SellYourSaasUtils
 
 								// Delete draft invoices linked to this thirdparty, after a successfull undeploy
 								if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture'])) {
-									foreach ($object->linkedObjects['facture'] as $idinvoice => $invoicetodelete) {
+									foreach ($object->linkedObjects['facture'] as $idline => $invoicetodelete) {
 										if ($invoicetodelete->statut == Facture::STATUS_DRAFT) {
 											if (preg_match('/\(.*\)/', $invoicetodelete->ref)) {
 												//$sql = "DELETE FROM ".MAIN_DB_PREFIX."facture WHERE fk_statut = ".Facture::STATUS_DRAFT." AND fk_soc = ".$object->fk_soc;
