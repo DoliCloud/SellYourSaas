@@ -117,7 +117,7 @@ class SellYourSaasUtils
 			while ($i < $num_rows) {
 				$obj = $this->db->fetch_object($resql);
 				if ($obj && $invoice->fetch($obj->rowid) > 0) {
-					dol_syslog("--- Process invoice id=".$invoice->id." ref=".$invoice->ref." restrictonthirdpartyid=".$restrictonthirdpartyid);
+					dol_syslog("--- Process invoice id=".$invoice->id." ref=".$invoice->ref." restrictonthirdpartyid=".$restrictonthirdpartyid." restrictoninvoiceid=".$restrictoninvoiceid);
 
 					$invoice->fetch_thirdparty();
 
@@ -144,15 +144,15 @@ class SellYourSaasUtils
 							$this->db->begin();
 
 							// Loop on all contracts linked to the invoices
-							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
+							foreach ($invoice->linkedObjects['contrat'] as $idline => $contract) {
 								if (!empty($draftinvoiceprocessed[$invoice->id]) || !empty($draftinvoicecanceled[$invoice->id])) {
 									continue;	// If already processed because of a previous contract line, do nothing more
 								}
 
-								dol_syslog("-- Process validation of invoices for the contract ".$contract->ref, LOG_DEBUG);
+								dol_syslog("-- Process validation of invoices for the contract ".$contract->ref.", id ".$contract->id, LOG_DEBUG);
 
 								if (!empty($tmparray['refsopened'])) {	// If there is other invoices for the same customer
-									dol_syslog("We check if an older open invoice exists");
+									dol_syslog("We check among open invoices if an older open invoice exists");
 
 									// Try to avoid validation of the current $invoice if another invoice, older, is open on the same contract !!!
 									$sqltocheckcontratnotlinkedtoanopeninvoice = "SELECT rowid FROM ".MAIN_DB_PREFIX."facture as f";
@@ -161,7 +161,7 @@ class SellYourSaasUtils
 									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND f.datef < '".$this->db->idate($invoice->date)."'";
 									// This condition should be a duplicate of the one defined into f.rowid IN..., but we keep it to be sure.
 									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND EXISTS (SELECT rowid FROM ".MAIN_DB_PREFIX."element_element";
-									$sqltocheckcontratnotlinkedtoanopeninvoice .= " WHERE sourcetype = 'contrat' AND fk_source = ".((int) $idcontract);
+									$sqltocheckcontratnotlinkedtoanopeninvoice .= " WHERE sourcetype = 'contrat' AND fk_source = ".((int) $contract->id);
 									$sqltocheckcontratnotlinkedtoanopeninvoice .= " AND targettype = 'facture' AND fk_target = f.rowid)";
 									$sqltocheckcontratnotlinkedtoanopeninvoice .= " LIMIT 1";
 
@@ -420,7 +420,7 @@ class SellYourSaasUtils
 
 												if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
 													//dol_sort_array($object->linkedObjects['facture'], 'date');
-													foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
+													foreach ($invoice->linkedObjects['contrat'] as $idline => $contract) {
 														$substitutionarray['__CONTRACT_REF__'] = $contract->ref_customer;
 														$substitutionarray['__REFCLIENT__'] = $contract->ref_customer;	// For backward compatibility
 														$substitutionarray['__REF_CLIENT__'] = $contract->ref_customer;
@@ -2109,7 +2109,7 @@ class SellYourSaasUtils
 
 						if (is_array($invoice->linkedObjects['contrat']) && count($invoice->linkedObjects['contrat']) > 0) {
 							//dol_sort_array($object->linkedObjects['facture'], 'date');
-							foreach ($invoice->linkedObjects['contrat'] as $idcontract => $contract) {
+							foreach ($invoice->linkedObjects['contrat'] as $idline => $contract) {
 								$substitutionarray['__CONTRACT_REF__']=$contract->ref_customer;
 								$substitutionarray['__REFCLIENT__']=$contract->ref_customer;	// For backward compatibility
 								$substitutionarray['__REF_CLIENT__']=$contract->ref_customer;
