@@ -121,6 +121,13 @@ if ($resqlproducts) {
 					} elseif ($tmpprodchild->array_options['options_app_or_option'] == 'system') {
 						// Don't add system services to global price, these are options with calculated quantities
 					} else {
+						if (!empty($tmpprodchild->array_options["options_only_for_country"])) {
+							$optioncountries = preg_split("/[\s,;]+/", $tmpprodchild->array_options["options_only_for_country"]);
+							if (!in_array(dol_strtolower($mythirdpartyaccount->country_code), $optioncountries)) {
+								// Thirdparty country code isn't in options_only_for_country array so we don't show price
+								continue;
+							}
+						}
 						$priceinstance['fix'] += $tmpprodchild->price;
 						$priceinstance_ttc['fix'] += $tmpprodchild->price_ttc;
 					}
