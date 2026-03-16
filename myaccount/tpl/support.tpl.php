@@ -79,6 +79,7 @@ print '
 
 	     <!-- BEGIN PAGE HEADER-->
 	<!-- BEGIN PAGE HEAD -->
+	<br>
 	<div class="page-head">
 	  <!-- BEGIN PAGE TITLE -->
 	<div class="page-title">
@@ -641,6 +642,7 @@ if ($sellyoursaassupporturl) {
 if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREATE") && empty($sellyoursaassupporturl) && ($action != 'presend' || !GETPOST('supportchannel', 'alpha'))) {
 	print '
     				<!-- BEGIN PAGE HEADER-->
+					<br>
     				<!-- BEGIN PAGE HEAD -->
     				<div class="page-head">
     				<!-- BEGIN PAGE TITLE -->
