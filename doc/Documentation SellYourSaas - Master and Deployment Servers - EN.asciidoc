@@ -78,9 +78,9 @@ All the commands to run are supposed to be run as user "root" when no specific u
 
 === Choice and creation of machine and OS
 
-* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximum *24.04*) for the *Master server*.
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *20.04* to maximum *24.04*) for the *Master server*.
 
-* Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximum *24.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
+* Obtain one or more servers with SSH access that can pass root (We will use Ubuntu LTS minimum *20.04* to maximum *24.04*) for the *Deployment server(s)*. Note: This point can be ignored if you decide that the Deployment server will be the same server as the Master server (not recommended in production).
 
 _Example with Amazon Web Services (AWS) Standard Medium:_
 
@@ -288,13 +288,6 @@ Modify the default shell to use bash (instead of dh, sh or dash)
 ln -fs /bin/bash /usr/bin/sh
 ---------------
 
-Or for Ubuntu 18.04
-
-[source, bash]
----------------
-ln -fs /bin/bash /bin/sh
----------------
-
 
 ==== Min for password
 
@@ -397,7 +390,6 @@ chmod go-rw /etc/ssh/sshd_config
 
 Copy the file into  */etc/ssh/sshd_config.d/sellyoursaas.conf* onto the server under the name */etc/ssh/sshd_config.d/sellyoursaas.conf*
 
-For Ubuntu 18.04: you can concat the content into file *sshd_config*, but be sure to not have duplicate values.
 
 
 Now add this at end of file */etc/ssh/sshd_config* (OpenSSH does not allow "Match User" rules into the custom file)
@@ -576,7 +568,7 @@ To manually disable an interface:
 ifconfig ethX down   or    ifconfig ethX:Y down
 ---------------
 
-==== With netplan (Ubuntu 18.04+)
+==== With netplan (Ubuntu 20.04+)
 
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
@@ -1064,7 +1056,7 @@ chown admin:admin /home/admin/.ssh/config
 
 === Installation of packages
 
-There are two scenarios depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one. For Postfix choose "webserver" as initial configuration.
+There are two scenarios depending on your version of Ubuntu. Follow the instruction *20.04-* OR the *22.04+* one. For Postfix choose "webserver" as initial configuration.
 
 * Installation of the 20.04+ Ubuntu packages
 
@@ -1181,7 +1173,7 @@ mkdir sellyoursaas-available sellyoursaas-online sellyoursaas-offline
 ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
 ---------------
 
-* On Ubuntu 18.04 and newer, check that the *PrivateTmp* parameter is *false* in the *apache2.service* launch configuration.
+* On Ubuntu 20.04+, check that the *PrivateTmp* parameter is *false* in the *apache2.service* launch configuration.
 This will make it possible to have a directory */tmp* which is not unique and not isolated to each instance, making debugging and analysis operations possible on the problems of sending emails and controlling spam.
 It also allows to call the antivirus into a separated process on uploaded files that are stored into this temporary directory.
 
@@ -1400,7 +1392,7 @@ apparmor_hat = sellyoursaas
 
 === Timeout of server launches
 
-On Ubuntu 18.04+ and when MariaDB has been migrated from a MySQL:
+On Ubuntu 20.04+ and when MariaDB has been migrated from a MySQL:
 
 Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. 
 To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
@@ -1938,13 +1930,7 @@ Note: It seems we must also restart apache to have this effective inside apache.
 [source,bash]
 ---------------
 
-On Ubuntu 18.04
-
-wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick_3.7.0-1ubuntu_all.deb/download
-dpkg -i afick.deb
-mv /etc/cron.daily/afick_cron.dpkg-new /etc/cron.daily/afick_cron
-
-or on Ubuntu 22.04
+on Ubuntu 22.04
 
 wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick-3.7.0.tgz/download
 tar -xvf afick.tgz; 
@@ -2742,7 +2728,7 @@ cp /usr/bin/dash /usr/bin/secureBash
 ---------------
 
 
-* Create an apparmor file */etc/apparmor.d/usr.bin.secureBash* (or */etc/apparmor.d/bin.secureBash* with Ubuntu 18.04-) with this content:
+* Create an apparmor file */etc/apparmor.d/usr.bin.secureBash* with this content:
 
 [source,bash]
 ---------------
@@ -4633,13 +4619,6 @@ To update Ubuntu to a higher LTS version on a SellYourSaas server:
 ---------------
 apt dist-upgrade or do-release-upgrade
 
-# if you move from 18.04 to 20.04, you must also delete old repository of ondrej/php and and reinstall it with
-sudo add-apt-repository ppa:ondrej/php
-apt update
-apt install php-mysql
-a2enmod php7.4
-apt remove php-fpm php7-fpm
-
 # if you move from 20.04 to 22.04, you must enable the correct php version
 sudo add-apt-repository ppa:ondrej/php
 apt update
@@ -5046,7 +5025,6 @@ Output
 Now that you’ve restarted MySQL and confirmed that it’s using the new location, take the opportunity to ensure that your database is fully functional. Once you’ve verified the integrity of any existing data, you can remove the backup data directory with sudo rm -Rf /var/lib/mysql.bak.
 
 
-!!!!! On Ubuntu 18.04
 Add */mnt/diskhome/mysql* in the apparmor profiles containing */var/lib/mysql* (file */etc/apparmor.d/usr.sbin.mysqld*)
 
 [source,bash]
@@ -5447,7 +5425,7 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SO
 --REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_INFO_SOCIETE_COUNTRY', 1, '__APPCOUNTRYIDCODELABEL__', 'chaine', 0);
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAIN_MAIL_EMAIL_FROM';
 UPDATE llx_const set value = '__APPEMAIL__' where name = 'MAILING_EMAIL_FROM';
-UPDATE llx_const set value = '18.0.0' where name = 'MAIN_VERSION_LAST_UPGRADE';
+UPDATE llx_const set value = '23.0.0' where name = 'MAIN_VERSION_LAST_UPGRADE';
 DELETE FROM llx_const where name IN ('MAIN_EXTERNAL_SMTP_SPF_STRING_TO_ADD', 'MAILING_NO_USING_PHPMAIL', 'MAIN_FILECHECK_LOCAL_SUFFIX');
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_EXTERNAL_SMTP_CLIENT_IP_ADDRESS', 0, 'deployment-server-1.ip, deployment-server-2.ip, [deployment-server-1.ipv6-between-actual-brackets], ...', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_EXTERNAL_MAIL_SPF_STRING_TO_ADD', 0, 'include:sendgrid.net', 'chaine', 0);
@@ -5474,7 +5452,7 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVEN
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_SECURITY_HASH_ALGO', 0, 'password_hash', 'chaine', 1);
 ---------------
 
-Change the value 18.0.0 with version of the image you will build to deploy.
+Change the value 23.0.0 with version of the image you will build to deploy.
 
 
 Into field *Sql to reset password of a deployed instance user*
