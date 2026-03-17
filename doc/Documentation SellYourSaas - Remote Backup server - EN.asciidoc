@@ -374,7 +374,7 @@ To take this into account, try this, otherwise, reboot.
 
 === Creation of working directories
 
-Only */mnt/diskbackup* is required, so no creation of directory has to be done.
+Only */mnt/diskbackup*, already created previously, is required, so no creation of directory has to be done.
 
 
   
@@ -385,17 +385,6 @@ Only */mnt/diskbackup* is required, so no creation of directory has to be done.
 === Installation of packages
 
 There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one
-
-* Installation of the 18.04- Ubuntu packages
-
-[source,bash]
----------------
-sudo apt update
-sudo apt install ntp git gzip zip zstd ncdu duc
-sudo apt install rkhunter chkrootkit
-sudo apt install spamc spamassassin clamav clamav-daemon
-sudo apt install fail2ban
----------------
 
 * Installation of the 20.04+ Ubuntu packages
 
@@ -642,7 +631,7 @@ su root syslog
 ---------------
 
 
-=== Setup of journalctl
+=== Setup of journalctl (optional)
 
 Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
 
