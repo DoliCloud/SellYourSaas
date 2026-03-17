@@ -61,14 +61,14 @@ Whether the disk has just been formatted or whether it is an added disk already 
 blkid
 ---------------
 
-* Declare the assembly for an automatic assembly at each reboot by adding a line in */etc/fstab*
+* Declare the mount for an automatic mount at each reboot by adding a line in */etc/fstab*
 
 [source, bash]
 ---------------
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0 (does not block the server from starting)
 ---------------
 
-* Mount disk
+* Mount disk manually the first time
 
 [source, bash]
 ---------------
@@ -80,15 +80,14 @@ blkid
 
 Note: A reboot may be required if disk or mount is not visible.
 
-* Optimize the filesystem by removing the update of the "atime" read access
+* Optimize filesystem it by removing the update of the "atime" read access
 
 To see options for optimizing filesystems:
 
 [source, bash]
 ---------------
-tune2fs -l /dev/vdxY | grep features
+cat /proc/mounts | grep time
 ---------------
-return
 
 Filesystem features: has_journal ext_attr resize_inode dir_index filetype needs_recovery extent flex_bg sparse_super large_file huge_file uninit_bg dir_nlink extra_isize
 
