@@ -276,7 +276,7 @@ print '
 	              <div class="form-body">
 	                <div class="form-group">
 	                  <label>'.img_picto('', 'email', 'class="paddingright"').$langs->trans("Email").'</label>
-	                  <input type="text" class="form-control" value="'.((GETPOSTISSET('email') && GETPOST('email')) ? GETPOST('email') : $mythirdpartyaccount->email).'" name="email">
+	                  <input type="text" class="form-control" value="'.((GETPOSTISSET('email') && GETPOST('email')) ? GETPOST('email') : $mythirdpartyaccount->email).'" name="email" spellcheck="false">
 	                  <input type="hidden" class="form-control" value="'.$mythirdpartyaccount->email.'" name="oldemail">
 					</div>
 					<div class="form-group">
@@ -293,7 +293,7 @@ if (empty($mythirdpartyaccount->array_options['options_firstname'])) {
 }
 					print '
 							<br>
-	                      <input type="text" class="inline-block" value="'.$mythirdpartyaccount->array_options['options_firstname'].'" name="firstName">
+	                      <input type="text" class="inline-block" value="'.$mythirdpartyaccount->array_options['options_firstname'].'" name="firstName" spellcheck="false">
 	                    </div>
 	                  </div>
 	                  <div class="col-md-6">
@@ -303,7 +303,7 @@ if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
 	print img_warning($langs->trans("Mandatory"));
 }
 					print '<br>
-	                      <input type="text" class="inline-block" value="'.$mythirdpartyaccount->array_options['options_lastname'].'" name="lastName">
+	                      <input type="text" class="inline-block" value="'.$mythirdpartyaccount->array_options['options_lastname'].'" name="lastName" spellcheck="false">
 	                    </div>
 	                  </div>
 	                </div>';
