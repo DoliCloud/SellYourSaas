@@ -990,9 +990,7 @@ function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextraf
 				$newcommentonqty .= '';
 			} else {
 				$error++;
-				dol_syslog('sellyoursaasGetNbUsersContract: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula);
-				//$this->error = 'sellyoursaasRemoteAction: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
-				//$this->errors[] = $this->error;
+				dol_syslog('sellyoursaasGetNbUsersContract: SQL to get resources returns error for '.$contract->ref.' - '.$sqlformula);
 			}
 			if ($newqty) {
 				$nbusersql = $newqty;
@@ -1021,9 +1019,7 @@ function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextraf
 				$newcommentonqty .= 'User Accounts ('.$newqty.') : '.join(', ', $arrayofcomment)."\n";
 			} else {
 				$error++;
-				dol_syslog('sellyoursaasGetNbUsersContract: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula);
-				//$this->error = 'sellyoursaasRemoteAction: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula;
-				//$this->errors[] = $this->error;
+				dol_syslog('sellyoursaasGetNbUsersContract: SQL to get resource list returns empty list for '.$contract->ref.' - '.$sqlformula);
 			}
 			if ($newqty) {
 				$nbusersql = $newqty;

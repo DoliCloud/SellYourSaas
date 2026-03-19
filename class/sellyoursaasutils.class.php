@@ -4914,7 +4914,7 @@ class SellYourSaasUtils
 							$resql = $dbinstance->query($sqlformula);
 							if ($resql) {
 								if (preg_match('/^select count/i', $sqlformula)) {
-									// If request is a simple SELECT COUNT
+									// If request is a simple SELECT COUNT (very old method)
 									$objsql = $dbinstance->fetch_object($resql);
 									if ($objsql) {
 										$newqty = $objsql->nb;
@@ -4927,7 +4927,7 @@ class SellYourSaasUtils
 								} else {
 									// If request is a SELECT nb, fieldlogin as comment
 									$num = $dbinstance->num_rows($resql);
-									if ($num > 0) {
+									if ($num > 0 || (getDolGlobalInt('SELLYOURSAAS_ALLOW_EMPTY_RESOURCES') && $num == 0)) {
 										$itmp = 0;
 										$arrayofcomment = array();
 										while ($itmp < $num) {
