@@ -191,8 +191,8 @@ $orgname = dol_trunc(ucfirst(trim(GETPOST('orgName', 'alpha'))), 250, 'right', '
 $phone   = dol_trunc(ucfirst(trim(GETPOST('phone', 'alpha'))), 20, 'right', 'UTF-8', 1);
 $email = dol_trunc(trim(GETPOST('username', 'alpha')), 255, 'right', 'UTF-8', 1);
 $domainemail = preg_replace('/^.*@/', '', $email);
-$password = dol_trunc(trim(GETPOST('password', 'alpha')), 128, 'right', 'UTF-8', 1);
-$password2 = dol_trunc(trim(GETPOST('password2', 'alpha')), 128, 'right', 'UTF-8', 1);
+$password = dol_trunc(trim(GETPOST('password', 'password')), 128, 'right', 'UTF-8', 1);
+$password2 = dol_trunc(trim(GETPOST('password2', 'password')), 128, 'right', 'UTF-8', 1);
 $country_code = trim(GETPOST('country', 'alpha'));
 
 $sldAndSubdomain = trim(GETPOST('sldAndSubdomain', 'alpha'));

@@ -916,7 +916,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$tickettocreate->origin_replyto = $replyto;
 			$tickettocreate->origin_email = $replyto;
 			$tickettocreate->ip = $ipaddress;
-			$tickettocreate->severity_code = strtoupper($priority); //To match code format in database 
+			$tickettocreate->severity_code = strtoupper($priority); //To match code format in database
 			$tickettocreate->category_code = $groupticket;
 			$tickettocreate->type_code = "OTHER"; //TODO: Add type in Form support to add it to ticket
 			if (is_object($tmpcontract)) {
@@ -1100,8 +1100,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$oldemail = trim(GETPOST('oldemail', 'alphanohtml'));
 	$emailccinvoice = trim(GETPOST('emailccinvoice', 'alphanohtml'));
 	$oldemailccinvoice = trim(GETPOST('oldemailccinvoice', 'alphanohtml'));
-	$firstname = trim(GETPOST('firstName', 'alphanohtml'));
-	$lastname = trim(GETPOST('lastName', 'alphanohtml'));
+	$firstname = trim(dol_string_nospecial(GETPOST('firstName', 'alphanohtml'), '_', '', array('.'), 1));
+	$lastname = trim(dol_string_nospecial(GETPOST('lastName', 'alphanohtml'), '_', '', array('.'), 1));
 	$phone = trim(GETPOST('phone', 'alphanohtml'));
 	$oldphone = trim(GETPOST('oldphone', 'alphanohtml'));
 
@@ -1161,8 +1161,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 } elseif ($action == 'updatepassword') {
-	$password = GETPOST('password', 'password');
-	$password2 = GETPOST('password2', 'password');
+	$password = dol_trunc(trim(GETPOST('password', 'password')), 128, 'right', 'UTF-8', 1);
+	$password2 = dol_trunc(trim(GETPOST('password2', 'password')), 128, 'right', 'UTF-8', 1);
 
 	if (empty($password) || empty($password2)) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Password")), null, 'errors');

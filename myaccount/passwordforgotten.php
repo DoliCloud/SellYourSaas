@@ -106,8 +106,8 @@ if (!$mode) {
 
 $username 		= trim(GETPOST('username', 'alphanohtml'));
 $hashreset		= GETPOST('hashreset', 'alpha');
-$newpassword1   = trim(GETPOST('newpassword1', 'none'));
-$newpassword2   = trim(GETPOST('newpassword2', 'none'));
+$newpassword1   = dol_trunc(trim(GETPOST('newpassword1', 'password')), 128, 'right', 'UTF-8', 1);
+$newpassword2   = dol_trunc(trim(GETPOST('newpassword2', 'password')), 128, 'right', 'UTF-8', 1);
 
 $conf->entity 	= (GETPOST('entity', 'int') ? GETPOST('entity', 'int') : 1);
 
