@@ -26,6 +26,7 @@
  * @var HookManager $hookmanager
  * @var Translate $langs
  *
+ * @var Societe $partnerthirdparty
  * @var string $title
  */
 
@@ -191,15 +192,6 @@ if (!GETPOSTINT('noheader')) {
 		  </div>
 		  <?php if (empty($mythirdparty->id)) {	?>
 		  <div class="paddingtop20" style="float: right;">
-			  <!--
-			  <div class="btn-sm">
-			  <span class="opacitymedium hideonsmartphone paddingright valignmiddle"><?php echo $langs->trans("AlreadyHaveAnAccount"); ?></span>
-				<?php if (! empty($partner) || ! empty($partnerkey)) {
-					print '<br class="hideonsmartphone">';
-				} ?>
-			  <a href="/" class="btn blue btn-sm btnalreadyanaccount valignmiddle"><?php echo $langs->trans("LoginAction"); ?></a>
-			  </div>
-			  -->
 				<?php if (! empty($homepage)) { ?>
 			  <div class="btn-sm home-page-url">
 			  <span class="opacitymedium"><a class="blue btn-sm" style="padding-left: 0;" href="<?php echo $homepage ?>"><?php echo $langs->trans("BackToHomePage"); ?></a></span>
@@ -418,7 +410,7 @@ if (empty($asknewpass) && ! preg_match('/class="(ok|warning)"/', $message)) {
 		$moreparam .= (strpos($moreparam, '?')===false ? '?' : '&').'username='.urlencode($username);
 	}
 
-	print '<a class="alogin" href="'.$dol_url_root.'/index.php'.$moreparam.'">('.((empty($asknewpass) || $asknewpass == 2) ? $langs->trans('BackToLoginPage') : $langs->trans("Cancel")).')</a>';
+	print '<a class="alogin small" href="'.$dol_url_root.'/index.php'.$moreparam.'">('.((empty($asknewpass) || $asknewpass == 2) ? $langs->trans('BackToLoginPage') : $langs->trans("Cancel")).')</a>';
 	?>
 </div>
 

@@ -65,7 +65,10 @@ if (! $res && file_exists("../../../main.inc.php")) {
 if (! $res) {
 	die("Include of main fails");
 }
-
+/**
+ * @var Translate $langs
+ * @var User $user
+ */
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
@@ -156,8 +159,8 @@ if (empty($reshook)) {
 		} else {
 			$tmparray = explode(':', $editthirdparty->array_options['options_pass_temp']);
 
-			if ($hashreset == $tmparray[0]) {
-				$maxdate = dol_stringtotime($tmparray[1]);
+			if (hash_equals($tmparray[0], $hashreset)) {	// Compare the 2 hash
+				$maxdate = dol_stringtotime($tmparray[1]);	// The part after the : into the options_pass_temp was set to date or request + 24 h
 				if (dol_now() > $maxdate) {
 					$langs->load("errors");
 					$message = '<div class="error">'.$langs->trans("ErrorLinkToResetPasswordHasExpired").'</div>';
@@ -180,9 +183,9 @@ if (empty($reshook)) {
 							$asknewpass = 1;
 						} else {
 							// Everything is ok to reset password
-							$editthirdparty->array_options['options_password']=dol_hash($newpassword1);
-							$editthirdparty->array_options['options_pass_temp']='';
-							$result=$editthirdparty->update($editthirdparty->id, $user, 0);
+							$editthirdparty->array_options['options_password'] = dol_hash($newpassword1);
+							$editthirdparty->array_options['options_pass_temp'] = '';
+							$result = $editthirdparty->update($editthirdparty->id, $user, 0);
 							$message = '<div class="ok">'.$langs->trans("YourPasswordHasBeenReset").'</div>';
 							$asknewpass = 2;
 						}
@@ -218,8 +221,10 @@ if (empty($reshook)) {
 				$username = '';
 			} else {
 				include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+
 				$hashreset = getRandomPassword(true, array('I'));
-				$thirdparty->array_options['options_pass_temp']=$hashreset.':'.dol_print_date(dol_time_plus_duree(dol_now('gmt'), 1, 'd'), 'dayhourlog', 'gmt');
+				$thirdparty->array_options['options_pass_temp'] = $hashreset.':'.dol_print_date(dol_time_plus_duree(dol_now('gmt'), 1, 'd'), 'dayhourlog', 'gmt');		// Link is valid 24h
+
 				$result=$thirdparty->update($thirdparty->id, $user, 0);
 				if ($result < 0) {
 					// Failed
