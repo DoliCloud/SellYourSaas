@@ -723,6 +723,8 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 				$i++;
 			}
 			print "</table>";
+			print '<div class="center inline-block divButAction"><a class="left" style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
+
 		} else {
 			print $langs->trans("SoonAvailable");
 		}
