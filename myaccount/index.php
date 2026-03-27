@@ -2629,6 +2629,41 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$action = '';
 		setEventMessages($object->error, $object->errors, 'errors');
 	}
+} elseif ($action == 'confirm_add_message'){
+	$error = 0;
+	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
+	$object = new ActionsTicket($db);
+	$track_id = GETPOST("track_id");
+	$message = GETPOST("message", 'alpha');
+
+	if (empty($track_id)) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("TrackId")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+
+	$object->fetch(0, '', $track_id);
+	if ($object->dao->fk_soc != $mythirdpartyaccount->id) {
+		setEventMessages($langs->trans("ErrorForbidden"), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+
+	if (empty($message)) {
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Message")), null, 'errors');
+		header("Location: ".$backtourl);
+		exit;
+	}
+
+	$result = $object->dao->newMessage($user, $action, 1, 1);
+	if ($result < 0) {
+		$action = '';
+		setEventMessages($object->error, $object->errors, 'errors');
+	} else {
+		$url = $_SERVER["PHP_SELF"].'?mode=ticket&action=view&track_id='.$track_id;
+		header("Location: ".$url);
+		exit;
+	}
 }
 
 

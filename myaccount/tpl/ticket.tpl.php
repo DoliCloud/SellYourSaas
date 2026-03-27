@@ -71,7 +71,7 @@ print '
 	print '<div class="col-md-12">';
 	print '<div class="div-table-responsive-no-min">';
 
-	if (in_array($action, array("view", "presend", "closeticket")) && !empty($track_id) && $object->dao->fk_soc == $mythirdpartyaccount->id) {
+	if (in_array($action, array("view", "add_message", "closeticket")) && !empty($track_id) && $object->dao->fk_soc == $mythirdpartyaccount->id) {
 		$backtourl = $_SERVER["PHP_SELF"]."?mode=ticket&action=view&track_id=".$object->dao->track_id;
 
 		print '<!-- public view ticket -->';
@@ -164,19 +164,6 @@ print '
 		}
 		print '</td></tr>';
 
-		// External contributors
-		if (getDolGlobalInt('TICKET_PUBLIC_DISPLAY_EXTERNAL_CONTRIBUTORS')) {
-			print '<tr><td>'.$langs->trans("ExternalContributors").'</td><td>';
-			if ($object->dao->id > 0) {
-				$contactlist = $object->dao->liste_contact(-1, 'external');
-				foreach ($contactlist as $externalContributor) {
-					print img_picto('', 'contact', 'class="pictofixedwidth"');
-					print $externalContributor["lastname"]." ".$externalContributor["firstname"]."<br>";
-				}
-			}
-			print '</td></tr>';
-		}
-
 		// Add new external contributor
 		if (getDolGlobalInt('TICKET_PUBLIC_SELECT_EXTERNAL_CONTRIBUTORS') && !empty($object->dao->fk_soc)) {
 			print '<form method="post" id="form_view_add_contact" name="form_view_add_contact" action="'.$_SERVER['PHP_SELF'].'?track_id='.$object->dao->track_id.'">';
@@ -204,35 +191,31 @@ print '
 		print '</div></div>';
 		print '</div></div>';
 
-		if ($action == 'presend') {
+		if ($action == 'add_message') {
 			print '<br>';
 			print load_fiche_titre($langs->trans('TicketAddMessage'), '', 'conversation');
 
 			$formticket = new FormTicket($db);
 
-			$formticket->action = "add_message";
+			$formticket->action = "confirm_add_message";
 			$formticket->track_id = $object->dao->track_id;
-			$formticket->trackid = 'tic'.$object->dao->id;
 
-			$baseurl = getDolGlobalString('TICKET_URL_PUBLIC_INTERFACE', DOL_URL_ROOT.'/public/ticket/');
+			$formticket->param = array('fk_user_create' => '-1', 'backtourl' => $_SERVER["PHP_SELF"]."?mode=ticket&action=view&track_id=".$object->dao->track_id,
+									'returnurl' => $_SERVER["PHP_SELF"], 'track_id' => $object->dao->track_id);
 
-			$formticket->param = array('track_id' => $object->dao->track_id, 'fk_user_create' => '-1',
-									   'backtourl' => $_SERVER["PHP_SELF"]."?mode=ticket&action=view&track_id=".$object->dao->track_id);
-
-			$formticket->withfile = 2;
 			$formticket->withcancel = 1;
 
 			$formticket->showMessageForm('100%');
 		}
 
-		if ($action != "presend") {
+		if ($action != "add_message") {
 			print '<div class="tabsAction right">';
 			// List ticket
 			print '<div class="inline-block divButAction"><a class="left" style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
 
 			if ($object->dao->status < Ticket::STATUS_CLOSED) {
 				// New message
-				print '<div class="inline-block divButAction"><a class="wordbreak btn" href="'.$_SERVER['PHP_SELF'].'?mode=ticket&action=presend&track_id='.$object->dao->track_id.'&token='.newToken().'">'.$langs->trans('TicketAddMessage').'</a></div>';
+				print '<div class="inline-block divButAction"><a class="wordbreak btn" href="'.$_SERVER['PHP_SELF'].'?mode=ticket&action=add_message&track_id='.$object->dao->track_id.'&token='.newToken().'">'.$langs->trans('TicketAddMessage').'</a></div>';
 
 				// Close ticket
 				if ($object->dao->status >= Ticket::STATUS_NOT_READ && $object->dao->status < Ticket::STATUS_CLOSED) {
@@ -242,12 +225,164 @@ print '
 
 			print '</div>';
 
-			print '<div class="ticketpublicarea ticketlargemargin">';
+			print '<div class="ticketlargemargin">';
 			print load_fiche_titre($langs->trans('TicketMessagesList'), '', 'conversation');
 			print '</div>';
 		}
 
-		$object->viewTicketMessages(false, false, $object->dao);
+		// View html list of message for ticket
+		$ret = $object->dao->loadCacheMsgsTicket();
+		if ($ret < 0) {
+			dol_print_error($object->dao->db);
+		}
+
+		$action = GETPOST('action', 'aZ09');
+
+		print '<div class="ticketlargemargin" style="padding-top: 0">';
+
+		print '<!-- initial message of ticket -->'."\n";
+		print '<div class="div-table-responsive-no-min">';
+		print '<table class="noborder centpercent">';
+		print '<tr class="liste_titre"><td class="nowrap titlefield">';
+		print $langs->trans("InitialMessage");
+		print '</td></tr>';
+		print '<tr>';
+		print '<td colspan="2">';
+		print '<div class="longmessagecut small">';
+		print dolPrintHTML($object->dao->message);
+		print '</div>';
+		print '</td>';
+		print '</tr>';
+		print '</table>';
+		print '</div>';
+
+		print '</div>';
+
+		if (is_array($object->dao->cache_msgs_ticket) && count($object->dao->cache_msgs_ticket) > 0) {
+			print '<div class="ticketlargemargin">';
+
+			print '<div class="div-table-responsive-no-min">';
+			print '<table class="noborder centpercent">';
+
+			print '<tr class="liste_titre">';
+
+			print '<td>';
+			print $langs->trans('TicketMessagesList');
+			print '</td>';
+
+			print '<td>';
+			print $langs->trans('User');
+			print '</td>';
+
+			foreach ($object->dao->cache_msgs_ticket as $id => $arraymsgs) {
+				if (!$arraymsgs['private'] || ($arraymsgs['private'] == "1" && $show_private)) {
+					print '<tr class="oddeven nohover">';
+					print '<td><strong>';
+					print img_picto('', 'object_action', 'class="paddingright"').dol_print_date($arraymsgs['datep'], 'dayhour');
+					print '<strong></td>';
+					print '<td>';
+					if ($arraymsgs['fk_user_author'] > 0) {
+						$userstat = new User($db);
+						$res = $userstat->fetch($arraymsgs['fk_user_author']);
+						if ($res) {
+							print $userstat->getNomUrl(0, 'nolink');
+						}
+					} elseif (isset($arraymsgs['fk_contact_author'])) {
+						$contactstat = new Contact($db);
+						$res = $contactstat->fetch(0, null, '', $arraymsgs['fk_contact_author']);
+						if ($res) {
+							print $contactstat->getNomUrl(0, 'nolink');
+						} else {
+							print $arraymsgs['fk_contact_author'];
+						}
+					} else {
+						print '<span class="opacitymedium">'.$langs->trans('Unknown').'</span>';
+					}
+					print '</td>';
+					print '</tr>';
+					print '<tr class="oddeven nohover">';
+					print '<td'.($show_user ? ' colspan="2"' : '').'>';
+					print $arraymsgs['message'];
+					//attachment
+
+					$documents = array();
+
+					$sql = 'SELECT ecm.rowid as id, ecm.src_object_type, ecm.src_object_id, ecm.agenda_id';
+					$sql .= ', ecm.filepath, ecm.filename, ecm.share';
+					$sql .= ' FROM '.MAIN_DB_PREFIX.'ecm_files ecm';
+					$sql .= " WHERE ecm.filepath = 'agenda/".(int) $arraymsgs['id']."'";
+					$sql .= " OR (ecm.agenda_id = ".(int) $arraymsgs['id']." AND ecm.src_object_type = 'ticket' AND ecm.src_object_id = ".(int) $object->dao->id.")";
+					$sql .= ' ORDER BY ecm.position ASC';
+
+					$resql = $db->query($sql);
+					if ($resql) {
+						if ($db->num_rows($resql)) {
+							while ($obj = $db->fetch_object($resql)) {
+								$documents[$obj->id] = $obj;
+							}
+						}
+					}
+					if (!empty($documents)) {
+						$isshared = 0;
+						$footer = '<div class="timeline-documents-container">';
+						foreach ($documents as $doc) {
+							if (!empty($doc->share) || ($doc->src_object_type == 'ticket')) {
+								$isshared = 1;
+								$footer .= '<span id="document_'.$doc->id.'" class="timeline-documents" ';
+								$footer .= ' data-id="'.$doc->id.'" ';
+								$footer .= ' data-path="'.$doc->filepath.'"';
+								$footer .= ' data-filename="'.dol_escape_htmltag($doc->filename).'" ';
+								$footer .= '>';
+
+								if (empty($doc->agenda_id)) {
+									$dir_ref = $arraymsgs['id'];
+									$modulepart = 'actions';
+								} else {
+									$split_dir = explode('/', $doc->filepath);
+									$modulepart = array_shift($split_dir);
+									$dir_ref = implode('/', $split_dir);
+								}
+								$filePath = DOL_DATA_ROOT.'/'.$doc->filepath.'/'.$doc->filename;
+								$file_relative_path = $dir_ref.'/'.$doc->filename;
+								$mime = dol_mimetype($filePath);
+								$doclink = '';
+								if (!empty($doc->share)) {
+									$doclink = DOL_URL_ROOT.'/document.php?hashp='.urlencode($doc->share);
+								} elseif ($doc->src_object_type == 'ticket') {
+									$doclink = dol_buildpath('document.php', 1).'?modulepart='.$modulepart.'&attachment=0&file='.urlencode($file_relative_path).'&entity='.getEntity('ticket', 0);
+								}
+
+								$mimeAttr = ' mime="'.$mime.'" ';
+								$class = '';
+								if (in_array($mime, array('image/png', 'image/jpeg', 'application/pdf'))) {
+									$class .= ' documentpreview';
+								}
+
+								$footer .= '<a href="'.$doclink.'" class="btn-link '.$class.'" target="_blank"  '.$mimeAttr.' >';
+								$footer .= img_mime($filePath).' '.$doc->filename;
+								$footer .= '</a>';
+
+								$footer .= '</span>';
+							}
+						}
+						$footer .= '</div>';
+						if ($isshared == 1) {
+							print '<br>';
+							print '<br>';
+							print $footer;
+						}
+					}
+				}
+			}
+			print '</table>';
+			print '</div>';
+			print '</div>';
+		} else {
+			print '<div class="ticketpublicarea ticketlargemargin centpercent">';
+			print '<div class="info">'.$langs->trans('NoMsgForThisTicket').'</div>';
+			print '</div>';
+		}
+
 		print '<br>';
 	} else {
 		$num_rows = 0;
