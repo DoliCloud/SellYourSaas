@@ -87,7 +87,7 @@ _Example with Amazon Web Services (AWS) Standard Medium:_
 Server *m1.medium* hosted in EU @ $ 0.18 per hour plus $ 10 for storage and bandwidth then switch to *m1.large* @ $ 0.18 per hour
 
 _Example with OVH Public Cloud:_
- 
+
 For the *Master server*: A 4 GB memory minimum server with 2 CPU minimum.
 For the *Deployment* server(s), for 500 instances: A 8 GB memory minimum server with 4 CPU minimum - Cost in 2020: 30 euros / month.
 
@@ -164,7 +164,7 @@ mkfs.btrfs /dev/vdxY      (you can also use mkfs.ext4 /dev/vdxY)
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
 
 
-* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command 
+* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command
 
 [source, bash]
 ---------------
@@ -364,7 +364,7 @@ Create the user account *admin*. It will be used to install and administer the s
 [source, bash]
 ---------------
 useradd admin;
-groupadd admin; 
+groupadd admin;
 useradd -m -s "/usr/bin/bash" -g admin admin;
 chown a+rx /home/admin;
 mkdir -p /home/admin/logs; chown root:admin /home/admin/logs; chmod 770 /home/admin/logs;
@@ -461,7 +461,7 @@ passwd root
 passwd admin
 ---------------
 
-Run *ssh-keygen* for all these acounts : *root*, *admin* and *mylastnamefirstname*
+Run *ssh-keygen* for all these accounts : *root*, *admin* and *mylastnamefirstname*
 
 
 === Deletion of information files at login
@@ -470,8 +470,8 @@ In order not to give information to users doing SSH, on the *Deployment servers*
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/00-header /etc/update-motd.d/20-runabove 
-rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-motd-news 
+rm /etc/update-motd.d/00-header /etc/update-motd.d/20-runabove
+rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-motd-news
 rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
@@ -572,7 +572,7 @@ ifconfig ethX down   or    ifconfig ethX:Y down
 
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
- 
+
 Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
 
 [source, conf]
@@ -588,7 +588,7 @@ network:
 			gateway6: "1234:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
- 
+
 [source, bash]
 ---------------
 netplan try
@@ -710,8 +710,8 @@ mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
 mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt;
 chown admin:root /mnt/diskbackup/backup /mnt/diskbackup/archives-test /mnt/diskbackup/archives-paid
 ln -fs /mnt/diskhome/home /home/jail/home
-ln -fs /mnt/diskbackup/backup /home/jail/backup 
-ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test 
+ln -fs /mnt/diskbackup/backup /home/jail/backup
+ln -fs /mnt/diskbackup/archives-test /home/jail/archives-test
 ln -fs /mnt/diskbackup/archives-paid /home/jail/archives-paid
 ---------------
 
@@ -741,7 +741,7 @@ chown -R admin:admin /home/admin/wwwroot/dolibarr
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas 
+git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 
@@ -769,10 +769,10 @@ domain=mysaasdomainname.com
 # If deployment server: url of subdomain for user instances
 subdomain=withX.mysaasdomainname.com
 
-# Set to 1 if this server is the *Master* server and must still have ssh and mysql port open, 
+# Set to 1 if this server is the *Master* server and must still have ssh and mysql port open,
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip[-ssh|-mysql].conf only
 masterserver=1
-# Set to 1 if this server host instances for the pool (*Deployment* server) and must have ssh and mysql port open, 
+# Set to 1 if this server host instances for the pool (*Deployment* server) and must have ssh and mysql port open,
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip[-ssh|-mysql].conf only
 instanceserver=1
 
@@ -901,7 +901,7 @@ mkdir -p /etc/sellyoursaas.d
 
 
 * Optional: If you want to restrict access from specific IP (to the web admin on *Master* server or to SSH or MySQL on the *Deployment* servers), you can also
-create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only) 
+create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only)
 
 Example:
 
@@ -958,7 +958,7 @@ Set a fixed port for mountd:
 vi /etc/default/nfs-kernel-server
 ---------------
 
-and comment out this line: RPCMOUNTDOPTS=--manage-gids, add this instead: 
+and comment out this line: RPCMOUNTDOPTS=--manage-gids, add this instead:
 
 [source, bash]
 ---------------
@@ -975,7 +975,7 @@ rpcinfo -p
 You should see mountd on port 33333, portmapper on port 111 and nfs on port 2049. If not, restart server.
 Warning: LISTEN is done on port 2049, so you can see it with "netstat -ultpn | grep 2049" or "ss -ultpn | grep 2049" but not with "lsof -P -i -n" (this is a special kernel embedded service). And you won't see link
 doing a grep on the server even with netstat or ss.
-On the *Deployment* server, you can see when the NFS share is linked on network with "netstat -n | grep ipservermaster" 
+On the *Deployment* server, you can see when the NFS share is linked on network with "netstat -n | grep ipservermaster"
 
 [source, bash]
 ---------------
@@ -991,7 +991,7 @@ exportfs
 
 ==== On the Deployment Servers
 
-Make sure to have firewall open between the NFS client (*Deployment* server) and the NFS server (*Master* server). 
+Make sure to have firewall open between the NFS client (*Deployment* server) and the NFS server (*Master* server).
 Note: The firewall will be installed later.
 
 Install the NFS client and install it manually. Mounting is performed by default in NFSv4.
@@ -1038,7 +1038,7 @@ Create or complete the file */home/admin/.ssh/config* to tell OpenSSH to use thi
 Host ip.server.deployment
     IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
 Host github.com
-    IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas    
+    IdentityFile /home/admin/.ssh/id_rsa_sellyoursaas
 ---------------
 
 Set correct permission on file
@@ -1049,7 +1049,7 @@ chmod 600 /home/admin/.ssh/config
 chown admin:admin /home/admin/.ssh/config
 ---------------
 
-  
+
 <<<<
 
 == Installation of system and application components
@@ -1139,14 +1139,14 @@ Enable apache *modules* to work with MPM_PREFORK and MPM_ITK:
 ---------------
 a2enmod actions alias asis auth_basic auth_digest authn_anon authn_dbd authn_dbm authn_file authz_dbm authz_groupfile authz_host authz_owner authz_user autoindex
 a2enmod cache cgid cgi charset_lite dav_fs dav dav_lock dbd deflate dir dump_io env expires ext_filter file_cache filter headers http2 ident include info ldap
-a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif speling ssl status substitute suexec unique_id userdir usertrack vhost_alias
+a2enmod mem_cache mime mime_magic negotiation reqtimeout rewrite setenvif spelling ssl status substitute suexec unique_id userdir usertrack vhost_alias
 a2enmod mpm_itk mpm_prefork
 a2enmod php7.0|php7.2|php7.4|php8.1|php8.3
 ---------------
 
 Remove these unused apache modules:
 ---------------
-a2dismod auth_digest authn_anon asis suexec userdir usertrack authn_dbd dbd ident mime_magic speling
+a2dismod auth_digest authn_anon asis suexec userdir usertrack authn_dbd dbd ident mime_magic spelling
 ---------------
 
 On php8.1+
@@ -1208,7 +1208,7 @@ ErrorLog "|/usr/bin/rotatelogs -t ${APACHE_LOG_DIR}/other_vhosts_error.log 1G"
 
 On the *Master* server:
 
-* Create the file */etc/apache2/.htpasswd* with 
+* Create the file */etc/apache2/.htpasswd* with
 
 [source, bash]
 ---------------
@@ -1258,7 +1258,7 @@ Choose a password. You will need to give this couple login/password to anyone wh
         AuthType None
         Require all granted
         Satisfy any
-        </Directory>        
+        </Directory>
         <Directory /home/admin/wwwroot/dolibarr/htdocs/public/>
         AuthType None
         Require all granted
@@ -1279,7 +1279,7 @@ Choose a password. You will need to give this couple login/password to anyone wh
         Require all granted
         Satisfy any
         </Files>
-        
+
         <Directory /home/admin/wwwroot>
         AllowOverride FileInfo Limit
         Options +FollowSymLinks
@@ -1385,7 +1385,7 @@ TODO: For a future use of php-fpm, add into */etc/php/7.4/fpm/pool.d/**.conf*
 ---------------
 php_admin_value[open_basedir] = /tmp/:/home/dolibarr:/home/dolibarr/maxmind/:/usr/share/GeoIP/
 ; a commenter si pb pour lancer php-fpm tourne en boucle
-apparmor_hat = sellyoursaas 
+apparmor_hat = sellyoursaas
 ---------------
 
 
@@ -1394,7 +1394,7 @@ apparmor_hat = sellyoursaas
 
 On Ubuntu 20.04+ and when MariaDB has been migrated from a MySQL:
 
-Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash. 
+Increase the timeout for launching processes because sometimes mysql / mariadb can take a long time to restart after a crash.
 To do this, modify the file */etc/systemd/system/mariadb.service.d/migrated-from-my.cnf-settings.conf* and put
 
 [source, bash]
@@ -1560,7 +1560,7 @@ We will enable some generic fail2ban rules:
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
 
 As well as the specific rules for sellyoursaas:
-  
+
   *email-dol-blacklist*, *email-dol-perday*, *email-dol-perhour*, *email-dol-perhouradmin*
   *web-accesslog-limit401*, *web-accesslog-limit403*, *web-accesslog-limitapi*, *web-accesslog-limitapipermin*,
   *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-limitpublic*, *web-dol-registerinstance*
@@ -1933,20 +1933,20 @@ Note: It seems we must also restart apache to have this effective inside apache.
 on Ubuntu 22.04
 
 wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.7.0/afick-3.7.0.tgz/download
-tar -xvf afick.tgz; 
+tar -xvf afick.tgz;
 cd afick-3.7.0; perl Makefile.pl; make install; ln -fs /opt/afick/etc/afick.conf /etc/afick.conf; ln -fs /opt/afick/bin/afick.pl /usr/bin/afick.pl;
 mv afick_cron /etc/cron.daily/afick_cron
-vi /etc/cron.daily/afick_cron to replace lines 
+vi /etc/cron.daily/afick_cron to replace lines
   AFICK="/usr/bin/afick.pl" with AFICK="/opt/afick/bin/afick.pl"
   /usr/bin/afick_archive.pl with /opt/afick/bin/afick_archive.pl
-  
+
 or on Ubuntu 24.04
 
 wget -O afick.tgz https://sourceforge.net/projects/afick/files/afick/3.8.1/afick-3.8.1.tgz/download
-tar -xvf afick.tgz; 
+tar -xvf afick.tgz;
 cd afick-3.8.1; perl Makefile.pl; make install; ln -fs /opt/afick/etc/afick.conf /etc/afick.conf; ln -fs /opt/afick/bin/afick.pl /usr/bin/afick.pl;
 mv afick_cron /etc/cron.daily/afick_cron
-vi /etc/cron.daily/afick_cron to replace lines 
+vi /etc/cron.daily/afick_cron to replace lines
   AFICK="/usr/bin/afick.pl" with AFICK="/opt/afick/bin/afick.pl"
   /usr/bin/afick_archive.pl with /opt/afick/bin/afick_archive.pl
 ---------------
@@ -1965,7 +1965,7 @@ exclude_suffix := tmp old bak
 [source,bash]
 ---------------
 # used by cron job (afick_cron)
-# define the mail adress to send cron job result
+# define the mail address to send cron job result
 @@define MAILTO supervision@mysaasdomainname.com
 # truncate the result sended by mail to the number of lines (avoid too long mails)
 @@define LINES 1000
@@ -1979,7 +1979,7 @@ exclude_suffix := tmp old bak
 @@define BATCH 1
 
 # if set to 0, keep all archives, else define the number of days to keep
-# with the syntaxe nS , n for a number, S for the scale
+# with the syntax nS , n for a number, S for the scale
 # (d for day, w for week, m for month, y for year)
 # ex : for 5 months : 5m
 @@define ARCHIVE_RETENTION 6m
@@ -2129,9 +2129,9 @@ WHITE_PROCESSES_LIST=   # Limit all processes except processes defined in this v
 if [[ -n "$BLACK_PROCESSES_LIST" &&  -n "$WHITE_PROCESSES_LIST" ]] ; then    # If both variables are defined then error is produced.
    echo "At least one or both of the variables BLACK_PROCESSES_LIST or WHITE_PROCESSES_LIST must be empty."
    exit 1
-elif [[ -n "$BLACK_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to bellow command
+elif [[ -n "$BLACK_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to below command
    NEW_PIDS_COMMAND="top -b -n1 -c | grep -E '$BLACK_PROCESSES_LIST' | gawk '\$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
-elif [[ -n "$WHITE_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to bellow command
+elif [[ -n "$WHITE_PROCESSES_LIST" ]] ; then                                 # If this variable is non-empty then set NEW_PIDS_COMMAND variable to below command
    NEW_PIDS_COMMAND="top -b -n1 -c | gawk 'NR>6' | grep -E -v '$WHITE_PROCESSES_LIST' | gawk '\$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
 else
    NEW_PIDS_COMMAND="top -b -n1 -c | gawk 'NR>6 && \$9>CPU_LIMIT {print \$1}' CPU_LIMIT=$CPU_LIMIT"
@@ -2161,7 +2161,7 @@ Note: Some global quotas can be set with the *ulimit* tool in */etc/security/lim
 
 === Setup of /etc/security/limits.conf (optional)
 
-* Create a file */etc/security/limits.d/sellyoursaas.conf* (or edit file */etc/security/limits.conf* if ot does not work) for example to increase the max number of files open by a process and set the max filesize for users with ID >= 65535 (See "man limits.conf" for possible syntaxes)
+* Create a file */etc/security/limits.d/sellyoursaas.conf* (or edit file */etc/security/limits.conf* if it does not work) for example to increase the max number of files open by a process and set the max filesize for users with ID >= 65535 (See "man limits.conf" for possible syntaxes)
 
 [source,conf]
 ---------------
@@ -2183,8 +2183,8 @@ Note: To get/see the current limits of OS for the connected user:
 ulimit -a
 ---------------
 
-Note: 
-You can check that there is indeed the line *session required pam_limits.so* in the files */etc/pam.d/system-auth* or */etc/pam.d/password-auth* and/or */etc/pam.d/sudo* to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files. 
+Note:
+You can check that there is indeed the line *session required pam_limits.so* in the files */etc/pam.d/system-auth* or */etc/pam.d/password-auth* and/or */etc/pam.d/sudo* to ensure that you always set the thresholds set by the administrator each time a user logs into the system. If the limits defined in this file are not taken into account, the first instinct is to ensure that the pam_limits.so module is activated in the PAM configuration files.
 NOTE: On some distributions the PAM configuration files may differ. You can find the definition of the limits in the files */etc/pam.d/common-session* or */etc/pam.d/login*. But the principle remains the same: ensure that at each user connection the system resource thresholds are applied.
 
 
@@ -2275,7 +2275,7 @@ smtpd_client_restrictions = permit_sasl_authenticated, permit_mynetworks, check_
 #smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access,  check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_rbl_client cbl.abuseat.org, reject_rbl_client bl.spamcop.net, reject_unknown_sender_domain
 smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_unknown_sender_domain
 
-# List of blocked recepients
+# List of blocked recipients
 #----------------------------
 # Here we declare we want mail to my domain, to specific email with SA filtering, otherwise refuse.
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
@@ -2289,7 +2289,7 @@ smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, che
 !!! IMPORTANT
 
 Remember to change those lines in */etc/postfix/main.cf*:
- 
+
 [source,bash]
 ---------------
 inet_interfaces = public.ip.returned.by_server_s_reverse_dns
@@ -2330,10 +2330,10 @@ smtp      inet  n       -       y       -       -       smtpd -v
 
 On a *Master* only server, change only the listened address of the MySQL/MariaDB server:
 
-Edit config file 
-*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
+Edit config file
+*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql)
 or
-*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
+*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb)
 to change:
 
 [source,bash]
@@ -2347,7 +2347,7 @@ Note: This may be "listen = 0.0.0.0" instead of "bind-address = 0.0.0.0".
 
 On *Deployment* servers:
 
-Edit the config file 
+Edit the config file
 */lib/systemd/system/mysql.service*  or  */lib/systemd/system/mariadb.service*
 to put into section *[Service]* a value that is a limit of number of files that is higher than the default value of *4096* (visible with *sudo systemctl show -p DefaultLimitNOFILE*) of systemd:
 
@@ -2368,10 +2368,10 @@ Take the change into account with command:
 systemctl daemon-reload
 ---------------
 
-Then edit config file 
-*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
+Then edit config file
+*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql)
 or
-*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
+*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb)
 to change:
 
 [source,bash]
@@ -2379,7 +2379,7 @@ to change:
 bind-address = 127.0.0.1
 ---------------
 
-with 
+with
 
 [source,bash]
 ---------------
@@ -2465,7 +2465,7 @@ SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
 For MariaDB: The plugin is *unix_socket* and is set by default on Ubuntu OS.
 
 
-To switch in mode authentification by password / by unix socket account :
+To switch in mode authentication by password / by unix socket account :
 
 For MySQL:
 
@@ -2565,10 +2565,10 @@ Note: This is user permission is used by:
 
 * the root batch *clean.sh* to SELECT contracts and to list all dbn databases using SHOW DATABASES.
 * the root batch *batch_detect_evil_instances.php* to SELECT contracts
-* the admin batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm 
-* the admin batch *backup_instance.php* to get and update properties of instances to backup 
-* the admin batch *restore_instance.php* to get and update properties of instances to restore 
-* the admin batch *backup_backup.php* to update status of remote backup 
+* the admin batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm
+* the admin batch *backup_instance.php* to get and update properties of instances to backup
+* the admin batch *restore_instance.php* to get and update properties of instances to restore
+* the admin batch *backup_backup.php* to update status of remote backup
 
 Note: If the user already exists, to set only the password:
 
@@ -2608,7 +2608,7 @@ FLUSH PRIVILEGES;
 
 ==== Create a user for supervision (optional)
 
-If you use a supervision agent like *DataDog* to superize the database, create an accunt to access localy to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
+If you use a supervision agent like *DataDog* to superize the database, create an account to access locally to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
 
 [source,sql]
 ---------------
@@ -2619,7 +2619,7 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-==== Setup mariadb cluster in mode master-slave (optional, abandonned)
+==== Setup mariadb cluster in mode master-slave (optional, abandoned)
 
 On the server, activate the mode MASTER by adding the directives:
 
@@ -2754,7 +2754,7 @@ include::repository_root/etc/apparmor.d/php-fpm[]
 ---------------
 
 
-Note: To activate(reload)/desactivate a rule apparmor, use *aa-disable* or *aa-enforce* (or *aa-complain*)
+Note: To activate(reload)/deactivate a rule apparmor, use *aa-disable* or *aa-enforce* (or *aa-complain*)
 
 To enable a profile:
 
@@ -2778,7 +2778,7 @@ All the disabled profiles are visible into */etc/apparmor.d/disable*
 Sometimes, a reboot of server may be required to take into account any change on apparmor profile files.
 
 
-Note: The apparmor logs are visible into */var/log/kern.log* or */var/log/audit/audit.log* or */var/log/syslog*. 
+Note: The apparmor logs are visible into */var/log/kern.log* or */var/log/audit/audit.log* or */var/log/syslog*.
 
 To solve a problem of permission blocked by apparmor, you can clean the file */var/log/syslog*, then execute the failed command, then run:
 
@@ -2805,7 +2805,7 @@ Note: Before Ubuntu 20.04, to unload ALL apparmor profiles and reload them:
 ---------------
 
 
-Note: To list all confined/unconfined processus:
+Note: To list all confined/unconfined processes:
 
 [source,bash]
 ---------------
@@ -2813,7 +2813,7 @@ ps fauxZ
 ---------------
 
 
-* Once the apparmor is enabled for apache2, we must enable the module "apparmor" for apache, so Apache will switch to the profile *sellyoursaas-instances* 
+* Once the apparmor is enabled for apache2, we must enable the module "apparmor" for apache, so Apache will switch to the profile *sellyoursaas-instances*
 when an instance is opened (and if the entry <IfModule mod_apparmor.c>AADefaultHatName sellyoursaas-instances</IfModule> is added into the virtual host).
 For this run:
 
@@ -3021,13 +3021,13 @@ In the registrar, update the DNS of the main domain *mysaasdomainname.com* with 
 
 ==== On registrar side
 
-In the registrar, update the DNS of the main domain *mysaasdomainname.com* with *A* records 
+In the registrar, update the DNS of the main domain *mysaasdomainname.com* with *A* records
 
     *withX.mysaasdomainname.com*          Type A		Subdomain of the actual user instances, points to the deployment server's IP
     *ns1withX.mysaasdomainname.com*       Type A		DNS server 1 of the user instances, points to the deployment server's IP
     *ns2withX.mysaasdomainname.com*       Type A		DNS server 2 of the user instances, points to the deployment server's IP
 
-In the registrar, add also the DNS of the DNS servers of the main domain *withX.mysaasdomainname.com* with *NS* records 
+In the registrar, add also the DNS of the DNS servers of the main domain *withX.mysaasdomainname.com* with *NS* records
 
     *withX.mysaasdomainname.com*       Type NS		DNS server 1 of the user instances, points to value *ns1withX.mysaasdomainname.com*
     *withX.mysaasdomainname.com*       Type NS		DNS server 2 of the user instances, points to value *ns2withX.mysaasdomainname.com*
@@ -3403,7 +3403,7 @@ You can use the solution 1 (recommended as free and with no manual update requir
 
 ===== Solution 1: From LetsEncrypt (recommended)
 
-* To create a SSL certficate *on the master* :
+* To create a SSL certificate *on the master* :
 
 [source,bash]
 ---------------
@@ -3420,7 +3420,7 @@ certbot certonly -n --server https://acme-v02.api.letsencrypt.org/directory --ag
 ---------------
 
 The option [--expand] is to concate the result to an already existing certificate when you want to add another domain.
- 
+
 For example, you can use *supervision@mysaasdomainname.com* as the email for letsencrypt account.
 
 This create certificates and also enable the automatic renewal of wildcard certificates so you do not need to renew manually every 90 days (systemd timer is run regularly, if the certificate is within 30 days of expiry, it is renewed automatically and the symbolic links in */etc/letsencrypt/live/<domain>* are updated, so if you use those in your vhosts you have nothing more to do)
@@ -3455,7 +3455,7 @@ systemctl status snap.certbot.renew.timer
 certbot renew -v [--dry-run]
 or
 certbot renew --force-renewal
-or 
+or
 certbot renew --cert-name admin.<mysaasdomainname.com> --dry-run
 ---------------
 
@@ -3472,10 +3472,10 @@ or
 certbot certonly -n [--manual-public-ip-logging-ok] --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual --preferred-challenges=dns --manual-auth-hook /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/letsencrypt_authenticator.sh -d "*.with<X>.<mysaasdomainname.com>,with<X>.<mysaasdomainname.com>" -m <email_for_your_account_with_lets_encrypt> --deploy-hook "systemctl restart apache2" --force-renewal
 ---------------
 
-Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file 
+Note: To know if a certificate will correctly use the hook for the renewal, you can have a look into the file
 */etc/letsencrypt/renewal/withX.mysaasdomainname.com.conf*
 
-To check that a DNS update is ok for a challenge, you can use this URL: 
+To check that a DNS update is ok for a challenge, you can use this URL:
 https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.withX.mysaasdomainname.com
 or from command line: host -t txt _acme-challenge.withX.mysaasdomainname.com
 
@@ -3490,8 +3490,8 @@ find /etc/letsencrypt/ -name "*with<X>.<mysaasdomainname>*" -exec rm -fr {} \;
 
 * Create the key *withX.mysaasdomainname.com.key* and csr *withX.mysaasdomainname.com.csr* files like so:
 
-To generate the .key file:   
-    
+To generate the .key file:
+
 [source,bash]
 ---------------
 cd /etc/apache2
@@ -3586,7 +3586,7 @@ touch /etc/apache2/sites-available/000-default-ssl.conf
 
 				#
 				# Allow server status reports generated by mod_status, when calling supervision.withX.mydomain.com
-				# The name "supervision" is by default in DNS to resolve on the IP of the server 
+				# The name "supervision" is by default in DNS to resolve on the IP of the server
 				# but no virtual hosts exists for it, so we reach this virtual host file.
 				# THIS IS ALSO REQUIRED FOR /usr/sbin/apachectl fullstatus
 				#
@@ -3599,12 +3599,12 @@ touch /etc/apache2/sites-available/000-default-ssl.conf
 				    # To allow an admin desktop to see status, you can uncomment this with the correct IP
 				    #Require ip 1.2.3.4
 				</Location>
-				
+
         </VirtualHost>
 </IfModule>
 ---------------
 
-So if a user is using an old URL with a delete virtual host, he will reach the default page */var/www/html/index.html*. 
+So if a user is using an old URL with a delete virtual host, he will reach the default page */var/www/html/index.html*.
 
 * Edit the page */var/www/html/index.html* with the content
 
@@ -3656,14 +3656,14 @@ You must have inside the cron of user *admin* (You can view the cron with *cront
 # m h  dom mon dow   command
 # cron master admin
 */10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php <securitykeydefinedinscheduledjobsetup> anonymousbatch >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log 2>&1
-5 5 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatedatabase.log 2>&1
+5 5 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly >> /home/admin/logs/batch_customers-updatestatsonly.log 2>&1
 7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git >> /home/admin/logs/git_update_sources.log 2>&1
 # cron master and deployment admin
 #7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
 5 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php backupdelete >> /home/admin/logs/batch_customers-backup.log 2>&1
 ---------------
 
-Note: *securitykeydefinedinscheduledjobsetup* is the value of a key you have choosen. And *anonymousbatch* is the user dedicated for batch processing. Remember the 2 value you use hare, you will set them later on the Dolibarr master.
+Note: *securitykeydefinedinscheduledjobsetup* is the value of a key you have chosen. And *anonymousbatch* is the user dedicated for batch processing. Remember the 2 value you use hare, you will set them later on the Dolibarr master.
 
 
 ==== On Deployment servers
@@ -3823,7 +3823,7 @@ On the Dolibarr *master server*, activate and setup the module GeoIP of Dolibarr
 
 == Installation or update of plugin SellYourSaas
 
-For a first installation, you must make all the initial setup of plugin. 
+For a first installation, you must make all the initial setup of plugin.
 If you just added a new deployment server, you must just edit the setup of the module to declare the new server.
 
 
@@ -3836,15 +3836,15 @@ Connect to Dolibarr's master server's user interface (https://admin.mysaasdomain
 * Create a *Generic Dolibarr user account* with login *anonymous* called "SellYourSaas anonymous account" that will be used to access Dolibarr data and functions when a customer is using the public customer interface.
 Give this user the permissions below and only the permission below:
 
-** Agenda Module 
+** Agenda Module
 *** Read actions
 *** Create/modify actions
-*** Read other's actions 
+*** Read other's actions
 *** Create actions for others
 ** Bank Module
 *** View financial accounts
 *** Create/modify amount/delete bank transactions
-** Categories Module 
+** Categories Module
 *** View categories
 ** Contracts/Subscriptions
 *** Read contracts/subscriptions
@@ -3855,27 +3855,27 @@ Give this user the permissions below and only the permission below:
 *** View invoices
 ** Vendors Module
 *** View vendors
-** SellYourSaas Module 
+** SellYourSaas Module
 *** Read SellYourSaaS data
-** Services Module 
+** Services Module
 *** View services
 ** Third Parties Module
 *** View third parties related to user
-** View Users and Groups Module 
+** View Users and Groups Module
 *** Create/modify one's own user data
 
 * Create a *Generic Dolibarr user account* with login *anonymousbatch* called "SellYourSaas batch account" that will be used for batch actions.
 Give this user the permissions below and only the permission below:
 
-** Agenda Module 
+** Agenda Module
 *** Read actions
 *** Create/modify actions
-*** Read other's actions 
+*** Read other's actions
 *** Create actions for others
 ** Bank Module
 *** View financial accounts
 *** Create/modify amount/delete bank transactions
-** Categories Module 
+** Categories Module
 *** View categories
 ** Contracts/Subscriptions
 *** Read contracts/subscriptions
@@ -3888,9 +3888,9 @@ Give this user the permissions below and only the permission below:
 *** Make payments on invoices
 ** Vendors Module
 *** View vendors
-** SellYourSaas Module 
+** SellYourSaas Module
 *** Read SellYourSaaS data
-** Services Module 
+** Services Module
 *** View services
 ** Third Parties Module
 *** View third parties related to user
@@ -3904,7 +3904,7 @@ Give this user the permissions below and only the permission below:
 
 ** Name of Saas service
 ** Name of main domain
-** Main email 
+** Main email
 
 * Create a *Package* to configure the applications to be deployed (files, config, database dump...)
 
@@ -3923,11 +3923,11 @@ See "Setup of Services" for a description of the fields.
 See "Services Configuration" for a description of the fields.
 
 
-Note: The *Options* and *Metrics* type services must be linked to an *Application* type service in The Virtual Products tab. 
+Note: The *Options* and *Metrics* type services must be linked to an *Application* type service in The Virtual Products tab.
 
 Note: The URL to deploy *Applications* type packages can be viewed in the *SellYourSaas - Deployment URL* menu
 
-* Go to the configuration of the *Scheduled jobs* module and retrieve the instruction to add in the cron of the user *admin* and check 
+* Go to the configuration of the *Scheduled jobs* module and retrieve the instruction to add in the cron of the user *admin* and check
 it has been added into the cron so the Sell-Your-Saas batches can run.
 The value for <securitykeydefinedinscheduledjobsetup> must match into the setup of the module and into the cron command line.
 
@@ -3952,14 +3952,14 @@ On the *Master*, if you install a new deployment server:
 DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 ---------------
 
-* Copy the datadog config file to supervize *mysql/mariadb*. 
+* Copy the datadog config file to supervize *mysql/mariadb*.
 
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
 ---------------
 
-Edit the file to enter the datadog password for mariadb. 
+Edit the file to enter the datadog password for mariadb.
 
 * Copy the datadog config file to supervize *apache*.
 
@@ -3976,7 +3976,7 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 cp /etc/datadog-agent/conf.d/postfix.d/conf.yaml.example /etc/datadog-agent/conf.d/postfix.d/conf.yaml
 ---------------
 
-Edit the file to add *min_collection_interval: 300* under *postfix_user: postfix*, and add under *queues: - defered* to existing options.
+Edit the file to add *min_collection_interval: 300* under *postfix_user: postfix*, and add under *queues: - deferred* to existing options.
 
 Add the following line into the file */etc/sudoers*
 
@@ -4036,11 +4036,11 @@ instances:
     search_string: ['/usr/sbin/cron']
     exact_match: False
     thresholds:
-      critical: [1, 5000]      
+      critical: [1, 5000]
 
   #
   # The following entries are for deployment server only
-  #      
+  #
 
   - name: agent_sellyoursaas
     search_string: ['remote_server']
@@ -4053,13 +4053,13 @@ instances:
     exact_match: False
     thresholds:
       critical: [1, 5000]
-      
+
   - name: apache_watchdog_daemon2
     search_string: ['apache_watchdog_daemon2']
     exact_match: False
     thresholds:
       critical: [1, 5000]
- 
+
   - name: apache_watchdog_daemon3
     search_string: ['apache_watchdog_daemon3']
     exact_match: False
@@ -4070,7 +4070,7 @@ instances:
     search_string: ['smtp_watchdog_daemon1']
     exact_match: False
     thresholds:
-      critical: [1, 5000]       
+      critical: [1, 5000]
 ---------------
 
 
@@ -4120,9 +4120,9 @@ instances:
 
     mount_point_exclude:
         - /home/admin/wwwroot/dolibarr_documents/sellyoursaas
-    
+
     include_all_devices: false
-    
+
 ---------------
 
 Note: Replace withX by correct prefix of the deployment server.
@@ -4147,7 +4147,7 @@ vi /var/log/datadog/agent.log
 
 This is some steps to do to test/check that an installation is correct:
 
-- You can/should run the script *desktop_install_check.sh*. 
+- You can/should run the script *desktop_install_check.sh*.
 
 This script suppose you have *ansible* installed on your desktop, and you have created a host file to list all your master/deployment/backup servers to check. See the example of a host file into *scripts/ansible/hosts.example* (you can copy this file into *scripts/ansible/hosts-mycompany* and update it manually).
 
@@ -4196,7 +4196,7 @@ See chapter <<Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_
 
 - The configuration of the server and the system database is done locally via the cron task of *root* :
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* 
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm*
 
 See <<installing_cron_tasks>>. This will write backup files into */home/admin/backup/conf* and */home/admin/backup/mysql*
 
@@ -4213,7 +4213,7 @@ See <<installing_cron_tasks>>. This will write backup files into */mnt/diskbacku
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1*
 
-See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter). 
+See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter).
 
 The script will read the file */etc/sellyoursaas.conf* to find the list of the name of backup servers where to push the backup to.
 
@@ -4231,13 +4231,13 @@ pip install awscli --upgrade --user
 
 *If the new instance withY exists:*
 
-Then go on the page of contract/instance X in the backoffice, tab "Backups" and use the command lines into 
+Then go on the page of contract/instance X in the backoffice, tab "Backups" and use the command lines into
 section "Duplicate an instance into another instance (already existing instance)".
 
 
 *If the new instance withY does not exists yet:*
 
-Then go on the file of instance X in the backoffice, tab "Backups" and use the command lines into 
+Then go on the file of instance X in the backoffice, tab "Backups" and use the command lines into
 section "Move an instance into another server (non existing target instance)".
 
 The option "*confirm*" will move the instance and close the old one.
@@ -4253,13 +4253,13 @@ so the old URL will still works (temporarily until the old instance is closed)
 
 === Update Sell-Your-Saas statistics
 
-- A cron script on *Master* calulates statistics: 
+- A cron script on *Master* calculates statistics:
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_customers.php updatestatsonly*
 
 
 === Increase/extend size of disk
 
-This is to increase the size of an additionnal disk of data (not the system disk).
+This is to increase the size of an additional disk of data (not the system disk).
 
 * Take a snapshot or backup of the disk to resize (in case of trouble). Then check the backup is ok by creating a new disk from this snapshot and attach it to another server (see chapter <<adding_a_disk>>).
 
@@ -4286,7 +4286,7 @@ lsof | grep "/mnt/disk"
 fdisk -l
 parted /dev/vdX    (X=a, b, etc!!! WITHOUT the digit, we want the full disk)
 print free
-resizepart 
+resizepart
 Y		  (the num of the part)
 999GB    (Don't input the default value but the max value of disk size found on line "Disk /dev/...: XXX" that was shown by "print free")
 q
@@ -4337,25 +4337,25 @@ ip addr del <IP_ADDRESS> dev eth0
 
 If you want to restore the NFS access from a new deployment server on the master server, you must export the IP of the new deployment server on the master by:
 
-- editing the file */etc/exports* 
+- editing the file */etc/exports*
 - run *systemctl restart nfs-kernel-server*
 
-If you want to restore the external disk, you must make a backup of the disk, create a new one from it, attach it to the new server. 
+If you want to restore the external disk, you must make a backup of the disk, create a new one from it, attach it to the new server.
 Then you can mount it.
 
 *With ScaleWay*:
 
 Create an image from the server.
 
-Create a server from the image. 
+Create a server from the image.
 
 Note: If you can't ping the server using IPv4, take a look at the Troubleshooting bad IP v4 mounting after cloning a server.
 Note: If you can't ping the server using IPv6, take a look at the Troubleshooting bad IP v6 mounting after cloning a server.
 Note: If you can ping but you can't connect to SSH, may be problem is the one described on the trouble shooting "sshd: no hostkeys available -- exiting"
 
 If you want to restore the IP of old serveur:
-Detach IPs on the 2 servers. Then attach the IP of the old production server to the new one. 
-Always check after that that files into /etc/network/intefaces* or */etc/netplan/???.yaml* match the correct IP when IP is not get using dhcp and mac address (See notes into previous chapter for OVH)
+Detach IPs on the 2 servers. Then attach the IP of the old production server to the new one.
+Always check after that that files into /etc/network/interfaces* or */etc/netplan/???.yaml* match the correct IP when IP is not get using dhcp and mac address (See notes into previous chapter for OVH)
 Go on the new server using the new IP to set the hostname with the same value than old name:
 
 [source,bash]
@@ -4379,7 +4379,7 @@ systemctl disable cron
 systemctl status cron
 ---------------
 
-- Edit the crons for *root* and *admin* 
+- Edit the crons for *root* and *admin*
 
 ---------------
 crontab -e
@@ -4422,13 +4422,13 @@ main.ip.of.server nameofserver.mysaasdomainname.com
 - If it is an empty disk, format the new data disk. To do so, see the chapter <<adding_a_disk>>.
   If the disk was formatted before, see the chapter <<adding_a_disk>> to only mount it and add in */etc/fstab*.
 
-- Add a file at the root of the disk to identify the volume (for instance: DATA_MYSERVERNAME, BACKUP_MYSERVERNAME, ...). 
+- Add a file at the root of the disk to identify the volume (for instance: DATA_MYSERVERNAME, BACKUP_MYSERVERNAME, ...).
 
 ---------------
 touch /mnt/diskhome/DATA_MYDEPLOYMENTSERVERX
 ---------------
 
-- Add a new permision for NFS access for the new server on *Master server*
+- Add a new permission for NFS access for the new server on *Master server*
 
 [source,bash]
 ---------------
@@ -4504,7 +4504,7 @@ Nothing to do.
 ==== Other changes to make
 
 - Modify the Postfix configuration files below (you can also deactivate Postfix completely or simply send emails to a dummy SMTP server for development purposes)
-  
+
   */etc/postfix/main.cf*
   */etc/postfix/mydestination*
   */etc/postfix/generic*
@@ -4524,7 +4524,7 @@ Nothing to do.
 
 [source,sql]
 ---------------
-CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (le mot de passe est celui dans /etc/sellyoursaas.conf du serveur de déploiement)
+CREATE USER 'sellyoursaas'@'ip.server.deployment' IDENTIFIED BY '...';   (the password is the one into /etc/sellyoursaas.conf of the deployment server)
 
 GRANT CREATE TEMPORARY TABLES, DELETE, INSERT, SELECT, UPDATE ON nom_de_base_dolibarr_master.* TO 'sellyoursaas'@'ip.server.deployment';
 
@@ -4540,42 +4540,42 @@ FLUSH PRIVILEGES;
   */etc/apache2/sellyoursaas-available*
 
 - And files matching:
-  
+
   */var/spool/mail/osu**
   */var/spool/cron/crontabs/osu**
 
-- Erase osu* lines from those files 
+- Erase osu* lines from those files
 
   */etc/passwd*
   */etc/shadow*
   */etc/group*
-  
+
 - Remove the folders */mnt/diskhome/home/osu...* and */mnt/diskhome/backup/osu...*
 
-- Remove the folders 
+- Remove the folders
 
   /etc/letsencrypt/archive/with*
   /etc/letsencrypt/live/with*
   /etc/letsencrypt/renewal/with*
 
 - If datadog is used (optional), fix the file */etc/datadog-agent/conf.d/http_check.d/conf.yaml* to use the new name of server.
-  
+
 - Destroy the database
 
     - of *dolibarr* master if source was the *Master* server.
     - of user instances if source was a deployment server. This can be done by doing:
-  
+
 [source,bash]
 ---------------
 mysql -uroot -e "show databases" | grep dbn | gawk '{print "drop database `" $1 "`;select sleep(0.1);"}' > /tmp/dbntodelete.sql
 mysql -uroot < /tmp/dbntodelete.sql
 ---------------
-  
+
 - Rename the DNS file */etc/bind/withX.mydomain.com.hosts* into */etc/bind/with(X+1).mydomain.com.hosts* and edit it to use the new prefix.
 
 - Modify */etc/bind/named.conf.local* to use the new name.
 
-- Add A records *ns1withX*, *ns2withX* pointing to the new deployement server IP to the domain *mydomain.com*
+- Add A records *ns1withX*, *ns2withX* pointing to the new deployment server IP to the domain *mydomain.com*
 
 - Add NS record pointing for *withX* to the domain *mydomain.com*, pointing to *ns1withX.mydomain.com*.
 
@@ -4610,8 +4610,8 @@ In addition, if other applications were active on the cloned server:
 Upgrading the OS is a risky operation. It is better to move instance from one server to a new one with a new OS.
 See <<Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_server>>
 
-You can create a clone of an instance (and its attached hard disk) if you want to test first that this operation works correctly. 
-Update your file */etc/hosts* to be able to test an instance on the new server. 
+You can create a clone of an instance (and its attached hard disk) if you want to test first that this operation works correctly.
+Update your file */etc/hosts* to be able to test an instance on the new server.
 
 To update Ubuntu to a higher LTS version on a SellYourSaas server:
 
@@ -4643,7 +4643,7 @@ vi /lib/apparmor/rc.apparmor.functions
 apt install apache2; apt install libapache2-mod-apparmor; apt install php8.4-tidy;
 a2dismod php7.4; a2enmod php8.4;
 a2enmod apparmor
-a2disconf php8.3-fpm; a2enconf php8.3-fpm; 
+a2disconf php8.3-fpm; a2enconf php8.3-fpm;
 # You must also remove an old apache2 UFW profile that is duplicate with apache2-utils.ufw.profile
 rm -fr apache2.2-common
 # You must also remove old apparmor lxc profiles
@@ -4672,7 +4672,7 @@ The following request gives the "real" space taken by databases (without the "pa
 show variables like 'innodb_stats_on_metadata';
 SET GLOBAL innodb_stats_on_metadata=0;
 SELECT table_schema "DB Name", ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB",
-SUM(data_length) "Data", SUM(index_length) "Index"  FROM information_schema.tables 
+SUM(data_length) "Data", SUM(index_length) "Index"  FROM information_schema.tables
 WHERE table_schema LIKE 'dbna%'
 GROUP BY table_schema;
 ---------------
@@ -4684,7 +4684,7 @@ And per table
 show variables like 'innodb_stats_on_metadata';
 SET GLOBAL innodb_stats_on_metadata=0;
 SELECT table_schema "DB Name", table_name, ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB",
-SUM(data_length) "Data", SUM(index_length) "Index"  FROM information_schema.tables 
+SUM(data_length) "Data", SUM(index_length) "Index"  FROM information_schema.tables
 WHERE table_schema LIKE 'dbna%'
 GROUP BY table_schema, table_name;
 ---------------
@@ -4778,9 +4778,9 @@ nova list
    ou   openstack server list --long
 nova image-create ID_OF_SERVER image-myfile-server1
 
-glance image-list   
+glance image-list
    ou   openstack image list --long
-glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a   
+glance image-download --file image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
    ou   openstack image save --file ~/Téléchargements/image-myfile-server1.qcow2 aaab785d-8a34-40f5-bdcd-0a3c3c350c5a
 ---------------
 
@@ -4794,7 +4794,7 @@ modprobe nbd max_part=16
 qemu-nbd -c /dev/nbd0 image-myfile-server1.qcow2
 
 fdisk -l /dev/nbd0
-mkdir /mnt/myimg; 
+mkdir /mnt/myimg;
 
 mount /dev/nbd0p1 /mnt/myimg
 rm -rf /mnt/myimg/tmp/*
@@ -4864,14 +4864,14 @@ See chapter <<Cloning_a_server_instance_for_an_extra_production_server_or_a_dev_
 === Reducing a filesystem/partition
 
 To reduce the filesystem partition, you must unmount it.
-So if you need to resize a boot filesystem, you need to boot in rescue mode. 
+So if you need to resize a boot filesystem, you need to boot in rescue mode.
 
-Warning: Reducing size of a filesystem does not work on OVH Public Cloud boot systems, only on added hard disks. 
-  
+Warning: Reducing size of a filesystem does not work on OVH Public Cloud boot systems, only on added hard disks.
+
 
 *Reboot in rescue mode With OVH Public Cloud*
 
-* Click on the instance where you want to reset the password. 
+* Click on the instance where you want to reset the password.
 
 * Click on the "Reboot in rescue mode" entry and validate.
 
@@ -4885,7 +4885,7 @@ Find attached disks to identify the system partition disk.
 [source,bash]
 ---------------
 lsblk -a / lsblk -f
-of 
+of
 fdisk -l
 ---------------
 
@@ -4900,8 +4900,7 @@ sudo brfs_growfs TODO for a btrfs filesystem
 
 You can remount the partition and check with df the new size. Unmount the filesystem.
 
-Lancer *dumpe2fs -h /dev/sdb1|grep Block* pour récupérer le nombre est taille de bloc puis *parted /dev/sdX unit b print free* pour récupérer l'octet de début
-de la partition et calculer le secteur de fin:
+Lancer *dumpe2fs -h /dev/sdb1|grep Block* to get the number and sir of block then *parted /dev/sdX unit b print free* to get the first byte of partition and calculate the ending sector:
 
 [source,bash]
 ---------------
@@ -5029,7 +5028,7 @@ Add */mnt/diskhome/mysql* in the apparmor profiles containing */var/lib/mysql* (
 
 [source,bash]
 ---------------
-# ADD For SellYourSaas. It allows also to move mysql dir into /mnt/diskhome if required. 
+# ADD For SellYourSaas. It allows also to move mysql dir into /mnt/diskhome if required.
   /proc/*/status r,
   /sys/devices/system/node/ r,
   /sys/devices/system/node/node*/meminfo r,
@@ -5056,8 +5055,8 @@ aa-enforce usr.sbin.mysqld
 
 [source,bash]
 ---------------
-sudo mkdir -p /var/run/mysqld; 
-sudo chown mysql /var/run/mysqld; 
+sudo mkdir -p /var/run/mysqld;
+sudo chown mysql /var/run/mysqld;
 sudo mysqld_safe --skip-grant-tables &
 ---------------
 
@@ -5076,14 +5075,14 @@ NOTE: If launching takes a long time, to follow what's happening, do:
 
 [source,bash]
 ---------------
-lsof -p PID_of_ps_grep_mysqld 
+lsof -p PID_of_ps_grep_mysqld
 ---------------
 to see files and DBs treated in relog. They are open either by date of the inodes or by alphabetical order in the dbn folder... (do it several times to determine which)
 
 
 === Check that batches of user instances are executed.
 
-All cron files are stored into */var/spool/cron/crontabs*. When an instnace is suspended, the cron file is moved into */var/spool/cron/crontabs.disabled*
+All cron files are stored into */var/spool/cron/crontabs*. When an instance is suspended, the cron file is moved into */var/spool/cron/crontabs.disabled*
 
 You can run the following command to see when user instance cron was started:
 
@@ -5095,7 +5094,7 @@ cat /var/log/auth.log | grep "session opened for user osu" | grep CRON
 
 === Deactivation of all user instances
 
-Use the scrip *make_instance_offline.sh* which deactivates all accesses by replacing every virtual host by one redirecting to a waiting page.
+Use the script *make_instance_offline.sh* which deactivates all accesses by replacing every virtual host by one redirecting to a waiting page.
 
 The same script can be used to reverse it.
 
@@ -5108,7 +5107,7 @@ scripts/make_instance_offline.sh  https://myaccount.mydomain.com/offline.php  te
 
 === Clean rubbish files
 
-Launch the script: 
+Launch the script:
 
 [source,bash]
 ---------------
@@ -5120,7 +5119,7 @@ Launch the script:
 
 Before any forensic analysis, you can:
 - block any network access from the Public Cloud service.
-- use the Public Cloud tool to make an image of the instance. 
+- use the Public Cloud tool to make an image of the instance.
 
 
 ==== Restoring a lost root access or a server blocked by a firewall
@@ -5128,9 +5127,9 @@ Before any forensic analysis, you can:
 To restore a root access, first you need to reboot your server in boot rescue mode.
 Use the Cloud service interface to switch to rescue mode. The server will be rebooted and a link to log in will be provided.
 
-*Reboot in rescue mode fomr the Public Cloud console*
+*Reboot in rescue mode from the Public Cloud console*
 
-* Click on the instance where you want to reset the password. 
+* Click on the instance where you want to reset the password.
 
 * Click on the "Reboot in rescue mode" entry and validate.
 
@@ -5142,7 +5141,7 @@ Find attached disks to identify the system partition disk.
 [source,bash]
 ---------------
 lsblk -a / lsblk -f
-of 
+of
 fdisk -l
 ---------------
 
@@ -5151,15 +5150,15 @@ Example when using lsblk -a:
 [source,bash]
 ---------------
 NAME    MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
-sda       8:0    0   2.5G  0 disk 
+sda       8:0    0   2.5G  0 disk
 └─sda1    8:1    0   2.5G  0 part /
-sdb       8:16   0   200G  0 disk 
-├─sdb1    8:17   0 199.9G  0 part 
-├─sdb14   8:30   0     4M  0 part 
-└─sdb15   8:31   0   106M  0 part 
+sdb       8:16   0   200G  0 disk
+├─sdb1    8:17   0 199.9G  0 part
+├─sdb14   8:30   0     4M  0 part
+└─sdb15   8:31   0   106M  0 part
 ---------------
 
-In this exemple, the system partition /dev/sda1 it the rescue partition, the oroginal partition is /dev/sdb1. Note : if your server is in RAID configuration the system partition is the raid volume partition.
+In this example, the system partition /dev/sda1 it the rescue partition, the oroginal partition is /dev/sdb1. Note : if your server is in RAID configuration the system partition is the raid volume partition.
 
 * Once the system partition is identified, you need to mount it.
 
@@ -5209,10 +5208,10 @@ Then
 iptables -P INPUT ACCEPT
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
- 
+
 # Flush All Iptables Chains/Firewall rules #
 iptables -F
- 
+
 # Delete all Iptables Chains #
 iptables -X
 
@@ -5383,7 +5382,7 @@ __DOL_DATA_ROOT__/sellyoursaas/packages/__PACKAGEREF__
 (With this value, you can upload the SQL dump file to load into the *Attachments* tab)
 
 
-Into field *Template fo cron file*
+Into field *Template for cron file*
 
 [source,bash]
 ---------------
@@ -5398,8 +5397,8 @@ Into field *Shell after deployment*
 
 [source,bash]
 ---------------
-touch __INSTANCEDIR__/documents/install.lock; 
-touch __INSTANCEDIR__/documents/installmodules.lock; 
+touch __INSTANCEDIR__/documents/install.lock;
+touch __INSTANCEDIR__/documents/installmodules.lock;
 chown -R __OSUSERNAME__:__OSUSERNAME__ __INSTANCEDIR__/documents;
 chmod -R a-w __INSTANCEDIR__/htdocs
 chmod -R u+w __INSTANCEDIR__/htdocs/custom
@@ -5485,28 +5484,28 @@ The *Application* type service can then have other types of services like *Optio
 
 Example of Application type service to deploy a PHP application, like Dolibarr ERP CRM:
 
-image::Example_service_application.png[Exemple service application]
+image::Example_service_application.png[Example service application]
 
 Example for a service adding a pricing metric by User:
 
-image::Example_service_metric_USER.png[Exemple service metric]
+image::Example_service_metric_USER.png[Example service metric]
 
 Example for a service adding an option for more Gb:
 
-image::Example_service_option_GO.png[Exemple service option GO]
+image::Example_service_option_GO.png[Example service option GO]
 
-Note: *Options* and *Metrics* type services must be attached to an *Application* type service from the Virtual Products tab. 
+Note: *Options* and *Metrics* type services must be attached to an *Application* type service from the Virtual Products tab.
 
 In the field *Formulae to count qty*, you can use:
 * BASH:... and bash instructions that return on stdout the qty
 * SQL:... and a SQL with the form: "SELECT ... as nb FROM ..." or "SELECT ... as nb, ... as comment FROM ..."
-The comment will be saved into an extrafield of the contract (only 1 comment for all services lines is possible). It is also copied into an extrafield of the template invoice and will be shown on the generated invoice. 
+The comment will be saved into an extrafield of the contract (only 1 comment for all services lines is possible). It is also copied into an extrafield of the template invoice and will be shown on the generated invoice.
 * PHPMETHOD:nameOfMethod:param1:param2
 
 
 === Get the URL for subscription
 
-Go to the menu *SellYourSaas - Subscription Pags* to get the URL for subscribing an instance (Application type package and its dependencies. 
+Go to the menu *SellYourSaas - Subscription Pags* to get the URL for subscribing an instance (Application type package and its dependencies.
 
 
 
@@ -5545,7 +5544,7 @@ Steps realized by the agent and the remote action *deploy* or *deployall* are:
 
 Steps realized by the agent and the remote action *undeploy* are:
 
-- All steps triggered by the "deploy" action are reversed (execpt for the first action : "undeploy" doesn't remove the Unix account, but "undeployall" does). 
+- All steps triggered by the "deploy" action are reversed (except for the first action : "undeploy" doesn't remove the Unix account, but "undeployall" does).
 
 ==== suspend
 
@@ -5553,7 +5552,7 @@ Steps realized by the agent and the remote action *suspend* are:
 
 - Deactivation of the virtual host and Apache reload.
 
-The goal is to lock the access to the instace with a link to the dashboard to update the payment method, without changing the instance itself.
+The goal is to lock the access to the instance with a link to the dashboard to update the payment method, without changing the instance itself.
 
 ==== unsuspend
 
@@ -5624,17 +5623,17 @@ This is a detail of events or URL that can be tracked:
 
 * Page returned when we show the subscription form
 - Name of event: Form to register
-- URL: /register.php   (example: can be used as goal in *Google Analytics "Prospective client"*)                 
+- URL: /register.php   (example: can be used as goal in *Google Analytics "Prospective client"*)
 - Event DataDog: None
 
 * Page shown after a completed subscription
 - Name of event: Instance created
-- URL: /index.php?welcomecid=   (example: can be used as goal in *Google Analytics "Subscribed client"*)                 
+- URL: /index.php?welcomecid=   (example: can be used as goal in *Google Analytics "Subscribed client"*)
 - Event DataDog: None
 
 * Page shown when a payment method is added for the first time = New client
 - Name of event: Payment mode added
-- URL: /index.php?paymentrecorded=1   (example: can be used as goal in *Google Analytics "Won client"*)                 
+- URL: /index.php?paymentrecorded=1   (example: can be used as goal in *Google Analytics "Won client"*)
 - Event Datadog: *sellyoursaas.paymentmodeadded*
 
 * Page shown when a payment method is modified with success
@@ -5664,7 +5663,7 @@ image::Example_screen_datadog.png[Example ecran supervision DataDog]
 
 You can force different values for some setup parameters to overwrite the default value when the customer has registered itself from a page with *mydomain.com* as main domain.
 
-* SELLYOURSAAS_NAME_FORDOMAIN-myseconddomain.com = My Service name bis 
+* SELLYOURSAAS_NAME_FORDOMAIN-myseconddomain.com = My Service name bis
 * SELLYOURSAAS_ACCOUNT_URL-myseconddomain.com = https://myaccount.myseconddomain.com
 * SELLYOURSAAS_ALLOW_RESELLER_PROGRAM-myseconddomain.com = 0
 * SELLYOURSAAS_MAIN_EMAIL_FORDOMAIN-myseconddomain.com = contact@myseconddomain.com
@@ -5736,7 +5735,7 @@ To block or ban an external IP 'the.ip.to.block' to access port 'porttoblock':
 
 [source,bash]
 ---------------
-ufw insert 1 deny from the.ip.to.block to any port porttoblock 
+ufw insert 1 deny from the.ip.to.block to any port porttoblock
 ---------------
 
 To delete a rule:
@@ -5744,7 +5743,7 @@ To delete a rule:
 [source,bash]
 ---------------
 ufw status numbered
-ufw delete X 
+ufw delete X
 ---------------
 
 
@@ -5775,28 +5774,28 @@ network:
     eth0:
       dhcp4: no
       addresses:
-        - the.static.ipv4.server/24      # Adresse IPv4 statique avec le préfixe CIDR
-      gateway4: the.static.ipv4.gateway  # Adresse de la passerelle (gateway)
+        - the.static.ipv4.server/24      # Address IPv4 static with prefix CIDR
+      gateway4: the.static.ipv4.gateway  # Address of gateway (gateway)
       nameservers:
         addresses:
-          - 8.8.8.8         # Serveur DNS primaire
-          - 8.8.4.4         # Serveur DNS secondaire 
+          - 8.8.8.8         # Serveur DNS primary
+          - 8.8.4.4         # Serveur DNS secondary
 ---------------
 
 Then run *netplan try* and apply.
 
-Check by doing an apt update that your network and outgoing connexion are ok. If yes, you can follow this tutorial provided by scaleway https://www.scaleway.com/en/docs/compute/instances/troubleshooting/fix-unreachable-focal-with-two-public-ips/ to
-fix definitively the bad generation of the netplan file during boot. It will add a line *- on-link: true* into the routes section for IPv4 that solve the trouble. You can then remove 
+Check by doing an apt update that your network and outgoing connection are ok. If yes, you can follow this tutorial provided by scaleway https://www.scaleway.com/en/docs/compute/instances/troubleshooting/fix-unreachable-focal-with-two-public-ips/ to
+fix definitively the bad generation of the netplan file during boot. It will add a line *- on-link: true* into the routes section for IPv4 that solve the trouble. You can then remove
 the file */etc/netplan/fixed-ip.yaml* that was previously added manually and reboot. IPv4 should be available.
 
 
 === Failed to ping or use IPv6 after cloning a server ===
 
-If after creating the server, you can't ping on IPv6, check the file */etc/network/interfaces* or */etc/netplan/???.yaml* to set the correct MAC address into 
+If after creating the server, you can't ping on IPv6, check the file */etc/network/interfaces* or */etc/netplan/???.yaml* to set the correct MAC address into
 the section *match: macaddress:" if it exists a condition to get a dhcp IP address, and reboot if needed (removing the match may also work).
 Check also that there is no old IP in file.
 
-For exemple here:
+For example here:
 
 [source,bash]
 ---------------
@@ -5813,7 +5812,7 @@ network:
 			nameservers:
                 addresses:
                 - ip.of.dns.server
-                search: []                
+                search: []
 			routes:
             -   to: ::/0
                 via: 2402:1f00:8102:100::1
@@ -5821,7 +5820,7 @@ network:
 ---------------
 
 You can get the MAC address by connecting to the console of server from the cloud provider dashboard. Execute *ip link show* to get the MAC address (just after the "link/ether" text). For example with the output:
- 
+
 [source,bash]
 ---------------
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1000
@@ -5862,7 +5861,7 @@ If after logged on a console, the keyboard is not in correct language, you can t
 loadkeys fr
 ---------------
 
-You can also try 
+You can also try
 
 [source,bash]
 ---------------
@@ -5889,7 +5888,7 @@ Error when sending email in */var/log/mail.log*:
 => Check you have a file */etc/resolv.conf* that is linked to ../run/resolvconf/resolv.conf and that in content, it has an entry that point to local bind server so:
 
 nameserver 127.0.0.1
-or 
+or
 nameserver 127.0.0.56
 
 If not, create it and restart postfix.
@@ -5902,18 +5901,18 @@ Error when sending email in */var/log/mail.log*
 	fatal: file /etc/postfix/main.cf: parameter mail_owner: unknown user name value: postfix
 or
 	fatal: file /etc/postfix/main.cf: parameter setgid_group: unknown group name: postdrop
-	
+
 => If the user *postfix* really exists into */etc/passwd*, the trouble may be apparmor that does not allow reading the file */etc/passwd* or */etc/groups*
 
 Check in file */etc/apparmor.d/usr.sbin.apache2* that */etc/passwd* is not denied and that phpsendmail.php command is allowed.
 
 
-==== Erro when sending email into /var/log/phpsendmail.log
+==== Error when sending email into /var/log/phpsendmail.log
 
-If you got this error 
-	
+If you got this error
+
 	ERROR /tmp/... can't be read.
-	
+
 Check that the PrivateTmp mode is false into the launcher of apache2.
 
 
@@ -5927,8 +5926,8 @@ into the parameter *myhostname* or *mydestination* in file */etc/postfix/main.cf
 
 If you have error like this one
 ------------
-Error [120]: Ran into problems sending Mail. 
-Response: 421 4.7.0 Try again later, closing connection. (EHLO) j206sm146142wmj.43 - gsmtp 
+Error [120]: Ran into problems sending Mail.
+Response: 421 4.7.0 Try again later, closing connection. (EHLO) j206sm146142wmj.43 - gsmtp
 Error [126]: 'smtp-relay.gmail.com' does not support authenticated connections. Error after sending EHLO smtp-relay.gmail.com
 
 Response:421 4.7.0 Try again later, closing connection. (EHLO) n17-20020a5099d1000000b0047e8c678d49sm385619edb.22 - gsmtp
@@ -5947,7 +5946,7 @@ To fix this, try to add the constant: MAIL_SMTP_USE_FROM_FOR_HELO = yourdomainna
 
 ==== Problem of php sessions files in /var/lib/php/sessions not purged
 
-php session purge can be done by 
+php session purge can be done by
 
 [source,bash]
 -------------
@@ -5969,13 +5968,13 @@ Check the correct one is enabled.
 We found into log file /var/log/fail2ban.log
 
 	2020-09-19 00:57:16,902 fail2ban.actions        [1182]: ERROR   Failed to execute ban jail 'postfix-sasl' action 'iptables-multiport' info 'ActionInfo
-	
+
 Edit the file /etc/fail2ban/jail/conf to replace *imap3* (it does not exists) into *imap* for rule postfix-sasl
 
 
 ==== Error when starting fail2ban
 
-You can get more information by running 
+You can get more information by running
 
 sudo fail2ban-client -vvv -x start
 
@@ -5983,7 +5982,7 @@ If error is:
 
 	ERROR: cannot import name 'MutableMapping' from 'collections' (/usr/lib/python3.10/collections/__init__.py)
 
-You must upgrade fail2ban version with the verison into "universe" repository:
+You must upgrade fail2ban version with the version into "universe" repository:
 Check the universe repository is enabled into */etc/apt/sources.list*, then run *apt update; apt upgrade;*
 
 
@@ -5993,7 +5992,7 @@ Launching mariadb launches the database but the command never returns to the com
 
 Check the */var/log/kern.log*, you may have an apparmor error on /usr/sbin/mysqld.
 
-If yes, disable the apparmor rule: 
+If yes, disable the apparmor rule:
 
 aa-disable usr.sbin.mysqld
 
@@ -6025,23 +6024,23 @@ Try to add the parameter --no-tablespaces into the mysqldump command.
 
 mysqldump: Error 3024: 'Query execution was interrupted, maximum statement execution time exceeded when dumping table'
 
-Try to read the *max_execution_time* of your database with:  
+Try to read the *max_execution_time* of your database with:
 
 [source,sql]
 ---------------
 show variables like '%max_execution_time%';
 ---------------
 
-Then try to increase it with:  
+Then try to increase it with:
 
 [source,sql]
 ---------------
-SET global max_execution_time = ...;    with millisecond 
+SET global max_execution_time = ...;    with millisecond
 ---------------
 
 Note: The change will be effective on next SQL connection. To have the change persistent after a reboot, you must edit the file */etc/mysql/mysql.conf.d/mysqld.cnf*
 
-See also chapter <<check_database_used>> to analyze the size of database. A table may be abnormaly large.
+See also chapter <<check_database_used>> to analyze the size of database. A table may be abnormally large.
 
 
 ==== Error mysql when connecting to database
@@ -6055,7 +6054,7 @@ Mariadb may try to use socket mode to connect to the database instead of IP. Try
 
 ==== Error mysqldump "Got a packet bigger than 'max_allowed_packet' bytes"
 
-Try to read the *max_allowed_packet* of your database with:  
+Try to read the *max_allowed_packet* of your database with:
 
 [source,sql]
 ---------------
@@ -6074,9 +6073,9 @@ You can edit the section [mysqld] of the file *mysql.cnf* to increase this limit
 
 [source,bash]
 ---------------
-# increase net_buffer_length to 100K and max_allowed_packet to 100M to 
+# increase net_buffer_length to 100K and max_allowed_packet to 100M to
 # avoid error "Got a packet bigger than 'max_allowed_packet' bytes"
-net_buffer_length=100000 
+net_buffer_length=100000
 max_allowed_packet=100000000
 ---------------
 
@@ -6102,7 +6101,7 @@ sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_buil
 
 ==== A lot of warnings  Error mysql connect pb with caching_sha2_password
 
-There is a lot of warning into /var/log/mysql/error.log like this one 
+There is a lot of warning into /var/log/mysql/error.log like this one
 Aborted connection 594 to db: 'unconnected' user: 'datadog' host: 'localhost' (CLOSE_CONNECTION)
 
 The warning appear into log file when we disconnect, even if we disconnect correctly.
@@ -6112,7 +6111,7 @@ To avoid this, check that the *log_warning = 2* (default value of mysql and mari
 
 ==== Extracting a zip file with file paths or names including backslash \
 
-The problem is into the zip file (may be generated by the bugged Powershell). To solve this, try to unzip from command line with 
+The problem is into the zip file (may be generated by the bugged Powershell). To solve this, try to unzip from command line with
 
 	unzip  file.zip
 
@@ -6124,7 +6123,7 @@ If it fails, you can fix path of extracted files with this command:
 ==== Error 77 when using the option MAIN_ODT_AS_PDF to build PDF from ODT automatically
 
 - Check the temp directory is writable by the web server user.
-	
+
 
 ==== Error when doing PHP ssh2_connect or just a CLI ssh to a server
 
@@ -6160,14 +6159,14 @@ Ciphers +aes128-cbc
 
 Check by listing the kex algorithms that the new one is here with: ssh-audit ipofserver
 
-Then reload ssh with 
+Then reload ssh with
 
 [source,bash]
 ---------------
 /etc/init.d/ssh reload
 ---------------
 
-To test if a couple client-server can work with one algorightm, you can try from the client:
+To test if a couple client-server can work with one algorithm, you can try from the client:
 
 ssh -oHostKeyAlgorithms=ssh-rsa admin@ip.of.server
 ssh -oHostKeyAlgorithms=ssh-ed25519 admin@ip.of.server
@@ -6178,7 +6177,7 @@ To use a different version of lib for PHP to make ssh2_connect, you can run Reco
 [source,bash]
 ---------------
 git clone https://github.com/libssh2/libssh2.git libssh2; cd libssh2; ./configure; make; make install;
-git clone https://github.com/php/pecl-networking-ssh2.git php-ssh2; cd php-ssh2; phpize; ./configure --with-ssh2; make; make install; 
+git clone https://github.com/php/pecl-networking-ssh2.git php-ssh2; cd php-ssh2; phpize; ./configure --with-ssh2; make; make install;
 php -i | grep ssh2
 restart
 ---------------
@@ -6188,7 +6187,7 @@ Even if php -i show the new version of library, a reboot may be required to have
 
 ==== Error "digital envelope routines::unsupported" or provider not found
 
-If you get such an error when calling PHP function *openssl_pkcs12_read*, try to complete the file */etc/ssl/openssl.cnf* to update 
+If you get such an error when calling PHP function *openssl_pkcs12_read*, try to complete the file */etc/ssl/openssl.cnf* to update
 
 [source,bash]
 ---------------
@@ -6196,7 +6195,7 @@ If you get such an error when calling PHP function *openssl_pkcs12_read*, try to
  default = default_sect
 ---------------
 
-into: 
+into:
 
 [source,bash]
 ---------------
@@ -6205,13 +6204,13 @@ into:
  legacy = legacy_sect
 ---------------
 
-Then change the [default_sect] section with the followin
+Then change the [default_sect] section with the following
 
 [source,bash]
 ---------------
- [default_sect] 
- activate = 1 
- [legacy_sect] 
+ [default_sect]
+ activate = 1
+ [legacy_sect]
  activate = 1
 ---------------
 
@@ -6232,7 +6231,7 @@ When logging using the "Console", after trying to start ssh server, we can find 
 sshd: no hostkeys available -- exiting
 ---------------
 
-To fix this, just run from root user 
+To fix this, just run from root user
 
 [source,bash]
 ---------------
@@ -6255,7 +6254,7 @@ If you get this error after upgrading packages on a server:
 ---------------
 apt install -f
 Reading package lists... Done
-Building dependency tree       
+Building dependency tree
 Reading state information... Done
 0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
 2 not fully installed or removed.
@@ -6282,7 +6281,7 @@ First check with *parted /dev/xxx* and then *p* that you have a fat32 boot disk 
 
 Retry. If it fails again, launch *debconf-get-selections | grep grub-efi* to know what is setup into debconf database for grub-common and grup-pc entry that use grub-efi.
 
-If one point to the disk that does not exists mentionned into the error, edit the line to remove it and keep only the disk you need as boot devices with:
+If one point to the disk that does not exists mentioned into the error, edit the line to remove it and keep only the disk you need as boot devices with:
 
 [source,bash]
 ---------------
@@ -6307,11 +6306,11 @@ RequestReadTimeout handshake=5 header=10 body=30
 
 ==== very slow IO / iowait are high even if few IOs are done
 
-Launch 
+Launch
 dstat -f
 If iowait (column "wai") is high in percentage and there is few read/write access on disk (see column read/writ) on devices;
 
-Launchthis command to know wich process is waiting  
+Launchthis command to know which process is waiting
 pidstat -dtu 1
 
 
@@ -6357,7 +6356,7 @@ apparmor="DENIED" operation="open" profile="/usr/sbin/ntpd" name="/snap/bin/" pi
 
 You must remove the ntpd package and use instead the package *systemd-timesyncd* with *sudo apt install systemd-timesyncd*
 
-You can test/check that ntp sync works with: 
+You can test/check that ntp sync works with:
 
 [source,bash]
 ---------------
@@ -6368,7 +6367,7 @@ timedatectl status
 
 You must remove the ntpd package and use instead the package *systemd-timesyncd* with *sudo apt install systemd-timesyncd*
 
-You can test/check that ntp sync works with: 
+You can test/check that ntp sync works with:
 
 [source,bash]
 ---------------
@@ -6409,7 +6408,7 @@ instances:
 	# The lines to add
 	file_system_blacklist:
         - overlay
-        
+
     mount_point_blacklist:
       - /run/docker/
 ---------------
@@ -6449,7 +6448,7 @@ Certificate chain
    i:/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte SGC CA
  1 s:/C=ZA/O=Thawte Consulting (Pty) Ltd./CN=Thawte SGC CA
    i:/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authority
-   
+
 It means main certificate was verified by Thawte and Thawte was verified by VeriSign
 
 But if you have only
@@ -6488,12 +6487,12 @@ It may mean that your IPv6 connection is wrong. Disable the firewall, and try to
 ip -6 addr flush eth0
 ---------------
 
-==== Web site blocked by an antivirus. Error is reported as PR_CONNECT_RESET_ERROR. 
+==== Web site blocked by an antivirus. Error is reported as PR_CONNECT_RESET_ERROR.
 
 An antivirus return a false positive saying myaccount.mysellyoursaas.com is blacklisted.
 For example, Avast will report message: "URL:blacklist"
 
-First, check that the URL is ok using https://www.virustotal.com/ 
+First, check that the URL is ok using https://www.virustotal.com/
 
 Then if this is a deployment server, check malicious files by running:
 
@@ -6542,4 +6541,3 @@ Restart the clamd daemon and check again with clamconf that the new parameter is
 systemctl restart clamav-daemon
 clamconf
 ---------------
-
