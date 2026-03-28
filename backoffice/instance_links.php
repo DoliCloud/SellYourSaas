@@ -561,7 +561,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			/* property not yet stored into database, so we don't persist it */
 			if ($stringofversion && $stringofversion != $object->array_options['options_instancemodules']) {
 				$savetodo = 1;
-				$object->array_options['options_instancemodules'] = $stringofversion;	// Version has changed, we must save it.
+				$object->array_options['options_instancemodules'] = $stringoflistofmodules;	// Version has changed, we must save it.
 			}
 		}
 	}
