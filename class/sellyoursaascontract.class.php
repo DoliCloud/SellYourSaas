@@ -53,7 +53,7 @@ class SellYourSaasContract extends Contrat
 	public $date_lastcheck;
 	public $lastcheck;
 
-	public $modulesenabled;
-	public $version;
+	public $modulesenabled;				// not stored, show dynamically
+	public $version;					// options_instanceversion
 	public $nbofusers;
 }

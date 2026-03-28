@@ -27,7 +27,7 @@ $res=0;
 if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
 	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 }
-// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
@@ -50,6 +50,7 @@ if (! $res) {
 	die("Include of main fails");
 }
 /**
+ * @var Conf $conf
  * @var	DoliDB $db
  * @var Hookmanager $hookmanager
  * @var Translate $langs
@@ -145,7 +146,7 @@ if (empty($reshook)) {
 				$blacklistip->status = Blacklistip::STATUS_ENABLED;
 				$blacklistip->date_use = $tmpcontract->array_options['options_deployment_date_start'];
 				$blacklistip->content = $tmpcontract->array_options['options_deployment_ip'];
-				$blacklistip->comment = "Flagged as Spammer (from the backoffice by ".$user->login."), after manual analyzis of the user activity";
+				$blacklistip->comment = "Flagged as Spammer (from the backoffice by ".$user->login."), after manual analysis of the user activity";
 
 				$result2 = $blacklistip->create($user);
 				if ($result2 <= 0) {
@@ -384,11 +385,8 @@ if ($action != 'create') {
 
 if ($id > 0 && $action != 'edit' && $action != 'create') {
 	/*
-	 * Fiche en mode visualisation
+	 * view mode of tab "useful links of contracts
 	 */
-
-	$instance = 'xxxx';
-	$type_db = $conf->db->type;
 
 	$object->fetch_thirdparty();
 
@@ -404,6 +402,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$version      = $object->array_options['options_instanceversion'];
 	$username_web = $object->thirdparty->email;
 	$password_web = $object->thirdparty->array_options['options_password'];
+	$type_db = $conf->db->type;
 
 	$tmp = explode('.', $object->ref_customer, 2);
 
@@ -421,6 +420,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	$object->username_web = $username_web;
 	$object->password_web = $password_web;
 
+	// Connect to remove instance
 	$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 	$newdb->prefix_db = $prefix_db;
 
@@ -482,7 +482,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		}
 
 		// Replace __INSTANCEDBPREFIX__
-		$substitarray=array(
+		$substitarray = array(
 			'__INSTANCEDBPREFIX__' => $prefix_db
 		);
 
@@ -493,7 +493,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		$sqltogetpackage .= ' AND cd.fk_product = pe.fk_object';
 		$sqltogetpackage .= " AND pe.app_or_option = 'app'";
 		$sqltogetpackage .= ' AND pe.package = p.rowid';
-		$sqltogetpackage .= ' LIMIT 1';		// We should always have only one line
+		$sqltogetpackage .= ' LIMIT 1';		// We should always have only one contract line with type 'app', so one line linked to a package with a version_formula.
 
 		$resqltogetpackage = $db->query($sqltogetpackage);
 		if ($resqltogetpackage) {
@@ -506,7 +506,7 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			$error++;
 		}
 		if (preg_match('/SQL:/', $formula)) {
-			// Define $stringofversion
+			// Set $stringofversion with result of sql defined into formula to get version of instance. This sql must return a field "version" and a field "name" (name of version).
 			$formula = preg_replace('/SQL:/', '', $formula);
 			$formula = make_substitutions($formula, $substitarray);
 			// 'MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
@@ -529,9 +529,9 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 				$object->version = $stringofversion;
 
-				if ($stringofversion != $object->array_options['options_instanceversion']) {
+				if ($stringofversion && $stringofversion != $object->array_options['options_instanceversion']) {
 					$savetodo = 1;
-					$object->array_options['options_instanceversion'] = $stringofversion;	// To save
+					$object->array_options['options_instanceversion'] = $stringofversion;	// Version has changed, we must save it.
 				}
 			} else {
 				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
@@ -540,10 +540,11 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 		}
 
 		if ($fordolibarr) {
+			// Set ->modulesenabled with list of enabled modules
 			$confinstance = new Conf();
 			$confinstance->setValues($newdb);
 			// Define $stringoflistofmodules
-			// TODO Put the defintion in a sql into package and stor it into an extrafield
+			// TODO Put the definition in a sql into package after formula
 			$i=0;
 			foreach ($confinstance->global as $key => $val) {
 				if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && ! empty($val)) {
@@ -556,6 +557,12 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 			}
 
 			$object->modulesenabled = $stringoflistofmodules;
+
+			/* property not yet stored into database, so we don't persist it */
+			if ($stringofversion && $stringofversion != $object->array_options['options_instancemodules']) {
+				$savetodo = 1;
+				$object->array_options['options_instancemodules'] = $stringofversion;	// Version has changed, we must save it.
+			}
 		}
 	}
 
@@ -563,6 +570,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	if ($savetodo) {
 		$object->update($user, 1);
 	}
+
+
 
 	/*if (is_object($object->db2)) {
 		$savdb=$object->db;
@@ -726,7 +735,7 @@ if (empty($object->nbofusers)) {
 					}
 
 					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
-					//var_dump($serverdeployement);		// just ip of deployement server
+					//var_dump($serverdeployment);		// just ip of deployment server
 					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 

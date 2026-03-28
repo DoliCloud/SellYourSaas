@@ -546,7 +546,7 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 	$sellyoursaasutils = new SellYourSaasUtils($dbmaster);
 
 
-	if (! $error && $action != 'updatestatsonly') {		// make updatecountsonly or, so refresh remote metrics only
+	if (! $error && $action != 'updatestatsonly') {		// make updatecountsonly or updatedatabase, so refresh remote metrics only
 		$i=0;
 		// Loop on each paid instance
 		foreach ($instances as $arrayofinstance) {
