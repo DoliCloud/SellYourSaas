@@ -890,6 +890,7 @@ CommandToSwithInstanceInReadOnlyMode=Command to switch all instances in read onl
 CommandToSqlToReGenerateDb=Command to generate the SQL script to (re)create all databases or user passwords, on a deployment server
 CommandToRedeployInstanceOnADeploymentServer=Command to redeploy all instances on a reset deployment server
 InstanceVersion=Instance version
+InstanceModules=Instance modules
 InvoicePDFNotYetAvailable=Invoice PDF not yet available
 InstancesToBackupWithoutRedirectionInstances=Instances to backup (paid or confirmed). Redirection instances are not included.
 SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY=Key on master to sign remote action messages (the default value if not defined at deployment server level)

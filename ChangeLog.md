@@ -1,15 +1,16 @@
 # CHANGELOG SELLYOURSAAS FOR <a href="https://www.dolibarr.org">DOLIBARR ERP CRM</a>
 
 
-## Unreleased
+## 3.0 Unreleased
 
+* NEW Add extrafield to store the list of enabled modules
 * NEW Add Profid (SIRET) in company profile. Ask to fill it if mandatory (For France).
 * NEW Remove automatically ending / in directory name in setup of package(this avoid errors and headach in setup phase)
 * NEW Reorganize menu for reseller and module providers
 * NEW Add option SELLYOURSAAS_DASHBOARD_OFF to disallow login/access to dashboard
 * NEW Add warning on support page if contact info are not complete
 * NEW Add badge with number of deployment server on tab title of deployment servers.
-* NEW Add the tab for histori of events info on a deployment server card.
+* NEW Add the tab for historic of events info on a deployment server card.
 * NEW Options to disable the apt unattended-upgrade. Such silent upgrade changes system files on disk making fight against intrusion detection more difficult.
 * NEW Can for a server on a service.
 * NEW Search on firstname and last name of thirdparty with global search on contract.  
@@ -63,7 +64,7 @@
 * NEW Show statistics (success/error) of remote backups in list of deployment servers
 * NEW Backup for instance is using localhostip if possible
 * FIX Event "Increase end date of services for contract" was not linked to the thirdparty.
-* NEW Better mesage on PDF in customer dashboard when PDF not yet available (SEPA payment).
+* NEW Better message on PDF in customer dashboard when PDF not yet available (SEPA payment).
 * NEW Add option --nostats to not update stats when doing a backup
 * NEW Show oldest date of backup ok/ko in popup on list of instances
 * NEW Removed a lot of useless or duplicated SQL request in remoteAction.
@@ -76,7 +77,7 @@
 * NEW Can filter and sort in the list of "users of" a given instance.
 * NEW Enhance script disk_used_per_instance to allow to process 1 instance only and to run updates manually
 * NEW More options on SELLYOURSAAS_ONLY_NON_PROFIT_ORGA
-* NEW Features "Shell after swtiching to paid" and "Sql after switch to paid" are now available.
+* NEW Features "Shell after switching to paid" and "Sql after switch to paid" are now available.
 * NEW Add the date of the first access.
 * NEW Use a local cache for deployment if no remote cache is found.
 * NEW Show info on latest backup on tooltip on column "Nb of backup"  
@@ -93,7 +94,7 @@
 * NEW Add a link to switch directly to the list of backup errors from the counter on list of deployment server
 * NEW Add a copy/paste picto after each field in the SSH/SFTP/Database info tabs 
 * NEW Can search on os or db username or db name from the quick search
-* NEW Powerfull users need to enter a password for sudo with new default setup
+* NEW Powerful users need to enter a password for sudo with new default setup
 * NEW Can use wildcard into list of whitelist IP (e.g. "1.2.3.*")
 * NEW Add test on user admin for scripts that must be launched as "admin".
 * NEW Save the choice "I am a non profit organization" of thirdparty creation.
@@ -110,7 +111,7 @@
  * NEW Add script disk_used_per_instance.sh
  * NEW Can send an email on sellyoursaas job error (need dolibarr 17+) 
  * NEW Can add a server and remove it from the Deployment tab. Need write permission of sellyoursaas. No more need for admin status.  
- * NEW Retreiving version of a deployed instance uses the SQL definition found into package instead of hardcoded SQL.
+ * NEW Retrieving version of a deployed instance uses the SQL definition found into package instead of hardcoded SQL.
  * NEW Can defined frequency of backup per instance
  * NEW Show the number of open instances in the page to setup Deployment servers  
  * NEW Using the restore_instance tool add a line into historic of events for instance.
@@ -120,8 +121,8 @@
  * NEW Add an evil picto on instances flagged as evil
  * NEW Add a page to list all evil instances (with filter predefined for this)
  * NEW Enhance the clean.sh script
- * NEW Add a parameter "Max number of deployement per IP (VPN)" (default 1) that is specific on VPN usage so different
-       than the paramater "Max number of deployement per IP" (default 4)
+ * NEW Add a parameter "Max number of deployment per IP (VPN)" (default 1) that is specific on VPN usage so different
+       than the parameter "Max number of deployment per IP" (default 4)
  * NEW Add option SELLYOURSAAS_MAX_MONTHLY_AMOUNT_OF_INVOICE
  * NEW Can enable/disable external service to validate IP or email in a simple click into SellYourSaas module setup.
  * NEW The option "Direct access to SFTP/mysql" on service setup now accept the value "On demand only". The tab will be visible to
@@ -130,7 +131,7 @@
  * NEW Can contact IPQualityScore external service to validate email quality (like done for IP validation)
  * NEW Add option backuprsyncdayfrequency and backupdumpdayfrequency (Value 1 by default).
  * Experimental feature to allow end user to migrate its instance from its own backup (works for a Dolibarr instance only)
- * Experimental feature to allow end user to upgrate its instance to a higher version (works for a Dolibarr instance only)
+ * Experimental feature to allow end user to upgrade its instance to a higher version (works for a Dolibarr instance only)
  * FIX Can show a different alert/announce message for each deployment server.  
  * FIX Timezone is filled also for instances created from customer dashboard
 
@@ -145,7 +146,7 @@
 * NEW Add Ansible scripts to update the sellyoursaas[-public].conf file.
 * NEW #215: Add possibility to force a plan price for resselers
 * NEW Add hidden option SELLYOURSAAS_LINK_TO_PARTNER_IF_FIRST_SOURCE to link a registration to a reseller when was just a first origin on
-  web site and even when reseller id was not explicitely into registration url with utm_source=partnerXXX.
+  web site and even when reseller id was not explicitly into registration url with utm_source=partnerXXX.
 * NEW Add option SELLYOURSAAS_SUPPORT_URL
 * Fix the payment term of recurring invoice was not propagated on invoice created just after a fix of credit card.
 * Fix can not use a closed deployment server with html injection.
@@ -166,4 +167,3 @@
 
 ## 1.0
 Initial version.
-
