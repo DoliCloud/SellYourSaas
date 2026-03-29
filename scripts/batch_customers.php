@@ -305,24 +305,27 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 }
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object=new Contrat($dbmaster);
+$object = new Contrat($dbmaster);
 
 // Get list of instance
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
-if ($instancefiltercomplete) {
+if ($instancefiltercomplete && !preg_match('/\*/', $instancefiltercomplete)) {
 	$stringforsearch = '';
 	$tmparray = explode(',', $instancefiltercomplete);
 	foreach ($tmparray as $instancefiltecompletevalue) {
 		if (! empty($stringforsearch)) {
-			$stringforsearch.=", ";
+			$stringforsearch .= ", ";
 		}
-		$stringforsearch.="'".trim($instancefiltecompletevalue)."'";
+		$stringforsearch .= "'".$db->escape(trim($instancefiltecompletevalue))."'";
 	}
 	$sql.= " AND c.ref_customer IN (".$stringforsearch.")";
 } else {
+	if ($instancefiltercomplete && preg_match('/\*/', $instancefiltercomplete)) {
+		$sql.= " AND c.ref_customer LIKE '".$db->escape(str_replace('*', '%', $stringforsearch))."')";
+	}
 	$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
 }
 $sql.= " AND ce.deployment_status IS NOT NULL";

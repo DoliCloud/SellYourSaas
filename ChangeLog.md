@@ -3,6 +3,7 @@
 
 ## 3.0 Unreleased
 
+* NEW Can use * in instance naefor batch_customers.php script
 * NEW Add extrafield to store the list of enabled modules
 * NEW Add Profid (SIRET) in company profile. Ask to fill it if mandatory (For France).
 * NEW Remove automatically ending / in directory name in setup of package(this avoid errors and headach in setup phase)
