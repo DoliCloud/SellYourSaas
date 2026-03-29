@@ -118,7 +118,7 @@ fwrite($fh, date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$in
 fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignature=".$recalculatedsignature."\n");
 
 // Compare signature and recalculatedsignature
-if (hash_equals($recalculatedsignature, $signature)) {
+if (!hash_equals($recalculatedsignature, $signature)) {
 	fwrite($fh, date('Y-m-d H:i:s')." The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into 'signature_key' in the /etc/sellyoursaas.conf file (instance server=".$instancename.")\n");
 
 	http_response_code(598);
