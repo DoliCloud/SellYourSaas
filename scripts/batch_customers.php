@@ -324,7 +324,7 @@ if ($instancefiltercomplete && !preg_match('/\*/', $instancefiltercomplete)) {
 	$sql.= " AND c.ref_customer IN (".$stringforsearch.")";
 } else {
 	if ($instancefiltercomplete && preg_match('/\*/', $instancefiltercomplete)) {
-		$sql.= " AND c.ref_customer LIKE '".$db->escape(str_replace('*', '%', $instancefiltercomplete))."')";
+		$sql.= " AND c.ref_customer LIKE '".$db->escape(str_replace('*', '%', $instancefiltercomplete))."'";
 	}
 	$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
 }
