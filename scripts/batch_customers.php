@@ -103,11 +103,11 @@ if (! $res) {
  * @var HookManager $hookmanager
  * @var User $user
  */
-
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
+include_once dol_buildpath("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 
 // Global variables
 $FORCE=0;
@@ -774,6 +774,8 @@ if ($action == 'updatestatsonly' || $action == 'updatemetricsonly' || $action ==
 			if ($result < 0) {
 				dol_print_error('', $object->error);
 			}
+
+			$object->fetch_thirdparty();
 
 			$object->oldcopy = dol_clone($object, 1);
 
