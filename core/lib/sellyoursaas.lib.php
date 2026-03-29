@@ -600,7 +600,7 @@ function updateInstanceInfo($object)
 		}
 
 		// Get user/pass of last admin user
-		if ($fordolibarr) {
+		if (!empty($fordolibarr)) {
 			// TODO Put the definition of sql to get last used admin user into the package.
 			$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
@@ -620,7 +620,7 @@ function updateInstanceInfo($object)
 		}
 
 		// Get user/pass of last admin user
-		if ($forglpi) {
+		if (!empty($forglpi)) {
 			// TODO Put the definition of sql to get last used admin user into the package.
 			$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
 
