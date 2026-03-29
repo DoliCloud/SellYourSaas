@@ -544,7 +544,7 @@ $error=0; $errors=array();
 $servicetouse = strtolower(getDolGlobalString('SELLYOURSAAS_NAME'));
 
 if ($action == 'updatestatsonly' || $action == 'updatemetricsonly' || $action == 'updateinfoonly' || $action == 'updatedatabase') {	// updatedatabase = updatestatsonly + updatemetricsonly + updateinfoonly
-	print "----- Start updatedatabase\n";
+	print "----- Start ".$action."\n";
 
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 	$sellyoursaasutils = new SellYourSaasUtils($dbmaster);
