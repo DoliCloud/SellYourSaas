@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2007-2018 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2007-2026 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *      \file       sellyoursaas/scripts/batch_customers.php
  *		\ingroup    sellyoursaas
  *      \brief      Main SellYourSaas batch:
- *      			- to run on master hosts for action updatedatabase|updatecountsonly|updatestatsonly
+ *      			- to run on master hosts for action updatestatsonly|updatemetricsonly|updateinfoonly or updatedatabase
  *      			- to run on deployment hosts for action backup* (paid customers rsync + databases backup)
  */
 
@@ -236,13 +236,14 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print "Usage on master            : ".$script_file." (updatestatsonly|updatecountsonly|updatedatabase) [instancefilter] [--force] [--nostats]\n";
+	print "Usage on master            : ".$script_file." (updatestatsonly|updatemetricsonly|updatedatabase) [instancefilter] [--force] [--nostats]\n";
 	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force] [--nostats]\n";
 	print "\n";
 	print "action can be:\n";
 	print "- updatestatsonly     updates stats only, only table sellyoursaas_stats for dashboard graph (and send data to Datagog if enabled). <<<<< Used by cron on master server\n";
-	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance).\n";
-	print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats table.\n";
+	print "- updatemetricsonly   updates metrics of instances only (list and nb of users for each instance).\n";
+	print "- updateinfoonly      updates info of instances only (like version and/or modules installed).\n";
+	print "- updatedatabase      (=updatestatsonly+updatemetricsonly+updateinfoonly) updates list and nb of users, modules and version and stats table.\n";
 	print "- backuptest          test rsync+database backup.\n";
 	print "- backuptestrsync     test rsync backup.\n";
 	print "- backuptestdatabase  test database backup.\n";
@@ -539,58 +540,13 @@ $today=dol_now();
 $error=0; $errors=array();
 $servicetouse = strtolower(getDolGlobalString('SELLYOURSAAS_NAME'));
 
-if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'updatecountsonly') {	// updatedatabase = updatestatsonly + updatecountsonly
+if ($action == 'updatestatsonly' || $action == 'updatemetricsonly' || $action == 'updateinfoonly' || $action == 'updatedatabase') {	// updatedatabase = updatestatsonly + updatemetricsonly + updateinfoonly
 	print "----- Start updatedatabase\n";
 
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 	$sellyoursaasutils = new SellYourSaasUtils($dbmaster);
 
-
-	if (! $error && $action != 'updatestatsonly') {		// make updatecountsonly or updatedatabase, so refresh remote metrics only
-		$i=0;
-		// Loop on each paid instance
-		foreach ($instances as $arrayofinstance) {
-			$instance = $arrayofinstance['instance'];
-
-			$return_val=0;
-			$error=0;
-			$errors=array();
-
-			// Run database update
-			print "Process update database info (nb of user) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
-
-			$dbmaster->begin();
-
-			$result=$object->fetch('', '', $instance);
-			if ($result < 0) {
-				dol_print_error('', $object->error);
-			}
-
-			$object->oldcopy=dol_clone($object, 1);
-
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $object);
-			if ($result <= 0) {
-				$errors[] = 'Failed to do sellyoursaasRemoteAction(refreshmetrics) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors) ? ' '.join(',', $sellyoursaasutils->errors) : '');
-			}
-
-			if (count($errors) == 0) {
-				print "OK\n";
-
-				$nbofok++;
-				$dbmaster->commit();
-			} else {
-				$nboferrors++;
-				$instancesupdateerror[$instance] = array('date' => dol_now('gmt'));
-				print 'KO. '.join(',', $errors)."\n";
-				$dbmaster->rollback();
-			}
-
-			$i++;
-		}
-	}
-
-
-	if (! $error && $action != 'updatecountsonly') {
+	if (! $error && in_array($action, array('updatestatsonly', 'updatedatabase'))) {
 		$stats=array();
 
 		// Load list of existing stats into $stats
@@ -754,6 +710,93 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 				}	// if we have to make update for this period
 			}	// end loop on month
 		} // end loop on year
+	}
+
+	if (! $error && in_array($action, array('updatemetricsonly', 'updatedatabase'))) {		// make updatemetricsonly (so refresh remote metrics) or updateinfoonly (update version/modules info)
+		$i=0;
+		// Loop on each paid instance
+		foreach ($instances as $arrayofinstance) {
+			$instance = $arrayofinstance['instance'];
+
+			$return_val=0;
+			$error=0;
+			$errors=array();
+
+			// Run database update
+			print "Process update metrics (like Nb of user or Gb) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
+
+			$dbmaster->begin();
+
+			$result=$object->fetch('', '', $instance);
+			if ($result < 0) {
+				dol_print_error('', $object->error);
+			}
+
+			$object->oldcopy = dol_clone($object, 1);
+
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $object);
+			if ($result <= 0) {
+				$errors[] = 'Failed to do sellyoursaasRemoteAction(refreshmetrics) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors) ? ' '.join(',', $sellyoursaasutils->errors) : '');
+			}
+
+			if (count($errors) == 0) {
+				print "OK\n";
+
+				$nbofok++;
+				$dbmaster->commit();
+			} else {
+				$nboferrors++;
+				$instancesupdateerror[$instance] = array('date' => dol_now('gmt'));
+				print 'KO. '.join(',', $errors)."\n";
+				$dbmaster->rollback();
+			}
+
+			$i++;
+		}
+	}
+
+	if (! $error && in_array($action, array('updateinfoonly', 'updatedatabase'))) {		// make updateinfoonly or updatedatabase
+		$i=0;
+		// Loop on each paid instance
+		foreach ($instances as $arrayofinstance) {
+			$instance = $arrayofinstance['instance'];
+
+			$return_val=0;
+			$error=0;
+			$errors=array();
+
+			// Run database update
+			print "Process update database info (nb of user) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
+
+			$dbmaster->begin();
+
+			$result=$object->fetch('', '', $instance);
+			if ($result < 0) {
+				dol_print_error('', $object->error);
+			}
+
+			$object->oldcopy = dol_clone($object, 1);
+
+			$result = updateInstanceInfo($object);
+
+			if (is_numeric($result) && $result <= 0) {
+				$errors[] = 'Failed to do updateInstanceInfo(object)';
+			}
+
+			if (count($errors) == 0) {
+				print "OK\n";
+
+				$nbofok++;
+				$dbmaster->commit();
+			} else {
+				$nboferrors++;
+				$instancesupdateerror[$instance] = array('date' => dol_now('gmt'));
+				print 'KO. '.join(',', $errors)."\n";
+				$dbmaster->rollback();
+			}
+
+			$i++;
+		}
 	}
 }
 
