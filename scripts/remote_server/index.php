@@ -86,6 +86,7 @@ if (! empty($tmparray[1])) {
 // Set variables
 $tmpparam = preg_split('/\s/', $paramspacenoquotes);		// $tmpparam is now array of parameters, like $paramarray but with '' replaced by '-'
 $osusername = $tmpparam[0];
+$instancename = $tmpparam[2];
 $dbname = $tmpparam[4];
 $dbusername = $tmpparam[6];
 $cliafter = $tmpparam[18];
@@ -94,7 +95,7 @@ $cliafterdeployoption = $tmpparam[47];
 $signature = empty($tmpparam[48]) ? '' : $tmpparam[48];		// Extract the signature received
 
 // Recalculate the signature with message received
-// TODO Replace with hash('sha256', $contentsigned.$signature_key); or use asymetric signature.
+// TODO Replace with hash('sha256', $contentsigned.$signature_key); or use asymmetric signature.
 $recalculatedsignature = hash('md5', $contentsigned.$signature_key);
 
 
@@ -118,10 +119,10 @@ fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignatur
 
 // Compare signature and recalculatedsignature
 if (hash_equals($recalculatedsignature, $signature)) {
-	fwrite($fh, date('Y-m-d H:i:s')." The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into 'signature_key' in the /etc/sellyoursaas.conf file (instance server=".$instanceserver.")\n");
+	fwrite($fh, date('Y-m-d H:i:s')." The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into 'signature_key' in the /etc/sellyoursaas.conf file (instance server=".$instancename.")\n");
 
 	http_response_code(598);
-	print 'The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into "signature_key" in the /etc/sellyoursaas.conf file (instance server='.$instanceserver.')'."\n";
+	print 'The provided signature by the caller does not match the signature recalculated from received parameters and the local signature key saved into "signature_key" in the /etc/sellyoursaas.conf file (instance server='.$instancename.')'."\n";
 	//print "signature_key=".$signature_key;
 	exit();
 }
