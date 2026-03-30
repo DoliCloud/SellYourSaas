@@ -94,7 +94,7 @@ class Deploymentserver extends CommonObject
 	 *  'alwayseditable' says if field can be modified also when status is not draft ('1' or '0')
 	 *  'default' is a default value for creation (can still be overwrote by the Setup of Default Values if field is editable in creation form). Note: If default is set to '(PROV)' and field is 'ref', the default value will be set to '(PROVid)' where id is rowid when a new record is created.
 	 *  'index' if we want an index in database.
-	 *  'foreignkey'=>'tablename.field' if the field is a foreign key (it is recommanded to name the field fk_...).
+	 *  'foreignkey'=>'tablename.field' if the field is a foreign key (it is recommended to name the field fk_...).
 	 *  'searchall' is 1 if we want to search in this field when making a search from the quick search button.
 	 *  'isameasure' must be set to 1 or 2 if field can be used for measure. Field type must be summable like integer or double(24,8). Use 1 in most cases, or 2 if you don't want to see the column total into list (for example for percentage)
 	 *  'css' and 'cssview' and 'csslist' is the CSS style to use on field. 'css' is used in creation and update. 'cssview' is used in view mode. 'csslist' is used for columns in lists. For example: 'css'=>'minwidth300 maxwidth500 widthcentpercentminusx', 'cssview'=>'wordbreak', 'csslist'=>'tdoverflowmax200'
@@ -118,7 +118,7 @@ class Deploymentserver extends CommonObject
 		'rowid' => array('type'=>'integer', 'label'=>'TechnicalID', 'enabled'=>'1', 'position'=>1, 'notnull'=>1, 'visible'=>-1, 'noteditable'=>'1', 'index'=>1, 'css'=>'left', 'comment'=>"Id"),
 		'ref' => array('type'=>'varchar(128)', 'label'=>'SellYourSaasSubDomainName', 'enabled'=>'1', 'position'=>10, 'notnull'=>1, 'index'=>1, 'searchall'=>1, 'comment'=>'Public sub domain or instances', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1, 'placeholder' => 'withX.mydomain.com'),
 		'hostname' => array('type'=>'varchar(64)', 'label'=>'SellYourSaasHostname', 'enabled'=>'1', 'position'=>11, 'comment'=>'Name of the hosting server', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1),
-		'label' => array('type'=>'varchar(64)', 'label'=>'LabelToShow', 'enabled'=>'1', 'position'=>11, 'comment'=>'Label to show incombo list on registration page', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1, 'help' => 'A label added after the hostname of server in the combobox of the regsitration page.<br>Example: Europe, USA'),
+		'label' => array('type'=>'varchar(64)', 'label'=>'LabelToShow', 'enabled'=>'1', 'position'=>11, 'comment'=>'Label to show incombo list on registration page', 'csslist'=>'tdoverflowmax250', 'visible'=>1, 'showoncombobox'=>1, 'help' => 'A label added after the hostname of server in the combobox of the registration page.<br>Example: Europe, USA'),
 		'fromdomainname' => array('type'=>'varchar(128)', 'label'=>'FromDomainName', 'enabled'=>'1', 'position'=>12, 'notnull'=>0, 'visible'=>1, 'help'=>"FromDomainNameInfo", 'csslist'=>'tdoverflowmax100'),
 		'servercountries' => array('type'=>'varchar(256)', 'label'=>'ServedCountriesServer', 'enabled'=>'1', 'position'=>13, 'notnull'=>0,'visible'=>1, 'help'=>'ServedCountriesServerInfo', 'csslist'=>'tdoverflowmax100'),
 		'entity' =>array('type'=>'integer', 'label'=>'Entity', 'default'=>1, 'enabled'=>1, 'visible'=>0, 'notnull'=>1, 'position'=>20, 'index'=>1),
@@ -130,8 +130,8 @@ class Deploymentserver extends CommonObject
 		'status' => array('type'=>'integer', 'label'=>'OpenCloseStatus', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Closed', '1'=>'Opened'), 'validate'=>'1',),
 		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>-1, 'cssview'=>'wordbreak', 'csslist'=>'small', 'validate'=>'1',),
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>-1, 'cssview'=>'wordbreak', 'csslist'=>'small', 'validate'=>'1',),
-		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>162, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
-		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>163, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
+		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>162, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
+		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>163, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
 		'serversignaturekey' => array('type'=>'varchar(128)', 'label'=>'ServerSignatureKey', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>-5, 'csslist'=>'tdoverflowmax150'),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModification', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
 	);
@@ -512,7 +512,7 @@ class Deploymentserver extends CommonObject
 
 		// Protection
 		if ($this->status == self::STATUS_ENABLED) {
-			dol_syslog(get_class($this)."::validate action abandonned: already validated", LOG_WARNING);
+			dol_syslog(get_class($this)."::validate action abandoned: already validated", LOG_WARNING);
 			return 0;
 		}
 
@@ -695,7 +695,7 @@ class Deploymentserver extends CommonObject
 	}
 
 	/**
-	 *  Return a link to the object card (with optionaly the picto)
+	 *  Return a link to the object card (with optionally the picto)
 	 *
 	 *  @param  int     $withpicto                  Include picto in link (0=No picto, 1=Include picto into link, 2=Only picto)
 	 *  @param  string  $option                     On what the link point to ('nolink', ...)
@@ -1039,7 +1039,7 @@ class Deploymentserver extends CommonObject
 	 *  Create a document onto disk according to template module.
 	 *
 	 *  @param	    string		$modele			Force template to use ('' to not force)
-	 *  @param		Translate	$outputlangs	objet lang a utiliser pour traduction
+	 *  @param		Translate	$outputlangs	object lang to use for translation
 	 *  @param      int			$hidedetails    Hide details of lines
 	 *  @param      int			$hidedesc       Hide description
 	 *  @param      int			$hideref        Hide ref
