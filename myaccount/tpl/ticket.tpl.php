@@ -31,11 +31,23 @@ if (empty($conf) || ! is_object($conf)) {
 	exit(1);
 }
 
+$upload_dir = $conf->sellyoursaas->dir_temp."/ticket_thirdparty_id_".$mythirdpartyaccount->id.'.tmp';
+
+if (!empty($_POST['addfile'])) {
+	// Set tmp user directory
+	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+	dol_add_file_process($upload_dir, 1, 0);
+
+	$action = "ticketaddmessage";
+}
+
 $langs->load("ticket");
 require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 $object = new ActionsTicket($db);
 $form = new Form($db);
+$formmail = new FormMail($db);
 $listticketid = array();
 $track_id = GETPOST("track_id");
 if (!empty($track_id)) {
@@ -71,7 +83,7 @@ print '
 	print '<div class="col-md-12">';
 	print '<div class="div-table-responsive-no-min">';
 
-	if (in_array($action, array("view", "add_message", "closeticket")) && !empty($track_id) && $object->dao->fk_soc == $mythirdpartyaccount->id) {
+	if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empty($track_id) && $object->dao->fk_soc == $mythirdpartyaccount->id) {
 		$backtourl = $_SERVER["PHP_SELF"]."?mode=ticket&action=view&track_id=".$object->dao->track_id;
 
 		print '<!-- public view ticket -->';
@@ -191,31 +203,130 @@ print '
 		print '</div></div>';
 		print '</div></div>';
 
-		if ($action == 'add_message') {
+		if ($action == 'ticketaddmessage') {
 			print '<br>';
 			print load_fiche_titre($langs->trans('TicketAddMessage'), '', 'conversation');
 
-			$formticket = new FormTicket($db);
+			$addfileaction = 'ticket_addfile';
+			$listofpaths = array();
+			$listofnames = array();
+			$listofmimes = array();
 
-			$formticket->action = "confirm_add_message";
-			$formticket->track_id = $object->dao->track_id;
 
-			$formticket->param = array('fk_user_create' => '-1', 'backtourl' => $_SERVER["PHP_SELF"]."?mode=ticket&action=view&track_id=".$object->dao->track_id,
-									'returnurl' => $_SERVER["PHP_SELF"], 'track_id' => $object->dao->track_id);
+			$keytoavoidconflict = $object->dao->track_id;
+			
+			//var_dump($keytoavoidconflict);
 
-			$formticket->withcancel = 1;
+			$formmail->add_attached_files($path, basename($path), dol_mimetype($path));
+	
+			//var_dump($_SESSION);
+			//var_dump($_SESSION["listofpaths".$keytoavoidconflict]);
+			if (!empty($_SESSION["listofpaths".$keytoavoidconflict])) {
+				$listofpaths = explode(';', $_SESSION["listofpaths".$keytoavoidconflict]);
+			}
+			if (!empty($_SESSION["listofnames".$keytoavoidconflict])) {
+				$listofnames = explode(';', $_SESSION["listofnames".$keytoavoidconflict]);
+			}
+			if (!empty($_SESSION["listofmimes".$keytoavoidconflict])) {
+				$listofmimes = explode(';', $_SESSION["listofmimes".$keytoavoidconflict]);
+			}
 
-			$formticket->showMessageForm('100%');
+			// Define output language
+			$outputlangs = $langs;
+			$newlang = '';
+			if (getDolGlobalInt('MAIN_MULTILANGS') && empty($newlang) && isset($this->param['langsmodels'])) {
+				$newlang = $this->param['langsmodels'];
+			}
+			if (!empty($newlang)) {
+				$outputlangs = new Translate("", $conf);
+				$outputlangs->setDefaultLang($newlang);
+				$outputlangs->load('other');
+			}
+
+			print "\n<!-- Begin message_form TICKET -->\n";
+
+			print '<form method="post" name="ticket" id="ticket" enctype="multipart/form-data" action="'.$_SERVER["PHP_SELF"].'">';
+			print '<input type="hidden" name="token" value="'.newToken().'">';
+			print '<input type="hidden" name="action" value="confirm_ticketaddmessage">';
+			print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
+			print '<input type="hidden" name="track_id" value="'.$object->dao->track_id.'">';
+			print '<input type="hidden" name="trackid" value="'.$object->dao->track_id.'">';
+			print '<input type="hidden" name="mode" value="'.$mode.'">';
+
+			print '<table class="noborder" width="100%">';
+
+			// Attached files
+		
+			$out = '<tr>';
+			$out .= '<td>'.$langs->trans("MailFile").'</td>';
+			$out .= '<td>';
+			// TODO Trick to have param removedfile containing nb of image to delete. But this does not works without javascript
+			$out .= '<input type="hidden" class="removedfilehidden" name="removedfile" value="">'."\n";
+			$out .= '<script nonce="'.getNonce().'" type="text/javascript">';
+			$out .= 'jQuery(document).ready(function () {';
+			$out .= '    jQuery("#'.$addfileaction.'").prop("disabled", true);';
+			$out .= '    jQuery("#addedfile").on("change", function() {';
+			$out .= '        if (jQuery(this).val().length) {';
+			$out .= '            jQuery("#'.$addfileaction.'").prop("disabled", false);';
+			$out .= '        } else {';
+			$out .= '            jQuery("#'.$addfileaction.'").prop("disabled", true);';
+			$out .= '        }';
+			$out .= '    });';
+			$out .= '    jQuery(".removedfile").click(function() {';
+			$out .= '        jQuery(".removedfilehidden").val(jQuery(this).val());';
+			$out .= '    });';
+			$out .= '})';
+			$out .= '</script>'."\n";
+
+			if (count($listofpaths)) {
+				foreach ($listofpaths as $key => $val) {
+					$out .= '<div id="attachfile_'.$key.'">';
+					$out .= img_mime($listofnames[$key]).' '.$listofnames[$key];
+					$out .= ' <input type="image" style="border: 0px;" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/delete.png" value="'.($key + 1).'" class="removedfile reposition" id="removedfile_'.$key.'" name="removedfile_'.$key.'" />';
+					$out .= '<br></div>';
+				}
+			} else {
+				//$out .= $langs->trans("NoAttachedFiles").'<br>';
+			}
+			$out .= '<input type="file" class="flat" id="addedfile" name="addedfile" value="'.$langs->trans("Upload").'" />';
+			$out .= ' ';
+			$out .= '<input type="submit" class="button btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" id="'.$addfileaction.'" name="'.$addfileaction.'" value="'.$langs->trans("MailingAddFile").'" />';
+			
+			$out .= "</td></tr>\n";
+
+			print $out;
+		
+			// MESSAGE
+			print '<tr><td colspan="2"><label for="message"><span class="fieldrequired">'.$langs->trans("Message").'</span>';
+			print '</label></td></tr>';
+			print '<tr><td colspan="2">';
+			print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="message" class="centpercent">'.GETPOST('message', 'none').'</textarea><br><br>';
+			print '</td></tr>';
+			print '</table>';
+
+			print '<br><center>';
+			print '<input type="submit" class="button btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" name="btn_ticketaddmessage" value="'.$langs->trans("Add").'"';
+			// Add a javascript test to avoid to forget to submit file before sending email
+			print ' onClick="if (document.ticket.addedfile.value != \'\') { alert(\''.dol_escape_js($langs->trans("FileWasNotUploaded")).'\'); return false; } else { return true; }"';
+			print ' />';
+			print " &nbsp; &nbsp; ";
+			print '<input class="button button-cancel btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" type="submit" name="cancel" value="'.$langs->trans("Cancel").'">';
+			
+			print "</center>\n";
+
+			print '<input type="hidden" name="page_y">'."\n";
+
+			print "</form><br>\n";
 		}
 
-		if ($action != "add_message") {
+		if ($action != "ticketaddmessage") {
 			print '<div class="tabsAction right">';
 			// List ticket
 			print '<div class="inline-block divButAction"><a class="left" style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
 
 			if ($object->dao->status < Ticket::STATUS_CLOSED) {
 				// New message
-				print '<div class="inline-block divButAction"><a class="wordbreak btn" href="'.$_SERVER['PHP_SELF'].'?mode=ticket&action=add_message&track_id='.$object->dao->track_id.'&token='.newToken().'">'.$langs->trans('TicketAddMessage').'</a></div>';
+				print '<div class="inline-block divButAction"><a class="wordbreak btn" href="'.$_SERVER['PHP_SELF'].'?mode=ticket&action=ticketaddmessage&track_id='.$object->dao->track_id.'&token='.newToken().'">'.$langs->trans('TicketAddMessage').'</a></div>';
 
 				// Close ticket
 				if ($object->dao->status >= Ticket::STATUS_NOT_READ && $object->dao->status < Ticket::STATUS_CLOSED) {
@@ -389,7 +500,7 @@ print '
 		$sql = "SELECT t.rowid as id";
 		$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
 		$sql .= " WHERE t.fk_soc = '".$db->escape($mythirdpartyaccount->id)."'";		// $socid is id of third party account
-		$sql .= $db->order('t.fk_statut', 'ASC');
+		$sql .= $db->order('t.fk_statut, t.rowid', 'ASC, DESC');
 
 		$resql=$db->query($sql);
 		if ($resql) {

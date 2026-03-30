@@ -2629,7 +2629,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$action = '';
 		setEventMessages($object->error, $object->errors, 'errors');
 	}
-} elseif ($action == 'confirm_add_message'){
+} elseif ($action == 'confirm_ticketaddmessage' && !GETPOST('ticket_addfile') && !GETPOST('ticket_removedfile')){
 	$error = 0;
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 	$object = new ActionsTicket($db);
