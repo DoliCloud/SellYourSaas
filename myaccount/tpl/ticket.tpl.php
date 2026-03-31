@@ -31,27 +31,34 @@ if (empty($conf) || ! is_object($conf)) {
 	exit(1);
 }
 
-$upload_dir = $conf->sellyoursaas->dir_temp."/ticket_thirdparty_id_".$mythirdpartyaccount->id.'.tmp';
-
-if (!empty($_POST['addfile'])) {
-	// Set tmp user directory
-	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-	dol_add_file_process($upload_dir, 1, 0);
-
-	$action = "ticketaddmessage";
-}
-
 $langs->load("ticket");
 require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formticket.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+
 $object = new ActionsTicket($db);
 $form = new Form($db);
-$formmail = new FormMail($db);
 $listticketid = array();
 $track_id = GETPOST("track_id");
 if (!empty($track_id)) {
 	$object->fetch(0, '', $track_id);
+}
+
+$upload_dir = $conf->sellyoursaas->dir_temp."/ticket_thirdparty_id_".$mythirdpartyaccount->id.'.tmp';
+if (!empty($object->dao->track_id)) {
+	$upload_dir = $conf->sellyoursaas->dir_temp."/ticket_track_id_".$object->dao->track_id.'.tmp';
+}
+
+if (!empty($_POST['ticket_addfile'])) {
+	// Set tmp user directory
+	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+	dol_add_file_process($upload_dir, 1, 0, 'addedfile', '', null, 'tic'.$object->dao->id);
+	$action = "ticketaddmessage";
+}
+
+if (!empty($_POST["ticket_removedfile"])) {
+	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+	dol_remove_file_process($_POST['ticket_removedfile'], 0, 0, 'tic'.$object->dao->id); // We really delete file linked to mailing
+	$action = "ticketaddmessage";
 }
 
 $backtourl = $_SERVER["PHP_SELF"]."?mode=ticket";
@@ -204,32 +211,12 @@ print '
 		print '</div></div>';
 
 		if ($action == 'ticketaddmessage') {
+			$addfileaction = 'ticket_addfile';
+			$removefileaction = 'ticket_addfile';
 			print '<br>';
+			dol_init_file_process($upload_dir, 'tic'.$object->dao->id);
 			print load_fiche_titre($langs->trans('TicketAddMessage'), '', 'conversation');
 
-			$addfileaction = 'ticket_addfile';
-			$listofpaths = array();
-			$listofnames = array();
-			$listofmimes = array();
-
-
-			$keytoavoidconflict = $object->dao->track_id;
-			
-			//var_dump($keytoavoidconflict);
-
-			$formmail->add_attached_files($path, basename($path), dol_mimetype($path));
-	
-			//var_dump($_SESSION);
-			//var_dump($_SESSION["listofpaths".$keytoavoidconflict]);
-			if (!empty($_SESSION["listofpaths".$keytoavoidconflict])) {
-				$listofpaths = explode(';', $_SESSION["listofpaths".$keytoavoidconflict]);
-			}
-			if (!empty($_SESSION["listofnames".$keytoavoidconflict])) {
-				$listofnames = explode(';', $_SESSION["listofnames".$keytoavoidconflict]);
-			}
-			if (!empty($_SESSION["listofmimes".$keytoavoidconflict])) {
-				$listofmimes = explode(';', $_SESSION["listofmimes".$keytoavoidconflict]);
-			}
 
 			// Define output language
 			$outputlangs = $langs;
@@ -260,8 +247,7 @@ print '
 			$out = '<tr>';
 			$out .= '<td>'.$langs->trans("MailFile").'</td>';
 			$out .= '<td>';
-			// TODO Trick to have param removedfile containing nb of image to delete. But this does not works without javascript
-			$out .= '<input type="hidden" class="removedfilehidden" name="removedfile" value="">'."\n";
+			$out .= '<input type="hidden" class="removedfilehidden" name="ticket_removedfile" value="">'."\n";
 			$out .= '<script nonce="'.getNonce().'" type="text/javascript">';
 			$out .= 'jQuery(document).ready(function () {';
 			$out .= '    jQuery("#'.$addfileaction.'").prop("disabled", true);';
@@ -278,12 +264,13 @@ print '
 			$out .= '})';
 			$out .= '</script>'."\n";
 
+			$listofpaths = dol_dir_list($upload_dir, 'files', 0, '', '', 'name', SORT_ASC, 0);
 			if (count($listofpaths)) {
 				foreach ($listofpaths as $key => $val) {
-					$out .= '<div id="attachfile_'.$key.'">';
-					$out .= img_mime($listofnames[$key]).' '.$listofnames[$key];
-					$out .= ' <input type="image" style="border: 0px;" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/delete.png" value="'.($key + 1).'" class="removedfile reposition" id="removedfile_'.$key.'" name="removedfile_'.$key.'" />';
-					$out .= '<br></div>';
+					$out .= '<div id="attachfile_'.$key.'" class="margintop">';
+					$out .= img_mime($listofpaths[$key]['name']).' '.$listofpaths[$key]['name'];
+					$out .= ' <input type="image" style="border: 0px;" src="'.img_picto($langs->trans("Search"), 'delete.png', '', '', 1).'" value="'.($key + 1).'" class="removedfile" id="removedfile_'.$key.'" name="removedfile_'.$key.'" />';
+					$out .= '</div>';
 				}
 			} else {
 				//$out .= $langs->trans("NoAttachedFiles").'<br>';

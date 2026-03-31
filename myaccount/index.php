@@ -2655,7 +2655,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		exit;
 	}
 
-	$result = $object->dao->newMessage($user, $action, 1, 1);
+	$result = $object->dao->newMessage($user, $action, 0, 1);
 	if ($result < 0) {
 		$action = '';
 		setEventMessages($object->error, $object->errors, 'errors');
