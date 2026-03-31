@@ -59,7 +59,7 @@ class modSellYourSaas extends DolibarrModules
 
 		// Data directories to create when module is enabled
 		// Note: Directory "/sellyoursaas" is shared between servers, "/sellyoursaas_local" is unique for each server
-		// The directory crt is shared but a copy is done locally to avoid dependency on master and avoid interuption of service if NFS is out.
+		// The directory crt is shared but a copy is done locally to avoid dependency on master and avoid interruption of service if NFS is out.
 		$this->dirs = array('/sellyoursaas/temp','/sellyoursaas/packages','/sellyoursaas/git','/sellyoursaas/spam', '/sellyoursaas/crt', '/sellyoursaas_local/crt', '/sellyoursaas_local/spam');
 
 		// Config pages. Put here list of php page names stored in admmin directory used to setup module
@@ -70,7 +70,7 @@ class modSellYourSaas extends DolibarrModules
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->phpmin = array(4,1);						// Minimum version of PHP required by module
 		$this->langfiles = array("sellyoursaas@sellyoursaas");
-		$this->need_dolibarr_version = array(18,0,-5);	// Minimum version of Dolibarr required by module
+		$this->need_dolibarr_version = array(19,0,-5);	// Minimum version of Dolibarr required by module
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 		$this->module_parts = array('triggers' => 1,
@@ -101,7 +101,7 @@ class modSellYourSaas extends DolibarrModules
 			5=>array('SELLYOURSAAS_NAME', 'chaine', 'SellYourSaas', 'Name of your SellYouSaaS service', 0, 'current', 0),
 			6=>array('CONTRACT_DISABLE_AUTOSET_AS_CLIENT_ON_CONTRACT_VALIDATION', 'chaine', '1', 'Disable autoset of client status on contract validation', 0, 'current', 0),
 			7=>array('INVOICE_ALLOW_EXTERNAL_DOWNLOAD', 'chaine', '1', 'Invoice can be downloaded with a public link', 0, 'current', 0),
-			8=>array('SELLYOURSAAS_NBHOURSBETWEENTRIES', 'chaine', 49, 'Nb hours minium between each try', 1, 'current', 0),
+			8=>array('SELLYOURSAAS_NBHOURSBETWEENTRIES', 'chaine', 49, 'Nb hours minimum between each try', 1, 'current', 0),
 			9=>array('SELLYOURSAAS_NBDAYSBEFOREENDOFTRIES', 'chaine', 35, 'Nb days before stopping invoice payment try', 1, 'current', 0),
 			10=>array('AUDIT_ENABLE_PREFIX_SESSION', 'chaine', 1, 'Enable column prefix session in audit view', 1, 'current', 0),
 			11=>array('PRODUIT_SOUSPRODUITS', 'chaine', 1, 'Enable the feature of kit', 1, 'current', 0)
@@ -127,7 +127,7 @@ class modSellYourSaas extends DolibarrModules
 		// 'intervention'     to add a tab in intervention view
 		// 'invoice'          to add a tab in customer invoice view
 		// 'invoice_supplier' to add a tab in supplier invoice view
-		// 'member'           to add a tab in fundation member view
+		// 'member'           to add a tab in foundation member view
 		// 'opensurveypoll'	  to add a tab in opensurvey poll view
 		// 'order'            to add a tab in customer order view
 		// 'order_supplier'   to add a tab in supplier order view
@@ -994,7 +994,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('fileupgradeunlock', "DateFileUpgradeUnlock", 'datetime', 153, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('latestresupdate_date', "LatestResUpdateDate", 'datetime', 155, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('instanceversion', "InstanceVersion", 'varchar', 156, '128', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
-		//$resultx=$extrafields->addExtraField('instancemodules', "InstanceModules", 'text', 157, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('instancemodules', "InstanceModules", 'text', 157, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax125 overflowellipsis'));
 
 		$resultx=$extrafields->addExtraField('latestbackup_date', "LatestBackupDate", 'datetime', 159, '', 'contrat', 0, 0, '', '', 1, '', -5, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('latestbackup_date_ok', "LatestBackupDateOK", 'datetime', 160, '', 'contrat', 0, 0, '', '', 1, '', -5, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');

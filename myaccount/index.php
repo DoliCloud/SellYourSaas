@@ -469,7 +469,6 @@ if (!empty($mythirdpartyaccount->context['isamoduleprovider']) && in_array($mode
 	} else {
 		dol_print_error($db);
 	}
-
 }
 
 // Define environment of payment modes
@@ -1314,7 +1313,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				if (!$error) {
 					// Creation of Stripe SEPA + update of societe_rib
 					$card = $stripe->sepaStripe($cu, $companypaymentmode, $stripeacc, $servicestatus, 1);
-					if (!$card) {
+					if (!$card || $stripe->error) {
 						$error++;
 						setEventMessages($stripe->error, $stripe->errors, 'errors');
 					} else {
@@ -1330,7 +1329,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$id_payment_mode_ban = dol_getIdFromCode($db, 'PRE', 'c_paiement', 'code', 'id', 1);
 
 			// Update all pending recurring invoices of the thirdparty to the payment mode direct debit. Update also the open invoices.
-			// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended). For such case, recuring invoice is created at end of this action.
+			// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended). For such case, recurring invoice is created at end of this action.
 			if ($id_payment_mode_ban > 0) {
 				// First update recurring invoices
 				$sql = "UPDATE ".MAIN_DB_PREFIX."facture_rec";
@@ -1359,7 +1358,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				setEventMessages("Failed to get payment mode ID for Direct Debit (code PRE). We can't continue.", null, 'errors');
 			}
 
-			dol_syslog("--- A sepa bank was recorded. Now we reset the custom stripeaccount (to force use of the default setup)", LOG_DEBUG, 0);
+			dol_syslog("--- A sepa bank was recorded. Now we reset the forced custom stripeaccount (to force use of the default setup)", LOG_DEBUG, 0);
 
 			$sql = 'UPDATE '.MAIN_DB_PREFIX.'societe_extrafields set stripeaccount = NULL WHERE fk_object = '.$mythirdpartyaccount->id;
 			$db->query($sql);
@@ -1417,7 +1416,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		$paymentmode = 'ban';
 		include dol_buildpath('/sellyoursaas/myaccount/tpl/action_create_recinvoice_after_payment_creation.tpl.php');
-		// This include the $db->commit() or $db->rollback() and the redirect if everything is ok
+		// This include the $db->commit() or $db->rollback() according to $error and the redirect if everything is ok
 
 		$action='';
 		$mode='registerpaymentmode';
@@ -2003,7 +2002,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				';
 
 				// TODO
-				// Make a redirect on cancelation survey
+				// Make a redirect on cancellation survey
 
 				llxFooter();
 
@@ -2410,7 +2409,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 						}
 					}
 				}
-			}  else {
+			} else {
 				if (!getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL")) {
 					// TODO: Send mail auto to inform admins of missing recinvoice
 				}
@@ -3610,7 +3609,7 @@ if (empty($welcomecid)
 						if ($mode != 'registerpaymentmode') {
 							print '<p class="pforbutton">';
 							if ($contract->total_ht > 0) {
-								// Link to add payment and to swith to instance
+								// Links to add a payment and to switch to the instance
 								print '<a href="'.$_SERVER["PHP_SELF"].'?mode=registerpaymentmode&backtourl='.urlencode($_SERVER["PHP_SELF"].'?mode='.$mode).'" class="btn btn-warning wordbreak marginrightonly">';
 								print $langs->trans("AddAPaymentMode");
 								print '</a>';

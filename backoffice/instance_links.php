@@ -27,7 +27,7 @@ $res=0;
 if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
 	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 }
-// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
@@ -50,6 +50,7 @@ if (! $res) {
 	die("Include of main fails");
 }
 /**
+ * @var Conf $conf
  * @var	DoliDB $db
  * @var Hookmanager $hookmanager
  * @var Translate $langs
@@ -145,7 +146,7 @@ if (empty($reshook)) {
 				$blacklistip->status = Blacklistip::STATUS_ENABLED;
 				$blacklistip->date_use = $tmpcontract->array_options['options_deployment_date_start'];
 				$blacklistip->content = $tmpcontract->array_options['options_deployment_ip'];
-				$blacklistip->comment = "Flagged as Spammer (from the backoffice by ".$user->login."), after manual analyzis of the user activity";
+				$blacklistip->comment = "Flagged as Spammer (from the backoffice by ".$user->login."), after manual analysis of the user activity";
 
 				$result2 = $blacklistip->create($user);
 				if ($result2 <= 0) {
@@ -363,10 +364,12 @@ $help_url='';
 llxHeader('', $title, $help_url);
 
 $form = new Form($db);
-$form2 = new Form($db2);
 $formcompany = new FormCompany($db);
 
-$countrynotdefined=$langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
+$lastloginadmin = '';
+$lastpassadmin = '';
+
+$countrynotdefined = $langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
 
 if ($action == 'upgradeinstance') {
 	$laststableversion = getDolGlobalString('SELLYOURSAAS_LAST_STABLE_VERSION_DOLIBARR');
@@ -384,190 +387,19 @@ if ($action != 'create') {
 
 if ($id > 0 && $action != 'edit' && $action != 'create') {
 	/*
-	 * Fiche en mode visualisation
+	 * view mode of tab "useful links of contracts
 	 */
-
-	$instance = 'xxxx';
-	$type_db = $conf->db->type;
 
 	$object->fetch_thirdparty();
 
-	$hostname_db  = $object->array_options['options_hostname_db'];
-	$username_db  = $object->array_options['options_username_db'];
-	$password_db  = $object->array_options['options_password_db'];
-	$database_db  = $object->array_options['options_database_db'];
-	$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
-	$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
-	$hostname_os  = $object->array_options['options_hostname_os'];
-	$username_os  = $object->array_options['options_username_os'];
-	$password_os  = $object->array_options['options_password_os'];
-	$version      = $object->array_options['options_instanceversion'];
-	$username_web = $object->thirdparty->email;
-	$password_web = $object->thirdparty->array_options['options_password'];
+	$restmp = updateInstanceInfo($object);
 
-	$tmp = explode('.', $object->ref_customer, 2);
-
-	$object->instance = $tmp[0];
-	$object->hostname_db  = $hostname_db;
-	$object->username_db  = $username_db;
-	$object->password_db  = $password_db;
-	$object->database_db  = $database_db;
-	$object->port_db      = $port_db;
-	$object->prefix_db    = $prefix_db;
-	$object->username_os  = $username_os;
-	$object->password_os  = $password_os;
-	$object->hostname_os  = $hostname_os;
-	$object->version      = $version;
-	$object->username_web = $username_web;
-	$object->password_web = $password_web;
-
-	$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
-	$newdb->prefix_db = $prefix_db;
-
-	$savetodo = 0;
-	$stringofversion = '';
-	$stringoflistofmodules = '';
-
-	if (is_object($newdb) && $newdb->connected) {
-		// Get $lastloginadmin, $lastpassadmin, $stringoflistofmodules
-		$lastloginadmin = '';
-		$lastpassadmin = '';
-		$stringoflistofmodules='';
-
-		$fordolibarr = 1;
-		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
-			$fordolibarr = 0;
-			$forglpi = 1;
-		}
-
-		// Get user/pass of last admin user
-		if ($fordolibarr) {
-			// TODO Put the definition of sql to get last used admin user into the package.
-			$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
-			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
-				$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
-			}
-
-			$resql=$newdb->query($sql);
-			if ($resql) {
-				$obj = $newdb->fetch_object($resql);
-				$object->lastlogin_admin = $obj->login;
-				$object->lastpass_admin = $obj->pass;
-				$lastloginadmin = $object->lastlogin_admin;
-				$lastpassadmin = $object->lastpass_admin;
-			} else {
-				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
-			}
-		}
-
-		// Get user/pass of last admin user
-		if ($forglpi) {
-			// TODO Put the definition of sql to get last used admin user into the package.
-			$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
-
-			$resql=$newdb->query($sql);
-			if ($resql) {
-				$obj = $newdb->fetch_object($resql);
-				if ($obj) {
-					$object->lastlogin_admin = $obj->login;
-					$object->lastpass_admin = $obj->pass;
-					$lastloginadmin = $object->lastlogin_admin;
-					$lastpassadmin = $object->lastpass_admin;
-				}
-
-				$newdb->free($resql);
-			} else {
-				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
-			}
-		}
-
-		// Replace __INSTANCEDBPREFIX__
-		$substitarray=array(
-			'__INSTANCEDBPREFIX__' => $prefix_db
-		);
-
-		// Get $stringofversion and $stringoflistofmodules
-		$formula = '';
-		$sqltogetpackage = 'SELECT p.version_formula FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
-		$sqltogetpackage .= ' WHERE cd.fk_contrat = '.((int) $object->id);
-		$sqltogetpackage .= ' AND cd.fk_product = pe.fk_object';
-		$sqltogetpackage .= " AND pe.app_or_option = 'app'";
-		$sqltogetpackage .= ' AND pe.package = p.rowid';
-		$sqltogetpackage .= ' LIMIT 1';		// We should always have only one line
-
-		$resqltogetpackage = $db->query($sqltogetpackage);
-		if ($resqltogetpackage) {
-			$obj = $db->fetch_object($resqltogetpackage);
-			if ($obj) {
-				$formula = $obj->version_formula;
-			}
-		} else {
-			setEventMessages('Failed to execute SQL: '.$db->lasterror(), null, 'warnings');
-			$error++;
-		}
-		if (preg_match('/SQL:/', $formula)) {
-			// Define $stringofversion
-			$formula = preg_replace('/SQL:/', '', $formula);
-			$formula = make_substitutions($formula, $substitarray);
-			// 'MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
-			$resqlformula = $newdb->query($formula);
-
-			if ($resqlformula) {
-				$num = $newdb->num_rows($resqlformula);
-
-				$i=0;
-				while ($i < $num) {
-					$obj = $newdb->fetch_object($resqlformula);
-					$stringofversion .= ($i > 0 ? ' / ' : '');
-					if ($obj) {
-						$stringofversion .= $obj->name.'='.$obj->version;
-					} else {
-						$stringofversion .= $langs->trans("Unknown");
-					}
-					$i++;
-				}
-
-				$object->version = $stringofversion;
-
-				if ($stringofversion != $object->array_options['options_instanceversion']) {
-					$savetodo = 1;
-					$object->array_options['options_instanceversion'] = $stringofversion;	// To save
-				}
-			} else {
-				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
-				$error++;
-			}
-		}
-
-		if ($fordolibarr) {
-			$confinstance = new Conf();
-			$confinstance->setValues($newdb);
-			// Define $stringoflistofmodules
-			// TODO Put the defintion in a sql into package and stor it into an extrafield
-			$i=0;
-			foreach ($confinstance->global as $key => $val) {
-				if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && ! empty($val)) {
-					if ($i > 0) {
-						$stringoflistofmodules .= ', ';
-					}
-					$stringoflistofmodules .= preg_replace('/^MAIN_MODULE_/', '', $key);
-					$i++;
-				}
-			}
-
-			$object->modulesenabled = $stringoflistofmodules;
-		}
+	if (is_array($restmp)) {
+		$lastloginadmin = $restmp['lastloginadmin'];
+		$lastpassadmin = $restmp['lastpassadmin'];
+	} else {
+		$error = $restmp;
 	}
-
-	// We have value that has changed, we saved them
-	if ($savetodo) {
-		$object->update($user, 1);
-	}
-
-	/*if (is_object($object->db2)) {
-		$savdb=$object->db;
-		$object->db=$object->db2;	// To have ->db to point to db2 for showrefnav function.  $db = master database
-	}*/
 
 
 	$object->fetch_thirdparty();
@@ -620,10 +452,6 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	dol_banner_tab($object, 'ref', $linkback, 1, 'ref', 'ref', $morehtmlref, '', $nodbprefix, '', '', 1);
 
-
-	if (is_object($object->db2)) {
-		$object->db = $savdb;
-	}
 
 	print '<div class="fichecenter">';
 
@@ -726,7 +554,7 @@ if (empty($object->nbofusers)) {
 					}
 
 					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
-					//var_dump($serverdeployement);		// just ip of deployement server
+					//var_dump($serverdeployment);		// just ip of deployment server
 					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 
@@ -898,6 +726,7 @@ print "</div>";	//  End fiche=center
 if (! $user->socid) {
 	$listmodules = dol_dir_list(DOL_DOCUMENT_ROOT."/core/modules/", "files");
 	foreach ($listmodules as $key => $module) {
+		$namemodule = array();
 		preg_match('/mod([[:upper:]].*)\.class\.php/', $module["name"], $namemodule);
 		if (!empty($namemodule)) {
 			$arraycoremodules[] = strtoupper($namemodule[1]);
@@ -938,6 +767,7 @@ if (! $user->socid) {
 	print '<br>';
 }
 
+
 print getListOfLinks($object, $lastloginadmin, $lastpassadmin);
 
 
@@ -977,7 +807,7 @@ foreach ($arraylistofinstances as $instance) {
 	print '<td>'.$instance->array_options['options_deployment_vpn_proba'].'</td>';
 	print '<td class="nowraponall">'.dol_print_date($instance->array_options['options_deployment_date_start'], 'dayhour', 'tzuserrel').'</td>';
 	print '<td>'.$instance->getLibStatut(7).'</td>';
-	print '<td align="right">';
+	print '<td class="right">';
 	if ($user->hasRight('sellyoursaas', 'write')) {
 		print ' <a class="reposition" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=markasspamandclose&token='.newToken().'&idtoclose='.$instance->id.'">'.img_picto('', 'fa-book-dead', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("MarkAsSpamAndClose").'</span></a>';
 		if (getDolGlobalString('SELLYOURSAAS_ADD_SPAMER_JS_SCANNER')) {

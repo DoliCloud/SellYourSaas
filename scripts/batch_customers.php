@@ -1,6 +1,6 @@
 #!/usr/bin/php
 <?php
-/* Copyright (C) 2007-2018 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2007-2026 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
  *      \file       sellyoursaas/scripts/batch_customers.php
  *		\ingroup    sellyoursaas
  *      \brief      Main SellYourSaas batch:
- *      			- to run on master hosts for action updatedatabase|updatecountsonly|updatestatsonly
- *      			- to run on deployment hosts for action backup* (payed customers rsync + databases backup)
+ *      			- to run on master hosts for action updatestatsonly|updatemetricsonly|updateinfoonly or updatedatabase
+ *      			- to run on deployment hosts for action backup* (paid customers rsync + databases backup)
  */
 
 if (!defined('NOREQUIREDB')) {
@@ -61,7 +61,7 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 
 // Load Dolibarr environment
 $res=0;
-// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try master.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
@@ -95,11 +95,19 @@ if (! $res) {
 }
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
-
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var Societe $mysoc
+ * @var Translate $langs
+ * @var HookManager $hookmanager
+ * @var User $user
+ */
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
+include_once dol_buildpath("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 
 // Global variables
 $FORCE=0;
@@ -228,21 +236,22 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print "Usage on master            : ".$script_file." (updatedatabase|updatecountsonly|updatestatsonly) [instancefilter] [--force] [--nostats]\n";
+	print "Usage on master            : ".$script_file." (updatestatsonly|updatemetricsonly|updatedatabase) [instancefilter] [--force] [--nostats]\n";
 	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force] [--nostats]\n";
 	print "\n";
 	print "action can be:\n";
-	print "- updatecountsonly    updates metrics of instances only (list and nb of users for each instance)\n";
-	print "- updatestatsonly     updates stats only (only table sellyoursaas_stats) and send data to Datagog if enabled <<<<< Used by cron on master server >>>>>\n";
-	print "- updatedatabase      (=updatecountsonly+updatestatsonly) updates list and nb of users, modules and version and stats table.\n";
-	print "- backuptest          test rsync+database backup\n";
-	print "- backuptestrsync     test rsync backup\n";
-	print "- backuptestdatabase  test database backup\n";
-	print "- backuprsync         creates backup (rsync)\n";
-	print "- backupdatabase      creates backup (mysqldump)\n";
-	print "- backup              creates backup (rsync + database)\n";
-	print "- backupdelete        creates backup (rsync with delete + database) <<<<< Used by cron on deployment servers >>>>>\n";
-	print "- backupdeleteexclude creates backup (rsync with delete excluded + database)\n";
+	print "- updatestatsonly     updates stats only, only table sellyoursaas_stats for dashboard graph (and send data to Datagog if enabled). <<<<< Used by cron on master server\n";
+	print "- updatemetricsonly   updates metrics of instances only (list and nb of users for each instance).\n";
+	print "- updateinfoonly      updates info of instances only (like version and/or modules installed).\n";
+	print "- updatedatabase      (=updatestatsonly+updatemetricsonly+updateinfoonly) updates list and nb of users, modules and version and stats table.\n";
+	print "- backuptest          test rsync+database backup.\n";
+	print "- backuptestrsync     test rsync backup.\n";
+	print "- backuptestdatabase  test database backup.\n";
+	print "- backuprsync         creates backup (rsync).\n";
+	print "- backupdatabase      creates backup (mysqldump).\n";
+	print "- backup              creates backup (rsync + database).\n";
+	print "- backupdelete        creates backup (rsync with delete + database). <<<<< Used by cron on deployment servers\n";
+	print "- backupdeleteexclude creates backup (rsync with delete excluded + database).\n";
 	print "\n";
 	print "with a backup... action, you can also add the option --force to execute backup even if done recently.\n";
 
@@ -296,24 +305,27 @@ if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomp
 }
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object=new Contrat($dbmaster);
+$object = new Contrat($dbmaster);
 
 // Get list of instance
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
-if ($instancefiltercomplete) {
+if ($instancefiltercomplete && !preg_match('/\*/', $instancefiltercomplete)) {
 	$stringforsearch = '';
 	$tmparray = explode(',', $instancefiltercomplete);
 	foreach ($tmparray as $instancefiltecompletevalue) {
 		if (! empty($stringforsearch)) {
-			$stringforsearch.=", ";
+			$stringforsearch .= ", ";
 		}
-		$stringforsearch.="'".trim($instancefiltecompletevalue)."'";
+		$stringforsearch .= "'".$db->escape(trim($instancefiltecompletevalue))."'";
 	}
 	$sql.= " AND c.ref_customer IN (".$stringforsearch.")";
 } else {
+	if ($instancefiltercomplete && preg_match('/\*/', $instancefiltercomplete)) {
+		$sql.= " AND c.ref_customer LIKE '".$db->escape(str_replace('*', '%', $instancefiltercomplete))."'";
+	}
 	$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
 }
 $sql.= " AND ce.deployment_status IS NOT NULL";
@@ -325,7 +337,7 @@ if (preg_match('/backup/', $action)) {
 
 $dbtousetosearch = $dbmaster;
 
-print $sql."\n";                                    // To have this into the ouput of cron job
+print $sql."\n";                                    // To have this into the output of cron job
 
 dol_syslog($script_file, LOG_DEBUG);
 
@@ -454,7 +466,7 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 
 			if (empty($qualifiedforbackup) && empty($FORCE)) {
 				// Discard backup
-				print "***** Discard backup of paid instance ".($i+1)." ".$instance.' at '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." - Already successfull recently the ".dol_print_date($arrayofinstance['latestbackup_date_ok'], "%Y%m%d-%H%M%S").".\n";
+				print "***** Discard backup of paid instance ".($i+1)." ".$instance.' at '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." - Already successful recently the ".dol_print_date($arrayofinstance['latestbackup_date_ok'], "%Y%m%d-%H%M%S").".\n";
 
 				$nbofokdiscarded++;
 				$instancesbackupsuccessdiscarded[$instance] = array('date' => dol_now('gmt'));
@@ -531,58 +543,13 @@ $today=dol_now();
 $error=0; $errors=array();
 $servicetouse = strtolower(getDolGlobalString('SELLYOURSAAS_NAME'));
 
-if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'updatecountsonly') {	// updatedatabase = updatestatsonly + updatecountsonly
-	print "----- Start updatedatabase\n";
+if ($action == 'updatestatsonly' || $action == 'updatemetricsonly' || $action == 'updateinfoonly' || $action == 'updatedatabase') {	// updatedatabase = updatestatsonly + updatemetricsonly + updateinfoonly
+	print "----- Start ".$action."\n";
 
 	dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 	$sellyoursaasutils = new SellYourSaasUtils($dbmaster);
 
-
-	if (! $error && $action != 'updatestatsonly') {		// make updatecountsonly so refresh remote metrics only
-		$i=0;
-		// Loop on each paid instance
-		foreach ($instances as $arrayofinstance) {
-			$instance = $arrayofinstance['instance'];
-
-			$return_val=0;
-			$error=0;
-			$errors=array();
-
-			// Run database update
-			print "Process update database info (nb of user) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
-
-			$dbmaster->begin();
-
-			$result=$object->fetch('', '', $instance);
-			if ($result < 0) {
-				dol_print_error('', $object->error);
-			}
-
-			$object->oldcopy=dol_clone($object, 1);
-
-			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $object);
-			if ($result <= 0) {
-				$errors[] = 'Failed to do sellyoursaasRemoteAction(refreshmetrics) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors) ? ' '.join(',', $sellyoursaasutils->errors) : '');
-			}
-
-			if (count($errors) == 0) {
-				print "OK\n";
-
-				$nbofok++;
-				$dbmaster->commit();
-			} else {
-				$nboferrors++;
-				$instancesupdateerror[$instance] = array('date' => dol_now('gmt'));
-				print 'KO. '.join(',', $errors)."\n";
-				$dbmaster->rollback();
-			}
-
-			$i++;
-		}
-	}
-
-
-	if (! $error && $action != 'updatecountsonly') {	// make updatestatsonly so count existing instances only
+	if (! $error && in_array($action, array('updatestatsonly', 'updatedatabase'))) {
 		$stats=array();
 
 		// Load list of existing stats into $stats
@@ -747,6 +714,95 @@ if ($action == 'updatedatabase' || $action == 'updatestatsonly' || $action == 'u
 			}	// end loop on month
 		} // end loop on year
 	}
+
+	if (! $error && in_array($action, array('updatemetricsonly', 'updatedatabase'))) {		// make updatemetricsonly (so refresh remote metrics) or updateinfoonly (update version/modules info)
+		$i=0;
+		// Loop on each paid instance
+		foreach ($instances as $arrayofinstance) {
+			$instance = $arrayofinstance['instance'];
+
+			$return_val=0;
+			$error=0;
+			$errors=array();
+
+			// Run database update
+			print "Process update metrics (like Nb of user or Gb) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
+
+			$dbmaster->begin();
+
+			$result=$object->fetch('', '', $instance);
+			if ($result < 0) {
+				dol_print_error('', $object->error);
+			}
+
+			$object->oldcopy = dol_clone($object, 1);
+
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction('refreshmetrics', $object);
+			if ($result <= 0) {
+				$errors[] = 'Failed to do sellyoursaasRemoteAction(refreshmetrics) '.$sellyoursaasutils->error.(is_array($sellyoursaasutils->errors) ? ' '.join(',', $sellyoursaasutils->errors) : '');
+			}
+
+			if (count($errors) == 0) {
+				print "OK\n";
+
+				$nbofok++;
+				$dbmaster->commit();
+			} else {
+				$nboferrors++;
+				$instancesupdateerror[$instance] = array('date' => dol_now('gmt'));
+				print 'KO. '.join(',', $errors)."\n";
+				$dbmaster->rollback();
+			}
+
+			$i++;
+		}
+	}
+
+	if (! $error && in_array($action, array('updateinfoonly', 'updatedatabase'))) {		// make updateinfoonly or updatedatabase
+		$i=0;
+		// Loop on each paid instance
+		foreach ($instances as $arrayofinstance) {
+			$instance = $arrayofinstance['instance'];
+
+			$return_val=0;
+			$error=0;
+			$errors=array();
+
+			// Run database update
+			print "Process update database info (nb of user) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
+
+			$dbmaster->begin();
+
+			$result=$object->fetch('', '', $instance);
+			if ($result < 0) {
+				dol_print_error('', $object->error);
+			}
+
+			$object->fetch_thirdparty();
+
+			$object->oldcopy = dol_clone($object, 1);
+
+			$result = updateInstanceInfo($object);
+
+			if (is_numeric($result) && $result <= 0) {
+				$errors[] = 'Failed to do updateInstanceInfo(object)';
+			}
+
+			if (count($errors) == 0) {
+				print "OK\n";
+
+				$nbofok++;
+				$dbmaster->commit();
+			} else {
+				$nboferrors++;
+				$instancesupdateerror[$instance] = array('date' => dol_now('gmt'));
+				print 'KO. '.join(',', $errors)."\n";
+				$dbmaster->rollback();
+			}
+
+			$i++;
+		}
+	}
 }
 
 
@@ -861,8 +917,8 @@ if (! $nboferrors) {
 			$subject = '[Backup instances - '.gethostname().'] Backup of user instances succeed';
 			$msg = 'Backup done without errors on '.gethostname().' by '.$script_file." ".(empty($argv[1]) ? '' : $argv[1])." ".(empty($argv[2]) ? '' : $argv[2])." (finished at ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').")\n\n".$out;
 
-			$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');                 // exemple 'DoliCloud'
-			$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');   // exemple 'dolicloud.com'
+			$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');                 // example 'DoliCloud'
+			$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');   // example 'dolicloud.com'
 
 			/*$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 			$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;
@@ -920,8 +976,8 @@ if (! $nboferrors) {
 					//$arraytags=array('result'=>'ko');
 					//$statsd->increment('sellyoursaas.backup', 1, $arraytags);
 
-					$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');                 // exemple 'My SaaS Service'
-					$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');   // exemple 'mysaasdomain.com'
+					$sellyoursaasname = getDolGlobalString('SELLYOURSAAS_NAME');                 // example 'My SaaS Service'
+					$sellyoursaasdomain = getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME');   // example 'mysaasdomain.com'
 
 					/*$domainname=getDomainFromURL($_SERVER['SERVER_NAME'], 1);
 					$constforaltname = 'SELLYOURSAAS_NAME_FORDOMAIN-'.$domainname;

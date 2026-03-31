@@ -114,7 +114,7 @@ if (empty($masterserver)) {
 
 // Load Dolibarr environment
 $res=0;
-// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try master.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
@@ -342,7 +342,7 @@ $newobject = new SellYourSaasContract($dbmaster);
 $result = $newobject->fetch('', '', $newinstance);
 if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {	// In test mode, we do not check that target instance exists (we won't create it so we don't mind)
 	if ($overwriteexistinginstance) {
-		// We want to overwrite an exsiting instance
+		// We want to overwrite an existing instance
 		if ($result > 0) {
 			print "An existing instance was found. We will overwrite it.\n";
 		}
@@ -367,7 +367,7 @@ $newobject->password_db = $oldobject->array_options['options_password_db'];
 $newobject->database_db = $oldobject->array_options['options_database_db'];
 
 if (empty($newobject->instance) || empty($newobject->username_os) || empty($newobject->password_os) || empty($newobject->database_db)) {
-	print "Error: Some properties for instance ".$newinstance." could not be retreived from old instance (missing instance, username_os, password_os or database_db).\n";
+	print "Error: Some properties for instance ".$newinstance." could not be retrieved from old instance (missing instance, username_os, password_os or database_db).\n";
 	print "\n";
 	exit(-3);
 }
@@ -664,7 +664,6 @@ if (empty($forceproductref)) {
 			// Product was not found in new contract when it was in old one.
 			print "The product id ".$productid." was found into old instance but not into the new one, we must add it.\n";
 			// TODO
-
 		}
 	}
 } else {
@@ -845,24 +844,28 @@ print $content_grabbed."\n";
 // STEP 3 of synchro - We should update the value of $dolibarr_main_instance_unique_id if
 // it was not done during creation of instance.
 $value_of_dolibarr_main_instance_unique_id = '';
-$value_of_dolibarr_main_cookie_cryptkey = '';
+$value_of_dolibarr_main_cookie_cryptkey = '';		// old key for $value_of_dolibarr_main_instance_unique_id
+$value_of_dolibarr_main_dol_cryptkey = '';
 if (file_exists($sourcedir.'/htdocs/conf/conf.php')) {
 	chmod($sourcedir.'/htdocs/conf', 0700);
 	dol_move($sourcedir.'/htdocs/conf/conf.php', $sourcedir.'/htdocs/conf/conf.php.mastermove', '0', 1, 0, 0);
 
 	$tmpfilecontent = file_get_contents($sourcedir.'/htdocs/conf/conf.php.mastermove');
 	foreach (explode("\n", $tmpfilecontent) as $line) {
-	    if (strpos($line, '=') === false) continue;
-	    if (preg_match('/^#/', $line)) continue;
-	    if (preg_match('/^\//', $line)) continue;
-	    [$key, $val] = explode('=', $line, 2);
-	    if (trim($key) === '$dolibarr_main_instance_unique_id') {
-	        $value_of_dolibarr_main_instance_unique_id = str_replace(array("'",";"), "", trim($val));
-			break;
-	    }
-	    if (trim($key) === '$dolibarr_main_cookie_cryptkey') {
-	        $value_of_dolibarr_main_cookie_cryptkey = str_replace(array("'",";"), "", trim($val));
-	    }
+		if (strpos($line, '=') === false) continue;
+		if (preg_match('/^#/', $line)) continue;
+		if (preg_match('/^\//', $line)) continue;
+		[$key, $val] = explode('=', $line, 2);
+
+		if (trim($key) === '$dolibarr_main_instance_unique_id') {
+			$value_of_dolibarr_main_instance_unique_id = str_replace(array("'",";"), "", trim($val));
+		}
+		if (trim($key) === '$dolibarr_main_cookie_cryptkey') {	// old key for $value_of_dolibarr_main_instance_unique_id
+			$value_of_dolibarr_main_cookie_cryptkey = str_replace(array("'",";"), "", trim($val));
+		}
+		if (trim($key) === '$dolibarr_main_dol_cryptkey') {
+			$value_of_dolibarr_main_dol_cryptkey = str_replace(array("'",";"), "", trim($val));
+		}
 	}
 
 	if (empty($value_of_dolibarr_main_instance_unique_id)) {
@@ -870,15 +873,20 @@ if (file_exists($sourcedir.'/htdocs/conf/conf.php')) {
 	}
 
 	if (empty($nointeractive)) {
-		print "Press ENTER to continue by running the ssh command to update the dolibarr_main_instance_unique_id on remote target host...\n";
+		print "Press ENTER to continue by running the ssh command to update the dolibarr_main_instance_unique_id and dolibarr_main_dol_cryptkey on remote target host...\n";
 		$input = trim(fgets(STDIN));
 	}
 
 	$fullcommand = 'ssh -o StrictHostKeyChecking=accept-new '.$newlogin.'@'.$newserver;
 	$fullcommand .= ' "';
 	$fullcommand .= 'chmod u+w '.$targetdir.'/htdocs/conf; ';
+	// This one is important (used as registering id for blockedlog module)
 	if ($value_of_dolibarr_main_instance_unique_id) {
 		$fullcommand .= 'sed -i \'s/^\$dolibarr_main_instance_unique_id=.*/\$dolibarr_main_instance_unique_id=\"'.$value_of_dolibarr_main_instance_unique_id.'\";/\' '.$targetdir.'/htdocs/conf/conf.php; ';
+	}
+	// This one is important for crypted values
+	if ($value_of_dolibarr_main_dol_cryptkey) {
+		$fullcommand .= 'sed -i \'s/^\$dolibarr_main_dolcrypt_key=.*/\$dolibarr_main_dolcrypt_key=\"'.$value_of_dolibarr_main_dol_cryptkey.'\";/\' '.$targetdir.'/htdocs/conf/conf.php; ';
 	}
 	$fullcommand .= 'chmod u-w '.$targetdir.'/htdocs/conf; ';
 	$fullcommand .= '"';
@@ -965,7 +973,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 	// If table already not exist, return_var is 1
 	// If technical error, return_var is also 1, so we disable this test
 	/*if ($return_var) {
-		print "Error on droping table into the new instance\n";
+		print "Error on dropping table into the new instance\n";
 		exit(-2);
 	}*/
 }
@@ -986,7 +994,7 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 	// If table already not exist, return_var is 1
 	// If technical error, return_var is also 1, so we disable this test
 	/*if ($return_var) {
-		print "Error on droping table into the new instance\n";
+		print "Error on dropping table into the new instance\n";
 		exit(-2);
 	}*/
 }

@@ -73,7 +73,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 
 
 	/**
-	 * Function called when a Dolibarrr business event is done.
+	 * Function called when a Dolibarr business event is done.
 	 * All functions "runTrigger" are triggered if file
 	 * is inside directory core/triggers
 	 *
@@ -506,7 +506,7 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 			if (! $error && $okforremoteaction) {
 				dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 				$sellyoursaasutils = new SellYourSaasUtils($this->db);
-				// Param '0' means an event is added for some remot action only, '-1' means never add remote action
+				// Param '0' means an event is added for some remote action only, '-1' means never add remote action
 				$forceaddevent = '0';
 				$result = $sellyoursaasutils->sellyoursaasRemoteAction($remoteaction, $object, 'admin', '', '', $forceaddevent, 'Remote action '.$remoteaction.' executed from trigger '.$action, 300);
 				if ($result <= 0) {

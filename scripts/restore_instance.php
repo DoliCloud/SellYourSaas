@@ -80,7 +80,7 @@ if (empty($dolibarrdir)) {
 
 // Load Dolibarr environment
 $res=0;
-// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try master.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
@@ -115,6 +115,9 @@ if (! $res) {
 	print("Include of master fails");
 	exit(-1);
 }
+/**
+ * @var Conf $conf
+ */
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
@@ -603,46 +606,54 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	$newdatabasedb = $object->database_db;
 	$utils = new Utils($db);
 
-	// Drop llx_accounting_account (if it exists)
-	$fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
-	$output=array();
-	$return_var=0;
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropa."\n";
-	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
-		$outputfile = $conf->admin->dir_temp.'/out.tmp';
-		$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
-
-		$return_var = $resultarray['result'];
-		$content_grabbed = $resultarray['output'];
-
-		print $content_grabbed."\n";
-		// If table already not exist, return_var is 1
-		// If technical error, return_var is also 1, so we disable this test
-		/*if ($return_var) {
-			print "Error on droping table into the new instance\n";
-			exit(-2);
-		}*/
+	$fordolibarr = 1;
+	if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+		$fordolibarr = 0;
+		$forglpi = 1;
 	}
 
-	// Drop llx_accounting_system (if it exists)
-	$fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
-	$output=array();
-	$return_var=0;
-	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropb."\n";
-	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
-		$outputfile = $conf->admin->dir_temp.'/out.tmp';
-		$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
+	if ($fordolibarr) {
+		// Drop llx_accounting_account (if it exists)
+		$fullcommanddropa='echo "drop table llx_accounting_account;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+		$output=array();
+		$return_var=0;
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropa."\n";
+		if ($mode == 'confirm' || $mode == 'confirmdatabase') {
+			$outputfile = $conf->admin->dir_temp.'/out.tmp';
+			$resultarray = $utils->executeCLI($fullcommanddropa, $outputfile, 0, null, 1);
 
-		$return_var = $resultarray['result'];
-		$content_grabbed = $resultarray['output'];
+			$return_var = $resultarray['result'];
+			$content_grabbed = $resultarray['output'];
 
-		print $content_grabbed."\n";
-		// If table already not exist, return_var is 1
-		// If technical error, return_var is also 1, so we disable this test
-		/*if ($return_var) {
-			print "Error on droping table into the new instance\n";
-			exit(-2);
-		}*/
+			print $content_grabbed."\n";
+			// If table already not exist, return_var is 1
+			// If technical error, return_var is also 1, so we disable this test
+			/*if ($return_var) {
+				print "Error on dropping table into the new instance\n";
+				exit(-2);
+			}*/
+		}
+
+		// Drop llx_accounting_system (if it exists)
+		$fullcommanddropb='echo "drop table llx_accounting_system;" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+		$output=array();
+		$return_var=0;
+		print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Drop table to prevent load error with '.$fullcommanddropb."\n";
+		if ($mode == 'confirm' || $mode == 'confirmdatabase') {
+			$outputfile = $conf->admin->dir_temp.'/out.tmp';
+			$resultarray = $utils->executeCLI($fullcommanddropb, $outputfile, 0, null, 1);
+
+			$return_var = $resultarray['result'];
+			$content_grabbed = $resultarray['output'];
+
+			print $content_grabbed."\n";
+			// If table already not exist, return_var is 1
+			// If technical error, return_var is also 1, so we disable this test
+			/*if ($return_var) {
+				print "Error on dropping table into the new instance\n";
+				exit(-2);
+			}*/
+		}
 	}
 
 	// Launch load
@@ -662,7 +673,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	}
 
 	$output=array();
-	$fullcommandwithoutpass = preg_replace('/\-p"(..).*"$/', '-p\1***hidden***', $fullcommand); // Hide password ecept the 2 first chars
+	$fullcommandwithoutpass = preg_replace('/\-p"(..).*"$/', '-p\1***hidden***', $fullcommand); // Hide password except the 2 first chars
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommandwithoutpass."\n";
 	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
 		exec($fullcommand, $output, $return_varmysql);

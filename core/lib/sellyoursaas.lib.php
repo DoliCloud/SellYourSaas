@@ -22,81 +22,6 @@
  */
 
 
-// Include function for backward comaptibility with v18-
-if (!function_exists('dolPrintLabel')) {
-	/**
-	 * Return a string label ready to be output on HTML content
-	 * To use text inside an attribute, use can simply only dol_escape_htmltag()
-	 *
-	 * @param	string	$s		String to print
-	 * @return	string			String ready for HTML output
-	 */
-	function dolPrintLabel($s)
-	{
-		return dol_escape_htmltag(dol_htmlentitiesbr($s));
-	}
-}
-
-if (!function_exists('dolPrintHTML')) {
-	/**
-	 * Return a string ready to be output on HTML page
-	 * To use text inside an attribute, you can simply use dol_escape_htmltag()
-	 *
-	 * @param	string	$s				String to print
-	 * @param	int		$allowiframe	Allow iframe tags
-	 * @return	string					String ready for HTML output
-	 */
-	function dolPrintHTML($s, $allowiframe = 0)
-	{
-		return dol_escape_htmltag(dol_htmlwithnojs(dol_string_onlythesehtmltags(dol_htmlentitiesbr($s), 1, 1, 1, $allowiframe)), 1, 1, 'common', 0, 1);
-	}
-}
-
-if (!function_exists('dolPrintHTMLForAttribute')) {
-	/**
-	 * Return a string ready to be output on an HTML attribute (alt, title, ...)
-	 *
-	 * @param	string	$s		String to print
-	 * @return	string			String ready for HTML output
-	 */
-	function dolPrintHTMLForAttribute($s)
-	{
-		// The dol_htmlentitiesbr will convert simple text into html
-		// The dol_escape_htmltag will escape html chars.
-		return dol_escape_htmltag(dol_htmlentitiesbr($s), 1, -1);
-	}
-}
-
-if (!function_exists('dolPrintHTMLForTextArea')) {
-	/**
-	 * Return a string ready to be output on input textarea
-	 * To use text inside an attribute, use can use only dol_escape_htmltag()
-	 *
-	 * @param	string	$s				String to print
-	 * @param	int		$allowiframe	Allow iframe tags
-	 * @return	string					String ready for HTML output into a textarea
-	 */
-	function dolPrintHTMLForTextArea($s, $allowiframe = 0)
-	{
-		return dol_escape_htmltag(dol_htmlwithnojs(dol_string_onlythesehtmltags(dol_htmlentitiesbr($s), 1, 1, 1, $allowiframe)), 1, 1, '', 0, 1);
-	}
-}
-
-if (!function_exists('dolPrintPassword')) {
-	/**
-	 * Return a string ready to be output on an HTML attribute (alt, title, ...)
-	 *
-	 * @param	string	$s		String to print
-	 * @return	string			String ready for HTML output
-	 */
-	function dolPrintPassword($s)
-	{
-		return htmlspecialchars($s, ENT_COMPAT, 'UTF-8');
-	}
-}
-
-
-
 /**
  * getNextInstanceInChain
  *
@@ -609,4 +534,205 @@ function command_exists($command)
 {
 	$test = is_windows() ? "where" : "which";
 	return is_executable(trim(shell_exec("$test $command")));
+}
+
+/**
+ * Update instance info by connecting to it and getting some info like version, list of modules, last admin user/pass, etc.
+ *
+ * @param	Object	$object		Object instance to update
+ * @return 	int					Return <0if KO, >0 if OK
+ */
+function updateInstanceInfo($object)
+{
+	global $user, $langs, $conf, $db;
+
+	$error = 0;
+
+	$hostname_db  = $object->array_options['options_hostname_db'];
+	$username_db  = $object->array_options['options_username_db'];
+	$password_db  = $object->array_options['options_password_db'];
+	$database_db  = $object->array_options['options_database_db'];
+	$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+	$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
+	$hostname_os  = $object->array_options['options_hostname_os'];
+	$username_os  = $object->array_options['options_username_os'];
+	$password_os  = $object->array_options['options_password_os'];
+	$version      = $object->array_options['options_instanceversion'];
+	$username_web = $object->thirdparty->email;
+	$password_web = $object->thirdparty->array_options['options_password'];
+	$type_db = $conf->db->type;
+
+	$tmp = explode('.', $object->ref_customer, 2);
+
+	$object->instance = $tmp[0];
+	$object->hostname_db  = $hostname_db;
+	$object->username_db  = $username_db;
+	$object->password_db  = $password_db;
+	$object->database_db  = $database_db;
+	$object->port_db      = $port_db;
+	$object->prefix_db    = $prefix_db;
+	$object->username_os  = $username_os;
+	$object->password_os  = $password_os;
+	$object->hostname_os  = $hostname_os;
+	$object->version      = $version;
+	$object->username_web = $username_web;
+	$object->password_web = $password_web;
+
+	// Connect to remote instance
+	$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+	$newdb->prefix_db = $prefix_db;
+
+	$savetodo = 0;
+	$stringofversion = '';
+	$stringoflistofmodules = '';
+
+	$lastloginadmin = '';
+	$lastpassadmin = '';
+
+	if (is_object($newdb) && $newdb->connected) {
+		// Get $lastloginadmin, $lastpassadmin, $stringoflistofmodules
+		$stringoflistofmodules='';
+
+		$fordolibarr = 1;
+		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+			$fordolibarr = 0;
+			$forglpi = 1;
+		}
+
+		// Get user/pass of last admin user
+		if (!empty($fordolibarr)) {
+			// TODO Put the definition of sql to get last used admin user into the package.
+			$sql="SELECT login, pass FROM ".$prefix_db."user WHERE admin = 1 ORDER BY statut DESC, datelastlogin DESC LIMIT 1";
+			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
+				$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
+			}
+
+			$resql=$newdb->query($sql);
+			if ($resql) {
+				$obj = $newdb->fetch_object($resql);
+				$object->lastlogin_admin = $obj->login;
+				$object->lastpass_admin = $obj->pass;
+				$lastloginadmin = $object->lastlogin_admin;
+				$lastpassadmin = $object->lastpass_admin;
+			} else {
+				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
+			}
+		}
+
+		// Get user/pass of last admin user
+		if (!empty($forglpi)) {
+			// TODO Put the definition of sql to get last used admin user into the package.
+			$sql="SELECT name as login, password as pass FROM glpi_users WHERE 1 = 1 ORDER BY is_active DESC, last_login DESC LIMIT 1";
+
+			$resql=$newdb->query($sql);
+			if ($resql) {
+				$obj = $newdb->fetch_object($resql);
+				if ($obj) {
+					$object->lastlogin_admin = $obj->login;
+					$object->lastpass_admin = $obj->pass;
+					$lastloginadmin = $object->lastlogin_admin;
+					$lastpassadmin = $object->lastpass_admin;
+				}
+
+				$newdb->free($resql);
+			} else {
+				setEventMessages('Success to connect to server, but failed to read last admin/pass user: '.$newdb->lasterror(), null, 'errors');
+			}
+		}
+
+		// Replace __INSTANCEDBPREFIX__
+		$substitarray = array(
+			'__INSTANCEDBPREFIX__' => $prefix_db
+		);
+
+		// Get $stringofversion and $stringoflistofmodules
+		$formula = '';
+		$sqltogetpackage = 'SELECT p.version_formula FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
+		$sqltogetpackage .= ' WHERE cd.fk_contrat = '.((int) $object->id);
+		$sqltogetpackage .= ' AND cd.fk_product = pe.fk_object';
+		$sqltogetpackage .= " AND pe.app_or_option = 'app'";
+		$sqltogetpackage .= ' AND pe.package = p.rowid';
+		$sqltogetpackage .= ' LIMIT 1';		// We should always have only one contract line with type 'app', so one line linked to a package with a version_formula.
+
+		$resqltogetpackage = $db->query($sqltogetpackage);
+		if ($resqltogetpackage) {
+			$obj = $db->fetch_object($resqltogetpackage);
+			if ($obj) {
+				$formula = $obj->version_formula;
+			}
+		} else {
+			setEventMessages('Failed to execute SQL: '.$db->lasterror(), null, 'warnings');
+			$error++;
+		}
+		if (preg_match('/SQL:/', $formula)) {
+			// Set $stringofversion with result of sql defined into formula to get version of instance. This sql must return a field "version" and a field "name" (name of version).
+			$formula = preg_replace('/SQL:/', '', $formula);
+			$formula = make_substitutions($formula, $substitarray);
+			// 'MAIN_VERSION_LAST_UPGRADE='.$confinstance->global->MAIN_VERSION_LAST_UPGRADE;
+			$resqlformula = $newdb->query($formula);
+
+			if ($resqlformula) {
+				$num = $newdb->num_rows($resqlformula);
+
+				$i=0;
+				while ($i < $num) {
+					$obj = $newdb->fetch_object($resqlformula);
+					$stringofversion .= ($i > 0 ? ' / ' : '');
+					if ($obj) {
+						$stringofversion .= $obj->name.'='.$obj->version;
+					} else {
+						$stringofversion .= $langs->trans("Unknown");
+					}
+					$i++;
+				}
+
+				$object->version = $stringofversion;
+
+				if ($stringofversion && $stringofversion != $object->array_options['options_instanceversion']) {
+					$savetodo = 1;
+					$object->array_options['options_instanceversion'] = $stringofversion;	// Version has changed, we must save it.
+				}
+			} else {
+				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
+				$error++;
+			}
+		}
+
+		if ($fordolibarr) {
+			// Set ->modulesenabled with list of enabled modules
+			$confinstance = new Conf();
+			$confinstance->setValues($newdb);
+			// Define $stringoflistofmodules
+			// TODO Put the definition in a sql into package after formula
+			$i=0;
+			foreach ($confinstance->global as $key => $val) {
+				if (preg_match('/^MAIN_MODULE_[^_]+$/', $key) && ! empty($val)) {
+					if ($i > 0) {
+						$stringoflistofmodules .= ', ';
+					}
+					$stringoflistofmodules .= preg_replace('/^MAIN_MODULE_/', '', $key);
+					$i++;
+				}
+			}
+
+			$object->modulesenabled = $stringoflistofmodules;
+
+			/* property not yet stored into database, so we don't persist it */
+			if ($stringoflistofmodules && $stringoflistofmodules != $object->array_options['options_instancemodules']) {
+				$savetodo = 1;
+				$object->array_options['options_instancemodules'] = $stringoflistofmodules;	// Version has changed, we must save it.
+			}
+		}
+	}
+
+	// We have value that has changed, we saved them
+	if ($savetodo) {
+		$object->update($user, 1);
+	}
+
+	if ($error) {
+		return -1;
+	} else {
+		return array($lastloginadmin, $lastpassadmin);
+	}
 }
