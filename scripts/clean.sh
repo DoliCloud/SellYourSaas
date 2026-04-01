@@ -17,7 +17,7 @@ echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
-echo "# PWD ------------> $PWD" 
+echo "# PWD ------------> $PWD"
 echo "# arguments ------> ${@}"
 echo "# path to me -----> ${0}"
 echo "# parent path ----> ${0%/*}"
@@ -28,7 +28,7 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 
 export PID=${$}
-export scriptdir=$(dirname $(realpath ${0}))				
+export scriptdir=$(dirname $(realpath ${0}))
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirtest=`grep '^archivedirtest=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirpaid=`grep '^archivedirpaid=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -94,14 +94,14 @@ fi
 echo "Search sellyoursaas database credential in /etc/sellyoursaas.conf"
 databasepass=`grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepass" == "x" ]]; then
-	echo Failed to get password for mysql user sellyoursaas 
+	echo Failed to get password for mysql user sellyoursaas
 	exit 5
 fi
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - test|confirm" 1>&2
 	echo "Usage: ${0} [test|confirm] (oldtempinarchive)"
-	echo "With mode test, the /temp/... files are not deleted at end of script" 
+	echo "With mode test, the /temp/... files are not deleted at end of script"
 	exit 6
 fi
 
@@ -109,12 +109,12 @@ echo "Search database server name and port for deployment server in /etc/sellyou
 export databasehostdeployment=`grep '^databasehostdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasehostdeployment" == "x" ]]; then
 	databasehostdeployment="localhost"
-fi 
+fi
 export databaseportdeployment=`grep '^databaseportdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databaseportdeployment" == "x" ]]; then
 	databaseportdeployment="3306"
 fi
-echo "Search admin database credential for deployement server in /etc/sellyoursaas.conf"
+echo "Search admin database credential for deployment server in /etc/sellyoursaas.conf"
 export databaseuserdeployment=`grep '^databaseuserdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databaseuserdeployment" == "x" ]]; then
 	databaseuserdeployment=$databaseuser
@@ -122,11 +122,11 @@ fi
 databasepassdeployment=`grep '^databasepassdeployment=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$databasepassdeployment" == "x" ]]; then
 	databasepassdeployment=$databasepass
-fi 
+fi
 
 dnsserver=`grep '^dnsserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 if [[ "x$dnsserver" == "x" ]]; then
-	echo Failed to get dns server parameters 
+	echo Failed to get dns server parameters
 	exit 7
 fi
 
@@ -140,7 +140,7 @@ echo "testorconfirm = $testorconfirm"
 
 
 MYSQL=`which mysql`
-MYSQLDUMP=`which mysqldump` 
+MYSQLDUMP=`which mysqldump`
 
 if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
 	if [[ ! -d $archivedirtest ]]; then
@@ -193,8 +193,10 @@ echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.lo
 find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
 
 echo "Nettoyage vieux fichiers /tmp"
-echo find /tmp -mtime +30 -name 'phpsendmail*.log' -delete
-find /tmp -mtime +30 -name 'phpsendmail*.log' -delete
+echo find /tmp -max-depth 1 -mtime +30 -name 'phpsendmail*.log' -delete
+find /tmp -max-depth 1 -mtime +30 -name 'phpsendmail*.log' -delete
+echo find /tmp -max-depth 1 -mtime +30 -name 'phpsendmail*.tmp' -delete
+find /tmp -max-depth 1 -mtime +30 -name 'phpsendmail*.tmp' -delete
 
 echo "Nettoyage vieux fichiers conf"
 echo find /home/admin/wwwroot/dolibarr/htdocs/conf -mtime +10 -name '*~' -delete
@@ -204,7 +206,7 @@ find /home/admin/wwwroot/dolibarr/htdocs/conf -mtime +10 -name '*~' -delete
 echo "***** Clean available virtualhost that are not enabled hosts (safe)"
 for fic in `ls /etc/apache2/sellyoursaas-available/*.*.*.*.conf /etc/apache2/sellyoursaas-available/*.home.lan 2>/dev/null`
 do
-	basfic=`basename $fic` 
+	basfic=`basename $fic`
 	if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
 		echo Remove file with rm /etc/apache2/sellyoursaas-available/$basfic
 		if [[ $testorconfirm == "confirm" ]]; then
@@ -219,7 +221,7 @@ echo "***** Clean available fpm pool that are not enabled hosts (safe)"
 if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
 	for fic in `ls /etc/apache2/sellyoursaas-fpm-pool/*.*.*.*.conf /etc/apache2/sellyoursaas-fpm-pool/*.home.lan 2>/dev/null`
 	do
-		basfic=`basename $fic` 
+		basfic=`basename $fic`
 		if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
 			echo Remove file with rm /etc/apache2/sellyoursaas-available/$basfic
 			if [[ $testorconfirm == "confirm" ]]; then
@@ -300,13 +302,13 @@ do
 done
 
 if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
-	echo "***** Search from /tmp/instancefound-activedbinsellyoursaas of active databases (with known osusername) with a non existing unix user (should never happen)" 
-	while read bidon osusername dbname deploymentstatus ipserverdeployment; do 
+	echo "***** Search from /tmp/instancefound-activedbinsellyoursaas of active databases (with known osusername) with a non existing unix user (should never happen)"
+	while read bidon osusername dbname deploymentstatus ipserverdeployment; do
 		if [[ "x$osusername" != "xusername_os" && "x$osusername" != "xunknown" && "x$osusername" != "xNULL" && "x$dbname" != "xNULL" ]]; then
 			echo $ipserverdeployment | grep "$IPSERVERDEPLOYMENT" > /dev/null 2>&1
 			notfoundip=$?
 			#echo notfoundip=$notfoundip
-	
+
 			if [[ $notfoundip == 0 ]]; then
 			    # The current line of instancefound-activedbinsellyoursaas is for an instance with files deployed on this server
 		    	id $osusername >/dev/null 2>/dev/null
@@ -352,7 +354,7 @@ fi
 
 # We disable this because when we undeploy, user is kept and we want to remove it only 1 month after undeployment date (processed by next point)
 # TODO Build the file /tmp/instancefound-olduninstalleddbinsellyoursaas
-#echo "***** Search from /tmp/instancefound-olduninstalleddbinsellyoursaas: osu unix account with record in /etc/passwd but not in instancefound-olduninstalleddbinsellyoursaas" 
+#echo "***** Search from /tmp/instancefound-olduninstalleddbinsellyoursaas: osu unix account with record in /etc/passwd but not in instancefound-olduninstalleddbinsellyoursaas"
 #cat /tmp/instancefound-dbinsellyoursaas | awk '{ if ($2 != "username_os" && $2 != "unknown" && $2 != "NULL") print $2":" }' > /tmp/osusernamefound
 #if [ -s /tmp/osusernamefound ]; then
 #	for osusername in `grep -v /etc/passwd -f /tmp/osusernamefound | grep '^osu'`
@@ -365,15 +367,15 @@ fi
 
 
 if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
-	echo "***** Search osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean" 
+	echo "***** Search osu unix account for $IPSERVERDEPLOYMENT with very old undeployed database into /tmp/osutoclean-oldundeployed and search entries with existing home dir and without dbn* subdir, and save it into /tmp/osutoclean"
 	Q1="use $database; "
 	Q2="SELECT ce.username_os FROM llx_contrat as c, llx_contrat_extrafields as ce WHERE c.rowid = ce.fk_object AND ce.deployment_host = '$IPSERVERDEPLOYMENT' AND c.rowid IN ";
-	Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";		# TODO Add a limit to not retreive too old one.
+	Q3=" (SELECT fk_contrat FROM llx_contratdet as cd, llx_contrat_extrafields as ce2 WHERE cd.fk_contrat = ce2.fk_object AND cd.STATUT = 5 AND ce2.deployment_status = 'undeployed' AND ce2.undeployment_date < ADDDATE(NOW(), INTERVAL -1 MONTH)); ";		# TODO Add a limit to not retrieve too old one.
 	SQL="${Q1}${Q2}${Q3}"
 
 	echo "$MYSQL -h $databasehost -P $databaseport -u$databaseuser -pxxxxxx -e $SQL"
 	$MYSQL -h $databasehost -P $databaseport -u$databaseuser -p$databasepass -e "$SQL" | grep '^osu' >> /tmp/osutoclean-oldundeployed
-	
+
 	# The file /tmp/osutoclean-oldundeployed may contains a very high number of lines.
 	if [ -s /tmp/osutoclean-oldundeployed ]; then
 		for osusername in `cat /tmp/osutoclean-oldundeployed`
@@ -395,23 +397,23 @@ echo "***** Loop on each user in /tmp/osutoclean to make a clean"
 if [ -s /tmp/osutoclean ]; then
 
 	export reloadapache=1
-	
+
 	cat /tmp/osutoclean | grep '^osu' | sort -u
 	for osusername in `grep '^osu' /tmp/osutoclean | sort -u`
 	do
 		echo "***** Archive and delete qualified user $osusername found in /tmp/osutoclean"
-		
+
 		echo Try to find database and instance name from username $osusername
 		export instancename=""
 		export dbname=""
 		export instancename=`grep $osusername /tmp/instancefound-dbinsellyoursaas | cut -f 1`
 		export dbname=`grep $osusername /tmp/instancefound-dbinsellyoursaas | cut -f 3`
-		
+
 		echo For osusername=$osusername, dbname is $dbname, instancename is $instancename, databasehostdeployment is $databasehostdeployment
-		
+
 		# If dbname is known
-		if [[ "x$dbname" != "x" ]]; then	
-			if [[ "x$dbname" != "xNULL" ]]; then	
+		if [[ "x$dbname" != "x" ]]; then
+			if [[ "x$dbname" != "xNULL" ]]; then
 				echo "Do a dump of database $dbname - may fails if already removed"
 				mkdir -p $archivedirtest/$osusername
 				if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
@@ -426,34 +428,34 @@ if [ -s /tmp/osutoclean ]; then
 				echo "echo 'DROP DATABASE $dbname;' | $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -pxxxxxx $dbname"
 				if [[ $testorconfirm == "confirm" ]]; then
 					echo "DROP DATABASE $dbname;" | $MYSQL -h $databasehostdeployment -P $databaseportdeployment -u$databaseuserdeployment -p$databasepassdeployment $dbname
-				fi	
+				fi
 			fi
 		fi
 
 
 		# If osusername is known, remove user and archive dir (Note: archive with clean.sh is always done into test directory !!!)
-		if [[ "x$osusername" != "x" ]]; then	
+		if [[ "x$osusername" != "x" ]]; then
 			if [[ "x$osusername" != "xNULL" ]]; then
 				echo rm -f $targetdir/$osusername/$dbname/*.log
-				rm -f $targetdir/$osusername/$dbname/*.log >/dev/null 2>&1 
+				rm -f $targetdir/$osusername/$dbname/*.log >/dev/null 2>&1
 				echo rm -f $targetdir/$osusername/$dbname/*.log.*
-				rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1 
-				
+				rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1
+
 				echo "clean $instancename (a clean means archive user dir and delete user, group and cron)" >> $archivedirtest/$osusername/clean-$instancename.txt
-				
+
 				echo crontab -r -u $osusername
 				crontab -r -u $osusername
-	
+
 				echo deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername
 				if [[ $testorconfirm == "confirm" ]]; then
 					deluser --remove-home --backup --backup-to $archivedirtest/$osusername $osusername
 				fi
-				
+
 				echo deluser --group $osusername
 				if [[ $testorconfirm == "confirm" ]]; then
 					deluser --group $osusername
 				fi
-				
+
 				# If dir still exists, we move it manually
 				if [ -d "$targetdir/$osusername" ]; then
 					echo The dir $targetdir/$osusername still exists when user does not exists anymore, we archive it manually
@@ -468,11 +470,11 @@ if [ -s /tmp/osutoclean ]; then
 				fi
 			fi
 		fi
-		
+
 		export ZONENOHOST=`echo $instancename | cut -d . -f 2-`
-		export ZONE="$ZONENOHOST.hosts" 
+		export ZONE="$ZONENOHOST.hosts"
 		export instancenameshort=`echo $instancename | cut -d . -f 1`
-	
+
 		# If instance name known
 		if [ "x$instancenameshort" != "x" ]; then
 			if [ "x$instancenameshort" != "xNULL" ]; then
@@ -483,12 +485,12 @@ if [ -s /tmp/osutoclean ]; then
 						cat /etc/bind/${ZONE} | grep "^$instancenameshort " > /dev/null 2>&1
 						notfound=$?
 						echo notfound=$notfound
-						
+
 						if [[ $notfound == 0 ]]; then
-				
+
 							echo "cat /etc/bind/${ZONE} | grep -v '^$instancenameshort ' > /tmp/${ZONE}.$PID"
 							cat /etc/bind/${ZONE} | grep -v "^$instancenameshort " > /tmp/${ZONE}.$PID
-						
+
 							# we're looking line containing this comment
 							export DATE=`date +%y%m%d%H`
 							export NEEDLE="serial number"
@@ -509,23 +511,23 @@ if [ -s /tmp/osutoclean ]; then
 						    fi
 						    echo Replace serial in /tmp/${ZONE}.$PID with ${serial}
 						    /bin/sed -i -e "s/^\(\s*\)[0-9]\{0,\}\(\s*;\s*${NEEDLE}\)$/\1${serial}\2/" /tmp/${ZONE}.$PID
-						    
+
 						    echo Test temporary file /tmp/${ZONE}.$PID
 							named-checkzone ${ZONENOHOST} /tmp/${ZONE}.$PID
 							if [[ "$?x" != "0x" ]]; then
-								echo Error when editing the DNS file during clean.sh. File /tmp/${ZONE}.$PID is not valid 
+								echo Error when editing the DNS file during clean.sh. File /tmp/${ZONE}.$PID is not valid
 								exit 22
-							fi 
-							
+							fi
+
 							echo "   ** Archive file with cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now"
 							cp /etc/bind/${ZONE} /etc/bind/archives/${ZONE}-$now
-							
+
 							echo "   ** Move new host file"
 							echo mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
 							if [[ $testorconfirm == "confirm" ]]; then
 								mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
 							fi
-							
+
 							echo "   ** Reload dns with rndc reload ${ZONENOHOST}"
 							if [[ $testorconfirm == "confirm" ]]; then
 								rndc reload ${ZONENOHOST}
@@ -534,9 +536,9 @@ if [ -s /tmp/osutoclean ]; then
 						fi
 					fi
 				fi
-				
+
 				apacheconf=/etc/apache2/sellyoursaas-online/$instancename.conf
-				
+
 				if [ -f $apacheconf ]; then
 					echo "   ** Disable apache conf with rm"
 					echo rm /etc/apache2/sellyoursaas-online/$instancename.conf
@@ -546,7 +548,7 @@ if [ -s /tmp/osutoclean ]; then
 						rm /etc/apache2/sellyoursaas-online/$instancename.custom.conf
 					fi
 				fi
-	
+
 				echo "   ** Remove apache conf /etc/apache2/sellyoursaas-available/$instancename.conf"
 				if [[ -f /etc/apache2/sellyoursaas-available/$instancename.conf ]]; then
 					echo rm /etc/apache2/sellyoursaas-available/$instancename.conf
@@ -565,16 +567,16 @@ if [ -s /tmp/osutoclean ]; then
 				else
 					echo File /etc/apache2/sellyoursaas-available/$instancename.custom.conf already deleted
 				fi
-			
+
 				/usr/sbin/apache2ctl configtest
 				if [[ "x$?" != "x0" ]]; then
-					echo Error when running apache2ctl configtest 
-				else 
+					echo Error when running apache2ctl configtest
+				else
 					echo "   ** Apache tasks finished with configtest ok"
 				fi
 			fi
 		fi
-		
+
 	done
 
 	# Restart apache
@@ -600,7 +602,7 @@ do
 	id $fic >/dev/null 2>/dev/null
 	if [[ "x$?" == "x1" ]]; then
 		echo "Found a crontabs file in /var/spool/cron/crontabs for user $fic that does not exists. We clean crontabs file by moving them into crontabs.disabled"
-		mv /var/spool/cron/crontabs/$fic /var/spool/cron/crontabs.disabled 
+		mv /var/spool/cron/crontabs/$fic /var/spool/cron/crontabs.disabled
 	fi
 done;
 
@@ -643,14 +645,14 @@ find "/var/log/journal/" -type f -path '/var/log/journal/*/user-*.journal' -mtim
 
 # Now clean also old dir in archives-test
 if [[ "x$masterserver" == "x1" ]]; then
-	echo "***** We are on a master, so we clean sellyoursaas temp files" 
+	echo "***** We are on a master, so we clean sellyoursaas temp files"
 	echo "Clean sellyoursaas temp files"
 	find "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/." ! -path "/home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp/" -mtime +1 -delete
 fi
 
 # Clean log files
 if [[ "x$instanceserver" != "x0" ]]; then
-	echo "***** We are on a deployment server, so we clean log files and history files" 
+	echo "***** We are on a deployment server, so we clean log files and history files"
 	echo "Clean web server _error logs"
 	for fic in `ls -art $targetdir/osu*/dbn*/*_error.log 2>/dev/null`; do > $fic; done
 	echo "Clean applicative log files"
@@ -660,7 +662,7 @@ if [[ "x$instanceserver" != "x0" ]]; then
 fi
 
 
-# Clean archives 
+# Clean archives
 if [ "x$2" == "xoldtempinarchive" ]; then
 	echo "Clean archives dir from not expected files (should not be required anymore). Archives are no more tree of files but an archive since 1st of july 2019".
 	echo "find '$archivedirpaid' -type d -path '*/osu*/temp' -delete"
@@ -671,7 +673,7 @@ fi
 
 if [[ $testorconfirm == "confirm" ]]; then
 	echo "***** Clean temporary files"
-	
+
 	echo rm -f /tmp/instancefound*
 	rm -f /tmp/instancefound*
 	echo rm -f /tmp/osutoclean*
@@ -703,8 +705,8 @@ if [[ $testorconfirm == "test" ]]; then
 	echo "***** We can also list all databases that are present on disk but with status 'undeployed' so we can force to undeployed them correctly again"
 	rm -f /tmp/idlistofdb
 	>> /tmp/idlistofdb
-	for fic in `ls -rt /var/lib/mysql /mnt/diskhome/mysql 2>/dev/null | grep dbn 2>/dev/null`; 
-	do 
+	for fic in `ls -rt /var/lib/mysql /mnt/diskhome/mysql 2>/dev/null | grep dbn 2>/dev/null`;
+	do
 		echo -n " '"$fic"'," >> /tmp/idlistofdb
 	done
 	export idlistofdb=`cat /tmp/idlistofdb | sed -e 's/,$//' `
@@ -753,12 +755,12 @@ do
 	fi
 done
 if [ -s /tmp/deletedirs.sh ]; then
-	echo "We should also clean old inactive backup directories of paying instances in $backupdir/osusername/ no more saved since a long time (all last_(mysqldump|rsync)* > $DAYSFORINACTIVEBACKUPDELETION days) and that are archived" 
+	echo "We should also clean old inactive backup directories of paying instances in $backupdir/osusername/ no more saved since a long time (all last_(mysqldump|rsync)* > $DAYSFORINACTIVEBACKUPDELETION days) and that are archived"
 	echo For this, you can execute commands into file: /tmp/deletedirs.sh
 else
-	echo "No old inactive backup directories" 
+	echo "No old inactive backup directories"
 fi
 
-echo 
+echo
 
 exit 0
