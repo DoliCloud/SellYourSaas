@@ -37,14 +37,14 @@ gitserver=${gitserver//[^a-zA-Z0-9.]/}
 
 # Install fingerprint of github.com but only if it was never installed
 # If it is already present, we keep it so we will be protected if domain name is routed on another evil server
-# TODO Allow to choose the git domain name server in /etc/sellyousaas.conf 
+# TODO Allow to choose the git domain name server in /etc/sellyousaas.conf
 echo "Install the known fingerprint of github if it was never installed"
 ssh-keygen -F "$gitserver" || ssh-keyscan "$gitserver" >>~/.ssh/known_hosts
 
 
 echo "Update git dirs found into $1."
 
-for dir in `ls -d $1/dolibarr* | grep -v documents`
+for dir in `ls -d $1/dolibarr* | grep -v documents | grep -v dolibarr_abricot | grep -v dolibarr_webpassword`
 do
 	# If a subdir is given, discard if not subdir
 	#if [ "x$2" != "x" ]; then
@@ -57,7 +57,7 @@ do
     cd $dir
 	if [ $? -eq 0 ]; then
 		export gitdir=`basename $dir`
-		
+
 	    if [ -d ".git" ]; then
 	    	echo chmod -R u+w $dir
 	    	chmod -R u+w $dir
@@ -78,11 +78,10 @@ do
 	    else
 	        echo "Not a git dir. Nothing done."
 	    fi
-		
-	    cd -
+
+	    cd - >/dev/null
 	fi
 done
 
 echo "Finished (exit=$error)."
 exit $error
-
