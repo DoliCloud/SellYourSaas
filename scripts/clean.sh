@@ -193,10 +193,10 @@ echo find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.lo
 find /home/admin/wwwroot/dolibarr_documents -maxdepth 1 -name "dolibarr*.log*" -type f -mtime +2 -delete
 
 echo "Nettoyage vieux fichiers /tmp"
-echo find /tmp -max-depth 1 -mtime +30 -name 'phpsendmail*.log' -delete
-find /tmp -max-depth 1 -mtime +30 -name 'phpsendmail*.log' -delete
-echo find /tmp -max-depth 1 -mtime +30 -name 'phpsendmail*.tmp' -delete
-find /tmp -max-depth 1 -mtime +30 -name 'phpsendmail*.tmp' -delete
+echo find /tmp -maxdepth 1 -mtime +30 -name 'phpsendmail*.log' -delete
+find /tmp -maxdepth 1 -mtime +30 -name 'phpsendmail*.log' -delete
+echo find /tmp -maxdepth 1 -mtime +30 -name 'phpsendmail*.tmp' -delete
+find /tmp -maxdepth 1 -mtime +30 -name 'phpsendmail*.tmp' -delete
 
 echo "Nettoyage vieux fichiers conf"
 echo find /home/admin/wwwroot/dolibarr/htdocs/conf -mtime +10 -name '*~' -delete
