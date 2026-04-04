@@ -679,7 +679,8 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 	$sql = "SELECT t.rowid, t.ref, t.track_id, t.datec, t.subject, t.fk_statut, t.origin_email, t.track_id";
 	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
 	$sql .= " WHERE t.fk_soc = '".$db->escape($socid)."'";		// $socid is id of third party account
-	$sql .= $db->order('t.fk_statut', 'ASC');
+	$sql .= $db->order('t.fk_statut, t.rowid', 'ASC, DESC');
+	$sql .= " LIMIT 5";		// $socid is id of third party account
 
 	$resql=$db->query($sql);
 	if ($resql) {
@@ -702,7 +703,9 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 
 				// Ref
 				print '<td class="nowraponall">';
+				print '<a href="'.$_SERVER["PHP_SELF"].'?mode=ticket&action=view&track_id='.$staticticket->track_id.'">';
 				print img_object("", $staticticket->picto, 'class="paddingright"'). $staticticket->ref;
+				print '</a>';
 				print "</td>\n";
 
 				// Creation date
@@ -723,6 +726,9 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 				$i++;
 			}
 			print "</table>";
+			print "<br>";
+			print '<div class="center divButAction"><a style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
+
 		} else {
 			print $langs->trans("SoonAvailable");
 		}

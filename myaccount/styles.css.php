@@ -128,8 +128,21 @@ span.discountcodeko {
 
 .maxwidthdate  { max-width: 100px; }
 
+.badge-status0 {
+	border: 1px solid #cbd3d3 !important;
+	color: #999999 !important;
+	background-color: #ffffff !important;
+}
 .badge-status1 {
     background-color: #bc9526 !important;
+}
+.badge-status2 {
+	background-color: #9c9c26 !important;
+}
+.badge-status3 {
+	border: 1px solid #bca52b !important;
+  	color: #9c850b !important;
+  	background-color: #ffffff !important;
 }
 .badge-status4 {
     background-color: #277d1e !important;
@@ -553,7 +566,6 @@ input.input-field {
 .tagtable, .table-border { display: table; }
 .tagtr, .table-border-row  { display: table-row; }
 .tagtd, .table-border-col, .table-key-border-col, .table-val-border-col { display: table-cell; }
-
 
 
 /* For smartphones */
