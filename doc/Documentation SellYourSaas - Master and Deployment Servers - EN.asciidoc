@@ -5444,7 +5444,6 @@ REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_FEATURE
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_MAIL_DEBUG', 0, '0', 'chaine', 1);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_MESSAGE_INSTALL_MODULES_DISABLED_CONTACT_US', 0, '1', 'chaine', 1);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_UMASK', 0, '0660', 'chaine', 1);
-REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_HELPCENTER_DISABLELINK', 0, '1', 'chaine', 1);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGIN', 1, '1', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGIN_FAILED', 1, '1', 'chaine', 0);
 REPLACE INTO llx_const (name, entity, value, type, visible) values('MAIN_LOGEVENTS_USER_LOGOUT', 1, '1', 'chaine', 0);
