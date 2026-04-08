@@ -687,7 +687,7 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 
 	$sql = "SELECT t.rowid, t.ref, t.track_id, t.datec, t.subject, t.fk_statut, t.origin_email, t.track_id";
 	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
-	$sql .= " WHERE t.fk_soc = '".$db->escape($socid)."'";		// $socid is id of third party account
+	$sql .= " WHERE t.fk_soc = ".((int) $socid);		// $socid is id of third party account
 	$sql .= $db->order('t.fk_statut, t.rowid', 'ASC, DESC');
 	$sql .= " LIMIT 5";		// $socid is id of third party account
 
