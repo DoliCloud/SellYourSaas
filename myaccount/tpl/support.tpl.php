@@ -358,7 +358,7 @@ if ($sellyoursaassupporturl) {
 		}
 
 		if (getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL_PREMIUM') && preg_match('/high/', GETPOST('supportchannel', 'alpha'))) {
-			// We must use the prioritary email
+			// We must use the priority email
 			$sellyoursaasemail = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL_PREMIUM');
 			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
 			&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
@@ -672,6 +672,14 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 
 
 
+	// List of tickets of customer/suppliers (SELLYOURSAAS_SUPPORT_TICKET_CREATE must be on)
+
+	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_CREATE_LIST_HIDDEN')) {
+		print $langs->trans("SectionSoonAvailable").'...';
+
+		print "\n".'<!-- Section for socid = '.$socid." --\n";
+	}
+
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticketstats.class.php';
 	$staticticket = new Ticket($db);
@@ -728,7 +736,6 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 			print "</table>";
 			print "<br>";
 			print '<div class="center divButAction"><a style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
-
 		} else {
 			print $langs->trans("SoonAvailable");
 		}
@@ -736,6 +743,11 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 	} else {
 		dol_print_error($db);
 	}
+
+	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_CREATE_LIST_HIDDEN')) {
+		print "\n".'-->'."\n";
+	}
+
 	print '</div></div>';
 
 
@@ -753,7 +765,7 @@ print '<script>';
 print "\n/* JS CODE TO ENABLE reposition management (does not work if a redirect is done after action of submission) */\n";
 print '
 	jQuery(document).ready(function() {
-				/* If page_y set, we set scollbar with it */
+				/* If page_y set, we set scrollbar with it */
 				page_y=getParameterByName(\'page_y\', 0);				/* search in GET parameter */
 				if (page_y == 0) page_y = jQuery("#page_y").text();		/* search in POST parameter that is filed at bottom of page */
 				if (page_y > 0)
