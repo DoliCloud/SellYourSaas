@@ -25,6 +25,7 @@
  * @var string $urlfaq
  * @var string $urlstatus
  * @var array $listofcontractid
+ * @var int $socid
  */
 
 // Protection to avoid direct call of template
