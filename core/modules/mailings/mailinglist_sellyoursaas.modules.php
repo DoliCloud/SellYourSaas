@@ -79,8 +79,10 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s .= '<label for="donotusedefaultstripeaccount">'.$langs->trans("DoNotUseDefaultStripeAccount").':</label> ';
 		$s .= '<input type="checkbox" class="margintoponly marginbottomonly" value="1" id="donotusedefaultstripeaccount" name="donotusedefaultstripeaccount"'.(GETPOST('donotusedefaultstripeaccount') ? ' checked' : '').'>';
 
-		// Filter on contracts
-		$s .= '<br>';
+		// Filter on contracts/instances
+		$s .= '<br><br>';
+
+		$s .= $langs->trans("HavingAtLeastOneInstance").'...<br>';
 
 		$s .= $langs->trans("DeploymentStatus").': ';
 		$s .= '<select name="filter" id="sellyoursaas_filter" class="flat">';
@@ -118,20 +120,6 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s .= ajax_combobox("sellyoursaas_filterip");
 		$s .= '<br> ';
 
-		/*$listofpackages=array();
-		$sql = "SELECT DISTINCT ref";
-		$sql .= " FROM ".MAIN_DB_PREFIX."packages";
-		//$sql .= " WHERE deployment_host IS NOT NULL AND deployment_status IN ('done', 'processing')";
-		$resql=$this->db->query($sql);
-		if ($resql) {
-			while ($obj = $this->db->fetch_object($resql)) {
-				$listofpackages[]=$obj->ref;
-			}
-			$this->db->free($resql);
-		} else dol_print_error($this->db);
-		$s .= $langs->trans("Package").': ';
-		*/
-
 		// Filter on contract ref
 		$s .= img_picto('', 'contract', 'class="pictofixedwidth"').$langs->trans("Instance");
 		$s .= ' <input type="text" class="flat maxwidth200" value="'.GETPOST("instanceref").'" placeholder="abc*" name="instanceref">';
@@ -142,22 +130,15 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 		$s .= img_picto('', 'product', 'class="pictofixedwidth"');
 		$s .= $form->select_produits(GETPOST('productid', 'int'), 'productid', '', 20, 0, 1, 2, '', 0, array(), 0, 'Contracts with at least one line with this product...', 0, 'maxwidth500', 0, '', array(), 1);
 
-		/*
-		$s .= '<br>';
-		$s .= '<input value="'.GETPOST('contractpricetotal', 'int').'" name="contractpricetotal" class="width100 right marginrightonly" placeholder="'.$langs->trans("UnitPriceOfLine").'">';
-		$s .= '<input value="'.GETPOST('quantityproduct', 'int').'" name="quantityproduct" class="width100 right marginrightonly" placeholder="'.$langs->trans("Quantity").'">';
-		$s .= '<input value="'.GETPOST('discountproduct', 'int').'" name="discountproduct" class="width100 right marginrightonly" placeholder="'.$langs->trans("Discount").'">';
-		*/
-
 		return $s;
 	}
 
 
 	/**
-	 *  Renvoie url lien vers fiche de la source du destinataire du mailing
+	 *  Return url link to the object (for title or target link)
 	 *
 	 *  @param		int			$id		ID
-	 *  @return     string      		Url lien
+	 *  @return     string      		Url link
 	 */
 	public function url($id)
 	{
@@ -334,7 +315,7 @@ class mailing_mailinglist_sellyoursaas extends MailingTargets
 	 */
 	public function getSqlArrayForStats()
 	{
-		// CHANGE THIS: Optionnal
+		// CHANGE THIS: Optional
 
 		//var $statssql=array();
 		//$this->statssql[0]="SELECT field1 as label, count(distinct(email)) as nb FROM mytable WHERE email IS NOT NULL";

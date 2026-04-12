@@ -985,3 +985,4 @@ FileSeemsValid=File seems valid
 SEPADoesNotUnsupendInstantly=Please note that the SEPA payment method does not allow you to instantly reactivate an instance that has been suspended due to non-payment. The instance will be automatically reactivated after a processing period of 3 to 12 days. For instant reactivation, you can enter a card payment method.
 SorryOptionsNotAvailableDuringTestPeriod=Sorry, this feature is not available during the test period. Please confirm your instance by entering your payment mode from menu <b>%s</b> to enable installation of options
 SectionSoonAvailable=This section is being updated. It will be available soon.
+HavingAtLeastOneInstance=Having at least one instance with
