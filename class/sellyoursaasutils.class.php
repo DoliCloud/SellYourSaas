@@ -588,7 +588,7 @@ class SellYourSaasUtils
 		$sql.= " AND ce.date_softalert_endfreeperiod IS NULL";
 		$sql.= " AND ce.date_hardalert_endfreeperiod IS NULL";
 		$sql.= " AND cd.date_fin_validite <= '".$this->db->idate($date_limit_expiration)."'";      // Expired contracts
-		$sql.= " AND cd.date_fin_validite >= '".$this->db->idate($date_limit_expiration - 7 * 24 * 3600)."'";	// Protection: We dont' go higher than 7 days late to avoid to resend too much warnings when update of date_softalert_endfreeperiod has failed
+		$sql.= " AND cd.date_fin_validite >= '".$this->db->idate($date_limit_expiration - 7 * 24 * 3600)."'";	// Protection: We don't go higher than 7 days late to avoid to resend too much warnings when update of date_softalert_endfreeperiod has failed
 		$sql.= " AND cd.statut = 4";	// 4 = ContratLigne::STATUS_OPEN
 		$sql.= " AND se.fk_object = c.fk_soc AND se.dolicloud = 'yesv2'";
 		$sql.= " ORDER BY c.rowid DESC";
@@ -790,7 +790,7 @@ class SellYourSaasUtils
 		$sql.= " AND ce.date_softalert_endfreeperiod IS NOT NULL"; // we don't send a hard alert unless a soft alert has already been sent
 		$sql.= " AND ce.date_hardalert_endfreeperiod IS NULL";
 		$sql.= " AND cd.date_fin_validite <= '".$this->db->idate($date_limit_expiration)."'";      // Expired contracts
-		$sql.= " AND cd.date_fin_validite >= '".$this->db->idate($date_limit_expiration - 7 * 24 * 3600)."'";	// Protection: We dont' go higher than 7 days late to avoid to resend too much warnings when update of date_hardalert_endfreeperiod has failed
+		$sql.= " AND cd.date_fin_validite >= '".$this->db->idate($date_limit_expiration - 7 * 24 * 3600)."'";	// Protection: We don't go higher than 7 days late to avoid to resend too much warnings when update of date_hardalert_endfreeperiod has failed
 		$sql.= " AND cd.statut = 4";	// 4 = ContratLigne::STATUS_OPEN
 		$sql.= " AND se.fk_object = c.fk_soc AND se.dolicloud = 'yesv2'";
 		$sql.= " ORDER BY c.rowid DESC";
@@ -1293,7 +1293,7 @@ class SellYourSaasUtils
 		$idpaiementcard = dol_getIdFromCode($this->db, 'CB', 'c_paiement', 'code', 'id', 1);
 		$idpaiementstripe = dol_getIdFromCode($this->db, 'STRIPE', 'c_paiement', 'code', 'id', 1);
 
-		// Get all payement to DO. Lines may be duplicated if there is several payment mode. Never mind, we will exclude duplicated invoice later.
+		// Get all payment to DO. Lines may be duplicated if there is several payment mode. Never mind, we will exclude duplicated invoice later.
 		$sql = 'SELECT f.rowid, f.ref, se.fk_object as socid, sr.rowid as companypaymentmodeid';
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'facture as f, '.MAIN_DB_PREFIX.'societe_extrafields as se, '.MAIN_DB_PREFIX.'societe_rib as sr';
 		$sql .= ' WHERE sr.fk_soc = f.fk_soc';
@@ -1685,7 +1685,7 @@ class SellYourSaasUtils
 							$errorforinvoice++;
 							$this->errors[]=$errmsg;
 						}
-						if (!$error && empty($nocancelifpaymenterror)) {	// If we are not in a mode that ask to avoid cancelation, we cancel payment.
+						if (!$error && empty($nocancelifpaymenterror)) {	// If we are not in a mode that ask to avoid cancellation, we cancel payment.
 							// Test if last AC_PAYMENT_STRIPE_KO event is an old error lower than $nbhoursbetweentries hours.
 							$recentfailedpayment = false;
 							$sqlonevents = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'actioncomm';
@@ -1735,7 +1735,7 @@ class SellYourSaasUtils
 										$charge = \Stripe\Charge::create(array(
 											'amount'   => price2num($amountstripe, 'MU'),
 											'currency' => $currency,
-											'capture'  => true,							// Charge immediatly
+											'capture'  => true,							// Charge immediately
 											'description' => $description,
 											'metadata' => array("FULLTAG" => $FULLTAG, 'Recipient' => $mysoc->name, 'dol_version'=>DOL_VERSION, 'dol_entity'=>$conf->entity, 'ipaddress'=>$ipaddress),
 											'customer' => $customer->id,
@@ -1844,7 +1844,7 @@ class SellYourSaasUtils
 
 									$postactionmessages[]='Success to charge card ('.$charge->id.' with '.$stripearrayofkeys['publishable_key'].')';
 
-									// Save a stripe payment was done in realy life so later we will be able to force a commit on recorded payments
+									// Save a stripe payment was done in really life so later we will be able to force a commit on recorded payments
 									// even if in batch mode (method doTakePaymentStripe), we will always make all action in one transaction with a forced commit.
 									$this->stripechargedone++;
 
@@ -1938,7 +1938,7 @@ class SellYourSaasUtils
 									}
 
 
-									if (! $errorforinvoice && ! empty($conf->banque->enabled)) {
+									if (! $errorforinvoice && isModEnabled('bank')) {
 										dol_syslog('* Add payment to bank');
 
 										$bankaccountid = 0;
@@ -3207,14 +3207,15 @@ class SellYourSaasUtils
 
 									$invoice_draft->fetch_thirdparty();
 
-									$origin='contrat';
-									$originid=$contract->id;
+									$origin = 'contrat';
+									$originid = $contract->id;
 
 									$invoice_draft->origin = $origin;
+									$invoice_draft->origin_type = $origin;
 									$invoice_draft->origin_id = $originid;
 
 									// Possibility to add external linked objects with hooks
-									$invoice_draft->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
+									$invoice_draft->linked_objects[$invoice_draft->origin_type] = $invoice_draft->origin_id;
 
 									$idinvoice = $invoice_draft->create($user);      // This include class to add_object_linked() and add add_contact()
 									if (! ($idinvoice > 0)) {
@@ -3322,7 +3323,36 @@ class SellYourSaasUtils
 										//$price_invoice_template_line = $lines[$i]->subprice * GETPOST('frequency_multiple','int');
 										$price_invoice_template_line = $lines[$i]->subprice;
 
-										$result = $invoice_draft->addline($desc, $price_invoice_template_line, $lines[$i]->qty, $tva_tx, $localtax1_tx, $localtax2_tx, $lines[$i]->fk_product, $discount, $date_start, $date_end, 0, $lines[$i]->info_bits, $lines[$i]->fk_remise_except, 'HT', 0, $product_type, $lines[$i]->rang, $lines[$i]->special_code, $invoice_draft->origin, $lines[$i]->rowid, $fk_parent_line, $lines[$i]->fk_fournprice, $lines[$i]->pa_ht, $label, $array_options, $lines[$i]->situation_percent, $lines[$i]->fk_prev_id, $lines[$i]->fk_unit);
+										$result = $invoice_draft->addline(
+											$desc,
+											$price_invoice_template_line,
+											$lines[$i]->qty,
+											$tva_tx,
+											$localtax1_tx,
+											$localtax2_tx,
+											$lines[$i]->fk_product,
+											$discount,
+											$date_start,
+											$date_end,
+											0,
+											$lines[$i]->info_bits,
+											$lines[$i]->fk_remise_except,
+											'HT',
+											0,
+											$product_type,
+											$lines[$i]->rang,
+											$lines[$i]->special_code,
+											'contractdet',
+											$lines[$i]->id,
+											$fk_parent_line,
+											$lines[$i]->fk_fournprice,
+											$lines[$i]->pa_ht,
+											$label,
+											$array_options,
+											$lines[$i]->situation_percent,
+											$lines[$i]->fk_prev_id,
+											$lines[$i]->fk_unit
+										);
 
 										if ($result > 0) {
 											$lineid = $result;
@@ -3793,7 +3823,7 @@ class SellYourSaasUtils
 									}
 								}
 
-								// Delete draft invoices linked to this thirdparty, after a successfull undeploy
+								// Delete draft invoices linked to this thirdparty, after a successful undeploy
 								if (!empty($object->linkedObjects['facture']) && is_array($object->linkedObjects['facture'])) {
 									foreach ($object->linkedObjects['facture'] as $idline => $invoicetodelete) {
 										if ($invoicetodelete->statut == Facture::STATUS_DRAFT) {
@@ -4304,7 +4334,7 @@ class SellYourSaasUtils
 				dol_syslog("List of lines contains an empty ContratLine, we discard this line.", LOG_WARNING);
 				continue;
 			}
-			dol_syslog("** Process contract line id=".$tmpobject->id." to know which action to do and define remoteaction to 0, 1 (most action like deploy, deployoption, rename, ...) or 2 (refesh)");
+			dol_syslog("** Process contract line id=".$tmpobject->id." to know which action to do and define remoteaction to 0, 1 (most action like deploy, deployoption, rename, ...) or 2 (refresh)");
 
 			$producttmp = new Product($this->db);
 			$producttmp->fetch($tmpobject->fk_product, '', '', '', 1, 1, 1);
@@ -4599,7 +4629,7 @@ class SellYourSaasUtils
 						$result = file_put_contents($tmppackage->srccliafter, str_replace("\r", '', $cliafter));
 						@chmod($tmppackage->srccliafter, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
 					} else {
-						dol_syslog("No cli adter file to create or no content");
+						dol_syslog("No cli after file to create or no content");
 					}
 
 					if ($tmppackage->cliafterpaid && $cliafterpaid) {
@@ -4636,7 +4666,7 @@ class SellYourSaasUtils
 						}
 						$result = file_put_contents($metadatadeploy, $strlistfile);
 						@chmod($metadatadeploy, 0664);  // so user/group has "rw" ('admin' can delete if owner/group is 'admin' or 'www-data', 'root' can also read using nfs)
-					} else{
+					} else {
 						dol_syslog("No meta data file to creaaaate or no content ");
 					}
 				}
@@ -4682,7 +4712,7 @@ class SellYourSaasUtils
 				// Add a signature of message at end of message
 				$signaturekey = $this->getRemoteServerSignatureKey($domainname);
 
-				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymetric signature.
+				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymmetric signature.
 				$commandurl.= '&'.md5($commandurl.$signaturekey);
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action
@@ -4715,7 +4745,7 @@ class SellYourSaasUtils
 						}
 
 						//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
-						//var_dump($serverdeployment);		// just ip of deployement server
+						//var_dump($serverdeployment);		// just ip of deployment server
 						//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 						$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
 						if (! $dbinstance || ! $dbinstance->connected) {
@@ -5403,13 +5433,13 @@ class SellYourSaasUtils
 			}
 		} else {
 			dol_include_once('sellyoursaas/class/deploymentserver.class.php');
-			$deployementserver = new Deploymentserver($this->db);
+			$deploymentserver = new Deploymentserver($this->db);
 
-			$res = $deployementserver->fetch(null, $domainname);
+			$res = $deploymentserver->fetch(null, $domainname);
 
 			if ($res < 0) {
-				$this->error = $deployementserver->error;
-				$this->errors[] = $deployementserver->errors;
+				$this->error = $deploymentserver->error;
+				$this->errors[] = $deploymentserver->errors;
 				$error++;
 			} elseif ($res == 0) {
 				dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
@@ -5418,8 +5448,8 @@ class SellYourSaasUtils
 				$error++;
 			}
 
-			if ($deployementserver->status != $deployementserver::STATUS_DISABLED || !$onlyifopen) {
-				$REMOTEIPTODEPLOYTO = $deployementserver->ipaddress;
+			if ($deploymentserver->status != $deploymentserver::STATUS_DISABLED || !$onlyifopen) {
+				$REMOTEIPTODEPLOYTO = $deploymentserver->ipaddress;
 			}
 		}
 
@@ -5442,13 +5472,13 @@ class SellYourSaasUtils
 		$serversignaturekey = getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY');
 
 		dol_include_once('sellyoursaas/class/deploymentserver.class.php');
-		$deployementserver = new Deploymentserver($this->db);
+		$deploymentserver = new Deploymentserver($this->db);
 
-		$res = $deployementserver->fetch(null, $domainname);
+		$res = $deploymentserver->fetch(null, $domainname);
 
 		if ($res < 0) {
-			$this->error = $deployementserver->error;
-			$this->errors[] = $deployementserver->errors;
+			$this->error = $deploymentserver->error;
+			$this->errors[] = $deploymentserver->errors;
 			$error++;
 		} elseif ($res == 0) {
 			dol_syslog("Failed to find server domain '".$domainname."' into database", LOG_WARNING);
@@ -5457,8 +5487,8 @@ class SellYourSaasUtils
 			$error++;
 		}
 
-		if (!empty($deployementserver->serversignaturekey)) {
-			$serversignaturekey = $deployementserver->serversignaturekey;
+		if (!empty($deploymentserver->serversignaturekey)) {
+			$serversignaturekey = $deploymentserver->serversignaturekey;
 		}
 
 		return $serversignaturekey;

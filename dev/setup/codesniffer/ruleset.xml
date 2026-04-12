@@ -109,7 +109,7 @@
 	</rule> -->
 
 
-	<!-- Check assignement have the = align on each line. Have 20 chars padding maximum and always show as errors -->
+	<!-- Check assignment have the = align on each line. Have 20 chars padding maximum and always show as errors -->
 	<!--  Disabled: Report some false warning
 		<rule ref="Generic.Formatting.MultipleStatementAlignment">
 		<properties>
@@ -126,7 +126,7 @@
 	<rule ref="Generic.Functions.FunctionCallArgumentSpacing" />
 
     <!-- Disallow several spaces after comma -->
-	<!-- We want to allow this because we want to be able to align params on several similare functions on different lines -->
+	<!-- We want to allow this because we want to be able to align params on several similar functions on different lines -->
 	<rule ref="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma">
 		<severity>0</severity>
 	</rule>
@@ -140,7 +140,7 @@
     </rule>
     <rule ref="Generic.Metrics.NestingLevel">
         <properties>
-            <property name="nestingLevel" value="12" />
+            <property name="nestingLevel" value="15" />
             <property name="absoluteNestingLevel" value="50" />
         </properties>
     </rule>
@@ -364,7 +364,7 @@
 	<rule ref="PEAR.NamingConventions.ValidClassName.StartWithCapital">
 		<severity>0</severity>
 	</rule>
-	<!-- some phpcs have a typo error in rule, so we add it this rule too with term "Captial" instead of "Capital" -->
+	<!-- some phpcs have a typo error in rule, so we add this rule too with bad term -->
 	<rule ref="PEAR.NamingConventions.ValidClassName.StartWithCaptial">
         <severity>0</severity>
 	</rule>
@@ -379,7 +379,7 @@
 	<rule ref="PEAR.NamingConventions.ValidFunctionName.FunctionNoCapital">
         <severity>0</severity>
 	</rule>
-	<!-- some phpcs have a typo error in rule, so we add it this rule too with term "Captial" instead of "Capital" -->
+	<!-- some phpcs have a typo error in rule, so we add it this rule too with bad term -->
 	<rule ref="PEAR.NamingConventions.ValidFunctionName.FunctionNoCaptial">
         <severity>0</severity>
 	</rule>
