@@ -732,7 +732,7 @@ if ($action == 'updatestatsonly' || $action == 'updatemetricsonly' || $action ==
 			$errors=array();
 
 			// Run database update
-			print "Process update metrics (like Nb of user or Gb) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
+			print "Process update metrics (like Nb of users or Gb) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
 
 			$dbmaster->begin();
 
@@ -775,7 +775,7 @@ if ($action == 'updatestatsonly' || $action == 'updatemetricsonly' || $action ==
 			$errors=array();
 
 			// Run database update
-			print "Process update database info (nb of user) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
+			print "Process update database info (version, modules) of instance ".($i+1)." ".$instance.' - '.dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." : ";
 
 			$dbmaster->begin();
 
