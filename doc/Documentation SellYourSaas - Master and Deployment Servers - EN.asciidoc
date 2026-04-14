@@ -2761,7 +2761,7 @@ To enable a profile:
 [source,bash]
 ---------------
 aa-status
-aa-enforce usr.bin.secureBash
+aa-enforce usr.bin.secureBash    or    aa-enforce usr.sbin.apache2
 aa-status
 /etc/init.d/apparmor status
 ---------------
@@ -2776,6 +2776,15 @@ aa-disable nameofprofile
 All the disabled profiles are visible into */etc/apparmor.d/disable*
 
 Sometimes, a reboot of server may be required to take into account any change on apparmor profile files.
+
+
+To enabled/disable the service at start, you can run:
+
+[source,bash]
+---------------
+sudo systemctl enable apparmor.service
+sudo systemctl disabled apparmor.service
+---------------
 
 
 Note: The apparmor logs are visible into */var/log/kern.log* or */var/log/audit/audit.log* or */var/log/syslog*.
