@@ -317,7 +317,7 @@ $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
-if ($instancefiltercomplete && preg_match('/[\*\%]/', $instancefiltercomplete)) {
+if ($instancefiltercomplete && !preg_match('/[\*%]/', $instancefiltercomplete)) {
 	$stringforsearch = '';
 	$tmparray = explode(',', $instancefiltercomplete);
 	foreach ($tmparray as $instancefiltecompletevalue) {
@@ -328,7 +328,7 @@ if ($instancefiltercomplete && preg_match('/[\*\%]/', $instancefiltercomplete)) 
 	}
 	$sql.= " AND c.ref_customer IN (".$stringforsearch.")";
 } else {
-	if ($instancefiltercomplete && preg_match('/[\*\%]/', $instancefiltercomplete)) {
+	if ($instancefiltercomplete && preg_match('/[\*%]/', $instancefiltercomplete)) {
 		$sql.= " AND c.ref_customer LIKE '".$db->escape(str_replace('*', '%', $instancefiltercomplete))."'";
 	}
 	$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
