@@ -236,7 +236,7 @@ $langs->load("main");				// To load language file for default language
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
 if (! isset($argv[1])) {	// Check parameters
-	print "Usage on master            : ".$script_file." (updatestatsonly|updatemetricsonly|updatedatabase) [instancefilter] [--force] [--nostats]\n";
+	print "Usage on master            : ".$script_file." (updatestatsonly|updatemetricsonly|updateinfoonly|updatedatabase) [instancefilter] [--force] [--nostats]\n";
 	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force] [--nostats]\n";
 	print "\n";
 	print "action can be:\n";
