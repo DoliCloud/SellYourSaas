@@ -253,6 +253,11 @@ if (! isset($argv[1])) {	// Check parameters
 	print "- backupdelete        creates backup (rsync with delete + database). <<<<< Used by cron on deployment servers\n";
 	print "- backupdeleteexclude creates backup (rsync with delete excluded + database).\n";
 	print "\n";
+	print "instancefilter can be:\n";
+	print "abc*\n";
+	print "*.withX.mydomain.com\n";
+	print "myinstancename.withX.mydomain.com\n";
+	print "\n";
 	print "with a backup... action, you can also add the option --force to execute backup even if done recently.\n";
 
 	exit(-1);
@@ -292,7 +297,7 @@ $instancefilter=((isset($argv[2]) && !in_array($argv[2], array('--force', '--nos
 $instancefiltercomplete=$instancefilter;
 
 // Forge complete name of instance
-if (! empty($instancefiltercomplete) && ! preg_match('/\./', $instancefiltercomplete) && ! preg_match('/\.home\.lan$/', $instancefiltercomplete)) {
+if (! empty($instancefiltercomplete) && !preg_match('/[,\.\*%]/', $instancefiltercomplete) && !preg_match('/\.home\.lan$/', $instancefiltercomplete)) {
 	if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
 		$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 	} else {
@@ -323,7 +328,7 @@ if ($instancefiltercomplete && !preg_match('/\*/', $instancefiltercomplete)) {
 	}
 	$sql.= " AND c.ref_customer IN (".$stringforsearch.")";
 } else {
-	if ($instancefiltercomplete && preg_match('/\*/', $instancefiltercomplete)) {
+	if ($instancefiltercomplete && (preg_match('/\*/', $instancefiltercomplete) || preg_match('/%/', $instancefiltercomplete))) {
 		$sql.= " AND c.ref_customer LIKE '".$db->escape(str_replace('*', '%', $instancefiltercomplete))."'";
 	}
 	$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
