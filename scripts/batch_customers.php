@@ -340,6 +340,7 @@ $sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_mes
 if (preg_match('/backup/', $action)) {
 	$sql.=" AND ce.deployment_host = '".$dbmaster->escape($ipserverdeployment)."'";
 }
+$sql .= $dbmaster->order("c.ref_customer", "ASC");
 
 $dbtousetosearch = $dbmaster;
 
