@@ -254,8 +254,9 @@ if (! isset($argv[1])) {	// Check parameters
 	print "- backupdeleteexclude creates backup (rsync with delete excluded + database).\n";
 	print "\n";
 	print "instancefilter can be:\n";
-	print "- abc*\n";
-	print "- *.withX.mydomain.com\n";
+	print "- 'abc*'\n";
+	print "- '*.withX.mydomain.com'\n";
+	print "- 'myinstancename1.withX.mydomain.com,myinstancename2.withX.mydomain.com'\n";
 	print "- myinstancename.withX.mydomain.com\n";
 	print "\n";
 	print "with a backup... action, you can also add the option --force to execute backup even if done recently.\n";
