@@ -907,6 +907,10 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$trackid = 'con'.$tmpcontract->id;
 		}
 		if (getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREATE")) {
+			$ticketpriority = strtoupper($priority);
+			if (in_array($ticketpriority, array("MEDIUM"))) {
+				$ticketpriority = "NORMAL";
+			}
 			$tickettocreate->ref = $tickettocreate->getDefaultRef();
 			$tickettocreate->subject = $topic;
 			$tickettocreate->message = $content;
@@ -915,7 +919,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$tickettocreate->origin_replyto = $replyto;
 			$tickettocreate->origin_email = $replyto;
 			$tickettocreate->ip = $ipaddress;
-			$tickettocreate->severity_code = strtoupper($priority); //To match code format in database
+			$tickettocreate->severity_code = $ticketpriority; //To match code format in database
 			$tickettocreate->category_code = $groupticket;
 			$tickettocreate->type_code = "OTHER"; //TODO: Add type in Form support to add it to ticket
 			if (is_object($tmpcontract)) {
