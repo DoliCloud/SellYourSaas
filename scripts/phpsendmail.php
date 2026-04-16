@@ -190,20 +190,6 @@ if (empty($ip)) {
 //file_put_contents($logfile, date('Y-m-d H:i:s')." Nb of entry into instanceofuser = ".count($instanceofuser), FILE_APPEND);
 $countnbprocess = 0;
 
-/* Replace old method to count with system calls by a native PHP count
-if ($EXEC == 'shell_exec') {
-	// Count other existing file starting with '/tmp/phpsendmail-'.posix_getuid()
-	// and return error if nb is higher than 500
-	$commandcheck = 'find /tmp/phpsendmail-'.posix_getuid().'-* -mtime -1 | wc -l';
-
-	// Execute the command
-	// We use 'shell_exec' here that return all the result as string and not only first line like 'exec' even ifexec can return all result too by using the second parameter output.
-	//$resexec = shell_exec("id");
-	//file_put_contents($logfile, date('Y-m-d H:i:s')." id = ".$resexec."\n", FILE_APPEND);
-	$resexec = shell_exec($commandcheck);
-	$countnbprocess = (int) (empty($resexec) ? 0 : trim($resexec));
-}
-*/
 // Count tmp files using full native PHP
 $pattern = '/tmp/phpsendmail-'.posix_getuid().'-*';
 
@@ -319,7 +305,7 @@ if ($blacklistofcontents === false) {
 }
 
 if (empty($fromline) && empty($emailfrom)) {
-	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' cant send email - exit 1. From not provided. See tmp file '.$tmpfile."\n", FILE_APPEND);
+	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' can not send email - exit 1. From not provided. See tmp file '.$tmpfile."\n", FILE_APPEND);
 	exit(1);
 } elseif (($nbto + $nbcc + $nbbcc) > $MAXOK) {
 	file_put_contents($logfile, date('Y-m-d H:i:s') . ' ' . $ip . ' sellyoursaas rules ko toomanyrecipient - exit 2. ( >'.$MAXOK.' : ' . $nbto . ' ' . $nbcc . ' ' . $nbbcc . ' ) ' . (empty($_ENV['PWD']) ? '' : $_ENV['PWD'])."\n", FILE_APPEND);
@@ -353,7 +339,7 @@ if (empty($ip) || $ip == 'unknown') {
 
 file_put_contents($logfile, date('Y-m-d H:i:s') . ' resexecstring=' . var_export($resexecstring, true)."\n", FILE_APPEND);
 
-time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successfull spamming
+time_nanosleep(0, 200000000);	// Add a delay to reduce effect of successful spamming
 
 return $resexecstring;
 
