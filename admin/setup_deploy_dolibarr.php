@@ -178,7 +178,8 @@ $formticket = new FormTicket($db);
 $help_url="";
 llxHeader("", $langs->trans("SellYouSaasSetup"), $help_url);
 
-$linkback='<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.$langs->trans("BackToModuleList").'</a>';
+$linkback = '<a href="'.($backtopage ? $backtopage : DOL_URL_ROOT.'/admin/modules.php?restore_lastsearch_values=1').'">'.img_picto($langs->trans("BackToModuleList"), 'back', 'class="pictofixedwidth"').'<span class="hideonsmartphone">'.$langs->trans("BackToModuleList").'</span></a>';
+
 print_fiche_titre($langs->trans('SellYouSaasSetup'), $linkback, 'setup');
 
 $error=0;
