@@ -382,8 +382,8 @@ if (! $error) {
 			$invoice_rec->unit_frequency = $frequency_unit;
 			$invoice_rec->nb_gen_max = $nb_gen_max;
 			$invoice_rec->auto_validate = 0;
-			//$invoice_rec->generate_pdf = ($isfreemodeenabled ? 0 : 1);		// By default we do not generate the PDF. TODO See how to deal the sending of link to download.
-			$invoice_rec->generate_pdf = 0;		// By default we do not generate the PDF. TODO See how to deal the sending of link to download.
+			//$invoice_rec->generate_pdf = ($isfreemodeenabled ? 0 : 1);
+			$invoice_rec->generate_pdf = 0;		// By default we do not generate the PDF, we will do it when calling createRecurringInvoices().
 
 			$invoice_rec->fk_project = 0;
 
@@ -423,7 +423,7 @@ if (! $error) {
 					setEventMessages($db->lasterror(), null, 'errors');
 				}
 
-				$result=$oldinvoice->delete($user, 1);
+				$result = $oldinvoice->delete($user, 1);
 				if (! $error && $result < 0) {
 					$error++;
 					setEventMessages($oldinvoice->error, $oldinvoice->errors, 'errors');
@@ -451,9 +451,9 @@ if (! $error) {
 				$user->rights->facture->invoice_advance->validate = 1;
 
 				// Generate real invoice from the newly created pending recurring invoices
-				// This also validate it and this can generate the PDF if $invoice_rec->generate_pdf was set to 1 previously.
-				// It does not send email because $invoice_rec->auto_validate was not set to 2 previously.
-				$result = $facturerec->createRecurringInvoices($invoicerecid, 1);
+				// This also validate it and this can generate the PDF if ->generate_pdf of the invoice with id $invoicerecid was set to 1 previously.
+				// It does not send email because ->auto_validate of the invoice with id $invoicerecid was not set to 2 previously.
+				$result = $facturerec->createRecurringInvoices($invoicerecid, 1, 0, 1);
 				if ($result != 0) {
 					$error++;
 					setEventMessages($facturerec->error, $facturerec->errors, 'errors');
