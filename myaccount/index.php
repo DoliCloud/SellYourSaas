@@ -1636,7 +1636,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$erroronstripecharge = 0;
 
 			// Loop on each pending invoices of the thirdparty and try to pay them with payment = remain amount of invoice.
-			// Note that it may have no pending invoice yet when contract is in trial mode (running or suspended)
+			// Note that when contract is in trial mode (running or suspended), it may have no pending invoice yet. First invoice will be created later.
 			if (! $error) {
 				dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
 
@@ -1644,6 +1644,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 				$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
 				if ($result != 0) {
+					$erroronstripecharge++;
 					$error++;
 					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
 					dol_syslog("--- Error when taking payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
@@ -1683,6 +1684,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			// $backurl
 			// $thirdpartyhadalreadyapaymentmode
 			// $langscompany
+			// $mythirdpartyaccount
+			// $now
 
 			$paymentmode = 'card';
 			include dol_buildpath('/sellyoursaas/myaccount/tpl/action_create_recinvoice_after_payment_creation.tpl.php');
@@ -2601,7 +2604,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 	exit();
-} elseif ($action == 'confirmcloseticket'){
+} elseif ($action == 'confirmcloseticket') {
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 	$object = new ActionsTicket($db);
 	$error = 0;
@@ -2628,7 +2631,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$action = '';
 		setEventMessages($object->error, $object->errors, 'errors');
 	}
-} elseif ($action == 'confirm_ticketaddmessage' && !GETPOST('ticket_addfile') && !GETPOST('ticket_removedfile')){
+} elseif ($action == 'confirm_ticketaddmessage' && !GETPOST('ticket_addfile') && !GETPOST('ticket_removedfile')) {
 	$error = 0;
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 	$object = new ActionsTicket($db);
