@@ -1384,7 +1384,7 @@ class SellYourSaasUtils
 	 * @param	int		             $service					'StripeTest' or 'StripeLive'
 	 * @param	int		             $servicestatus				Service 0 or 1
 	 * @param	int		             $thirdparty_id				Thirdparty id
-	 * @param	CompanyPaymentMode	 $companypaymentmode		Company payment mode
+	 * @param	CompanyPaymentMode	 $companypaymentmode		Object company payment mode
 	 * @param	null|Facture         $invoice					null=All invoices of thirdparty, Invoice=Only this invoice
 	 * @param	int		             $includedraft				Include draft invoices
 	 * @param	int		             $noemailtocustomeriferror	1=No email sent to customer if there is a payment error (can be used when error is already reported on screen)

@@ -752,6 +752,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				$listofcontractid[] = $contract;
 				$backurl = $_SERVER['PHP_SELF']."?mode=instances#contractid".$contract->id;
 
+				// Create a recurring invoice
+				// Conf $conf must be defined
+				// string $action must be defined
+				// $listofcontractid must be defined
+
 				include dol_buildpath('/sellyoursaas/myaccount/tpl/action_create_recinvoice_after_payment_creation.tpl.php');
 			}
 		}
@@ -1407,12 +1412,16 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 
 		// Create a recurring invoice (+real invoice + contract renewal if payment try success and not 'ban') if there is no recurring invoice yet
+		// Conf $conf must be defined
+		// string $action must be defined
 		// $listofcontractid must be defined
 		// $error must be defined
 		// $paymentmode must be defined to 'card' or 'ban'
 		// $backurl
 		// $thirdpartyhadalreadyapaymentmode
 		// $langscompany
+		// CompanyPaymentMode $companypaymentmode
+
 
 		$paymentmode = 'ban';
 		include dol_buildpath('/sellyoursaas/myaccount/tpl/action_create_recinvoice_after_payment_creation.tpl.php');
@@ -1678,6 +1687,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 
 			// Create a recurring invoice (+real invoice + contract renewal if payment try success and not 'ban') if there is no recurring invoice yet
+			// Conf $conf must be defined
+			// string $action must be defined
 			// $listofcontractid must be defined
 			// $error must be defined
 			// $paymentmode must be defined to 'card' or 'ban'
@@ -1686,6 +1697,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			// $langscompany
 			// $mythirdpartyaccount
 			// $now
+			// CompanyPaymentMode $companypaymentmode
 
 			$paymentmode = 'card';
 			include dol_buildpath('/sellyoursaas/myaccount/tpl/action_create_recinvoice_after_payment_creation.tpl.php');
