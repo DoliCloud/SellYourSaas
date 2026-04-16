@@ -31,6 +31,7 @@
  * @var array $listofcontractid
  * @var Societe $mythirdpartyaccount
  * @var int $now
+ * @var Translate $langscompany
  */
 
 // Protection to avoid direct call of template
@@ -404,8 +405,9 @@ if (! $error) {
 					$contractidid = reset($srcObject->linkedObjectsIds['contrat']);
 
 					$invoice_rec->origin = 'contrat';
+					$invoice_rec->origin_type = 'contrat';
 					$invoice_rec->origin_id = $contractidid;
-					$invoice_rec->linked_objects[$invoice_draft->origin] = $invoice_draft->origin_id;
+					$invoice_rec->linked_objects[$invoice_draft->origin_type] = $invoice_draft->origin_id;
 				}
 			}
 
