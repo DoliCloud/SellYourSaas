@@ -734,7 +734,7 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 			print "<br>";
 			print '<div class="center divButAction"><a style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
 		} else {
-			print $langs->trans("NoTickets");
+			print '<span class="opacitymedium">'.$langs->trans("NoTickets").'</span>';
 		}
 		print '</div>';
 	} else {
