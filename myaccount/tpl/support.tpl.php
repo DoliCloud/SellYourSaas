@@ -683,7 +683,7 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
 	$sql .= " WHERE t.fk_soc = ".((int) $socid);		// $socid is id of third party account
 	$sql .= $db->order('t.fk_statut, t.rowid', 'ASC, DESC');
-	$sql .= " LIMIT 10";		// $socid is id of third party account
+	$sql .= " LIMIT 5";		// The last 5. A link will be available to see more
 
 	$resql=$db->query($sql);
 	if ($resql) {

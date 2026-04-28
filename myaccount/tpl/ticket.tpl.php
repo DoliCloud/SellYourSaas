@@ -529,9 +529,11 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 			print $object->dao->subject;
 			print "</td>\n";
 
-			print '<td class="nowraponall right">';
-			print $object->getLibStatut(5);
-			print "</td>";
+			if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_SHOW_STATUS')) {
+				print '<td class="nowraponall right">';
+				print $object->getLibStatut(5);
+				print "</td>";
+			}
 
 			print "</tr>\n";
 		}
