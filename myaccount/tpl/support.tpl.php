@@ -675,12 +675,6 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 
 	// List of tickets of customer/suppliers (SELLYOURSAAS_SUPPORT_TICKET_CREATE must be on)
 
-	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_CREATE_LIST_HIDDEN')) {
-		print $langs->trans("SectionSoonAvailable").'...';
-
-		print "\n".'<!-- Section for socid = '.$socid." --\n";
-	}
-
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/actions_ticket.class.php';
 	require_once DOL_DOCUMENT_ROOT.'/ticket/class/ticketstats.class.php';
 	$staticticket = new Ticket($db);
@@ -689,7 +683,7 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 	$sql .= " FROM ".MAIN_DB_PREFIX."ticket as t";
 	$sql .= " WHERE t.fk_soc = ".((int) $socid);		// $socid is id of third party account
 	$sql .= $db->order('t.fk_statut, t.rowid', 'ASC, DESC');
-	$sql .= " LIMIT 5";		// $socid is id of third party account
+	$sql .= " LIMIT 10";		// $socid is id of third party account
 
 	$resql=$db->query($sql);
 	if ($resql) {
@@ -727,9 +721,11 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 				print $obj->subject;
 				print "</td>\n";
 
-				print '<td class="nowraponall right">';
-				print $staticticket->getLibStatut(5);
-				print "</td>";
+				if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_SHOW_STATUS')) {
+					print '<td class="nowraponall right">';
+					print $staticticket->getLibStatut(5);
+					print "</td>";
+				}
 
 				print "</tr>\n";
 				$i++;
@@ -738,15 +734,11 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 			print "<br>";
 			print '<div class="center divButAction"><a style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
 		} else {
-			print $langs->trans("SoonAvailable");
+			print $langs->trans("NoTickets");
 		}
 		print '</div>';
 	} else {
 		dol_print_error($db);
-	}
-
-	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_CREATE_LIST_HIDDEN')) {
-		print "\n".'-->'."\n";
 	}
 
 	print '</div></div>';
