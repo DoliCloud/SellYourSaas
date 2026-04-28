@@ -555,7 +555,7 @@ print '</tr>';
 // Support features
 
 print '<tr class="liste_titre">';
-print '<td>'.$langs->trans("SupportFeatures").'</td><td></td>';
+print '<td>'.$langs->trans("Tickets").' - '.$langs->trans("SupportFeatures").'</td><td></td>';
 print '<td>';
 print '</td>';
 print "</tr>\n";
