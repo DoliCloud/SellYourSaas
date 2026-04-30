@@ -111,6 +111,7 @@ input.form-control::-moz-placeholder { /* Firefox 19+ */
 
 .note.note-success {
     border-left: 5px solid #3c763d;
+    box-shadow: 1px 1px 10px #DDD;
 }
 .note.note-warning {
     background-color: #fcf8e3;
