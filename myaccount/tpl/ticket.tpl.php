@@ -401,7 +401,7 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 				print '<td>';
 
 				if ($arraymsgs['fk_user_author'] > 0) {
-					if (getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER') == $arraymsgs['fk_contact_author']) {
+					if (getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER') == $arraymsgs['fk_user_author']) {
 						print $mythirdpartyaccount->getFullName($langs);
 					} else {
 						$userstat = new User($db);
