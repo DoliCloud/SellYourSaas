@@ -61,7 +61,7 @@ $res=0;
 if (! $res && ! empty($_SERVER["CONTEXT_DOCUMENT_ROOT"])) {
 	$res=@include $_SERVER["CONTEXT_DOCUMENT_ROOT"]."/main.inc.php";
 }
-// Try main.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try main.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
@@ -654,9 +654,9 @@ if ($reshook == 0) {
 
 						';
 
-						if (getDolGlobalString('SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL')) {
-							print ' jQuery("#tldid").val("");';
-						}
+				if (getDolGlobalString('SELLYOURSAAS_FORCE_NO_SELECTION_IF_SEVERAL')) {
+					print ' jQuery("#tldid").val("");';
+				}
 
 						print '
 
@@ -812,7 +812,7 @@ if ($reshook == 0) {
 				?>
 				<div class="control-group-select2 control-group required">
 					<label class="control-label-select2" for="options_sellyoursaas_source_choice">
-						<span class="fa fa-question-circle opacityhigh"></span> <?= $langs->trans("HowDidYouHearAboutUs") ?>
+						<span class="fa fa-question-circle opacityhigh"></span> <?php echo $langs->trans("HowDidYouHearAboutUs") ?>
 					</label>
 					<div class="controls-select2">
 						<?php
@@ -855,7 +855,7 @@ if ($reshook == 0) {
 				} else {
 					print '<hr>';
 				}
-			?>
+				?>
 
 			  <!-- Selection of domain to create instance -->
 			  <section id="selectDomain">
@@ -953,7 +953,7 @@ if ($reshook == 0) {
 								// Check if domain is allowed by $productref
 								$arrayofonlyserver = explode(',', $productonlyserver);
 								$qualifiedbyonlyserver = false;
-								foreach($arrayofonlyserver as $onlyserver) {
+								foreach ($arrayofonlyserver as $onlyserver) {
 									//var_dump($onlyserver.' '.$newval);
 									if (preg_match('/'.$onlyserver.'/', $newval)) {
 										$qualifiedbyonlyserver = 1;
@@ -1161,7 +1161,6 @@ if ($reshook == 0) {
 
 				if ($productref == 'array') {
 					$disabled = ' disabled="disabled" title="'.$langs->trans("ChooseAProductForYourApplication").'"';
-
 				}
 
 				if ($productref != 'none') {

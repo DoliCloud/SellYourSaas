@@ -114,7 +114,7 @@ if (empty($masterserver)) {
 
 // Load Dolibarr environment
 $res=0;
-// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try master.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
@@ -213,7 +213,7 @@ if (empty($newinstance) || empty($mode)) {
 	print "Usage: ".$script_file." *.withX.mysaasdomainname.com withY.mysaasdomainname.com (test|confirmmaintenance|confirmredirect) [maxnb] [--overwrite-existing-instance]\n";
 	print "Mode is: test                test mode (nothing is done).\n";
 	print "         confirmmaintenance  real move and replace old instance with a definitive message 'Suspended. Instance has been moved.'.\n";
-	print "         confirmredirect     real move with a mesage 'Move in progress' during transfer, and then, switch old instance into a redirect instance.\n";
+	print "         confirmredirect     real move with a message 'Move in progress' during transfer, and then, switch old instance into a redirect instance.\n";
 	print "maxnb will process only the first maxnb instances found.\n";
 	print "Return code: 0 if success, <>0 if error\n";
 	print "\n";
