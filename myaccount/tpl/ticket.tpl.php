@@ -336,6 +336,8 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 	}
 
 
+	print '<br><br>';
+
 	print '<div class="portlet">';
 
 	if ($action != "ticketaddmessage") {
@@ -391,15 +393,22 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 		foreach ($object->dao->cache_msgs_ticket as $id => $arraymsgs) {
 			if (!$arraymsgs['private'] || ($arraymsgs['private'] == "1" && $show_private)) {
 				print '<tr class="oddeven nohover">';
+				// Date
 				print '<td><strong>';
 				print img_picto('', 'object_action', 'class="paddingright"').dol_print_date($arraymsgs['datep'], 'dayhour');
 				print '<strong></td>';
+				// User
 				print '<td>';
+
 				if ($arraymsgs['fk_user_author'] > 0) {
-					$userstat = new User($db);
-					$res = $userstat->fetch($arraymsgs['fk_user_author']);
-					if ($res) {
-						print $userstat->getNomUrl(0, 'nolink');
+					if (getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER') == $arraymsgs['fk_contact_author']) {
+						print $mythirdpartyaccount->getFullName($langs);
+					} else {
+						$userstat = new User($db);
+						$res = $userstat->fetch($arraymsgs['fk_user_author']);
+						if ($res) {
+							print $userstat->getNomUrl(0, 'nolink');
+						}
 					}
 				} elseif (isset($arraymsgs['fk_contact_author'])) {
 					$contactstat = new Contact($db);
