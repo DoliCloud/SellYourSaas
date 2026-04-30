@@ -53,7 +53,7 @@ define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to
 
 // Load Dolibarr environment
 $res=0;
-// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try master.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME'])?'':$_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) { $i--; $j--; }
 if (! $res && $i > 0 && file_exists(substr($tmp, 0, ($i+1))."/master.inc.php")) $res=@include substr($tmp, 0, ($i+1))."/master.inc.php";
@@ -196,8 +196,8 @@ if ($userpublickey) {
 }
 if ($userpassword) {
 	$salt = generateSalt(16); // génère un sel aléatoire de 16 caractères
-	//$hash = '$6$' . $salt . '$' . hash('sha512', $salt . $userpassword, false); // utilise la fonction hash() pour hasher le mot de passe avec le sel et encode le résultat dans le format du fichier /etc/shadow
-	$hash = crypt($userpassword, "$6$".$salt); // utilise la fonction crypt() pour hasher le mot de passe avec le sel
+	//$hash = '$6$' . $salt . '$' . hash('sha512', $salt . $userpassword, false); // use fonction hash() to hash passwordwith salt and encode result in format of /etc/shadow
+	$hash = crypt($userpassword, "$6$".$salt); // use fonction crypt() tp password with salt
 
 	$command .= " userpassword=\"".$hash."\"";
 }

@@ -123,7 +123,7 @@ if (empty($EMAILTO)) {
 
 // Load Dolibarr environment
 $res=0;
-// Try master.inc.php into web root detected using web root caluclated from SCRIPT_FILENAME
+// Try master.inc.php into web root detected using web root calculated from SCRIPT_FILENAME
 $tmp=empty($_SERVER['SCRIPT_FILENAME']) ? '' : $_SERVER['SCRIPT_FILENAME'];$tmp2=realpath(__FILE__); $i=strlen($tmp)-1; $j=strlen($tmp2)-1;
 while ($i > 0 && $j > 0 && isset($tmp[$i]) && isset($tmp2[$j]) && $tmp[$i]==$tmp2[$j]) {
 	$i--;
@@ -169,7 +169,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 
 
 file_put_contents($logfile, date('Y-m-d H:i:s') . " **** $script_file started\n", FILE_APPEND);
-file_put_contents($logfile, date('Y-m-d H:i:s') . " Try to detect a smtp connexion from $WDLOGFILE and log who do it\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " Try to detect a smtp connection from $WDLOGFILE and log who do it\n", FILE_APPEND);
 
 if (empty($MAXPERDAY)) {
 	$MAXPERDAY=1000;
@@ -247,6 +247,7 @@ while (!feof($handle)) {
 
 	if ($datelastload < (dol_now() - 3600)) {
 		file_put_contents($logfile, date('Y-m-d H:i:s') . " reload cached files (at least once per hour)\n", FILE_APPEND);
+		file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " reload cached files (at least once per hour)\n", FILE_APPEND);
 
 		// Call this sometimes to refresh list of paid instances
 		$instanceofuser = getInstancesOfUser($pathtospamdir, $logfile);
@@ -472,7 +473,7 @@ while (!feof($handle)) {
 					}
 				}
 
-				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Nb of processes found with ".$commandresexec." = ".$resexec." (we accept mailquota ".$MAXALLOWED.")\n", FILE_APPEND);
+				file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " Nb of processes found with ".$commandresexec." = ".$resexec." (we accept mailquota ".$MAXALLOWED." - MAXPERDAY=".$MAXPERDAY." - MAXPERDAYPAID=".$MAXPERDAYPAID.")\n", FILE_APPEND);
 
 				if ($resexec > $MAXALLOWED) {
 					file_put_contents($logphpsendmail, date('Y-m-d H:i:s') . " $remoteip sellyoursaas rules ko quota reached. User has reached its quota of ".$MAXALLOWED."\n", FILE_APPEND);
