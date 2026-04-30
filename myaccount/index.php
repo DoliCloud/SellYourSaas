@@ -885,7 +885,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 						$content .= ' - Support type = '.$product->array_options['options_typesupport'];
 					}
 				} else {
-					$content .= '- Service '.$val->label;
+					$content .= '- Service '.dol_trunc($val->description, 32);
 				}
 				$content .= "<br>\n";
 				;
@@ -931,8 +931,13 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				$tickettocreate->fk_contract = $tmpcontract->id;
 			}
 			$res = $tickettocreate->create($user);
-			if ($res > 0) {
+			if ($tickettocreate->id > 0) {
 				$trackid = 'tic'.$tickettocreate->id;
+			}
+
+			// Add ref of ticket into
+			if ($tickettocreate->id > 0) {
+				$topic = preg_replace('/^\[([^\]]+)\]/', '[\1] '.$tickettocreate->ref.' - ', $topic);
 			}
 		}
 
