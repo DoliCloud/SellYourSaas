@@ -116,9 +116,11 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 	print '</td></tr>';
 
 	// Statut
-	print '<tr><td>'.$langs->trans("Status").'</td><td>';
-	print $object->dao->getLibStatut(2);
-	print '</td></tr>';
+	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_SHOW_STATUS')) {
+		print '<tr><td>'.$langs->trans("Status").'</td><td>';
+		print $object->dao->getLibStatut(2);
+		print '</td></tr>';
+	}
 
 	// Type
 	print '<tr><td>'.$langs->trans("Type").'</td><td>';
@@ -174,14 +176,22 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 	}
 
 	// User assigned
-	print '<tr><td>'.$langs->trans("AssignedTo").'</td><td>';
-	if ($object->dao->fk_user_assign > 0) {
-		$fuser = new User($db);
-		$fuser->fetch($object->dao->fk_user_assign);
-		print img_picto('', 'user', 'class="pictofixedwidth"');
-		print $fuser->getFullName($langs, 0);
+	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_SHOW_STATUS')) {
+		print '<tr><td>'.$langs->trans("Assigned").'</td><td>';
+		if (in_array($object->dao->status, array(Ticket::STATUS_ASSIGNED, Ticket::STATUS_IN_PROGRESS, Ticket::STATUS_NEED_MORE_INFO))) {
+			if ($object->dao->fk_user_assign > 0) {
+				$fuser = new User($db);
+				$fuser->fetch($object->dao->fk_user_assign);
+				print img_picto('', 'user', 'class="pictofixedwidth"');
+				print $fuser->getFullName($langs, 0);
+			} else {
+				print yn(1);
+			}
+		} else {
+			print yn(0);
+		}
+		print '</td></tr>';
 	}
-	print '</td></tr>';
 
 	// Add new external contributor
 	if (getDolGlobalInt('TICKET_PUBLIC_SELECT_EXTERNAL_CONTRIBUTORS') && !empty($object->dao->fk_soc)) {
@@ -308,6 +318,7 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 
 	if ($action != "ticketaddmessage") {
 		print '<div class="tabsAction right">';
+
 		// List ticket
 		print '<div class="inline-block divButAction"><a class="left" style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
 
@@ -322,7 +333,12 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 		}
 
 		print '</div>';
+	}
 
+
+	print '<div class="portlet">';
+
+	if ($action != "ticketaddmessage") {
 		print '<div class="ticketlargemargin">';
 		print load_fiche_titre($langs->trans('TicketMessagesList'), '', 'conversation');
 		print '</div>';
@@ -480,6 +496,8 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 		print '<div class="info">'.$langs->trans('NoMsgForThisTicket').'</div>';
 		print '</div>';
 	}
+
+	print '</div>';
 
 	print '<br>';
 } else {
