@@ -316,19 +316,20 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 		print "</form><br>\n";
 	}
 
+	// Show action buttons
 	if ($action != "ticketaddmessage") {
 		print '<div class="tabsAction right">';
 
 		// List ticket
-		print '<div class="inline-block divButAction"><a class="left" style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
+		print '<div class="inline-block divButAction"><a class="left marginrightonly" style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
 
 		if ($object->dao->status < Ticket::STATUS_CLOSED) {
 			// New message
-			print '<div class="inline-block divButAction"><a class="wordbreak btn" href="'.$_SERVER['PHP_SELF'].'?mode=ticket&action=ticketaddmessage&track_id='.$object->dao->track_id.'&token='.newToken().'">'.$langs->trans('TicketAddMessage').'</a></div>';
+			print '<div class="inline-block divButAction"><a class="wordbreak btn btn-primary wordbreak marginrightonly" href="'.$_SERVER['PHP_SELF'].'?mode=ticket&action=ticketaddmessage&track_id='.$object->dao->track_id.'&token='.newToken().'">'.$langs->trans('TicketAddMessage').'</a></div>';
 
 			// Close ticket
 			if ($object->dao->status >= Ticket::STATUS_NOT_READ && $object->dao->status < Ticket::STATUS_CLOSED) {
-				print '<div class="inline-block divButAction"><a class="wordbreak btn" href="'.$_SERVER['PHP_SELF'].'?mode=ticket&action=closeticket&track_id='.$object->dao->track_id.'&token='.newToken().'">'.$langs->trans('CloseTicket').'</a></div>';
+				print '<div class="inline-block divButAction"><a class="wordbreak btn btn-primary wordbreak" href="'.$_SERVER['PHP_SELF'].'?mode=ticket&action=closeticket&track_id='.$object->dao->track_id.'&token='.newToken().'">'.$langs->trans('CloseTicket').'</a></div>';
 			}
 		}
 
