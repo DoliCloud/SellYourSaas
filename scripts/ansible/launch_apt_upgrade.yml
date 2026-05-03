@@ -13,12 +13,12 @@
   become_user: root
   tasks:
   - name: Switch instances in maintenance mode
-    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/make_instances_offlineonline.sh maintenance.php offline
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_make_instances_offlineonline.sh maintenance.php offline
     register: command_output
 
   - debug:
       var: command_output.stdout_lines
-      
+
   - name: Launch apt
     apt:
       upgrade: yes
@@ -30,15 +30,13 @@
     reboot:
     when:
       - reboot is defined
-      
+
   - debug:
       var: command_output.stdout_lines
-      
+
   - name: Restore the production mode
-    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/make_instances_offlineonline.sh maintenance.php online
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_make_instances_offlineonline.sh maintenance.php online
     register: command_output
 
   - debug:
       var: command_output.stdout_lines
-      
-   

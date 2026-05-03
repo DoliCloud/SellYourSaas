@@ -20,7 +20,7 @@
 /**
  *      \file       sellyoursaas/scripts/master_redeploy_instances.php
  *		\ingroup    sellyoursaas
- *      \brief      Script to run from master server to redeploy all the instances of a deployment server known by the master onto an empty deployment server
+ *      \brief      Script to run from master server, to redeploy all the instances of a deployment server known by the master onto an empty deployment server (when server was lost and recreated from scratch)
  */
 
 if (!defined('NOREQUIREDB')) {
@@ -35,7 +35,7 @@ if (!defined('NOREQUIREVIRTUALURL')) {
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
-$path=dirname(__FILE__).'/';
+$path = dirname(__FILE__).'/';
 
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
@@ -53,7 +53,7 @@ $instance=isset($argv[2]) ? $argv[2] : '';
 $mode=isset($argv[3]) ? $argv[3] : '';
 
 @set_time_limit(0);							// No timeout for this script
-define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);		// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
+define('EVEN_IF_ONLY_LOGIN_ALLOWED', 1);	// Set this define to 0 if you want to lock your script when dolibarr setup is "locked to admin user only".
 
 // Read /etc/sellyoursaas.conf file
 $masterserver='';
@@ -150,6 +150,10 @@ if (! $res) {
 	print("Include of master fails");
 	exit(-1);
 }
+/**
+ * @var Conf	$conf
+ * @var DoliDB	$db
+ */
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 
@@ -313,7 +317,57 @@ while ($i < $num_rows) {
 
 	$now = dol_now();
 
+
 	// WIP
+
+	// TODO run the script to create the instance container
+	/*
+	print '--- Create new container for new instance (need sql create/write access on master database with master database user)'."\n";
+
+	$newpass = empty($object->array_options['options_deployment_initial_password']) ? '' : $object->array_options['options_deployment_initial_password'];
+	if (empty($newpass)) {
+		$newpass = getRandomPassword(true, array('I'), 16);
+	}
+
+	// Create virgin envelop for the new instance. The register_instance will use the $oldinstance name
+	// Note that if the old instance had a value into instance_unique_id, the creation of the new one should reuse it.
+	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
+	$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
+	$command.=" ".escapeshellarg($oldinstance);
+	echo $commandnopass."\n";
+
+	$return_val = 0;
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+		$outputfile = $conf->admin->dir_temp.'/out.tmp';
+		$resultarray = $utils->executeCLI($command, $outputfile, 0);
+
+		$return_val = $resultarray['result'];
+		$content_grabbed = $resultarray['output'];
+
+		echo "Result: ".$return_val."\n";
+		if (!empty($resultarray['error'])) {
+			echo "Output: ".$content_grabbed."\n";
+			echo "Error: ".$resultarray['error']."\n";
+		}
+	}
+
+	if ($return_val != 0) {
+		$error++;
+	}
+
+	// Return
+	if (! $error) {
+		if ($mode == 'confirm') {
+			print '-> Creation of a new instance with name '.$newinstance." done.\n";
+		} else {
+			print '-> Creation of a new instance with name '.$newinstance." canceled (test mode)\n";
+		}
+	} else {
+		print '-> Failed to create a new instance with name '.$newinstance."\n";
+		print "\n";
+		exit(-1);
+	}
+	*/
 }
 
 

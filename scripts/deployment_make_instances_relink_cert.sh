@@ -11,7 +11,7 @@ export BLUE='\033[0;34m'
 export YELLOW='\033[0;33m'
 
 
-echo "***** $0 *****"
+echo "***** $0 $1 $2 $3 *****"
 
 if [ "x$2" == "x" ]; then
    echo "Relink local certificates found into /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt to link to the provided specific cert files."
@@ -51,7 +51,7 @@ fi
 
 export scriptdir=$(dirname $(realpath ${0}))
 
-echo "Search local cert files to relink with: ls /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/*.key | grep $2" 
+echo "Search local cert files to relink with: ls /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/*.key | grep $2"
 for fic in `ls /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/*.key | grep $2`
 do
 	newfic="${fic%.key}"
@@ -59,7 +59,7 @@ do
 	#echo "ls -l $newfic.key | grep $1"
 	islink=`ls -l $newfic.key | grep $1 | cut -c1`
 	#echo "islink=$islink"
-	
+
 	if [ "x$islink" == "xl" ]; then
 		echo "File $newfic.key is already a link, we ignore it"
 	else

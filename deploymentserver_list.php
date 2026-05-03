@@ -878,7 +878,7 @@ while ($i < $imaxinloop) {
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToPutInstancesOnOffline").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
-			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_offlineonline.sh offline.php test|offline|online';
+			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_make_instances_offlineonline.sh offline.php test|offline|online';
 			$html .= '">';
 			$html .= '</div>';
 
@@ -886,7 +886,7 @@ while ($i < $imaxinloop) {
 				$html .= '<br>';
 				$html .= $langs->trans("CommandToSwithInstanceInReadOnlyMode").' <span class="opacitymedium">(to run from a deployment server)</span>:<br>';
 				$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" value="';
-				$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/make_instances_readonly.php '.$object->ref.' (on|off) (test|confirm)';
+				$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_make_instances_readonly.sh '.$object->ref.' (readonly|readwrite) (test|confirm)';
 				$html .= '">';
 				$html .= '</div>';
 			}
