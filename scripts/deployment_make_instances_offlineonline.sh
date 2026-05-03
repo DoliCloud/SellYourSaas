@@ -19,8 +19,8 @@ if [ "x$2" == "x" ]; then
    echo "Script to make all instances offline or back online."
    echo "Usage:   $0  urlwhenoffline  test|offline|online"
    echo
-   echo "Example: $0  offline.php  test"
-   echo "Example: $0  maintenance.php  test"
+   echo "Example: $0  maintenance.php  offline"
+   echo "Example: $0  maintenance.php  online"
    echo "Example: $0  https://myaccount.mydomain.com/offline.php  test       (old syntax)"
    echo "Example: $0  https://myaccount.mydomain.com/maintenance.php  test   (old syntax)"
    echo
@@ -64,6 +64,7 @@ else
 fi
 
 if [ "x$2" != "xonline" ]; then
+	# Param is offline (or test), so we create a virtual host to make offline instances. Switch of virtual host is done at next step.
 	echo "Url to use for __webMyAccount__ is $urlwhenoffline"
 
 	echo "Loop on each enabled virtual host of customer instances, create a new one and switch it"
@@ -116,6 +117,7 @@ if [ "x$2" != "xonline" ]; then
 fi
 
 if [ "x$2" = "xoffline" ]; then
+	# Make offline
 	rm /etc/apache2/sellyoursaas-enabled
 	echo Create link /etc/apache2/sellyoursaas-enabled pointing to /etc/apache2/sellyoursaas-offline
 	ln -fs /etc/apache2/sellyoursaas-offline /etc/apache2/sellyoursaas-enabled
@@ -125,6 +127,7 @@ if [ "x$2" = "xoffline" ]; then
 fi
 
 if [ "x$2" = "xonline" ]; then
+	# Make online
 	rm /etc/apache2/sellyoursaas-enabled
 	echo Create link /etc/apache2/sellyoursaas-enabled pointing to /etc/apache2/sellyoursaas-online
 	ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
