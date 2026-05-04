@@ -88,7 +88,14 @@ if (! $res) {
 }
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
-
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ * @var Societe $mysoc
+ * @var Translate $langs
+ * @var HookManager $hookmanager
+ * @var User $user
+ */
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
@@ -475,7 +482,7 @@ if (empty($instancefiltercomplete)) {
 print $sql;
 $dbtousetosearch = $dbmaster;
 
-print $sql."\n";                                    // To have this into the ouput of cron job
+print $sql."\n";                                    // To have this into the output of cron job
 
 dol_syslog($script_file, LOG_DEBUG);
 
