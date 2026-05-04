@@ -282,7 +282,7 @@ $action=$argv[1];
 $nbofok=0;
 $nbofokdiscarded=0;
 
-if ($action == 'updateinfoonly' && !empty($masterserver)) {
+if (in_array($action, array('updatestatsonly', 'updatemetricsonly', 'updateinfoonly', 'updatedatabase')) && !empty($masterserver)) {
 	echo "This server seems to not be a master server (this should be defined in sellyoursaas.conf file).\n";
 	exit(-1);
 }
