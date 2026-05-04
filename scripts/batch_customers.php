@@ -133,12 +133,20 @@ $databasepass='';
 $ipserverdeployment='';
 $emailfrom='';
 $emailsupervision='';
+$instanceserver = '';
+$masterserver = '';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'instanceserver') {
+			$instanceserver = $tmpline[1];
+		}
+		if ($tmpline[0] == 'masterserver') {
+			$masterserver = $tmpline[1];
+		}
 		if ($tmpline[0] == 'domain') {
 			$domain = dol_string_nospecial($tmpline[1]);
 		}
@@ -235,6 +243,7 @@ $langs->load("main");				// To load language file for default language
 
 
 print "***** ".$script_file." (".$version.") - ".dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt')." *****\n";
+
 if (! isset($argv[1])) {	// Check parameters
 	print "Usage on master            : ".$script_file." (updatestatsonly|updatemetricsonly|updateinfoonly|updatedatabase) [instancefilter] [--force] [--nostats]\n";
 	print "Usage on deployment servers: ".$script_file." backup... [instancefilter] [--force] [--nostats]\n";
@@ -272,6 +281,11 @@ $now = dol_now();
 $action=$argv[1];
 $nbofok=0;
 $nbofokdiscarded=0;
+
+if ($action == 'updateinfoonly' && !empty($masterserver)) {
+	echo "This server seems to not be a master server (this should be defined in sellyoursaas.conf file).\n";
+	exit(-1);
+}
 
 
 // Initialize the array $instances*

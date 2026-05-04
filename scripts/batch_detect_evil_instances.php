@@ -116,12 +116,16 @@ $databasepass='';
 $ipserverdeployment='';
 $emailfrom='';
 $emailsupervision='';
+$instanceserver = '';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
+		if ($tmpline[0] == 'instanceserver') {
+			$instanceserver = $tmpline[1];
+		}
 		if ($tmpline[0] == 'domain') {
 			$domain = dol_string_nospecial($tmpline[1]);
 		}
@@ -243,6 +247,12 @@ if (! isset($argv[1])) {	// Check parameters
 	print "- remove        not yet available\n";
 	exit(-1);
 }
+
+if (empty($instanceserver)) {
+	echo "This server seems to not be a server for the deployment of instances (this should be defined in sellyoursaas.conf file).\n";
+	exit(-1);
+}
+
 print '--- Start script with mode '.$argv[1]."\n";
 //print 'Argument 1='.$argv[1]."\n";
 //print 'Argument 2='.$argv[2]."\n";

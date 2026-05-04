@@ -163,6 +163,7 @@ $backupcompressionalgorithms='';	// can be '' or 'zstd'
 $backuprsyncdayfrequency=1;	// Default value is an rsync every 1 day.
 $backupdumpdayfrequency=1;	// Default value is a sql dump every 1 day.
 $master_unique_id = '';
+$instanceserver = '';
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
