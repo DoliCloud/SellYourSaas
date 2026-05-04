@@ -4645,7 +4645,6 @@ vi /lib/apparmor/rc.apparmor.functions
   # sed -e "s/ (\(enforce\|complain\))$//" "$SFS_MOUNTPOINT/profiles" | \
   sed -e "s/ (\(enforce\|complain\|unconfined\))$//" "$SFS_MOUNTPOINT/profiles" | \
 # You may also need to enable RSA protocol for ssh server if you need to connect from an old PHP server (see troubleshooting)
-# To fix the error parameter mail_owner: unknown user name value: postfix
 
 
 # if you move from 22.04 to 24.04, you must enable the correct php version
