@@ -451,6 +451,7 @@ if ($action == "instanceverification") {
 	}
 
 	print '<form action="'.$_SERVER["PHP_SELF"].'#Step'.($stepautoupgrade+1).'" method="GET">';
+	print '<input type="hidden" name="token" value="'.newToken().'">';
 	print '<input type="hidden" name="backtopagesupport" value="'.$backtopagesupport.'">';
 	print '<input type="hidden" name="action" value="'.($stepautoupgrade == 2 ? 'instanceverification' : 'view').'">';
 	print '<input type="hidden" name="mode" value="autoupgrade">';

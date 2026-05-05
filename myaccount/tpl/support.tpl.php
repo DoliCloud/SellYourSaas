@@ -612,7 +612,7 @@ if ($sellyoursaassupporturl) {
 		print '</form>';
 
 		if (getDolGlobalString('SELLYOURSAAS_AUTOMIGRATION_CODE') || getDolGlobalString('SELLYOURSAAS_AUTOUPGRADE_CODE')) {
-			print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="get" id="changemodeForm">';
+			print '<form action="'.$_SERVER["PHP_SELF"].'#Step1" method="GET" id="changemodeForm">';
 			print '<input type="hidden" id="modeforchangemmode" name="mode" value="automigration">';
 			print '<input type="hidden" name="token" value="'.newToken().'">';
 			print '<input type="hidden" name="contractid" value="'.$tmpcontractid.'">';
