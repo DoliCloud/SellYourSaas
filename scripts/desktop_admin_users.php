@@ -145,8 +145,8 @@ for ($i = 5; $i <= 10; $i++) {
 	}
 }
 
-if ($action == 'create' && ($userroot === '' || empty($userpublickey))) {
-	echo "Error: To create a personal user login, the parameter userroot and userpublickey are mandatory.\n";
+if ($action == 'create' && $userroot === '') {
+	echo "Error: To create a personal user login, the parameter userroot=0|1 is mandatory (userpublickey may be guessed from master database).\n";
 	exit(-1);
 }
 if ($action == 'create' && $userroot && empty($userpassword)) {
