@@ -375,7 +375,6 @@ if (count($listofcontractidmodulesupplier) == 0) {
 			$resourceformula='';
 			$tmpproduct = new Product($db);
 			if ($line->fk_product > 0) {
-
 				$tmpproduct->fetch($line->fk_product);
 
 				$maxHeight=40;
@@ -527,7 +526,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 			if ($statuslabel != 'undeployed') {
 				if ($priceinvoicedht == $contract->total_ht) {
 					// Disabled on "My customer invoices" view
-					//print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=changeplan&id='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ChangePlan").'</a>';
+					//print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=changeplan&token='.newToken().'&id='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ChangePlan").'</a>';
 				}
 			}
 		}
@@ -580,7 +579,7 @@ if (count($listofcontractidmodulesupplier) == 0) {
 							print "</form>";
 						} else {
 							print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
-							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=editfreeperiod&idcontract='.$contract->id.'&token='.newToken().'#contractid'.$contract->id.'"> '.img_edit().'</a>';
+							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=editfreeperiod&token='.newToken().'&idcontract='.$contract->id.'#contractid'.$contract->id.'"> '.img_edit().'</a>';
 						}*/
 						print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
 					} else {
@@ -679,33 +678,33 @@ if (count($listofcontractidmodulesupplier) == 0) {
 			$ssh_server_port = ($contract->array_options['options_port_os'] ? $contract->array_options['options_port_os'] : getDolGlobalInt('SELLYOURSAAS_SSH_SERVER_PORT', 22));
 			print '
 
-                                <form class="form-horizontal" role="form">
-                                <input type="hidden" name="token" value="'.newToken().'">
+								<form class="form-horizontal" role="form">
+								<input type="hidden" name="token" value="'.newToken().'">
 
-				                <div class="form-body">
-				                  <div class="form-group col-md-12 row">
-				                    <label class="col-md-3 control-label">'.$langs->trans("Hostname").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_os'].'">
-				                    </div>
-				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
-				                    </div>
-				                  </div>
-				                  <div class="form-group col-md-12 row">
-				                    <label class="col-md-3 control-label">'.$langs->trans("SFTP Username").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_os'].'">
-				                    </div>
-				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_os'].'">
-				                    </div>
-				                  </div>
-				                </div>
+								<div class="form-body">
+								  <div class="form-group col-md-12 row">
+									<label class="col-md-3 control-label">'.$langs->trans("Hostname").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_os'].'">
+									</div>
+									<label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$ssh_server_port.'">
+									</div>
+								  </div>
+								  <div class="form-group col-md-12 row">
+									<label class="col-md-3 control-label">'.$langs->trans("SFTP Username").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_os'].'">
+									</div>
+									<label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_os'].'">
+									</div>
+								  </div>
+								</div>
 
-				                </form>
+								</form>
 								';
 		} elseif ($directaccess == 4) {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
@@ -735,60 +734,60 @@ if (count($listofcontractidmodulesupplier) == 0) {
 			print '<br>'.$langs->trans("DBDesc2").' :';
 		}
 		print '</p>
-                                ';
+								';
 
 		if ($directaccess == 1 || ($directaccess == 2 && empty($foundtemplate)) || ($directaccess == 3 && ! empty($foundtemplate))) {
 			print '
-                                <form class="form-horizontal" role="form">
-                                <input type="hidden" name="token" value="'.newToken().'">
+								<form class="form-horizontal" role="form">
+								<input type="hidden" name="token" value="'.newToken().'">
 
-				                <div class="form-body">
-				                  <div class="form-group col-md-12 row">
-				                    <label class="col-md-3 control-label">'.$langs->trans("Hostname").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_db'].'">
-				                    </div>
-				                    <label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_port_db'].'">
-				                    </div>
-				                  </div>
-				                  <div class="form-group col-md-12 row">
-				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseName").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_database_db'].'">
-				                    </div>
-				                  </div>
-				                  <div class="form-group col-md-12 row">
-				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLogin").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_db'].'">
-				                    </div>
-				                    <label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
-				                    <div class="col-md-3">
-				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_db'].'">
-				                    </div>
-    				                  </div>';
+								<div class="form-body">
+								  <div class="form-group col-md-12 row">
+									<label class="col-md-3 control-label">'.$langs->trans("Hostname").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_hostname_db'].'">
+									</div>
+									<label class="col-md-3 control-label">'.$langs->trans("Port").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_port_db'].'">
+									</div>
+								  </div>
+								  <div class="form-group col-md-12 row">
+									<label class="col-md-3 control-label">'.$langs->trans("DatabaseName").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_database_db'].'">
+									</div>
+								  </div>
+								  <div class="form-group col-md-12 row">
+									<label class="col-md-3 control-label">'.$langs->trans("DatabaseLogin").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_db'].'">
+									</div>
+									<label class="col-md-3 control-label">'.$langs->trans("Password").'</label>
+									<div class="col-md-3">
+									  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_db'].'">
+									</div>
+									  </div>';
 
 			if (! empty($contract->array_options['options_username_ro_db'])) {
 				print '
-	    				                  <div class="form-group col-md-12 row">
-	    				                    <label class="col-md-3 control-label">'.$langs->trans("DatabaseLoginReadOnly").'</label>
-	    				                    <div class="col-md-3">
-	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_ro_db'].'">
-	    				                    </div>
-	    				                    <label class="col-md-3 control-label">'.$langs->trans("PasswordReadOnly").'</label>
-	    				                    <div class="col-md-3">
-	    				                      <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_ro_db'].'">
-	    				                    </div>
-	    				                  </div>';
+										  <div class="form-group col-md-12 row">
+											<label class="col-md-3 control-label">'.$langs->trans("DatabaseLoginReadOnly").'</label>
+											<div class="col-md-3">
+											  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_username_ro_db'].'">
+											</div>
+											<label class="col-md-3 control-label">'.$langs->trans("PasswordReadOnly").'</label>
+											<div class="col-md-3">
+											  <input type="text" disabled="disabled" class="form-control input-medium" value="'.$contract->array_options['options_password_ro_db'].'">
+											</div>
+										  </div>';
 			}
 
 			print '
-				                    	</div>
+										</div>
 
-				                </form>
-					           ';
+								</form>
+							   ';
 		} elseif ($directaccess == 4) {
 			print '<!-- directaccess = '.$directaccess.' foundtemplate = '.$foundtemplate.' -->';
 			print '<p class="opacitymedium" style="padding: 15px">'.$langs->trans("PleaseOpenATicketToRequestYourCredential").'</p>';

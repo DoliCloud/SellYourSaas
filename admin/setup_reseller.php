@@ -192,9 +192,9 @@ if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM', array(), null, 0, 0, 1);
 } else {
 	if (!getDolGlobalString('SELLYOURSAAS_ALLOW_RESELLER_PROGRAM')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM&token='.newToken().'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_RESELLER_PROGRAM&token='.newToken().'">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
 print '<br>';
@@ -203,9 +203,9 @@ if ($conf->use_javascript_ajax) {
 	print ajax_constantonoff('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM', array(), null, 0, 0, 1);
 } else {
 	if (!getDolGlobalString('SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM')) {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM&token='.newToken().'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 	} else {
-		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ALLOW_MODULE_PROVIDER_PROGRAM&token='.newToken().'">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 	}
 }
 print '<br>';
@@ -266,9 +266,9 @@ if ($allowresellerprogram) {
 		print ajax_constantonoff('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE', array(), null, 0, 0, 1);
 	} else {
 		if (!getDolGlobalString('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE')) {
-			print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE&token='.newToken().'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
 		} else {
-			print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+			print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE&token='.newToken().'">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
 		}
 	}
 	//print $form->selectyesno('SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE', $allowresellerprogram, 1);

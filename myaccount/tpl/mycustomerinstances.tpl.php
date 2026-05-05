@@ -518,7 +518,7 @@ if (count($listofcontractidreseller) == 0) {
 			if ($statuslabel != 'undeployed') {
 				if ($priceinvoicedht == $contract->total_ht) {
 					// Disabled on "My customer invoices" view
-					//print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=changeplan&id='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ChangePlan").'</a>';
+					//print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=changeplan&token='.newToken().'&id='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ChangePlan").'</a>';
 				}
 			}
 		}
@@ -571,7 +571,7 @@ if (count($listofcontractidreseller) == 0) {
 							print "</form>";
 						} else {
 							print $langs->trans("TrialUntil", dol_print_date($contract->array_options['options_date_endfreeperiod'], 'day'));
-							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=editfreeperiod&idcontract='.$contract->id.'&token='.newToken().'#contractid'.$contract->id.'"> '.img_edit().'</a>';
+							print '<a href="'.$_SERVER["PHP_SELF"].'?mode=mycustomerinstances&action=editfreeperiod&token='.newToken().'&idcontract='.$contract->id.'#contractid'.$contract->id.'"> '.img_edit().'</a>';
 						}
 					} else {
 						print $langs->trans("Trial");

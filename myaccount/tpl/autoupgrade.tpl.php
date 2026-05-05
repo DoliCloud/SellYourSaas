@@ -40,7 +40,7 @@ dol_include_once('sellyoursaas/class/sellyoursaascontract.class.php');
 
 
 $upload_dir = $conf->sellyoursaas->dir_temp."/autoupgrade_".$mythirdpartyaccount->id.'.tmp';
-$backtopagesupport = GETPOST("backtopagesupport", 'alpha') ? GETPOST("backtopagesupport", 'alpha') : $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautoupgrade=backfromautoupgrade&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha') ? GETPOST('ticketcategory_child_id', 'alpha') : '').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha') ? GETPOST('ticketcategory', 'alpha') : '').'&subject='.(GETPOST('subject_back', 'alpha') ? GETPOST('subject', 'alpha') : '').'#supportform';
+$backtopagesupport = GETPOST("backtopagesupport", 'alpha') ? GETPOST("backtopagesupport", 'alpha') : $_SERVER["PHP_SELF"].'?action=presend&token='.newToken().'&mode=support&backfromautoupgrade=backfromautoupgrade&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha') ? GETPOST('ticketcategory_child_id', 'alpha') : '').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha') ? GETPOST('ticketcategory', 'alpha') : '').'&subject='.(GETPOST('subject_back', 'alpha') ? GETPOST('subject', 'alpha') : '').'#supportform';
 $arraybacktopage=explode("&", $backtopagesupport);
 $ticketcategory_child_id = "";
 $ticketcategory = "";
@@ -177,7 +177,7 @@ if ($action == "autoupgrade") {
 	$utils = new Utils($db);
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 
-	// If error occurs this is usefull to redirect to support page
+	// If error occurs this is useful to redirect to support page
 	$keyticketcategory_child_id = array_keys(preg_grep('/ticketcategory_child_id.*/', $arraybacktopage))[0];
 	$keyticketcategory = array_keys(preg_grep('/ticketcategory=.*/', $arraybacktopage))[0];
 	$ticketcategory_child_id = explode("=", $arraybacktopage[$keyticketcategory_child_id])[1];

@@ -62,7 +62,7 @@ if (!empty($plan)) {		// If ref of product was forced via plan=... parameter
 		$productref = $plan;
 	}
 	$listofplanref = '';
-	foreach($planarray as $tmpplanref) {
+	foreach ($planarray as $tmpplanref) {
 		$listofplanref .= ($listofplanref ? "," : "")."'".$db->escape($tmpplanref)."'";
 	}
 	$sqlproducts .= " AND p.ref IN (".$db->sanitize($listofplanref, 1).")";
@@ -988,7 +988,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 				$productalreadyininstance = 0;
 				if (!empty($tmpproduct->array_options['options_package'])) {
-					// If there is a package, test if module already depoyed on instance
+					// If there is a package, test if module already deployed on instance
 					foreach ($arrayoflines as $keyline => $line) {
 						if ($tmpproduct->id == $line->fk_product) {
 							$productalreadyininstance = 1;
@@ -1054,7 +1054,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				}
 				// Button to subscribe
 				if (!empty($tmpproduct->array_options['options_package'])) {
-					// If there is a package, test if module already depoyed on instance
+					// If there is a package, test if module already deployed on instance
 					$productalreadyininstance = 0;
 					foreach ($arrayoflines as $keyline => $line) {
 						if ($tmpproduct->id == $line->fk_product) {
@@ -1066,14 +1066,14 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					if (!$productalreadyininstance) {
 						// Show link to subscribe
 						if ($ispaid || $freemodeinstance || getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL")) {
-							print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+							print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 						} else {
 							// Show disabled button if not paying or validated
 							print '<input type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" title="'.$langs->trans("SorryOptionsNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'..." disabled="disabled" value="'.$langs->trans("Install").'..."><br>';
 						}
 					} else {
 						// Show link to unsubscribe
-						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'&token='.newToken().'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
 					}
 					print '</div>';
 				} else {
@@ -1149,7 +1149,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<span class="bold">'.$planlabel.'</span>';
 			if ($statuslabel != 'undeployed') {
 				if ($foundtemplate == 0 || ($priceinvoicedht == $contract->total_ht && !$atleastonediscount)) {
-					print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=changeplan&id='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ChangePlan").'</a>';
+					print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=changeplan&token='.newToken().'&id='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ChangePlan").'</a>';
 				}
 			}
 		}
@@ -1202,7 +1202,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 						//else print ' - <span style="color: orange">'.$langs->trans("SuspendWillBeDoneSoon").'</span>';
 					}
 					if ($freemodeinstance) {
-						print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ConfirmInstanceValidation").'</a>';
+						print ' - <a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&token='.newToken().'&contractid='.$contract->id.'#contractid'.$contract->id.'">'.$langs->trans("ConfirmInstanceValidation").'</a>';
 					} elseif ($statuslabel == 'suspended') {
 						if (empty($atleastonepaymentmode)) {
 							if ($contract->total_ht > 0) {
@@ -2081,18 +2081,18 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 
 						/* Now disable according to restrict_domains */
 						console.log("Now, disable servers according to restrict_domains");'."\n";
-						foreach ($arrayofplansfull as $key => $tmpplan) {
-							if (!empty($tmpplan['restrict_domains'])) {
-								$restrict_domains = explode(",", $tmpplan['restrict_domains']);
-								print "/* Code if we select pid = ".$key." so plan = ".$tmpplan['label']." with restrict_domains = ".$tmpplan['restrict_domains']." */\n";
-								foreach ($restrict_domains as $domain) {
-									print " if (pid == ".$key.") { disable_tld_if_not('".trim($domain)."'); }\n";
-									break;	// We keep only the first domain in list as the domain to keep possible for deployment
-								}
-							} else {
-								print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname." */\n";
-							}
-						}
+		foreach ($arrayofplansfull as $key => $tmpplan) {
+			if (!empty($tmpplan['restrict_domains'])) {
+				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
+				print "/* Code if we select pid = ".$key." so plan = ".$tmpplan['label']." with restrict_domains = ".$tmpplan['restrict_domains']." */\n";
+				foreach ($restrict_domains as $domain) {
+					print " if (pid == ".$key.") { disable_tld_if_not('".trim($domain)."'); }\n";
+					break;	// We keep only the first domain in list as the domain to keep possible for deployment
+				}
+			} else {
+				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname." */\n";
+			}
+		}
 		print '
 
 						/* Now disable according to onlyserver */

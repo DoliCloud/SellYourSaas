@@ -515,19 +515,19 @@ if (!getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP')) {
 			if (! empty($tmparraydomain[1])) {
 				if (in_array($tmparraydomain[1], array('bidon', 'hidden', 'closed'))) {
 					// Button off, click to enable
-					$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=1&key='.urlencode($key).'&token='.newToken().'">';
+					$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&token='.newToken().'&value=1&key='.urlencode($key).'">';
 					$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
 					$enabledisablehtml.='</a>';
 				} else {
 					// Button on, click to disable
-					$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.urlencode($key).'&token='.newToken().'">';
+					$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&token='.newToken().'&value=0&key='.urlencode($key).'">';
 					$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
 					$enabledisablehtml.='</a><br>';
 					$enabledisablehtml.='<span class="small opacitymedium">'.$langs->trans("OnDomainOnly", $tmparraydomain[1]).'</span>';
 				}
 			} else {
 				// Button on, click to disable
-				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&value=0&key='.urlencode($key).'&token='.newToken().'">';
+				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_DISABLE_INSTANCE&token='.newToken().'&value=0&key='.urlencode($key).'">';
 				$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'valignmiddle paddingright');
 				$enabledisablehtml.='</a>';
 			}
@@ -557,12 +557,12 @@ if (!getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_IP')) {
 			$keyforparam = 'SELLYOURSAAS_ANNOUNCE_ON_'.$tmparraydomain[0];
 			if (!getDolGlobalString($keyforparam)) {
 				// Button off, click to enable
-				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=1&key='.urlencode($tmparraydomain[0]).'&token='.newToken().'">';
+				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&token='.newToken().'&value=1&key='.urlencode($tmparraydomain[0]).'">';
 				$enabledisablehtml.=img_picto($langs->trans("Disabled"), 'switch_off', '', false, 0, 0, '', 'valignmiddle paddingright');
 				$enabledisablehtml.='</a>';
 			} else {
 				// Button on, click to disable
-				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&value=0&key='.urlencode($tmparraydomain[0]).'&token='.newToken().'">';
+				$enabledisablehtml='<a class="reposition" href="'.$_SERVER["PHP_SELF"].'?action=setSELLYOURSAAS_ANNOUNCE_ON&token='.newToken().'&value=0&key='.urlencode($tmparraydomain[0]).'">';
 				$enabledisablehtml.=img_picto($langs->trans("Activated"), 'switch_on', '', false, 0, 0, '', 'warning valignmiddle paddingright');
 				$enabledisablehtml.='</a> ';
 			}

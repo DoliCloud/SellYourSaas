@@ -3357,8 +3357,8 @@ if ($mythirdpartyaccount->isareseller && in_array($mode, array('dashboard', 'myr
 						}
 					}*/
 					print '<td class="center">';
-					print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&mode='.$mode.'&token='.newToken().'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
-					print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&mode='.$mode.'&token='.newToken().'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
+					print '<a class="editfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=editproperty&token='.newToken().'&mode='.$mode.'&propertykey='.urlencode($key).'">'.img_edit().'</a>';
+					print '<a class="resetfielda reposition marginleftonly marginrighttonly paddingright paddingleft" href="'.$_SERVER["PHP_SELF"].'?action=resetproperty&token='.newToken().'&mode='.$mode.'&propertykey='.urlencode($key).'" title="'.dol_escape_htmltag($langs->trans("ResetToRecommendedValue")).'">'.img_picto('', 'eraser', 'class="paddingrightonly" style="color: #444;"').'</a>';
 					print '</td>';
 				}
 				print '</tr>';
@@ -3641,7 +3641,7 @@ if (empty($welcomecid)
 								$daybeforeendoftrial = getDolGlobalInt('SELLYOURSAAS_NBDAYS_BEFORE_TRIAL_END_FOR_SOFT_ALERT');
 								if ($delaybeforeendoftrial <= (($daybeforeendoftrial + 1) * 3600 * 24)) {	// We add 1 to be sure that link is visible before we send the soft email remind
 									// Link to validate definitely instance
-									print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
+									print '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&token='.newToken().'&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
 									print $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
 									print '</a>';
 								} else {
@@ -3668,7 +3668,7 @@ if (empty($welcomecid)
 								$s .= '</a>';
 							} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE') && $delaybeforeendoftrial < 7) {
 								// Link to validate definitely instance
-								$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
+								$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&token='.newToken().'&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
 								$s .= $langs->trans("ConfirmInstanceValidationToRestoreInstance");
 								$s .= '</a>';
 							}
@@ -3706,7 +3706,7 @@ if (empty($welcomecid)
 							$s .= '</a>';
 						} elseif (getDolGlobalInt('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE') && $delaybeforeendoftrial < 7) {
 							// Link to validate definitely instance
-							$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
+							$s .= '<a href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=validatefreemode&token='.newToken().'&contractid='.$contract->id.'#contractid'.$contract->id.'" class="btn btn-warning wordbreak marginrightonly">';
 							if (! $isASuspendedContract) {
 								$s .= $langs->trans("ConfirmInstanceValidationToAvoidSuspensionAfterTrial");
 							} else {

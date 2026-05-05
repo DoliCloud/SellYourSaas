@@ -706,7 +706,7 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 
 				// Ref
 				print '<td class="nowraponall">';
-				print '<a href="'.$_SERVER["PHP_SELF"].'?mode=ticket&action=view&track_id='.$staticticket->track_id.'">';
+				print '<a href="'.$_SERVER["PHP_SELF"].'?mode=ticket&action=view&token='.newToken().'&track_id='.$staticticket->track_id.'">';
 				print img_object("", $staticticket->picto, 'class="paddingright"'). $staticticket->ref;
 				print '</a>';
 				print "</td>\n";

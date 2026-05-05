@@ -47,7 +47,7 @@ $upload_dir = $conf->sellyoursaas->dir_temp.'/'.$uploaddirname;
 $filenames = array();
 $fileverification = array();
 $stepautomigration = 0;
-$backtopagesupport = $_SERVER["PHP_SELF"].'?action=presend&mode=support&backfromautomigration=backfromautomigration&token='.newToken().'&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha') ? GETPOST('ticketcategory_child_id', 'alpha') : '').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha') ? GETPOST('ticketcategory', 'alpha') : '').'&subject'.(GETPOST('subject_back', 'alpha') ? GETPOST('subject', 'alpha') : '').'#supportform';
+$backtopagesupport = $_SERVER["PHP_SELF"].'?action=presend&token='.newToken().'&mode=support&backfromautomigration=backfromautomigration&contractid='.GETPOST('contractid', 'alpha').'&supportchannel='.GETPOST('supportchannel', 'alpha').'&ticketcategory_child_id='.(GETPOST('ticketcategory_child_id_back', 'alpha') ? GETPOST('ticketcategory_child_id', 'alpha') : '').'&ticketcategory='.(GETPOST('ticketcategory_back', 'alpha') ? GETPOST('ticketcategory', 'alpha') : '').'&subject'.(GETPOST('subject_back', 'alpha') ? GETPOST('subject', 'alpha') : '').'#supportform';
 
 print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST" id="migrationFormbacksupport">';
 	print '<input type="hidden" name="action" value="presend">';
@@ -214,9 +214,9 @@ if ($action == 'automigration') {
 
 	// Check that $sqlfiletomigrate is ending with .sql
 	if (!preg_match('/\.sql$/i', $sqlfiletomigrate)) {
-        setEventMessages($langs->trans("WrongFileExtension", '', $sqlfiletomigrate), null, "errors");
-        $erroronmigration = 1;
-    }
+		setEventMessages($langs->trans("WrongFileExtension", '', $sqlfiletomigrate), null, "errors");
+		$erroronmigration = 1;
+	}
 
 	// Sql prefix process To test
 	if (!$erroronmigration) {
@@ -253,7 +253,7 @@ if ($action == 'automigration') {
 			$commandtestmysqldumpversion = "mysqldump --version";
 			$resultversion = $utils->executeCLI($commandtestmysqldumpversion, "", 0);
 			$mysqldumpversionarr = array();
-			preg_match('/Ver (\d+)(?:\.\d+)*/',$resultversion["output"], $mysqldumpversionarr);
+			preg_match('/Ver (\d+)(?:\.\d+)*/', $resultversion["output"], $mysqldumpversionarr);
 			$mysqldumpversion = $mysqldumpversionarr[1];
 
 			$command = "mysqldump";
@@ -325,7 +325,7 @@ if ($action == 'automigration') {
 						$comment = 'Call of sellyoursaasRemoteAction(migrate) on contract ref='.$object->ref;
 						$notused = '';
 						$timeoutmigrate = 240;
-						// Note sellyoursasRemoteAction wil use $object->array_options to find parameters
+						// Note sellyoursasRemoteAction will use $object->array_options to find parameters
 						$exitcode = $sellyoursaasutils->sellyoursaasRemoteAction("migrate", $object, 'admin', $notused, $notused, 1, $comment, $timeoutmigrate);
 						if ($exitcode < 0) {
 							$result["result"] = $exitcode;
