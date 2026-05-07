@@ -18,14 +18,13 @@ echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
-echo "# PWD ------------> $PWD" 
+echo "# PWD ------------> $PWD"
 #echo "# arguments ------> ${@}"
 echo "# parent path ----> ${0%/*}"
 echo "# realname name --> $(basename $(realpath ${0}))"
 echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
-export ZONES_PATH="/etc/bind/zones"
 export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
@@ -183,11 +182,11 @@ echo "fileforconfig1 = $fileforconfig1"
 echo "targetdir = $targetdir"
 echo "EMAILTO = $EMAILTO"
 echo "REMOTEIP = $REMOTEIP"
-echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL" 
-echo "instancenameold = $instancenameold" 
+echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL"
+echo "instancenameold = $instancenameold"
 echo "domainnameold = $domainnameold"
 echo "customurl = $customurl"
-echo "contractlineid = $contractlineid" 
+echo "contractlineid = $contractlineid"
 echo "EMAILFROM = $EMAILFROM"
 echo "CERTIFFORCUSTOMDOMAIN = $CERTIFFORCUSTOMDOMAIN"
 echo "archivedir = $archivedir"
@@ -211,7 +210,7 @@ echo "instancedir = $instancedir"
 testorconfirm="confirm"
 
 
-# Create / Remove the virtual hostinto available dir. 
+# Create / Remove the virtual hostinto available dir.
 # Create/Disable Apache virtual host
 
 if [[ "$mode" == "deploywebsite" ]]; then
@@ -264,12 +263,12 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 	export vhostko=$?
-	
+
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
 
 	#echo Enable conf with a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
 	#a2ensite $instance.$domain.website-$CUSTOMDOMAIN.conf
-	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online 
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
 	ln -fs /etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf /etc/apache2/sellyoursaas-online
 
 
@@ -277,7 +276,7 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	service apache2 reload
 	if [[ "x$?" != "x0" ]]; then
 		echo Error when running service apache2 reload
-		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO
 		sleep 1
 		exit 20
 	else
@@ -297,10 +296,10 @@ if [[ "$mode" == "deploywebsite" ]]; then
 		certbot certonly -n -v --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN -d $CUSTOMDOMAIN
 		export certko=$?
 	fi
-	
+
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file = $certko"
-	
-	
+
+
 	echo "Link certificate for virtualhost with
 		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
 		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
@@ -309,18 +308,18 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
 	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
 	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
-	
 
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate beeing loaded"
+
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate being loaded"
 	service apache2 reload
 	if [[ "x$?" != "x0" ]]; then
 		echo Error when running service apache2 reload
-		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO
 		sleep 1
 		exit 20
 	else
 		sleep 3
-	fi	
+	fi
 fi
 
 if [ "x$vhostko" != "x0" ] || [ "x$certko" != "x0" ]; then
@@ -328,7 +327,7 @@ if [ "x$vhostko" != "x0" ] || [ "x$certko" != "x0" ]; then
 	sleep 1
 	echo `date +'%Y-%m-%d %H:%M:%S'`" return 50"
 	echo
-	
+
 	exit 50
 fi
 

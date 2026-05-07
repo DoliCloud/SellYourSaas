@@ -18,14 +18,13 @@ echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
-echo "# PWD ------------> $PWD" 
+echo "# PWD ------------> $PWD"
 #echo "# arguments ------> ${@}"
 echo "# parent path ----> ${0%/*}"
 echo "# realname name --> $(basename $(realpath ${0}))"
 echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
-export ZONES_PATH="/etc/bind/zones"
 export scriptdir=$(dirname $(realpath ${0}))
 
 if [ "$(id -u)" != "0" ]; then
@@ -151,11 +150,11 @@ echo "fileforconfig1 = $fileforconfig1"
 echo "targetdir = $targetdir"
 echo "EMAILTO = $EMAILTO"
 echo "REMOTEIP = $REMOTEIP"
-echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL" 
-echo "instancenameold = $instancenameold" 
+echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL"
+echo "instancenameold = $instancenameold"
 echo "domainnameold = $domainnameold"
 echo "customurl = $customurl"
-echo "contractlineid = $contractlineid" 
+echo "contractlineid = $contractlineid"
 echo "EMAILFROM = $EMAILFROM"
 echo "CERTIFFORCUSTOMDOMAIN = $CERTIFFORCUSTOMDOMAIN"
 echo "archivedir = $archivedir"
@@ -184,7 +183,7 @@ if [[ "$mode" == "actionafterpaid" ]]; then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Execute script with . $cliafterpaid"
 			. $cliafterpaid
 			if [[ "x$?" != "x0" ]]; then
-				echo Error when running the CLI script $cliafterpaid 
+				echo Error when running the CLI script $cliafterpaid
 				echo "Error when running the CLI script $cliafterpaid" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 				exit 26
 			fi

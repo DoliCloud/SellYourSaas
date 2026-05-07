@@ -18,14 +18,13 @@ echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
-echo "# PWD ------------> $PWD" 
+echo "# PWD ------------> $PWD"
 #echo "# arguments ------> ${@}"
 echo "# parent path ----> ${0%/*}"
 echo "# realname name --> $(basename $(realpath ${0}))"
 echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
-export ZONES_PATH="/etc/bind/zones"
 export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
@@ -213,11 +212,11 @@ echo "fileforconfig1 = $fileforconfig1"
 echo "targetdir = $targetdir"
 echo "EMAILTO = $EMAILTO"
 echo "REMOTEIP = $REMOTEIP"
-echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL" 
-echo "instancenameold = $instancenameold" 
+echo "SELLYOURSAAS_ACCOUNT_URL = $SELLYOURSAAS_ACCOUNT_URL"
+echo "instancenameold = $instancenameold"
 echo "domainnameold = $domainnameold"
 echo "customurl = $customurl"
-echo "contractlineid = $contractlineid" 
+echo "contractlineid = $contractlineid"
 echo "EMAILFROM = $EMAILFROM"
 echo "archivedir = $archivedir"
 echo "SSLON = $SSLON"
@@ -287,14 +286,14 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 	export vhostko=$?
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
 
-	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online 
+	echo Enable conf with ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
 	ln -fs /etc/apache2/sellyoursaas-available/$fqn.custom.conf /etc/apache2/sellyoursaas-online
-	
+
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new virtual host working"
 	service apache2 reload
 	if [[ "x$?" != "x0" ]]; then
 		echo Error when running service apache2 reload
-		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO
 		sleep 1
 		exit 20
 	else
@@ -314,10 +313,10 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 	certbot certonly -n -v --webroot -w $instancedir/htdocs/ -d www.$customurl
 	export certko=$?
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of cert file for custom url = $certko"
-	
+
 	if [[ "x$?" != "x0" ]]; then
 		echo Error when running certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl
-		echo "Failed to generate custom certificate www.$customurl for virtualhost $apacheconf: certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in custom certificate generation" $EMAILTO 
+		echo "Failed to generate custom certificate www.$customurl for virtualhost $apacheconf: certbot certonly --webroot -w $instancedir/htdocs/ -d www.$customurl" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in custom certificate generation" $EMAILTO
 		sleep 1
 		exit 20
 	else
@@ -339,7 +338,7 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 
 	if [[ "x$certkeyko" != "x0" ]] || [[ "x$certcrtko" != "x0" ]] || [[ "x$certinterko" != "x0" ]]; then
 		echo Error when linking certificate with error certkeyko=$certkeyko , certcrtko=$certcrtko and certinterko=$certinterko
-		echo "Failed to linking certificate www.$customurl for virtualhost $apacheconf: certkeyko=$certkeyko , certcrtko=$certcrtko and certinterko=$certinterko" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in custom certificate linking" $EMAILTO 
+		echo "Failed to linking certificate www.$customurl for virtualhost $apacheconf: certkeyko=$certkeyko , certcrtko=$certcrtko and certinterko=$certinterko" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in custom certificate linking" $EMAILTO
 		sleep 1
 		exit 20
 	else
@@ -347,16 +346,16 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 	fi
 
 
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate beeing loaded"
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate being loaded"
 	service apache2 reload
 	if [[ "x$?" != "x0" ]]; then
 		echo Error when running service apache2 reload
-		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO 
+		echo "Failed to restart apache to validate the new virtual host $apacheconf: Error when running service apache2 reload" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in apache reload to enable a new website" $EMAILTO
 		sleep 1
 		exit 20
 	else
 		sleep 3
-	fi	
+	fi
 fi
 
 

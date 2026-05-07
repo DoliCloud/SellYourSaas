@@ -22,7 +22,7 @@ export now=`date +'%Y-%m-%d %H:%M:%S'`
 #echo "# user id --------> $(id -u)"
 #echo "# now ------------> $now"
 #echo "# PID ------------> ${$}"
-#echo "# PWD ------------> $PWD" 
+#echo "# PWD ------------> $PWD"
 #echo "# arguments ------> ${@}"
 #echo "# path to me -----> ${0}"
 #echo "# parent path ----> ${0%/*}"
@@ -32,12 +32,11 @@ export now=`date +'%Y-%m-%d %H:%M:%S'`
 #echo "# realname dir ---> $(dirname $(realpath ${0}))"
 
 export PID=${$}
-export scriptdir=$(dirname $(realpath ${0}))				
+export scriptdir=$(dirname $(realpath ${0}))
 export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export homedir=`grep '^homedir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirtest=`grep '^archivedirtest=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export archivedirpaid=`grep '^archivedirpaid=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export archivedirbind="/etc/bind/archives"
 export archivedircron="/var/spool/cron/crontabs.disabled"
 
 
@@ -101,12 +100,12 @@ for fic in `ls -A`; do
 			echo duc info -b -a -d "$fic/.duc.db"
 		fi
 		duc info -b -a -d "$fic/.duc.db" >>/tmp/disk_used.tmp 2>&1;
-	fi 
+	fi
 	if [ "x$1" == "xupdate" ]; then
 		echo Update duc for $homedir/$fic
 		duc index $homedir/$fic -x -m 3 -d "$homedir/$fic/.duc.db"
 		chown $fic:$fic "$homedir/$fic/.duc.db"
-	fi 
+	fi
 	if [ "x$1" == "xdelete" ]; then
 		rm "$fic/.duc.db"
 	fi
@@ -114,6 +113,6 @@ done
 
 cat /tmp/disk_used.tmp | sed -e 's/Error opening:/YYYY-MM-DD HH:MM:SS 0 0 0/g' | grep -v "Date" | awk ' { if ($6) { print $5" octets "$6; } } ' | sort -n -r -k 1
 
-echo 
+echo
 
 exit 0
