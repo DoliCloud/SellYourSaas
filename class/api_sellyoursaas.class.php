@@ -103,7 +103,7 @@ class Sellyoursaasapi extends DolibarrApi
 	/**
 	 * Get properties of a packages object
 	 *
-	 * Return an array with packages informations
+	 * Return an array with packages information
 	 *
 	 * @param 	int 	$id ID of packages
 	 * @return 	array|mixed data without useless information
@@ -260,7 +260,7 @@ class Sellyoursaasapi extends DolibarrApi
 		$result = $this->_validate($request_data);
 
 		foreach ($request_data as $field => $value) {
-			$this->packages->$field = $value;
+			$this->packages->$field = $this->_checkValForAPI($field, $value, $this->packages);
 		}
 		if ($this->packages->create(DolibarrApiAccess::$user)<0) {
 			throw new RestException(500, "Error creating Packages", array_merge(array($this->packages->error), $this->packages->errors));
@@ -298,7 +298,7 @@ class Sellyoursaasapi extends DolibarrApi
 			if ($field == 'id') {
 				continue;
 			}
-			$this->packages->$field = $value;
+			$this->packages->$field = $this->_checkValForAPI($field, $value, $this->packages);
 		}
 
 		if ($this->packages->update(DolibarrApiAccess::$user, false) > 0) {
@@ -348,7 +348,7 @@ class Sellyoursaasapi extends DolibarrApi
 	/**
 	 * Get properties of a packages object
 	 *
-	 * Return an array with packages informations
+	 * Return an array with packages information
 	 *
 	 * @param	string		$yearmonth	'YYYYMM' or 'last'
 	 * @return 	array|mixed 			data without useless information
