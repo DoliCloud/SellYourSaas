@@ -39,6 +39,12 @@ if (! defined('NOBROWSERNOTIF')) {
 	define('NOBROWSERNOTIF', '1');
 }
 
+// Special case for action=undeployconfirmed
+if ($_GET['action'] == 'undeployconfirmed' && GETPOST('hash')) {
+	// We are in a case of deletion from a public link protected by a hash value. We can downgrade protection MAIN_SECURITY_CSRF_WITH_TOKEN to 2 instead of 3.
+	define('MAIN_SECURITY_CSRF_WITH_TOKEN', '2');	// If we keep 3 or unset (=3 by default with v24+), we have a CSRF error when we click on the link in the email to confirm undeploy. Security is guaranteed by the hash.
+}
+
 define('SYSLOG_FILE_ADDIP', 1);
 define('SYSLOG_FILE_ADDSUFFIX', 'myaccountindex');
 
@@ -1740,7 +1746,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	}
 
 	if (! $error) {
-		$stringtohash = getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $contract->thirdparty->email.dol_print_date($now, 'dayrfc');
+		$stringtohash = getDolGlobalString('SELLYOURSAAS_KEYFORHASH').$contract->thirdparty->email.dol_print_date($now, 'dayrfc');
 
 		$hash = dol_hash($stringtohash);
 		dol_syslog("Hash generated to allow immediate deletion: ".$hash);
