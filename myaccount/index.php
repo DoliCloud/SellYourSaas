@@ -40,7 +40,7 @@ if (! defined('NOBROWSERNOTIF')) {
 }
 
 // Special case for action=undeployconfirmed
-if ($_GET['action'] == 'undeployconfirmed' && GETPOST('hash')) {
+if ($_GET['action'] == 'undeployconfirmed' && isset($_GET['hash'])) {
 	// We are in a case of deletion from a public link protected by a hash value. We can downgrade protection MAIN_SECURITY_CSRF_WITH_TOKEN to 2 instead of 3.
 	define('MAIN_SECURITY_CSRF_WITH_TOKEN', '2');	// If we keep 3 or unset (=3 by default with v24+), we have a CSRF error when we click on the link in the email to confirm undeploy. Security is guaranteed by the hash.
 }
