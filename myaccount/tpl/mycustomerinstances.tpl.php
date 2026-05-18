@@ -20,6 +20,19 @@
  * @var DoliDB $db
  * @var HookManager $hookmanager
  * @var Translate $langs
+ * @var User $user
+ *
+ * @var Form $form
+ * @var Societe $mythirdpartyaccount
+ * @var string $search_instance_name
+ * @var string $search_customer_name
+ * @var string $mode
+ * @var int $firstrecord
+ * @var int $lastrecord
+ * @var array $listofcontractidreseller
+ * @var string $initialaction
+ * @var array $arrayofplans
+ * @var array $arrayofplansfull
  */
 
 // Protection to avoid direct call of template
@@ -425,6 +438,7 @@ if (count($listofcontractidreseller) == 0) {
 					} elseif ($tmpproduct->duration == '1y') {
 						$tmpduration.=' / '.$langs->trans("DurationYear");
 					} else {
+						$regs = array();
 						preg_match('/^([0-9]+)([a-z]{1})$/', $tmpproduct->duration, $regs);
 						if (! empty($regs[1]) && ! empty($regs[2])) {
 							$tmpduration.=' / '.$regs[1].' '.($regs[2] == 'm' ? $langs->trans("Month") : ($regs[2] == 'y' ? $langs->trans("DurationYear") : ''));
@@ -806,7 +820,7 @@ if (count($listofcontractidreseller) == 0) {
 	// Force flag to not be an external use to be able to see all thirdparties
 	$user->socid = 0;
 
-	$selectofthirdparties = $form->select_company('', 'reusesocid', 'parent = '.$mythirdpartyaccount->id, '1', 0, 1, array(), 0, 'centpercent');
+	$selectofthirdparties = $form->select_company('', 'reusesocid', '(parent:=:'.$mythirdpartyaccount->id.')', '1', 0, 1, array(), 0, 'centpercent');
 
 if ($form->result['nbofthirdparties'] == 0) {
 	print '<span class="opacitymedium">'.$langs->trans("YouDontHaveCustomersYet").'...</span><br>';
