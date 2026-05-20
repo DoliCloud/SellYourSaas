@@ -128,8 +128,11 @@ if (! $res) {
 	die("Include of main fails");
 }
 /**
+ * @var Conf $conf
  * @var DoliDB $db
+ * @var HookManager $hookmanager
  * @var Translate $langs
+ * @var User $user
  */
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
@@ -171,7 +174,7 @@ if (empty($user->id)) {
 		exit(-1);
 	}
 
-	$user->getrights();
+	$user->loadRights();
 
 	// Add more permissions
 	if (!isset($user->rights->societe->lire) || empty($user->rights->societe->lire)) {
@@ -447,7 +450,7 @@ if ($reusecontractid) {
 		exit(240);
 	}
 } else {
-	// When we deploy from the register.php page
+	// When we deploy from the public register.php page
 
 	// Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 	$hookmanager->initHooks(array('sellyoursaas-register-instance'));
@@ -564,7 +567,7 @@ if ($reusecontractid) {
 	}
 	*/
 
-	// Possibility to block email adresses from a regex into global setup
+	// Possibility to block email addresses from a regex into global setup
 	if (getDolGlobalInt('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED_ENABLED')) {
 		// TODO: use the blacklist list instead.
 		if (getDolGlobalString('SELLYOURSAAS_EMAIL_ADDRESSES_BANNED')) {
@@ -1045,6 +1048,9 @@ if ($reusecontractid) {
 			}
 			$myaccounturl.='?mode=instances&addanotherinstance=1&service='.((int) $service).'&sldAndSubdomain='.urlencode($sldAndSubdomain).'#addanotherinstance';
 
+			// Output the key "Instance creation blocked for"
+			dol_syslog("InstanceCreationBlockedDuplicate: Instance creation blocked for remoteip ".$remoteip.", duplicate account", LOG_WARNING);
+
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				setEventMessages($langs->trans("AccountAlreadyExistsForEmail", $myaccounturl), null, 'errors');
 				header("Location: ".$newurl);
@@ -1183,7 +1189,7 @@ if ($reusecontractid) {
 			$tmpthirdparty->code_fournisseur = -1;
 		}
 		if ($partner > 0) {
-			$tmpthirdparty->parent = $partner;		// Add link to parent/reseller id with the id of partner explicitely into registration link
+			$tmpthirdparty->parent = $partner;		// Add link to parent/reseller id with the id of partner explicitly into registration link
 		}
 
 		$result = $tmpthirdparty->create($user);
@@ -1204,7 +1210,7 @@ if ($reusecontractid) {
 	}
 
 	if (getDolGlobalString('SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG')) {
-		dol_syslog("register_instance.php We will set customer into the categroy");
+		dol_syslog("register_instance.php We will set customer into the category");
 
 		// To prevent deletion of categories already present
 		$categories =  $tmpthirdparty->getCategoriesCommon('customer');
@@ -1655,7 +1661,7 @@ if (! $error) {
 		$emailtemplate = '';
 		if ($productref != 'none') {
 			$emailtemplate = 'InstanceDeployed';
-			$arraydefaultmessage=$formmail->getEMailTemplate($db, 'contract', $user, $langs, 0, 1, $emailtemplate);		// Templates were initialiazed into data.sql
+			$arraydefaultmessage=$formmail->getEMailTemplate($db, 'contract', $user, $langs, 0, 1, $emailtemplate);		// Templates were initialized into data.sql
 		} else {
 			$emailtemplate = '(ChannelPartnerCreated)';
 			$arraydefaultmessage=$formmail->getEMailTemplate($db, 'thirdparty', $user, $langs, 0, 1, $emailtemplate);	// Templates were initialized into data.sql
@@ -1740,7 +1746,7 @@ if ($productref != 'none') {
 }
 $errormessages[] = $langs->trans("OurTeamHasBeenAlerted");
 
-// Force reload ot thirdparty
+// Force reload of thirdparty
 if (is_object($contract) && method_exists($contract, 'fetch_thirdparty')) {
 	$contract->fetch_thirdparty();
 }
