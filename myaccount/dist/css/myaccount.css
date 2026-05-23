@@ -55,6 +55,11 @@ label.nobold {
     padding-top: 10px !important;
     word-wrap: break-word;
 }
+div.jnotify-background {
+    opacity: 0.95 !important;
+    -webkit-box-shadow: 2px 2px 4px #888 !important;
+    box-shadow: 2px 2px 4px #888 !important;
+}
 .jnotify-container .jnotify-notification .jnotify-message {
 	/* box-shadow: 2px 3px 6px #eee; */
     border-radius: 10px;
