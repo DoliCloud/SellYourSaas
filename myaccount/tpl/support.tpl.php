@@ -127,7 +127,7 @@ if ($sellyoursaassupporturl) {
 	print '</div></div></div>';
 } else {
 	// Define if mandatory contact information are complete
-	$mandatoryInfoAreNotSet = isMandatoryInfoSet($mythirdpartyaccount);
+	$mandatoryInfoAreNotSet = !isMandatoryInfoSet($mythirdpartyaccount);
 
 	print '
 			    <div class="row" id="choosechannel">
