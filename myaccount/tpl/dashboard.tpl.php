@@ -18,9 +18,19 @@
 /**
  * @var Conf $conf
  * @var DoliDB $db
+ * @var Form $form
  * @var Translate $langs
  *
  * @var Societe $mythirdpartyaccount
+ * @var int $welcomecid
+ * @var int $nbofinstancesdone
+ * @var int $nbofinstancessuspended
+ * @var int $nbofinstancesdonereseller
+ * @var int $nbofinstancessuspendedreseller
+ * @var int $nbofinstancesdonemodules
+ * @var int $nbofinstancessuspendedmodules
+ * @var array<int,mixed> $listofcontractid
+ * @var int $atleastonepaymentmode
  */
 
 // Protection to avoid direct call of template
@@ -224,16 +234,8 @@ print '
 				<div class="col-md-12">
 	                ';
 if (empty($welcomecid)) {		// If we just created an instance, we don't show warnings yet.
-	$missing = 0;
-	if (empty($mythirdpartyaccount->array_options['options_firstname'])) {
-		$missing++;
-	}
-	if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
-		$missing++;
-	}
-	if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
-		$missing++;
-	}
+	// Define if mandatory contact information are complete
+	$missing = !isMandatoryInfoSet($mythirdpartyaccount);
 
 	if (! $missing) {
 		print $langs->trans("ProfileIsComplete");

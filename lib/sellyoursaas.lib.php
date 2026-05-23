@@ -263,7 +263,7 @@ function sellyoursaasHasOpenInvoices($contract)
 
 /**
  * Return date of expiration. Can also return other information on instance (status, nb of users, id of product of application, ...)
- * For expiration date, it takes the lowest planed end date for services (whatever is service status)
+ * For expiration date, it takes the lowest planned end date for services (whatever is service status)
  *
  * @param 	Contrat $contract				Object contract
  * @param	int		$onlyexpirationdate		1=Return only property 'expiration_date' (no need to load each product line properties to also set the 'nbusers', 'nbofgbs', 'status', 'duration_value', ...)
@@ -325,7 +325,7 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 				$statusofappline = $line->statut;
 
 				if (empty($duration_value) || empty($duration_unit)) {
-					dol_syslog("Error, the definition of duration for product ID ".$prodforline->id." is uncomplete.", LOG_ERR);
+					dol_syslog("Error, the definition of duration for product ID ".$prodforline->id." is incomplete.", LOG_ERR);
 				}
 			}
 			if ($prodforline->array_options['options_app_or_option'] == 'system') {
@@ -346,7 +346,7 @@ function sellyoursaasGetExpirationDate($contract, $onlyexpirationdate = 0)
 
 /**
  * Return an array of all the suspended contracts for thirdparty
- * 
+ *
  * @param	int	$thirdpatyid	 If of thirdparty
  * @return  array				 The array with all supended contracts
  */
@@ -389,7 +389,7 @@ function sellyoursaasGetSuspendedContracts($thirdpatyid)
 
 /**
  * Return if contract is suspenced/close
- * Take lowest planed end date for services (whatever is service status)
+ * Take lowest planned end date for services (whatever is service status)
  *
  * @param 	Contrat $contract		Object contract
  * @return	boolean					Return if a contract is suspended or not
@@ -531,7 +531,7 @@ function sellyoursaas_admin_prepare_head()
  * @param	string		$remoteip		User remote IP
  * @param	boolean		$whitelisted	Is the IP or email white listed ?
  * @param	string		$email			User remote email
- * @param	int			$checkcaptcha	Check also captcha (check will not be done when deploying from customer dashboard for exemple, where user is already logged)
+ * @param	int			$checkcaptcha	Check also captcha (check will not be done when deploying from customer dashboard for example, where user is already logged)
  * @return 	string[]					Array with ipquality (string with different scores), emailquality (string with different scores), vpnproba, abusetest, fraudscoreip, fraudscoreemail
  */
 function getRemoteCheck($remoteip, $whitelisted, $email, $checkcaptcha = 1)
@@ -786,12 +786,12 @@ function getRemoteCheck($remoteip, $whitelisted, $email, $checkcaptcha = 1)
 				$jsonreponse = json_decode($result['content'], true);
 				dol_syslog("For ip ".$remoteip.": fraud_score=".$jsonreponse['fraud_score']." - is_crawler=".$jsonreponse['is_crawler']." - vpn=".$jsonreponse['vpn']." - recent_abuse=".$jsonreponse['recent_abuse']." - tor=".($jsonreponse['tor'] || $jsonreponse['active_tor']));
 				if ($jsonreponse['success']) {
-					if ($jsonreponse['recent_abuse'] && getDolGlobalString('SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP')) {	// Not recommanded if users are using shared IP
+					if ($jsonreponse['recent_abuse'] && getDolGlobalString('SELLYOURSAAS_IPQUALITY_BLOCK_ABUSING_IP')) {	// Not recommended if users are using shared IP
 						dol_syslog("Instance creation blocked for ".$remoteip." - This is an IP with recent abuse reported");
 						$abusetest = 2;
 					}
 					if ($jsonreponse['tor'] || $jsonreponse['active_tor']) {
-						// So recommanded that is it enabled always, no option to disable this
+						// So recommended that is it enabled always, no option to disable this
 						dol_syslog("Instance creation blocked for ".$remoteip." - This is a TOR or evil IP - host=".$jsonreponse['host']);
 						$abusetest = 3;
 					}
@@ -1054,7 +1054,8 @@ function sellyoursaasGetNbUsersContract($contractref, $contractline, $codeextraf
  * @param	Societe		$mythirdpartyaccount	Thirdparty
  * @return 	int									0 if trial mode, 1 if paid mode, 2 free mode
  */
-function sellyoursaasGetModeStatusInstance($contract, $mythirdpartyaccount){
+function sellyoursaasGetModeStatusInstance($contract, $mythirdpartyaccount)
+{
 	$modeinstancestatus = 0;
 	$ispaid = sellyoursaasIsPaidInstance($contract);
 	if ($ispaid) {
@@ -1065,4 +1066,31 @@ function sellyoursaasGetModeStatusInstance($contract, $mythirdpartyaccount){
 		}
 	}
 	return $modeinstancestatus;
+}
+
+/**
+ * Check if mandatory info are set
+ *
+ * @param Societe $mythirdpartyaccount		Thirdparty to test
+ * @return boolean
+ */
+function isMandatoryInfoSet($mythirdpartyaccount)
+{
+	$missing = 0;
+	if (empty($mythirdpartyaccount->array_options['options_firstname'])) {
+		$missing++;
+	}
+	if (empty($mythirdpartyaccount->array_options['options_lastname'])) {
+		$missing++;
+	}
+	if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
+		if ($mythirdpartyaccount->tva_assuj && empty($mythirdpartyaccount->tva_intra) && !getDolGlobalString('SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE')) {
+			$missing++;
+		}
+		if ($mythirdpartyaccount->country_code == 'FR' && empty($mythirdpartyaccount->idprof1)) {
+			$missing++;
+		}
+	}
+
+	return !$missing;
 }
