@@ -35,13 +35,25 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/core/modules/facture/doc/pdf_crabe.modules.php';
+
+if (file_exists(DOL_DOCUMENT_ROOT.'/core/modules/facture/doc/pdf_sponge.modules.php')) {
+	include_once DOL_DOCUMENT_ROOT.'/core/modules/facture/doc/pdf_sponge.modules.php';
+} else {
+	include_once DOL_DOCUMENT_ROOT.'/core/modules/facture/doc/pdf_sponge.modules.php';
+
+	/**
+	 *	Class to manage PDF invoice template Crabe
+	 */
+	class pdf_spong extends pdf_crabe
+	{
+	}
+}
 
 
 /**
  *	Class to manage PDF invoice template Crabe
  */
-class pdf_sellyoursaas extends pdf_crabe
+class pdf_sellyoursaas extends pdf_sponge
 {
 	/**
 	 *	Constructor
