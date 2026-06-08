@@ -186,7 +186,7 @@ Edit the macro file "~/.xbindkeysrc" to add your macro instruction
 # End of xbindkeys configuration
 ---------------
 
-Replace the "stringtoshow" with your sentence to ouput.
+Replace the "stringtoshow" with your sentence to output.
 
 Note: Because, the stringtoshow must be entered in Qwerty, it is easier to have it recorded by editing the macro file with xbindkeys-config (notavailable on some distrib)
 
@@ -349,14 +349,14 @@ sudo boot-repair
 
 == Connect to a server via a bastion with remmina
 
-When you are using a SSH bastion to connect to your production server and the ssh command is 
+When you are using a SSH bastion to connect to your production server and the ssh command is
 
 ssh bastionuser@bastion.mysaasdomain.com -t -oRemoteCommand="my.remote.production.server"
 
-(So connection to the bastion with ssh bastionuser@bastion.mysaasdomain.com then connecting to the remote server with ssh my.remote.production.server) 
+(So connection to the bastion with ssh bastionuser@bastion.mysaasdomain.com then connecting to the remote server with ssh my.remote.production.server)
 
 You can setup Remmina with:
-- Server = Address of bastion server 
+- Server = Address of bastion server
 - User name = bastionuser
 - Opening command = ssh my.remote.production.server
 
@@ -376,7 +376,7 @@ If you got this error:
 
 
 It probably means you try to execute a remote ansible rule on a new version of ansible, from an old version of ansible.
-See compatible version on this page: 
+See compatible version on this page:
 https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix
 
 Check ansible version:
@@ -396,7 +396,7 @@ sudo apt upgrade
 sudo apt install python3-pip
 
 sudo apt install ansible -y
-or 
+or
 pip install --force-reinstall ansible==9.11.0
 
 sudo ansible --version
@@ -424,5 +424,19 @@ pip install --upgrade paramiko
 ---------------
 
 
+=== Error on push/pull from Eclipse IDE with Ubuntu 26.04
 
+Add this into the .ssh/config to force the protocol to use for SSH. Ubuntu 26.04 use a more secured one with "publickey-hostbound@openssh.com" not supported by Egit.
+Then restart Eclipse.
 
+[source,bash]
+---------------
+Host github.com
+    User git
+    IdentityFile ~/.ssh/id_rsa
+    IdentitiesOnly yes
+    PubkeyAcceptedAlgorithms ssh-rsa,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com
+    HostKeyAlgorithms ssh-rsa,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,sk-ssh-ed25519@openssh.com
+    KexAlgorithms diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1
+    StrictHostKeyChecking yes
+---------------
