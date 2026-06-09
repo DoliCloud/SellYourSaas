@@ -440,3 +440,14 @@ Host github.com
     KexAlgorithms diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1
     StrictHostKeyChecking yes
 ---------------
+
+Note: The commande *ssh-agent -s* must return something like this:
+
+[source,bash]
+---------------
+SSH_AUTH_SOCK=/home/mylogin/.ssh/agent/s.419v2MPStb.agent.7dWwsVSLUf; export SSH_AUTH_SOCK;
+SSH_AGENT_PID=461316; export SSH_AGENT_PID;
+echo Agent pid 461316;
+---------------
+
+You can force the addition of the key with :  ssh-add ~/.ssh/id_rsa or ssh-add ~/.ssh/id_ed25519
