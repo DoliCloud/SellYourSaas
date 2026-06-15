@@ -6548,3 +6548,19 @@ Restart the clamd daemon and check again with clamconf that the new parameter is
 systemctl restart clamav-daemon
 clamconf
 ---------------
+
+
+==== Error filesystem readonly in Apache or PHP error in JIT memory
+
+Error on "filesystem in readonly" or "PHP error in JIT memory allocation".
+
+Example: preg_replace_callback(): Allocation of JIT memory failed, PCRE JIT will be disabled. This is likely caused by security restrictions. Either grant PHP permission to allocate executable memory, or set pcre.jit=0 in /home/ldestailleur/git/dolibarr_dev/htdocs/waf.inc.php on line 127
+
+Create a file */etc/systemd/system/apache2.service.d/override.conf* with content
+
+[source,bash]
+---------------
+[Service]
+ProtectHome=false
+MemoryDenyWriteExecute=no
+---------------
