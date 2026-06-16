@@ -206,25 +206,8 @@ repos:
 
   # Execute codespell to fix typo errors (setup of codespell into dev/tools/codespell/)
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
-      - id: codespell
-        # Due to a current limitation of configuration files,
-        # we can specify two dicts only on the CLI.
-        # You can update the contents of the exclude-file codespell-lines-ignore with the script
-        # dev/tools/codespell/addCodespellIgnores.sh
-        args:
-          - -D
-          - "-"
-          - -D
-          - dev/tools/codespell/codespell-dict.txt
-          - -I
-          - dev/tools/codespell/codespell-ignore.txt
-          - -x
-          - dev/tools/codespell/codespell-lines-ignore.txt
-        exclude_types: [image]
-        exclude: (?x)^(.phan/stubs/.*|phpstan\.neon.*)$
-        additional_dependencies: [tomli]
       - alias: codespell-lang-en_US
         # Only for translations with specialised exceptions
         # -D contains predefined conversion dictionaries
