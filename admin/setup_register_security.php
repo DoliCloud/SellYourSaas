@@ -193,6 +193,7 @@ if ($action == 'set') {
 
 		dolibarr_set_const($db, "SELLYOURSAAS_HASHALGOFORPASSWORD", GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", 'alpha'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_MXDOMAIN", GETPOST("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_MXDOMAIN", 'alpha'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", GETPOST("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", 'alpha'), 'chaine', 0, '', $conf->entity);
 
@@ -383,6 +384,12 @@ if (!getDolGlobalString('SELLYOURSAAS_HASHALGOFORPASSWORD') || getDolGlobalStrin
 	print '</tr>';
 }
 
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_MXDOMAIN").'</td>';
+print '<td>';
+print '<input type="text" class="minwidth300" name="SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_MXDOMAIN" value="'.getDolGlobalString('SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_MXDOMAIN').'">';
+print '</td>';
+print '<td><span class="opacitymedium small">exemple.com, domain.com, domain.com, ...</span></td>';
+print '</tr>';
 
 
 // Google recaptcha

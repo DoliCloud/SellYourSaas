@@ -708,11 +708,16 @@ if (!$reusecontractid && !$reusesocid) {
 			exit(-27);
 		}
 
-		if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0) {
-			dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
-			setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL')), null, 'errors');
-			header("Location: ".$newurl);
-			exit(-28);
+		$whitelisteddomains = getDolGlobalString("SELLYOURSAAS_DISABLE_NEW_INSTANCES_EXCEPT_MXDOMAIN");
+		$whitelisteddomains = explode(',', $whitelisteddomains);
+
+		if (!in_array($domainemail, $whitelisteddomains)) {
+			if (function_exists('isValidMXRecord') && isValidMXRecord($domainemail) == 0) {
+				dol_syslog("Try to register with a bad value for email domain : ".$domainemail);
+				setEventMessages($langs->trans("BadValueForDomainInEmail", $domainemail, getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL')), null, 'errors');
+				header("Location: ".$newurl);
+				exit(-28);
+			}
 		}
 	}
 }
