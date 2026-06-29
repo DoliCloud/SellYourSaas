@@ -3122,7 +3122,7 @@ class SellYourSaasUtils
 					$expirationdate = $tmparray['expirationdate'];
 
 					if ($expirationdate && $expirationdate < $now) {	// If contract expired (we already had a test into main select, this is a security)
-						$this->db->begin();
+						$this->db->begin('doSuspendInstances');
 
 						$somethingdoneoncontract++;
 
@@ -3574,9 +3574,9 @@ class SellYourSaasUtils
 						}
 
 						if (! $error) {
-							$this->db->commit();
+							$this->db->commit('doSuspendInstances');
 						} else {
-							$this->db->rollback();
+							$this->db->rollback('doSuspendInstances');
 						}
 					}
 				}
