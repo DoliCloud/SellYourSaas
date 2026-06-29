@@ -3487,11 +3487,19 @@ class SellYourSaasUtils
 						if ($wemustsuspendinstance) {
 							$conf->global->noapachereload = $noapachereload;	// Set a global variable that can be read later by trigger
 							$comment = "Closed by batch doSuspendInstances('".$mode.", ".$noapachereload.", ".$maxnbofinstances."') the ".dol_print_date($now, 'dayhourrfc').')';
+
 							$result = $object->closeAll($user, 0, $comment);			// This may execute trigger that make remote actions to suspend instance
+
+							// Add a delay because the closeAll may have triggered a suspend remote action and we want to be sure the apache reload is complete
+							sleep(1);
+
 							$conf->global->noapachereload = null;    // unset a global variable that can be read later by trigger
 							if ($result < 0) {
+								$contractprocessed[$object->id] = $object->ref;
+
 								$error++;
 								$errorforinstance++;
+
 								$this->error = $object->error.' ('.$object->ref.')';
 								if (is_array($object->errors) && count($object->errors)) {
 									if (is_array($this->errors)) {
@@ -3501,10 +3509,7 @@ class SellYourSaasUtils
 									}
 								}
 							} else {
-								// Add a delay because the closeAll may have triggered a suspend remote action and we want to be sure the apache reload is complete
-								sleep(1);
-
-								$contractprocessed[$object->id]=$object->ref;
+								$contractprocessed[$object->id] = $object->ref;
 
 								// Send an email to warn customer of suspension
 
@@ -3530,7 +3535,7 @@ class SellYourSaasUtils
 								// Send deployment email
 								include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 								include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-								$formmail=new FormMail($this->db);
+								$formmail = new FormMail($this->db);
 
 								// Define output language
 								$outputlangs = $langs;
@@ -3549,9 +3554,9 @@ class SellYourSaasUtils
 
 								dol_syslog("GETPOST('lang_id','aZ09')=".GETPOST('lang_id', 'aZ09')." object->thirdparty->default_lang=".(is_object($object->thirdparty) ? $object->thirdparty->default_lang : 'object->thirdparty not defined')." newlang=".$newlang." outputlangs->defaultlang=".$outputlangs->defaultlang);
 
-								$arraydefaultmessage=$formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, $labeltemplate);
+								$arraydefaultmessage = $formmail->getEMailTemplate($this->db, 'contract', $user, $outputlangs, 0, 1, $labeltemplate);
 
-								$substitutionarray=getCommonSubstitutionArray($outputlangs, 0, null, $object);
+								$substitutionarray = getCommonSubstitutionArray($outputlangs, 0, null, $object);
 								complete_substitutions_array($substitutionarray, $outputlangs, $object);
 
 								$subject = make_substitutions($arraydefaultmessage->topic, $substitutionarray, $outputlangs);
