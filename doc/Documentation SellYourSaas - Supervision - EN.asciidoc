@@ -13,10 +13,10 @@ This document describes the technical and functional implementation of the super
 
 == Introduction ==
 
-This document explains how to install the optionnal supervision platform of Sell-Your-Saas.
+This document explains how to install the optional supervision platform of Sell-Your-Saas.
 
 
-== Installation of the machine and OS
+== Installation of the machine and OS of the supervision platform
 
 === Choice of the machine and OS and create it ===
 
@@ -38,7 +38,7 @@ mkdir /home/admin/wwwroot; chown admin:admin /home/admin/wwwroot
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
- 
+
 
 Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to log in.
 
@@ -132,7 +132,7 @@ To test a ssh config, you can run
 sshd -T -C user=mylogin -C host=clienthost -C addr=clientaddr
 ---------------
 
-Then reload ssh 
+Then reload ssh
 
 [source, conf]
 ---------------
@@ -199,7 +199,7 @@ passwd root
 passwd admin
 ---------------
 
-Run *ssh-keygen* for all these acounts : *root*, *admin* and *myunixlogin*
+Run *ssh-keygen* for all these accounts : *root*, *admin* and *myunixlogin*
 
 
 === Deletion of information files at login
@@ -208,7 +208,7 @@ In order not to give information to users doing SSH, on the server:
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove
 rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
@@ -232,7 +232,7 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
- 
+
 Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
 
 [source, conf]
@@ -248,7 +248,7 @@ network:
 			gateway6: "1234:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
- 
+
 [source, bash]
 ---------------
 netplan try
@@ -280,149 +280,6 @@ mkdir /mnt/diskhome/backup; chown admin /mnt/diskhome/backup;
 ln -fs /mnt/diskhome/backup /mnt/diskbackup/backup
 ---------------
 
-
-=== Getting files of Dolibarr and SellYourSaas application
-
-* Under the *root* login, install git tool:
-
-[source,bash]
----------------
-apt install git
----------------
-
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v16 or +) to be placed in */home/admin/wwwroot/dolibarr*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr --branch x.y
-chown -R admin:admin /home/admin/wwwroot/dolibarr
----------------
-
-* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas 
----------------
-
-
-=== Creation of sellyoursaas.conf with credentials
-
-* Create a file */etc/sellyoursaas.conf* on the *Web* server
-
-[source,bash]
----------------
-vi /etc/sellyoursaas.conf
-chown root:admin /etc/sellyoursaas.conf
-chmod g-wx /etc/sellyoursaas.conf
-chmod o-rwx /etc/sellyoursaas.conf
----------------
-
-With the following content:
-
-[source,conf]
----------------
-# File /etc/sellyoursaas.conf
-
-# domain du service
-domain=mysaasdomainname.com
-
-# Set to 1 if this server is the master server, 
-# or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
-masterserver=0
-# Set to 1 if this server host instances for the pool (deployment server), 
-# or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
-instanceserver=0
-# Set to 1 if this server hosts a dns for the pool (deployment server)
-dnsserver=0
-# Set to 1 if this server hosts a web portal
-webserver=1
-
-# email from
-emailfrom=noreply@mysaasdomainname.com
-# email supervision
-emailsupervision=supervision@mysaasdomainname.com
-
-# Set location of the web database
-databasehost=ipOfMasterServer or localhost if on master server
-# Set port of the web database (default is 3306)
-databaseport=3306
-# Set database name of the web server
-database=databaseNameOnMasterServer
-# Set list of more database if there is
-#databasemore=database2,database3...
-# Set a credential for an access to the master database (each server can have a different account to access the master database)
-databaseuser=sellyoursaas
-databasepass=xxxxx
-
-# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
-usecompressformatforarchive=zstd
-
-# Set this to directory where dolibarr repository is installed
-dolibarrdir=/home/admin/wwwroot/dolibarr
-# Set directory where instances are stored (default is /home/jail/home)
-#targetdir=/home/jail/home
-
-# Set directory where backup are stored
-backupdir=/mnt/diskbackup/backup
-
-# Set option to exclude some tables for some instances in backup
-#backupignoretables=myinstance.withX.mysellyoursaasdomain.com:table1+table2,all:table3+table4,...
-# Set option to use --compression-algorithms=zstd on mysqldump command (required with mysql 8.0.18+)
-#backupcompressionalgorithms=zstd
-# Can set the frequency of rsync
-#backuprsyncdayfrequency=1
-# Can set the frequency of sql dump
-#backupdumpdayfrequency=1
-
-remotebackupserver=ip.of.remote.backup.ssh.server
-remotebackupuser=admin
-remotebackupdir=/mnt/diskbackup
-
-# Option to use different path for dataroot
-#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
-#newdoldataroot=/new/path/of/documents
-# Options to change the directory of vhostfile templates
-#templatesdir=/path/of/vhostfile/templates
-
-# Options to change the SSL certificates names in Apache virtualhost
-#websslcertificatecrt=with.sellyoursaas.com.crt
-#websslcertificatekey=with.sellyoursaas.com.key
-#websslcertificateintermediate=with.sellyoursaas.com-intermediate.crt
-
-# Options for Jailkit
-#chrootdir=/home/jail/chroot
-#privatejailtemplatename=privatejail
-#commonjailtemplatename=commonjail
----------------
-
-Put *masterserver*, *dnsserver* and *instanceserver* to 0
-
-
-* Create also an empty directory:
-
-[source,conf]
----------------
-mkdir -p /etc/sellyoursaas.d
----------------
-
-
-* Optional: If you want to restrict access to some IP (to the web admin on *Master server* or to ssh or mysql to the *Deployment servers*), you can also
-create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only) 
-
-[source,conf]
----------------
-# File /etc/sellyoursaas.d/xxx-allowed-ip-zzz.conf
-
-# User 1
-Require ip ip.user.1
-# User 2
-Require ip ip.user.2
----------------
-
-Once such a file is created/removed or modified, you must run the *scripts/firewallsellyoursaasufw.sh* to have the change taken into account on the firewall.
 
 <<<<
 
@@ -490,9 +347,9 @@ ufw enable
 * Installation of fail2ban and activation of the following fail2ban rules:
   *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
-  
+
 * As well as the specific rules for sellyoursaas:
-  
+
   *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
 
 
@@ -725,7 +582,7 @@ exclude_suffix := tmp old bak
 [source,bash]
 ---------------
 # used by cron job (afick_cron)
-# define the mail adress to send cron job result
+# define the mail address to send cron job result
 @@define MAILTO supervision@mysaasdomainname.com
 # truncate the result sended by mail to the number of lines (avoid too long mails)
 @@define LINES 1000
@@ -738,7 +595,7 @@ exclude_suffix := tmp old bak
 # = 1 to allow cron job, = 0 to suppress cron job
 @@define BATCH 1
 # if set to 0, keep all archives, else define the number of days to keep
-# with the syntaxe nS , n for a number, S for the scale
+# with the syntax nS , n for a number, S for the scale
 # (d for day, w for week, m for month, y for year)
 # ex : for 5 months : 5m
 @@define ARCHIVE_RETENTION 6m
@@ -818,7 +675,7 @@ Modifier son enregistrement de domaine, pour ajouter SPF et DKIM et DMARC
 
  mysaasdomainname.com.		600	IN	TXT	"v=spf1 a mx ip4:91.121.9.47 ip4:147.135.135.4 ip4:147.135.135.36 ip4:147.135.135.37 include:spf.sendinblue.com include:_spf.google.com ~all"
 
-* DKIM permet de signer certaines informations du mail.
+* DKIM permet de signer certaines information du mail.
 
  dkim._domainkey.mysaasdomainname.com. 1000 IN	TXT	"v=DKIM1; k=rsa; p=MIGfMA0GCSrGSIb3DQEBAQUAA4GNADCBiQKBgQC6xSkwtlnAkegCARg5US7KHdoTlUS2MsXFPMy7ykwG88XK8vKEYPGuN56/6+YoxGLxtN2CZy/MVagQUOYcA3VAjBEPP5vJPrUnDsVY0OC8U+dK383g+DDW0tcAqrMXJI7Y/jXUJXh/ydI5aloiqT59JGo9Ane1C3XmoJz3bkVsKwIDAQAB"
 
@@ -921,7 +778,7 @@ smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, che
 !!! IMPORTANT
 
 Pensez à modifier dans */etc/postfix/main.cf*, les entrées :
- 
+
 [source,bash]
 ---------------
 inet_interfaces = ip_publique_associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
@@ -929,7 +786,7 @@ inet_protocols = ipv4
 ---------------
 
 
-=== Configuration de Postfix pour authentification externe SMTP sécurisée (optionnel)
+=== Configuration de Postfix pour authentication externe SMTP sécurisée (optionnel)
 
 En cas de besoin d'utiliser postfix depuis un accès externe (et donc authentifié)
 
@@ -939,7 +796,7 @@ sudo apt install sasl2-bin
 vi /etc/default/saslauthd  pour mettre START=yes
 ---------------
 
-Vérifier que le user postfix se trouve dans le groupe *sasl*. Si non, l'ajouter par:
+Check that postfix user is inside group *sasl*. If not, add it with:
 
 [source,bash]
 ---------------
@@ -963,7 +820,7 @@ mech_list: plain login
 ---------------
 
 Pour du SMTPS, créer un certificat:
- 
+
 [source,bash]
 ---------------
 cd /etc/postfix
@@ -1066,7 +923,7 @@ logrotate -f logrotate_sellyoursaas_log
 
 Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
 
-* Editer le fichier */etc/systemd/journald.conf* pour définir une taille max aux journaux systemd
+* Edit file */etc/systemd/journald.conf* to define the ma size of journal systemd
 
 [source,conf]
 ---------------
@@ -1129,91 +986,6 @@ Note: Les rapports sont dans */var/crash*
 
 
 
-[[installation_des_taches_cron]]
-=== Installation of Cron tasks
-
-You must have inside the cron of user *root*
-
-[source,bash]
----------------
-# m h  dom mon dow   command
-# cron master root
-10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
-# cron master and deployment root
-40 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1
-00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.sh >/home/admin/logs/perms.log
-#40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
----------------
-
-You must have inside the cron of user *admin*:
-
-[source,bash]
----------------
-# m h  dom mon dow   command
-# cron master admin
-*/10 * * * * /home/admin/wwwroot/dolibarr/scripts/cron/cron_run_jobs.php securitykeydefinedinscheduledjobsetup firstadmin >> /home/admin/wwwroot/dolibarr_documents/cron_run_jobs.php.log
-# cron master and deployment root
-#7 7 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/git_update_sellyoursaas.sh /home/admin/wwwroot >> /home/admin/logs/git_update_sellyoursaas.log 2>&1
----------------
-
-Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide. You will also set it into the setup of module *Scheduled jobs* on the Dolibarr later.
-
-==== Check that launching of cron is ok
-
-Reprendre du fichier */etc/crontab*, les commandes pour tester le lancement de crontab journalière, hebdo et mensuelles et tester en lançant en manuel. Par exemple par:
-
-[source,bash]
----------------
-cd / && run-parts --report /etc/cron.daily
----------------
-
-
-
-== Installation of Dolibarr
-
-* Under the *admin* account, retrieve the sources of *Dolibarr* (v13 or +) to be placed in */home/admin/wwwroot/dolibarr*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/Dolibarr/dolibarr dolibarr
-chown -R admin:admin /home/admin/wwwroot/dolibarr
----------------
-
-* Install an Apache virtual host, for example: https://adminweb.mysaasdomainname.com (therefore pointing to */home/admin/wwwroot/dolibarr/htdocs*).
-Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than
-*/home/admin/wwwroot/dolibarr/documents*
-
-* If you will add feature to send email from web portal using a SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
-
-* Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php*
-
-
-
-== Installation of plugin SellYourSaas
-
-* Under login *admin*, install the sources of *SellYourSaas* : Get the sources of the project to place them into */home/admin/wwwroot/dolibarr_sellyoursaas*
-
-[source,bash]
----------------
-cd /home/admin/wwwroot
-git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
----------------
-
-* Create a symbolic link called *sellyoursaas* into */home/admin/wwwroot/dolibarr/htdocs/custom* to point to */home/admin/wwwroot/dolibarr_sellyoursaas* :
-
-[source,bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
----------------
-
-* Create a symbolic link called *source* into directory *myaccount* that point to */home/admin/wwwroot/dolibarr/htdocs* :
-
-[source,bash]
----------------
-ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/myaccount/source
----------------
-
 
 
 <<<<
@@ -1231,14 +1003,14 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/c
 DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 ---------------
 
-* Copy the datadog config file to supervize *mysql/mariadb*. 
+* Copy the datadog config file to supervize *mysql/mariadb*.
 
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
 ---------------
 
-Edit the file to enter the datadog password for mariadb. 
+Edit the file to enter the datadog password for mariadb.
 
 * Copy the datadog config file to supervize *apache*.
 
@@ -1300,7 +1072,7 @@ instances:
 cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
 ---------------
 
-Editer le pour suivre les process suivants:
+Edit it to follow the process
 
 [source,bash]
 ---------------
@@ -1321,7 +1093,7 @@ instances:
     search_string: ['/usr/sbin/cron']
     exact_match: False
     thresholds:
-      critical: [1, 5000]      
+      critical: [1, 5000]
 ---------------
 
 
@@ -1334,7 +1106,7 @@ sudo service datadog-agent start
 ---------------
 
 
-== Installation composants Backups/Synchro
+== Installation composant Backups/Synchro
 
 === Synchro des filesystems /home
 
@@ -1380,7 +1152,7 @@ From OVH's "Snapshots" interface, you can restore a VM image on a server or a di
 
 See chapter in Master and Deployment Servers doc.
 
-Note une fois une restauration faite, si elle a été faite sur un autre serveur, il faut:
+Note that once a restoration has been done, if done from another server, you must:
 
 * Log into ssh: Change apache virtual host to set new host name
 * If VM is a backup VM, disabled also root cron tasks
@@ -1398,7 +1170,7 @@ Et si le serveur avait des services complémentaires:
 
 - The configuration of the server and the system database is done locally via the cron task of *root* :
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* 
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm*
 
 See <<installing_cron_tasks>>. This will write backup files into */home/admin/backup/conf* and */home/admin/backup/mysql*
 
@@ -1412,7 +1184,7 @@ The script will read the file */etc/sellyoursaas.conf* to find the list of the n
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1*
 
-See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter). 
+See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter).
 
 The script will read the file */etc/sellyoursaas.conf* to find the list of the name of backup servers where to push the backup to.
 
@@ -1439,7 +1211,7 @@ See the chapter available into the *Documentation SellYourSaas - Master and Depl
 
 == Error when launching dkim daemon: opendkim.service: Can't open PID file /var/run/opendkim/opendkim.pid
 
-Open the file */etc/opendkim.conf* and add the line 
+Open the file */etc/opendkim.conf* and add the line
 
 PidFile                 /run/opendkim/opendkim.pid
 
@@ -1451,4 +1223,3 @@ The PIDFile is defined into the */lib/systemd/system/opendkim.service* but seems
 We can see this error into */var/log/syslog.log*.
 
 Check the configuration file */etc/default/opendkim* and verify that the socket is SOCKET="inet:12345@localhost"
-
