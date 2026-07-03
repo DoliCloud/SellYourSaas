@@ -725,6 +725,13 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 			print "</table>";
 			print "<br>";
 			print '<div class="center divButAction"><a style="padding-right: 50px; vertical-align:middle" href="'.$_SERVER["PHP_SELF"].'?mode=ticket">'.$langs->trans('ViewMyTicketList').'</a></div>';
+
+
+			if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_SHOW_STATUS')) {
+				print '<span class="small">';
+				print $langs->trans("NoteYouShouldReceiveTheAnswerByEmail");
+				print '</span>';
+			}
 		} else {
 			print '<span class="opacitymedium">'.$langs->trans("NoTickets").'</span>';
 		}
