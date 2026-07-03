@@ -571,7 +571,7 @@ if ($sellyoursaassupporturl) {
 		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailFrom").'</span> <input type="text" class="minwidth300" id="from" name="from" value="'.(GETPOST('from', 'none') ? GETPOST('from', 'none') : $mythirdpartyaccount->email).'" placeholder="email@domain.com"><br><br>';
 
 		// Topic
-		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject"'.(GETPOST('addfile') ? '' : ' autofocus').' value="'.$subject.'"><br><br>';
+		print '<span class="supportemailfield inline-block bold">'.$langs->trans("MailTopic").'</span> <input type="text" class="minwidth500" id="formsubject" name="subject"'.(GETPOST('addfile') ? '' : ' autofocus').' value="'.$subject.'" required><br><br>';
 
 		print '<input type="file" class="flat" id="addedfile" name="addedfile[]" multiple value="'.$langs->trans("Upload").'" />';
 		print ' ';
@@ -587,7 +587,7 @@ if ($sellyoursaassupporturl) {
 		print $doleditor->Create();
 		print '<br>';
 		*/
-		print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent">'.GETPOST('content', 'none').'</textarea><br><br>';
+		print '<textarea rows="6" placeholder="'.$langs->trans("YourText").'" style="border: 1px solid #888" name="content" class="centpercent" required>'.GETPOST('content', 'none').'</textarea><br><br>';
 
 		// Button to send ticket/email
 		print '<center><input type="submit" name="submit" value="'.$langs->trans("SendMail").'" class="btn green-haze btn-circle marginrightonly reposition"';
