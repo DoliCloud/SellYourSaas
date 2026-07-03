@@ -728,10 +728,10 @@ if (isModEnabled("ticket") && getDolGlobalInt("SELLYOURSAAS_SUPPORT_TICKET_CREAT
 
 
 			if (!getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_SHOW_STATUS')) {
-				print '<br><br>';
+				print '<br><br><center>';
 				print '<span class="small opacitymedium">';
 				print $langs->trans("NoteYouShouldReceiveTheAnswerByEmail");
-				print '</span>';
+				print '</span></center>';
 			}
 		} else {
 			print '<span class="opacitymedium">'.$langs->trans("NoTickets").'</span>';

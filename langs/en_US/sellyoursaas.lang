@@ -988,4 +988,4 @@ SEPADoesNotUnsupendInstantly=Please note that the SEPA payment method does not a
 SorryOptionsNotAvailableDuringTestPeriod=Sorry, this feature is not available during the test period. Please confirm your instance by entering your payment mode from menu <b>%s</b> to enable installation of options
 SectionSoonAvailable=This section is being updated. It will be available soon.
 HavingAtLeastOneInstance=Having at least one instance with
-NoteYouShouldReceiveTheAnswerByEmail=Note: You should receive answer of the ticket by emails (check your spam if not received)
+NoteYouShouldReceiveTheAnswerByEmail=Note: You should receive answers of the tickets by email (check your spam if not received)
