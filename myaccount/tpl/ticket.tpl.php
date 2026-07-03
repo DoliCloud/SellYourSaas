@@ -115,7 +115,7 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 	print '</span>';
 	print '</td></tr>';
 
-	print '<tr><td></td><td></td></tr>';
+	print '<tr><td>&nbsp;</td><td></td></tr>';
 
 	// Statut
 	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_SHOW_STATUS')) {
