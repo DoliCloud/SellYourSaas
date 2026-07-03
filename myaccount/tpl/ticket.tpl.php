@@ -102,7 +102,7 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 	}
 	print '<table class="noborder centpercent">';
 	// Ref - Tracking ID
-	print '<tr><td class="titlefield">'.$langs->trans("Ref").' / '.$langs->trans("TicketTrackId").'</td><td>';
+	print '<tr><td class="titlefield">'.$langs->trans("Ref").' / '.$langs->trans("TicketTrackId").'</td><td class="font-green-sharp">';
 	print img_picto('', 'ticket', 'class="pictofixedwidth"');
 	print dolPrintHTML($object->dao->ref);
 	print '<span class="opacitylow"> &nbsp; / &nbsp; '.dolPrintHTML($object->dao->track_id).'</span>';
@@ -114,6 +114,8 @@ if (in_array($action, array("view", "ticketaddmessage", "closeticket")) && !empt
 	print dol_escape_htmltag($object->dao->subject);
 	print '</span>';
 	print '</td></tr>';
+
+	print '<tr><td></td><td></td></tr>';
 
 	// Statut
 	if (getDolGlobalString('SELLYOURSAAS_SUPPORT_TICKET_SHOW_STATUS')) {
