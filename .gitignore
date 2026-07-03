@@ -4,3 +4,4 @@
 .idea
 .vscode
 /.asciidoctorconfig.adoc
+/ansible-py38/
