@@ -29,6 +29,13 @@
 if (!defined('NOSESSION')) {
 	define('NOSESSION', '1');
 }
+if (!defined('NOREQUIREDB')) {
+	define('NOREQUIREDB', '1');
+}				// Do not create database handler $db
+if (!defined('NOREQUIREVIRTUALURL')) {
+	define('NOREQUIREVIRTUALURL', '1');
+}
+
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
@@ -63,9 +70,6 @@ if ($fp) {
 	$array = explode("\n", fread($fp, filesize('/etc/sellyoursaas.conf')));
 	foreach ($array as $val) {
 		$tmpline=explode("=", $val);
-		if ($tmpline[0] == 'masterserver') {
-			$masterserver = $tmpline[1];
-		}
 		if ($tmpline[0] == 'instanceserver') {
 			$instanceserver = $tmpline[1];
 		}
@@ -101,8 +105,8 @@ if (empty($dolibarrdir)) {
 	print "Failed to find 'dolibarrdir' entry into /etc/sellyoursaas.conf file\n";
 	exit(-1);
 }
-if (empty($masterserver)) {
-	print "Failed to find 'masterserver' entry into /etc/sellyoursaas.conf file. This script must be run on master server.\n";
+if (empty($instanceserver)) {
+	print "Failed to find 'instanceserver' entry into /etc/sellyoursaas.conf file. This script must be run on deployment server.\n";
 	print "\n";
 	exit(-1);
 }
@@ -144,25 +148,41 @@ if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 	$res=@include $dolibarrdir."/htdocs/master.inc.php";
 }
 
-
-$quiet = 0;
-$test = 0;
-
-$i = 0;
-while ($i < $argc) {
-	if (!empty($argv[$i])) {
-		if ($argv[$i] == '-q') {
-			$quiet = 1;
-			unset($argv[$i]);
-		} elseif ($argv[$i] == '-t') {
-			$test = 1;
-			unset($argv[$i]);
-		}
-	}
-	$i++;
-}
-$argv = array_values($argv);	// We reindex parameters
-
 $mode=isset($argv[1]) ? $argv[1] : '';
+$productref=isset($argv[2]) ? $argv[2] : '';
+
+dol_include_once("sellyoursaas/core/lib/sellyoursaas.lib.php");
+dol_include_once("sellyoursaas/class/sellyoursaascontract.class.php");
+dol_include_once("sellyoursaas/class/sellyoursaasutils.class.php");
+dol_include_once('sellyoursaas/class/packages.class.php');
+include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+
 
 print "***** ".$script_file." ".$version." *****\n";
+
+if (0 != posix_getuid()) {
+	echo "Script must be ran with root user. Try to launch it using sudo.\n";
+	exit(-1);
+}
+
+if (empty($productref)) {
+	print "Deploy a specific module for all deployed instances.\n";
+	print "Script must be ran from each deployment server with login root.\n";
+	print "\n";
+	print "Usage:   ".$script_file." test|confirm productref\n";
+	print "Example: ".$script_file." test TESTMODULE\n";
+	print "Return code: 0 if success, <> 0 if error\n";
+	exit(-1);
+}
+
+$db = getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
+
+// Try to find module to deploy
+$product = new Product($db);
+$res = $product->fetch('', $productref);
+if ($res <= 0) {
+	print "Bad value for productid with action ".$mode.".\n";
+	exit(-1);
+}
+
+// TODO: Loop on all the instances of the deplyment server to deploy module
