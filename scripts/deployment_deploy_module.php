@@ -48,7 +48,9 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 }
 
 $version='1.0';
-$error=0;
+$nbdeployok = 0;
+$nbdeployko = 0;
+$nbdeploynothingdone = 0;
 
 // Include Dolibarr environment
 @set_time_limit(0);							// No timeout for this script
@@ -64,6 +66,8 @@ $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
 $usecompressformatforarchive='gzip';
+$subdomain='';
+
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -93,6 +97,9 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'subdomain') {
+			$subdomain = $tmpline[1];
 		}
 	}
 } else {
@@ -150,6 +157,7 @@ if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 
 $mode=isset($argv[1]) ? $argv[1] : '';
 $productref=isset($argv[2]) ? $argv[2] : '';
+$instancefilter = isset($argv[3]) ? $argv[3] : '';
 
 dol_include_once("sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("sellyoursaas/class/sellyoursaascontract.class.php");
@@ -175,14 +183,139 @@ if (empty($productref)) {
 	exit(-1);
 }
 
-$db = getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
+$dbmaster = getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
+$db = $dbmaster;
 
 // Try to find module to deploy
-$product = new Product($db);
+$product = new Product($dbmaster);
 $res = $product->fetch('', $productref);
 if ($res <= 0) {
 	print "Bad value for productid with action ".$mode.".\n";
 	exit(-1);
 }
 
-// TODO: Loop on all the instances of the deplyment server to deploy module
+$instancefiltercomplete = $instancefilter; //TODO: escape filter
+if (empty($instancefilter)) {
+	$instancefiltercomplete = "*";
+}
+$instancefiltercomplete .= ".".$subdomain;
+
+include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+$object=new Contrat($dbmaster);
+
+$sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
+$sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
+$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
+$sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
+$sql.= " AND c.ref_customer LIKE '".str_replace('*', '%', $instancefiltercomplete)."'";	// $instancefiltercomplete can contains % chars.
+$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
+$sql.= " AND ce.deployment_status IS NOT NULL";
+$sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
+$sql.= " ORDER BY instance ASC";
+
+dol_syslog($script_file, LOG_DEBUG);
+
+$resql=$dbmaster->query($sql);
+if ($resql) {
+	$num = $dbmaster->num_rows($resql);
+	$i = 0;
+	if ($num) {
+		// Loop on each deployed instance/contract
+		while ($i < $num) {
+			$dbmaster->begin();
+			$error=0;
+			$obj = $dbmaster->fetch_object($resql);
+			if ($obj) {
+				$instance = $obj->instance;
+				print("Deploying module for instance ".$instance."\n");
+				$contractid = $obj->id;
+
+				unset($object->linkedObjects);
+				unset($object->linkedObjectsIds);
+				$result = $object->fetch($contractid);
+				if ($result <= 0) {
+					$i++;
+					$nbdeployko++;
+					dol_print_error($dbmaster, $object->error, $object->errors);
+					continue;
+				}
+
+				$contractlines = $object->getLinesArray();
+				$productlinefound = false;
+				foreach ($contractlines as $tmpline) {
+					if ($tmpline->fk_product == $product->id) {
+						$productlinefound =true;
+					}
+				}
+				if ($productlinefound) {
+					$i++;
+					$nbdeploynothingdone++;
+					print("Warning: Module ".$product->ref." already deployed for instance ".$instance."\n");
+					continue;
+				}
+
+				// Create service line(s) in contract
+				$expirationarray = sellyoursaasGetExpirationDate($object, 0);
+				$duration_value = $expirationarray['duration_value'];
+				$duration_unit = $expirationarray['duration_unit'];
+				var_dump($expirationarray);
+				$date_start = dol_now();
+				$date_end = dol_time_plus_duree($date_start, $duration_value, $duration_unit) - 1;
+				//TODO: fix php warning tiggered
+				$idlinecontract = $object->addline($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, $date_start, $date_end);
+				if ($idlinecontract <= 0) {
+					dol_print_error($dbmaster, $object->error, $object->errors);
+					$nbdeployko++;
+					$error++;
+				}
+
+				// Activate service line(s) in contract
+				if (!$error) {
+					$object->fetch($contractid); //TODO: fix no enddate on activate
+					$result = $object->active_line($user, $idlinecontract, $date_start, $date_end, 'Activation after option deployment');
+					if (!$result) {
+						dol_print_error($dbmaster, $object->error, $object->errors);
+						$nbdeployko++;
+						$error ++;
+					}
+				}
+
+				// create service line in recurring invoice
+				if (!$error) {
+					$object->fetchObjectLinked();
+					if (!empty($object->linkedObjects["facturerec"])) {
+						$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
+
+						if (count($arrayfacturerec) != 1) {
+							print("Error: Too many recurring invoices were found for instance ".$instance."\n");
+							$nbdeployko++;
+							$error ++;
+						} else {
+							$facturerec = $arrayfacturerec[0];
+							$result = $facturerec->addLine($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+							if (!$result) {
+								dol_print_error($dbmaster, $facturerec->error, $facturerec->errors);
+								$nbdeployko++;
+								$error ++;
+							}
+						}
+					}
+				}
+
+				//TODO: Deploy module archive
+			}
+			if (!$error) {
+				$dbmaster->commit();
+			} else {
+				$dbmaster->rollback();
+			}
+			$i++;
+		}
+	}
+} else {
+	$error++;
+	$nboferrors++;
+	dol_print_error($dbmaster);
+}
+
+print("Deployment ended with ".$nbdeployok." contract without error, ".$nbdeployko." contract with error and ".$nbdeploynothingdone." contract where nothing was done\n");
