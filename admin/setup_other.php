@@ -370,7 +370,7 @@ print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_EXTCSS").'</td>';
 print '<td>';
 print '<input class="maxwidth200" type="text" name="SELLYOURSAAS_EXTCSS" value="'.getDolGlobalString('SELLYOURSAAS_EXTCSS', '').'">';
 print '</td>';
-print '<td><span class="opacitymedium small">dist/css/myaccount.css, https://adomain.com/acssfile.css</span></td>';
+print '<td><span class="opacitymedium small">dist/css/myaccount.css, dist/css/alt-myaccount-example.css, https://adomain.com/acssfile.css</span></td>';
 print '</tr>';
 
 // SELLYOURSAAS_CSS
