@@ -392,11 +392,15 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 			// CKEditor
 			if (empty($disableforlogin) && (isModEnabled('fckeditor') && (!getDolGlobalString('FCKEDITOR_EDITORNAME') || getDolGlobalString('FCKEDITOR_EDITORNAME') == 'ckeditor') && !defined('DISABLE_CKEDITOR')) || defined('FORCE_CKEDITOR')) {
 				print '<!-- Includes JS for CKEditor -->'."\n";
-				$pathckeditor = DOL_URL_ROOT . '/includes/ckeditor/ckeditor/';
+				if ((float) DOL_VERSION < 24.0) {
+					$pathckeditor = DOL_URL_ROOT . '/includes/ckeditor/ckeditor/';
+				} else {
+					$pathckeditor = DOL_URL_ROOT . '/public/includes/ckeditor/ckeditor/';
+				}
 				$jsckeditor='ckeditor.js';
 				if (constant('JS_CKEDITOR')) {
 					// To use external ckeditor 4 js lib
-					$pathckeditor=constant('JS_CKEDITOR');
+					$pathckeditor = constant('JS_CKEDITOR');
 				}
 				print '<script>';
 				print '/* enable ckeditor by mainmyaccount.inc.php */';
