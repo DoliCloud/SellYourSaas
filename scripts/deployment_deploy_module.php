@@ -184,7 +184,12 @@ if (empty($productref)) {
 }
 
 $dbmaster = getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasepass, $database, $databaseport);
+if ($dbmaster) {
+	$conf->setValues($dbmaster);
+}
 $db = $dbmaster;
+$mysoc = new Societe($db);
+$mysoc->setMysoc($conf);
 
 // Try to find module to deploy
 $product = new Product($dbmaster);
@@ -242,10 +247,12 @@ if ($resql) {
 
 				$contractlines = $object->getLinesArray();
 				$productlinefound = false;
+				$date_end = dol_now();
 				foreach ($contractlines as $tmpline) {
 					if ($tmpline->fk_product == $product->id) {
 						$productlinefound =true;
 					}
+					$date_end = $tmpline->date_end;
 				}
 				if ($productlinefound) {
 					$i++;
@@ -258,10 +265,10 @@ if ($resql) {
 				$expirationarray = sellyoursaasGetExpirationDate($object, 0);
 				$duration_value = $expirationarray['duration_value'];
 				$duration_unit = $expirationarray['duration_unit'];
-				var_dump($expirationarray);
 				$date_start = dol_now();
-				$date_end = dol_time_plus_duree($date_start, $duration_value, $duration_unit) - 1;
-				//TODO: fix php warning tiggered
+				if ($date_end < $date_start) {
+					$date_end = $date_start;
+				}
 				$idlinecontract = $object->addline($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, $date_start, $date_end);
 				if ($idlinecontract <= 0) {
 					dol_print_error($dbmaster, $object->error, $object->errors);
@@ -271,8 +278,8 @@ if ($resql) {
 
 				// Activate service line(s) in contract
 				if (!$error) {
-					$object->fetch($contractid); //TODO: fix no enddate on activate
-					$result = $object->active_line($user, $idlinecontract, $date_start, $date_end, 'Activation after option deployment');
+					$object->fetch($contractid);
+					$result = $object->active_line($user, $idlinecontract, $date_start, '', 'Activation after option deployment');
 					if (!$result) {
 						dol_print_error($dbmaster, $object->error, $object->errors);
 						$nbdeployko++;
