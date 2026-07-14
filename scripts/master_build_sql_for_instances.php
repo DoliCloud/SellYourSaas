@@ -326,6 +326,7 @@ while ($i < $num_rows) {
 		print '-- Process instance '.$dbmaster->escape($object->instance).', ID '.$object->id.' --'."\n";
 		$newpassword = dolDecrypt($object->password_db);
 		print "ALTER USER ".$dbmaster->sanitize($object->username_db)." IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($newpassword)."';\n";
+		print "ALTER USER ".$dbmaster->sanitize($object->username_db)."@'localhost' IDENTIFIED WITH mysql_native_password BY '".$dbmaster->escape($newpassword)."';\n";
 	}
 
 	if ($mode == 'sellyoursaasrebuildredirect') {
@@ -354,6 +355,7 @@ while ($i < $num_rows) {
 }
 
 if ($num_rows > 0) {
+	print 'FLUSH PRIVILEGES;'."\n";
 	print '-- This script can be run on the deployment server with the command:'."\n";
 	print '-- sudo mysql -h '.$server.' < sqlfile.sql'."\n";
 } else {

@@ -3736,7 +3736,7 @@ cd / && run-parts --report /etc/cron.daily
 
 == Installation of Dolibarr framework
 
-We need to install the program files of Dolibarr ERP CRM as we use it for a lot of utiliy tools.
+We need to install the program files of Dolibarr ERP CRM as we use it for a lot of utility tools.
 
 On all servers (*Master and Deployment*):
 
@@ -4983,14 +4983,18 @@ sudo mv /var/lib/mysql /var/lib/mysql.bak
 Now we’re ready to turn our attention to configuration.
 
 Step 2 — Pointing to the New Data Location
-MySQL has several ways to override configuration values. By default, the datadir is set to /var/lib/mysql in the /etc/my.cnf file. Edit this file to reflect the new data directory:
+MySQL has several ways to override configuration values. By default, the datadir is set to */var/lib/mysql* in the */etc/mysql/my.cnf* file. Edit this file to reflect the new data directory:
 
-sudo vi /etc/my.cnf
 Find the line in the [mysqld] block that begins with datadir=, which is separated from the block heading with several comments. Change the path which follows to reflect the new location. In addition, since the socket was previously man mlocated in the data directory, we’ll need to update it to the new location:
 
 [source,bash]
 ---------------
-vi /etc/my.cnf
+sudo vi /etc/mysql/my.cnf
+---------------
+
+[source,bash]
+---------------
+vi /etc/mysql/my.cnf
 [mysqld]
 datadir=/mnt/volume-nyc1-01/mysql
 socket=/mnt/volume-nyc1-01/mysql/mysql.sock
@@ -5020,7 +5024,8 @@ Look at the value for the data directory again:
 [source,sql]
 ----------------
 select @@datadir;
-Output
+
+will return
 +----------------------------+
 | @@datadir                  |
 +----------------------------+
@@ -6086,6 +6091,7 @@ net_buffer_length=100000
 max_allowed_packet=100000000
 ---------------
 
+
 ==== Error mysql connect pb with caching_sha2_password
 
 Error can be: Client does not support authentication protocol requested by server; consider upgrading MySQL client
@@ -6098,11 +6104,11 @@ If this is the case, you must modify the encryption of user password with the *m
 ALTER USER dbu... IDENTIFIED WITH mysql_native_password BY 'userpassword';
 ---------------
 
-You can also run the script to generate a SQL file to update all passwords of the deployment server in one script.
+You can also run this script, on the master server, to generate a SQL file to update passwords protocol of allinstances of the deployment server in one script.
 
 [source,bash]
 ---------------
-sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_build_sql_for_instances.php withX.mysaasdomain.com userresetpass
+sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_build_sql_for_instances.php ip.of.deployment.server dbuserresetpass [withX.mysaasdomain.com]
 ---------------
 
 
