@@ -638,7 +638,7 @@ if ($moveinstancestringtoshow) {
 if ($ducstringtoshow) {
 	//$restorestringtoshow=$restorestringfrombackupshort.' nameoftargetinstance (test|confirm)';
 	print '<span class="fa fa-database secondary"></span> Command to list or update disk use <span class="opacitymedium">(to run by root on deployment server)</span><br>';
-	print '<textarea name="ducstring" id="ducstring" class="centpercent" spellcheck="false" rows="'.ROWS_3.'">';
+	print '<textarea name="ducstring" id="ducstring" class="centpercent" spellcheck="false" rows="'.ROWS_4.'">';
 	print $ducstringtoshow;
 	print '</textarea>';
 
