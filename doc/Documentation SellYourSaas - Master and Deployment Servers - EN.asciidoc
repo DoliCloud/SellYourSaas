@@ -6109,7 +6109,8 @@ max_allowed_packet=100000000
 ==== Error mysql connect pb with caching_sha2_password
 
 Error can be: Client does not support authentication protocol requested by server; consider upgrading MySQL client
-
+or: The server requested authentication method unknown to the client
+mysql --version
 The client may be the mariadb mysql client and the user on server may be encrypted with *caching_sha2_password* instead of *mysql_native_password*.
 If this is the case, you must modify the encryption of user password with the *mysql_native_password*. For this you can run
 
@@ -6122,7 +6123,7 @@ You can also run this script, on the master server, to generate a SQL file to up
 
 [source,bash]
 ---------------
-sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_build_sql_for_instances.php ip.of.deployment.server dbuserresetpass [withX.mysaasdomain.com]
+sudo /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/master_build_sql_for_instances.php ip.of.deployment.server dbuserresetpass [instance.withX.mysaasdomain.com]
 ---------------
 
 
