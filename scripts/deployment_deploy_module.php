@@ -164,6 +164,7 @@ dol_include_once("sellyoursaas/class/sellyoursaascontract.class.php");
 dol_include_once("sellyoursaas/class/sellyoursaasutils.class.php");
 dol_include_once('sellyoursaas/class/packages.class.php');
 include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
 
 
 print "***** ".$script_file." ".$version." *****\n";
@@ -192,12 +193,21 @@ $mysoc = new Societe($db);
 $mysoc->setMysoc($conf);
 
 // Try to find module to deploy
-$product = new Product($dbmaster);
+$product = new Product($db);
 $res = $product->fetch('', $productref);
 if ($res <= 0) {
 	print "Bad value for productid with action ".$mode.".\n";
 	exit(-1);
 }
+$packageid = $product->array_options["options_package"];
+$package = new Packages($db);
+$res = $package->fetch($packageid);
+if ($res <= 0) {
+	print "Product package not found with action ".$mode.".\n";
+	exit(-1);
+}
+
+$utils = new Utils($db);
 
 $instancefiltercomplete = $instancefilter; //TODO: escape filter
 if (empty($instancefilter)) {
@@ -206,7 +216,7 @@ if (empty($instancefilter)) {
 $instancefiltercomplete .= ".".$subdomain;
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-$object=new Contrat($dbmaster);
+$object=new Contrat($db);
 
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
@@ -220,16 +230,16 @@ $sql.= " ORDER BY instance ASC";
 
 dol_syslog($script_file, LOG_DEBUG);
 
-$resql=$dbmaster->query($sql);
+$resql=$db->query($sql);
 if ($resql) {
-	$num = $dbmaster->num_rows($resql);
+	$num = $db->num_rows($resql);
 	$i = 0;
 	if ($num) {
 		// Loop on each deployed instance/contract
 		while ($i < $num) {
-			$dbmaster->begin();
+			$db->begin();
 			$error=0;
-			$obj = $dbmaster->fetch_object($resql);
+			$obj = $db->fetch_object($resql);
 			if ($obj) {
 				$instance = $obj->instance;
 				print("Deploying module for instance ".$instance."\n");
@@ -241,7 +251,7 @@ if ($resql) {
 				if ($result <= 0) {
 					$i++;
 					$nbdeployko++;
-					dol_print_error($dbmaster, $object->error, $object->errors);
+					dol_print_error($db, $object->error, $object->errors);
 					continue;
 				}
 
@@ -262,17 +272,13 @@ if ($resql) {
 				}
 
 				// Create service line(s) in contract
-				$expirationarray = sellyoursaasGetExpirationDate($object, 0);
-				$duration_value = $expirationarray['duration_value'];
-				$duration_unit = $expirationarray['duration_unit'];
 				$date_start = dol_now();
 				if ($date_end < $date_start) {
 					$date_end = $date_start;
 				}
 				$idlinecontract = $object->addline($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, $date_start, $date_end);
 				if ($idlinecontract <= 0) {
-					dol_print_error($dbmaster, $object->error, $object->errors);
-					$nbdeployko++;
+					dol_print_error($db, $object->error, $object->errors);
 					$error++;
 				}
 
@@ -281,8 +287,7 @@ if ($resql) {
 					$object->fetch($contractid);
 					$result = $object->active_line($user, $idlinecontract, $date_start, '', 'Activation after option deployment');
 					if (!$result) {
-						dol_print_error($dbmaster, $object->error, $object->errors);
-						$nbdeployko++;
+						dol_print_error($db, $object->error, $object->errors);
 						$error ++;
 					}
 				}
@@ -295,26 +300,185 @@ if ($resql) {
 
 						if (count($arrayfacturerec) != 1) {
 							print("Error: Too many recurring invoices were found for instance ".$instance."\n");
-							$nbdeployko++;
 							$error ++;
 						} else {
 							$facturerec = $arrayfacturerec[0];
 							$result = $facturerec->addLine($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
 							if (!$result) {
-								dol_print_error($dbmaster, $facturerec->error, $facturerec->errors);
-								$nbdeployko++;
+								dol_print_error($db, $facturerec->error, $facturerec->errors);
 								$error ++;
 							}
 						}
 					}
 				}
 
-				//TODO: Deploy module archive
+				if (!$error) {
+					if (empty($object->thirdparty)) {
+						$object->fetch_thirdparty();
+					}
+					$tmppackage = $package;
+					$now = dol_now();
+					$orgname = $object->thirdparty->name;
+					$countryid = 0;
+					$countrycode = '';
+					$countrylabel = '';
+					$countryidcodelabel = '';
+					if ($object->thirdparty->country_id > 0 && $object->thirdparty->country_code && $object->thirdparty->country) {
+						$countryidcodelabel=$object->thirdparty->country_id.':'.$object->thirdparty->country_code.':'.$object->thirdparty->country;
+					}
+
+					$targetdir            = getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
+					$archivedir           = getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH');
+					/*if ($ispaidinstance) {
+						$archivedir = getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH');
+					}*/
+					
+					$type_db = $conf->db->type;
+					$hostname_db  = $object->array_options['options_hostname_db'];
+					$username_db  = $object->array_options['options_username_db'];
+					$password_db  = $object->array_options['options_password_db'];
+					$database_db  = $object->array_options['options_database_db'];
+					$port_db      = (!empty($object->array_options['options_port_db']) ? $object->array_options['options_port_db'] : 3306);
+					$prefix_db    = (!empty($object->array_options['options_prefix_db']) ? $object->array_options['options_prefix_db'] : 'llx_');
+					$hostname_os  = $object->array_options['options_hostname_os'];
+					$username_os  = $object->array_options['options_username_os'];
+					$password_os  = $object->array_options['options_password_os'];
+					$tmp = explode('.', $object->ref_customer, 2);
+					$instance = $tmp[0];
+
+					// Replace __INSTANCEDIR__, __INSTALLHOURS__, __INSTALLMINUTES__, __OSUSERNAME__, __APPUNIQUEKEY__, __APPDOMAIN__, ...
+					$substitarray=array(
+						'__INSTANCEDIR__'=>$targetdir.'/'.$username_os.'/'.$database_db,
+						'__INSTANCEDBPREFIX__'=>$prefix_db,
+						'__DOL_DATA_ROOT__'=> getDolGlobalString('SELLYOURSAAS_FORCE_DOL_DATA_ROOT', DOL_DATA_ROOT),
+						'__INSTALLHOURS__'=>dol_print_date($now, '%H'),
+						'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),
+						'__OSHOSTNAME__'=>$hostname_os,
+						'__OSUSERNAME__'=>$username_os,
+						'__OSPASSWORD__'=>$password_os,
+						'__DBHOSTNAME__'=>$hostname_db,
+						'__DBNAME__'=>$database_db,
+						'__DBPORT__'=>$port_db,
+						'__DBUSER__'=>$username_os,
+						'__DBPASSWORD__'=>$password_os,
+						'__PACKAGEREF__'=> $tmppackage->ref,
+						'__PACKAGENAME__'=> $tmppackage->label,
+						'__APPORGNAME__'=> $orgname,
+						'__APPCOUNTRYID__'=> $countryid,
+						'__APPCOUNTRYCODE__'=> $countrycode,
+						'__APPCOUNTRYLABEL__'=> $countrylabel,
+						'__APPCOUNTRYIDCODELABEL__'=> $countryidcodelabel,
+						'__ALLOWOVERRIDE__'=>$tmppackage->allowoverride,
+						'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT'),
+					);
+
+					$datafile1 = make_substitutions($tmppackage->datafile1, $substitarray);
+					$srcfile1 = make_substitutions($tmppackage->srcfile1, $substitarray);
+					$srcfile2 = make_substitutions($tmppackage->srcfile2, $substitarray);
+					$srcfile3 = make_substitutions($tmppackage->srcfile3, $substitarray);
+					$targetsrcfile1 = make_substitutions($tmppackage->targetsrcfile1, $substitarray);
+					$targetsrcfile2 = make_substitutions($tmppackage->targetsrcfile2, $substitarray);
+					$targetsrcfile3 = make_substitutions($tmppackage->targetsrcfile3, $substitarray);
+					$cliafterdeployoption = make_substitutions($tmppackage->cliafterdeployoption, $substitarray);
+
+					$deployarray = array();
+					$deployarray[] = array("src" => $srcfile1, "dest" => $targetsrcfile1);
+					$deployarray[] = array("src" => $srcfile2, "dest" => $targetsrcfile2);
+					$deployarray[] = array("src" => $srcfile3, "dest" => $targetsrcfile3);
+					foreach ($deployarray as $deploy) {
+						print "Deploy with src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
+						if (dol_is_dir($deploy["src"])) {
+							$res = dol_mkdir($deploy["dest"]);
+							if ($res < 0) {
+								$error++;
+								break;
+							}
+							$datesource = 0;
+							$datecache = 0;
+
+							// Check cache
+							if (dol_is_file($deploy["src"].".tar.zst")) {
+								$datesource = dol_filemtime($deploy["src"].".tar.zst");
+							}
+							if (dol_is_file("/tmp/cache".$deploy["src"].".tar.zst")) {
+								$datecache = dol_filemtime("/tmp/cache".$deploy["src"].".tar.zst");
+							} else {
+								if (dol_is_file("/tmp/cache".$deploy["src"].".tgz")) {
+									$datecache = dol_filemtime("/tmp/cache".$deploy["src"].".tgz");
+								}
+							}
+							$cacheage = ($now - $datecache) / 86400;
+
+							if ($datecache == 0 || $datesource > $datecache || $cacheage > 7) {
+								print "Renew of the archive\n";
+								$res = dol_mkdir("/tmp/cache".$deploy["src"]);
+								if ($res < 0) {
+									$error++;
+									break;
+								}
+								if (dol_is_file($deploy["src"].".tar.zst")) {
+									dol_copy($deploy["src"].".tar.zst", "/tmp/cache".$deploy["src"].".tar.zst");
+								}
+								if (dol_is_file($deploy["src"].".tgz")) {
+									dol_copy($deploy["src"].".tgz", "/tmp/cache".$deploy["src"].".tgz");
+								} else {
+									$cmd = "cd ".$deploy["src"]."/\n";
+									$cmd .= "tar c -I gzip --exclude-vcs --exclude-from=".$path."git_update_sources.exclude -f /tmp/cache".$deploy['src'].".tgz .\n";
+									$utils->executeCli($cmd, "");
+								}
+							}
+
+							if (dol_is_file($deploy["src"].".tar.zst")) {
+								$cmd = "tar -I zstd -xf /tmp/cache".$deploy["src"].".tar.zst --directory ".$deploy["dest"]."/";
+							}
+							if (dol_is_file($deploy["src"].".tgz")) {
+								$cmd = "tar -xzf /tmp/cache".$deploy["src"].".tgz --directory ".$deploy["dest"]."/";
+							} else {
+								$cmd = "cp -r ".$deploy["src"]."/. ".$deploy["dest"];
+							}
+							// Execute cmd to deploy module files
+							print $cmd."\n";
+							$result = $utils->executeCli($cmd, "");
+							if ($result["result"] != 0) {
+								$error++;
+								print $result["error"];
+							}
+
+							// Execute chown to change permissions
+							$cmd = "chown -R ".$username_os.":".$username_os." ".$deploy["dest"];
+							print $cmd."\n";
+							$result = $utils->executeCli($cmd, "");
+							if ($result["result"] != 0) {
+								$error++;
+								print $result["error"];
+							}
+
+							if ($mode != "confirm") {
+								dol_delete_dir_recursive($deploy["dest"]);
+							}
+						}
+					}
+
+					if ($mode == "confirm") {
+						$res = $utils->executeCli($cliafterdeployoption, "");
+						if ($result["result"] != 0) {
+							$error++;
+							print $result["error"];
+						}
+					}
+				}
 			}
 			if (!$error) {
-				$dbmaster->commit();
+				if ($mode != "confirm") {
+					$db->rollback();
+					$nbdeploynothingdone++;
+				} else {
+					$db->commit();
+					$nbdeployok++;
+				}
 			} else {
-				$dbmaster->rollback();
+				$db->rollback();
+				$nbdeployko++;
 			}
 			$i++;
 		}
@@ -322,7 +486,7 @@ if ($resql) {
 } else {
 	$error++;
 	$nboferrors++;
-	dol_print_error($dbmaster);
+	dol_print_error($db);
 }
 
 print("Deployment ended with ".$nbdeployok." contract without error, ".$nbdeployko." contract with error and ".$nbdeploynothingdone." contract where nothing was done\n");
