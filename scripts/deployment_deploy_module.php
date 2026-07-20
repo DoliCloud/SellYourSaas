@@ -329,9 +329,6 @@ if ($resql) {
 
 					$targetdir            = getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
 					$archivedir           = getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH');
-					/*if ($ispaidinstance) {
-						$archivedir = getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH');
-					}*/
 					
 					$type_db = $conf->db->type;
 					$hostname_db  = $object->array_options['options_hostname_db'];
@@ -380,14 +377,15 @@ if ($resql) {
 					$targetsrcfile2 = make_substitutions($tmppackage->targetsrcfile2, $substitarray);
 					$targetsrcfile3 = make_substitutions($tmppackage->targetsrcfile3, $substitarray);
 					$cliafterdeployoption = make_substitutions($tmppackage->cliafterdeployoption, $substitarray);
+					$cliafterdeployoption = str_replace("\r", '', $cliafterdeployoption);
 
 					$deployarray = array();
-					$deployarray[] = array("src" => $srcfile1, "dest" => $targetsrcfile1);
-					$deployarray[] = array("src" => $srcfile2, "dest" => $targetsrcfile2);
-					$deployarray[] = array("src" => $srcfile3, "dest" => $targetsrcfile3);
+					$deployarray[1] = array("src" => $srcfile1, "dest" => $targetsrcfile1);
+					$deployarray[2] = array("src" => $srcfile2, "dest" => $targetsrcfile2);
+					$deployarray[3] = array("src" => $srcfile3, "dest" => $targetsrcfile3);
 					foreach ($deployarray as $deploy) {
-						print "Deploy with src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
 						if (dol_is_dir($deploy["src"])) {
+							print "Deploy with src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
 							$res = dol_mkdir($deploy["dest"]);
 							if ($res < 0) {
 								$error++;
@@ -460,8 +458,8 @@ if ($resql) {
 					}
 
 					if ($mode == "confirm") {
-						$res = $utils->executeCli($cliafterdeployoption, "");
-						if ($result["result"] != 0) {
+						$res = $utils->executeCli($cliafterdeployoption, "", 0, null, 1);
+						if ($res["result"] != 0) {
 							$error++;
 							print $result["error"];
 						}
