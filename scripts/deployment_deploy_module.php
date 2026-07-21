@@ -178,8 +178,8 @@ if (empty($productref)) {
 	print "Deploy a specific module for all deployed instances.\n";
 	print "Script must be ran from each deployment server with login root.\n";
 	print "\n";
-	print "Usage:   ".$script_file." test|confirm productref\n";
-	print "Example: ".$script_file." test TESTMODULE\n";
+	print "Usage:   ".$script_file." test|confirm productref instancefilter\n";
+	print "Example: ".$script_file." test TESTMODULE aa*\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	exit(-1);
 }
