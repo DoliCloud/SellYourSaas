@@ -209,7 +209,7 @@ if ($res <= 0) {
 
 $utils = new Utils($db);
 
-$instancefiltercomplete = $instancefilter; //TODO: escape filter
+$instancefiltercomplete = $instancefilter;
 if (empty($instancefilter)) {
 	$instancefiltercomplete = "*";
 }
