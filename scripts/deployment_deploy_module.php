@@ -155,9 +155,10 @@ if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 	$res=@include $dolibarrdir."/htdocs/master.inc.php";
 }
 
-$mode=isset($argv[1]) ? $argv[1] : '';
+$mode=isset($argv[1]) ? $argv[1] : 'test';
 $productref=isset($argv[2]) ? $argv[2] : '';
 $instancefilter = isset($argv[3]) ? $argv[3] : '';
+$allowdeployforfree = isset($argv[4]) ? $argv[4] : 'deny';
 
 dol_include_once("sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("sellyoursaas/class/sellyoursaascontract.class.php");
@@ -177,9 +178,10 @@ if (0 != posix_getuid()) {
 if (empty($productref)) {
 	print "Deploy a specific module for all deployed instances.\n";
 	print "Script must be ran from each deployment server with login root.\n";
+	print "Last param is used to deploy on free instances or not (default deny).\n";
 	print "\n";
-	print "Usage:   ".$script_file." test|confirm productref instancefilter\n";
-	print "Example: ".$script_file." test TESTMODULE aa*\n";
+	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny\n";
+	print "Example: ".$script_file." test TESTMODULE aa* deny\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	exit(-1);
 }
@@ -218,7 +220,9 @@ $instancefiltercomplete = $instancefilter;
 if (empty($instancefilter)) {
 	$instancefiltercomplete = "*";
 }
-$instancefiltercomplete .= ".".$subdomain;
+if (!strpos($instancefiltercomplete, ".".$subdomain)) {
+	$instancefiltercomplete .= ".".$subdomain;
+}
 
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object=new Contrat($db);
@@ -257,6 +261,17 @@ if ($resql) {
 					$i++;
 					$nbdeployko++;
 					dol_print_error($db, $object->error, $object->errors);
+					continue;
+				}
+				// Set $payment_status ('TRIAL'or 'PAID')
+				$payment_status='PAID';
+				$ispaid = sellyoursaasIsPaidInstance($object);	// This load linkedObjectsIds
+				if (! $ispaid) {
+					$payment_status='TRIAL';
+				}
+				if ($payment_status == "TRIAL" && $allowdeployforfree != "allow") {
+					print("Instance ".$instance." is in free mode so we do nothing\n");
+					$nbdeploynothingdone++;
 					continue;
 				}
 
