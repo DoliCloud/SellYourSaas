@@ -199,6 +199,11 @@ if ($res <= 0) {
 	print "Bad value for productid with action ".$mode.".\n";
 	exit(-1);
 }
+if ($product->array_options["options_app_or_option"] != "option") {
+	print "Product isn't an optional module.\n";
+	exit(-1);
+}
+
 $packageid = $product->array_options["options_package"];
 $package = new Packages($db);
 $res = $package->fetch($packageid);
