@@ -455,8 +455,7 @@ if ($resql) {
 
 							if (dol_is_file($deploy["src"].".tar.zst")) {
 								$cmd = "tar -I zstd -xf /tmp/cache".$deploy["src"].".tar.zst --directory ".$deploy["dest"]."/";
-							}
-							if (dol_is_file($deploy["src"].".tgz")) {
+							} elseif (dol_is_file($deploy["src"].".tgz")) {
 								$cmd = "tar -xzf /tmp/cache".$deploy["src"].".tgz --directory ".$deploy["dest"]."/";
 							} else {
 								$cmd = "cp -r ".$deploy["src"]."/. ".$deploy["dest"];
