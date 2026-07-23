@@ -15,8 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * or see http://www.gnu.org/
- *
- * Script to update virtual hosts on customer instances.
+ */
+
+/**
+ * Script to update the virtual host of one or several customer instances so we can
+ * add an entry in the virtual host file.
  */
 
 if (!defined('NOSESSION')) {
@@ -28,7 +31,7 @@ if (!defined('NOREQUIREDB')) {
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
-$path=dirname(__FILE__).'/';
+$path = dirname(__FILE__).'/';
 
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
@@ -37,8 +40,8 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 }
 
 // Global variables
-$version='1.0';
-$error=0;
+$version = '1.0';
+$error = 0;
 
 $mode=isset($argv[1]) ? $argv[1] : '';
 $option=isset($argv[2]) ? $argv[2] : '';

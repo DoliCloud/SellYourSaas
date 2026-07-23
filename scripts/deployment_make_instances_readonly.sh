@@ -1,6 +1,7 @@
 #!/bin/bash
 #---------------------------------------------------------
-# Script to make instances in readonly mode.
+# Script to make all instances in readonly mode by adding/updating/removing an entry
+# into the conf.php file of the instances.
 #---------------------------------------------------------
 
 source /etc/lsb-release
@@ -14,8 +15,8 @@ export YELLOW='\033[0;33m'
 echo "***** $0 $1 $2 $3 *****"
 
 if [ "x$1" == "x" ]; then
-   echo "Script to make one instances readonly."
-   echo "Usage:   $0  instance  readonly|readwrite  test|confirm"
+   echo "Script to make all instances in readonly or write mode."
+   echo "Usage:   $0  readonly|readwrite  test|confirm"
    echo
    exit 1
 fi
@@ -61,13 +62,13 @@ else
 fi
 
 if [ "x$2" != "xreadonly" ]; then
-	echo "Set instance in read only mode"
+	echo "Set instances in read only mode"
 	# TODO
 	echo --
 fi
 
 if [ "x$2" != "xreadwrite" ]; then
-	echo "Set instance in read write mode"
+	echo "Set instances in read write mode"
 	# TODO
 	echo --
 fi

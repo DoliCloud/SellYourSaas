@@ -15,8 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * or see http://www.gnu.org/
- *
- * Script to update dns zone files on customer instances.
+ */
+
+/**
+ * Script to update the dns zone file of a customer instance to update the IP address of the instance.
+ * This script is called by action_suspend_unsuspend.sh when action=suspendredirect
  */
 
 if (!defined('NOSESSION')) {
@@ -31,7 +34,7 @@ if (!defined('NOREQUIREVIRTUALURL')) {
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
-$path=dirname(__FILE__).'/';
+$path = dirname(__FILE__).'/';
 
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
@@ -40,8 +43,8 @@ if (substr($sapi_type, 0, 3) == 'cgi') {
 }
 
 // Global variables
-$version='1.0';
-$error=0;
+$version = '1.0';
+$error = 0;
 
 // Include Dolibarr environment
 @set_time_limit(0);							// No timeout for this script
