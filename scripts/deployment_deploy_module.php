@@ -175,7 +175,8 @@ require_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
 print "***** ".$script_file." ".$version." *****\n";
 
 if (0 != posix_getuid()) {
-	echo "Script must be ran with root user. Try to launch it using sudo.\n";
+	echo "Script must be ran with root user. Try to switch user.\n";
+	print "\n";
 	exit(-1);
 }
 
@@ -185,8 +186,10 @@ if (empty($productref)) {
 	print "Last param is used to deploy on free instances or not (default deny).\n";
 	print "\n";
 	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny\n";
-	print "Example: ".$script_file." test TESTMODULE aa* deny\n";
+	print "Example: ".$script_file." test TESTMODULE a* deny\n";
+	print "Example: ".$script_file." test TESTMODULE *.with1.mydomain.com deny\n";
 	print "Return code: 0 if success, <> 0 if error\n";
+	print "\n";
 	exit(-1);
 }
 
