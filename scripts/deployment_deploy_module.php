@@ -239,8 +239,8 @@ $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.ba
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 $sql.= " AND c.ref_customer LIKE '".str_replace('*', '%', $instancefiltercomplete)."'";	// $instancefiltercomplete can contains % chars.
-$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
-$sql.= " AND ce.deployment_status IS NOT NULL";
+$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only
+//$sql.= " AND ce.deployment_status IS NOT NULL";
 $sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 $sql.= " ORDER BY instance ASC";
 
