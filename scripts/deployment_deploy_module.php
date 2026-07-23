@@ -154,6 +154,10 @@ if (! $res && file_exists(__DIR__."/../../../master.inc.php")) {
 if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 	$res=@include $dolibarrdir."/htdocs/master.inc.php";
 }
+if (! $res) {
+	print("Include of master fails\n");
+	exit(-1);
+}
 
 $mode=isset($argv[1]) ? $argv[1] : 'test';
 $productref=isset($argv[2]) ? $argv[2] : '';
@@ -349,7 +353,7 @@ if ($resql) {
 
 					$targetdir            = getDolGlobalString('DOLICLOUD_INSTANCES_PATH');
 					$archivedir           = getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH');
-					
+
 					$type_db = $conf->db->type;
 					$hostname_db  = $object->array_options['options_hostname_db'];
 					$username_db  = $object->array_options['options_username_db'];

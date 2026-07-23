@@ -147,7 +147,7 @@ if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 	$res=@include $dolibarrdir."/htdocs/master.inc.php";
 }
 if (! $res) {
-	print("Include of master fails");
+	print("Include of master fails\n");
 	exit(-1);
 }
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';

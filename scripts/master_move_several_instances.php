@@ -146,7 +146,7 @@ if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 	$res=@include $dolibarrdir."/htdocs/master.inc.php";
 }
 if (! $res) {
-	print("Include of master fails");
+	print("Include of master fails\n");
 	exit(-1);
 }
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
@@ -304,7 +304,7 @@ $sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_mes
 
 $dbtousetosearch = $dbmaster;
 
-print $sql."\n";                                    // To have this into the ouput of cron job
+print $sql."\n";                                    // To have this into the output of cron job
 
 dol_syslog($script_file, LOG_DEBUG);
 
