@@ -163,6 +163,7 @@ $mode=isset($argv[1]) ? $argv[1] : 'test';
 $productref=isset($argv[2]) ? $argv[2] : '';
 $instancefilter = isset($argv[3]) ? $argv[3] : '';
 $allowdeployforfree = isset($argv[4]) ? $argv[4] : 'deny';
+$countrycode = isset($argv[5]) ? $argv[5] : '';
 
 dol_include_once("sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("sellyoursaas/class/sellyoursaascontract.class.php");
@@ -170,6 +171,7 @@ dol_include_once("sellyoursaas/class/sellyoursaasutils.class.php");
 dol_include_once('sellyoursaas/class/packages.class.php');
 include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
+require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 
 
 print "***** ".$script_file." ".$version." *****\n";
@@ -183,11 +185,10 @@ if (0 != posix_getuid()) {
 if (empty($productref)) {
 	print "Deploy a specific module for all deployed instances.\n";
 	print "Script must be ran from each deployment server with login root.\n";
-	print "Last param is used to deploy on free instances or not (default deny).\n";
+	print "allow|deny param is used to deploy on free instances or not (default deny).\n";
 	print "\n";
-	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny\n";
-	print "Example: ".$script_file." test TESTMODULE a* deny\n";
-	print "Example: ".$script_file." test TESTMODULE *.with1.mydomain.com deny\n";
+	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny countrycode\n";
+	print "Example: ".$script_file." test TESTMODULE aa* deny FR\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	print "\n";
 	exit(-1);
@@ -237,10 +238,19 @@ $object=new Contrat($db);
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = c.fk_soc";
 $sql.= " WHERE c.ref_customer <> '' AND c.ref_customer IS NOT NULL";
 $sql.= " AND c.ref_customer LIKE '".str_replace('*', '%', $instancefiltercomplete)."'";	// $instancefiltercomplete can contains % chars.
-$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only
+$sql.= " AND ce.deployment_status = 'done'";		// Get 'deployed' only, but only if we don't request a specific instance
 //$sql.= " AND ce.deployment_status IS NOT NULL";
+if (!empty($countrycode)) {
+	$countryid = getCountry($countrycode, "3", $db);
+	if ($countryid == "NotDefined") {
+		print "No country found with code ".$countrycode.".\n";
+		exit(-1);
+	}
+	$sql.= " AND s.fk_pays = ".$countryid;
+}
 $sql.= " AND (ce.suspendmaintenance_message IS NULL OR ce.suspendmaintenance_message NOT LIKE 'http%')";	// Exclude instance of type redirect
 $sql.= " ORDER BY instance ASC";
 
