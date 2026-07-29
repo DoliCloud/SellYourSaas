@@ -425,6 +425,7 @@ if ($resql) {
 							print "Deploy with src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
 							$res = dol_mkdir($deploy["dest"]);
 							if ($res < 0) {
+								print "Failed to create ".$deploy["dest"]." directory\n";
 								$error++;
 								break;
 							}
@@ -459,7 +460,12 @@ if ($resql) {
 								} else {
 									$cmd = "cd ".$deploy["src"]."/\n";
 									$cmd .= "tar c -I gzip --exclude-vcs --exclude-from=".$path."git_update_sources.exclude -f /tmp/cache".$deploy['src'].".tgz .\n";
-									$utils->executeCli($cmd, "");
+									print $cmd."\n";
+									$result = $utils->executeCli($cmd, "");
+									if ($result["result"] != 0) {
+										$error++;
+										print $result["error"];
+									}
 								}
 							}
 

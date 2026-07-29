@@ -9,7 +9,7 @@
   hosts: '{{target}}'
   become: yes
   become_method: sudo
-  become_user: admin
+  become_user: root
   tasks:
   - name: Launch deployment_deploy_module.php
     command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_deploy_module.php {{command}} {{productref}} {{instancefilter}} allow
