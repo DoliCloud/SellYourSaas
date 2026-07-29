@@ -502,6 +502,7 @@ if ($resql) {
 					}
 
 					if ($mode == "confirm") {
+						print $cliafterdeployoption."\n";
 						$res = $utils->executeCli($cliafterdeployoption, "", 0, null, 1);
 						if ($res["result"] != 0) {
 							$error++;
