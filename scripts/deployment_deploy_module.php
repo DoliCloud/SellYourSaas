@@ -458,23 +458,25 @@ if ($resql) {
 								if (dol_is_file($deploy["src"].".tgz")) {
 									dol_copy($deploy["src"].".tgz", "/tmp/cache".$deploy["src"].".tgz");
 								} else {
-									$cmd = "cd ".$deploy["src"]."/\n";
-									$cmd .= "tar c -I gzip --exclude-vcs --exclude-from=".$path."git_update_sources.exclude -f /tmp/cache".$deploy['src'].".tgz .\n";
+									$cmd = "cd '".$deploy["src"]."'";
+									$cmd .= " && tar c -I gzip --exclude-vcs --exclude-from='".$path."git_update_sources.exclude' -f '/tmp/cache".$deploy['src'].".tgz' .";
 									print $cmd."\n";
-									$result = $utils->executeCli($cmd, "");
+									file_put_contents('/tmp/debug_cmd.txt', $cmd);
+									$result = $utils->executeCli(str_replace("\r", '', $cmd), "", 0, null, 1);
 									if ($result["result"] != 0) {
 										$error++;
 										print $result["error"];
 									}
+									print $result["output"];
 								}
 							}
 
-							if (dol_is_file($deploy["src"].".tar.zst")) {
-								$cmd = "tar -I zstd -xf /tmp/cache".$deploy["src"].".tar.zst --directory ".$deploy["dest"]."/";
-							} elseif (dol_is_file($deploy["src"].".tgz")) {
-								$cmd = "tar -xzf /tmp/cache".$deploy["src"].".tgz --directory ".$deploy["dest"]."/";
+							if (dol_is_file("/tmp/cache".$deploy["src"].".tar.zst")) {
+								$cmd = "tar -I zstd -xf '/tmp/cache".$deploy["src"].".tar.zst' --directory '".$deploy["dest"]."/'";
+							} elseif (dol_is_file("/tmp/cache".$deploy["src"].".tgz")) {
+								$cmd = "tar -xzf '/tmp/cache".$deploy["src"].".tgz' --directory '".$deploy["dest"]."/'";
 							} else {
-								$cmd = "cp -r ".$deploy["src"]."/. ".$deploy["dest"];
+								$cmd = "cp -r '".$deploy["src"]."/.' '".$deploy["dest"]."'";
 							}
 							// Execute cmd to deploy module files
 							print $cmd."\n";
@@ -500,6 +502,7 @@ if ($resql) {
 					}
 
 					if ($mode == "confirm") {
+						print $cliafterdeployoption."\n";
 						$res = $utils->executeCli($cliafterdeployoption, "", 0, null, 1);
 						if ($res["result"] != 0) {
 							$error++;
