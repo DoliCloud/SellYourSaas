@@ -235,6 +235,9 @@ if (!strpos($instancefiltercomplete, ".".$subdomain)) {
 include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object=new Contrat($db);
 
+print "Search instances with status done and name matching ".$instancefiltercomplete;
+print ", country code = ".$countrycode;
+print "\n";
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object";
