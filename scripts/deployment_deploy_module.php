@@ -192,7 +192,7 @@ if (empty($productref)) {
 	print "allow|deny param is used to deploy on free instances or not (default deny).\n";
 	print "\n";
 	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny masteruniquekey [countrycode]\n";
-	print "Example: ".$script_file." test TESTMODULE aa* deny abc123456789 FR\n";
+	print "Example: ".$script_file." test TESTMODULE 'aa*' deny abc123456789 FR\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	print "\n";
 	exit(-1);
