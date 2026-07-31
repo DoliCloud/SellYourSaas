@@ -515,7 +515,7 @@ if ($resql) {
 					}
 
 					// Add a direct db connection to instance and add SQL to insert constant into llx_const
-					$dbinstance = getDoliDBInstance('mysql', $hostname_db, $username_db, $password_db, $database_db, $port_db);
+					$dbinstance = getDoliDBInstance('mysqli', $hostname_db, $username_db, $password_db, $database_db, $port_db);
 					if ($dbinstance->connected) {
 						$arrayofoptiontoforce = array(
 							'EINVOICING_SUPERPDP_VIAPARTNER' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER'),					// Example: 'DoliCloud'
