@@ -492,10 +492,14 @@ if ($resql) {
 							}
 							// Execute cmd to deploy module files
 							print $cmd."\n";
-							$result = $utils->executeCli($cmd, "");
-							if ($result["result"] != 0) {
-								$error++;
-								print $result["error"];
+							if ($mode == "confirm") {
+								$result = $utils->executeCli($cmd, "");
+								if ($result["result"] != 0) {
+									$error++;
+									print $result["error"];
+								}
+							} else {
+								print "Disabled in test mode\n";
 							}
 
 							// Execute chown to change permissions
@@ -507,22 +511,24 @@ if ($resql) {
 								print $result["error"];
 							}
 
-							if ($mode != "confirm") {
+							/*if ($mode != "confirm") {
 								dol_delete_dir_recursive($deploy["dest"]);
-							}
+							}*/
 						}
 					}
 
-					if ($mode == "confirm") {
-						// Split string on n lines of command to process. The loop on each command.
-						$arrayofcommand = explode("\n", $cliafterdeployoption);
-						foreach ($arrayofcommand as $command) {
-							print $command."\n";
+					// Split string on n lines of command to process. The loop on each command.
+					$arrayofcommand = explode("\n", $cliafterdeployoption);
+					foreach ($arrayofcommand as $command) {
+						print $command."\n";
+						if ($mode == "confirm") {
 							$res = $utils->executeCli($command, "", 0, null, 1);
 							if ($res["result"] != 0) {
 								$error++;
 								print $result["error"];
 							}
+						} else {
+							print "Disabled in test mode\n";
 						}
 					}
 
