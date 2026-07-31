@@ -532,13 +532,23 @@ if ($resql) {
 					if ($dbinstance->connected) {
 						include_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 						$arrayofoptiontoforce = array(
-							'EINVOICING_SUPERPDP_VIAPARTNER' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER'),					// Example: 'DoliCloud'
-							'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL') // Example: 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauthcallback.php'
+							'EINVOICING_SUPERPDP_VIAPARTNER' => '',					// Example: 'DoliCloud'
+							'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => '',		// Example: 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauth.php'
 						);
+
+						$dbinstance->begin();
 
 						foreach ($arrayofoptiontoforce as $key => $value) {
 							print "Set constant ".$key." to ".$value."\n";
 							dolibarr_set_const($dbinstance, $key, $value);
+						}
+
+						if ($mode != "confirm") {
+							print "Rollback\n";
+							$dbinstance->rollback();
+						} else {
+							print "Commit\n";
+							$dbinstance->commit();
 						}
 					} else {
 						print "Failed to connect to database of instance ".$localhostnamedb.", ".$username_db.", ".$database_db.", ".$port_db."\n";
