@@ -530,6 +530,7 @@ if ($resql) {
 					$localhostnamedb = 'localhost';
 					$dbinstance = getDoliDBInstance($type_db, $localhostnamedb, $username_db, $password_db, $database_db, $port_db);
 					if ($dbinstance->connected) {
+						include_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 						$arrayofoptiontoforce = array(
 							'EINVOICING_SUPERPDP_VIAPARTNER' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER'),					// Example: 'DoliCloud'
 							'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL') // Example: 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauthcallback.php'
