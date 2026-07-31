@@ -206,7 +206,7 @@ $mysoc->setMysoc($conf);
 $product = new Product($db);
 $res = $product->fetch('', $productref);
 if ($res <= 0) {
-	print "Bad value for productid with action ".$mode.".\n";
+	print "Can't find product ".$productref." for action ".$mode.".\n";
 	exit(-1);
 }
 if ($product->array_options["options_app_or_option"] != "option") {
