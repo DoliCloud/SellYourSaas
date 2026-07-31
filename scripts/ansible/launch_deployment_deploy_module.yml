@@ -2,8 +2,8 @@
 # Script to run deployment_deploy_module.php to install a module on all instances on servers
 #
 # To run the script:
-# ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-xxx -e 'target=targethost command=test productref=REFMODULENAME instancefilter=*'
-# ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-xxx -e 'target=targethost command=test productref=REFMODULENAME instancefilter=*' --limit=*.mydomain.com
+# ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-xxx -e 'target=targethost command=test productref=REFMODULENAME instancefilter=* master_instance_id=abc1234'
+# ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-xxx -e 'target=targethost command=test productref=REFMODULENAME instancefilter=* master_instance_id=abc1234' --limit=*.mydomain.com
 
 - name: Deploy module {{productref}} on instances of deployment servers
   hosts: '{{target}}'
@@ -12,7 +12,7 @@
   become_user: root
   tasks:
   - name: Launch deployment_deploy_module.php
-    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_deploy_module.php {{command}} {{productref}} {{instancefilter}} allow
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_deploy_module.php {{command}} {{productref}} {{instancefilter}} allow {{master_instance_id}}
     register: command_output
 
   - debug:
