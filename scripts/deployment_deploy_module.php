@@ -158,12 +158,16 @@ if (! $res) {
 	print("Include of master fails\n");
 	exit(-1);
 }
-
+/**
+ * @var Conf $conf
+ * @var DoliDB $db
+ */
 $mode=isset($argv[1]) ? $argv[1] : 'test';
 $productref=isset($argv[2]) ? $argv[2] : '';
 $instancefilter = isset($argv[3]) ? $argv[3] : '';
 $allowdeployforfree = isset($argv[4]) ? $argv[4] : 'deny';
-$countrycode = isset($argv[5]) ? $argv[5] : '';
+$decryptkey = isset($argv[5]) ? $argv[5] : '';
+$countrycode = isset($argv[6]) ? $argv[6] : '';
 
 dol_include_once("sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("sellyoursaas/class/sellyoursaascontract.class.php");
@@ -187,8 +191,8 @@ if (empty($productref)) {
 	print "Script must be ran from each deployment server with login root.\n";
 	print "allow|deny param is used to deploy on free instances or not (default deny).\n";
 	print "\n";
-	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny countrycode\n";
-	print "Example: ".$script_file." test TESTMODULE aa* deny FR\n";
+	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny masteruniquekey [countrycode]\n";
+	print "Example: ".$script_file." test TESTMODULE aa* deny abc123456789 FR\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	print "\n";
 	exit(-1);
@@ -198,6 +202,9 @@ $dbmaster = getDoliDBInstance('mysqli', $databasehost, $databaseuser, $databasep
 if ($dbmaster) {
 	$conf->setValues($dbmaster);
 }
+// To be able to decrypt encrypted value in master we set the symmetric key
+$conf->file->instance_unique_id = $decryptkey;
+
 $db = $dbmaster;
 $mysoc = new Societe($db);
 $mysoc->setMysoc($conf);
@@ -272,7 +279,7 @@ if ($resql) {
 			if ($obj) {
 				$instance = $obj->instance;
 
-				print("-- Deploying module for instance ".$instance."\n");
+				print("\n-- Deploying module for instance ".$instance."\n");
 
 				$contractid = $obj->id;
 
