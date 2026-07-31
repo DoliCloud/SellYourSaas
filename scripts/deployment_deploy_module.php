@@ -494,12 +494,20 @@ if ($resql) {
 					}
 
 					if ($mode == "confirm") {
+						// TODO Split string on n lines of command to process. The loop on each command.
 						$res = $utils->executeCli($cliafterdeployoption, "", 0, null, 1);
 						if ($res["result"] != 0) {
 							$error++;
 							print $result["error"];
 						}
 					}
+
+
+					// TODO Add a direct db connection to instance and add SQL to insert constant into llx_const
+					$array = array(
+						'EINVOICING_SUPERPDP_VIAPARTNER' => 'DoliCloud',
+						'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauthcallback.php'
+					);
 				}
 			}
 			if (!$error) {
