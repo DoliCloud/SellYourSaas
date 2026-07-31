@@ -502,21 +502,32 @@ if ($resql) {
 					}
 
 					if ($mode == "confirm") {
-						// TODO Split string on n lines of command to process. The loop on each command.
-						print $cliafterdeployoption."\n";
-						$res = $utils->executeCli($cliafterdeployoption, "", 0, null, 1);
-						if ($res["result"] != 0) {
-							$error++;
-							print $result["error"];
+						// Split string on n lines of command to process. The loop on each command.
+						$arrayofcommand = explode("\n", $cliafterdeployoption);
+						foreach ($arrayofcommand as $command) {
+							print $command."\n";
+							$res = $utils->executeCli($command, "", 0, null, 1);
+							if ($res["result"] != 0) {
+								$error++;
+								print $result["error"];
+							}
 						}
 					}
 
+					// Add a direct db connection to instance and add SQL to insert constant into llx_const
+					$dbinstance = getDoliDBInstance('mysql', $hostname_db, $username_db, $password_db, $database_db, $port_db);
+					if ($dbinstance->connected) {
+						$arrayofoptiontoforce = array(
+							'EINVOICING_SUPERPDP_VIAPARTNER' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER'),					// Example: 'DoliCloud'
+							'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL') // Example: 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauthcallback.php'
+						);
 
-					// TODO Add a direct db connection to instance and add SQL to insert constant into llx_const
-					$array = array(
-						'EINVOICING_SUPERPDP_VIAPARTNER' => 'DoliCloud',
-						'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauthcallback.php'
-					);
+						foreach ($arrayofoptiontoforce as $key => $value) {
+							dolibarr_set_const($dbinstance, $key, $value);
+						}
+					} else {
+						print "Failed to connect to database of instance ".$dbinstance->name."\n";
+					}
 				}
 			}
 			if (!$error) {
