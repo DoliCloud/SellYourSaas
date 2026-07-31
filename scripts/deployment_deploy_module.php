@@ -271,7 +271,9 @@ if ($resql) {
 			$obj = $db->fetch_object($resql);
 			if ($obj) {
 				$instance = $obj->instance;
-				print("Deploying module for instance ".$instance."\n");
+
+				print("-- Deploying module for instance ".$instance."\n");
+
 				$contractid = $obj->id;
 
 				unset($object->linkedObjects);
