@@ -526,7 +526,7 @@ if ($resql) {
 							dolibarr_set_const($dbinstance, $key, $value);
 						}
 					} else {
-						print "Failed to connect to database of instance ".$dbinstance->name."\n";
+						print "Failed to connect to database of instance ".$hostname_db.", ".$username_db.", ".$database_db.", ".$port_db."\n";
 					}
 				}
 			}
