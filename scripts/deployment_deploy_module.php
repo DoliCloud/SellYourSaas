@@ -305,50 +305,50 @@ if ($resql) {
 					$i++;
 					$nbdeploynothingdone++;
 					print("Warning: Module ".$product->ref." already deployed for instance ".$instance."\n");
-					continue;
-				}
-
-				// Create service line(s) in contract
-				$date_start = dol_now();
-				if ($date_end < $date_start) {
-					$date_end = $date_start;
-				}
-				$idlinecontract = $object->addline($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, $date_start, $date_end);
-				if ($idlinecontract <= 0) {
-					dol_print_error($db, $object->error, $object->errors);
-					$error++;
-				}
-
-				// Activate service line(s) in contract
-				if (!$error) {
-					$object->fetch($contractid);
-					$result = $object->active_line($user, $idlinecontract, $date_start, '', 'Activation after option deployment');
-					if (!$result) {
-						dol_print_error($db, $object->error, $object->errors);
-						$error ++;
+				} else {
+					// Create service line(s) in contract
+					$date_start = dol_now();
+					if ($date_end < $date_start) {
+						$date_end = $date_start;
 					}
-				}
+					$idlinecontract = $object->addline($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, $date_start, $date_end);
+					if ($idlinecontract <= 0) {
+						dol_print_error($db, $object->error, $object->errors);
+						$error++;
+					}
 
-				// create service line in recurring invoice
-				if (!$error) {
-					$object->fetchObjectLinked();
-					if (!empty($object->linkedObjects["facturerec"])) {
-						$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
-
-						if (count($arrayfacturerec) != 1) {
-							print("Error: Too many recurring invoices were found for instance ".$instance."\n");
+					// Activate service line(s) in contract
+					if (!$error) {
+						$object->fetch($contractid);
+						$result = $object->active_line($user, $idlinecontract, $date_start, '', 'Activation after option deployment');
+						if (!$result) {
+							dol_print_error($db, $object->error, $object->errors);
 							$error ++;
-						} else {
-							$facturerec = $arrayfacturerec[0];
-							$result = $facturerec->addLine($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
-							if (!$result) {
-								dol_print_error($db, $facturerec->error, $facturerec->errors);
+						}
+					}
+
+					// create service line in recurring invoice
+					if (!$error) {
+						$object->fetchObjectLinked();
+						if (!empty($object->linkedObjects["facturerec"])) {
+							$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
+
+							if (count($arrayfacturerec) != 1) {
+								print("Error: Too many recurring invoices were found for instance ".$instance."\n");
 								$error ++;
+							} else {
+								$facturerec = $arrayfacturerec[0];
+								$result = $facturerec->addLine($product->description, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $product->id, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+								if (!$result) {
+									dol_print_error($db, $facturerec->error, $facturerec->errors);
+									$error ++;
+								}
 							}
 						}
 					}
 				}
 
+				// Deploy files and launch scripts
 				if (!$error) {
 					if (empty($object->thirdparty)) {
 						$object->fetch_thirdparty();
