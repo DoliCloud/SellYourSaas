@@ -537,6 +537,7 @@ if ($resql) {
 						);
 
 						foreach ($arrayofoptiontoforce as $key => $value) {
+							print "Set constant ".$key." to ".$value."\n";
 							dolibarr_set_const($dbinstance, $key, $value);
 						}
 					} else {
