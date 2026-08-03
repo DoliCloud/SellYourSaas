@@ -533,7 +533,7 @@ function is_windows()
 function command_exists($command)
 {
 	$test = is_windows() ? "where" : "which";
-	return is_executable(trim(shell_exec("$test $command")));
+	return is_executable(trim(exec("$test $command")));
 }
 
 /**
