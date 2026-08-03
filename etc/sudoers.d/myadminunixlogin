@@ -6,3 +6,5 @@ myadminunixlogin ALL=(ALL) ALL
 #myadminunixlogin ALL=(ALL) /usr/bin/fail2ban-client
 #myadminunixlogin ALL=(ALL) /usr/bin/tail
 #myadminunixlogin ALL=(ALL) /usr/bin/nano
+#myadminunixlogin ALL=(ALL) /usr/bin/zcat
+#myadminunixlogin ALL=(ALL) /usr/bin/grep
