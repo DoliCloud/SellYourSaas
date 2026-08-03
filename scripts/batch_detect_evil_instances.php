@@ -83,7 +83,7 @@ if (! $res && file_exists(__DIR__."/../../../master.inc.php")) {
 	$res=@include __DIR__."/../../../master.inc.php";
 }
 if (! $res) {
-	print "Include of master fails";
+	print "Include of master fails\n";
 	exit(-1);
 }
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).

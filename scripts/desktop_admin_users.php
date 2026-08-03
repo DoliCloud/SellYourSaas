@@ -63,7 +63,9 @@ if (! $res && file_exists("./master.inc.php")) $res=@include "./master.inc.php";
 if (! $res && file_exists("../master.inc.php")) $res=@include "../master.inc.php";
 if (! $res && file_exists("../../master.inc.php")) $res=@include "../../master.inc.php";
 if (! $res && file_exists("../../../master.inc.php")) $res=@include "../../../master.inc.php";
-if (! $res) die("Include of master fails");
+if (! $res) {
+	die("Include of master fails\n");
+}
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 */

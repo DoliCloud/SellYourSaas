@@ -112,7 +112,7 @@ if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 	$res=@include $dolibarrdir."/htdocs/master.inc.php";
 }
 if (! $res) {
-	print("Include of master fails");
+	print("Include of master fails\n");
 	exit(-1);
 }
 /**
@@ -497,6 +497,8 @@ if ($mode == 'testrsync' || $mode == 'test' || $mode == 'confirmrsync' || $mode 
 	$param[]="--exclude 'conf.php'";			// a conf file for dolibarr
 	$param[]="--exclude 'config_db.php'";		// a conf file for glpi
 	$param[]="--exclude 'downstream.php'";		// a conf file for glpi
+	$param[]="--exclude 'install.lock";
+	$param[]="--exclude 'installmodules.lock";
 	$param[]="--exclude .buildpath";
 	$param[]="--exclude .git";
 	$param[]="--exclude .gitignore";

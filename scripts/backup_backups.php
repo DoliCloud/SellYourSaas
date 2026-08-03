@@ -240,7 +240,7 @@ if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 	$res=@include $dolibarrdir."/htdocs/master.inc.php";
 }
 if (! $res) {
-	print("Include of master fails");
+	print("Include of master fails\n");
 	exit(-1);
 }
 
@@ -429,7 +429,7 @@ if (!empty($instanceserver)) {
 
 	$dbtousetosearch = $dbmaster;
 
-	print $sql."\n\n";                                    // To have this into the ouput of cron job
+	print $sql."\n\n";                                    // To have this into the output of cron job
 	$resql=$dbtousetosearch->query($sql);
 	if ($resql) {
 		$num = $dbtousetosearch->num_rows($resql);

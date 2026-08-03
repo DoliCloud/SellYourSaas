@@ -205,7 +205,7 @@ textarea {
 }
 
 .justify {
-	text-align: justify;	
+	text-align: justify;
 }
 
 [type="checkbox"],
@@ -6129,7 +6129,7 @@ a.bg-danger:focus, a.bg-danger:hover {
 }
 
 .bg-inverse {
-  background-color: #334 !important;
+  background-color: #334;
 }
 
 a.bg-inverse:focus, a.bg-inverse:hover {

@@ -899,7 +899,7 @@ while ($i < $imaxinloop) {
 			$html .= '</div>';
 
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run from the master server)</span>:<br>';
+			$html .= $langs->trans("CommandToRedeployInstanceOnADeploymentServer").' <span class="opacitymedium">(to run as admin from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
 			$html .= 'sudo '.getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_redeploy_instances.php '.$object->ref.' test|confirm';
 			$html .= '">';
@@ -909,6 +909,13 @@ while ($i < $imaxinloop) {
 			$html .= $langs->trans("CommandToMoveInstanceOnAnotherDeploymentServer").' <span class="opacitymedium">(to run as admin from the master server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
 			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/master_move_several_instances.php afilter*.'.$object->ref.' withX.mysaaasdomain.com test|confirmredirect';
+			$html .= '">';
+			$html .= '</div>';
+
+			$html .= '<br>';
+			$html .= $langs->trans("CommandToDeployAModuleOptionOnAllInstances").' <span class="opacitymedium">(to run as root from the deployment server)</span>:<br>';
+			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
+			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test|confirm PRODUCTREF \'afilter*.'.$object->ref.'\' withX.mysaaasdomain.com allow master_instance_id [FR]';
 			$html .= '">';
 			$html .= '</div>';
 

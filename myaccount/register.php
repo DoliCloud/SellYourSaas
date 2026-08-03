@@ -540,7 +540,7 @@ if ($reshook == 0) {
 			  <input type="hidden" name="reusecontractid" value="<?php echo dol_escape_htmltag($reusecontractid); ?>" />
 			  <input type="hidden" name="fromsocid" value="<?php echo dol_escape_htmltag($fromsocid); ?>" />
 
-			  <input type="hidden" name="origin" value="<?php echo dol_escape_htmltag($origin); ?>" /><!-- wil be saved into options_source -->
+			  <input type="hidden" name="origin" value="<?php echo dol_escape_htmltag($origin); ?>" /><!-- will be saved into options_source -->
 			  <!-- the utm_source_cookie=<?php echo dol_escape_htmltag(empty($_COOKIE["utm_source_cookie"]) ? '' : $_COOKIE["utm_source_cookie"]); ?> will be saved into options_source_utm -->
 
 			  <input type="hidden" name="disablecustomeremail" value="<?php echo dol_escape_htmltag($disablecustomeremail); ?>" />
@@ -747,7 +747,7 @@ if ($reshook == 0) {
 				<?php if (!getDolGlobalInt('SELLYOURSAAS_REGISTER_HIDE_PHONE')) { ?>
 				<div class="horizontal-fld">
 					<div class='control-group'>
-						<label class='control-label' for='phone' spellcheck="false" trans='1'><span class="fa fa-phone opacityhigh"></span> <?php echo $langs->trans('Phone') ?></label>
+						<label class='control-label' for='phone' spellcheck="false" trans='1'><span class="fa fa-phone opacityhigh"></span> <span class="opacitymedium nobold"><?php echo $langs->trans('Phone') ?></span></label>
 						<div class="controls">
 							<input type="text"<?php echo $disabled; ?> name="phone" maxlength="250"
 								   value="<?php echo GETPOST('phone', 'alpha'); ?>" id="phone"/>
@@ -1085,7 +1085,7 @@ if ($reshook == 0) {
 
 
 			<?php if (getDolGlobalInt('SELLYOURSAAS_ENABLE_OPTINMESSAGES')) { ?>
-			<!-- checkbox for optin messages -->
+			<!-- checkbox for opt-in messages -->
 			<section id="optinmessagesid">
 				<input type="checkbox" id="optinmessages" name="optinmessages" class="valignmiddle inline" style="margin-top: 0" value="1">
 				<label for="optinmessages" class="valignmiddle small inline opacitymedium"><?php echo $langs->trans("OptinForCommercialMessagesOnMyAccount", $sellyoursaasname); ?></label>

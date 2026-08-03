@@ -175,7 +175,7 @@ if (empty($linklogo)) {               // Show main logo of Cloud service
 	} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png')) {
 		$linklogo=DOL_URL_ROOT.'/theme/dolibarr_logo.png';
 	} else {
-		$linklogo=DOL_URL_ROOT.'/theme/login_logo.png';
+		$linklogo=DOL_URL_ROOT.'/theme/common/login_logo.png';
 	}
 }
 

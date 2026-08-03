@@ -140,7 +140,7 @@ if (! $res && file_exists($dolibarrdir."/htdocs/master.inc.php")) {
 	$res=@include $dolibarrdir."/htdocs/master.inc.php";
 }
 if (! $res) {
-	print("Include of master fails");
+	print("Include of master fails\n");
 	exit(-1);
 }
 
@@ -150,6 +150,6 @@ print 'Script to create missing payment after successful Stripe payment but not 
 print 'TODO...';
 
 /*
-Scan "Successfuly charge card pm_.... for invoice ...."
-and create payment for those invoices if invoice does not has the payement.
+Scan "Successfully charge card pm_.... for invoice ...."
+and create payment for those invoices if invoice does not has the payment.
 */
