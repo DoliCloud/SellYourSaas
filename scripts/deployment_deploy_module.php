@@ -533,6 +533,12 @@ if ($resql) {
 					}
 
 					// Add a direct db connection to instance and add SQL to insert constant into llx_const
+					if (preg_match('/^dolcrypt/', $password_db)) {
+						// The password for user database could not be decrypted, so we can't connect to database
+						print "Could not decrypt the database user password, check that you provided the correct parameter masteruniquekey\n";
+						$error++;
+					}
+
 					$localhostnamedb = 'localhost';
 					$dbinstance = getDoliDBInstance($type_db, $localhostnamedb, $username_db, $password_db, $database_db, $port_db);
 					if ($dbinstance->connected) {
