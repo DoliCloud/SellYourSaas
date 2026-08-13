@@ -544,8 +544,8 @@ if ($resql) {
 					if ($dbinstance->connected) {
 						include_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 						$arrayofoptiontoforce = array(
-							'EINVOICING_SUPERPDP_VIAPARTNER' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER'),						// Example: 'DoliCloud'
-							'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL'),	// Example: 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauth.php'
+							'EINVOICING_SUPERPDP_VIAPARTNER' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_TEMPLATE'),						// Example: 'DoliCloud'
+							'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL_TEMPLATE'),	// Example: 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauth.php'
 						);
 
 						$dbinstance->begin();
