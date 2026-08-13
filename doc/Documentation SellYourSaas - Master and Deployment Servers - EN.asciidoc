@@ -3311,7 +3311,7 @@ logrotate -f logrotate_admin_log
 logrotate -f logrotate_sellyoursaas_log
 ---------------
 
-The logrotate -d logrotate_admin_log can report an error saying there is no files yet to rotate. Ignore this, files will appears after first deployment.
+The "logrotate -f -d logrotate_admin_log" can report an error saying there is no files yet to rotate. Ignore this, files will appears after first deployment.
 
 
 === Setup of journalctl
