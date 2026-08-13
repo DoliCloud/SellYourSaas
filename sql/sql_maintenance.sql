@@ -89,3 +89,6 @@ where subprice = 12 AND qty IN (1,2) AND rowid IN (SELECT fdrid from tmp_tmp);
 
 UPDATE llx_contratdet SET subprice = 12, price_ht = 12, total_ht = 12 * qty, total_tva = 12 * qty * (tva_tx / 100), total_ttc = 12 * qty * (1 + tva_tx / 100) where subprice = 12 AND qty IN (1,2) AND rowid IN (SELECT cdid from tmp_tmp);
 
+-- alter user dbu... IDENTIFIED WITH mysql_native_password BY '...';
+-- alter user dbu...@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
+

@@ -1,6 +1,10 @@
 myadminunixlogin ALL=(ALL) ALL
 # You can also add this lines to avoid user to re-enter a password when switching to 'admin' or 'osu*'
-# This allows to switch to admin or osu* with "sudo su - admin" or "sudo su - osu..."
+# This allows to switch to admin or osu* with "sudo su - admin" or "sudo su - osu..." or "sudo vi ..."
 #myadminunixlogin ALL=(ALL) /usr/bin/su - admin
 #myadminunixlogin ALL=(ALL) /usr/bin/su - osu*
 #myadminunixlogin ALL=(ALL) /usr/bin/fail2ban-client
+#myadminunixlogin ALL=(ALL) /usr/bin/tail
+#myadminunixlogin ALL=(ALL) /usr/bin/nano
+#myadminunixlogin ALL=(ALL) /usr/bin/zcat
+#myadminunixlogin ALL=(ALL) /usr/bin/grep
