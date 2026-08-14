@@ -161,6 +161,7 @@ if (! $res) {
 /**
  * @var Conf $conf
  * @var DoliDB $db
+ * @var User $user
  */
 $mode=isset($argv[1]) ? $argv[1] : 'test';
 $productref=isset($argv[2]) ? $argv[2] : '';
@@ -551,23 +552,30 @@ if ($resql) {
 					if ($dbinstance->connected) {
 						include_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
 						$arrayofoptiontoforce = array(
+							'EINVOICING_PDP' => 'SUPERPDPViaPartner',	// Set the AP provider
 							'EINVOICING_SUPERPDP_VIAPARTNER' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_TEMPLATE'),						// Example: 'DoliCloud'
 							'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL_TEMPLATE'),	// Example: 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauth.php'
+							'EINVOICING_DISABLE_SYNC_DOLI_TO_AP' => '1'
 						);
 
-						$dbinstance->begin();
+						$s = dolibarr_get_const($dbinstance, 'EINVOICING_PDP');
+						if (empty($s)) {
+							$dbinstance->begin();
 
-						foreach ($arrayofoptiontoforce as $key => $value) {
-							print "Set constant ".$key." to ".$value."\n";
-							dolibarr_set_const($dbinstance, $key, $value);
-						}
+							foreach ($arrayofoptiontoforce as $key => $value) {
+								print "Set constant ".$key." to ".$value."\n";
+								dolibarr_set_const($dbinstance, $key, $value);
+							}
 
-						if ($mode != "confirm") {
-							print "Rollback\n";
-							$dbinstance->rollback();
+							if ($mode != "confirm") {
+								print "Rollback\n";
+								$dbinstance->rollback();
+							} else {
+								print "Commit\n";
+								$dbinstance->commit();
+							}
 						} else {
-							print "Commit\n";
-							$dbinstance->commit();
+							print "A einvoicing provider seems already set for the instance (on entity 1), we do not change it.\n";
 						}
 					} else {
 						print "Failed to connect to database of instance ".$localhostnamedb.", ".$username_db.", ".$database_db.", ".$port_db."\n";
