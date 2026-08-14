@@ -279,7 +279,7 @@ if ($resql) {
 			if ($obj) {
 				$instance = $obj->instance;
 
-				print("\n-- Deploying module for instance ".$instance."\n");
+				print("\n-- Deploying module ".$productref." for instance ".$instance."\n");
 
 				$contractid = $obj->id;
 
@@ -428,16 +428,21 @@ if ($resql) {
 					$cliafterdeployoption = make_substitutions($tmppackage->cliafterdeployoption, $substitarray);
 					$cliafterdeployoption = str_replace("\r", '', $cliafterdeployoption);
 
+					print "Deploy files\n";
+
 					$deployarray = array();
 					$deployarray[1] = array("src" => $srcfile1, "dest" => $targetsrcfile1);
 					$deployarray[2] = array("src" => $srcfile2, "dest" => $targetsrcfile2);
 					$deployarray[3] = array("src" => $srcfile3, "dest" => $targetsrcfile3);
 					foreach ($deployarray as $deploy) {
+						if (empty($deploy["src"])) {
+							continue;
+						}
 						if (dol_is_dir($deploy["src"])) {
 							print "Deploy with src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
 							$res = dol_mkdir($deploy["dest"]);
 							if ($res < 0) {
-								print "Failed to create ".$deploy["dest"]." directory\n";
+								print "Error: Failed to create ".$deploy["dest"]." directory\n";
 								$error++;
 								break;
 							}
@@ -514,6 +519,8 @@ if ($resql) {
 							/*if ($mode != "confirm") {
 								dol_delete_dir_recursive($deploy["dest"]);
 							}*/
+						} else {
+							print "Error: Deploy with src = ".$deploy["src"]." failed. Dir nor found.\n";
 						}
 					}
 
