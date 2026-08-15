@@ -317,7 +317,7 @@ if ($resql) {
 				if ($productlinefound) {
 					$i++;
 					$nbdeploynothingdone++;
-					print("Warning: Module ".$product->ref." already deployed for instance ".$instance."\n");
+					print("Warning: Module ".$product->ref." already present in contract for instance ".$instance."\n");
 				} else {
 					// Create service line(s) in contract
 					$date_start = dol_now();
@@ -610,4 +610,5 @@ if ($resql) {
 	dol_print_error($db);
 }
 
-print("Deployment ended with ".$nbdeployok." contract without error, ".$nbdeployko." contract with error and ".$nbdeploynothingdone." contract where nothing was done\n");
+print("Deployment ended with ".$nbdeployok." contract without error, ".$nbdeployko." contract with error. ".$nbdeploynothingdone." contract were already present in contract.\n");
+print "\n";
