@@ -915,7 +915,7 @@ while ($i < $imaxinloop) {
 			$html .= '<br>';
 			$html .= $langs->trans("CommandToDeployAModuleOptionOnAllInstances").' <span class="opacitymedium">(to run as root from the deployment server)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
-			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test|confirm PRODUCTREF \'afilter*.'.$object->ref.'\' withX.mysaaasdomain.com allow master_instance_id [FR]';
+			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test|confirm PRODUCTREF \'afilter*\' allow master_instance_id [FR]';
 			$html .= '">';
 			$html .= '</div>';
 
