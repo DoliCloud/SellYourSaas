@@ -116,6 +116,8 @@ for fic in `ls -A`; do
 		if [ "$ret" -ne 0 ]; then
 		    echo "Base duc $fic/.duc.db invalid (duc info returned $ret), we delete it"
 			rm "$fic/.duc.db"
+		else
+		    echo "Base duc $fic/.duc.db OKt"
 		fi
 	fi
 done
