@@ -102,9 +102,10 @@ for fic in `ls -A`; do
 		duc info -b -a -d "$fic/.duc.db" >>/tmp/disk_used.tmp 2>&1;
 	fi
 	if [ "x$1" == "xupdate" ]; then
-		echo Update duc for $homedir/$fic
+		echo Update duc with: duc index $homedir/$fic -x -m 3 -d \"$homedir/$fic/.duc.db\"
 		duc index $homedir/$fic -x -m 3 -d "$homedir/$fic/.duc.db"
 		chown $fic:$fic "$homedir/$fic/.duc.db"
+		echo done
 	fi
 	if [ "x$1" == "xdelete" ]; then
 		rm "$fic/.duc.db"
