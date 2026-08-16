@@ -76,7 +76,7 @@ if [ "x$1" == "x" ]; then
 	echo "         "`basename ${0}`" list osu123456"
 	exit 1
 fi
-if [ "x$1" != "xlist" -a "x$1" != "xupdate" -a "x$1" != "xdelete" ]; then
+if [ "x$1" != "xlist" -a "x$1" != "xupdate" -a "x$1" != "xdelete" -a "x$1" != "xdeletecorrupted" ]; then
 	echo "Bad value for first parameter."
 	echo "Usage:   "`basename ${0}`" (list|update|delete|deletecorrupted) [osu...]"
 	echo "Example: "`basename ${0}`" list"
