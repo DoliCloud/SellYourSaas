@@ -111,13 +111,18 @@ for fic in `ls -A`; do
 		rm "$fic/.duc.db"
 	fi
 	if [ "x$1" == "xdeletecorrupted" ]; then
+		# Test if file "$fic/.duc.db" exists
+		if [ ! -f "$fic/.duc.db" ]; then
+			echo "Base duc $fic/.duc.db does not exists"
+			continue
+		fi
 		duc info -d "$fic/.duc.db" >/dev/null 2>&1
 		ret=$?
 		if [ "$ret" -ne 0 ]; then
 		    echo "Base duc $fic/.duc.db invalid (duc info returned $ret), we delete it"
 			rm "$fic/.duc.db"
 		else
-		    echo "Base duc $fic/.duc.db OKt"
+		    echo "Base duc $fic/.duc.db OK"
 		fi
 	fi
 done
