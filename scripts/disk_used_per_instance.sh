@@ -71,14 +71,14 @@ echo "***** Disk used per instance (scan home dir duc.db file, containing the an
 
 if [ "x$1" == "x" ]; then
 	echo "Missing parameter - list|update|delete"
-	echo "Usage:   "`basename ${0}`" (list|update|delete) [osu...]"
+	echo "Usage:   "`basename ${0}`" (list|update|delete|deletecorrupted) [osu...]"
 	echo "Example: "`basename ${0}`" list"
 	echo "         "`basename ${0}`" list osu123456"
 	exit 1
 fi
 if [ "x$1" != "xlist" -a "x$1" != "xupdate" -a "x$1" != "xdelete" ]; then
 	echo "Bad value for first parameter."
-	echo "Usage:   "`basename ${0}`" (list|update|delete) [osu...]"
+	echo "Usage:   "`basename ${0}`" (list|update|delete|deletecorrupted) [osu...]"
 	echo "Example: "`basename ${0}`" list"
 	echo "         "`basename ${0}`" list osu123456"
 	exit 1
@@ -109,6 +109,14 @@ for fic in `ls -A`; do
 	fi
 	if [ "x$1" == "xdelete" ]; then
 		rm "$fic/.duc.db"
+	fi
+	if [ "x$1" == "xdeletecorrupted" ]; then
+		duc info -d "$fic/.duc.db" >/dev/null 2>&1
+		ret=$?
+		if [ "$ret" -ne 0 ]; then
+		    echo "Base duc $fic/.duc.db invalid (duc info returned $ret), we delete it"
+			rm "$fic/.duc.db"
+		fi
 	fi
 done
 
