@@ -272,7 +272,7 @@ if (empty($dirroot) || empty($instance) || empty($mode)) {
 	print "Usage:   $script_file  instance    backup_dir  (testrsync|testdatabase|test|confirmrsync|confirmdatabase|confirm) [--delete] [--notransaction] [--quick] [--forcersync] [--forcedump] [--nostats]\n";
 	print "Example: $script_file  myinstance  " . getDolGlobalString('DOLICLOUD_BACKUP_PATH')."  testrsync\n";
 	print "Note:    ssh keys must be authorized to have rsync (test and confirm) working\n";
-	print "         remote access to database must be granted for testdatabase or confirmdatabase.\n";
+	print "         remote access to database must be granted for mode testdatabase or confirmdatabase.\n";
 	print "         the parameter --delete run the rsync with the --delete option\n";
 	print "         the parameter --notransaction run the mysqldump without the --single-transaction\n";
 	print "         the parameter --quick run the mysqldump with the --quick option (recommended)\n";
