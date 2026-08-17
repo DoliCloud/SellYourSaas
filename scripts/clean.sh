@@ -303,6 +303,7 @@ done
 
 if [ "x$IPSERVERDEPLOYMENT" != "x" ]; then
 	echo "***** Search from /tmp/instancefound-activedbinsellyoursaas of active databases (with known osusername) with a non existing unix user (should never happen)"
+	echo "parse /tmp/instancefound-activedbinsellyoursaas and test osu... user with id osu..."
 	while read bidon osusername dbname deploymentstatus ipserverdeployment; do
 		if [[ "x$osusername" != "xusername_os" && "x$osusername" != "xunknown" && "x$osusername" != "xNULL" && "x$dbname" != "xNULL" ]]; then
 			echo $ipserverdeployment | grep "$IPSERVERDEPLOYMENT" > /dev/null 2>&1
