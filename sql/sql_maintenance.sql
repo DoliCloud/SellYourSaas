@@ -41,7 +41,7 @@ See also the documentation *Documentation SellYourSaas - Master and Deployment S
 
 
 
--- List on recuring invoice line and contract invoice line with amount of 9 euros and qty of 1 or 2 for some languages for product 162
+-- List on recurring invoice line and contract invoice line with amount of 9 euros and qty of 1 or 2 for some languages for product 162
 drop table tmp_tmp;
 create table tmp_tmp AS SELECT
 	DISTINCT fr.rowid as frid, s.rowid as sid,
@@ -83,7 +83,7 @@ ORDER BY
 	frid
 
 
-UPDATE llx_facturedet_rec SET subprice = 12, total_ht = 12 * qty, total_tva = 12 * qty * (tva_tx / 100), total_ttc = 12 * qty * (1 + tva_tx / 100), 
+UPDATE llx_facturedet_rec SET subprice = 12, total_ht = 12 * qty, total_tva = 12 * qty * (tva_tx / 100), total_ttc = 12 * qty * (1 + tva_tx / 100),
 multicurrency_subprice = 12, multicurrency_total_ht = 12 * qty, multicurrency_total_tva =  12 * qty * (tva_tx / 100), multicurrency_total_ttc = 12 * qty * (1 + tva_tx / 100)
 where subprice = 12 AND qty IN (1,2) AND rowid IN (SELECT fdrid from tmp_tmp);
 
@@ -92,3 +92,13 @@ UPDATE llx_contratdet SET subprice = 12, price_ht = 12, total_ht = 12 * qty, tot
 -- alter user dbu... IDENTIFIED WITH mysql_native_password BY '...';
 -- alter user dbu...@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
 
+
+
+-- lines of contract of product einvoicing 197 open alone
+select * from llx_contratdet as cd WHERE cd.statut = 4 and cd.fk_product = 197 and not exists (select * from llx_contratdet as cd2 WHERE cd2.fk_contrat = cd.fk_contrat and cd2.rowid != cd.rowid and cd2.statut != 5)
+
+-- lines of contract open alone
+select * from llx_contratdet as cd WHERE cd.statut = 4 and not exists (select * from llx_contratdet as cd2 WHERE cd2.fk_contrat = cd.fk_contrat and cd2.rowid != cd.rowid and cd2.statut != 5)
+
+-- Close contract lines of product einvoicing 197 if they are alone open
+update llx_contratdet as cd set cd.statut = 5 WHERE cd.statut = 4 and cd.fk_product = 197 and not exists (select * from llx_contratdet as cd2 WHERE cd2.fk_contrat = cd.fk_contrat and cd2.rowid != cd.rowid and cd2.statut != 5);
