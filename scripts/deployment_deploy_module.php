@@ -465,8 +465,10 @@ if ($resql) {
 								}
 							}
 							$cacheage = ($now - $datecache) / 86400;
+							$MAXAGE = 2;
+							print "Cache age is ".$cacheage." / MAX is ".$MAXAGE."\n";
 
-							if ($datecache == 0 || $datesource > $datecache || $cacheage > 7) {
+							if ($datecache == 0 || $datesource > $datecache || $cacheage > $MAXAGE) {
 								print "Renew of the archive\n";
 								$res = dol_mkdir("/tmp/cache".$deploy["src"]);
 								if ($res < 0) {
