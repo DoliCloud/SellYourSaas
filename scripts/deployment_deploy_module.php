@@ -104,6 +104,9 @@ if ($fp) {
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
+	if (0 != posix_getuid()) {
+		echo "Script must be ran with root user. Try to switch user.\n";
+	}
 	print "\n";
 	exit(-1);
 }
