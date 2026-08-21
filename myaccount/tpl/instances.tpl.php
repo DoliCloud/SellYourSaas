@@ -2085,9 +2085,16 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 			if (!empty($tmpplan['restrict_domains'])) {
 				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
 				print "/* Code if we select pid = ".$key." so plan = ".$tmpplan['label']." with restrict_domains = ".$tmpplan['restrict_domains']." */\n";
+				$allowed_domains = array();
 				foreach ($restrict_domains as $domain) {
-					print " if (pid == ".$key.") { disable_tld_if_not('".trim($domain)."'); }\n";
-					break;	// We keep only the first domain in list as the domain to keep possible for deployment
+					$domain = trim($domain);
+					if ($domain === '') {
+						continue;
+					}
+					$allowed_domains[] = "'".dol_escape_js($domain)."'";
+				}
+				if (!empty($allowed_domains)) {
+					print " if (pid == ".$key.") { disable_tld_if_not([".implode(", ", $allowed_domains)."]); }\n";
 				}
 			} else {
 				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname." */\n";
@@ -2168,11 +2175,21 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 					jQuery("#service").trigger("change");
 
 
-					function disable_tld_if_not(s) {
-						console.log("Disable combo choice except if s="+s);
+					function disable_tld_if_not(allowedDomains) {
+						if (!Array.isArray(allowedDomains)) {
+							allowedDomains = [allowedDomains];
+						}
+						console.log("Disable combo choice except if domain ends with one of "+allowedDomains);
 						$("#tldid > option").each(function() {
-							if (this.value && !this.value.endsWith(s)) {
-								console.log("We disable the option "+this.value);
+							var valueOfSubDomain = this.value;
+							if (!valueOfSubDomain) {
+								return;
+							}
+							var qualified = allowedDomains.some(function(allowedDomain) {
+								return valueOfSubDomain.endsWith(allowedDomain);
+							});
+							if (!qualified) {
+								console.log("We disable the option "+valueOfSubDomain);
 								$(this).attr("disabled", "disabled");
 								$(this).removeAttr("selected");
 							}
