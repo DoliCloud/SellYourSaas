@@ -889,9 +889,13 @@ if ($reusecontractid) {
 	}
 
 	// Check if some deployment are already in process and ask to wait
-	$MAXDEPLOYMENTPARALLEL = getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 2);
+	$MAXDEPLOYMENTPARALLEL = getDolGlobalInt('SELLYOURSAAS_MAXDEPLOYMENTPARALLEL', 4);
 	if ($MAXDEPLOYMENTPARALLEL <= 0) {	// Protection to avoid problems
 		$MAXDEPLOYMENTPARALLEL = 1;
+	}
+	$MAXDELAYFORDEPLOYMENTINPROGRESS = getDolGlobalInt('SELLYOURSAAS_MAXDELAYFORDEPLOYMENTINPROGRESS', 3600);
+	if ($MAXDELAYFORDEPLOYMENTINPROGRESS <= 0) {
+		$MAXDELAYFORDEPLOYMENTINPROGRESS = 3600;
 	}
 
 	$tmp=explode('.', $sldAndSubdomain.$tldid, 2);
@@ -904,7 +908,7 @@ if ($reusecontractid) {
 	$select = 'SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX."contrat_extrafields";
 	$select .= " WHERE deployment_host = '".$db->escape($serverdeployement)."'";
 	$select .= " AND deployment_status IN ('processing')";
-	$select .= " AND deployment_date_start >= DATE_SUB('".$db->idate(dol_now())."', INTERVAL 1 DAY)";	// We ignore deployment started more than 24h ago: They are supposed to be finished even if not correctly flagged as 'done'.
+	$select .= " AND deployment_date_start >= '".$db->idate(dol_now() - $MAXDELAYFORDEPLOYMENTINPROGRESS)."'";	// A deployment older than this delay is no more in progress, even if not correctly flagged as 'done'.
 	$resselect = $db->query($select);
 	if ($resselect) {
 		$objselect = $db->fetch_object($resselect);
