@@ -99,6 +99,11 @@ class ActionsSellyoursaas
 
 			// Dashboard
 			if ($user->hasRight('sellyoursaas', 'read') && ! empty($tmparray['options_dolicloud'])) {
+				$pagessavinggetnomurlintoashortfield = array('advtargetemailing.php', 'targetemailing.php');
+				if (in_array((empty($_SERVER['PHP_SELF']) ? '' : basename($_SERVER['PHP_SELF'])), $pagessavinggetnomurlintoashortfield)) {
+					return 0;
+				}
+
 				$url = '';
 				if ($tmparray['options_dolicloud'] == 'yesv2') {
 					$urlmyaccount = getDolGlobalString('SELLYOURSAAS_ACCOUNT_URL');
