@@ -307,6 +307,10 @@ if (getDolGlobalString('SELLYOURSAAS_ANNOUNCE_ON') && getDolGlobalString('SELLYO
 <div id="login_right">
 
 <table class="left centpercent" title="<?php echo $langs->trans("EnterLoginDetail"); ?>">
+<?php
+$sellyoursaas2fapending = !empty($_SESSION['sellyoursaas_2fa_pending_socid']);
+?>
+<?php if (empty($sellyoursaas2fapending)) { ?>
 <!-- Login -->
 <tr>
 <td class="nowrap center valignmiddle">
@@ -333,6 +337,25 @@ if (GETPOST('usernamebis', 'alpha')) {
 </span>
 <br>
 </td></tr>
+<?php } else { ?>
+<input type="hidden" id="username" name="username" value="<?php echo dol_escape_htmltag($login); ?>" />
+<input type="hidden" id="password" name="password" value="<?php echo dol_escape_htmltag($password); ?>" />
+<!-- Second factor: entirely provided by whichever module implements the
+     'mainmyaccountloginpage' hook context's printSecondFactorFields method
+     (e.g. twofactorauth) - this template has no knowledge of TOTP/WebAuthn
+     or any other specific mechanism. -->
+<?php
+global $hookmanager;
+if (!is_object($hookmanager)) {
+	include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+	$hookmanager = new HookManager($db);
+}
+$hookmanager->initHooks(array('mainmyaccountloginpage'));
+$parameters = array('socid' => (int) $_SESSION['sellyoursaas_2fa_pending_socid']);
+$hookmanager->executeHooks('printSecondFactorFields', $parameters);
+echo $hookmanager->resPrint;
+?>
+<?php } ?>
 <?php
 /*
 if (! empty($morelogincontent)) {

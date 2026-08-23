@@ -373,6 +373,22 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_OPTINMESSAGES')) {
 
 			';
 
+// Second factor settings (enrollment UI): entirely provided by whichever
+// module implements the 'mainmyaccountloginpage' hook context's
+// printSecondFactorSettings method (e.g. twofactorauth) - this template has
+// no knowledge of TOTP/WebAuthn or any other specific mechanism, and does
+// not need to know whether any such module is even installed or enabled: if
+// none is listening, or the feature is toggled off, the hook simply returns
+// empty output - that decision belongs entirely to the listening module.
+if (!is_object($hookmanager)) {
+	include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+	$hookmanager = new HookManager($db);
+}
+$hookmanager->initHooks(array('mainmyaccountloginpage'));
+$parameters = array('socid' => $mythirdpartyaccount->id);
+$hookmanager->executeHooks('printSecondFactorSettings', $parameters);
+print $hookmanager->resPrint;
+
 if (! GETPOST('deleteaccount')) {
 	print '<div class="center"><br><a href="#deletemyaccountarea" class="deletemyaccountclick"><span class="fa fa-trash paddingright"></span>'.$langs->trans("DeleteMyAccount").'...</a><br><br><br></div>';
 }

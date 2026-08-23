@@ -507,6 +507,15 @@ if (getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA')) {
 	print '</tr>';
 }
 
+// Allow customers to set up a second factor on their myaccount login. This whole
+// admin row (including the on/off toggle) is entirely provided by whichever
+// module implements sellyoursaas's 'mainmyaccountloginpage' hooks - if none is
+// installed, nothing is printed at all, since there would be nothing for the
+// toggle to actually turn on.
+$hookmanager->initHooks(array('mainmyaccountloginpage'));
+$hookmanager->executeHooks('printSecondFactorAdminSetup', array());
+print $hookmanager->resPrint;
+
 
 print '<tr class="liste_titre">';
 print '<td class="titlefieldmiddle">'.$langs->trans("Fees").'</td><td></td>';

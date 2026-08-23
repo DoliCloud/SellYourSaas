@@ -118,7 +118,76 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 				$tmpuser = new User($db);
 				$tmpuser->fetch(getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER'));
 				if ($tmpuser->login) {
-					// Login is ok
+					// Second factor login, if any module implementing it is installed: entirely
+					// hook-driven (context 'mainmyaccountloginpage', method checkSecondFactorLogin)
+					// so this file never needs to know which module (twofactorauth or an
+					// equivalent) provides it, nor which POST field names/verification method it
+					// uses - the listening module owns all of that internally and only reports
+					// back an abstract status.
+					//   status 'none'    : nothing enrolled for this thirdparty via this provider, proceed
+					//   status 'pending' : second factor required, none supplied in this request yet
+					//   status 'success' : second factor required and verified
+					//   status 'error'   : second factor required, supplied but invalid
+					//   status 'blocked' : too many failed attempts, pending state fully reset
+					// No SELLYOURSAAS_ENABLE_2FA check here on purpose: whether the toggle is
+					// on or off is entirely the listening module's call to make (e.g. it may
+					// choose to keep enforcing 2FA for an already-enrolled thirdparty even
+					// after the toggle is switched off, and only use it to hide new
+					// enrollment - see printSecondFactorSettings on the twofactorauth side).
+					$secondfactorstatus = 'none';
+					$secondfactormessage = '';
+					global $hookmanager;
+					if (!is_object($hookmanager)) {
+						include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+						$hookmanager = new HookManager($db);
+					}
+					$hookmanager->initHooks(array('mainmyaccountloginpage'));
+
+					$parameters = array('socid' => $thirdparty->id);
+					$hookobject = null;
+					$hookaction = '';
+					$hookmanager->executeHooks('checkSecondFactorLogin', $parameters, $hookobject, $hookaction);
+
+					if (!empty($hookmanager->resArray['status'])) {
+						// A hook result can come back as a plain string (one listener) or, per
+						// Dolibarr's array_merge_recursive-based hook aggregation, as an array of
+						// values if more than one module answered - take the first one, a single
+						// active second-factor provider is the supported scenario here.
+						$secondfactorstatus = is_array($hookmanager->resArray['status']) ? reset($hookmanager->resArray['status']) : $hookmanager->resArray['status'];
+					}
+					if (!empty($hookmanager->resArray['message'])) {
+						$secondfactormessage = is_array($hookmanager->resArray['message']) ? reset($hookmanager->resArray['message']) : $hookmanager->resArray['message'];
+					}
+
+					if ($secondfactorstatus == 'pending') {
+						// Password just validated, second factor not supplied yet - the login
+						// template re-renders in 2FA mode within this same request (no redirect
+						// happens today between checkLoginPassEntity() failing and
+						// dol_loginfunction() re-rendering, same mechanism the existing "bad
+						// password" case already relies on), so username/password stay available
+						// to re-post from GETPOST() on the next submission - nothing needs to be
+						// stashed server side beyond which thirdparty is pending.
+						$_SESSION['sellyoursaas_2fa_pending_socid'] = $thirdparty->id;
+						$_SESSION["dol_loginmesg"] = '<!-- No message -->';
+						return '';
+					} elseif ($secondfactorstatus == 'blocked') {
+						unset($_SESSION['sellyoursaas_2fa_pending_socid']);
+						sleep(1);
+						$langs->loadLangs(array('main', 'errors'));
+						$_SESSION["dol_loginmesg"] = $langs->transnoentitiesnoconv("ErrorTooManyAttempts");
+						return '';
+					} elseif ($secondfactorstatus == 'error') {
+						// stay in 2FA mode, don't fall back to password re-entry
+						$_SESSION['sellyoursaas_2fa_pending_socid'] = $thirdparty->id;
+						sleep(1); // Anti brute-force protection. Must be same delay when 2FA is not valid
+						dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Authentication KO bad second factor for '" . $usertotest . "'", LOG_NOTICE);
+						$langs->loadLangs(array('main', 'errors'));
+						$_SESSION["dol_loginmesg"] = (!empty($secondfactormessage) ? $secondfactormessage : $langs->transnoentitiesnoconv("ErrorBadLoginPassword"));
+						return '';
+					}
+
+					// status 'none' or 'success': login is ok
+					unset($_SESSION['sellyoursaas_2fa_pending_socid']);
 					$_SESSION["dol_loginsellyoursaas"] = $thirdparty->id;
 					return $tmpuser->login;
 				}
