@@ -576,6 +576,17 @@ if ($resql) {
 									dolibarr_set_const($dbinstance, $key, $value);
 								}
 
+								// Make SQL requests
+								$sql1 = 'CREATE TABLE llx_einvoicing_extrafields (rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, element_id integer NOT NULL, element_type varchar(50) NOT NULL, name varchar(64) NOT NULL, value text, date_creation datetime NOT NULL, tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, fk_user_creat integer NOT NULL, fk_user_modif integer) ENGINE = innodb;';
+								print "Run sql1 ".$sql1."\n";
+								$dbinstance->query($sql1);
+								$sql2 = 'ALTER TABLE llx_einvoicing_extrafields ADD UNIQUE INDEX uk_einvoicing_extrafields (element_type, element_id, name);';
+								print "Run sql2 ".$sql2."\n";
+								$dbinstance->query($sql2);
+								$sql3 = 'UPDATE llx_extrafields SET printable = 2 WHERE printable = 1 AND elementtype IN (\'facture\', \'commande\') AND name IN (\'d4d_service_code\', \'d4d_contract_number\', \'d4d_promise_code\')';
+								print "Run sql3 ".$sql3."\n";
+								$dbinstance->query($sql3);
+
 								if ($mode != "confirm") {
 									print "Rollback\n";
 									$dbinstance->rollback();
