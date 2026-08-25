@@ -586,9 +586,12 @@ if ($resql) {
 								$sql3 = 'UPDATE llx_extrafields SET printable = 2 WHERE printable = 1 AND elementtype IN (\'facture\', \'commande\') AND name IN (\'d4d_service_code\', \'d4d_contract_number\', \'d4d_promise_code\')';
 								print "Run sql3 ".$sql3."\n";
 								$dbinstance->query($sql3);
-								$sql4 = 'ALTER TABLE llx_einvoicing_call ADD COLUMN request_id varchar(36) AFTER endpoint;';
+								$sql4 = 'ALTER TABLE llx_einvoicing_call ADD COLUMN call_id_num integer AFTER call_id;';
 								print "Run sql4 ".$sql4."\n";
 								$dbinstance->query($sql4);
+								$sql5 = 'ALTER TABLE llx_einvoicing_call ADD COLUMN request_id varchar(36) AFTER endpoint;';
+								print "Run sql5 ".$sql5."\n";
+								$dbinstance->query($sql5);
 
 								if ($mode != "confirm") {
 									print "Rollback\n";
