@@ -495,6 +495,8 @@ CommissionsOnOldSystem=Commissions sur l'ancienne plateforme
 InvoiceBeforeAreAvailableOnDemandAt=Les factures d'avant le %s sont disponibles par demande email à %s
 MyAcountDesc=Cet espace est dédié à la gestion de vos abonnements à <a href="%s" target="sellyoursaas"> %s </a> . Vous pouvez créer de nouvelles instances d'applications, choisir des options, obtenir vos factures d'abonnement, contacter l'équipe de support ou annuler votre compte.
 YourCustomUrl=Votre URL personnalisée
+AddCustomUrlDone=Votre domaine personnalisé a été demandé. Cela peut prendre quelques minutes pour devenir actif.
+ErrorAddCustomUrl=Échec de la configuration de votre domaine personnalisé. Merci de réessayer ou de contacter le support.
 CustomURL=URL personnalisée
 CustomUrlDesc=Avoir une URL personnalisée ajoutera un deuxième fichier virtualhost pour l'instance mais se terminant par .custom.conf. <br> Exemple : /etc/apache2/sellyoursaas-available/yourname.withX.domainname.com.custom.conf <br> Si des fichiers de certificat SSL sont trouvés (sur le master dans /home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt), ils seront utilisés. Sinon, ils peuvent être générés par letsencrypt. En cas d'erreur, les fichiers de certificat génériques pour *.withX.domainname.com seront utilisés.
 NextInvoice=Prochaine facture
