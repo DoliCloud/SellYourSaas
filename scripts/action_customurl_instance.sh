@@ -271,6 +271,8 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
@@ -288,6 +290,8 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 	export vhostko=$?
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
