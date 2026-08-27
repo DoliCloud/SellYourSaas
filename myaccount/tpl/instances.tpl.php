@@ -817,8 +817,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '</div>';
 					print '<span class="small">'.$langs->trans("YourCustomUrl").' : '.$contract->array_options['options_custom_url'].'</span>';
 					print '</div>';
-					print '<div class="tagtd center minwidth100 width100">';
-					print '<a class="btn btn-warning wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'" rel="noopener">'.$langs->trans("Uninstall").'...</a>';
+					print '<div class="tagtd center valignmiddle minwidth100">';
+					print '<a class="btn btn-warning nowraponall" href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'" rel="noopener">'.$langs->trans("Uninstall").'...</a>';
 					print '</div>';
 					print '</div></div>';	// end tr, end table
 					print '<hr>';
@@ -1087,14 +1087,14 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					if (!$productalreadyininstance) {
 						// Show link to subscribe
 						if ($ispaid || $freemodeinstance || getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL")) {
-							print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+							print '<a class="btn btn-primary nowraponall" href="/index.php?mode=instances&action=install&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 						} else {
 							// Show disabled button if not paying or validated
 							print '<input type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" title="'.$langs->trans("SorryOptionsNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'..." disabled="disabled" value="'.$langs->trans("Install").'..."><br>';
 						}
 					} else {
 						// Show link to unsubscribe
-						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+						print '<a class="btn btn-warning nowraponall" href="/index.php?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
 					}
 					print '</div>';
 				} else {
