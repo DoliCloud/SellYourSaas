@@ -595,6 +595,7 @@ PhpVersionDefaultServerHelp=Version PHP par défaut utilisée lors du déploieme
 AllowPhpVersionOverride=Autoriser la surcharge de la version PHP par instance
 AllowPhpVersionOverrideHelp=Si activé, le champ "Version PHP" d'un contrat peut être utilisé pour déployer une instance sur ce serveur avec une version PHP différente de celle par défaut du serveur.
 UseServerDefault=Utiliser la version par défaut du serveur
+UseServerDefault=Utiliser la version par défaut du serveur
 UseGlobalConfigValue=Utiliser la valeur du fichier de configuration du serveur
 PhpVersionsAvailable=Versions PHP détectées sur ce serveur
 PhpVersionsAvailableHelp=Liste en cache des versions PHP-FPM trouvées installées sur ce serveur, rafraîchie avec le bouton "Détecter les versions PHP". Pas de mise à jour automatique.

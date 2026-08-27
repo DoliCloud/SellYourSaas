@@ -402,6 +402,29 @@ class ActionsSellyoursaas
 		}
 
 		if (in_array($parameters['currentcontext'], array('contractcard'))) {
+			// Restrict the "phpversion" extrafield dropdown to the PHP versions actually
+			// detected on this contract's deployment server (Deploymentserver->phpversionsavailable),
+			// when that server allows a per-instance override (phpversionoverride). This mutates the
+			// options of the extrafield in place before it is displayed, so the field keeps its normal
+			// position among other extrafields (unlike printing custom HTML from formObjectOptions).
+			global $extrafields;
+			if (is_object($extrafields) && isset($extrafields->attributes['contrat']['param']['phpversion']) && !empty($object->array_options['options_deployment_host'])) {
+				$sqlphpversionoptions = 'SELECT phpversionsavailable, phpversionoverride FROM '.MAIN_DB_PREFIX."sellyoursaas_deploymentserver WHERE ipaddress = '".$db->escape($object->array_options['options_deployment_host'])."'";
+				$resqlphpversionoptions = $db->query($sqlphpversionoptions);
+				if ($resqlphpversionoptions && $db->num_rows($resqlphpversionoptions) > 0) {
+					$objphpversionoptions = $db->fetch_object($resqlphpversionoptions);
+					if ($objphpversionoptions->phpversionoverride && !empty($objphpversionoptions->phpversionsavailable)) {
+						$newoptions = array('' => 'UseServerDefault');
+						foreach (array_map('trim', explode(',', $objphpversionoptions->phpversionsavailable)) as $tmpphpversion) {
+							if ($tmpphpversion !== '') {
+								$newoptions[$tmpphpversion] = $tmpphpversion;
+							}
+						}
+						$extrafields->attributes['contrat']['param']['phpversion']['options'] = $newoptions;
+					}
+				}
+			}
+
 			if ($action == 'deploy' || $action == 'deployall') {
 				$db->begin();
 
