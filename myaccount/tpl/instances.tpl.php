@@ -2084,11 +2084,9 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 		foreach ($arrayofplansfull as $key => $tmpplan) {
 			if (!empty($tmpplan['restrict_domains'])) {
 				$restrict_domains = explode(",", $tmpplan['restrict_domains']);
+				$restrict_domains = array_map('trim', $restrict_domains);
 				print "/* Code if we select pid = ".$key." so plan = ".$tmpplan['label']." with restrict_domains = ".$tmpplan['restrict_domains']." */\n";
-				foreach ($restrict_domains as $domain) {
-					print " if (pid == ".$key.") { disable_tld_if_not('".trim($domain)."'); }\n";
-					break;	// We keep only the first domain in list as the domain to keep possible for deployment
-				}
+				print " if (pid == ".$key.") { disable_tld_if_not('".implode(',', $restrict_domains)."'); }\n";
 			} else {
 				print '	/* No restriction for pid = '.$key.', currentdomain is '.$domainname." */\n";
 			}
@@ -2170,8 +2168,14 @@ if ($MAXINSTANCESPERACCOUNT && count($listofcontractidopen) < $MAXINSTANCESPERAC
 
 					function disable_tld_if_not(s) {
 						console.log("Disable combo choice except if s="+s);
+						var allowedDomains = s.split(",");
 						$("#tldid > option").each(function() {
-							if (this.value && !this.value.endsWith(s)) {
+							if (!this.value) {
+								return;
+							}
+							var optionValue = this.value;
+							var matched = allowedDomains.some(function(d) { return optionValue.endsWith(d); });
+							if (!matched) {
 								console.log("We disable the option "+this.value);
 								$(this).attr("disabled", "disabled");
 								$(this).removeAttr("selected");
