@@ -1307,24 +1307,11 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 										</div>
 									';
 			}
-			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL")) {
-				// Modify: reuses the same deploycustomurl handler used to add one (it already
-				// overwrites the value and re-triggers the vhost/cert regeneration). Removal is
-				// done via the "Uninstall" button in the options panel above, like any other option.
-				print '
-									<div class="col-md-5"></div>
-									<div class="col-md-5">
-										<form method="POST" action="'.$_SERVER["PHP_SELF"].'" class="inline-block">
-											<input type="hidden" name="token" value="'.newToken().'">
-											<input type="hidden" name="action" value="deploycustomurl">
-											<input type="hidden" name="contractid" value="'.$contract->id.'">
-											<input type="hidden" name="mode" value="'.$mode.'">
-											<input type="text" name="domainname" class="minwidth300" value="'.dol_escape_htmltag(reset($arrayofcustom)).'" placeholder="myerp.mycompany.com">
-											<input type="submit" class="btn btn-primary default" value="'.$langs->trans("Modify").'">
-										</form>
-									</div>
-								';
-			}
+			// Modify is hidden for now: only one custom URL is supported per instance, and
+			// changing it in place had a confusing empty=remove trap. To change domain,
+			// customers must Uninstall the option (panel above) then re-Install with the new
+			// value. TODO: once multiple custom URLs per instance are supported (with a cap),
+			// bring back an edit/modify affordance here.
 		}
 
 		//print '<input type="submit" class="btn btn-warning default change-domain-link" name="changedomain" value="'.$langs->trans("ChangeDomain").'">';
