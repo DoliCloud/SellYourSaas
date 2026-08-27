@@ -249,8 +249,8 @@ testorconfirm="confirm"
 # Create target directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt if it does not exists
 export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 if [[ ! -d $pathforcertiflocal ]]; then
-	echo "Create cert directory with mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;"
-	mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;
+	echo "Create cert directory with mkdir -p $pathforcertiflocal; chown admin:admin $pathforcertiflocal;"
+	mkdir -p $pathforcertiflocal; chown admin:admin $pathforcertiflocal;
 fi
 
 
