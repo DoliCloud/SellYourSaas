@@ -817,7 +817,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '</div>';
 					print '<span class="small">'.$langs->trans("YourCustomUrl").' : '.$contract->array_options['options_custom_url'].'</span>';
 					print '</div>';
-					print '<div class="tagtd center valignmiddle minwidth100">';
+					print '<div class="tagtd right valignmiddle minwidth100 width150">';
 					print '<a class="btn btn-warning nowraponall" href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'" rel="noopener">'.$langs->trans("Uninstall").'...</a>';
 					print '</div>';
 					print '</div></div>';	// end tr, end table
