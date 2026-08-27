@@ -341,6 +341,10 @@ if [[ "$mode" == "rename" ]]; then
 	# Remove and recreate customurl
 	rm -f /etc/apache2/sellyoursaas-available/$fqn.custom.conf
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+	# Also remove any certificate files left from a previous custom domain for this instance
+	# (we don't know the old customurl value here, only $fqn, so match on that prefix instead)
+	rm -f /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-*.crt
+	rm -f /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-*.key
 	if [[ "x$customurl" != "x" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and mode=rename, we will create a new custom virtual name $fqn.custom"
 
