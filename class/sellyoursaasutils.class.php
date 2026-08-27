@@ -4365,7 +4365,7 @@ class SellYourSaasUtils
 			// Note: remote action 'undeployall' is used to undeploy test instances
 			// Note: remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'actionafterpaid')) &&
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'changephpversion', 'actionafterpaid')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 				$doremoteaction = 1;
 				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => $doremoteaction, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
@@ -4599,6 +4599,15 @@ class SellYourSaasUtils
 						$phpversion = $objphpversion->phpversiondefault;
 					}
 				}
+
+				// Previous PHP version, only meaningful for the "changephpversion" remote action
+				// (triggered automatically when the contract's "phpversion" extrafield changes on an
+				// already-deployed instance, see the trigger), used to remove the old, now-unused
+				// FPM pool/service once the instance is confirmed running on the new version.
+				$oldphpversion = '';
+				if (isset($contract->oldcopy) && ! empty($contract->oldcopy->array_options['options_phpversion'])) {
+					$oldphpversion = $contract->oldcopy->array_options['options_phpversion'];
+				}
 				$substitarray['__PHPVERSION__'] = $phpversion;
 
 
@@ -4642,7 +4651,7 @@ class SellYourSaasUtils
 				}
 
 				// Prepare the script or txt files
-				if ($remoteaction != "migrate" && $remoteaction != "upgrade") {
+				if ($remoteaction != "migrate" && $remoteaction != "upgrade" && $remoteaction != "changephpversion") {
 					dol_syslog("Create conf file ".$tmppackage->srcconffile1);
 					if ($tmppackage->srcconffile1 && $conffile) {
 						dol_delete_file($tmppackage->srcconffile1, 0, 1, 0, null, false, 0);
@@ -4748,6 +4757,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterpaid); 	// Param 48 in .sh src for cli after paid
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterdeployoption); 	// Param 49 in .sh src for cli after deploy option
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $phpversion); 	// Param 50 in .sh: per-instance PHP version override (empty = use server default from /etc/sellyoursaas.conf)
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $oldphpversion); 	// Param 51 in .sh: previous PHP version, used by changephpversion to clean up the old pool
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message

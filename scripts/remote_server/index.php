@@ -341,7 +341,7 @@ if (in_array($tmparray[0], array('deploywebsite'))) {
 	exit();
 }
 
-if (in_array($tmparray[0], array('deploycustomurl'))) {
+if (in_array($tmparray[0], array('deploycustomurl', 'changephpversion'))) {
 	if ($DEBUG) {
 		fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace." \n");
 	} else {

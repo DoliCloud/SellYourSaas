@@ -165,6 +165,11 @@ export phpversionforinstance=${50//£/ }
 if [[ "x$phpversionforinstance" != "x" && "x$phpversionforinstance" != "x-" ]]; then
 	phpversion=$phpversionforinstance
 fi
+# Previous PHP version, only used by mode "changephpversion" to clean up the old pool/service.
+export oldphpversionforinstance=${51//£/ }
+if [ "x$oldphpversionforinstance" == "x-" ]; then
+	oldphpversionforinstance=""
+fi
 
 
 export ErrorLog='#ErrorLog'
@@ -365,6 +370,89 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		exit 20
 	else
 		sleep 3
+	fi
+fi
+
+if [[ "$mode" == "changephpversion" ]]; then
+	export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
+
+	if [[ "x$phpfpm" == "x" ]]; then
+		echo "This server is not configured for phpfpm (phpfpm= not set in /etc/sellyoursaas.conf), nothing to do for mode changephpversion"
+	elif [ ! -f "$apacheconf" ]; then
+		echo "Error: vhost $apacheconf not found, cannot change PHP version for an instance that does not seem deployed"
+		exit 20
+	else
+		# Always trust what the live vhost is actually pointing to, not what the caller thinks the
+		# previous value was (oldphpversionforinstance, param 51), to stay correct even if that value
+		# is missing or stale.
+		export currentphpversioninvhost=`grep -oP "(?<=php)[0-9]+\.[0-9]+(?=-fpm-${fqn//./\\.}\.sock)" "$apacheconf" | head -1`
+		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Changing PHP version of $fqn from '$currentphpversioninvhost' (caller said '$oldphpversionforinstance') to '$phpversion'"
+
+		if [[ "x$currentphpversioninvhost" == "x$phpversion" ]]; then
+			echo "Instance $fqn is already running PHP $phpversion, nothing to do"
+		else
+			export newphpfpmpooldir="/etc/php/$phpversion/fpm/pool.d/sellyoursaas"
+			export newphpfpmconf="$newphpfpmpooldir/$fqn.phpfpm.conf"
+			export newphpfpmservicename="sellyoursaas-php$phpversion-fpm-$fqn.service"
+			export newphpfpmservice="/etc/systemd/system/$newphpfpmservicename"
+
+			mkdir -p "$newphpfpmpooldir"
+
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Create php fpm pool conf $newphpfpmconf from $fpmpoolfiletemplate"
+			cat $fpmpoolfiletemplate | sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__osUsername__;$osusername;g" | \
+				  sed -e "s;__osGroupname__;$osusername;g" | \
+				  sed -e "s;__webAppPath__;$instancedir;g" > $newphpfpmconf
+			export poolko=$?
+
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Create php fpm service $newphpfpmservice from $fpmservicefiletemplate"
+			cat $fpmservicefiletemplate | sed -e "s;__fqn__;$fqn;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" > $newphpfpmservice
+			export serviceko=$?
+
+			if [[ "x$poolko" != "x0" ]] || [[ "x$serviceko" != "x0" ]]; then
+				echo Error when generating pool/service files poolko=$poolko serviceko=$serviceko
+				echo "Failed to change PHP version for $fqn: error generating pool/service files" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in change PHP version" $EMAILTO
+				exit 20
+			fi
+
+			systemctl daemon-reload
+			systemctl enable --now $newphpfpmservicename
+			sleep 1
+
+			export newsocket="/run/php/php$phpversion-fpm-$fqn.sock"
+			if [ ! -S "$newsocket" ]; then
+				echo "Error: expected socket $newsocket not found after starting $newphpfpmservicename"
+				echo "Failed to change PHP version for $fqn: new php-fpm pool did not start (socket missing)" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in change PHP version" $EMAILTO
+				exit 21
+			fi
+
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Update SetHandler in $apacheconf to point to the new socket"
+			cp -a "$apacheconf" "$apacheconf.bak-changephpversion-$(date +%Y%m%d-%H%M%S)"
+			sed -i "s;php${currentphpversioninvhost:-X.Y}-fpm-$fqn.sock;php$phpversion-fpm-$fqn.sock;g" "$apacheconf"
+
+			apache2ctl configtest
+			if [[ "x$?" != "x0" ]]; then
+				echo Error when running apache2ctl configtest after changing PHP version
+				echo "Failed to change PHP version for $fqn: apache2ctl configtest failed after updating vhost" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in change PHP version" $EMAILTO
+				exit 22
+			fi
+			service apache2 reload
+
+			if [ -n "$currentphpversioninvhost" ]; then
+				export oldphpfpmservicename="sellyoursaas-php$currentphpversioninvhost-fpm-$fqn.service"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Stop and remove old php fpm pool/service for previous version $currentphpversioninvhost"
+				systemctl disable --now $oldphpfpmservicename 2>/dev/null
+				rm -f "/etc/systemd/system/$oldphpfpmservicename"
+				rm -f "/etc/php/$currentphpversioninvhost/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf"
+				systemctl daemon-reload
+			else
+				echo "Could not determine the previous PHP version from the vhost, leaving any old pool/service in place for manual cleanup"
+			fi
+
+			echo `date +'%Y-%m-%d %H:%M:%S'`" PHP version change for $fqn to $phpversion done"
+		fi
 	fi
 fi
 
