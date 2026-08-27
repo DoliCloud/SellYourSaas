@@ -410,7 +410,10 @@ class ActionsSellyoursaas
 			// normal position among other extrafields when shown (unlike printing custom
 			// HTML from formObjectOptions).
 			global $extrafields;
-			if (is_object($extrafields) && isset($extrafields->attributes['contrat']['label']['phpversion']) && !empty($object->array_options['options_deployment_host'])) {
+			if (is_object($extrafields) && isset($extrafields->attributes['contrat']['label']['phpversion']) && !getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
+				// Feature disabled module-wide (Setup > Deployment servers): hide the field regardless of server settings
+				unset($extrafields->attributes['contrat']['label']['phpversion']);
+			} elseif (is_object($extrafields) && isset($extrafields->attributes['contrat']['label']['phpversion']) && !empty($object->array_options['options_deployment_host'])) {
 				$sqlphpversionoptions = 'SELECT phpversionsavailable, phpversionoverride FROM '.MAIN_DB_PREFIX."sellyoursaas_deploymentserver WHERE ipaddress = '".$db->escape($object->array_options['options_deployment_host'])."'";
 				$resqlphpversionoptions = $db->query($sqlphpversionoptions);
 				if ($resqlphpversionoptions && $db->num_rows($resqlphpversionoptions) > 0) {

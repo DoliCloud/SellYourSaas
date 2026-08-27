@@ -125,6 +125,9 @@ if (empty($arrayofsuffixfound)) {
  * Actions
  */
 
+// Handle generic set_XXX / del_XXX actions (used by the non-JS fallback links of on/off toggles)
+include DOL_DOCUMENT_ROOT.'/core/actions_setmoduleoptions.inc.php';
+
 if ($action == 'set') {
 	$error=0;
 	$reg = array();
@@ -275,6 +278,23 @@ if (getDolGlobalString('SELLYOURSAAS_SUPPORT_DEFAULT_PASSWORD')) {
 }
 print '</td>';
 print '<td><span class="opacitymedium small">Password to use to create a support user account on customer instances</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>';
+print $form->textwithpicto($langs->trans("SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE"), $langs->trans("SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDEDesc"));
+print '</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE', array(), null, 0, 0, 0);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE&token='.newToken().'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE&token='.newToken().'">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td></td>';
 print '</tr>';
 
 print '</table>';

@@ -166,7 +166,7 @@ if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
-if ($action == 'detectphpversions' && $permissiontoadd && $id > 0) {
+if ($action == 'detectphpversions' && $permissiontoadd && $id > 0 && getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$phpversionsfound = $sellyoursaasutils->detectPhpVersionsOnServer($object);
 	if ($phpversionsfound === -1) {
@@ -636,7 +636,7 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			//	print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init&token='.newToken().'#formmailbeforetitle');
 			//}
 
-			if (!empty($object->ipaddress)) {
+			if (!empty($object->ipaddress) && getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
 				print dolGetButtonAction($langs->trans('DetectPhpVersions'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=detectphpversions&token='.newToken(), '', $permissiontoadd);
 			}
 
