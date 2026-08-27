@@ -233,6 +233,26 @@ if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
 	done
 fi
 
+echo "***** Clean orphaned php-fpm services/pools (sellyoursaas-php<version>-fpm-<fqn> scheme, not cleaned by undeploy before this was fixed)"
+for svcfile in /etc/systemd/system/sellyoursaas-php*-fpm-*.service
+do
+	[ -e "$svcfile" ] || continue
+	basfic=`basename $svcfile`
+	fqn=`echo $basfic | sed -E 's/^sellyoursaas-php[0-9]+\.[0-9]+-fpm-//; s/\.service$//'`
+	phpver=`echo $basfic | sed -E 's/^sellyoursaas-php([0-9]+\.[0-9]+)-fpm-.*/\1/'`
+	if [ ! -L /etc/apache2/sellyoursaas-online/$fqn.conf ]; then
+		echo "Instance $fqn has no live vhost, removing orphaned php-fpm service $basfic"
+		if [[ $testorconfirm == "confirm" ]]; then
+			systemctl disable --now $basfic 2>/dev/null
+			rm -f $svcfile
+			rm -f /etc/php/$phpver/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf
+			systemctl daemon-reload
+		fi
+	else
+		echo "Instance $fqn is enabled, we keep its php-fpm service $basfic"
+	fi
+done
+
 
 echo "***** Get list of databases of all instances and save it into /tmp/instancefound-dbinsellyoursaas"
 

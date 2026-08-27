@@ -1542,6 +1542,15 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 			rm /etc/apache2/sellyoursaas-fpm-pool.d/$fqn.conf
 		fi
 
+		if [[ "x$phpfpm" != "x" ]]; then
+			export phpfpmservicename="sellyoursaas-php$phpversion-fpm-$fqn.service"
+			echo Stop and remove php-fpm service $phpfpmservicename
+			systemctl disable --now $phpfpmservicename 2>/dev/null
+			rm -f /etc/systemd/system/$phpfpmservicename
+			rm -f /etc/php/$phpversion/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf
+			systemctl daemon-reload
+		fi
+
 		/usr/sbin/apache2ctl configtest
 		if [[ "x$?" != "x0" ]]; then
 			echo Error when running apache2ctl configtest
