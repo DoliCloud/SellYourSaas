@@ -801,7 +801,11 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<br>';
 
 			// Hard coded option: Custom domain name
+			// Only one custom domain is actually functional per instance (the server side only
+			// generates a single vhost/certificate per instance), so the "add" form is only shown
+			// when none is set yet - otherwise the customer must use the "Remove" button first.
 			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0
+				&& empty($contract->array_options['options_custom_url'])
 				&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID'))))) {
 				print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
 
@@ -1285,6 +1289,30 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 											</div>
 										</div>
 									';
+			}
+			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL")) {
+				// Modify: reuses the same deploycustomurl handler used to add one (it already
+				// overwrites the value and re-triggers the vhost/cert regeneration).
+				print '
+									<div class="col-md-5"></div>
+									<div class="col-md-5">
+										<form method="POST" action="'.$_SERVER["PHP_SELF"].'" class="inline-block">
+											<input type="hidden" name="token" value="'.newToken().'">
+											<input type="hidden" name="action" value="deploycustomurl">
+											<input type="hidden" name="contractid" value="'.$contract->id.'">
+											<input type="hidden" name="mode" value="'.$mode.'">
+											<input type="text" name="domainname" class="minwidth300" value="'.dol_escape_htmltag(reset($arrayofcustom)).'" placeholder="myerp.mycompany.com">
+											<input type="submit" class="btn btn-primary default" value="'.$langs->trans("Modify").'">
+										</form>
+										<form method="POST" action="'.$_SERVER["PHP_SELF"].'" class="inline-block" onsubmit="return confirm(\''.dol_escape_js($langs->trans("ConfirmRemoveCustomUrl")).'\');">
+											<input type="hidden" name="token" value="'.newToken().'">
+											<input type="hidden" name="action" value="removecustomurl">
+											<input type="hidden" name="contractid" value="'.$contract->id.'">
+											<input type="hidden" name="mode" value="'.$mode.'">
+											<input type="submit" class="btn btn-warning default" value="'.$langs->trans("Remove").'">
+										</form>
+									</div>
+								';
 			}
 		}
 
