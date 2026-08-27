@@ -4576,29 +4576,28 @@ class SellYourSaasUtils
 				}
 				$substitarray['__SMTP_SPF_STRING__'] = '_spf'.$sldAndSubdomain.'.'.$domainname;
 
-				// PHP version to use for this instance: a per-instance override (contract extrafield
-				// "phpversion") takes priority over the deployment server's configured default
-				// (Deploymentserver->phpversiondefault), but only if the server allows it
-				// (Deploymentserver->phpversionoverride). If neither is set, an empty value is sent
-				// and the server falls back to its own "phpversion=" in /etc/sellyoursaas.conf.
-				$phpversiondefault = '';
-				$phpversionoverride = 0;
-				if (getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
-					$sqlphpversion = 'SELECT phpversiondefault, phpversionoverride FROM '.MAIN_DB_PREFIX."sellyoursaas_deploymentserver WHERE ipaddress = '".$this->db->escape($serverdeployment)."'";
+				// PHP version to use for this instance. An explicit per-instance value (contract
+				// extrafield "phpversion") is ALWAYS respected once set, regardless of the
+				// SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE toggle or the deployment server's own
+				// phpversionoverride setting - those two only gate whether the field can be
+				// edited going forward (see actions_sellyoursaas.class.php::doActions), not
+				// whether an already-set value keeps being applied. This avoids silently
+				// reverting an instance already running a pinned PHP version to the server's
+				// /etc/sellyoursaas.conf default just because the toggle got disabled later.
+				// With no per-instance value, the deployment server's configured default
+				// (Deploymentserver->phpversiondefault) is used, but only while the feature is
+				// enabled module-wide; otherwise an empty value is sent and the instance server
+				// falls back to its own "phpversion=" in /etc/sellyoursaas.conf.
+				$phpversion = '';
+				if (! empty($contract->array_options['options_phpversion'])) {
+					$phpversion = $contract->array_options['options_phpversion'];
+				} elseif (getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
+					$sqlphpversion = 'SELECT phpversiondefault FROM '.MAIN_DB_PREFIX."sellyoursaas_deploymentserver WHERE ipaddress = '".$this->db->escape($serverdeployment)."'";
 					$resqlphpversion = $this->db->query($sqlphpversion);
 					if ($resqlphpversion && $this->db->num_rows($resqlphpversion) > 0) {
 						$objphpversion = $this->db->fetch_object($resqlphpversion);
-						$phpversiondefault = $objphpversion->phpversiondefault;
-						$phpversionoverride = $objphpversion->phpversionoverride;
+						$phpversion = $objphpversion->phpversiondefault;
 					}
-				}
-				// If SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE is off, $phpversiondefault/$phpversionoverride
-				// stay empty/0, so $phpversion below stays empty and the instance server falls back to its
-				// own "phpversion=" in /etc/sellyoursaas.conf, exactly like before this feature existed.
-
-				$phpversion = $phpversiondefault;
-				if ($phpversionoverride && ! empty($contract->array_options['options_phpversion'])) {
-					$phpversion = $contract->array_options['options_phpversion'];
 				}
 				$substitarray['__PHPVERSION__'] = $phpversion;
 
