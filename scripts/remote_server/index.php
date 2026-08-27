@@ -230,6 +230,27 @@ if (in_array($tmparray[0], array('test'))) {
 	exit();
 }
 
+if (in_array($tmparray[0], array('listphpversions'))) {
+	// Read-only action: list PHP-FPM versions actually installed on this server, so the
+	// portal can offer only versions that really exist when setting a server's default.
+	$phpversionsfound = array();
+	exec('ls -1 /usr/sbin/php-fpm* 2>/dev/null', $lsoutput);
+	foreach ($lsoutput as $lsline) {
+		if (preg_match('/php-fpm([0-9]+\.[0-9]+)$/', trim($lsline), $reg)) {
+			$phpversionsfound[] = $reg[1];
+		}
+	}
+	sort($phpversionsfound);
+
+	fwrite($fh, date('Y-m-d H:i:s').' action "listphpversions" found: '.implode(',', $phpversionsfound)."\n");
+	fclose($fh);
+
+	http_response_code(200);
+	print implode(',', $phpversionsfound);
+
+	exit();
+}
+
 if (in_array($tmparray[0], array('migrate'))) {
 	if ($DEBUG) {
 		fwrite($fh, date('Y-m-d H:i:s').' ./action_migrate_instance.sh '.$tmparray[0].' '.$paramspace."\n");

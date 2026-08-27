@@ -5497,6 +5497,53 @@ class SellYourSaasUtils
 	}
 
 	/**
+	 * Call the remote server agent (read-only action "listphpversions") to get the list of
+	 * PHP-FPM versions actually installed on a deployment server, so the portal can offer
+	 * only versions that really exist when setting the server's default PHP version.
+	 *
+	 * @param	Deploymentserver	$deploymentserver	Deployment server to query (must have ipaddress set)
+	 * @return	array|int								Array of version strings (e.g. array('8.1','8.3')) or -1 if error (see $this->error)
+	 */
+	public function detectPhpVersionsOnServer($deploymentserver)
+	{
+		global $conf;
+
+		$this->error = '';
+		$this->errors = array();
+
+		if (empty($deploymentserver->ipaddress)) {
+			$this->error = 'No IP address defined on this deployment server';
+			return -1;
+		}
+
+		$signaturekey = !empty($deploymentserver->serversignaturekey) ? $deploymentserver->serversignaturekey : getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY');
+
+		// No real parameter needed for this read-only action: send a single placeholder
+		// value so the remote agent can split off the trailing signature correctly.
+		$commandurl = '-';
+		$commandurl .= '&'.md5($commandurl.$signaturekey);
+
+		$conf->global->MAIN_USE_RESPONSE_TIMEOUT = 15;
+
+		$urltoget = 'http://'.$deploymentserver->ipaddress.':8080/listphpversions?'.urlencode($commandurl);
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+		$retarray = getURLContent($urltoget, 'GET', '', 0, array(), array('http', 'https'), 2);
+
+		if (!empty($retarray['curl_error_no']) || $retarray['http_code'] != 200) {
+			$this->error = !empty($retarray['curl_error_msg']) ? $retarray['curl_error_msg'] : $retarray['content'];
+			$this->errors[] = $this->error;
+			return -1;
+		}
+
+		$content = trim($retarray['content']);
+		if ($content === '') {
+			return array();
+		}
+
+		return explode(',', $content);
+	}
+
+	/**
 	 * Return signature key of server, from it's short host name
 	 *
 	 * @param 	string 		$domainname 	Domain name to select remote ip to deploy to (example: 'home.lan', 'withX.mysellyoursaasdomain.com', ...)

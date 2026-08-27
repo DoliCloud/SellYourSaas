@@ -135,6 +135,7 @@ class Deploymentserver extends CommonObject
 		'serversignaturekey' => array('type'=>'varchar(128)', 'label'=>'ServerSignatureKey', 'enabled'=>'1', 'position'=>170, 'notnull'=>0, 'visible'=>-5, 'csslist'=>'tdoverflowmax150'),
 		'phpversiondefault' => array('type'=>'varchar(8)', 'label'=>'PhpVersionDefault', 'enabled'=>'1', 'position'=>171, 'notnull'=>0, 'visible'=>1, 'arrayofkeyval'=>array(''=>'UseGlobalConfigValue', '7.4'=>'7.4', '8.1'=>'8.1', '8.2'=>'8.2', '8.3'=>'8.3', '8.4'=>'8.4', '8.5'=>'8.5'), 'help'=>'PhpVersionDefaultServerHelp'),
 		'phpversionoverride' => array('type'=>'integer', 'label'=>'AllowPhpVersionOverride', 'enabled'=>'1', 'default'=>0, 'position'=>172, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center', 'help'=>'AllowPhpVersionOverrideHelp'),
+		'phpversionsavailable' => array('type'=>'varchar(128)', 'label'=>'PhpVersionsAvailable', 'enabled'=>'1', 'position'=>173, 'notnull'=>0, 'noteditable'=>'1', 'visible'=>1, 'help'=>'PhpVersionsAvailableHelp', 'csslist'=>'tdoverflowmax150'),
 		'fk_user_modif' => array('type'=>'integer:User:user/class/user.class.php', 'label'=>'UserModification', 'enabled'=>'1', 'position'=>600, 'notnull'=>0, 'visible'=>-2, 'css'=>'maxwidth500', 'csslist'=>'tdoverflowmax500'),
 	);
 

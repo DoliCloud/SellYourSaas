@@ -79,6 +79,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 dol_include_once('/sellyoursaas/lib/sellyoursaas_deploymentserver.lib.php');
+dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("sellyoursaas@sellyoursaas", "other"));
@@ -163,6 +164,23 @@ $parameters = array();
 $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
+
+if ($action == 'detectphpversions' && $permissiontoadd && $id > 0) {
+	$sellyoursaasutils = new SellYourSaasUtils($db);
+	$phpversionsfound = $sellyoursaasutils->detectPhpVersionsOnServer($object);
+	if ($phpversionsfound === -1) {
+		setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+	} else {
+		$object->phpversionsavailable = implode(',', $phpversionsfound);
+		$resupdate = $object->update($user);
+		if ($resupdate > 0) {
+			setEventMessages($langs->trans('PhpVersionsDetected', $object->phpversionsavailable ? $object->phpversionsavailable : $langs->trans('None')), null, 'mesgs');
+		} else {
+			setEventMessages($object->error, $object->errors, 'errors');
+		}
+	}
+	$action = 'view';
 }
 
 if (empty($reshook)) {
@@ -602,6 +620,10 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 			//if (empty($user->socid)) {
 			//	print dolGetButtonAction($langs->trans('SendMail'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=presend&mode=init&token='.newToken().'#formmailbeforetitle');
 			//}
+
+			if (!empty($object->ipaddress)) {
+				print dolGetButtonAction($langs->trans('DetectPhpVersions'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=detectphpversions&token='.newToken(), '', $permissiontoadd);
+			}
 
 			// Close
 			if ($object->status == $object::STATUS_ENABLED) {
