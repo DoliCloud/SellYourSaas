@@ -589,6 +589,14 @@ EvenIfDomainIsOpenTo=Even if domain is open to registration, it may not appears 
 OnDomainOnly=Only from %s
 LastPaymentTry=Last payment try
 SellYourSaasTimeZoneDesc=This timezone can be used to replace string TZ=UTC into cron file
+PhpVersion=PHP version
+PhpVersionDesc=Override the PHP version to use for this instance instead of the deployment server default. Only used if the deployment server allows PHP version override.
+PhpVersionDefault=Default PHP version
+PhpVersionDefaultServerHelp=Default PHP version used when deploying a new instance on this server. Leave empty to use the "phpversion" value of the server's /etc/sellyoursaas.conf file.
+AllowPhpVersionOverride=Allow PHP version override per instance
+AllowPhpVersionOverrideHelp=When enabled, the "PHP version" field on a contract can be used to deploy an instance on this server with a PHP version different from the server default.
+UseServerDefault=Use server default
+UseGlobalConfigValue=Use value from server config file
 NoteForSupportUser=This user is used for maintenance purpose by your hosting provider. This user can be deleted at any time and you can also delete it yourself at any time, it will be recreated if necessary. If you have a paid instance, this user is not included into billing.
 SorryEmailExistsforAnotherAccount=Sorry, the email '%s' is already used for another account
 BackupNow=Backup now

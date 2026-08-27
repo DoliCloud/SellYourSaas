@@ -588,6 +588,14 @@ EvenIfDomainIsOpenTo=Even if domain is open to registration, it may not appears 
 OnDomainOnly=Uniquement depuis %s
 LastPaymentTry=Dernier tentative d'encaissement
 SellYourSaasTimeZoneDesc=Ce fuseau horaire peut être utilisé pour remplacer la chaîne TZ=UTC dans le fichier cron
+PhpVersion=Version PHP
+PhpVersionDesc=Surcharge la version PHP à utiliser pour cette instance à la place de la version par défaut du serveur de déploiement. Utilisé seulement si le serveur de déploiement autorise la surcharge de version PHP.
+PhpVersionDefault=Version PHP par défaut
+PhpVersionDefaultServerHelp=Version PHP par défaut utilisée lors du déploiement d'une nouvelle instance sur ce serveur. Laisser vide pour utiliser la valeur "phpversion" du fichier /etc/sellyoursaas.conf du serveur.
+AllowPhpVersionOverride=Autoriser la surcharge de la version PHP par instance
+AllowPhpVersionOverrideHelp=Si activé, le champ "Version PHP" d'un contrat peut être utilisé pour déployer une instance sur ce serveur avec une version PHP différente de celle par défaut du serveur.
+UseServerDefault=Utiliser la version par défaut du serveur
+UseGlobalConfigValue=Utiliser la valeur du fichier de configuration du serveur
 NoteForSupportUser=Cet utilisateur est utilisé à des fins de maintenance par votre hébergeur. Cet utilisateur peut être supprimé à tout moment et vous pouvez également le supprimer vous-même à tout moment, il sera recréé si nécessaire. Si vous avez une instance payante, cet utilisateur n'est pas inclus dans la facturation.
 SorryEmailExistsforAnotherAccount=Désolé, l'e-mail '%s' est déjà utilisé pour un autre compte
 BackupNow=Sauvegarder maintenant

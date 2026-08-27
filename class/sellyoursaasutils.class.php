@@ -4576,11 +4576,23 @@ class SellYourSaasUtils
 				}
 				$substitarray['__SMTP_SPF_STRING__'] = '_spf'.$sldAndSubdomain.'.'.$domainname;
 
-				// If a given PHP version was set for this contract/instance, it overrides the
-				// server global default (phpversion= in /etc/sellyoursaas.conf) for this instance only.
-				// Requires a "phpversion" extrafield on Contract (same pattern as "timezone").
-				$phpversion = '';
-				if (! empty($contract->array_options['options_phpversion'])) {
+				// PHP version to use for this instance: a per-instance override (contract extrafield
+				// "phpversion") takes priority over the deployment server's configured default
+				// (Deploymentserver->phpversiondefault), but only if the server allows it
+				// (Deploymentserver->phpversionoverride). If neither is set, an empty value is sent
+				// and the server falls back to its own "phpversion=" in /etc/sellyoursaas.conf.
+				$phpversiondefault = '';
+				$phpversionoverride = 0;
+				$sqlphpversion = 'SELECT phpversiondefault, phpversionoverride FROM '.MAIN_DB_PREFIX."sellyoursaas_deploymentserver WHERE ipaddress = '".$this->db->escape($serverdeployment)."'";
+				$resqlphpversion = $this->db->query($sqlphpversion);
+				if ($resqlphpversion && $this->db->num_rows($resqlphpversion) > 0) {
+					$objphpversion = $this->db->fetch_object($resqlphpversion);
+					$phpversiondefault = $objphpversion->phpversiondefault;
+					$phpversionoverride = $objphpversion->phpversionoverride;
+				}
+
+				$phpversion = $phpversiondefault;
+				if ($phpversionoverride && ! empty($contract->array_options['options_phpversion'])) {
 					$phpversion = $contract->array_options['options_phpversion'];
 				}
 				$substitarray['__PHPVERSION__'] = $phpversion;

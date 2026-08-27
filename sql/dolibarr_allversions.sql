@@ -207,3 +207,6 @@ ALTER TABLE llx_packages ADD COLUMN sqlafterundeployoption text;
 UPDATE llx_extrafields SET enabled = 'isModEnabled("sellyoursaas")' WHERE enabled = '$conf->sellyoursaas->enabled';
 ALTER TABLE llx_packages ADD COLUMN cliafterdeployoption text;
 
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN phpversiondefault varchar(8);
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN phpversionoverride integer DEFAULT 0;
+

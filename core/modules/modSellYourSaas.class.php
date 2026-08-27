@@ -989,6 +989,8 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('password_ro_db', "Read-only Password DB", 'password', 136, '128', 'contrat', 0, 0, '', $param, 1, '', -1, 'ToUpdateDBPassword:password_ro_db', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('prefix_db', "Special table prefix DB", 'varchar', 140, '64', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('timezone', "TimeZone", 'varchar', 141, '64', 'contrat', 0, 0, '', '', 1, '', -1, 'SellYourSaasTimeZoneDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
+		$param=array('options'=>array(''=>'UseServerDefault', '7.4'=>'7.4', '8.1'=>'8.1', '8.2'=>'8.2', '8.3'=>'8.3', '8.4'=>'8.4', '8.5'=>'8.5'));
+		$resultx=$extrafields->addExtraField('phpversion', "PhpVersion", 'select', 142, '', 'contrat', 0, 0, '', $param, 1, '', -1, 'PhpVersionDesc', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('fileauthorizekey', "DateFileauthorizekey", 'datetime', 150, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('filelock', "DateFilelock", 'datetime', 151, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('fileinstallmoduleslock', "DateFileInstallmoduleslock", 'datetime', 152, '', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
