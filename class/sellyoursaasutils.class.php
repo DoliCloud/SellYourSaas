@@ -4576,6 +4576,15 @@ class SellYourSaasUtils
 				}
 				$substitarray['__SMTP_SPF_STRING__'] = '_spf'.$sldAndSubdomain.'.'.$domainname;
 
+				// If a given PHP version was set for this contract/instance, it overrides the
+				// server global default (phpversion= in /etc/sellyoursaas.conf) for this instance only.
+				// Requires a "phpversion" extrafield on Contract (same pattern as "timezone").
+				$phpversion = '';
+				if (! empty($contract->array_options['options_phpversion'])) {
+					$phpversion = $contract->array_options['options_phpversion'];
+				}
+				$substitarray['__PHPVERSION__'] = $phpversion;
+
 
 				$dirfortmpfiles = DOL_DATA_ROOT.'/sellyoursaas/temp';
 				dol_mkdir($dirfortmpfiles, '', '0775');
@@ -4722,6 +4731,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $websitenamedeploy); 			// Param 47 in .sh
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterpaid); 	// Param 48 in .sh src for cli after paid
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterdeployoption); 	// Param 49 in .sh src for cli after deploy option
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $phpversion); 	// Param 50 in .sh: per-instance PHP version override (empty = use server default from /etc/sellyoursaas.conf)
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message

@@ -168,6 +168,12 @@ fi
 
 export CUSTOMDOMAIN=${46}
 
+# Per-instance PHP version override (from contract extrafield "phpversion"), takes priority
+# over the server-wide "phpversion=" read from /etc/sellyoursaas.conf when set.
+export phpversionforinstance=${50//£/ }
+if [[ "x$phpversionforinstance" != "x" && "x$phpversionforinstance" != "x-" ]]; then
+	phpversion=$phpversionforinstance
+fi
 
 
 export ErrorLog='#ErrorLog'

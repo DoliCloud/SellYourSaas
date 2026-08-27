@@ -92,7 +92,8 @@ $dbusername = $tmpparam[6];
 $cliafter = $tmpparam[18];
 $cliafterpaid = $tmpparam[46];
 $cliafterdeployoption = $tmpparam[47];
-$signature = empty($tmpparam[48]) ? '' : $tmpparam[48];		// Extract the signature received
+// $tmpparam[48] is the per-instance phpversion override added after cliafterdeployoption (see class/sellyoursaasutils.class.php)
+$signature = empty($tmpparam[49]) ? '' : $tmpparam[49];		// Extract the signature received
 
 // Recalculate the signature with message received
 // TODO Replace with hash('sha256', $contentsigned.$signature_key); or use asymmetric signature.
