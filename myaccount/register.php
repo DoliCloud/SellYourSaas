@@ -933,7 +933,7 @@ if ($reshook == 0) {
 							// If $tmppackage is defined, check if there is a restriction on some domains for this package (if not, $tmppackage->restrict_domains is empty and no restriction is done here)
 							if (! empty($tmppackage->restrict_domains)) {
 								$restrictfound = false;
-								$tmparray=explode(',', $tmppackage->restrict_domains);
+								$tmparray=array_map('trim', explode(',', $tmppackage->restrict_domains));
 								foreach ($tmparray as $tmprestrictdomain) {
 									$newdomain = getDomainFromURL($newval, 1);
 									if ($newdomain == $tmprestrictdomain) {
