@@ -2228,7 +2228,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$duration_unit = $tmparray['duration_unit'];
 		$date_start = dol_now();
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
-		$descriptionlines = "Websiteref = ".$website->ref;
+		$descriptionlines = "CustomURL = ".$custom_url;
 		$foundlinecontract = 0;
 
 		$object->array_options['options_custom_url'] = urlencode($custom_url);
