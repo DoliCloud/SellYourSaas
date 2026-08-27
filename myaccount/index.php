@@ -2300,11 +2300,14 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 } elseif ($action == 'removecustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
 	// Clears the custom_url extrafield and re-triggers "rename", which already removes the
 	// .custom.conf vhost and its certificate files when the value is empty (see
-	// action_suspend_unsuspend.sh mode=rename).
+	// action_suspend_unsuspend.sh mode=rename). Also removes the contract/recurring-invoice
+	// line for the custom URL product, same as the generic "uninstall" option action does,
+	// so the customer stops being billed for it.
 	$error = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$contractid = GETPOST('contractid', 'int');
 	$object = $listofcontractid[$contractid];
+	$productid = getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL");
 
 	$db->begin();
 
@@ -2312,6 +2315,37 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$result = $object->update($user);
 	if ($result <= 0) {
 		$error++;
+	}
+
+	if (!$error && $productid > 0) {
+		foreach ($object->lines as $key => $line) {
+			if ($line->fk_product == $productid) {
+				$res = $object->deleteLine($line->id, $user);
+				if ($res <= 0) {
+					setEventMessages($object->error, null, 'errors');
+					$error++;
+				}
+			}
+		}
+	}
+
+	if (!$error && $productid > 0) {
+		$object->fetchObjectLinked();
+		if (!empty($object->linkedObjects["facturerec"])) {
+			$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
+			if (count($arrayfacturerec) == 1) {
+				$facturerec = $arrayfacturerec[0];
+				foreach ($facturerec->lines as $key => $line) {
+					if ($line->fk_product == $productid) {
+						$res = $line->delete($user);
+						if ($res <= 0) {
+							setEventMessages($line->error, null, 'errors');
+							$error++;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	if (!$error) {
