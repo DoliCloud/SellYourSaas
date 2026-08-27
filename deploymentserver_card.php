@@ -240,6 +240,21 @@ $form = new Form($db);
 $formfile = new FormFile($db);
 $formproject = new FormProjets($db);
 
+// Restrict the "default PHP version" dropdown to versions actually detected on this server
+// (cached into phpversionsavailable by the "Detect PHP versions" button), when available.
+// Falls back to the full static list (set on the field definition) when nothing was
+// detected yet, e.g. for a new server or one never queried.
+if (!empty($object->phpversionsavailable)) {
+	$arrayofphpversionsdetected = array_map('trim', explode(',', $object->phpversionsavailable));
+	$newarrayofkeyval = array('' => 'UseGlobalConfigValue');
+	foreach ($arrayofphpversionsdetected as $tmpphpversion) {
+		if ($tmpphpversion !== '') {
+			$newarrayofkeyval[$tmpphpversion] = $tmpphpversion;
+		}
+	}
+	$object->fields['phpversiondefault']['arrayofkeyval'] = $newarrayofkeyval;
+}
+
 $title = $langs->trans("Deploymentserver");
 $help_url = '';
 llxHeader('', $title, $help_url);
