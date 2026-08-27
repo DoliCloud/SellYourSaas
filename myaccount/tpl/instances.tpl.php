@@ -802,11 +802,27 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 
 			// Hard coded option: Custom domain name
 			// Only one custom domain is actually functional per instance (the server side only
-			// generates a single vhost/certificate per instance), so the "add" form is only shown
-			// when none is set yet - otherwise the customer must use the "Remove" button first.
+			// generates a single vhost/certificate per instance), so once one is set this shows
+			// a generic "Uninstall" button (like any other option) instead of the add form again.
 			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0
-				&& empty($contract->array_options['options_custom_url'])
 				&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID'))))) {
+				if (! empty($contract->array_options['options_custom_url'])) {
+					print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
+					print '<div class="tagtd valignmiddle paddingleft paddingright">';
+					print '<div class="titleoption">';
+					print '<div class="inline-block">';
+					print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/theme/common/octicons/build/svg/milestone.svg" title="'.dol_escape_htmltag($alt).'">';
+					print '</div>';
+					print '<div class="inline-block paddingleft marginleftonly paddingright marginrightonly bold">'.$langs->trans("OptionYourCustomDomainName").'</div>';
+					print '</div>';
+					print '<span class="small">'.$langs->trans("YourCustomUrl").' : '.$contract->array_options['options_custom_url'].'</span>';
+					print '</div>';
+					print '<div class="tagtd center minwidth100 width100">';
+					print '<a class="btn btn-warning wordbreak" href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'" rel="noopener">'.$langs->trans("Uninstall").'...</a>';
+					print '</div>';
+					print '</div></div>';	// end tr, end table
+					print '<hr>';
+				} else {
 				print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
 
 				print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
@@ -856,6 +872,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</div></div>';	// end tr, end table
 
 				print '<hr>';
+				}
 			}
 
 			// Hard coded option: A website
@@ -1292,7 +1309,8 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			}
 			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL")) {
 				// Modify: reuses the same deploycustomurl handler used to add one (it already
-				// overwrites the value and re-triggers the vhost/cert regeneration).
+				// overwrites the value and re-triggers the vhost/cert regeneration). Removal is
+				// done via the "Uninstall" button in the options panel above, like any other option.
 				print '
 									<div class="col-md-5"></div>
 									<div class="col-md-5">
@@ -1303,13 +1321,6 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 											<input type="hidden" name="mode" value="'.$mode.'">
 											<input type="text" name="domainname" class="minwidth300" value="'.dol_escape_htmltag(reset($arrayofcustom)).'" placeholder="myerp.mycompany.com">
 											<input type="submit" class="btn btn-primary default" value="'.$langs->trans("Modify").'">
-										</form>
-										<form method="POST" action="'.$_SERVER["PHP_SELF"].'" class="inline-block" onsubmit="return confirm(\''.dol_escape_js($langs->trans("ConfirmRemoveCustomUrl")).'\');">
-											<input type="hidden" name="token" value="'.newToken().'">
-											<input type="hidden" name="action" value="removecustomurl">
-											<input type="hidden" name="contractid" value="'.$contract->id.'">
-											<input type="hidden" name="mode" value="'.$mode.'">
-											<input type="submit" class="btn btn-warning default" value="'.$langs->trans("Remove").'">
 										</form>
 									</div>
 								';

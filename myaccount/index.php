@@ -2297,74 +2297,6 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 		exit();
 	}
-} elseif ($action == 'removecustomurl' && getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL')) {
-	// Clears the custom_url extrafield and re-triggers "rename", which already removes the
-	// .custom.conf vhost and its certificate files when the value is empty (see
-	// action_suspend_unsuspend.sh mode=rename). Also removes the contract/recurring-invoice
-	// line for the custom URL product, same as the generic "uninstall" option action does,
-	// so the customer stops being billed for it.
-	$error = 0;
-	$sellyoursaasutils = new SellYourSaasUtils($db);
-	$contractid = GETPOST('contractid', 'int');
-	$object = $listofcontractid[$contractid];
-	$productid = getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL");
-
-	$db->begin();
-
-	$object->array_options['options_custom_url'] = '';
-	$result = $object->update($user);
-	if ($result <= 0) {
-		$error++;
-	}
-
-	if (!$error && $productid > 0) {
-		foreach ($object->lines as $key => $line) {
-			if ($line->fk_product == $productid) {
-				$res = $object->deleteLine($line->id, $user);
-				if ($res <= 0) {
-					setEventMessages($object->error, null, 'errors');
-					$error++;
-				}
-			}
-		}
-	}
-
-	if (!$error && $productid > 0) {
-		$object->fetchObjectLinked();
-		if (!empty($object->linkedObjects["facturerec"])) {
-			$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
-			if (count($arrayfacturerec) == 1) {
-				$facturerec = $arrayfacturerec[0];
-				foreach ($facturerec->lines as $key => $line) {
-					if ($line->fk_product == $productid) {
-						$res = $line->delete($user);
-						if ($res <= 0) {
-							setEventMessages($line->error, null, 'errors');
-							$error++;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if (!$error) {
-		$result = $sellyoursaasutils->sellyoursaasRemoteAction("rename", $object);
-		if ($result <= 0) {
-			$error++;
-		}
-	}
-
-	if ($error) {
-		$db->rollback();
-		setEventMessages($langs->trans("ErrorRemoveCustomUrl"), null, 'errors');
-	} else {
-		$db->commit();
-		setEventMessages($langs->trans("RemoveCustomUrlDone"), null, 'mesgs');
-	}
-
-	header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
-	exit();
 } elseif ($action == 'confirmeditfreeperiod' && getDolGlobalInt("SELLYOURSAAS_MAX_NB_MONTH_FREE_PERIOD_RESELLERS", $MAXMONTHFORTRIAL) > 0) {
 	$error = 0;$nothingdone =0;
 	$contractid = GETPOSTINT("contractid");
@@ -2550,7 +2482,19 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$object->username_web = $username_web;
 		$object->password_web = $password_web;
 
-		$result = $sellyoursaasutils->sellyoursaasRemoteAction("undeployoption", $tmplineforremoteaction);
+		if ($productid > 0 && $productid == getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL")) {
+			// The custom URL "option" has no package/deployment scripts of its own to undeploy:
+			// clear the extrafield and re-trigger "rename", which already removes the .custom.conf
+			// vhost and its certificate files when the value is empty (see
+			// action_suspend_unsuspend.sh mode=rename).
+			$object->array_options['options_custom_url'] = '';
+			$result = $object->update($user);
+			if ($result > 0) {
+				$result = $sellyoursaasutils->sellyoursaasRemoteAction("rename", $object);
+			}
+		} else {
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction("undeployoption", $tmplineforremoteaction);
+		}
 		if ($result <= 0) {
 			$error++;
 			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
