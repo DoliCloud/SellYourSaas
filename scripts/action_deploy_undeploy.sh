@@ -944,6 +944,21 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 	chown -R $osusername:$osusername $targetdir/$osusername/$dbname
 	echo `date +'%Y-%m-%d %H:%M:%S'`" chmod -R go-rwxs $targetdir/$osusername/$dbname"
 	chmod -R go-rwxs $targetdir/$osusername/$dbname
+
+	# Grant the web server group read+traverse on htdocs only (never on documents/, which is
+	# only ever reached through an authenticated PHP script running under the instance's own
+	# php-fpm pool user). This keeps htdocs servable by Apache whether the server still uses
+	# mpm_itk (harmless, itk already gives full access) or has moved to mpm_event for HTTP/2
+	# (where Apache itself runs as a single shared user and needs this ACL to serve static files).
+	if command -v setfacl >/dev/null 2>&1; then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Grant www-data traverse-only on the instance directories and read+traverse on htdocs"
+		setfacl -m g:www-data:--x "$targetdir/$osusername"
+		setfacl -m g:www-data:--x "$targetdir/$osusername/$dbname"
+		setfacl -R -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
+		setfacl -d -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
+	else
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Warning: setfacl not found (acl package not installed), skipping www-data ACL on htdocs - static files will only be servable while this server still uses mpm_itk"
+	fi
 fi
 
 # Undeploy option files
