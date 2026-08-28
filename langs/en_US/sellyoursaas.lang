@@ -490,6 +490,7 @@ CreateMyAccount=Create my account
 YouDontHaveCustomersYet=You don't have customers yet. Promote the link provided in top of page to find new prospects or customers...
 ManualCollection=Manual invoicing
 NoEmailSentToInformCustomer=No email sent to inform user.
+SellYourSaasNewAdminPasswordAfterRedeploy=The admin password stored for this contract was empty (cleared after the first deploy), so a new one was generated for this redeploy and is not sent by email: %s
 EvilUser=Unfair user or spammer
 DisableEmailToCustomer=Do not send email to customer
 CommissionsOnOldSystem=Commissions on old system

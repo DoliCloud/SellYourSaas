@@ -489,6 +489,7 @@ CreateMyAccount=Créer mon compte
 YouDontHaveCustomersYet=Vous n'avez pas encore de clients. Promouvez le lien fourni en haut de cette page pour trouver des prospects ou clients...
 ManualCollection=Facturation manuelle
 NoEmailSentToInformCustomer=Aucun email a été envoyé pour informer l'utilisateur
+SellYourSaasNewAdminPasswordAfterRedeploy=Le mot de passe admin stocké pour ce contrat était vide (effacé après le premier déploiement), un nouveau a été généré pour ce redéploiement et n'est pas envoyé par email : %s
 EvilUser=Utilisateur déloyal ou spammeur
 DisableEmailToCustomer=Ne pas envoyer d'e-mail au client
 CommissionsOnOldSystem=Commissions sur l'ancienne plateforme
