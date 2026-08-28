@@ -1795,7 +1795,11 @@ if (getDolGlobalString('MAIN_FAVICON_URL')) {
 
 $head = '';
 if ($favicon) {
-	$head.='<link rel="icon" href="img/'.$favicon.'">'."\n";
+	$hreffavicon = 'img/'.$favicon;
+	if (preg_match('/^http/i', $favicon)) {
+		$hreffavicon = $favicon;
+	}
+	$head.='<link rel="icon" href="'.$hreffavicon.'">'."\n";
 }
 $head .= '<!-- Bootstrap core CSS -->';
 $head .= '<link href="dist/css/bootstrap.css" type="text/css" rel="stylesheet">';
