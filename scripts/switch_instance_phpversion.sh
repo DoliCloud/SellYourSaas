@@ -1,7 +1,9 @@
 #!/bin/bash
 #
-# Create/update the php-fpm pool and systemd service for one instance, and point its
-# Apache vhost's SetHandler at it - whether the instance is already on php-fpm (switching
+# Create/update the php-fpm pool and systemd service for one instance, and point every one
+# of its Apache vhosts' SetHandler at it - the main one plus any extra custom-URL vhost
+# ("<fqn>.custom.conf", "<fqn>.custom2.conf"...: one <VirtualHost> per custom domain, since
+# each needs its own SSL cert) - whether the instance is already on php-fpm (switching
 # version) or still on mod_php (first-time migration, no existing SetHandler to replace).
 #
 # Used by both action_customurl_instance.sh (mode changephpversion, one instance at a time
@@ -10,7 +12,7 @@
 #
 # Usage: switch_instance_phpversion.sh <fqn> <osusername> <instancedir> <newphpversion>
 #
-# Safe to re-run: does nothing if the vhost is already pointed at <newphpversion>.
+# Safe to re-run: does nothing if every vhost is already pointed at <newphpversion>.
 
 set -e
 
@@ -43,13 +45,41 @@ if [ ! -f "$apacheconf" ]; then
 	exit 20
 fi
 
-# Always trust what the live vhost is actually pointing to (empty if still on mod_php,
+# An instance can have extra custom-URL vhosts (one SSL cert per domain means one full
+# <VirtualHost> per domain, not just a ServerAlias on the main one) - only one of them is
+# ever known to Dolibarr (contract custom_url field, "<fqn>.custom.conf"); others may have
+# been added by hand ("<fqn>.custom2.conf", "<fqn>.custom3.conf"...), multi-URL support
+# being deferred for now. All of them proxy to the same php-fpm socket as the main vhost,
+# so every one of them needs the same SetHandler update, or it silently keeps serving the
+# old PHP version - or breaks outright once the old pool/service is torn down below.
+apacheconfs=$(
+	{
+		echo "$apacheconf"
+		ls /etc/apache2/sellyoursaas-available/"$fqn".custom*.conf 2>/dev/null
+		ls /etc/apache2/sellyoursaas-enabled/"$fqn".custom*.conf 2>/dev/null
+	} | xargs -r -I{} realpath {} | sort -u
+)
+echo "$(date +'%Y-%m-%d %H:%M:%S') Vhost(s) for $fqn:"
+echo "$apacheconfs" | sed 's/^/  /'
+
+# Always trust what the live main vhost is actually pointing to (empty if still on mod_php,
 # there's never been a SetHandler proxying to a php-fpm socket for this instance yet).
 currentphpversioninvhost=$(grep -oP "(?<=php)[0-9]+\.[0-9]+(?=-fpm-${fqn//./\\.}\.sock)" "$apacheconf" | head -1)
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Switching PHP version of $fqn from '${currentphpversioninvhost:-mod_php}' to '$phpversion'"
 
-if [[ "x$currentphpversioninvhost" == "x$phpversion" ]]; then
-	echo "Instance $fqn is already running PHP $phpversion, nothing to do"
+# Only skip everything (including the vhost loop below) if EVERY vhost already points at the
+# target version - a custom-URL vhost added or re-pointed after the last switch could still
+# be lagging behind even when the main one already matches.
+allvhostsalreadyonversion=1
+while IFS= read -r onevhost; do
+	[ -n "$onevhost" ] || continue
+	if ! grep -q "php$phpversion-fpm-$fqn.sock" "$onevhost"; then
+		allvhostsalreadyonversion=0
+		break
+	fi
+done <<< "$apacheconfs"
+if [[ "$allvhostsalreadyonversion" == "1" ]]; then
+	echo "Instance $fqn is already running PHP $phpversion on every vhost, nothing to do"
 	exit 0
 fi
 
@@ -83,34 +113,38 @@ if [ ! -S "$newsocket" ]; then
 	exit 21
 fi
 
-cp -a "$apacheconf" "$apacheconf.bak-switchphpversion-$(date +%Y%m%d-%H%M%S)"
+while IFS= read -r onevhost; do
+	[ -n "$onevhost" ] || continue
+	cp -a "$onevhost" "$onevhost.bak-switchphpversion-$(date +%Y%m%d-%H%M%S)"
 
-if [[ "x$currentphpversioninvhost" != "x" ]]; then
-	# Already on php-fpm: just repoint the existing SetHandler at the new socket
-	echo "$(date +'%Y-%m-%d %H:%M:%S') Update SetHandler in $apacheconf to point to the new socket"
-	sed -i "s;php$currentphpversioninvhost-fpm-$fqn.sock;php$phpversion-fpm-$fqn.sock;g" "$apacheconf"
-else
-	# Still on mod_php: there is no SetHandler to replace, insert one fresh right after the
-	# first </IfModule> (the mpm_itk AssignUserID block, present in every vhost regardless
-	# of PHP mode), matching vhostHttps-phpfpm-sellyoursaas.template's own placement. Also
-	# neutralize php_admin_value open_basedir: it's an Apache/mod_php-only directive, invalid
-	# once mod_php is disabled, and redundant anyway since php-fpm enforces open_basedir
-	# per-pool (see php_admin_value[open_basedir] in phppool-phpfpm.template).
-	echo "$(date +'%Y-%m-%d %H:%M:%S') No existing php-fpm SetHandler in $apacheconf (instance was on mod_php), inserting one"
-	awk -v socket="php$phpversion-fpm-$fqn.sock" '
-		{ print }
-		!done && /<\/IfModule>/ {
-			print ""
-			print "        # Indique a Apache d'"'"'utiliser le socket de PHP-FPM specifique"
-			print "        <FilesMatch \\.php$>"
-			print "            ProxyFCGIBackendType GENERIC"
-			print "            SetHandler \"proxy:unix:/run/php/" socket "|fcgi://localhost/\""
-			print "        </FilesMatch>"
-			done = 1
-		}
-	' "$apacheconf" > "$apacheconf.tmp" && mv "$apacheconf.tmp" "$apacheconf"
-	sed -i 's/^\([[:space:]]*\)php_admin_value open_basedir/\1#php_admin_value open_basedir/' "$apacheconf"
-fi
+	oneversioninvhost=$(grep -oP "(?<=php)[0-9]+\.[0-9]+(?=-fpm-${fqn//./\\.}\.sock)" "$onevhost" | head -1)
+	if [[ "x$oneversioninvhost" != "x" ]]; then
+		# Already on php-fpm: just repoint the existing SetHandler at the new socket
+		echo "$(date +'%Y-%m-%d %H:%M:%S') Update SetHandler in $onevhost to point to the new socket"
+		sed -i "s;php$oneversioninvhost-fpm-$fqn.sock;php$phpversion-fpm-$fqn.sock;g" "$onevhost"
+	else
+		# Still on mod_php: there is no SetHandler to replace, insert one fresh right after the
+		# first </IfModule> (the mpm_itk AssignUserID block, present in every vhost regardless
+		# of PHP mode), matching vhostHttps-phpfpm-sellyoursaas.template's own placement. Also
+		# neutralize php_admin_value open_basedir: it's an Apache/mod_php-only directive, invalid
+		# once mod_php is disabled, and redundant anyway since php-fpm enforces open_basedir
+		# per-pool (see php_admin_value[open_basedir] in phppool-phpfpm.template).
+		echo "$(date +'%Y-%m-%d %H:%M:%S') No existing php-fpm SetHandler in $onevhost (instance was on mod_php), inserting one"
+		awk -v socket="php$phpversion-fpm-$fqn.sock" '
+			{ print }
+			!done && /<\/IfModule>/ {
+				print ""
+				print "        # Indique a Apache d'"'"'utiliser le socket de PHP-FPM specifique"
+				print "        <FilesMatch \\.php$>"
+				print "            ProxyFCGIBackendType GENERIC"
+				print "            SetHandler \"proxy:unix:/run/php/" socket "|fcgi://localhost/\""
+				print "        </FilesMatch>"
+				done = 1
+			}
+		' "$onevhost" > "$onevhost.tmp" && mv "$onevhost.tmp" "$onevhost"
+		sed -i 's/^\([[:space:]]*\)php_admin_value open_basedir/\1#php_admin_value open_basedir/' "$onevhost"
+	fi
+done <<< "$apacheconfs"
 
 # Grant www-data read+traverse on htdocs (needed if/when this server later drops mpm_itk
 # for HTTP/2 - harmless additive ACL, itk already has full access via the socket owner).
