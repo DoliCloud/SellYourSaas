@@ -85,9 +85,38 @@ if [[ "$failed" != "0" ]]; then
 fi
 echo "$(date +'%Y-%m-%d %H:%M:%S') ACL verification OK"
 
+echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Fixing up existing php-fpm pools created before listen.group was www-data"
+for poolconf in /etc/php/*/fpm/pool.d/sellyoursaas/*.phpfpm.conf; do
+	[ -f "$poolconf" ] || continue
+	if grep -q '^listen.group = www-data$' "$poolconf"; then
+		continue
+	fi
+	echo "  $poolconf"
+	sed -i -E 's/^listen\.group = .*/listen.group = www-data/' "$poolconf"
+	if ! grep -q '^listen.mode' "$poolconf"; then
+		sed -i '/^listen.group = www-data$/a listen.mode = 0660' "$poolconf"
+	fi
+	phpversion=$(basename "$(dirname "$(dirname "$(dirname "$poolconf")")")")
+	fqn=$(basename "$poolconf" .phpfpm.conf)
+	systemctl restart "sellyoursaas-php${phpversion}-fpm-${fqn}.service"
+done
+
+echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Neutralizing the now-invalid php_admin_value open_basedir line (mod_php will be disabled below; open_basedir is already enforced per-pool by php-fpm)"
+for vhost in /etc/apache2/sellyoursaas-available/*.conf /etc/apache2/sellyoursaas-enabled/*.conf; do
+	[ -f "$vhost" ] || continue
+	[ -L "$vhost" ] && continue
+	sed -i 's/^\([[:space:]]*\)php_admin_value open_basedir/\1#php_admin_value open_basedir/' "$vhost"
+done
+
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Switching MPM from itk/prefork to event and enabling HTTP/2"
 apache2ctl configtest
-a2dismod mpm_itk mpm_prefork 2>/dev/null || true
+enabledphpmod=$(apache2ctl -M 2>/dev/null | grep -oE 'php[0-9]+\.[0-9]+' | head -1 || true)
+if [[ "x$enabledphpmod" != "x" ]]; then
+	a2dismod "$enabledphpmod"
+fi
+a2dismod mpm_itk 2>/dev/null || true
+a2dismod mpm_prefork
+rm -f /etc/apache2/mods-enabled/mpm_itk.conf
 a2enmod mpm_event
 a2enmod http2
 apache2ctl configtest
