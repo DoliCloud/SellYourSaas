@@ -39,6 +39,12 @@ if [[ "x$defaultphpversion" == "x" ]]; then
 	exit 1
 fi
 
+if ! apache2ctl -M 2>/dev/null | grep -q proxy_fcgi_module; then
+	echo "Error: mod_proxy_fcgi is not enabled - needed before any mod_php instance can be switched to php-fpm." 1>&2
+	echo "Run 'a2enmod proxy proxy_fcgi', then 'systemctl restart apache2' (a2enmod alone is not enough, this needs a full restart), then re-run this script." 1>&2
+	exit 1
+fi
+
 scriptdir=$(dirname "$(realpath "$0")")
 modphpvhosts=$(grep -L 'fpm-.*\.sock' /etc/apache2/sellyoursaas-enabled/*.conf 2>/dev/null || true)
 if [[ "x$modphpvhosts" != "x" ]]; then

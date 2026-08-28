@@ -31,6 +31,12 @@ fi
 fpmpoolfiletemplate="$templatesdir/phppool-phpfpm.template"
 fpmservicefiletemplate="$templatesdir/poolservice-phpfpm.template"
 
+if ! apache2ctl -M 2>/dev/null | grep -q proxy_fcgi_module; then
+	echo "Error: mod_proxy_fcgi is not enabled - the SetHandler this script writes into the vhost needs it to reach php-fpm." 1>&2
+	echo "Run 'a2enmod proxy proxy_fcgi', then 'systemctl restart apache2' (a2enmod alone is not enough, this needs a full restart), before retrying." 1>&2
+	exit 22
+fi
+
 apacheconf="/etc/apache2/sellyoursaas-available/$fqn.conf"
 if [ ! -f "$apacheconf" ]; then
 	echo "Error: vhost $apacheconf not found, cannot switch PHP version for an instance that does not seem deployed" 1>&2
