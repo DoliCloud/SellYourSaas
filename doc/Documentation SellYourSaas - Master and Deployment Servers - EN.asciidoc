@@ -3311,6 +3311,17 @@ Once the server is prepared (step 1), `scripts/migrate_server_http2.sh` does the
 
 If the server needs several PHP versions to keep coexisting for a while (eg. some instances need an old version step 1 also installed, others should move to a newer default) that is fine under PHP-FPM, one pool per instance - but not under mod_php, which only ever runs one version at a time for every instance on the server. Migrate those instances to PHP-FPM individually first (keeping each one on its current PHP version) before running `scripts/migrate_server_http2.sh`, which needs every instance already off mod_php.
 
+===== Step 3: Dolibarr-side configuration
+
+On the **Master server**, once at least one deployment server is prepared (step 1):
+
+* Enable the feature module-wide: *Home - Setup - Other*, set `SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE = 1`. While disabled (the default), none of the fields below exist on screen - it is not just that they are left empty.
+* On each **Deployment server** card (`deploymentserver_card.php`), three fields appear once the feature is enabled:
+** *PhpVersionDefault*: the PHP-FPM version new instances on this server get by default. Leave it on *UseGlobalConfigValue* to fall back to `phpversion=` from `/etc/sellyoursaas.conf` (what step 1 set); pick one explicitly to override just this server. The dropdown itself is auto-restricted to whatever *PhpVersionsAvailable* below holds, once populated - before that, it offers a fixed placeholder list (7.4, 8.1 to 8.5) that may not match what is actually installed.
+** *AllowPhpVersionOverride*: whether a contract deployed on this server is allowed to pick its own PHP version at all (see below). Off by default even with the module-wide feature on - a server has to opt in.
+** *PhpVersionsAvailable*: read-only, filled by the *DetectPhpVersions* button next to it. That button calls the remote agent (`listphpversions` action, `scripts/remote_server/index.php`) to list the `php-fpm` binaries actually installed on that server (`ls /usr/sbin/php-fpm*`) and caches the result here - re-run it after step 1 installs a new version, or it will keep offering the stale list to admins and to the *PhpVersionDefault* dropdown above.
+* On a **contract**, the extrafield *PhpVersion* only appears when both the module-wide feature and that contract's deployment server's *AllowPhpVersionOverride* are on; its dropdown is restricted to that server's *PhpVersionsAvailable* the same way (`class/actions_sellyoursaas.class.php`, `contractcard` hook, mutates the extrafield definition in place before display - it does not touch what is stored, only what is offered on screen). Left on *UseServerDefault*, the instance follows whatever *PhpVersionDefault* says; changing it later (once already deployed) triggers `changephpversion`, which is what actually calls `scripts/switch_instance_phpversion.sh` on the deployment server.
+
 
 === Setup of logrotate
 
