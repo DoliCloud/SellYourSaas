@@ -1,13 +1,11 @@
 #!/bin/bash
 #
 # One-time, per-deployment-server migration from mpm_itk (mod_php or php-fpm era) to
-# mpm_event + HTTP/2. Run this AFTER every instance on the server has already been
-# switched to php-fpm (phpfpm=1 in /etc/sellyoursaas.conf, and every vhost's SetHandler
-# pointing at a php*-fpm-*.sock - check with:
-#   grep -L 'fpm-.*\.sock' /etc/apache2/sellyoursaas-enabled/*.conf
-# If that prints any file, that instance is still on mod_php: migrate it to php-fpm first
-# (mpm_itk is what currently gives it OS-user isolation - dropping itk before its pool
-# exists would run it, unisolated, as the shared Apache worker user).
+# mpm_event + HTTP/2. Requires phpfpm=1 and phpversion=<server default> already set in
+# /etc/sellyoursaas.conf. Any vhost still on mod_php gets switched to that default PHP-FPM
+# version first (via switch_instance_phpversion.sh, one instance at a time) before the MPM
+# switch, so isolation (currently from mpm_itk's OS-user switching) is never dropped before
+# each instance has its own php-fpm pool to fall back on.
 #
 # Why this is needed: mod_http2 refuses to load under mpm_prefork (which mpm_itk is built
 # on), so HTTP/2 requires mpm_event. But mpm_event has no per-vhost UID switching, so Apache
@@ -35,15 +33,32 @@ if [[ "x$phpfpm" == "x" ]]; then
 	exit 1
 fi
 
-modphpvhosts=$(grep -L 'fpm-.*\.sock' /etc/apache2/sellyoursaas-enabled/*.conf 2>/dev/null || true)
-if [[ "x$modphpvhosts" != "x" ]]; then
-	echo "Error: the following vhosts are still on mod_php (no php-fpm socket in their SetHandler):" 1>&2
-	echo "$modphpvhosts" 1>&2
-	echo "Switch them to php-fpm first (changephpversion from the contract, then check the vhost got a SetHandler proxy:unix:... block - see FIX needed in action_customurl_instance.sh for first-time mod_php->fpm migrations)." 1>&2
+defaultphpversion=$(grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
+if [[ "x$defaultphpversion" == "x" ]]; then
+	echo "Error: phpversion= is not set in /etc/sellyoursaas.conf (server default PHP-FPM version)" 1>&2
 	exit 1
 fi
 
-echo "$(date +'%Y-%m-%d %H:%M:%S') All vhosts are already on php-fpm, continuing"
+scriptdir=$(dirname "$(realpath "$0")")
+modphpvhosts=$(grep -L 'fpm-.*\.sock' /etc/apache2/sellyoursaas-enabled/*.conf 2>/dev/null || true)
+if [[ "x$modphpvhosts" != "x" ]]; then
+	echo "$(date +'%Y-%m-%d %H:%M:%S') ***** The following vhosts are still on mod_php, switching them to php-fpm $defaultphpversion (the server default) first:"
+	echo "$modphpvhosts"
+	while IFS= read -r vhost; do
+		[ -n "$vhost" ] || continue
+		fqn=$(basename "$vhost" .conf)
+		documentroot=$(grep -oP '(?<=DocumentRoot )\S+' "$vhost" | head -1)
+		documentroot=${documentroot%/htdocs}
+		if [[ "x$documentroot" == "x" || ! -d "$documentroot" ]]; then
+			echo "Error: could not find the instance directory for $fqn from $vhost's DocumentRoot" 1>&2
+			exit 1
+		fi
+		osusername=$(stat -c '%U' "$documentroot")
+		"$scriptdir/switch_instance_phpversion.sh" "$fqn" "$osusername" "$documentroot" "$defaultphpversion"
+	done <<< "$modphpvhosts"
+fi
+
+echo "$(date +'%Y-%m-%d %H:%M:%S') All vhosts are now on php-fpm, continuing"
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Installing acl package"
 if ! command -v setfacl >/dev/null 2>&1; then
