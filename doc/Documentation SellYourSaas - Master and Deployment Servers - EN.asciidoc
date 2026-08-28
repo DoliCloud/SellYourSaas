@@ -3286,6 +3286,16 @@ chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmo
 
 ---------------
 
+==== PHP-FPM per instance and HTTP/2 migration
+
+On **Deployment servers**, an instance can run under mod_php (default) or under its own PHP-FPM pool, one systemd service per instance (`sellyoursaas-php<version>-fpm-<fqn>.service`), letting different instances run different PHP versions on the same server. Set `phpfpm=1` and `phpversion=<default version>` in `/etc/sellyoursaas.conf` to make new deployments use PHP-FPM (with that default version, overridable per contract); existing mod_php instances are not affected until switched individually (contract PHP version field, or in bulk with `scripts/migrate_server_http2.sh`, see below).
+
+Prerequisites before installing extra PHP versions: `mod_proxy_fcgi` must be enabled (`a2enmod proxy proxy_fcgi`, then a full `systemctl restart apache2` - `a2enmod` alone is not enough) - both `scripts/switch_instance_phpversion.sh` and `scripts/migrate_server_http2.sh` refuse to run otherwise, since the `SetHandler` they write into a vhost needs it to reach the php-fpm socket.
+
+Why HTTP/2 needs this: `mod_http2` refuses to load under `mpm_prefork` (which `mpm_itk` is built on), so HTTP/2 requires `mpm_event`. But `mpm_event` has no per-vhost UID switching like `mpm_itk` does, so Apache then runs every vhost as a single shared user (`www-data`). PHP execution stays isolated per client either way (each php-fpm pool runs as its own OS user via `user=`/`group=` in its pool config), but `www-data` still needs read+traverse access to reach each instance's `htdocs/` and hand `.php` requests to the fcgi socket. `scripts/action_deploy_undeploy.sh` grants this via a POSIX ACL after every deploy, scoped to `htdocs/` only - `documents/` (private Dolibarr data) is never `Alias`ed into any vhost and stays fully unreadable by `www-data`, since it is only ever reached through an authenticated PHP script running under the instance's own pool user.
+
+Once every instance on a deployment server is on PHP-FPM, `scripts/migrate_server_http2.sh` does the rest of the one-time, per-server work: switches any still-mod_php instance to the server's default PHP-FPM version, installs `acl` and applies/verifies the ACL above on every existing instance, then switches `mpm_itk`/`mpm_prefork` to `mpm_event` and enables `http2`. It is idempotent and safe to re-run. It does not touch a server still needing several PHP versions coexisting under mod_php (that is not possible - mod_php only ever runs one version at a time) - migrate those instances to PHP-FPM individually first, keeping their current PHP version, if the server hosts old code that cannot run under a newer default version.
+
 
 === Setup of logrotate
 
