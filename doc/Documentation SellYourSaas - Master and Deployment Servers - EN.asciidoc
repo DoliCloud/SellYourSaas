@@ -2912,7 +2912,7 @@ executables = /usr/bin/groups
 
 [php]
 comment = The PHP Interpreter and Libraries
-executables = /usr/bin/php, /usr/bin/php7.4, /usr/bin/php7.3, /usr/bin/php7.2, /usr/bin/php5.6
+executables = /usr/bin/php, /usr/bin/php8.1, /usr/bin/php8.2, /usr/bin/php8.3, /usr/bin/php8.4
 directories = /usr/lib/php, /usr/share/php, /usr/share/php, /etc/php, /usr/share/php-geshi, /usr/share/zoneinfo
 includesections = env
 
@@ -2923,9 +2923,11 @@ executables = /usr/bin/env
 [mysqlclient]
 comment = mysql client
 executables = /usr/bin/mysql, /usr/bin/mysqldump
-paths = /usr/lib/x86_64-linux-gnu/libmysqlclient.so.21
+paths = /usr/lib/x86_64-linux-gnu/libmariadb.so.3
 regularfiles = /etc/mysql/my.cf, /etc/mysql/conf.d/, /etc/mysql/mariadb.conf.d/
 ---------------
+
+Only list the `executables` (php and mysqlclient libs) that actually exist on this server - `ls /usr/bin/php*` and `ldconfig -p | grep libmariadb` first. When adding or removing a PHP-FPM version on the server later (see the PHP-FPM per-instance section), update this list and rebuild the jail template (next section) so SSH/SFTP users get a matching `phpX.Y` binary for their instance's version.
 
 * Add this to the end of the config file /etc/jailkit/jk_chrootsh.ini
 
@@ -2956,7 +2958,9 @@ In this example the commonjail.tgz template will be used to create the chroot/ja
 
 and the privatejail.tgz template will be used to create private chroot/jail (eg. /home/jail/chroot/osuxxxxx)
 
-* Create your tgz which will be used to install the private chroot/jail and reinstall the common chroot/jail if necessary
+commonjail.tgz and privatejail.tgz are packaged from the exact same `template` directory - they are the same content under two names, one used for the shared jail and one for a per-user private jail, not two different builds.
+
+* Create your tgz which will be used to install the private chroot/jail and reinstall the common chroot/jail if necessary. Use `--zstd` instead of `-z` if `usecompressformatforarchive=zstd` in /etc/sellyoursaas.conf (name the files `.tar.zst` instead of `.tgz` in that case, and everywhere below)
 
 [source,bash]
 ---------------
@@ -2970,6 +2974,13 @@ tar czf privatejail.tgz template
 [source,bash]
 ---------------
 mv commonjail.tgz privatejail.tgz /home/admin/wwwroot/dolibarr_documents/sellyoursaas/scripts/templates/
+---------------
+
+* If /home/jail/chroot/commonjail already exists (eg. you are only adding a new PHP version to an existing server), the tgz above will NOT be re-extracted onto it automatically - sync the freshly rebuilt template into the live jail so already-deployed instances see the change too, without removing anything already there:
+
+[source,bash]
+---------------
+rsync -a /home/jail/chroot/template/ /home/jail/chroot/commonjail/
 ---------------
 
 * Modify the /etc/sellyoursaas.conf file of your instances server
