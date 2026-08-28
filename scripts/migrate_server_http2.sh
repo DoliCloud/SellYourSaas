@@ -96,7 +96,7 @@ for poolconf in /etc/php/*/fpm/pool.d/sellyoursaas/*.phpfpm.conf; do
 	if ! grep -q '^listen.mode' "$poolconf"; then
 		sed -i '/^listen.group = www-data$/a listen.mode = 0660' "$poolconf"
 	fi
-	phpversion=$(basename "$(dirname "$(dirname "$(dirname "$poolconf")")")")
+	phpversion=$(echo "$poolconf" | sed -n 's#/etc/php/\([0-9.]*\)/fpm/.*#\1#p')
 	fqn=$(basename "$poolconf" .phpfpm.conf)
 	systemctl restart "sellyoursaas-php${phpversion}-fpm-${fqn}.service"
 done
