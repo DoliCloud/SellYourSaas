@@ -3298,6 +3298,15 @@ On the **Master server**, *Home - Setup - Other*, set `SELLYOURSAAS_ENABLE_PHPVE
 
 ===== Step 2: prepare the server for PHP-FPM
 
+If the server is still on an Ubuntu release too old for Sury's PPA (`setup_server_phpfpm.sh` checks this and refuses to run otherwise - see https://packages.sury.org/php/dists/ for the current list, eg. Ubuntu 20.04 "focal" was dropped), the OS itself needs upgrading first. This is a manual, supervised procedure, not something to automate unattended on a server carrying live instances:
+
+. Stop Apache (`systemctl stop apache2`) - every instance on the server goes down for the duration.
+. Bring the system fully up to date first: `do-release-upgrade` refuses to start otherwise (prints "Please install all available updates for your release before upgrading" and exits, without actually erroring out). Run `apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y && apt-get autoremove -y`.
+. Drop a `Dpkg::Options { "--force-confdef"; "--force-confold"; }` snippet into `/etc/apt/apt.conf.d/` so config-file-conflict prompts default to keeping the existing file instead of hanging waiting for input, then run `DEBIAN_FRONTEND=noninteractive do-release-upgrade -m server -f DistUpgradeViewNonInteractive`. It still needs supervising (watch the log for anything unexpected) even in this frontend - it is not safe to fire-and-forget.
+. Once it finishes, check `/var/run/reboot-required` and reboot deliberately (not automatically) - the point where the server briefly drops off the network entirely.
+. If the old PHP version's Apache module (mod_php) got fully purged by the OS upgrade (it usually does, since the new release's repositories no longer carry the old PHP branch), every vhost's `php_admin_value open_basedir` line - the same one `scripts/migrate_server_http2.sh` neutralizes later in the normal flow - is now invalid and breaks `apache2ctl configtest` immediately, before `setup_server_phpfpm.sh` even gets to enabling `mod_proxy_fcgi`. Comment those lines out (`sed -i 's/^\([[:space:]]*\)php_admin_value open_basedir/\1#php_admin_value open_basedir/'` across every vhost) *before* running `setup_server_phpfpm.sh` below, not after.
+. Existing instances were running under whatever single mod_php version was active before the upgrade - request that version explicitly in `setup_server_phpfpm.sh`'s version list alongside the new default, and switch each instance to it individually (`switch_instance_phpversion.sh`), rather than letting `scripts/migrate_server_http2.sh` bulk-switch every still-mod_php vhost to the new server default - existing instances keep the PHP version they were actually running, same policy as everywhere else in this section.
+
 `scripts/setup_server_phpfpm.sh <default_version> <version> [version...]` does everything a server needs *before* any instance can be switched or `scripts/migrate_server_http2.sh` can run. Example, to install PHP 8.1 to 8.4 with 8.3 as the default:
 
 [source,bash]
