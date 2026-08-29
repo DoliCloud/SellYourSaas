@@ -34,6 +34,12 @@ htdocsdir=`grep '^htdocsdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+# Undocumented and easy to omit from /etc/sellyoursaas.conf on a new server - left empty, this
+# used to silently produce "<VirtualHost :443 :80>" (empty address), which apache2ctl configtest
+# then refuses to load at all, breaking deployall/suspend/unsuspend/custom-URL on that server.
+if [[ "x$localip" == "x" ]]; then
+	localip="*"
+fi
 if [[ "x$htdocsdir" == "x" ]]; then
 	export htdocsdir="/htdocs"
 fi
