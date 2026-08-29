@@ -2482,7 +2482,19 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$object->username_web = $username_web;
 		$object->password_web = $password_web;
 
-		$result = $sellyoursaasutils->sellyoursaasRemoteAction("undeployoption", $tmplineforremoteaction);
+		if ($productid > 0 && $productid == getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL")) {
+			// The custom URL "option" has no package/deployment scripts of its own to undeploy:
+			// clear the extrafield and re-trigger "rename", which already removes the .custom.conf
+			// vhost and its certificate files when the value is empty (see
+			// action_suspend_unsuspend.sh mode=rename).
+			$object->array_options['options_custom_url'] = '';
+			$result = $object->update($user);
+			if ($result > 0) {
+				$result = $sellyoursaasutils->sellyoursaasRemoteAction("rename", $object);
+			}
+		} else {
+			$result = $sellyoursaasutils->sellyoursaasRemoteAction("undeployoption", $tmplineforremoteaction);
+		}
 		if ($result <= 0) {
 			$error++;
 			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');

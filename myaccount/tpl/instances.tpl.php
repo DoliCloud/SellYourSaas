@@ -801,8 +801,28 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			print '<br>';
 
 			// Hard coded option: Custom domain name
+			// Only one custom domain is actually functional per instance (the server side only
+			// generates a single vhost/certificate per instance), so once one is set this shows
+			// a generic "Uninstall" button (like any other option) instead of the add form again.
 			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0
 				&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID'))))) {
+				if (! empty($contract->array_options['options_custom_url'])) {
+					print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
+					print '<div class="tagtd valignmiddle paddingleft paddingright">';
+					print '<div class="titleoption">';
+					print '<div class="inline-block">';
+					print '<img class="photo photowithmargin" border="0" height="'.$maxHeight.'" src="'.DOL_URL_ROOT.'/theme/common/octicons/build/svg/milestone.svg" title="'.dol_escape_htmltag($alt).'">';
+					print '</div>';
+					print '<div class="inline-block paddingleft marginleftonly paddingright marginrightonly bold">'.$langs->trans("OptionYourCustomDomainName").'</div>';
+					print '</div>';
+					print '<span class="small">'.$langs->trans("YourCustomUrl").' : '.$contract->array_options['options_custom_url'].'</span>';
+					print '</div>';
+					print '<div class="tagtd right valignmiddle minwidth100 width150">';
+					print '<a class="btn btn-warning nowraponall" href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'" rel="noopener">'.$langs->trans("Uninstall").'...</a>';
+					print '</div>';
+					print '</div></div>';	// end tr, end table
+					print '<hr>';
+				} else {
 				print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
 
 				print '<form method="POST" id="formwebsiteoption" action="'.$_SERVER["PHP_SELF"].'">'."\n";
@@ -852,6 +872,7 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 				print '</div></div>';	// end tr, end table
 
 				print '<hr>';
+				}
 			}
 
 			// Hard coded option: A website
@@ -1066,14 +1087,14 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					if (!$productalreadyininstance) {
 						// Show link to subscribe
 						if ($ispaid || $freemodeinstance || getDolGlobalInt("SELLYOURSAAS_ENABLE_OPTION_FOR_TRIAL")) {
-							print '<a class="btn btn-primary wordbreak" href="/index.php?mode=instances&action=install&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
+							print '<a class="btn btn-primary nowraponall" href="/index.php?mode=instances&action=install&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Install").'...</a><br>';
 						} else {
 							// Show disabled button if not paying or validated
 							print '<input type="button" class="btn green-haze btn-circle margintop marginbottom marginleft marginright reposition" title="'.$langs->trans("SorryOptionsNotAvailableDuringTestPeriod", $langs->transnoentitiesnoconv("MyBilling")).'..." disabled="disabled" value="'.$langs->trans("Install").'..."><br>';
 						}
 					} else {
 						// Show link to unsubscribe
-						print '<a class="btn btn-warning wordbreak" href="/index.php?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
+						print '<a class="btn btn-warning nowraponall" href="/index.php?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.$tmpproduct->id.'" rel="noopener">'.$langs->trans("Uninstall").'...</a><br>';
 					}
 					print '</div>';
 				} else {
@@ -1286,6 +1307,11 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 										</div>
 									';
 			}
+			// Modify is hidden for now: only one custom URL is supported per instance, and
+			// changing it in place had a confusing empty=remove trap. To change domain,
+			// customers must Uninstall the option (panel above) then re-Install with the new
+			// value. TODO: once multiple custom URLs per instance are supported (with a cap),
+			// bring back an edit/modify affordance here.
 		}
 
 		//print '<input type="submit" class="btn btn-warning default change-domain-link" name="changedomain" value="'.$langs->trans("ChangeDomain").'">';
