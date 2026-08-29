@@ -2366,7 +2366,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 	header("Location: ".$backtourl);
 	exit;
-} elseif ($action == 'uninstall') {
+} elseif ($action == 'uninstall') {		// Remove a service (option) $productid from $contractid
 	$error = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$deletedlinecontract = 0; $deletedlinefacturerec = 0;
