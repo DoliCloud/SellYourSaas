@@ -350,8 +350,8 @@ if (!is_object($hookmanager)) {
 	include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 	$hookmanager = new HookManager($db);
 }
-$hookmanager->initHooks(array('mainmyaccountloginpage'));
-$parameters = array('socid' => (int) $_SESSION['sellyoursaas_2fa_pending_socid']);
+
+$parameters = array('socid' => (int) $_SESSION['sellyoursaas_2fa_pending_socid'], 'mainmyaccountloginpage' => 1);
 $hookmanager->executeHooks('printSecondFactorFields', $parameters);
 echo $hookmanager->resPrint;
 ?>
