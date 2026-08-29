@@ -131,6 +131,26 @@ for v in $versions; do
 	fi
 done
 
+# A handful of extensions (imagick, ssh2, xdebug at least) are not built per PHP version by
+# Sury - installing any of them pulls in a version-independent package that registers itself
+# against every PHP ABI already present on the system via a packaging trigger, which can
+# silently apt-get install (and systemd auto-enables) a whole extra php<version>-fpm this
+# script never asked for and knows nothing about. Mask any php-fpm service on disk that isn't
+# one of the versions actually requested, whatever pulled it in.
+for unit in /usr/lib/systemd/system/php*-fpm.service /lib/systemd/system/php*-fpm.service; do
+	[ -f "$unit" ] || continue
+	v=$(basename "$unit" | sed -n 's/^php\([0-9.]*\)-fpm\.service$/\1/p')
+	[[ "x$v" != "x" ]] || continue
+	case " $versions " in
+		*" $v "*) ;;
+		*)
+			echo "  php$v-fpm was not requested (pulled in as a side dependency) - masking it"
+			systemctl disable --now "php$v-fpm" 2>/dev/null || true
+			systemctl mask "php$v-fpm"
+			;;
+	esac
+done
+
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Creating pool.d/sellyoursaas for every version"
 for v in $versions; do
 	mkdir -p "/etc/php/$v/fpm/pool.d/sellyoursaas"
