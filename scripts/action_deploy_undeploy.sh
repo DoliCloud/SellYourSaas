@@ -1775,6 +1775,19 @@ if [[ "$mode" == "undeployall" ]]; then
 	echo crontab -r -u $osusername
 	crontab -r -u $osusername
 
+	# Jailed users (sshaccesstype 1 or 2) had their real /etc/passwd home field rewritten by
+	# jk_jailuser to a jail-chroot-relative path (eg. .../chroot/commonjail/./home/jail/home/$osusername)
+	# at deploy time - the jail-side mirror of that path was just unmounted and rm -Rf'd earlier in
+	# this script, but the real passwd entry was never pointed back at the real home. deluser below
+	# reads that same field to know what to back up/remove: left as-is, it looks at a path that no
+	# longer exists, silently backs up and removes nothing, and still reports success - leaving the
+	# real home directory (with whatever it still contains) permanently orphaned with no account.
+	echo usermod -d $targetdir/$osusername $osusername
+	if [[ $testorconfirm == "confirm" ]]
+	then
+		usermod -d $targetdir/$osusername $osusername
+	fi
+
 	# Note: When we do this the home dir of $osusername was already archived by code few lines previously
 	echo deluser --remove-home --backup --backup-to $archivedir/$osusername $osusername
 	if [[ $testorconfirm == "confirm" ]]
