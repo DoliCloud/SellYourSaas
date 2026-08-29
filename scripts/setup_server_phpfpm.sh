@@ -137,8 +137,13 @@ systemctl restart apache2
 systemctl is-active apache2
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Refreshing the jailkit common jail"
+chrootdir=$(grep '^chrootdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
 if ! command -v jk_init >/dev/null 2>&1; then
-	echo "Warning: jailkit is not installed on this server, skipping the jail refresh."
+	echo "jailkit is not installed on this server (SSH access is not jailed here), skipping the jail refresh."
+elif [[ "x$chrootdir" == "x" ]]; then
+	echo "chrootdir= is not set in /etc/sellyoursaas.conf, this server is not using jailkit for SellYourSaaS, skipping the jail refresh."
+elif ! grep -q '^\[php\]' /etc/jailkit/jk_init.ini; then
+	echo "Warning: jailkit is installed and chrootdir= is set, but /etc/jailkit/jk_init.ini has no [php] section yet - this server's jail was never set up per the Jailkit section of the doc. Skipping the jail refresh (add the [php]/[env]/[mysqlclient] sections by hand first, then re-run this script)."
 else
 	currentmodphp=$(apache2ctl -M 2>/dev/null | grep -oE 'php[0-9]+\.[0-9]+' | head -1 || true)
 	jailversions="$versions"
