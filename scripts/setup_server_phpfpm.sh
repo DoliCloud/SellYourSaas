@@ -11,9 +11,11 @@
 #     whose own distro php<version>-fpm.service stays enabled; the others are masked
 #   - sets phpfpm=1 and phpversion=<default_version> in /etc/sellyoursaas.conf
 #   - enables mod_proxy_fcgi and restarts Apache
-#   - refreshes the jailkit commonjail so SSH/SFTP users get a matching php<version>
-#     CLI binary for every version above, plus whatever PHP version mod_php is
-#     currently serving (if any - existing instances keep using it until migrated)
+#   - refreshes the jailkit common jail AND every existing private jail (sshaccesstype=2
+#     instances each got their own full copy at deploy time, they don't share commonjail)
+#     so SSH/SFTP users get a matching php<version> CLI binary for every version above,
+#     plus whatever PHP version mod_php is currently serving (if any - existing instances
+#     keep using it until migrated). Skipped entirely if this server isn't using jailkit.
 #
 # What this script does NOT do: touch any existing vhost, or run
 # scripts/migrate_server_http2.sh's MPM switch. Existing instances keep running
@@ -184,6 +186,23 @@ else
 	if [ -d /home/jail/chroot/commonjail ]; then
 		rsync -a /home/jail/chroot/template/ /home/jail/chroot/commonjail/
 		echo "  synced into the live commonjail"
+	fi
+
+	# Instances with sshaccesstype=2 (PrivateUserJail) each got their own full copy of this
+	# same template at deploy time (extracted from privatejail.tar.zst, then renamed to
+	# $chrootdir/$osusername) instead of sharing commonjail - refresh every one of them too,
+	# or they silently keep whatever PHP versions were available on the day they were deployed.
+	if [[ "x$chrootdir" != "x" && -d "$chrootdir" ]]; then
+		for onejail in "$chrootdir"/*/; do
+			onejail=${onejail%/}
+			base=$(basename "$onejail")
+			case "$base" in
+				commonjail|template) continue ;;
+			esac
+			[ -d "$onejail/usr/bin" ] || continue
+			rsync -a /home/jail/chroot/template/ "$onejail/"
+			echo "  synced into the private jail $onejail"
+		done
 	fi
 fi
 
