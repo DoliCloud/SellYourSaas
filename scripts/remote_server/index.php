@@ -92,8 +92,12 @@ $dbusername = $tmpparam[6];
 $cliafter = $tmpparam[18];
 $cliafterpaid = $tmpparam[46];
 $cliafterdeployoption = $tmpparam[47];
-// $tmpparam[48] is the per-instance phpversion override added after cliafterdeployoption (see class/sellyoursaasutils.class.php)
-$signature = empty($tmpparam[49]) ? '' : $tmpparam[49];		// Extract the signature received
+// The signature is always the last parameter appended by the caller (see sellyoursaasRemoteAction()),
+// whatever the total number of parameters sent for this action. preg_split() leaves a trailing empty
+// element because paramspacenoquotes always ends with a separator space, so the signature is the
+// element right before that one.
+$signatureindex = count($tmpparam) - 2;
+$signature = ($signatureindex >= 0 && !empty($tmpparam[$signatureindex])) ? $tmpparam[$signatureindex] : '';
 
 // Recalculate the signature with message received
 // TODO Replace with hash('sha256', $contentsigned.$signature_key); or use asymmetric signature.
