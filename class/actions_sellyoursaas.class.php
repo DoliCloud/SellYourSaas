@@ -23,6 +23,7 @@
  */
 require_once DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php";
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
 dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 
@@ -432,14 +433,35 @@ class ActionsSellyoursaas
 				}
 
 				if (! $error) {
+					// deployall recreates the admin user from scratch, so it always needs a real password to set, not
+					// just one to display. options_deployment_init_adminpass is emptied once the very first deploy is
+					// marked done (see register_instance.php, "Clear password, we don't need it anymore"), unless
+					// SELLYOURSAAS_KEEP_INIT_ADMINPASS is set - so on every later Redeploy from this card, this field
+					// is expected to already be empty when that constant is off. Generate a fresh password here
+					// instead of silently sending an empty string as the new admin password. If the constant is on,
+					// the field finding itself empty anyway is not the expected case, so leave it alone rather than
+					// paper over it - that configuration means the real password should always be known/kept.
+					$adminpassforredeploy = $object->array_options['options_deployment_init_adminpass'];
+					$generatedadminpassforredeploy = false;
+					if (empty($adminpassforredeploy) && !getDolGlobalString('SELLYOURSAAS_KEEP_INIT_ADMINPASS')) {
+						$adminpassforredeploy = substr(getRandomPassword(true, array('I')), 0, 9);
+						$generatedadminpassforredeploy = true;
+					}
+
 					dol_include_once('sellyoursaas/class/sellyoursaasutils.class.php');
 					$sellyoursaasutils = new SellYourSaasUtils($db);
-					$result = $sellyoursaasutils->sellyoursaasRemoteAction('deployall', $object, 'admin', $object->thirdparty->email, $object->array_options['options_deployment_init_adminpass'], '0', 'Deploy from contract card', 300);
+					$result = $sellyoursaasutils->sellyoursaasRemoteAction('deployall', $object, 'admin', $object->thirdparty->email, $adminpassforredeploy, '0', 'Deploy from contract card', 300);
 					if ($result <= 0) {
 						$error++;
 						$this->error=$sellyoursaasutils->error;
 						$this->errors=$sellyoursaasutils->errors;
 						setEventMessages($this->error, $this->errors, 'errors');
+					} elseif ($generatedadminpassforredeploy) {
+						// Store it back so it is not lost, and show it once: this is the only place it is recorded now,
+						// there is no email sent for it (the customer chooses their own password on first registration).
+						$object->array_options['options_deployment_init_adminpass'] = $adminpassforredeploy;
+						$object->insertExtraFields();
+						setEventMessages($langs->trans('SellYourSaasNewAdminPasswordAfterRedeploy', $adminpassforredeploy), null, 'warnings');
 					}
 				}
 
