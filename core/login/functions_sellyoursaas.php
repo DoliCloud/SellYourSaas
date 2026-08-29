@@ -141,9 +141,8 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 						include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 						$hookmanager = new HookManager($db);
 					}
-					$hookmanager->initHooks(array('mainmyaccountloginpage'));
 
-					$parameters = array('socid' => $thirdparty->id);
+					$parameters = array('socid' => $thirdparty->id, 'mainmyaccountloginpage' => 1);
 					$hookobject = null;
 					$hookaction = '';
 					$hookmanager->executeHooks('checkSecondFactorLogin', $parameters, $hookobject, $hookaction);
