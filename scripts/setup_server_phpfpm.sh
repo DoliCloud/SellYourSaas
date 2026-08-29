@@ -183,8 +183,17 @@ else
 		chown nobody:nogroup "$templatesdir/commonjail.tar.zst" "$templatesdir/privatejail.tar.zst" 2>/dev/null || true
 	fi
 
+	# /etc/passwd, /etc/group (and their -/shadow variants) are NOT part of the software
+	# refreshed here - jk_init only ever seeds them with root/system accounts, and every real
+	# jailed user then gets added to the LIVE jail's own copy by jk_jailuser at deploy time
+	# (see action_deploy_undeploy.sh). Syncing the freshly rebuilt template's minimal versions
+	# over them would wipe out every already-deployed user, breaking their SSH/SFTP access and
+	# any cron (eg. backups) that logs in as them - found and fixed the hard way on this exact
+	# set of servers, see the commit history.
+	jailidentityexcludes=(--exclude=/etc/passwd --exclude=/etc/passwd- --exclude=/etc/group --exclude=/etc/group- --exclude=/etc/shadow --exclude=/etc/shadow- --exclude=/etc/gshadow --exclude=/etc/gshadow-)
+
 	if [ -d /home/jail/chroot/commonjail ]; then
-		rsync -a /home/jail/chroot/template/ /home/jail/chroot/commonjail/
+		rsync -a "${jailidentityexcludes[@]}" /home/jail/chroot/template/ /home/jail/chroot/commonjail/
 		echo "  synced into the live commonjail"
 	fi
 
@@ -200,7 +209,7 @@ else
 				commonjail|template) continue ;;
 			esac
 			[ -d "$onejail/usr/bin" ] || continue
-			rsync -a /home/jail/chroot/template/ "$onejail/"
+			rsync -a "${jailidentityexcludes[@]}" /home/jail/chroot/template/ "$onejail/"
 			echo "  synced into the private jail $onejail"
 		done
 	fi
