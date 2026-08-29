@@ -2454,6 +2454,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	// Call to remoteaction to undeploy option
 	if (!$error) {
 		$object = $tmpcontract;
+
+		// All the block under here seems useless
+		/*
 		$type_db = $conf->db->type;
 		$hostname_db  = $object->array_options['options_hostname_db'];
 		$username_db  = $object->array_options['options_username_db'];
@@ -2481,6 +2484,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$object->hostname_os  = $hostname_os;
 		$object->username_web = $username_web;
 		$object->password_web = $password_web;
+		*/
 
 		$result = $sellyoursaasutils->sellyoursaasRemoteAction("undeployoption", $tmplineforremoteaction);
 		if ($result <= 0) {
@@ -2595,7 +2599,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 				break;
 			}
 		}
+
 		$object = $tmpcontract;
+
+		// All the block under here seems useless
+		/*
 		$type_db = $conf->db->type;
 		$hostname_db  = $object->array_options['options_hostname_db'];
 		$username_db  = $object->array_options['options_username_db'];
@@ -2623,6 +2631,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$object->hostname_os  = $hostname_os;
 		$object->username_web = $username_web;
 		$object->password_web = $password_web;
+		*/
 
 		//$object->context["options_websitename"] = $website->ref;
 		$result = $sellyoursaasutils->sellyoursaasRemoteAction("deployoption", $tmplineforremoteaction);
