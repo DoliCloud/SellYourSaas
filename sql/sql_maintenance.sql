@@ -37,7 +37,7 @@ select concat("update mysql.user set password = '", u.password, "' where host = 
 
 
 -- Other
-See also the documentation *Documentation SellYourSaas - Master and Deployment Servers*
+-- See also the documentation *Documentation SellYourSaas - Master and Deployment Servers*
 
 
 
