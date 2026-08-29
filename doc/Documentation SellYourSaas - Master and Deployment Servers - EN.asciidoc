@@ -1515,6 +1515,29 @@ systemctl status remote_server_launcher
 
 Note: The agent is launched on port 8080 and is waiting master orders.
 
+Note: *remote_server_launcher* (this file) and the *scripts/remote_server/index.php* it serves
+should instead be **local, non-mounted copies** under */etc/init.d/* (not the symlink above),
+so the agent can still be started/restarted and report its own status even if the
+*/mnt/sellyoursaas* mount is temporarily down - only the action_*.sh scripts it calls, which
+genuinely only exist on the mount, would then fail explicitly. *remote_server_launcher.sh* still
+`cd`s into the real (mounted) scripts directory (read from *dolibarrdir=* in
+*/etc/sellyoursaas.conf*) before starting `php -S`, and *index.php* itself also `chdir()`s there
+on every request as a safety net, in case the cwd set by the launcher does not survive however
+the init system forks/daemonizes the process (observed to not survive on some systemd-wrapped
+LSB service starts).
+
+Since the launcher no longer needs the mount just to be read/executed, nothing else forces
+systemd to wait for it at boot - add a drop-in so the service still starts in the right order:
+
+[source, bash]
+---------------
+mkdir -p /etc/systemd/system/remote_server_launcher.service.d
+cat > /etc/systemd/system/remote_server_launcher.service.d/mount-order.conf << 'EOF'
+[Unit]
+RequiresMountsFor=/mnt/sellyoursaas
+EOF
+systemctl daemon-reload
+---------------
 
 To use systemd create a file */etc/systemd/system/remote-server-launcher.service* :
 
