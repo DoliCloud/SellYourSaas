@@ -535,11 +535,32 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 					fi
 					echo 'sed -i "/$osusername/d" /etc/fstab'
 					sed -i "/$osusername/d" /etc/fstab
-					# to prevent error "user osuxxxxx is currently used by process xxxx"
-					echo "killall -u $osusername; sleep 2"
-					killall -u $osusername; sleep 2
+					# to prevent error "user osuxxxxx is currently used by process xxxx" - killall only
+					# sends SIGTERM and a flat 2s sleep is not always enough for a process to actually
+					# exit before usermod below runs, and usermod's exit code was never checked: a
+					# still-running process silently leaves the passwd home field pointing at the jail
+					# path just removed above, which later breaks deluser --remove-home in undeployall
+					# mode (see the fix further down for why that matters). SIGKILL and poll for the
+					# processes to actually be gone (up to 10s) instead of blindly sleeping, then retry
+					# usermod once more after another kill if it still fails, and log clearly if it does
+					# not - this used to fail silently.
+					echo "killall -9 -u $osusername"
+					killall -9 -u $osusername 2>/dev/null
+					for i in 1 2 3 4 5 6 7 8 9 10; do
+						pgrep -u $osusername >/dev/null 2>&1 || break
+						sleep 1
+					done
 					echo "usermod -d $targetdir/$osusername --shell /bin/false $osusername"
 					usermod -d $targetdir/$osusername --shell /bin/false $osusername
+					if [[ $? != 0 ]]; then
+						echo "usermod failed for $osusername (still in use?), killing again and retrying once"
+						killall -9 -u $osusername 2>/dev/null
+						sleep 2
+						usermod -d $targetdir/$osusername --shell /bin/false $osusername
+						if [[ $? != 0 ]]; then
+							echo "Error: usermod still failed for $osusername after retry - its passwd home field may still point at the jail path just removed above"
+						fi
+					fi
 				fi
 			fi
 		fi
