@@ -887,7 +887,7 @@ class modSellYourSaas extends DolibarrModules
 		$param=array('options'=>array('0' => 'No','1'=>'Yes', '2' => 'DuringTestPeriodOnly', '3' => 'AfterTestPeriodOnly', '4' => 'OnDemand'));
 		$resultx=$extrafields->addExtraField('directaccess', "AccessToResources", 'select', 101118, '', 'product', 0, 0, '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('0' => 'SystemDefault', '1' => 'CommonUserJail', '2' => 'PrivateUserJail'));
-		$resultx=$extrafields->addExtraField('sshaccesstype', "SshAccessType", 'select', 101119, '', 'product', 0, 0, '', $param, 1, '', 'getDolGlobalInt("SELLYOURSAAS_SSH_JAILKIT_ENABLED")', 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('sshaccesstype', "SshAccessType", 'select', 101119, '', 'product', 0, 0, '', $param, 1, '', -1, 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas") && getDolGlobalInt("SELLYOURSAAS_SSH_JAILKIT_ENABLED")');
 		$param=array('options'=>array('basic'=>'Basic','premium'=>'Premium','none'=>'None'));
 		$resultx=$extrafields->addExtraField('typesupport', "TypeOfSupport", 'select', 101125, '', 'product', 0, 0, '', $param, 1, '', 1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('register_text', "RegisterText", 'varchar', 101130, '255', 'product', 0, 0, '', '', 1, '', -1, 'EnterHereTranslationKeyToUseOnRegisterPage', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")', 0, 0, array('csslist'=>'tdoverflowmax150'));
@@ -974,7 +974,7 @@ class modSellYourSaas extends DolibarrModules
 		$param=array('options'=>array('0'=>'SystemDefault','1'=>'CommonUserJail','2'=>'PrivateUserJail'));
 		$resultx=$extrafields->addExtraField('instance_unique_id', "Instance unique ID", 'varchar', 128, '32', 'contrat', 1, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
-		$resultx=$extrafields->addExtraField('sshaccesstype', "SshAccessType", 'select', 400, '', 'contrat', 0, 0, '', $param, 1, '', 'getDolGlobalInt("SELLYOURSAAS_SSH_JAILKIT_ENABLED")', 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('sshaccesstype', "SshAccessType", 'select', 400, '', 'contrat', 0, 0, '', $param, 1, '', -1, 'HelpOnSshAccessType', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas") && getDolGlobalInt("SELLYOURSAAS_SSH_JAILKIT_ENABLED")');
 		$param=array('options'=>array('0'=>'DefaultFromAppService','1'=>'Yes'));
 		$resultx=$extrafields->addExtraField('directaccess', "AccessToResources", 'select', 401, '', 'contrat', 0, 0, '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
