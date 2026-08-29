@@ -191,10 +191,14 @@ done
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Switching MPM from itk/prefork to event and enabling HTTP/2"
 apache2ctl configtest
-enabledphpmod=$(apache2ctl -M 2>/dev/null | grep -oE 'php[0-9]+\.[0-9]+' | head -1 || true)
-if [[ "x$enabledphpmod" != "x" ]]; then
+# a2query -m reports the a2enmod/a2dismod name (eg. "php7.4", "php8.3" - stable across Ubuntu
+# 22.04/24.04, Debian package naming convention), NOT apache2ctl -M's internal module symbol
+# (always "php7_module" for the whole 7.x branch, "php_module" for 8.x - never version-specific,
+# so grepping for "php[0-9]+\.[0-9]+" in apache2ctl -M's output never matches anything there).
+enabledphpmods=$(a2query -m 2>/dev/null | grep -oE '^php[0-9]+\.[0-9]+' || true)
+for enabledphpmod in $enabledphpmods; do
 	a2dismod "$enabledphpmod"
-fi
+done
 a2dismod mpm_itk 2>/dev/null || true
 a2dismod mpm_prefork
 rm -f /etc/apache2/mods-enabled/mpm_itk.conf

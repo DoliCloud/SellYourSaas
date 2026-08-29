@@ -187,7 +187,11 @@ elif [[ "x$chrootdir" == "x" ]]; then
 elif ! grep -q '^\[php\]' /etc/jailkit/jk_init.ini; then
 	echo "Warning: jailkit is installed and chrootdir= is set, but /etc/jailkit/jk_init.ini has no [php] section yet - this server's jail was never set up per the Jailkit section of the doc. Skipping the jail refresh (add the [php]/[env]/[mysqlclient] sections by hand first, then re-run this script)."
 else
-	currentmodphp=$(apache2ctl -M 2>/dev/null | grep -oE 'php[0-9]+\.[0-9]+' | head -1 || true)
+	# a2query -m reports the a2enmod/a2dismod name (eg. "php7.4", "php8.3" - stable across Ubuntu
+	# 22.04/24.04, Debian package naming convention), NOT apache2ctl -M's internal module symbol
+	# (always "php7_module" for the whole 7.x branch, "php_module" for 8.x - never version-specific,
+	# so grepping for "php[0-9]+\.[0-9]+" in apache2ctl -M's output never matches anything there).
+	currentmodphp=$(a2query -m 2>/dev/null | grep -oE '^php[0-9]+\.[0-9]+' | head -1 || true)
 	jailversions="$versions"
 	if [[ "x$currentmodphp" != "x" ]]; then
 		case " $jailversions " in
