@@ -39,6 +39,46 @@ if [[ "x$defaultphpversion" == "x" ]]; then
 	exit 1
 fi
 
+masterdbhost=$(grep '^databasehost=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
+masterdbport=$(grep '^databaseport=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
+masterdbuser=$(grep '^databaseuser=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
+masterdbpass=$(grep '^databasepass=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
+masterdbname=$(grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
+if [[ "x$masterdbhost" == "x" || "x$masterdbname" == "x" ]]; then
+	echo "Error: could not read the master database connection details from /etc/sellyoursaas.conf" 1>&2
+	exit 1
+fi
+mastermysql() {
+	mysql -h "$masterdbhost" -P "$masterdbport" -u "$masterdbuser" -p"$masterdbpass" "$masterdbname" --default-character-set=utf8 -N -e "$1"
+}
+
+# The Dolibarr table prefix defaults to llx_ but is configurable per install (dolibarr_main_db_prefix
+# in conf.php); read the local Dolibarr's conf.php to get the prefix actually used by this master database.
+dolibarrdir=$(grep '^dolibarrdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
+dbprefix=llx_
+if [[ "x$dolibarrdir" != "x" && -f "$dolibarrdir/htdocs/conf/conf.php" ]]; then
+	confprefix=$(grep -vE '^\s*//' "$dolibarrdir/htdocs/conf/conf.php" 2>/dev/null | grep -oP "dolibarr_main_db_prefix\s*=\s*[\"']\K[^\"']+" || true)
+	if [[ "x$confprefix" != "x" ]]; then
+		dbprefix=$confprefix
+	fi
+fi
+
+# Nothing enforces that this locally-read prefix actually matches the master database's real
+# table prefix (the rest of the module - batch_customers.php and friends - makes the exact same
+# unchecked assumption); fail clearly here instead of a confusing "table doesn't exist" further down.
+mastermysqlerror=$(mastermysql "SELECT 1 FROM ${dbprefix}const LIMIT 1" 2>&1 >/dev/null)
+if [[ $? -ne 0 ]]; then
+	echo "Error: could not query ${dbprefix}const on the master database ($masterdbname@$masterdbhost) - check the master database credentials in /etc/sellyoursaas.conf, and that '$dbprefix' (from $dolibarrdir/htdocs/conf/conf.php, or the llx_ default if that file wasn't found) actually matches the table prefix used on the master database." 1>&2
+	echo "$mastermysqlerror" 1>&2
+	exit 1
+fi
+
+enableoverride=$(mastermysql "SELECT value FROM ${dbprefix}const WHERE name='SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE' AND entity=1" 2>/dev/null)
+if [[ "x$enableoverride" != "x1" ]]; then
+	echo "Error: SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE is not enabled on the master server (Home - Setup - Other). Enable it before running this migration." 1>&2
+	exit 1
+fi
+
 if ! apache2ctl -M 2>/dev/null | grep -q proxy_fcgi_module; then
 	echo "Error: mod_proxy_fcgi is not enabled - needed before any mod_php instance can be switched to php-fpm." 1>&2
 	echo "Run 'a2enmod proxy proxy_fcgi', then 'systemctl restart apache2' (a2enmod alone is not enough, this needs a full restart), then re-run this script." 1>&2
@@ -65,6 +105,26 @@ if [[ "x$modphpvhosts" != "x" ]]; then
 fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') All vhosts are now on php-fpm, continuing"
+
+# Instances already on php-fpm before this script ever ran (e.g. deployed straight onto
+# php-fpm, or switched manually) never went through switch_instance_phpversion.sh above,
+# so their contract 'PHP version' field may never have been synced - visit them too, passing
+# their own current version (a no-op on the server, but triggers the contract-field sync).
+alreadyfpmvhosts=$(grep -l 'fpm-.*\.sock' /etc/apache2/sellyoursaas-enabled/*.conf 2>/dev/null | grep -v '\.custom[0-9]*\.conf$' || true)
+if [[ "x$alreadyfpmvhosts" != "x" ]]; then
+	echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Syncing the contract 'PHP version' field for vhosts already on php-fpm before this script ran:"
+	while IFS= read -r vhost; do
+		[ -n "$vhost" ] || continue
+		fqn=$(basename "$vhost" .conf)
+		currentphpversion=$(grep -oP "(?<=php)[0-9]+\.[0-9]+(?=-fpm-${fqn//./\\.}\.sock)" "$vhost" | head -1)
+		[ -n "$currentphpversion" ] || continue
+		documentroot=$(grep -oP '(?<=DocumentRoot )\S+' "$vhost" | head -1)
+		documentroot=${documentroot%/htdocs}
+		[[ "x$documentroot" != "x" && -d "$documentroot" ]] || continue
+		osusername=$(stat -c '%U' "$documentroot")
+		"$scriptdir/switch_instance_phpversion.sh" "$fqn" "$osusername" "$documentroot" "$currentphpversion"
+	done <<< "$alreadyfpmvhosts"
+fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Installing acl package"
 if ! command -v setfacl >/dev/null 2>&1; then
