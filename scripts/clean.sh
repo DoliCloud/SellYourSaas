@@ -217,6 +217,21 @@ do
 	fi
 done
 
+echo "***** Clean vhost backups from scripts/switch_instance_phpversion.sh for hosts that are not enabled (safe, never cleaned up before this was fixed)"
+for fic in /etc/apache2/sellyoursaas-available/*.conf.bak-switchphpversion-* /etc/apache2/sellyoursaas-available/*.custom*.conf.bak-switchphpversion-*
+do
+	[ -e "$fic" ] || continue
+	basfic=`basename $fic | sed -E 's/\.bak-switchphpversion-[0-9]+-[0-9]+$//'`
+	if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
+		echo Remove file with rm $fic
+		if [[ $testorconfirm == "confirm" ]]; then
+			rm $fic
+		fi
+	else
+		echo "Site $basfic is enabled, we keep its backup $fic"
+	fi
+done
+
 echo "***** Clean available fpm pool that are not enabled hosts (safe)"
 if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
 	for fic in `ls /etc/apache2/sellyoursaas-fpm-pool/*.*.*.*.conf /etc/apache2/sellyoursaas-fpm-pool/*.home.lan 2>/dev/null`
@@ -588,6 +603,15 @@ if [ -s /tmp/osutoclean ]; then
 				else
 					echo File /etc/apache2/sellyoursaas-available/$instancename.custom.conf already deleted
 				fi
+
+				echo "   ** Remove leftover vhost backups from scripts/switch_instance_phpversion.sh (never cleaned up before now)"
+				for bakfile in /etc/apache2/sellyoursaas-available/$instancename.conf.bak-switchphpversion-* /etc/apache2/sellyoursaas-available/$instancename.custom*.conf.bak-switchphpversion-*; do
+					[[ -f "$bakfile" ]] || continue
+					echo rm "$bakfile"
+					if [[ $testorconfirm == "confirm" ]]; then
+						rm "$bakfile"
+					fi
+				done
 
 				/usr/sbin/apache2ctl configtest
 				if [[ "x$?" != "x0" ]]; then
