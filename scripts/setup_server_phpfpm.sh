@@ -158,6 +158,14 @@ for v in $versions; do
 	chmod 755 "/etc/php/$v/fpm/pool.d/sellyoursaas"
 done
 
+echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Enabling /etc/php/sellyoursaas.ini (auto_prepend_file, upload limits...) for fpm"
+for v in $versions; do
+	ln -fs /etc/php/sellyoursaas.ini "/etc/php/$v/fpm/conf.d/sellyoursaas.ini"
+	if systemctl is-active --quiet "php$v-fpm"; then
+		systemctl reload "php$v-fpm"
+	fi
+done
+
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Deploying the php-fpm AppArmor local override"
 imagickdir=$(basename "$(ls -d /etc/ImageMagick-* 2>/dev/null | head -1)")
 if [[ "x$imagickdir" == "x" ]]; then
