@@ -3251,8 +3251,10 @@ Then enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one 
 [source,bash]
 ---------------
 cd /etc/php/8.1/cli/conf.d/; ln -fs /etc/php/sellyoursaas.ini; cd /etc/php/8.1/apache2/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
-#cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
+cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
 ---------------
+
+NOTE: for a PHP-FPM server, `scripts/setup_server_phpfpm.sh` already creates this `fpm/conf.d` symlink (and reloads php-fpm) for every version it sets up, so this manual step is only needed if `auto_prepend_file` / `sendmail_path` stop working and you need to check or redo it by hand.
 
 
 Create the files *phpmail.log* and *phpsendmail.log*:
