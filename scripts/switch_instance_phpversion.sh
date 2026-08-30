@@ -234,6 +234,22 @@ if [[ "x$currentphpversioninvhost" != "x" ]]; then
 fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Updating the 'PHP version' contract field on the master server to match"
-mastermysql "UPDATE ${dbprefix}contrat_extrafields ce JOIN ${dbprefix}contrat c ON c.rowid = ce.fk_object SET ce.phpversion = '$phpversion' WHERE c.ref_customer = '$fqn'"
+# Retry: this UPDATE runs after the actual php-fpm/vhost switch already succeeded, so a
+# transient InnoDB lock wait timeout here (eg. from another contract-touching job running at
+# the same time) should not make the whole action report failure - it's a real risk on a
+# Galera cluster under concurrent writes, and always safe to retry (single-row idempotent SET).
+masterupdateok=0
+for i in 1 2 3 4 5; do
+	if mastermysql "UPDATE ${dbprefix}contrat_extrafields ce JOIN ${dbprefix}contrat c ON c.rowid = ce.fk_object SET ce.phpversion = '$phpversion' WHERE c.ref_customer = '$fqn'"; then
+		masterupdateok=1
+		break
+	fi
+	echo "Warning: failed to update the 'PHP version' contract field (attempt $i/5), retrying in 3s" 1>&2
+	sleep 3
+done
+if [[ "$masterupdateok" != "1" ]]; then
+	echo "Error: could not update the 'PHP version' contract field on the master server after 5 attempts - the instance itself is now correctly running $phpversion, but the contract record is stale and needs a manual or retried update" 1>&2
+	exit 1
+fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') PHP version switch for $fqn to $phpversion done"
