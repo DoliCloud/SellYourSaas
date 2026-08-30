@@ -1808,6 +1808,18 @@ if [[ "$mode" == "deployoption" ]]; then
 	fi
 fi
 
+# Re-grant the web server group ACL on htdocs after cliafter/cliafterdeployoption: those scripts
+# often unzip or chmod module files (e.g. enabling a custom module, changing the theme logo) after
+# the ACL grant above, which either leaves new files/dirs with no ACL at all or, when a plain chmod()
+# is used, resets the ACL mask and silently disables the www-data grant on the affected files.
+if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption" ]]; then
+	if command -v setfacl >/dev/null 2>&1; then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Re-grant www-data ACL on htdocs after cliafter/cliafterdeployoption"
+		setfacl -R -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
+		setfacl -d -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
+	fi
+fi
+
 
 if [[ "$mode" == "undeploy" ]]; then
 	echo "$mode $instancename.$domainname" >> $targetdir/$osusername/$mode-$instancename.$domainname.txt
