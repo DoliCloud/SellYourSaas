@@ -39,6 +39,16 @@ templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+# php-fpm pool open_basedir needs read access to the sellyoursaas module's own scripts/
+# directory (eg. for phpsendmail.php/phpsendmailprepend.php) - derive it from dolibarrdir
+# rather than hardcoding a path, so it works whatever directory the module was installed into.
+dolibarrdir=`grep '^dolibarrdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$dolibarrdir" != "x" ]]; then
+  sellyoursaasscriptsdir="$dolibarrdir/htdocs/custom/sellyoursaas/scripts"
+else
+  sellyoursaasscriptsdir="/home/admin/wwwroot/dolibarr_sellyoursaas/scripts"
+fi
 if [[ "x$templatesdir" != "x" ]]; then
   if [[ "x$phpfpm" != "x" ]]; then
     export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
@@ -1397,7 +1407,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__instancename__;$instancename;g' | \
 				  sed -e 's;__localip__;$localip;g' | \
-				  sed -e 's;__webAppPath__;$instancedir;g' > $phpfpmconf"
+				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $phpfpmconf"
 		cat $fpmpoolfiletemplate | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -1418,7 +1429,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;__fqn__;$fqn;g" | \
 				  sed -e "s;__instancename__;$instancename;g" | \
 				  sed -e "s;__localip__;$localip;g" | \
-				  sed -e "s;__webAppPath__;$instancedir;g" > $phpfpmconf
+				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $phpfpmconf
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm service $phpfpmservice from $fpmservicefiletemplate"
 		if [[ -s $phpfpmservice ]]
