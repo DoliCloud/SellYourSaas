@@ -487,6 +487,19 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	echo rm -f $targetdir/$osusername/$dbname/*.log.*
 	rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1
 
+	# Stop this instance's php-fpm service(s) FIRST, before the jailkit/killall/usermod cleanup
+	# below: the pool service has Restart=always (see poolservice-phpfpm.template), so leaving it
+	# running just has systemd respawn a worker as $osusername within RestartSec, making the
+	# usermod further down fail ("user ... is currently used by process ...") and leave the passwd
+	# home field pointing at the jail directory this same block is about to delete. Match any PHP
+	# version, not just the server's default $phpversion further below: an instance's actual
+	# running version can differ from it via changephpversion.
+	for svc in $(ls /etc/systemd/system/sellyoursaas-php*-fpm-"$fqn".service 2>/dev/null); do
+		svcname=$(basename "$svc")
+		echo "Stop php-fpm service $svcname before jailkit/user cleanup"
+		systemctl disable --now "$svcname" 2>/dev/null
+	done
+
 	if [[ "$sshaccesstype" > "0" ]]; then
 
 		if [[ ! -f "/etc/jailkit/jk_init.ini" ]]; then
