@@ -23,8 +23,11 @@ pm.min_spare_servers = 5
 pm.max_spare_servers = 35
 
 env[PATH] = /usr/local/bin:/usr/bin:/bin
-env[TMP] = /tmp
-env[TMPDIR] = /tmp
-env[TEMP] = /tmp
+env[TMP] = __webAppPath__/tmp
+env[TMPDIR] = __webAppPath__/tmp
+env[TEMP] = __webAppPath__/tmp
 
-php_admin_value[open_basedir] = __webAppPath__:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:/tmp/:/usr/local/bin/
+php_admin_value[sys_temp_dir] = __webAppPath__/tmp
+php_admin_value[upload_tmp_dir] = __webAppPath__/tmp
+
+php_admin_value[open_basedir] = __webAppPath__:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:/usr/local/bin/

@@ -136,6 +136,15 @@ newphpfpmservice="/etc/systemd/system/$newphpfpmservicename"
 
 mkdir -p "$newphpfpmpooldir"
 
+# Per-instance temp dir the pool conf points env TMP/TMPDIR/TEMP, sys_temp_dir and
+# upload_tmp_dir at instead of the shared system /tmp - may not exist yet for an instance
+# switching to php-fpm for the first time (action_deploy_undeploy.sh only creates it on deploy).
+# Owner needs fixing here (unlike on deploy) since this script never chowns the rest of
+# $instancedir - it already belongs to $osusername from the original deploy.
+mkdir -p "$instancedir/tmp"
+chown "$osusername:$osusername" "$instancedir/tmp"
+chmod go-rwxs "$instancedir/tmp"
+
 echo "$(date +'%Y-%m-%d %H:%M:%S') Create php fpm pool conf $newphpfpmconf from $fpmpoolfiletemplate"
 sed -e "s;__fqn__;$fqn;g" \
     -e "s;__phpversion__;$phpversion;g" \

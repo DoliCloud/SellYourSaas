@@ -763,6 +763,12 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 	echo "Create dir for instance = $targetdir/$osusername/$dbname"
 	mkdir -p $targetdir/$osusername/$dbname
 
+	# Per-instance temp dir for php-fpm (env TMP/TMPDIR/TEMP, sys_temp_dir, upload_tmp_dir in
+	# phppool-phpfpm.template) instead of the shared system /tmp - keeps temp/upload files
+	# inside this instance's own open_basedir jail rather than a directory shared by every
+	# jailed instance on the server.
+	mkdir -p $targetdir/$osusername/$dbname/tmp
+
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Check dirwithsources1=$dirwithsources1 targetdirwithsources1=$targetdirwithsources1"
 	if [ -d $dirwithsources1 ]; then
 		if [[ "x$targetdirwithsources1" != "x" ]]; then
