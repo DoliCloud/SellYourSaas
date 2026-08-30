@@ -234,22 +234,30 @@ if [[ "x$currentphpversioninvhost" != "x" ]]; then
 fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Updating the 'PHP version' contract field on the master server to match"
-# Retry: this UPDATE runs after the actual php-fpm/vhost switch already succeeded, so a
-# transient InnoDB lock wait timeout here (eg. from another contract-touching job running at
-# the same time) should not make the whole action report failure - it's a real risk on a
-# Galera cluster under concurrent writes, and always safe to retry (single-row idempotent SET).
+# When this script is called from the CONTRACT_MODIFY trigger (the normal UI path), Dolibarr's
+# own updateExtraField() already wrote this same value to this same row *before* firing the
+# trigger, inside a transaction it only commits after this whole remote action returns - so this
+# UPDATE is racing its own caller for a lock it cannot win until the caller gives up and commits.
+# Fail fast (a handful of seconds, not the default 50s) instead of retrying blindly, and treat a
+# lock timeout as fine as long as the value already matches - it only ever needs to actually win
+# the race when this script is run standalone from the CLI, with no such caller/lock involved.
 masterupdateok=0
-for i in 1 2 3 4 5; do
-	if mastermysql "UPDATE ${dbprefix}contrat_extrafields ce JOIN ${dbprefix}contrat c ON c.rowid = ce.fk_object SET ce.phpversion = '$phpversion' WHERE c.ref_customer = '$fqn'"; then
+for i in 1 2; do
+	if mastermysql "SET SESSION innodb_lock_wait_timeout=5; UPDATE ${dbprefix}contrat_extrafields ce JOIN ${dbprefix}contrat c ON c.rowid = ce.fk_object SET ce.phpversion = '$phpversion' WHERE c.ref_customer = '$fqn'"; then
 		masterupdateok=1
 		break
 	fi
-	echo "Warning: failed to update the 'PHP version' contract field (attempt $i/5), retrying in 3s" 1>&2
-	sleep 3
+	echo "Warning: failed to update the 'PHP version' contract field (attempt $i/2), retrying in 2s" 1>&2
+	sleep 2
 done
 if [[ "$masterupdateok" != "1" ]]; then
-	echo "Error: could not update the 'PHP version' contract field on the master server after 5 attempts - the instance itself is now correctly running $phpversion, but the contract record is stale and needs a manual or retried update" 1>&2
-	exit 1
+	currentvalue=$(mastermysql "SELECT ce.phpversion FROM ${dbprefix}contrat_extrafields ce JOIN ${dbprefix}contrat c ON c.rowid = ce.fk_object WHERE c.ref_customer = '$fqn'" 2>/dev/null | tail -n1)
+	if [[ "$currentvalue" == "$phpversion" ]]; then
+		echo "$(date +'%Y-%m-%d %H:%M:%S') Could not get the lock to update the 'PHP version' contract field, but it already reads '$phpversion' (most likely already set by the caller before triggering this action) - nothing more to do"
+	else
+		echo "Error: could not update the 'PHP version' contract field on the master server (currently '$currentvalue', expected '$phpversion') - the instance itself is now correctly running $phpversion, but the contract record is stale and needs a manual or retried update" 1>&2
+		exit 1
+	fi
 fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') PHP version switch for $fqn to $phpversion done"
