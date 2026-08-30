@@ -73,6 +73,15 @@ fi
 fpmpoolfiletemplate="$templatesdir/phppool-phpfpm.template"
 fpmservicefiletemplate="$templatesdir/poolservice-phpfpm.template"
 
+# php-fpm's open_basedir needs read access to the sellyoursaas module's own scripts/ directory
+# (eg. for phpsendmail.php/phpsendmailprepend.php) - same variable as action_deploy_undeploy.sh,
+# otherwise __sellyoursaasScriptsPath__ is left unsubstituted in the generated pool conf.
+sellyoursaasdir=$(grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2)
+if [[ "x$sellyoursaasdir" == "x" ]]; then
+	sellyoursaasdir="/home/admin/wwwroot/dolibarr_sellyoursaas"
+fi
+sellyoursaasscriptsdir="$sellyoursaasdir/scripts"
+
 if ! apache2ctl -M 2>/dev/null | grep -q proxy_fcgi_module; then
 	echo "Error: mod_proxy_fcgi is not enabled - the SetHandler this script writes into the vhost needs it to reach php-fpm." 1>&2
 	echo "Run 'a2enmod proxy proxy_fcgi', then 'systemctl restart apache2' (a2enmod alone is not enough, this needs a full restart), before retrying." 1>&2
@@ -151,6 +160,7 @@ sed -e "s;__fqn__;$fqn;g" \
     -e "s;__osUsername__;$osusername;g" \
     -e "s;__osGroupname__;$osusername;g" \
     -e "s;__webAppPath__;$instancedir;g" \
+    -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" \
     "$fpmpoolfiletemplate" > "$newphpfpmconf"
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Create php fpm service $newphpfpmservice from $fpmservicefiletemplate"
