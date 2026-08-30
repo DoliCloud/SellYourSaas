@@ -2912,7 +2912,7 @@ executables = /usr/bin/groups
 
 [php]
 comment = The PHP Interpreter and Libraries
-executables = /usr/bin/php, /usr/bin/php7.4, /usr/bin/php7.3, /usr/bin/php7.2, /usr/bin/php5.6
+executables = /usr/bin/php, /usr/bin/php8.1, /usr/bin/php8.2, /usr/bin/php8.3, /usr/bin/php8.4
 directories = /usr/lib/php, /usr/share/php, /usr/share/php, /etc/php, /usr/share/php-geshi, /usr/share/zoneinfo
 includesections = env
 
@@ -2923,9 +2923,11 @@ executables = /usr/bin/env
 [mysqlclient]
 comment = mysql client
 executables = /usr/bin/mysql, /usr/bin/mysqldump
-paths = /usr/lib/x86_64-linux-gnu/libmysqlclient.so.21
+paths = /usr/lib/x86_64-linux-gnu/libmariadb.so.3
 regularfiles = /etc/mysql/my.cf, /etc/mysql/conf.d/, /etc/mysql/mariadb.conf.d/
 ---------------
+
+Only list the `executables` (php and mysqlclient libs) that actually exist on this server - `ls /usr/bin/php*` and `ldconfig -p | grep libmariadb` first. When adding or removing a PHP-FPM version on the server later (see the PHP-FPM per-instance section), update this list and rebuild the jail template (next section) so SSH/SFTP users get a matching `phpX.Y` binary for their instance's version.
 
 * Add this to the end of the config file /etc/jailkit/jk_chrootsh.ini
 
@@ -2956,7 +2958,9 @@ In this example the commonjail.tgz template will be used to create the chroot/ja
 
 and the privatejail.tgz template will be used to create private chroot/jail (eg. /home/jail/chroot/osuxxxxx)
 
-* Create your tgz which will be used to install the private chroot/jail and reinstall the common chroot/jail if necessary
+commonjail.tgz and privatejail.tgz are packaged from the exact same `template` directory - they are the same content under two names, one used for the shared jail and one for a per-user private jail, not two different builds.
+
+* Create your tgz which will be used to install the private chroot/jail and reinstall the common chroot/jail if necessary. Use `--zstd` instead of `-z` if `usecompressformatforarchive=zstd` in /etc/sellyoursaas.conf (name the files `.tar.zst` instead of `.tgz` in that case, and everywhere below)
 
 [source,bash]
 ---------------
@@ -2970,6 +2974,13 @@ tar czf privatejail.tgz template
 [source,bash]
 ---------------
 mv commonjail.tgz privatejail.tgz /home/admin/wwwroot/dolibarr_documents/sellyoursaas/scripts/templates/
+---------------
+
+* If /home/jail/chroot/commonjail already exists (eg. you are only adding a new PHP version to an existing server), the tgz above will NOT be re-extracted onto it automatically - sync the freshly rebuilt template into the live jail so already-deployed instances see the change too, without removing anything already there:
+
+[source,bash]
+---------------
+rsync -a /home/jail/chroot/template/ /home/jail/chroot/commonjail/
 ---------------
 
 * Modify the /etc/sellyoursaas.conf file of your instances server
@@ -3240,8 +3251,10 @@ Then enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one 
 [source,bash]
 ---------------
 cd /etc/php/8.1/cli/conf.d/; ln -fs /etc/php/sellyoursaas.ini; cd /etc/php/8.1/apache2/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
-#cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
+cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
 ---------------
+
+NOTE: for a PHP-FPM server, `scripts/setup_server_phpfpm.sh` already creates this `fpm/conf.d` symlink (and reloads php-fpm) for every version it sets up, so this manual step is only needed if `auto_prepend_file` / `sendmail_path` stop working and you need to check or redo it by hand.
 
 
 Create the files *phpmail.log* and *phpsendmail.log*:
@@ -3274,6 +3287,56 @@ cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent 
 chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/*;
 
 ---------------
+
+==== PHP-FPM per instance and HTTP/2 migration
+
+On **Deployment servers**, an instance can run under mod_php (default) or under its own PHP-FPM pool, one systemd service per instance (`sellyoursaas-php<version>-fpm-<fqn>.service`), letting different instances run different PHP versions on the same server. Set `phpfpm=1` and `phpversion=<default version>` in `/etc/sellyoursaas.conf` to make new deployments use PHP-FPM (with that default version, overridable per contract); existing mod_php instances are not affected until switched individually (contract PHP version field, or in bulk with `scripts/migrate_server_http2.sh`, see below).
+
+All three scripts below (`setup_server_phpfpm.sh`, `migrate_server_http2.sh`, `switch_instance_phpversion.sh`) connect back to the **master** database directly, using the same `databasehost=`/`databaseport=`/`databaseuser=`/`databasepass=`/`database=` credentials as `/etc/sellyoursaas.conf` already carries for other scripts (eg. `batch_customers.php`), and the table prefix read from `dolibarr_main_db_prefix` in the local Dolibarr's `conf.php` (`dolibarrdir=`), falling back to `llx_` like Dolibarr itself does if that is not set. They refuse to run at all if that prefix does not actually resolve to a real table on the master, or if `SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE` is not enabled there (see step 1 below) - **enable that setting before running any of them**.
+
+===== Step 1: enable the feature on the master
+
+On the **Master server**, *Home - Setup - Other*, set `SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE = 1`. While disabled (the default), none of the *Deployment server* or contract fields described below exist on screen - it is not just that they are left empty - and none of the three scripts in this section will run.
+
+NOTE: the *Home - Setup - Other* toggle, the *Deployment server* fields (*PhpVersionsAvailable*/*PhpVersionDefault*/*AllowPhpVersionOverride*) and the contract *PhpVersion* dropdown described under "Contract-side configuration" below ship in a companion module update, proposed as a separate PR from the scripts documented here. In the meantime the underlying constant can be set directly (`UPDATE llx_const SET value='1' WHERE name='SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE' AND entity=1`, or inserted if the row does not exist yet) to use the scripts standalone.
+
+===== Step 2: prepare the server for PHP-FPM
+
+If the server is still on an Ubuntu release too old for Sury's PPA (`setup_server_phpfpm.sh` checks this and refuses to run otherwise - see https://packages.sury.org/php/dists/ for the current list, eg. Ubuntu 20.04 "focal" was dropped), the OS itself needs upgrading first. This is a manual, supervised procedure, not something to automate unattended on a server carrying live instances:
+
+. Stop Apache (`systemctl stop apache2`) - every instance on the server goes down for the duration.
+. Bring the system fully up to date first: `do-release-upgrade` refuses to start otherwise (prints "Please install all available updates for your release before upgrading" and exits, without actually erroring out). Run `apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y && apt-get autoremove -y`.
+. Drop a `Dpkg::Options { "--force-confdef"; "--force-confold"; }` snippet into `/etc/apt/apt.conf.d/` so config-file-conflict prompts default to keeping the existing file instead of hanging waiting for input, then run `DEBIAN_FRONTEND=noninteractive do-release-upgrade -m server -f DistUpgradeViewNonInteractive`. It still needs supervising (watch the log for anything unexpected) even in this frontend - it is not safe to fire-and-forget.
+. Once it finishes, check `/var/run/reboot-required` and reboot deliberately (not automatically) - the point where the server briefly drops off the network entirely.
+. If the old PHP version's Apache module (mod_php) got fully purged by the OS upgrade (it usually does, since the new release's repositories no longer carry the old PHP branch), every vhost's `php_admin_value open_basedir` line - the same one `scripts/migrate_server_http2.sh` neutralizes later in the normal flow - is now invalid and breaks `apache2ctl configtest` immediately, before `setup_server_phpfpm.sh` even gets to enabling `mod_proxy_fcgi`. Comment those lines out (`sed -i 's/^\([[:space:]]*\)php_admin_value open_basedir/\1#php_admin_value open_basedir/'` across every vhost) *before* running `setup_server_phpfpm.sh` below, not after.
+. Existing instances were running under whatever single mod_php version was active before the upgrade - request that version explicitly in `setup_server_phpfpm.sh`'s version list alongside the new default, and switch each instance to it individually (`switch_instance_phpversion.sh`), rather than letting `scripts/migrate_server_http2.sh` bulk-switch every still-mod_php vhost to the new server default - existing instances keep the PHP version they were actually running, same policy as everywhere else in this section.
+
+`scripts/setup_server_phpfpm.sh <default_version> <version> [version...]` does everything a server needs *before* any instance can be switched or `scripts/migrate_server_http2.sh` can run. Example, to install PHP 8.1 to 8.4 with 8.3 as the default:
+
+[source,bash]
+---------------
+scripts/setup_server_phpfpm.sh 8.3 8.1 8.2 8.3 8.4
+---------------
+
+It: checks the Sury PHP PPA (https://packages.sury.org/php/) actually supports the server's Ubuntu/Debian codename first (older releases like Ubuntu 20.04 "focal" have been dropped - upgrading the OS, eg. with `do-release-upgrade`, is the usual fix); adds that PPA; installs php-fpm and a standard extension set for every version listed (skipping any extension package not available for a given version instead of failing outright - eg. `php-rrd` is not packaged past PHP 8.1); masks the distro's own default `php<version>-fpm.service` for every non-default version and keeps the default version's enabled; creates `pool.d/sellyoursaas` under every version; deploys the AppArmor local override needed for a php-fpm pool socket (`/etc/apparmor.d/local/php-fpm`, auto-detecting the installed ImageMagick policy directory); sets `phpfpm=`/`phpversion=` in `/etc/sellyoursaas.conf`; enables `mod_proxy_fcgi` (with the Apache restart this needs, since `a2enmod` alone does not load a new module into the already-running process); and, only on a server actually using Jailkit for SellYourSaaS (`chrootdir=` set in `/etc/sellyoursaas.conf` and `jk_init.ini` already has its `[php]` section - see the Jailkit section above), refreshes the common jail *and every existing private jail* (an instance with the "SSH access type" contract field set to *PrivateUserJail* got its own full copy at deploy time under `$chrootdir/<osusername>`, instead of sharing the common one) so SSH/SFTP users get a `php<version>` CLI binary matching every version just installed, plus whichever version mod_php is still actively serving on this server (if any - existing instances keep using it until migrated). Skipped with a message otherwise (jailkit not installed, or installed but never set up for this module).
+
+Finally, it writes the result straight onto this server's **Deployment server** card on the master: *PhpVersionsAvailable* (the same detection the *DetectPhpVersions* button runs - `ls /usr/sbin/php-fpm*`), *PhpVersionDefault* (always overwritten with `<default_version>`, even if an admin had set something else there by hand), and *AllowPhpVersionOverride* (always turned on). No manual step is needed on the card after running this script; the button remains useful only to re-detect versions installed outside of it.
+
+It does not touch any existing vhost, and is idempotent (safe to re-run, eg. to add one more PHP version to a server later).
+
+===== Step 3: migrate existing mod_php instances, and HTTP/2
+
+Why HTTP/2 needs more than just installing php-fpm: `mod_http2` refuses to load under `mpm_prefork` (which `mpm_itk` is built on), so HTTP/2 requires `mpm_event`. But `mpm_event` has no per-vhost UID switching like `mpm_itk` does, so Apache then runs every vhost as a single shared user (`www-data`). PHP execution stays isolated per client either way (each php-fpm pool runs as its own OS user via `user=`/`group=` in its pool config), but `www-data` still needs read+traverse access to reach each instance's `htdocs/` and hand `.php` requests to the fcgi socket. `scripts/action_deploy_undeploy.sh` grants this via a POSIX ACL after every deploy, scoped to `htdocs/` only - `documents/` (private Dolibarr data) is never `Alias`ed into any vhost and stays fully unreadable by `www-data`, since it is only ever reached through an authenticated PHP script running under the instance's own pool user.
+
+Once the server is prepared (step 2), `scripts/migrate_server_http2.sh` does the rest of the one-time, per-server work: switches any still-mod_php instance to the server's default PHP-FPM version (via `scripts/switch_instance_phpversion.sh`, the same script the contract PHP version field calls for a single instance), then does a second pass over every vhost *already* on PHP-FPM (passing each its own current version, a no-op switch) purely so its contract's *PhpVersion* field gets synced too - needed for any instance that was already running PHP-FPM before this tooling existed, since it would otherwise never go through `switch_instance_phpversion.sh` and never get that field written. It then installs `acl` and applies/verifies the htdocs ACL above on every existing instance, and finally switches `mpm_itk`/`mpm_prefork` to `mpm_event` and enables `http2`. It is idempotent and safe to re-run. It refuses to run if `mod_proxy_fcgi` is not enabled, or if `phpfpm=`/`phpversion=` are not set (run step 2 first).
+
+`scripts/switch_instance_phpversion.sh` updates every vhost belonging to the instance, not just the main one: an instance can have extra custom-URL vhosts (one full `<VirtualHost>` per domain, since each needs its own SSL cert - see the *CustomURL* option), and every one of them proxies to the same php-fpm socket. Only one custom URL is ever known to Dolibarr (the contract's `custom_url` field, giving `<fqn>.custom.conf`); further ones added by hand (multi-URL support being deferred) are matched by filename glob (`<fqn>.custom2.conf`, `<fqn>.custom3.conf`...) and get the same treatment. After a successful switch - or after confirming every vhost is already on the target version - it writes that version back to the contract's *PhpVersion* field on the master, so that field always reflects what is actually running without needing a manual check.
+
+If the server needs several PHP versions to keep coexisting for a while (eg. some instances need an old version step 2 also installed, others should move to a newer default) that is fine under PHP-FPM, one pool per instance - but not under mod_php, which only ever runs one version at a time for every instance on the server. Migrate those instances to PHP-FPM individually first (keeping each one on its current PHP version) before running `scripts/migrate_server_http2.sh`, which needs every instance already off mod_php.
+
+===== Contract-side configuration
+
+On a **contract**, the extrafield *PhpVersion* only appears when both the module-wide feature (step 1) and that contract's deployment server's *AllowPhpVersionOverride* are on; its dropdown is restricted to that server's *PhpVersionsAvailable* the same way (`class/actions_sellyoursaas.class.php`, `contractcard` hook, mutates the extrafield definition in place before display - it does not touch what is stored, only what is offered on screen). Left on *UseServerDefault*, the instance follows whatever *PhpVersionDefault* says; changing it later (once already deployed) triggers `changephpversion`, which is what actually calls `scripts/switch_instance_phpversion.sh` on the deployment server - which, as described above, also keeps this same field in sync afterward.
 
 
 === Setup of logrotate
