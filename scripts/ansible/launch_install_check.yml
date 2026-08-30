@@ -1282,6 +1282,16 @@
   become_method: sudo
   become_user: root
   tasks:
+    - name: Read sellyoursaasdir from /etc/sellyoursaas.conf
+      shell: "grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2"
+      register: sellyoursaasdir_result
+      changed_when: false
+      failed_when: false
+
+    - name: Fall back to the documented default sellyoursaasdir if not set in /etc/sellyoursaas.conf
+      set_fact:
+        sellyoursaasdir: "{{ sellyoursaasdir_result.stdout if sellyoursaasdir_result.stdout != '' else '/home/admin/wwwroot/dolibarr_sellyoursaas' }}"
+
     #- name: Set sshd config files /etc/ssh/sshd_config.d/sellyousaas.conf
     #  ansible.builtin.template:
     #    src: ../../etc/ssh/sshd_config.d/sellyoursaas.conf
@@ -1378,7 +1388,7 @@
     # Fail2ban rules
     - name: Search all fail2ban rules into filter.d directory
       ansible.builtin.find:
-        paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d
+        paths: "{{ sellyoursaasdir }}/etc/fail2ban/filter.d"
         patterns: '*.conf'
       register: dolibarr_fail2ban_files
 
@@ -1394,7 +1404,7 @@
 
     - name: Search all fail2ban rules into jail.d directory
       ansible.builtin.find:
-        paths: /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/jail.d
+        paths: "{{ sellyoursaasdir }}/etc/fail2ban/jail.d"
         patterns: '*.conf'
         file_type: file
       register: dolibarr_fail2ban_files2
@@ -1488,8 +1498,18 @@
   become_method: sudo
   become_user: root
   tasks:
+  - name: Read sellyoursaasdir from /etc/sellyoursaas.conf
+    shell: "grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2"
+    register: sellyoursaasdir_result
+    changed_when: false
+    failed_when: false
+
+  - name: Fall back to the documented default sellyoursaasdir if not set in /etc/sellyoursaas.conf
+    set_fact:
+      sellyoursaasdir: "{{ sellyoursaasdir_result.stdout if sellyoursaasdir_result.stdout != '' else '/home/admin/wwwroot/dolibarr_sellyoursaas' }}"
+
   - name: Launch perms.sh to set permissions, create some dirs and files
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/perms.sh confirm"
+    command: "{{ sellyoursaasdir }}/scripts/perms.sh confirm"
     register: command_output
     changed_when: false
 
