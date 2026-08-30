@@ -224,14 +224,22 @@ fi
 apache2ctl configtest
 service apache2 reload
 
-if [[ "x$currentphpversioninvhost" != "x" ]]; then
-	oldphpfpmservicename="sellyoursaas-php$currentphpversioninvhost-fpm-$fqn.service"
-	echo "$(date +'%Y-%m-%d %H:%M:%S') Stop and remove old php fpm pool/service for previous version $currentphpversioninvhost"
+# Stop/remove every OTHER existing php-fpm service for this instance, not just the one detected
+# from the live vhost's SetHandler above: that detection reads as "mod_php, nothing to stop" when
+# the current vhost has no SetHandler at all (eg. the suspended/maintenance templates, which only
+# redirect and were never meant to carry one), silently leaving the real previous-version service
+# (created at the original deploy or an earlier switch) running and orphaned instead of being
+# replaced. List actual services on disk instead of trusting the vhost content for this part.
+for oldsvc in $(ls /etc/systemd/system/sellyoursaas-php*-fpm-"$fqn".service 2>/dev/null); do
+	oldphpfpmservicename=$(basename "$oldsvc")
+	[[ "$oldphpfpmservicename" == "sellyoursaas-php$phpversion-fpm-$fqn.service" ]] && continue
+	oldphpver=$(echo "$oldphpfpmservicename" | sed -E "s/^sellyoursaas-php([0-9]+\.[0-9]+)-fpm-.*/\1/")
+	echo "$(date +'%Y-%m-%d %H:%M:%S') Stop and remove old php fpm pool/service for previous version $oldphpver"
 	systemctl disable --now "$oldphpfpmservicename" 2>/dev/null
 	rm -f "/etc/systemd/system/$oldphpfpmservicename"
-	rm -f "/etc/php/$currentphpversioninvhost/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf"
-	systemctl daemon-reload
-fi
+	rm -f "/etc/php/$oldphpver/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf"
+done
+systemctl daemon-reload
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') Updating the 'PHP version' contract field on the master server to match"
 # When this script is called from the CONTRACT_MODIFY trigger (the normal UI path), Dolibarr's
