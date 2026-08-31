@@ -2561,7 +2561,7 @@ Add instructions to reduce the permissions on the database server to the user se
 ---------------
 
 
-Note: This is user permission is used by:
+Note: This user permission is used by:
 
 * the root batch *clean.sh* to SELECT contracts and to list all dbn databases using SHOW DATABASES.
 * the root batch *batch_detect_evil_instances.php* to SELECT contracts
