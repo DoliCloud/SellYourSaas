@@ -510,7 +510,7 @@ if ($resql) {
 									print $result["error"];
 								}
 							} else {
-								print "Disabled in test mode\n";
+								print "Ignored. Unpacking files is disabled in test mode\n";
 							}
 
 							// Execute chown to change permissions
@@ -541,7 +541,7 @@ if ($resql) {
 								print $result["error"];
 							}
 						} else {
-							print "Disabled in test mode\n";
+							print "Running command from the cli after deploy option script is disabled in test mode\n";
 						}
 					}
 

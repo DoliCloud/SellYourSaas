@@ -28,8 +28,8 @@ if [ "x$7" == "x" ]; then
 	echo "         [master_instance_id] is the master instance ID"
 	echo "         [countrycode] is optional country code (e.g. FR)"
 	echo
-	echo "Example: $0  myhosts  deployment  test  REFMODULENAME  *  abc1234"
-	echo "Example: $0  myhosts  deployment  deploy  REFMODULENAME  *  abc1234  FR"
+	echo "Example: $0  myhosts  deployment  test  REFMODULENAME  'abc*'  abc1234"
+	echo "Example: $0  myhosts  deployment  deploy  REFMODULENAME  '*abc.mydomain.com'  abc1234  FR"
 	echo
 	exit 1
 fi
