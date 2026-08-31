@@ -566,10 +566,11 @@ if ($resql) {
 								'EINVOICING_DISABLE_SYNC_DOLI_TO_AP' => '1'
 							);
 
-							$s = dolibarr_get_const($dbinstance, 'EINVOICING_PDP');
-							if (empty($s)) {
-								$dbinstance->begin();
+							$dbinstance->begin();
 
+							$s = dolibarr_get_const($dbinstance, 'EINVOICING_PDP');
+
+							if (empty($s)) {
 								foreach ($arrayofoptiontoforce as $key => $value) {
 									print "Set setup constant ".$key." to ".$value."\n";
 									dolibarr_set_const($dbinstance, $key, $value);
