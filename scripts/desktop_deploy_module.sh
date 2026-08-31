@@ -22,14 +22,14 @@ if [ "x$7" == "x" ]; then
 	echo "Usage:   $0  hostsfile  target  command  productref  instancefilter  master_instance_id  [countrycode]"
 	echo "         [hostsfile] is the ansible inventory file prefix (e.g. myhosts will use hosts-myhosts)"
 	echo "         [target] is the host group or hostname to target"
-	echo "         [command] is the command to execute (e.g. test, deploy)"
+	echo "         [command] is the command to execute (e.g. test, confirm)"
 	echo "         [productref] is the module reference name"
 	echo "         [instancefilter] is the instance filter (e.g. * for all instances)"
 	echo "         [master_instance_id] is the master instance ID"
 	echo "         [countrycode] is optional country code (e.g. FR)"
 	echo
-	echo "Example: $0  myhosts  deployment  test  REFMODULENAME  'abc*'  abc1234"
-	echo "Example: $0  myhosts  deployment  deploy  REFMODULENAME  '*abc.mydomain.com'  abc1234  FR"
+	echo "Example: $0  myhosts  deployment  test     REFMODULENAME  'abc*'  abc1234"
+	echo "Example: $0  myhosts  deployment  confirm  REFMODULENAME  '*abc.mydomain.com'  abc1234  FR"
 	echo
 	exit 1
 fi
