@@ -2564,7 +2564,7 @@ Add instructions to reduce the permissions on the database server to the user se
 Note: This user permission is used by:
 
 * the root batch *clean.sh* to SELECT contracts and to list all dbn databases using SHOW DATABASES.
-* the root batch *batch_detect_evil_instances.php* to SELECT contracts
+* the root batch *deployment_batch_detect_evil_instances.php* to SELECT contracts
 * the admin batch *batch_customers.php* to SELECT const, element_element, product, packages, CREATE actioncomm
 * the admin batch *backup_instance.php* to get and update properties of instances to backup
 * the admin batch *restore_instance.php* to get and update properties of instances to restore
@@ -3686,7 +3686,7 @@ You must have inside the cron of user *root* (You can view the cron with *cronta
 10 0 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm >/home/admin/logs/backup_mysql_system.log 2>&1
 00 4 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/perms.sh >/home/admin/logs/perms.log
 40 15 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1
-00 9 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_detect_evil_instances.php test 86400 > /home/admin/logs/batch_detect_evil_instances.log 2>&1
+00 9 * * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/deployment_batch_detect_evil_instances.php test 86400 > /home/admin/logs/batch_detect_evil_instances.log 2>&1
 #40 4 4 * * /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/clean.sh confirm
 ---------------
 
@@ -5377,7 +5377,7 @@ Then if this is a deployment server, check malicious files by running:
 
 [source,bash]
 ---------------
-/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/batch_detect_evil_instances.php test 86400
+/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/deployment_batch_detect_evil_instances.php test 86400
 ---------------
 
 You can then check files with:
