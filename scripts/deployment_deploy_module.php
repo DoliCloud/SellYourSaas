@@ -571,11 +571,11 @@ if ($resql) {
 								$dbinstance->begin();
 
 								foreach ($arrayofoptiontoforce as $key => $value) {
-									print "Set constant ".$key." to ".$value."\n";
+									print "Set setup constant ".$key." to ".$value."\n";
 									dolibarr_set_const($dbinstance, $key, $value);
 								}
 							} else {
-								print "A einvoicing provider seems already set for the instance (on entity 1), we do not change it.\n";
+								print "A einvoicing provider seems already set for the instance (on entity 1), we do not change setup.\n";
 							}
 
 							// Make SQL requests to run upgrade
