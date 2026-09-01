@@ -844,6 +844,7 @@ print $content_grabbed."\n";
 
 // STEP 3 of synchro - We should update the value of $dolibarr_main_instance_unique_id if
 // it was not done during creation of instance.
+
 $value_of_dolibarr_main_instance_unique_id = '';
 $value_of_dolibarr_main_cookie_cryptkey = '';		// old key for $value_of_dolibarr_main_instance_unique_id
 $value_of_dolibarr_main_dol_cryptkey = '';
@@ -911,7 +912,7 @@ if (empty($nointeractive)) {
 print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 
 
-// STEP 1 of database copy - we backup the source database
+// STEP 4 of database copy - we backup the source database
 $command="mysqldump";
 $param=array();
 $param[]=$olddbname;
@@ -954,7 +955,7 @@ if ($return_var) {
 }
 
 
-// STEP 2 of database copy - We load the backup on target database
+// STEP 5 of database copy - We load the backup on target database
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 //print "If the mysql fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
@@ -1022,8 +1023,28 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 }
 
 
-// Update var
+// STEP 6 - Foce update of some vars (for Dolibarr only)
+// TODO Do it only for Dolibarr instances.
 
+$fullcommandupdatecronkey='echo "update llx_const set value = \''.$oldosuser.'\' WHERE value = \'CRON_KEY\');" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+$output=array();
+$return_var=0;
+print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Force update of CRON_KEY with '.$fullcommandupdatecronkey."\n";
+if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+	$outputfile = $conf->admin->dir_temp.'/out.tmp';
+	$resultarray = $utils->executeCLI($fullcommandupdatecronkey, $outputfile, 0, null, 1);
+
+	$return_var = $resultarray['result'];
+	$content_grabbed = $resultarray['output'];
+
+	print $content_grabbed."\n";
+	// If table already not exist, return_var is 1
+	// If technical error, return_var is also 1, so we disable this test
+	/*if ($return_var) {
+		print "Error on dropping table into the new instance\n";
+		exit(-2);
+	}*/
+}
 
 // Prepare SQL commands to execute after the load
 $sqla = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$newobject->ref.' '.$newobject->ref_customer)."'";
