@@ -318,7 +318,6 @@ if ($resql) {
 					$date_end = $tmpline->date_end;
 				}
 				if ($productlinefound) {
-					$i++;
 					$nbdeploynothingdone++;
 					print("Warning: Module ".$product->ref." already present in contract for instance ".$instance."\n");
 				} else {
