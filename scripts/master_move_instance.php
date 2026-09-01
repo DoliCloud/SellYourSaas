@@ -388,7 +388,7 @@ if ($mode == 'moveonlycontractfiles') {
 	// Copy all files linked to instance to the new one
 	$srcdir = $conf->contract->dir_output.'/'.dol_sanitizeFileName($oldobject->ref).'/';
 	$destdir = $conf->contract->dir_output.'/'.dol_sanitizeFileName($newobject->ref).'/';
-	print "--- Copy files linked to contact in old instance (dir ".$srcdir.") into the new instance (into dir ".$destdir.")\n";
+	print "--- Copy files linked to contract in old instance (dir ".$srcdir.") into the new instance (into dir ".$destdir.")\n";
 	if (dol_is_dir($srcdir)) {
 		$tmpresult = dolCopyDir($srcdir, $destdir, '0', 0, null, 1);
 		print "dolCopyDir for ".$oldobject->ref." into ".$newobject->ref." result = ".$tmpresult."\n";
@@ -524,7 +524,8 @@ if (empty($overwriteexistinginstance)) {
 	}
 
 	// Create virgin envelop for the new instance. The register_instance will use the $oldinstance name
-	// Note that if the old instance had a value into instance_unique_id, the creation of the new one should reuse it.
+	// Note that if the old instance had a value into contrat_extrafields.instance_unique_id, the creation of the new one should reuse it.
+	// But in a move process, the new instance may not have, never mind, the instance_unique_id will be forced with the one of old instance later at Step 3.
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
 	$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
 	$command.=" ".escapeshellarg($oldinstance);
@@ -1019,6 +1020,10 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 } else {
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Load canceled (test mode)'."\n";
 }
+
+
+// Update var
+
 
 // Prepare SQL commands to execute after the load
 $sqla = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$newobject->ref.' '.$newobject->ref_customer)."'";
