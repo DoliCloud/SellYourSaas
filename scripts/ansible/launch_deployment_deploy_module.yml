@@ -11,8 +11,18 @@
   become_method: sudo
   become_user: root
   tasks:
+  - name: Read sellyoursaasdir from /etc/sellyoursaas.conf
+    shell: "grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2"
+    register: sellyoursaasdir_result
+    changed_when: false
+    failed_when: false
+
+  - name: Fall back to the documented default sellyoursaasdir if not set in /etc/sellyoursaas.conf
+    set_fact:
+      sellyoursaasdir: "{{ sellyoursaasdir_result.stdout if sellyoursaasdir_result.stdout != '' else '/home/admin/wwwroot/dolibarr_sellyoursaas' }}"
+
   - name: Launch deployment_deploy_module.php
-    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_deploy_module.php {{command}} {{productref}} {{instancefilter}} allow {{master_instance_id}} {{countrycode}}
+    command: "{{ sellyoursaasdir }}/scripts/deployment_deploy_module.php {{command}} {{productref}} {{instancefilter}} allow {{master_instance_id}} {{countrycode}}"
     register: command_output
 
   - debug:
