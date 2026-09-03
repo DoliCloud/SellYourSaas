@@ -166,12 +166,31 @@ if (! $res) {
  * @var DoliDB $db
  * @var User $user
  */
+
+$nocache ='';
 $mode=isset($argv[1]) ? $argv[1] : 'test';
 $productref=isset($argv[2]) ? $argv[2] : '';
 $instancefilter = isset($argv[3]) ? $argv[3] : '';
 $allowdeployforfree = isset($argv[4]) ? $argv[4] : 'deny';
 $decryptkey = isset($argv[5]) ? $argv[5] : '';
-$countrycode = isset($argv[6]) ? $argv[6] : '';
+if (isset($argv[6])) {
+	$tmp = $argv[6];
+	if (strlen($tmp) == 2) {
+		$countrycode = $tmp;
+	}
+	if ($tmp == 'nocache') {
+		$nocache = 'nocache';
+	}
+}
+if (isset($argv[7])) {
+	$tmp = $argv[7];
+	if (strlen($tmp) == 2) {
+		$countrycode = $tmp;
+	}
+	if ($tmp == 'nocache') {
+		$nocache = 'nocache';
+	}
+}
 
 dol_include_once("sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("sellyoursaas/class/sellyoursaascontract.class.php");
@@ -195,7 +214,7 @@ if (empty($productref)) {
 	print "Script must be ran from each deployment server with login root.\n";
 	print "allow|deny param is used to deploy on free instances or not (default deny).\n";
 	print "\n";
-	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny masteruniquekey [countrycode]\n";
+	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny masteruniquekey [countrycode] [nocache]\n";
 	print "Example: ".$script_file." test TESTMODULE 'aa*' deny abc123456789 FR\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	print "\n";
@@ -247,7 +266,7 @@ include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object=new Contrat($db);
 
 print "Search instances with status done and name matching ".$instancefiltercomplete;
-print ", country code = ".$countrycode;
+print ", country code = ".$countrycode.", nocache = ".$nocache;
 print "\n";
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
@@ -465,9 +484,9 @@ if ($resql) {
 							}
 							$cacheage = ($now - $datecache) / 86400;
 							$MAXAGE = 2;
-							print "Cache age is ".$cacheage." / MAX is ".$MAXAGE."\n";
+							print "Cache age is ".$cacheage." / MAX is ".$MAXAGE.", nocache is ".$nocache."\n";
 
-							if ($datecache == 0 || $datesource > $datecache || $cacheage > $MAXAGE) {
+							if ($datecache == 0 || $datesource > $datecache || $cacheage > $MAXAGE || $nocache) {
 								print "Renew of the archive\n";
 								$res = dol_mkdir("/tmp/cache".$deploy["src"]);
 								if ($res < 0) {
