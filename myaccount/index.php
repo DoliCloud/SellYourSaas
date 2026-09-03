@@ -2115,7 +2115,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			}
 		}
 		if (!$foundlinecontract) {
-			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end);
+			$rangnewline = $object->line_max() + 1;
+			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end, 'HT', 0, 0, null, 0, array(), null, $rangnewline);
 			if ($idlinecontract <= 0) {
 				// TODO: Send mail auto to inform admins of error line creation
 				$error ++;
@@ -2228,7 +2229,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$duration_unit = $tmparray['duration_unit'];
 		$date_start = dol_now();
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
-		$descriptionlines = "Websiteref = ".$website->ref;
+		$descriptionlines = "CustomURL = ".$custom_url;
 		$foundlinecontract = 0;
 
 		$object->array_options['options_custom_url'] = urlencode($custom_url);
@@ -2240,7 +2241,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			}
 		}
 		if (!$foundlinecontract) {
-			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end);
+			$rangnewline = $object->line_max() + 1;
+			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end, 'HT', 0, 0, null, 0, array(), null, $rangnewline);
 			if ($idlinecontract <= 0) {
 				// TODO: Send mail auto to inform admins of error line creation
 				$error ++;
@@ -2561,8 +2563,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$duration_unit = $tmparray['duration_unit'];
 		$date_start = dol_now();
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
-		// Create service line(s) from contract
-		$idlinecontract = $tmpcontract->addline($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, $date_start, $date_end);
+		// Create service line(s) from contract, appended after existing lines (not rang 0 = first)
+		$rangnewline = $tmpcontract->line_max() + 1;
+		$idlinecontract = $tmpcontract->addline($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, $date_start, $date_end, 'HT', 0, 0, null, 0, array(), null, $rangnewline);
 		if ($idlinecontract <= 0) {
 			setEventMessages($contract->error, null, 'errors');
 			$error++;

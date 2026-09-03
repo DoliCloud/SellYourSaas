@@ -1206,7 +1206,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
 
 		export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
-		export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+		export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 		# Delete old custom conf file
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
