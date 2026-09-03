@@ -461,7 +461,7 @@ if ($resql) {
 							continue;
 						}
 						if (dol_is_dir($deploy["src"])) {
-							print "Deploy with src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
+							print "Using src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
 							$res = dol_mkdir($deploy["dest"]);
 							if ($res < 0) {
 								print "Error: Failed to create ".$deploy["dest"]." directory\n";
@@ -484,7 +484,7 @@ if ($resql) {
 							}
 							$cacheage = ($now - $datecache) / 86400;
 							$MAXAGE = 2;
-							print "Cache age is ".$cacheage." / MAX is ".$MAXAGE.", nocache is ".$nocache."\n";
+							print "Archive cache age is ".$cacheage." / MAX is ".$MAXAGE.", nocache is ".$nocache."\n";
 
 							if ($datecache == 0 || $datesource > $datecache || $cacheage > $MAXAGE || $nocache) {
 								print "Renew of the archive\n";
@@ -510,6 +510,7 @@ if ($resql) {
 									}
 									print $result["output"];
 								}
+								$nocache = "";	// We do not want to renew cache for next deploy
 							}
 
 							if (dol_is_file("/tmp/cache".$deploy["src"].".tar.zst")) {
