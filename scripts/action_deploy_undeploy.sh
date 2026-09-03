@@ -39,6 +39,15 @@ templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+# php-fpm/apache open_basedir needs read access to the sellyoursaas module's own scripts/
+# directory (eg. for phpsendmail.php/phpsendmailprepend.php) - possibility to change it if
+# the module was not installed into the default /home/admin/wwwroot/dolibarr_sellyoursaas
+sellyoursaasdir=`grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$sellyoursaasdir" == "x" ]]; then
+  sellyoursaasdir="/home/admin/wwwroot/dolibarr_sellyoursaas"
+fi
+sellyoursaasscriptsdir="$sellyoursaasdir/scripts"
 if [[ "x$templatesdir" != "x" ]]; then
   if [[ "x$phpfpm" != "x" ]]; then
     export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
@@ -477,6 +486,19 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	rm -f $targetdir/$osusername/$dbname/*.log >/dev/null 2>&1
 	echo rm -f $targetdir/$osusername/$dbname/*.log.*
 	rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1
+
+	# Stop this instance's php-fpm service(s) FIRST, before the jailkit/killall/usermod cleanup
+	# below: the pool service has Restart=always (see poolservice-phpfpm.template), so leaving it
+	# running just has systemd respawn a worker as $osusername within RestartSec, making the
+	# usermod further down fail ("user ... is currently used by process ...") and leave the passwd
+	# home field pointing at the jail directory this same block is about to delete. Match any PHP
+	# version, not just the server's default $phpversion further below: an instance's actual
+	# running version can differ from it via changephpversion.
+	for svc in $(ls /etc/systemd/system/sellyoursaas-php*-fpm-"$fqn".service 2>/dev/null); do
+		svcname=$(basename "$svc")
+		echo "Stop php-fpm service $svcname before jailkit/user cleanup"
+		systemctl disable --now "$svcname" 2>/dev/null
+	done
 
 	if [[ "$sshaccesstype" > "0" ]]; then
 
@@ -1170,7 +1192,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				sed -e 's;__fqn__;$fqn;g' | \
 				sed -e 's;__instancename__;$instancename;g' | \
 				sed -e 's;__localip__;$localip;g' | \
-			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+			  sed -e 's;__webAppPath__;$instancedir;g' | \
+			  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $apacheconf"
 	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -1191,7 +1214,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				sed -e "s;__fqn__;$fqn;g" | \
 				sed -e "s;__instancename__;$instancename;g" | \
 				sed -e "s;__localip__;$localip;g" | \
-			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+			  sed -e "s;__webAppPath__;$instancedir;g" | \
+			  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $apacheconf
 
 
 	# Enable conf with ln
@@ -1330,6 +1354,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' | \
 				  sed -e 's;__phpversion__;$phpversion;g' | \
 				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__instancename__;$instancename;g' | \
@@ -1352,6 +1377,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" | \
 				  sed -e "s;__phpversion__;$phpversion;g" | \
 				  sed -e "s;__fqn__;$fqn;g" | \
 				  sed -e "s;__instancename__;$instancename;g" | \
@@ -1397,7 +1423,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__instancename__;$instancename;g' | \
 				  sed -e 's;__localip__;$localip;g' | \
-				  sed -e 's;__webAppPath__;$instancedir;g' > $phpfpmconf"
+				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $phpfpmconf"
 		cat $fpmpoolfiletemplate | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -1418,7 +1445,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;__fqn__;$fqn;g" | \
 				  sed -e "s;__instancename__;$instancename;g" | \
 				  sed -e "s;__localip__;$localip;g" | \
-				  sed -e "s;__webAppPath__;$instancedir;g" > $phpfpmconf
+				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $phpfpmconf
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm service $phpfpmservice from $fpmservicefiletemplate"
 		if [[ -s $phpfpmservice ]]
@@ -1790,6 +1818,18 @@ if [[ "$mode" == "deployoption" ]]; then
 				exit 27
 			fi
 		fi
+	fi
+fi
+
+# Re-grant the web server group ACL on htdocs after cliafter/cliafterdeployoption: those scripts
+# often unzip or chmod module files (e.g. enabling a custom module, changing the theme logo) after
+# the ACL grant above, which either leaves new files/dirs with no ACL at all or, when a plain chmod()
+# is used, resets the ACL mask and silently disables the www-data grant on the affected files.
+if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption" ]]; then
+	if command -v setfacl >/dev/null 2>&1; then
+		echo `date +'%Y-%m-%d %H:%M:%S'`" Re-grant www-data ACL on htdocs after cliafter/cliafterdeployoption"
+		setfacl -R -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
+		setfacl -d -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
 	fi
 fi
 
