@@ -79,6 +79,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 dol_include_once('/sellyoursaas/class/deploymentserver.class.php');
 dol_include_once('/sellyoursaas/lib/sellyoursaas_deploymentserver.lib.php');
+dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 
 // Load translation files required by the page
 $langs->loadLangs(array("sellyoursaas@sellyoursaas", "other"));
@@ -209,6 +210,26 @@ if (empty($reshook)) {
 	$autocopy = 'MAIN_MAIL_AUTOCOPY_DEPLOYMENTSERVER_TO';
 	$trackid = 'deploymentserver'.$object->id;
 	include DOL_DOCUMENT_ROOT.'/core/actions_sendmails.inc.php';
+
+	// Detect PHP-FPM versions actually installed on this server (read-only remote agent call)
+	if ($action == 'detectphpversions' && $permissiontoadd) {
+		$sellyoursaasutils = new SellYourSaasUtils($db);
+		$phpversionsfound = $sellyoursaasutils->detectPhpVersionsOnServer($object);
+		if (!is_array($phpversionsfound)) {
+			setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+		} else {
+			$object->phpversionsavailable = implode(',', $phpversionsfound);
+			if (empty($object->phpversiondefault) && !empty($phpversionsfound)) {
+				$object->phpversiondefault = $phpversionsfound[0];
+			}
+			$resultupdate = $object->update($user);
+			if ($resultupdate > 0) {
+				setEventMessages($langs->trans('PhpVersionsDetected', implode(', ', $phpversionsfound)), null, 'mesgs');
+			} else {
+				setEventMessages($object->error, $object->errors, 'errors');
+			}
+		}
+	}
 }
 
 
@@ -615,6 +636,11 @@ if ($object->id > 0 && (empty($action) || ($action != 'edit' && $action != 'crea
 
 			// Modify
 			print dolGetButtonAction($langs->trans('Modify'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=edit&token='.newToken(), '', $permissiontoadd);
+
+			// Detect PHP versions actually installed on this server (queries the remote agent, read-only)
+			if (getDolGlobalInt('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE') && !empty($object->ipaddress)) {
+				print dolGetButtonAction($langs->trans('DetectPhpVersions'), '', 'default', $_SERVER["PHP_SELF"].'?id='.$object->id.'&action=detectphpversions&token='.newToken(), '', $permissiontoadd);
+			}
 
 			/*// Validate
 			if ($object->status == $object::STATUS_DISABLED) {

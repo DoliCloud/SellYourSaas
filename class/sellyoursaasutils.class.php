@@ -4365,7 +4365,7 @@ class SellYourSaasUtils
 			// Note: remote action 'undeployall' is used to undeploy test instances
 			// Note: remote action 'undeploy' is used to undeploy paying instances
 			$doremoteaction = 0;
-			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'actionafterpaid')) &&
+			if (in_array($remoteaction, array('backup', 'deploy', 'deployall', 'rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'undeploy', 'undeployall', 'migrate', 'upgrade', 'deploywebsite', 'deploycustomurl', 'changephpversion', 'actionafterpaid')) &&
 				($producttmp->array_options['options_app_or_option'] == 'app')) {
 				$doremoteaction = 1;
 				$listoflinesqualified[] = array('tmpobject' => $tmpobject, 'position' => 10, 'doremoteaction' => $doremoteaction, 'remoteaction' => $remoteaction, 'producttmp' => $producttmp, 'tmppackage' => $tmppackage);
@@ -4616,8 +4616,30 @@ class SellYourSaasUtils
 					$directaccess=$producttmp->array_options['options_directaccess'];
 				}
 
+				// PHP version to use for this instance. An explicit per-instance value (contract
+				// extrafield "phpversion") is ALWAYS respected once set, regardless of the
+				// SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE toggle or the deployment server's own
+				// phpversionoverride setting - those two only gate whether the field can be
+				// edited going forward (see actions_sellyoursaas.class.php::doActions), not
+				// whether an already-set value keeps being applied. With no per-instance value,
+				// the deployment server's configured default (Deploymentserver->phpversiondefault)
+				// is used, but only while the feature is enabled module-wide; otherwise an empty
+				// value is sent and the instance server falls back to its own "phpversion=" in
+				// /etc/sellyoursaas.conf.
+				$phpversion = '';
+				if (!empty($contract->array_options['options_phpversion'])) {
+					$phpversion = $contract->array_options['options_phpversion'];
+				} elseif (getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
+					$sqlphpversion = 'SELECT phpversiondefault FROM '.MAIN_DB_PREFIX."sellyoursaas_deploymentserver WHERE ipaddress = '".$this->db->escape($serverdeployment)."'";
+					$resqlphpversion = $this->db->query($sqlphpversion);
+					if ($resqlphpversion && $this->db->num_rows($resqlphpversion) > 0) {
+						$objphpversion = $this->db->fetch_object($resqlphpversion);
+						$phpversion = $objphpversion->phpversiondefault;
+					}
+				}
+
 				// Prepare the script or txt files
-				if ($remoteaction != "migrate" && $remoteaction != "upgrade") {
+				if ($remoteaction != "migrate" && $remoteaction != "upgrade" && $remoteaction != "changephpversion") {
 					dol_syslog("Create conf file ".$tmppackage->srcconffile1);
 					if ($tmppackage->srcconffile1 && $conffile) {
 						dol_delete_file($tmppackage->srcconffile1, 0, 1, 0, null, false, 0);
@@ -4722,6 +4744,7 @@ class SellYourSaasUtils
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $websitenamedeploy); 			// Param 47 in .sh
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterpaid); 	// Param 48 in .sh src for cli after paid
 				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $tmppackage->srccliafterdeployoption); 	// Param 49 in .sh src for cli after deploy option
+				$commandurl.= '&'.str_replace(array(' ', '&'), '£', $phpversion); 	// Param 50 in .sh: per-instance PHP version override (empty = use server default from /etc/sellyoursaas.conf)
 				//$outputfile = $conf->sellyoursaas->dir_temp.'/action-'.$remoteaction.'-'.dol_getmypid().'.out';
 
 				// Add a signature of message at end of message
@@ -5507,5 +5530,54 @@ class SellYourSaasUtils
 		}
 
 		return $serversignaturekey;
+	}
+
+	/**
+	 * Call the remote server agent (read-only action "listphpversions") to get the list of
+	 * PHP-FPM versions actually installed on a deployment server, so the portal can offer
+	 * only versions that really exist when setting the server's default PHP version.
+	 *
+	 * @param	Deploymentserver	$deploymentserver	Deployment server to query (must have ipaddress set)
+	 * @return	array|int								Array of version strings (e.g. array('8.1','8.3')) or -1 if error (see $this->error)
+	 */
+	public function detectPhpVersionsOnServer($deploymentserver)
+	{
+		global $conf;
+
+		$this->error = '';
+		$this->errors = array();
+
+		if (empty($deploymentserver->ipaddress)) {
+			$this->error = 'No IP address defined on this deployment server';
+			return -1;
+		}
+
+		$signaturekey = !empty($deploymentserver->serversignaturekey) ? $deploymentserver->serversignaturekey : getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY');
+
+		// No real parameter needed for this read-only action, but the remote agent expects the
+		// signature at a fixed position (49th '&'-separated field, see remote_server/index.php)
+		// shared by every action - pad with placeholders like every other action does for its
+		// unused params, rather than special-casing the parsing on the agent side for this one.
+		$commandurl = implode('&', array_fill(0, 48, '-'));
+		$commandurl .= '&'.md5($commandurl.$signaturekey);
+
+		$conf->global->MAIN_USE_RESPONSE_TIMEOUT = 15;
+
+		$urltoget = 'http://'.$deploymentserver->ipaddress.':8080/listphpversions?'.urlencode($commandurl);
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
+		$retarray = getURLContent($urltoget, 'GET', '', 0, array(), array('http', 'https'), 2);
+
+		if (!empty($retarray['curl_error_no']) || $retarray['http_code'] != 200) {
+			$this->error = !empty($retarray['curl_error_msg']) ? $retarray['curl_error_msg'] : $retarray['content'];
+			$this->errors[] = $this->error;
+			return -1;
+		}
+
+		$content = trim($retarray['content']);
+		if ($content === '') {
+			return array();
+		}
+
+		return explode(',', $content);
 	}
 }

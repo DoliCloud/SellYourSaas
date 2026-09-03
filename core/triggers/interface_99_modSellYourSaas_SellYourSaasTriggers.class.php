@@ -236,6 +236,14 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					}
 				}
 
+				// Do we change the per-instance PHP version override ?
+				if (isset($object->oldcopy)
+				&& $object->oldcopy->array_options['options_phpversion'] != $object->array_options['options_phpversion']
+				&& $object->array_options['options_deployment_status'] != 'undeployed') {
+					dol_syslog("We found a change in phpversion (old=".$object->oldcopy->array_options['options_phpversion'].", new=".$object->array_options['options_phpversion'].") for a deployed instance, so we will call the remote action changephpversion");
+					$remoteaction = 'changephpversion';
+				}
+
 				// Do we change end of trial ?
 				if (isset($object->oldcopy) && $object->oldcopy->array_options['options_date_endfreeperiod'] != $object->array_options['options_date_endfreeperiod']) {
 					dol_syslog("We found a change in date of end of trial (old=".dol_print_date($object->oldcopy->array_options['options_date_endfreeperiod'], 'standard').", new=".dol_print_date($object->array_options['options_date_endfreeperiod'], 'standard').", so we check if we can and, if yes, we make the update of contract");
