@@ -19,7 +19,7 @@ if [ "x$7" == "x" ]; then
 	echo "***** desktop_deployment_deploy_module.sh *****"
 	echo "This script allows to deploy a module on instances of deployment servers"
 	echo
-	echo "Usage:   $0  hostsfile  target  command  productref  instancefilter  master_instance_id  [countrycode] [nocache]"
+	echo "Usage:   $0  hostsfile  target  command  productref  instancefilter  master_instance_unique_id  [countrycode] [nocache]"
 	echo "         [hostsfile] is the ansible inventory file prefix (e.g. myhosts will use hosts-myhosts)"
 	echo "         [target] is the host group or hostname to target"
 	echo "         [command] is the command to execute (e.g. test, confirm)"
