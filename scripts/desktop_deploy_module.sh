@@ -42,14 +42,14 @@ productref=$4
 instancefilter=$5
 master_instance_id=$6
 countrycode=""
-if [ "x$7" == "x" ]; then
+if [ "x$7" != "x" ]; then
 	if [ "x$7" == "xnocache" ]; then
 		$nocache="nocache"
 	else
 		countrycode=$7
 	fi
 fi
-if [ "x$8" == "x" ]; then
+if [ "x$8" != "x" ]; then
 	if [ "x$8" == "xnocache" ]; then
 		$nocache="nocache"
 	else
