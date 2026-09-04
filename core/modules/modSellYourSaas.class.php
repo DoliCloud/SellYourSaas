@@ -970,7 +970,7 @@ class modSellYourSaas extends DolibarrModules
 		$resultx=$extrafields->addExtraField('hostname_os', "Hostname OS", 'varchar', 125, '128', 'contrat', 0, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$resultx=$extrafields->addExtraField('username_os', "Username OS", 'varchar', 126, '32', 'contrat', 1, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('dolcrypt'=>null));
-		$resultx=$extrafields->addExtraField('password_os', "Password OS", 'password', 127, '128', 'contrat', 0, 0, '', $param, 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
+		$resultx=$extrafields->addExtraField('password_os', "Password OS", 'password', 127, '128', 'contrat', 0, 0, '', $param, 1, '', -1, 'ToUpdateSSHPassword', '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 		$param=array('options'=>array('0'=>'SystemDefault','1'=>'CommonUserJail','2'=>'PrivateUserJail'));
 		$resultx=$extrafields->addExtraField('instance_unique_id', "Instance unique ID", 'varchar', 128, '32', 'contrat', 1, 0, '', '', 1, '', -1, 0, '', '', 'sellyoursaas@sellyoursaas', 'isModEnabled("sellyoursaas")');
 
