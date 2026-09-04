@@ -46,7 +46,7 @@ do
 	if [ $? -eq 0 ]; then
 		export gitdir=`basename $dir`
 
-		
+
 	    if [ -d ".git" ]; then
 	    	git pull
 	    	if [ $? -ne 0 ]; then
@@ -62,7 +62,7 @@ do
 	    else
 	        echo "Not a git dir. Nothing done."
 	    fi
-	   
+
 		echo "Clean some dirs to save disk spaces"
 		has_install_lock=''
 		if [[ -f documents/install.lock ]]; then has_install_lock='1'; fi
@@ -82,7 +82,7 @@ do
 
 		echo "Clean some files to save disk spaces"
 		find . -type f -name index.html ! -path ./htdocs/includes/restler/framework/Luracast/Restler/explorer/index.html -delete
-		
+
 	    if [ -s dev/build/generate_filelist_xml.php ]; then
 	        echo "Found generate_filelist_xml.php from ".`pwd`
 	        php dev/build/generate_filelist_xml.php release=auto-sellyoursaas buildzip=1
@@ -103,16 +103,18 @@ do
 		        fi
 		    fi
 	    fi
-	
+
 		# Create a deployment tar file
 		if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 			echo "Compress the repository into an archive $dir/../$gitdir.tar.zst"
-			tar c -I zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tar.zst .
+			echo tar c -I zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f `dirname $dir`/$gitdir.tar.zst .
+			tar c -I zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f `dirname $dir`/$gitdir.tar.zst .
 			# Delete archive in other format
 			rm $dir/../$gitdir.tgz 2>/dev/null
 		else
 			echo "Compress the repository into an archive $dir/../$gitdir.tgz"
-			tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f $dir/../$gitdir.tgz .
+			echo tar c -I zstd --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f `dirname $dir`/$gitdir.tar.zst .
+			tar c -I gzip --exclude-vcs --exclude-from=$currentpath/git_update_sources.exclude -f `dirname $dir`/$gitdir.tgz .
 			# Delete archive in other format
 			rm $dir/../$gitdir.tar.zst 2>/dev/null
 		fi
