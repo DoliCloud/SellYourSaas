@@ -180,6 +180,12 @@ fi
 export CUSTOMDOMAIN=${46}
 export cliafterdeployoption=${49}
 
+# Per-instance PHP version override (from contract extrafield "phpversion"), takes priority
+# over the server-wide "phpversion=" read from /etc/sellyoursaas.conf when set.
+export phpversionforinstance=${50//£/ }
+if [[ "x$phpversionforinstance" != "x" && "x$phpversionforinstance" != "x-" ]]; then
+	phpversion=$phpversionforinstance
+fi
 
 
 export ErrorLog='#ErrorLog'
@@ -1557,6 +1563,24 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		fi
 	else
 		echo "Virtual host $apacheconf seems already disabled"
+	fi
+
+	if [[ "x$phpfpm" != "x" ]]; then
+		# The service(s) were already stopped/disabled earlier in this script (before the
+		# jailkit/user cleanup); remove the now-unused unit and pool conf files here so they
+		# don't pile up on disk for every undeployed instance. Match any PHP version, not just
+		# $phpversion: the instance's actual version can differ from it via changephpversion.
+		for phpfpmsvc in $(ls /etc/systemd/system/sellyoursaas-php*-fpm-"$fqn".service 2>/dev/null); do
+			echo "Remove php-fpm service file $phpfpmsvc"
+			rm -f "$phpfpmsvc"
+		done
+		for phpfpmpoolconf in /etc/php/*/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf; do
+			if [ -f "$phpfpmpoolconf" ]; then
+				echo "Remove php-fpm pool conf $phpfpmpoolconf"
+				rm -f "$phpfpmpoolconf"
+			fi
+		done
+		systemctl daemon-reload
 	fi
 fi
 

@@ -1488,6 +1488,8 @@ Then enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one 
 cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
 ---------------
 
+NOTE: this manual step stays the definitive setup here - `scripts/setup_server_phpfpm.sh` does not apply to this web portal server. That script is scoped to deployment servers hosting multiple Dolibarr instances (it checks the master database's per-instance PHP version override setting, configures mod_proxy_fcgi and refreshes jailkit jails), whereas this portal server runs a single fixed PHP version.
+
 
 === Setup of logrotate
 
