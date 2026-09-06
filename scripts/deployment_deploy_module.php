@@ -624,6 +624,11 @@ if ($resql) {
 							if ($mode == "confirm") {
 								$dbinstance->query($sql5);
 							}
+							$sql6 = 'ALTER TABLE llx_einvoicing_document ADD COLUMN processing_rule varchar(50) AFTER flow_profile;';
+							print "Run sql6 ".$sql6."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql6);
+							}
 
 							if ($mode != "confirm") {
 								print "Rollback\n";
