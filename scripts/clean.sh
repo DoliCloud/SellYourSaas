@@ -457,15 +457,20 @@ if [ -s /tmp/osutoclean ]; then
 					deluser --group $osusername
 				fi
 
-				# If dir still exists, we move it manually
+				# If dir still exists, we archive it manually. mv is tried first (immediate when
+				# home and archive dirs are on the same filesystem); cp -pr + rm is the fallback,
+				# only run if mv left the dir behind (failed or was only partial), so we never
+				# silently skip the archive when mv did not fully complete.
 				if [ -d "$targetdir/$osusername" ]; then
 					echo The dir $targetdir/$osusername still exists when user does not exists anymore, we archive it manually
 					echo mv -f $targetdir/$osusername $archivedirtest
-					echo cp -pr $targetdir/$osusername $archivedirtest
 					if [[ $testorconfirm == "confirm" ]]; then
 						mv -f $targetdir/$osusername $archivedirtest 2>/dev/null
-						cp -pr $targetdir/$osusername $archivedirtest
-						rm -fr $targetdir/$osusername
+						if [ -d "$targetdir/$osusername" ]; then
+							echo cp -pr $targetdir/$osusername $archivedirtest
+							cp -pr $targetdir/$osusername $archivedirtest
+							rm -fr $targetdir/$osusername
+						fi
 						chown -R root $archivedirtest/$osusername
 					fi
 				fi
