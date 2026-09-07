@@ -31,7 +31,7 @@ fi
 
 echo "Update git dirs found into $1 and generate the archive file (.zst or .tgz)"
 
-for dir in $(find "$1" -mindepth 1 -maxdepth 1 -type d)
+for dir in $(find "$1" -mindepth 1 -maxdepth 1 \( -type d -o -type l \))
 do
 	# If a subdir is given, discard if not subdir
 	if [ "x$2" != "x" -a "x$2" != "xall" ]; then
