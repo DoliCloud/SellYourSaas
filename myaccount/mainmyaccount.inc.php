@@ -43,7 +43,7 @@ if (! function_exists("llxHeader")) {
 	/**
 	 *	Show HTML header HTML + BODY + Top menu + left menu + DIV
 	 *
-	 * @param 	string 			$head				Optionnal head lines
+	 * @param 	string 			$head				Optional head lines
 	 * @param 	string 			$title				HTML title
 	 * @param	string			$help_url			Url links to help page
 	 * 		                            			Syntax is: For a wiki page: EN:EnglishPage|FR:FrenchPage|ES:SpanishPage
@@ -175,10 +175,10 @@ function top_httphead_sellyoursaas($contenttype = 'text/html', $forcenocache = 0
 }
 
 /**
- * Ouput html header of a page. It calls also top_httphead_sellyoursaas()
+ * Output html header of a page. It calls also top_httphead_sellyoursaas()
  * This code is also duplicated into security2.lib.php::dol_loginfunction
  *
- * @param 	string 	$head			 Optionnal head lines
+ * @param 	string 	$head			 Optional head lines
  * @param 	string 	$title			 HTML title
  * @param 	int    	$disablejs		 Disable js output
  * @param 	int    	$disablehead	 Disable head output
@@ -265,7 +265,7 @@ function top_htmlhead_sellyoursaas($head, $title = '', $disablejs = 0, $disableh
 		//if (! empty($conf->dol_use_jmobile)) $ext='version='.urlencode(DOL_VERSION);
 		$ext='version='.urlencode(DOL_VERSION);
 		if (GETPOST('version', 'int')) {
-			$ext='version='.GETPOST('version', 'int');	// usefull to force no cache on css/js
+			$ext='version='.GETPOST('version', 'int');	// useful to force no cache on css/js
 		}
 		// Refresh value of MAIN_IHM_PARAMS_REV before forging the parameter line.
 		if (GETPOST('dol_resetcache')) {
@@ -477,7 +477,7 @@ if (! function_exists("llxFooter")) {
 	 *
 	 * @param	string	$comment    				A text to add as HTML comment into HTML generated page
 	 * @param	string	$zone						'private' (for private pages) or 'public' (for public pages)
-	 * @param	int		$disabledoutputofmessages	Clear all messages stored into session without diplaying them
+	 * @param	int		$disabledoutputofmessages	Clear all messages stored into session without displaying them
 	 * @return	void
 	 */
 	function llxFooter($comment = '', $zone = 'private', $disabledoutputofmessages = 0)
@@ -536,7 +536,7 @@ if (! function_exists("llxFooter")) {
 		}
 
 		printCommonFooter($zone);
-		//var_dump($langs);		// Uncommment to see the property _tab_loaded to see which language file were loaded
+		//var_dump($langs);		// Uncomment to see the property _tab_loaded to see which language file were loaded
 
 		if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
 			print getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER');
@@ -609,9 +609,18 @@ if (! function_exists("llxFooter")) {
 
 		// Show conversion tracker.
 		// The $_SESSION['showconversiontracker'] is set into code of the action 'createpaymentmode' after a payment mode has been recorded, into myaccount/index.php.
-		if (! empty($_SESSION['showconversiontracker'])) {
+		if (!empty($_SESSION['showstarttrialtracker'])) {
+			print "\n".'<!-- Conversion tracker $_SESSION[\'showstarttrialtracker\']='.$_SESSION['showstarttrialtracker'].' -->'."\n";
+			if ($_SESSION['showstarttrialtracker'] == 'trialstarted') {
+				// TODO Make substitutions ?
+				print getDolGlobalString('SELLYOURSAAS_START_TRIAL_FOOTER');
+				$_SESSION['showstarttrialtracker'] = '';
+				unset($_SESSION['showstarttrialtracker']);
+			}
+		} elseif (!empty($_SESSION['showconversiontracker'])) {
 			print "\n".'<!-- Conversion tracker $_SESSION[\'showconversiontracker\']='.$_SESSION['showconversiontracker'].' -->'."\n";
 			if ($_SESSION['showconversiontracker'] == 'paymentrecorded') {
+				// TODO Make substitutions ?
 				print getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER');
 				$_SESSION['showconversiontracker'] = '';
 				unset($_SESSION['showconversiontracker']);
