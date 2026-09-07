@@ -610,13 +610,14 @@ if (! function_exists("llxFooter")) {
 		// Show conversion tracker.
 		if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
 			print "\n".'<!-- Conversion tracker for all pages -->'."\n";
-			global $mythirdparty;
-			if (is_object($mythirdparty)) {
-				print "\n".'<!-- mythirdparty = '.$mythirdparty->id.' -->'."\n";
+			global $mythirdpartyaccount;
+			if (is_object($mythirdpartyaccount)) {
+				print "\n".'<!-- mythirdparty = '.$mythirdpartyaccount->id.' -->'."\n";
 			}
 			$msg = getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER');
 			$msg = make_substitutions($msg, $arraysubstitution);
 			print $msg;
+			print "\n";
 		}
 		// The $_SESSION['showstarttrialtracker'] is set into myaccount/register_instance.php.
 		if (!empty($_SESSION['showstarttrialtracker'])) {
@@ -625,11 +626,12 @@ if (! function_exists("llxFooter")) {
 				$msg = getDolGlobalString('SELLYOURSAAS_START_TRIAL_FOOTER');
 				$msg = make_substitutions($msg, $arraysubstitution);
 				print $msg;
+				print "\n";
 				$_SESSION['showstarttrialtracker'] = '';
 				unset($_SESSION['showstarttrialtracker']);
 			}
 		} else {
-			print "\n".'<!-- No showstarttrialtracker tracker to show -->'."\n";
+			print "\n".'<!-- No showstarttrialtracker tracker to show -->'."\n\n";
 		}
 		// The $_SESSION['showconversiontracker'] is set into code of the action 'createpaymentmode' after a payment mode has been recorded, into myaccount/index.php.
 		if (!empty($_SESSION['showconversiontracker'])) {
@@ -638,11 +640,12 @@ if (! function_exists("llxFooter")) {
 				$msg = getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER');
 				$msg = make_substitutions($msg, $arraysubstitution);
 				print $msg;
+				print "\n";
 				$_SESSION['showconversiontracker'] = '';
 				unset($_SESSION['showconversiontracker']);
 			}
 		} else {
-			print "\n".'<!-- No showconversiontracker tracker to show -->'."\n";
+			print "\n".'<!-- No showconversiontracker tracker to show -->'."\n\n";
 		}
 
 		print "</body>\n";
