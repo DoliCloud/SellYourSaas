@@ -203,6 +203,23 @@ class modSellYourSaas extends DolibarrModules
 			9 =>array('priority'=>82, 'label'=>'SellYourSaasUndeployOldSuspendedTestInstances', 'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doUndeployOldSuspendedTestInstances', 'parameters'=>'',      'comment'=>'Undeployed test instances if we are after planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT)', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>$statusatinstall, 'test'=>'isModEnabled("sellyoursaas")', 'datestart'=>$datestart),
 			10=>array('priority'=>85, 'label'=>'SellYourSaasSuspendExpiredRealInstances',       'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doSuspendExpiredRealInstances',       'parameters'=>'',      'comment'=>'Suspend expired services of paid instances if we are after planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND)', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'isModEnabled("sellyoursaas")', 'datestart'=>$datestart),
 			11=>array('priority'=>86, 'label'=>'SellYourSaasUndeployOldSuspendedRealInstances', 'jobtype'=>'method', 'class'=>'/sellyoursaas/class/sellyoursaasutils.class.php', 'objectname'=>'SellYourSaasUtils', 'method'=>'doUndeployOldSuspendedRealInstances', 'parameters'=>'',      'comment'=>'Undeployed paid instances if we are after planned end date (+ grace offset in SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT)', 'frequency'=>1, 'unitfrequency'=>86400, 'status'=>$statusatinstall, 'test'=>'isModEnabled("sellyoursaas")', 'datestart'=>$datestart),
+
+			12 => array(
+				'label' => 'SendEmailsRemindersAfterRegistration',
+				'jobtype' => 'method',
+				'class' => '/sellyoursaas/class/sellyoursaasutils.class.php',
+				'objectname' => 'SellYourSaasUtils',
+				'method' => 'sendEmailsRemindersAfterRegistration',
+				'parameters' => "10,EmailTemplateCode",
+				'comment' => 'Send an email when we reach the registration date + n days. First param is n, the number of days after registration to send the remind, second parameter is the code of the email template to use (an email template with the EmailTemplateCode must exists. The version of the email template in the language of the thirdparty will be used in priority).',
+				'frequency' => 1,
+				'unitfrequency' => 3600 * 24,
+				'priority' => 50,
+				'status' => 0,
+				'test' => 'isModEnabled("sellyoursaas")',
+				'datestart' => $datestart
+			),
+
 		);
 		// Example: $this->cronjobs=array(0=>array('label'=>'My label', 'jobtype'=>'method', 'class'=>'/dir/class/file.class.php', 'objectname'=>'MyClass', 'method'=>'myMethod', 'parameters'=>'param1, param2', 'comment'=>'Comment', 'frequency'=>2, 'unitfrequency'=>3600, 'status'=>0, 'test'=>true),
 		//                                1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'param1, param2', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>true)
