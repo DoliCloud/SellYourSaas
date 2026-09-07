@@ -538,11 +538,6 @@ if (! function_exists("llxFooter")) {
 		printCommonFooter($zone);
 		//var_dump($langs);		// Uncomment to see the property _tab_loaded to see which language file were loaded
 
-		if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
-			print getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER');
-		}
-
-
 		if (empty($conf->dol_hide_leftmenu) && empty($conf->dol_use_jmobile)) {
 			print '</div> <!-- End div id-container -->'."\n";
 		}	// End div container
@@ -607,26 +602,47 @@ if (! function_exists("llxFooter")) {
 		print "\n<!-- A div to allow dialog popup -->\n";
 		print '<div id="dialogforpopup" style="display: none;"></div>'."\n";
 
+		$arraysubstitution = array(
+			'__SHA256_THIRPARTY_EMAIL__' => 'tocomplete',
+			'__THIRPARTY_ID__' => 'tocomplete'
+		);
+
 		// Show conversion tracker.
-		// The $_SESSION['showconversiontracker'] is set into code of the action 'createpaymentmode' after a payment mode has been recorded, into myaccount/index.php.
+		if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
+			print "\n".'<!-- Conversion tracker for all pages -->'."\n";
+			global $mythirdparty;
+			if (is_object($mythirdparty)) {
+				print "\n".'<!-- mythirdparty = '.$mythirdparty->id.' -->'."\n";
+			}
+			$msg = getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER');
+			$msg = make_substitutions($msg, $arraysubstitution);
+			print $msg;
+		}
+		// The $_SESSION['showstarttrialtracker'] is set into myaccount/register_instance.php.
 		if (!empty($_SESSION['showstarttrialtracker'])) {
 			print "\n".'<!-- Conversion tracker $_SESSION[\'showstarttrialtracker\']='.$_SESSION['showstarttrialtracker'].' -->'."\n";
 			if ($_SESSION['showstarttrialtracker'] == 'trialstarted') {
-				// TODO Make substitutions ?
-				print getDolGlobalString('SELLYOURSAAS_START_TRIAL_FOOTER');
+				$msg = getDolGlobalString('SELLYOURSAAS_START_TRIAL_FOOTER');
+				$msg = make_substitutions($msg, $arraysubstitution);
+				print $msg;
 				$_SESSION['showstarttrialtracker'] = '';
 				unset($_SESSION['showstarttrialtracker']);
 			}
-		} elseif (!empty($_SESSION['showconversiontracker'])) {
+		} else {
+			print "\n".'<!-- No showstarttrialtracker tracker to show -->'."\n";
+		}
+		// The $_SESSION['showconversiontracker'] is set into code of the action 'createpaymentmode' after a payment mode has been recorded, into myaccount/index.php.
+		if (!empty($_SESSION['showconversiontracker'])) {
 			print "\n".'<!-- Conversion tracker $_SESSION[\'showconversiontracker\']='.$_SESSION['showconversiontracker'].' -->'."\n";
 			if ($_SESSION['showconversiontracker'] == 'paymentrecorded') {
-				// TODO Make substitutions ?
-				print getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER');
+				$msg = getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER');
+				$msg = make_substitutions($msg, $arraysubstitution);
+				print $msg;
 				$_SESSION['showconversiontracker'] = '';
 				unset($_SESSION['showconversiontracker']);
 			}
 		} else {
-			print "\n".'<!-- No conversion tracker on this page -->'."\n";
+			print "\n".'<!-- No showconversiontracker tracker to show -->'."\n";
 		}
 
 		print "</body>\n";
