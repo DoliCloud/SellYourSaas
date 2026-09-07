@@ -602,18 +602,17 @@ if (! function_exists("llxFooter")) {
 		print "\n<!-- A div to allow dialog popup -->\n";
 		print '<div id="dialogforpopup" style="display: none;"></div>'."\n";
 
-		$arraysubstitution = array(
-			'__SHA256_THIRPARTY_EMAIL__' => 'tocomplete',
-			'__THIRPARTY_ID__' => 'tocomplete'
-		);
+		$arraysubstitution = array();
+		global $mythirdpartyaccount;
+		if (is_object($mythirdpartyaccount)) {
+			print "\n".'<!-- mythirdparty = '.$mythirdpartyaccount->id.' -->'."\n";
+			$arraysubstitution['__SHA256_THIRPARTY_EMAIL__'] = hash('sha256', $mythirdpartyaccount->email);
+			$arraysubstitution['__THIRPARTY_ID__'] = $mythirdpartyaccount->id;
+		}
 
 		// Show conversion tracker.
 		if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
 			print "\n".'<!-- Conversion tracker for all pages -->'."\n";
-			global $mythirdpartyaccount;
-			if (is_object($mythirdpartyaccount)) {
-				print "\n".'<!-- mythirdparty = '.$mythirdpartyaccount->id.' -->'."\n";
-			}
 			$msg = getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER');
 			$msg = make_substitutions($msg, $arraysubstitution);
 			print $msg;
