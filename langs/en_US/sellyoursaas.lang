@@ -142,6 +142,7 @@ ConfirmResetPassword=Are you sure you want to reset password for this user ?
 SEPAMandate=SEPA Mandate
 SepaMandateForSellYourSaas=SEPA Mandate for SellYourSaas
 FooterContent=Content of footer of all pages in "myaccount" web site (including conversion page)
+StartTrialContent=Content of footer on the "start trial page" (once an instance has been created)
 ConversionContent=Content of footer on the "conversion page" (only once a first payment mode has been recorded)
 InstallingInstance=Installing your instance...
 PleaseWait=Please wait.
