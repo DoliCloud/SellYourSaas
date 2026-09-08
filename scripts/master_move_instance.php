@@ -534,7 +534,7 @@ if (empty($overwriteexistinginstance)) {
 	$return_val = 0;
 	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
 		$outputfile = $conf->admin->dir_temp.'/out.tmp';
-		$resultarray = $utils->executeCLI($command, $outputfile, 0, null, 1);
+		$resultarray = $utils->executeCLI($command, $outputfile, 0);
 
 		$return_val = $resultarray['result'];
 		$content_grabbed = $resultarray['output'];
@@ -748,7 +748,7 @@ if (empty($nointeractive)) {
 print $fullcommand."\n";
 
 $outputfile = $conf->admin->dir_temp.'/out.tmp';
-$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, null, 1);
+$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0);
 
 $return_var = $resultarray['result'];
 $content_grabbed = $resultarray['output'];
@@ -823,7 +823,7 @@ if (empty($nointeractive)) {
 print $fullcommand."\n";
 
 $outputfile = $conf->admin->dir_temp.'/out.tmp';
-$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, null, 1);
+$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0);
 
 $return_var = $resultarray['result'];
 $content_grabbed = $resultarray['output'];
@@ -939,7 +939,7 @@ $return_varmysql = 0;
 print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommand." > ".$fullcommandredirectionfile."\n";
 
 $outputfile = $conf->admin->dir_temp.'/out.tmp';
-$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, $fullcommandredirectionfile, 1);
+$resultarray = $utils->executeCLI($fullcommand, $outputfile, 0, $fullcommandredirectionfile);
 
 $return_varmysql = $resultarray['result'];
 $content_grabbed = $resultarray['output'];
