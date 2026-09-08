@@ -5436,3 +5436,14 @@ Create a file */etc/systemd/system/apache2.service.d/override.conf* with content
 ProtectHome=false
 MemoryDenyWriteExecute=no
 ---------------
+
+
+==== Some chars appears on vi terminal (for example 4 and 6)
+
+This may appear on server with high latency answer. You can increase the timeout for vi terminal by adding this lineto ~/.vimrc:
+
+[source,bash]
+---------------
+set ttimeout
+set ttimeoutlen=1000
+---------------
