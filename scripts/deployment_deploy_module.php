@@ -165,6 +165,8 @@ if (! $res) {
  * @var Conf $conf
  * @var DoliDB $db
  * @var User $user
+ *
+ * @var string $dolibarr_main_restrict_os_commands
  */
 
 $nocache ='';
@@ -200,6 +202,7 @@ include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 
+$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', cd, cp, chown, tar' : '');
 
 print "***** ".$script_file." ".$version." *****\n";
 

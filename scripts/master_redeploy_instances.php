@@ -153,9 +153,13 @@ if (! $res) {
 /**
  * @var Conf	$conf
  * @var DoliDB	$db
+ *
+ * @var string 	$dolibarr_main_restrict_os_commands
  */
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
+
+$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', php' : '');
 
 // Read /etc/sellyoursaas.conf file
 $databasehost='localhost';
