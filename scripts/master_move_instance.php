@@ -61,6 +61,7 @@ $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
 $usecompressformatforarchive='gzip';
+$mastermoveinstancefordolibarr=0;
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -93,6 +94,9 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'mastermoveinstancefordolibarr') {
+			$mastermoveinstancefordolibarr = $tmpline[1];
 		}
 	}
 } else {
@@ -1028,27 +1032,31 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 
 
 // STEP 6 - Foce update of some vars (for Dolibarr only)
-// TODO Do it only for Dolibarr instances.
 
-$fullcommandupdatecronkey='echo "update llx_const set value = \''.$oldosuser.'\' WHERE value = \'CRON_KEY\');" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
-$output=array();
-$return_var=0;
-print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Force update of CRON_KEY with '.$fullcommandupdatecronkey."\n";
-if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
-	$outputfile = $conf->admin->dir_temp.'/out.tmp';
-	$resultarray = $utils->executeCLI($fullcommandupdatecronkey, $outputfile, 0, null, 1);
+if ($mastermoveinstancefordolibarr) {
+	$fullcommandupdatecronkey='echo "update llx_const set value = \''.$oldosuser.'\' WHERE value = \'CRON_KEY\';" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+	$output=array();
+	$return_var=0;
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Force update of CRON_KEY with '.$fullcommandupdatecronkey."\n";
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+		$outputfile = $conf->admin->dir_temp.'/out.tmp';
+		$resultarray = $utils->executeCLI($fullcommandupdatecronkey, $outputfile, 0, null, 1);
 
-	$return_var = $resultarray['result'];
-	$content_grabbed = $resultarray['output'];
+		$return_var = $resultarray['result'];
+		$content_grabbed = $resultarray['output'];
 
-	print $content_grabbed."\n";
-	// If table already not exist, return_var is 1
-	// If technical error, return_var is also 1, so we disable this test
-	/*if ($return_var) {
-		print "Error on dropping table into the new instance\n";
-		exit(-2);
-	}*/
+		print $content_grabbed."\n";
+		// If table already not exist, return_var is 1
+		// If technical error, return_var is also 1, so we disable this test
+		/*if ($return_var) {
+			print "Error on dropping table into the new instance\n";
+			exit(-2);
+		}*/
+	}
 }
+
+
+// STEP 7 - Update master database
 
 // Prepare SQL commands to execute after the load
 $sqla = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$newobject->ref.' '.$newobject->ref_customer)."'";
