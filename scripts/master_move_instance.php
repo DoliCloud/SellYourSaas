@@ -157,6 +157,8 @@ if (! $res) {
  * @var Societe $soc
  * @var Translate $langs
  * @var User $user
+ *
+ * @var $dolibarr_main_restrict_os_commands
  */
 
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
@@ -172,6 +174,8 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 //include_once(DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
 
 $langs->loadLangs(array("main", "errors"));
+
+$dolibarr_main_restrict_os_commands .= ', php, ssh, rsync, echo, cat, sed';
 
 $oldinstance=isset($argv[1]) ? $argv[1] : '';
 $newinstance=isset($argv[2]) ? strtolower($argv[2]) : '';
