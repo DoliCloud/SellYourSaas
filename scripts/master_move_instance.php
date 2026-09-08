@@ -179,7 +179,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 
 $langs->loadLangs(array("main", "errors"));
 
-$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', php' : '');
+$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', php, rsync, ssh, cat, echo, sed' : '');
 
 $oldinstance=isset($argv[1]) ? $argv[1] : '';
 $newinstance=isset($argv[2]) ? strtolower($argv[2]) : '';
@@ -507,7 +507,7 @@ if ($CERTIFFORCUSTOMDOMAIN) {
 							print "  File for ext ".$ext.$ext2." was sync\n";
 						}
 					} else {
-						print " -> Error during rsync\n";
+						print " -> Error during rsync: ".($resultarray['error'] ?? '')."\n";
 						print $content_grabbed;
 					}
 				} else {
