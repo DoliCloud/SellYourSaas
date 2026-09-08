@@ -152,7 +152,10 @@ if (! $res) {
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
 /**
- * @var Translate $langs
+ * @var DoliDB		$db
+ * @var Conf 		$conf
+ * @var Societe		$mysoc
+ * @var Translate 	$langs
  *
  * @var string $dolibarr_main_restrict_os_commands
  */
