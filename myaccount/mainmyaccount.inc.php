@@ -604,10 +604,24 @@ if (! function_exists("llxFooter")) {
 
 		$arraysubstitution = array();
 		global $mythirdpartyaccount;
-		if (is_object($mythirdpartyaccount)) {
+		if (!empty($mythirdpartyaccount) && is_object($mythirdpartyaccount)) {
 			print "\n".'<!-- mythirdparty = '.$mythirdpartyaccount->id.' -->'."\n";
 			$arraysubstitution['__SHA256_THIRPARTY_EMAIL__'] = hash('sha256', $mythirdpartyaccount->email);
+			$arraysubstitution['__SHA256_THIRPARTY_FIRSTNAME__'] = hash('sha256', $mythirdpartyaccount->array_options['options_firstname']);
+			$arraysubstitution['__SHA256_THIRPARTY_LASTNAME__'] = hash('sha256', $mythirdpartyaccount->array_options['options_lastname']);
+			$arraysubstitution['__SHA256_THIRPARTY_PHONE__'] = hash('sha256', $mythirdpartyaccount->phone_pro);
+			$arraysubstitution['__THIRPARTY_COUNTRY_CODE__'] = $mythirdpartyaccount->country_code;
 			$arraysubstitution['__THIRPARTY_ID__'] = $mythirdpartyaccount->id;
+		}
+		global $tmpthirdparty;
+		if (!empty($tmpthirdparty) && is_object($tmpthirdparty)) {
+			print "\n".'<!-- tmpthirdparty = '.$tmpthirdparty->id.' -->'."\n";
+			$arraysubstitution['__SHA256_THIRPARTY_EMAIL__'] = hash('sha256', $tmpthirdparty->email);
+			$arraysubstitution['__SHA256_THIRPARTY_FIRSTNAME__'] = hash('sha256', $tmpthirdparty->array_options['options_firstname']);
+			$arraysubstitution['__SHA256_THIRPARTY_LASTNAME__'] = hash('sha256', $tmpthirdparty->array_options['options_lastname']);
+			$arraysubstitution['__SHA256_THIRPARTY_PHONE__'] = hash('sha256', $tmpthirdparty->phone_pro);
+			$arraysubstitution['__THIRPARTY_COUNTRY_CODE__'] = $tmpthirdparty->country_code;
+			$arraysubstitution['__THIRPARTY_ID__'] = $tmpthirdparty->id;
 		}
 
 		// Show conversion tracker.
