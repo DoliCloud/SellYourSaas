@@ -158,6 +158,7 @@ if ($action == 'set') {
 		}
 
 		dolibarr_set_const($db, "SELLYOURSAAS_MYACCOUNT_FOOTER", GETPOST("SELLYOURSAAS_MYACCOUNT_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
+		dolibarr_set_const($db, "SELLYOURSAAS_START_TRIAL_FOOTER", GETPOST("SELLYOURSAAS_START_TRIAL_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_CONVERSION_FOOTER", GETPOST("SELLYOURSAAS_CONVERSION_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_ANONYMOUSUSER", GETPOST("SELLYOURSAAS_ANONYMOUSUSER", 'alpha'), 'chaine', 0, '', $conf->entity);
@@ -260,7 +261,7 @@ if (in_array('shell_exec', $arrayoffunctionsdisabled)) {
 }
 print "<br>\n";
 
-print '<form enctype="multipart/form-data" method="POST" action="'.$_SERVER["PHP_SELF"].'" name="form_index">';
+print '<form enctype="multipart/form-data" method="POST" action="'.$_SERVER["PHP_SELF"].'" name="form_index" spellcheck="false">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
 print '<input type="hidden" name="action" value="set">';
 
@@ -423,6 +424,13 @@ print '<td>';
 print '<textarea name="SELLYOURSAAS_MYACCOUNT_FOOTER" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER').'</textarea>';
 print '</td>';
 print '<td><span class="opacitymedium small">&lt;script&gt;Your google analytics code&lt;/script&gt;</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("StartTrialContent").'</td>';
+print '<td>';
+print '<textarea name="SELLYOURSAAS_START_TRIAL_FOOTER" class="quatrevingtpercent" rows="3">'.getDolGlobalString('SELLYOURSAAS_START_TRIAL_FOOTER').'</textarea>';
+print '</td>';
+print '<td><span class="opacitymedium small">&lt;script&gt;Your start trial trackers&lt;/script&gt;</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td>'.$langs->trans("ConversionContent").'</td>';

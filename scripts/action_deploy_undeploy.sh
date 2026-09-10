@@ -757,7 +757,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" || "$mode" == "deployoption"
 			mkdir -p $targetdirwithsources1
 
 			# Check local cache
-
+			echo "Remote cache file (archive on NFS dir) should be: $dirwithsources1.tar.zst"
 			if [ -f "$dirwithsources1.tar.zst" ]; then
 				datesource=`date -r $dirwithsources1.tar.zst +"%Y%m%d"`
 			else

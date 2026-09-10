@@ -142,6 +142,7 @@ ConfirmResetPassword=Are you sure you want to reset password for this user ?
 SEPAMandate=SEPA Mandate
 SepaMandateForSellYourSaas=SEPA Mandate for SellYourSaas
 FooterContent=Content of footer of all pages in "myaccount" web site (including conversion page)
+StartTrialContent=Content of footer on the "start trial page" (once an instance has been created)
 ConversionContent=Content of footer on the "conversion page" (only once a first payment mode has been recorded)
 InstallingInstance=Installing your instance...
 PleaseWait=Please wait.
@@ -535,6 +536,7 @@ SourceURLOfEvent=Source URL of event
 SeeOnBackoffice=See on backoffice
 PaymentModeAddedFrom=Payment mode added from
 ErrorBadValueForIntraVAT=Error: the value '%s' entered for field '%s' is not valid for your country (%s).<br>Please fix your country or your intracommunautary VAT number (You can also uncheck the field '%s' if you are not a company or don't have your intracommunautary VAT number. In such a case, a VAT may be added when charging the service to respect the European VAT rules for Business to Customer sales).
+CustomerDashboardLogin=also your customer dashboard login
 LoginForSupport=Login for support
 PasswordForSupport=Password for support
 SSHPublicKey=SSH public keys to deploy
@@ -598,8 +600,9 @@ BackupNow=Backup now
 BackupOK=Backup successful
 ArchiveInstanceDesc=Directory where instance will be archived when it is destroyed.
 ArchiveTestInstanceDesc=WARNING: Check that the feature is enabled by having the entry archivetestinstance=1 into sellyoursaas.conf file
-ToCreateDBUserManualy=To create a db user manually on SELECT only, you can do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;
-ToUpdateDBPassword=To update password of a db user, you can do<br>SET PASSWORD FOR 'dbu...'@'%%' = PASSWORD('newpassword'); SET PASSWORD FOR 'dbu...'@'localhost' = PASSWORD('newpassword'); FLUSH PRIVILEGES;
+ToCreateDBUserManualy=To create a Read only db user manually, enter here its login and do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;<br>Don't forget to also set password field.
+ToUpdateDBPassword=To update the password of a db user, you can modify it here and run in sql:<br>SET PASSWORD FOR 'dbu...'@'%%' = PASSWORD('newpassword'); SET PASSWORD FOR 'dbu...'@'localhost' = PASSWORD('newpassword'); FLUSH PRIVILEGES;<br>Then update the config file of the application to use the new password.
+ToUpdateSSHPassword=To update the SSH password of a user, you can modify it here and run as root:<br>passwd dbu...<br>Then update the config file of the application to use the new password.
 LatestBackupMessage=Latest backup message
 SELLYOURSAAS_ACCEPT_DISCOUNTCODE=Accept discount code when entering payment mode
 SELLYOURSAAS_ENABLE_OPTINMESSAGES=Add an Opt-In checkbox "Accept commercial offers" (on registration and customer dashboard)
@@ -729,7 +732,12 @@ ErrorOnMigration=An error occurred while trying to migrate your instance.<br>We 
 ErrorOnSqlDumpForge=SQL dump format error
 ErrorOnSqlPrefix=SQL table prexif error
 KeepEmptyToUseMainEmail=This is an alternative email you want us to send your invoices to. Keep empty if sending to main email is enough.
-SourceUtm=Source (first access)
+SourceUtm=Source tracker (first access)
+SourceUtmHelp=Value for the parameter utm_source added in the URL used to reach the web site the first time.
+SourceRegistration=Source (registration)
+SourceRegistrationHelp=Value of the tracker source found in URL used to reach the registration page.
+SourceChoice=Source (set by user)
+SourceChoiceHelp=Value of the source set by the user on the registration page among the list of possible value defined into dictionary (the least appears only if there is 2 or more value set in dictionary).
 SELLYOURSAAS_MINAMOUNT_TO_CLAIM=Minimum amount earned by reseller to be able to claim money
 SELLYOURSAAS_RESELLER_EMAIL=Contact email for reseller program
 SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE=Allow resellers to set custom prices
@@ -802,7 +810,7 @@ WhitelistipDesc=Add IP addresses that must be allowed to register new account or
 WhitelistemailDesc=Add Email addresses that must be allowed to register even if the check of validity (syntax or MX record) fails.
 BlacklistipDesc=Add IP in this list to block any creation of new account or instances from this IP. The list of IP is also used as the global source to generate the local file of blacklisted IP used by the PHP wrapper to send emails.
 BlacklistXDesc=The list of emails listed here are used as the global source to generate the local file of blacklisted emails used in the <b>%s</b> header for emails sent by the PHP wrapper.
-BlacklistdirDesc=List of directories or files (signature of phishing kits=scamas) that are not allowed into an instance. The script batch_detect_evil_instances.php will use it to report warnings.
+BlacklistdirDesc=List of directories or files (signature of phishing kits=scamas) that are not allowed into an instance. The script deployment_batch_detect_evil_instances.php will use it to report warnings.
 BlacklistcontentDesc=List of keywords that are used as the global source to generate the local file of blacklisted keywords checked by the PHP wrapper to send emails. Check is done both in header and body email.
 Searchkeys=Search keys
 NoBlackListIf=No blacklist for path

@@ -339,7 +339,7 @@ if (! preg_match('/class="(ok|warning)"/', $message)) {
 	<td><a href="<?php echo $php_self; ?>" tabindex="4"><?php echo $captcha_refresh; ?></a></td>
 	</tr></table>
 
-	</br>
+	<br>
 	</td></tr>
 		<?php
 	} ?>

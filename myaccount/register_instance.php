@@ -1630,7 +1630,7 @@ if (! $error && $productref != 'none') {
 }
 
 
-// Go to dashboard with login session forced
+// Go to dashboard with login session filled
 
 if (! $error) {
 	// Deployment is complete and finished.
@@ -1640,21 +1640,23 @@ if (! $error) {
 		$fromsocid = $tmpthirdparty->id;
 	}
 
-	$newurl=$_SERVER["PHP_SELF"];
-	$newurl=preg_replace('/register_instance\.php/', 'index.php?welcomecid='.$contract->id.(($fromsocid > 0) ? '&fromsocid='.$fromsocid : ''), $newurl);
+	$newurl = $_SERVER["PHP_SELF"];
+	$newurl = preg_replace('/register_instance\.php/', 'index.php?welcomecid='.$contract->id.(($fromsocid > 0) ? '&fromsocid='.$fromsocid : ''), $newurl);
 
-	$anonymoususer=new User($db);
+	$anonymoususer = new User($db);
 	$anonymoususer->fetch(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'));
-	$_SESSION['dol_login']=$anonymoususer->login;				// Set dol_login in session so for next page index.php we will load, we are already logged.
+	$_SESSION['dol_login'] = $anonymoususer->login;				// Set dol_login in session so for next page index.php we will load, we are already logged.
 
 	if ($fromsocid > 0) {
-		$_SESSION['dol_loginsellyoursaas']=$fromsocid;
+		$_SESSION['dol_loginsellyoursaas'] = $fromsocid;
 	} else {
-		$_SESSION['dol_loginsellyoursaas']=$contract->thirdparty->id;
+		$_SESSION['dol_loginsellyoursaas'] = $contract->thirdparty->id;
 	}
 
-	$_SESSION['initialapplogin']='admin';
-	$_SESSION['initialapppassword']=$password;
+	$_SESSION['initialapplogin'] = 'admin';
+	$_SESSION['initialapppassword'] = $password;
+
+	$_SESSION['showstarttrialtracker'] = 'trialstarted';
 
 	if (! $disablecustomeremail) {	// In most cases this test is true
 		// Send deployment email

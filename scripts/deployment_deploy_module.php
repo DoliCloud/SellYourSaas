@@ -165,13 +165,34 @@ if (! $res) {
  * @var Conf $conf
  * @var DoliDB $db
  * @var User $user
+ *
+ * @var string $dolibarr_main_restrict_os_commands
  */
+
+$nocache ='';
 $mode=isset($argv[1]) ? $argv[1] : 'test';
 $productref=isset($argv[2]) ? $argv[2] : '';
 $instancefilter = isset($argv[3]) ? $argv[3] : '';
 $allowdeployforfree = isset($argv[4]) ? $argv[4] : 'deny';
 $decryptkey = isset($argv[5]) ? $argv[5] : '';
-$countrycode = isset($argv[6]) ? $argv[6] : '';
+if (isset($argv[6])) {
+	$tmp = $argv[6];
+	if (strlen($tmp) == 2) {
+		$countrycode = $tmp;
+	}
+	if ($tmp == 'nocache') {
+		$nocache = 'nocache';
+	}
+}
+if (isset($argv[7])) {
+	$tmp = $argv[7];
+	if (strlen($tmp) == 2) {
+		$countrycode = $tmp;
+	}
+	if ($tmp == 'nocache') {
+		$nocache = 'nocache';
+	}
+}
 
 dol_include_once("sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("sellyoursaas/class/sellyoursaascontract.class.php");
@@ -181,6 +202,7 @@ include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT."/core/class/utils.class.php";
 require_once DOL_DOCUMENT_ROOT."/core/lib/company.lib.php";
 
+$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', cd, cp, chown, tar' : '');
 
 print "***** ".$script_file." ".$version." *****\n";
 
@@ -195,7 +217,7 @@ if (empty($productref)) {
 	print "Script must be ran from each deployment server with login root.\n";
 	print "allow|deny param is used to deploy on free instances or not (default deny).\n";
 	print "\n";
-	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny masteruniquekey [countrycode]\n";
+	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny masteruniquekey [countrycode] [nocache]\n";
 	print "Example: ".$script_file." test TESTMODULE 'aa*' deny abc123456789 FR\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	print "\n";
@@ -247,7 +269,7 @@ include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 $object=new Contrat($db);
 
 print "Search instances with status done and name matching ".$instancefiltercomplete;
-print ", country code = ".$countrycode;
+print ", country code = ".$countrycode.", nocache = ".$nocache;
 print "\n";
 $sql = "SELECT c.rowid as id, c.ref, c.ref_customer as instance,";
 $sql.= " ce.deployment_status as instance_status, ce.latestbackup_date_ok, ce.backup_frequency";
@@ -318,7 +340,6 @@ if ($resql) {
 					$date_end = $tmpline->date_end;
 				}
 				if ($productlinefound) {
-					$i++;
 					$nbdeploynothingdone++;
 					print("Warning: Module ".$product->ref." already present in contract for instance ".$instance."\n");
 				} else {
@@ -443,7 +464,7 @@ if ($resql) {
 							continue;
 						}
 						if (dol_is_dir($deploy["src"])) {
-							print "Deploy with src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
+							print "Using src = ".$deploy["src"]." dest = ".$deploy["dest"]."\n";
 							$res = dol_mkdir($deploy["dest"]);
 							if ($res < 0) {
 								print "Error: Failed to create ".$deploy["dest"]." directory\n";
@@ -466,9 +487,9 @@ if ($resql) {
 							}
 							$cacheage = ($now - $datecache) / 86400;
 							$MAXAGE = 2;
-							print "Cache age is ".$cacheage." / MAX is ".$MAXAGE."\n";
+							print "Archive cache age is ".$cacheage." / MAX is ".$MAXAGE.", nocache is ".$nocache."\n";
 
-							if ($datecache == 0 || $datesource > $datecache || $cacheage > $MAXAGE) {
+							if ($datecache == 0 || $datesource > $datecache || $cacheage > $MAXAGE || $nocache) {
 								print "Renew of the archive\n";
 								$res = dol_mkdir("/tmp/cache".$deploy["src"]);
 								if ($res < 0) {
@@ -492,6 +513,7 @@ if ($resql) {
 									}
 									print $result["output"];
 								}
+								$nocache = "";	// We do not want to renew cache for next deploy
 							}
 
 							if (dol_is_file("/tmp/cache".$deploy["src"].".tar.zst")) {
@@ -510,7 +532,7 @@ if ($resql) {
 									print $result["error"];
 								}
 							} else {
-								print "Disabled in test mode\n";
+								print "Ignored. Unpacking files is disabled in test mode\n";
 							}
 
 							// Execute chown to change permissions
@@ -541,7 +563,7 @@ if ($resql) {
 								print $result["error"];
 							}
 						} else {
-							print "Disabled in test mode\n";
+							print "Running command from the cli after deploy option script is disabled in test mode\n";
 						}
 					}
 
@@ -566,41 +588,57 @@ if ($resql) {
 								'EINVOICING_DISABLE_SYNC_DOLI_TO_AP' => '1'
 							);
 
-							$s = dolibarr_get_const($dbinstance, 'EINVOICING_PDP');
-							if (empty($s)) {
-								$dbinstance->begin();
+							$dbinstance->begin();
 
+							$s = dolibarr_get_const($dbinstance, 'EINVOICING_PDP');
+
+							if (empty($s)) {
 								foreach ($arrayofoptiontoforce as $key => $value) {
-									print "Set constant ".$key." to ".$value."\n";
+									print "Set setup constant ".$key." to ".$value."\n";
 									dolibarr_set_const($dbinstance, $key, $value);
 								}
-
-								// Make SQL requests
-								$sql1 = 'CREATE TABLE llx_einvoicing_extrafields (rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, element_id integer NOT NULL, element_type varchar(50) NOT NULL, name varchar(64) NOT NULL, value text, date_creation datetime NOT NULL, tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, fk_user_creat integer NOT NULL, fk_user_modif integer) ENGINE = innodb;';
-								print "Run sql1 ".$sql1."\n";
-								$dbinstance->query($sql1);
-								$sql2 = 'ALTER TABLE llx_einvoicing_extrafields ADD UNIQUE INDEX uk_einvoicing_extrafields (element_type, element_id, name);';
-								print "Run sql2 ".$sql2."\n";
-								$dbinstance->query($sql2);
-								$sql3 = 'UPDATE llx_extrafields SET printable = 2 WHERE printable = 1 AND elementtype IN (\'facture\', \'commande\') AND name IN (\'d4d_service_code\', \'d4d_contract_number\', \'d4d_promise_code\')';
-								print "Run sql3 ".$sql3."\n";
-								$dbinstance->query($sql3);
-								$sql4 = 'ALTER TABLE llx_einvoicing_call ADD COLUMN call_id_num integer AFTER call_id;';
-								print "Run sql4 ".$sql4."\n";
-								$dbinstance->query($sql4);
-								$sql5 = 'ALTER TABLE llx_einvoicing_call ADD COLUMN request_id varchar(36) AFTER endpoint;';
-								print "Run sql5 ".$sql5."\n";
-								$dbinstance->query($sql5);
-
-								if ($mode != "confirm") {
-									print "Rollback\n";
-									$dbinstance->rollback();
-								} else {
-									print "Commit\n";
-									$dbinstance->commit();
-								}
 							} else {
-								print "A einvoicing provider seems already set for the instance (on entity 1), we do not change it.\n";
+								print "A einvoicing provider seems already set for the instance (on entity 1), we do not change setup.\n";
+							}
+
+							// Make SQL requests to run upgrade
+							$sql1 = 'CREATE TABLE llx_einvoicing_extrafields (rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, element_id integer NOT NULL, element_type varchar(50) NOT NULL, name varchar(64) NOT NULL, value text, date_creation datetime NOT NULL, tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, fk_user_creat integer NOT NULL, fk_user_modif integer) ENGINE = innodb;';
+							print "Run sql1 ".$sql1."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql1);
+							}
+							$sql2 = 'ALTER TABLE llx_einvoicing_extrafields ADD UNIQUE INDEX uk_einvoicing_extrafields (element_type, element_id, name);';
+							print "Run sql2 ".$sql2."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql2);
+							}
+							$sql3 = 'UPDATE llx_extrafields SET printable = 2 WHERE printable = 1 AND elementtype IN (\'facture\', \'commande\') AND name IN (\'d4d_service_code\', \'d4d_contract_number\', \'d4d_promise_code\')';
+							print "Run sql3 ".$sql3."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql3);
+							}
+							$sql4 = 'ALTER TABLE llx_einvoicing_call ADD COLUMN call_id_num integer AFTER call_id;';
+							print "Run sql4 ".$sql4."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql4);
+							}
+							$sql5 = 'ALTER TABLE llx_einvoicing_call ADD COLUMN request_id varchar(36) AFTER endpoint;';
+							print "Run sql5 ".$sql5."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql5);
+							}
+							$sql6 = 'ALTER TABLE llx_einvoicing_document ADD COLUMN processing_rule varchar(50) AFTER flow_profile;';
+							print "Run sql6 ".$sql6."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql6);
+							}
+
+							if ($mode != "confirm") {
+								print "Rollback\n";
+								$dbinstance->rollback();
+							} else {
+								print "Commit\n";
+								$dbinstance->commit();
 							}
 
 							$dbinstance->close();
