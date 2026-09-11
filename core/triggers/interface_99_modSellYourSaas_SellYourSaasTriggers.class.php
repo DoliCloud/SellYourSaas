@@ -221,10 +221,10 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 						$nametotest = $object->array_options['options_custom_url'];
 						$otherid = sellyoursaasCheckCustomUrlAlreadyUsed($this->db, $nametotest, $object->id);
 						if ($otherid > 0) {
-							$this->errors[] = "Custom URL '".$nametotest."' is already used by another contract (id=".$otherid.")";
+							$this->errors[] = $langs->trans("ErrorCustomUrlAlreadyUsed", $nametotest);
 							$testok = 0;
 						} elseif (sellyoursaasCheckCustomUrlDns($nametotest, $object->ref_customer) !== 1) {
-							$this->errors[] = "Custom URL '".$nametotest."' does not currently resolve (DNS) to the same IP address than ".$object->ref_customer.". Point its DNS record to the instance before saving.";
+							$this->errors[] = $langs->trans("ErrorCustomUrlDnsNotPointingHere", $nametotest, $object->ref_customer);
 							$testok = 0;
 						}
 					}
