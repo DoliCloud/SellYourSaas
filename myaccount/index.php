@@ -2257,26 +2257,30 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		if (!$error) {
 			$object->fetchObjectLinked();
-			$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
-			if (count($arrayfacturerec) != 1) {
-				// TODO: Send mail auto to inform admins of multiples faturerec contract
-				$error ++;
-			} else {
-				$facturerec = $arrayfacturerec[0];
-				$foundlinefacturerec = 0;
-				foreach ($facturerec->lines as $key => $line) {
-					if ($line->description == $descriptionlines && $line->fk_product == $productid) {
-						$foundlinefacturerec ++;
+			if (!empty($object->linkedObjects["facturerec"])) {
+				$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
+				if (count($arrayfacturerec) != 1) {
+					// TODO: Send mail auto to inform admins of multiples faturerec contract
+					$error ++;
+				} else {
+					$facturerec = $arrayfacturerec[0];
+					$foundlinefacturerec = 0;
+					foreach ($facturerec->lines as $key => $line) {
+						if ($line->description == $descriptionlines && $line->fk_product == $productid) {
+							$foundlinefacturerec ++;
+						}
 					}
-				}
-				if (!$foundlinefacturerec) {
-					$result = $facturerec->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
-					if (!$result) {
-						// TODO: Send mail auto to inform admins of error line creation facturRec
-						$error ++;
+					if (!$foundlinefacturerec) {
+						$result = $facturerec->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+						if (!$result) {
+							// TODO: Send mail auto to inform admins of error line creation facturRec
+							$error ++;
+						}
 					}
 				}
 			}
+			// else: no recurring invoice at all for this contract (e.g. a trial) - nothing to add a
+			// line to, same as the uninstall side of this option already tolerates.
 		}
 		if (!$error) {
 			//$object->context["options_websitename"] = $website->ref;
