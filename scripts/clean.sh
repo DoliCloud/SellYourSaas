@@ -2,7 +2,8 @@
 # Purge data.
 # This script can be run on the master or any deployment servers.
 #
-# Put the following entry into your root cron
+# Put the following entry into your root cron (adjust the path if sellyoursaasdir is
+# customized in /etc/sellyoursaas.conf)
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 
 #set -e
@@ -217,6 +218,21 @@ do
 	fi
 done
 
+echo "***** Clean vhost backups from scripts/switch_instance_phpversion.sh for hosts that are not enabled (safe, never cleaned up before this was fixed)"
+for fic in /etc/apache2/sellyoursaas-available/*.conf.bak-switchphpversion-* /etc/apache2/sellyoursaas-available/*.custom*.conf.bak-switchphpversion-*
+do
+	[ -e "$fic" ] || continue
+	basfic=`basename $fic | sed -E 's/\.bak-switchphpversion-[0-9]+-[0-9]+$//'`
+	if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
+		echo Remove file with rm $fic
+		if [[ $testorconfirm == "confirm" ]]; then
+			rm $fic
+		fi
+	else
+		echo "Site $basfic is enabled, we keep its backup $fic"
+	fi
+done
+
 echo "***** Clean available fpm pool that are not enabled hosts (safe)"
 if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
 	for fic in `ls /etc/apache2/sellyoursaas-fpm-pool/*.*.*.*.conf /etc/apache2/sellyoursaas-fpm-pool/*.home.lan 2>/dev/null`
@@ -232,6 +248,26 @@ if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
 		fi
 	done
 fi
+
+echo "***** Clean orphaned php-fpm services/pools (sellyoursaas-php<version>-fpm-<fqn> scheme, not cleaned by undeploy before this was fixed)"
+for svcfile in /etc/systemd/system/sellyoursaas-php*-fpm-*.service
+do
+	[ -e "$svcfile" ] || continue
+	basfic=`basename $svcfile`
+	fqn=`echo $basfic | sed -E 's/^sellyoursaas-php[0-9]+\.[0-9]+-fpm-//; s/\.service$//'`
+	phpver=`echo $basfic | sed -E 's/^sellyoursaas-php([0-9]+\.[0-9]+)-fpm-.*/\1/'`
+	if [ ! -L /etc/apache2/sellyoursaas-online/$fqn.conf ]; then
+		echo "Instance $fqn has no live vhost, removing orphaned php-fpm service $basfic"
+		if [[ $testorconfirm == "confirm" ]]; then
+			systemctl disable --now $basfic 2>/dev/null
+			rm -f $svcfile
+			rm -f /etc/php/$phpver/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf
+			systemctl daemon-reload
+		fi
+	else
+		echo "Instance $fqn is enabled, we keep its php-fpm service $basfic"
+	fi
+done
 
 
 echo "***** Get list of databases of all instances and save it into /tmp/instancefound-dbinsellyoursaas"
@@ -457,20 +493,15 @@ if [ -s /tmp/osutoclean ]; then
 					deluser --group $osusername
 				fi
 
-				# If dir still exists, we archive it manually. mv is tried first (immediate when
-				# home and archive dirs are on the same filesystem); cp -pr + rm is the fallback,
-				# only run if mv left the dir behind (failed or was only partial), so we never
-				# silently skip the archive when mv did not fully complete.
+				# If dir still exists, we archive it manually. Used to also mv -f the dir away
+				# before this cp -pr, which silently defeated the cp (source already gone) and
+				# could leave nothing at all in the archive if that mv itself failed.
 				if [ -d "$targetdir/$osusername" ]; then
 					echo The dir $targetdir/$osusername still exists when user does not exists anymore, we archive it manually
-					echo mv -f $targetdir/$osusername $archivedirtest
+					echo cp -pr $targetdir/$osusername $archivedirtest
 					if [[ $testorconfirm == "confirm" ]]; then
-						mv -f $targetdir/$osusername $archivedirtest 2>/dev/null
-						if [ -d "$targetdir/$osusername" ]; then
-							echo cp -pr $targetdir/$osusername $archivedirtest
-							cp -pr $targetdir/$osusername $archivedirtest
-							rm -fr $targetdir/$osusername
-						fi
+						cp -pr $targetdir/$osusername $archivedirtest
+						rm -fr $targetdir/$osusername
 						chown -R root $archivedirtest/$osusername
 					fi
 				fi
@@ -573,6 +604,15 @@ if [ -s /tmp/osutoclean ]; then
 				else
 					echo File /etc/apache2/sellyoursaas-available/$instancename.custom.conf already deleted
 				fi
+
+				echo "   ** Remove leftover vhost backups from scripts/switch_instance_phpversion.sh (never cleaned up before now)"
+				for bakfile in /etc/apache2/sellyoursaas-available/$instancename.conf.bak-switchphpversion-* /etc/apache2/sellyoursaas-available/$instancename.custom*.conf.bak-switchphpversion-*; do
+					[[ -f "$bakfile" ]] || continue
+					echo rm "$bakfile"
+					if [[ $testorconfirm == "confirm" ]]; then
+						rm "$bakfile"
+					fi
+				done
 
 				/usr/sbin/apache2ctl configtest
 				if [[ "x$?" != "x0" ]]; then
