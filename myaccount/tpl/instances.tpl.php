@@ -1327,18 +1327,40 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 										</div>
 									';
 			}
-			// Modify is hidden for now: only one custom URL is supported per instance, and
-			// changing it in place had a confusing empty=remove trap. To change domain,
-			// customers must Uninstall the option (panel above) then re-Install with the new
-			// value. TODO: once multiple custom URLs per instance are supported (with a cap),
-			// bring back an edit/modify affordance here.
 		}
 
 		//print '<input type="submit" class="btn btn-warning default change-domain-link" name="changedomain" value="'.$langs->trans("ChangeDomain").'">';
 		print '
 									</div></div>
 
-							  	</form>
+							  	</form>';
+
+		if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0
+			&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID'))))
+			&& ! empty($contract->array_options['options_custom_url'])) {
+			// Own separate form (can't nest inside the "updateurl" form above): lets the customer
+			// change the already-set custom URL here too, not just from the resources/options tab.
+			// deploycustomurl creates the missing contract/facturerec line itself when needed.
+			print '
+								<form class="form-group" action="'.$_SERVER["PHP_SELF"].'" method="POST" role="form">
+									<input type="hidden" name="token" value="'.newToken().'">
+									<input type="hidden" name="mode" value="instances"/>
+									<input type="hidden" name="action" value="deploycustomurl" />
+									<input type="hidden" name="contractid" value="'.$contract->id.'" />
+									<input type="hidden" name="tab" value="domain_'.$contract->id.'" />
+									<div class="form-body">
+										<div class="form-group col-md-12 row">
+											<label class="col-md-5 control-label">'.$langs->trans("YourCustomUrl").'</label>
+											<div class="col-md-5">
+												<input type="text" name="domainname" class="minwidth300" value="'.dol_escape_htmltag($contract->array_options['options_custom_url']).'">
+												<input type="submit" class="btn btn-primary button-small" name="activateoption" value="'.$langs->trans("Modify").'">
+											</div>
+										</div>
+									</div>
+								</form>';
+		}
+
+		print '
 				            </div>';
 
 		// Tab for SSH/SFTP
