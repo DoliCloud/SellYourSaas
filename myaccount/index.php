@@ -2372,6 +2372,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$deletedlinecontract = 0; $deletedlinefacturerec = 0;
 	$contractid = GETPOSTINT("instanceid");
 	$productid = GETPOSTINT("productid");
+	// The custom URL "option" can be set directly (by support, or from a time before this option
+	// existed/was purchased) without ever going through the deploycustomurl flow that creates its
+	// contract/facturerec lines below - tolerate having none of those lines for this specific
+	// product instead of reporting a failure for something that isn't actually broken.
+	$isCustomUrlOption = ($productid > 0 && $productid == getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL"));
 	if ($contractid <= 0) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
 		header("Location: ".$backtourl);
@@ -2505,7 +2510,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 
-	if (!$deletedlinecontract || (!$deletedlinefacturerec && !empty($tmpcontract->linkedObjects["facturerec"]))) {
+	if (!$isCustomUrlOption && (!$deletedlinecontract || (!$deletedlinefacturerec && !empty($tmpcontract->linkedObjects["facturerec"])))) {
 		$error ++;
 		setEventMessages("FailedToUninstallOption", null, 'errors');
 	}

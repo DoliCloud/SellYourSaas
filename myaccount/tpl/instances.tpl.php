@@ -807,7 +807,20 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 			if (getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL") && getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL") > 0
 				&& (!getDolGlobalString("SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID") || in_array($mythirdpartyaccount->id, explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_CUSTOMURL_FOR_THIRDPARTYID'))))) {
 				if (! empty($contract->array_options['options_custom_url'])) {
+					// A value here may have been set directly (support, or before this option existed)
+					// without ever going through the form below, so there may be no contract/facturerec
+					// line for it yet - still offer a way to change the value (deploycustomurl creates
+					// the missing line itself if needed) alongside the existing Uninstall button.
 					print '<div class="tagtable centpercent divcustomdomain"><div class="tagtr">';
+
+					print '<form method="POST" id="formwebsiteoptionmodify" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+					print '<input type="hidden" name="token" value="'.newToken().'">';
+					print '<input type="hidden" name="action" value="deploycustomurl">';
+					print '<input type="hidden" name="contractid" value="'.$contract->id.'">';
+					print '<input type="hidden" name="mode" value="'.$mode.'">';
+					print '<input type="hidden" name="keylineoption" value="'.$keyline.'">';
+					print '<input type="hidden" name="page_y" value="">';
+
 					print '<div class="tagtd valignmiddle paddingleft paddingright">';
 					print '<div class="titleoption">';
 					print '<div class="inline-block">';
@@ -815,11 +828,18 @@ if (count($listofcontractid) == 0) {				// If all contracts were removed
 					print '</div>';
 					print '<div class="inline-block paddingleft marginleftonly paddingright marginrightonly bold">'.$langs->trans("OptionYourCustomDomainName").'</div>';
 					print '</div>';
-					print '<span class="small">'.$langs->trans("YourCustomUrl").' : '.$contract->array_options['options_custom_url'].'</span>';
+					print '<span class="small">'.$langs->trans("YourCustomUrl").' : ';
+					print '<input type="text" name="domainname" class="minwidth300" value="'.dol_escape_htmltag($contract->array_options['options_custom_url']).'">';
+					print '<input type="submit" class="btn btn-primary button-small" name="activateoption" value="'.$langs->trans("Modify").'">';
+					print '</span>';
 					print '</div>';
+
 					print '<div class="tagtd right valignmiddle minwidth100 width150">';
 					print '<a class="btn btn-warning nowraponall" href="'.$_SERVER["PHP_SELF"].'?mode=instances&action=uninstall&token='.newToken().'&instanceid='.$contract->id.'&productid='.getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL").'" rel="noopener">'.$langs->trans("Uninstall").'...</a>';
 					print '</div>';
+
+					print '</form>';
+
 					print '</div></div>';	// end tr, end table
 					print '<hr>';
 				} else {
