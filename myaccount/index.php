@@ -2189,6 +2189,17 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$error++;
 	}
 	if (!$error) {
+		$otherid = sellyoursaasCheckCustomUrlAlreadyUsed($db, $custom_url, $contractid);
+		if ($otherid > 0) {
+			setEventMessages($langs->trans("ErrorCustomUrlAlreadyUsed", $custom_url), null, 'errors');
+			$error++;
+		}
+	}
+	if (!$error && sellyoursaasCheckCustomUrlDns($custom_url, $object->ref_customer) !== 1) {
+		setEventMessages($langs->trans("ErrorCustomUrlDnsNotPointingHere", $custom_url, $object->ref_customer), null, 'errors');
+		$error++;
+	}
+	if (!$error) {
 		$type_db = $conf->db->type;
 		$hostname_db  = $object->array_options['options_hostname_db'];
 		$username_db  = $object->array_options['options_username_db'];

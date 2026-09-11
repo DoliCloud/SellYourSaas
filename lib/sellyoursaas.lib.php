@@ -407,6 +407,64 @@ function sellyoursaasIsSuspended($contract)
 }
 
 /**
+ * Check that a custom domain name currently resolves (public DNS) to the same IP address(es)
+ * as the instance's own default domain name, so we know a Let's Encrypt HTTP-01 challenge
+ * against it has a chance to succeed.
+ *
+ * @param	string	$customurl	Custom domain name to check (without protocol)
+ * @param	string	$reffqdn	Instance's own default domain name (Contrat->ref_customer)
+ * @return	int					1 if customurl resolves to the same IP(s) than reffqdn, 0 if not, -1 if we failed to resolve reffqdn itself
+ */
+function sellyoursaasCheckCustomUrlDns($customurl, $reffqdn)
+{
+	$ipref = @gethostbynamel($reffqdn);
+	if (empty($ipref)) {
+		// Should not happen: reffqdn is the instance's own working domain name.
+		return -1;
+	}
+
+	$ipcustom = @gethostbynamel($customurl);
+	if (empty($ipcustom)) {
+		return 0;
+	}
+
+	if (count(array_intersect($ipref, $ipcustom)) > 0) {
+		return 1;
+	}
+
+	return 0;
+}
+
+/**
+ * Check if a custom domain name is already used by another contract, whatever its deployment server.
+ *
+ * @param	DoliDB	$db					Database handler
+ * @param	string	$customurl			Custom domain name to check
+ * @param	int		$excludecontractid	Contract id to exclude from the search (the one being edited)
+ * @return	int							Id of the other contract already using this custom url, 0 if not used, -1 if error
+ */
+function sellyoursaasCheckCustomUrlAlreadyUsed($db, $customurl, $excludecontractid = 0)
+{
+	$sql = "SELECT ce.fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields as ce";
+	$sql .= " WHERE ce.custom_url = '".$db->escape($customurl)."'";
+	if ($excludecontractid > 0) {
+		$sql .= " AND ce.fk_object != ".((int) $excludecontractid);
+	}
+	$sql .= " LIMIT 1";
+
+	$resql = $db->query($sql);
+	if (!$resql) {
+		return -1;
+	}
+	$obj = $db->fetch_object($resql);
+	if ($obj) {
+		return (int) $obj->fk_object;
+	}
+
+	return 0;
+}
+
+/**
  * Return URL of customer account. Try to guess using an object.
  *
  * @param   Object      $object         Object Product or Object Packages or Object Contract
