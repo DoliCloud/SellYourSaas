@@ -117,12 +117,16 @@ if (! $res) {
 }
 /**
  * @var Conf $conf
+ *
+ * @var string	$dolibarr_main_restrict_os_commands
  */
 include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once("/sellyoursaas/lib/sellyoursaas.lib.php");
+
+$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', php' : '');
 
 // Read /etc/sellyoursaas.conf file
 $domain='';

@@ -102,12 +102,16 @@ if (! $res) {
  * @var Translate $langs
  * @var HookManager $hookmanager
  * @var User $user
+ *
+ * @var string $dolibarr_main_restrict_os_commands
  */
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
 include_once dol_buildpath("/sellyoursaas/backoffice/lib/refresh.lib.php");		// This set $serverprice
 include_once dol_buildpath("/sellyoursaas/core/lib/sellyoursaas.lib.php");
+
+$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', php, backup_instance.php' : '');
 
 // Global variables
 $FORCE=0;
@@ -505,7 +509,7 @@ if ($action == 'backup' || $action == 'backupdelete' || $action == 'backupdelete
 				$mode = ($action == 'backuptestdatabase' ? 'testdatabase' : $mode);
 				$mode = ($action == 'backuptestrsync' ? 'testrsync' : $mode);
 
-				$command = ($path ? $path : '')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg($conf->global->DOLICLOUD_BACKUP_PATH)." ".$mode;
+				$command = ($path ? $path : '')."backup_instance.php ".escapeshellarg($instance)." ".escapeshellarg(getDolGlobalString("DOLICLOUD_BACKUP_PATH"))." ".$mode;
 				if ($action == 'backupdelete') {
 					$command .= ' --delete';
 				}

@@ -151,7 +151,14 @@ if (! $res) {
 }
 // After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
 // $user is created but empty.
-
+/**
+ * @var DoliDB		$db
+ * @var Conf 		$conf
+ * @var Societe		$mysoc
+ * @var Translate 	$langs
+ *
+ * @var string $dolibarr_main_restrict_os_commands
+ */
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 dol_include_once('/sellyoursaas/class/packages.class.php');
 include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
@@ -163,6 +170,8 @@ include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
 include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 //include_once(DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
+
+$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', php' : '');
 
 $langs->loadLangs(array("main", "errors"));
 

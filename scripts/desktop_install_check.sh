@@ -15,7 +15,7 @@ export YELLOW='\033[0;33m'
 
 
 if [ "x$1" == "x" ]; then
-   echo "Usage:   $0  hostfile  [hostgrouporname]  (apache|php70|php72|php74|php80|php81|php82|php83)"
+   echo "Usage:   $0  hostfile  [hostgrouporname]  (apache|php70|php72|php74|php80|php81|php82|php83|php84)"
    echo "         [hostgrouporname] can be 'master', 'deployment' or list separated with comma like 'master,deployment' (default)"
    echo "Example: $0  myhostfile  master,deployment"
    echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com"
@@ -47,6 +47,12 @@ if [ "x$3" == "xphp81" ]; then
 fi
 if [ "x$3" == "xphp82" ]; then
 	php82=1
+fi
+if [ "x$3" == "xphp83" ]; then
+	php83=1
+fi
+if [ "x$3" == "xphp84" ]; then
+	php84=1
 fi
 if [ "x$3" == "xapache" ]; then
 	apache=1
@@ -87,6 +93,8 @@ elif [ "x$php82" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' php82='1'"'
 elif [ "x$php83" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' php83='1'"'
+elif [ "x$php84" == "x1" ]; then
+	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' php84='1'"'
 elif [ "x$apache" == "x1" ]; then
 	command='ansible-playbook -K launch_install_check.yml -i hosts-'$1' -e "target='$target' apache='1'"'
 else

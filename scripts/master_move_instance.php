@@ -61,6 +61,7 @@ $databaseuser='sellyoursaas';
 $databasepass='';
 $dolibarrdir='';
 $usecompressformatforarchive='gzip';
+$mastermoveinstancefordolibarr=0;
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
 // Add each line to an array
 if ($fp) {
@@ -93,6 +94,9 @@ if ($fp) {
 		}
 		if ($tmpline[0] == 'usecompressformatforarchive') {
 			$usecompressformatforarchive = $tmpline[1];
+		}
+		if ($tmpline[0] == 'mastermoveinstancefordolibarr') {
+			$mastermoveinstancefordolibarr = $tmpline[1];
 		}
 	}
 } else {
@@ -157,6 +161,8 @@ if (! $res) {
  * @var Societe $soc
  * @var Translate $langs
  * @var User $user
+ *
+ * @var string $dolibarr_main_restrict_os_commands
  */
 
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
@@ -172,6 +178,8 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 //include_once(DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
 
 $langs->loadLangs(array("main", "errors"));
+
+$dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', php, rsync, ssh, cat, echo, sed' : '');
 
 $oldinstance=isset($argv[1]) ? $argv[1] : '';
 $newinstance=isset($argv[2]) ? strtolower($argv[2]) : '';
@@ -388,7 +396,7 @@ if ($mode == 'moveonlycontractfiles') {
 	// Copy all files linked to instance to the new one
 	$srcdir = $conf->contract->dir_output.'/'.dol_sanitizeFileName($oldobject->ref).'/';
 	$destdir = $conf->contract->dir_output.'/'.dol_sanitizeFileName($newobject->ref).'/';
-	print "--- Copy files linked to contact in old instance (dir ".$srcdir.") into the new instance (into dir ".$destdir.")\n";
+	print "--- Copy files linked to contract in old instance (dir ".$srcdir.") into the new instance (into dir ".$destdir.")\n";
 	if (dol_is_dir($srcdir)) {
 		$tmpresult = dolCopyDir($srcdir, $destdir, '0', 0, null, 1);
 		print "dolCopyDir for ".$oldobject->ref." into ".$newobject->ref." result = ".$tmpresult."\n";
@@ -499,7 +507,7 @@ if ($CERTIFFORCUSTOMDOMAIN) {
 							print "  File for ext ".$ext.$ext2." was sync\n";
 						}
 					} else {
-						print " -> Error during rsync\n";
+						print " -> Error during rsync: ".($resultarray['error'] ?? '')."\n";
 						print $content_grabbed;
 					}
 				} else {
@@ -524,7 +532,8 @@ if (empty($overwriteexistinginstance)) {
 	}
 
 	// Create virgin envelop for the new instance. The register_instance will use the $oldinstance name
-	// Note that if the old instance had a value into instance_unique_id, the creation of the new one should reuse it.
+	// Note that if the old instance had a value into contrat_extrafields.instance_unique_id, the creation of the new one should reuse it.
+	// But in a move process, the new instance may not have, never mind, the instance_unique_id will be forced with the one of old instance later at Step 3.
 	$command='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." ".escapeshellarg($newpass)." ".escapeshellarg($oldobject->thirdparty->id);
 	$commandnopass='php '.DOL_DOCUMENT_ROOT."/custom/sellyoursaas/myaccount/register_instance.php ".escapeshellarg($productref)." ".escapeshellarg($newinstance)." --a-new-password-- ".escapeshellarg($oldobject->thirdparty->id);
 	$command.=" ".escapeshellarg($oldinstance);
@@ -843,6 +852,7 @@ print $content_grabbed."\n";
 
 // STEP 3 of synchro - We should update the value of $dolibarr_main_instance_unique_id if
 // it was not done during creation of instance.
+
 $value_of_dolibarr_main_instance_unique_id = '';
 $value_of_dolibarr_main_cookie_cryptkey = '';		// old key for $value_of_dolibarr_main_instance_unique_id
 $value_of_dolibarr_main_dol_cryptkey = '';
@@ -910,7 +920,7 @@ if (empty($nointeractive)) {
 print '--- Dump database '.$olddbname.' into '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 
 
-// STEP 1 of database copy - we backup the source database
+// STEP 4 of database copy - we backup the source database
 $command="mysqldump";
 $param=array();
 $param[]=$olddbname;
@@ -953,7 +963,7 @@ if ($return_var) {
 }
 
 
-// STEP 2 of database copy - We load the backup on target database
+// STEP 5 of database copy - We load the backup on target database
 print '--- Load database '.$newdatabasedb.' from '.$tmptargetdir.'/mysqldump_'.$olddbname.'_'.dol_print_date(dol_now('gmt'), "%d", 'gmt').".sql\n";
 //print "If the mysql fails, try to run mysql -u".$newloginbase." -p".$newpasswordbase." -D ".$newobject->database_db."\n";
 
@@ -1019,6 +1029,34 @@ if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmainten
 } else {
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Load canceled (test mode)'."\n";
 }
+
+
+// STEP 6 - Foce update of some vars (for Dolibarr only)
+
+if ($mastermoveinstancefordolibarr) {
+	$fullcommandupdatecronkey='echo "update llx_const set value = \''.$oldosuser.'\' WHERE value = \'CRON_KEY\';" | mysql -A -h '.$newserverbase.' -u '.$newloginbase.' -p'.$newpasswordbase.' -D '.$newdatabasedb;
+	$output=array();
+	$return_var=0;
+	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' Force update of CRON_KEY with '.$fullcommandupdatecronkey."\n";
+	if ($mode == 'confirm' || $mode == 'confirmredirect' || $mode == 'confirmmaintenance') {
+		$outputfile = $conf->admin->dir_temp.'/out.tmp';
+		$resultarray = $utils->executeCLI($fullcommandupdatecronkey, $outputfile, 0, null, 1);
+
+		$return_var = $resultarray['result'];
+		$content_grabbed = $resultarray['output'];
+
+		print $content_grabbed."\n";
+		// If table already not exist, return_var is 1
+		// If technical error, return_var is also 1, so we disable this test
+		/*if ($return_var) {
+			print "Error on dropping table into the new instance\n";
+			exit(-2);
+		}*/
+	}
+}
+
+
+// STEP 7 - Update master database
 
 // Prepare SQL commands to execute after the load
 $sqla = 'UPDATE '.MAIN_DB_PREFIX."facture_rec SET titre='".$dbmaster->escape('Template invoice for '.$newobject->ref.' '.$newobject->ref_customer)."'";
