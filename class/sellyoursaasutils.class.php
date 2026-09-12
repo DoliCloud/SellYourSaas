@@ -97,11 +97,11 @@ class SellYourSaasUtils
 		dol_syslog(__METHOD__." start", LOG_INFO);
 
 		// Select all action comm reminder
-		$sql = "SELECT rowid as id FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."societe_extrafields as se";
+		$sql = "SELECT s.rowid as id FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."societe_extrafields as se";
 		$sql .= " WHERE se.fk_object = s.rowid AND s.statut = ".$tmpcompany::STATUS_INACTIVITY;
-		$sql .= " AND s.date_regitration > '".$this->db->idate($now - $nbdays * 24 * 60 * 60)."'";
-		$sql .= " AND s.date_regitration <= '".$this->db->idate($now - ($nbdays + 1) * 24 * 60 * 60)."'";
-		$sql .= " AND f.entity IN (".getEntity('facture', 0).")";	// One batch processes only one company (no sharing)
+		$sql .= " AND s.datec > '".$this->db->idate($now - ($nbdays + 1) * 24 * 60 * 60)."'";
+		$sql .= " AND s.datec <= '".$this->db->idate($now - $nbdays * 24 * 60 * 60)."'";
+		$sql .= " AND s.entity IN (".getEntity('facture', 0).")";	// One batch processes only one company (no sharing)
 		// TODO Add a date date_last_remind_email in select. We can update date after the result of sendfile() later. To avoid to send it twice if we re-run the batch.
 
 		$resql = $this->db->query($sql);
@@ -316,7 +316,7 @@ class SellYourSaasUtils
 
 			return 0;
 		} else {
-			$this->error = 'Nb of emails sent : '.$nbMailSend.', '.(!empty($errorsMsg) ? implode(', ', $errorsMsg) : $error);
+			$this->error = 'Nb of emails sent : '.$nbMailSend.', '.(!empty($errorsMsg) ? implode(', ', $errorsMsg) : 'Error '.$error);
 
 			dol_syslog(__METHOD__." end - ".$this->error, LOG_INFO);
 
