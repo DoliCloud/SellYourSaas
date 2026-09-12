@@ -5,8 +5,8 @@
         AADefaultHatName sellyoursaas-instances
         </IfModule>
 
-        # Allow access to /tmp and sellyoursaas scripts for mails and myaccount for the maintenance.php file. Allow also access to user dir webAppPath.
-        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:/home/admin/wwwroot/dolibarr_sellyoursaas/myaccount/:__webAppPath__/:/usr/local/bin/
+        # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir webAppPath.
+        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__webAppPath__/:/usr/local/bin/
 
 
         ServerName __webAppDomain__
