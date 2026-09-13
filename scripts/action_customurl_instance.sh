@@ -159,6 +159,14 @@ fi
 
 export CUSTOMDOMAIN=${46}
 
+# Per-instance PHP version override (from contract extrafield "phpversion"), takes priority
+# over the server-wide "phpversion=" read from /etc/sellyoursaas.conf when set. For mode
+# "changephpversion" this is the target version to switch to - switch_instance_phpversion.sh
+# discovers the instance's current pool(s) from disk itself, no need to pass it explicitly.
+export phpversionforinstance=${50//£/ }
+if [[ "x$phpversionforinstance" != "x" && "x$phpversionforinstance" != "x-" ]]; then
+	phpversion=$phpversionforinstance
+fi
 
 
 export ErrorLog='#ErrorLog'
@@ -265,6 +273,8 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 				  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
+				  sed -e 's;__phpversion__;$phpversion;g' | \
+				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
@@ -282,6 +292,8 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 				  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
+				  sed -e "s;__phpversion__;$phpversion;g" | \
+				  sed -e "s;__fqn__;$fqn;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
 	export vhostko=$?
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
@@ -355,6 +367,20 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		exit 20
 	else
 		sleep 3
+	fi
+fi
+
+if [[ "$mode" == "changephpversion" ]]; then
+	if [[ "x$phpfpm" == "x" ]]; then
+		echo "This server is not configured for phpfpm (phpfpm= not set in /etc/sellyoursaas.conf), nothing to do for mode changephpversion"
+	else
+		echo "$scriptdir/switch_instance_phpversion.sh $fqn $osusername $instancedir $phpversion"
+		"$scriptdir/switch_instance_phpversion.sh" "$fqn" "$osusername" "$instancedir" "$phpversion"
+		if [[ "x$?" != "x0" ]]; then
+			echo "Failed to change PHP version for $fqn"
+			echo "Failed to change PHP version for $fqn, see the remote agent log for details" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in change PHP version" $EMAILTO
+			exit 20
+		fi
 	fi
 fi
 
