@@ -56,7 +56,7 @@ if ($fp) {
 // leaving this process's cwd at whatever systemd's default WorkingDirectory is instead) - so
 // set it here too, unconditionally, rather than relying on the launcher alone.
 if (!empty($dolibarrdir)) {
-	@chdir($dolibarrdir.'/custom/sellyoursaas/scripts');
+	@chdir($dolibarrdir.'/htdocs/custom/sellyoursaas/scripts');
 }
 //if (! in_array('127.0.0.1', $allowed_hosts_array)) {
 //	$allowed_hosts_array[] = '127.0.0.1';	// Add localhost if not present
