@@ -403,6 +403,37 @@ class ActionsSellyoursaas
 		}
 
 		if (in_array($parameters['currentcontext'], array('contractcard'))) {
+			// Adjust the "phpversion" extrafield based on this contract's deployment server:
+			// hide it entirely when the server does not allow a per-instance PHP version
+			// override, otherwise restrict its dropdown to the versions actually detected
+			// on that server (Deploymentserver->phpversionsavailable). This mutates the
+			// extrafield definition in place before it is displayed, so the field keeps its
+			// normal position among other extrafields when shown (unlike printing custom
+			// HTML from formObjectOptions).
+			global $extrafields;
+			if (is_object($extrafields) && isset($extrafields->attributes['contrat']['label']['phpversion']) && !getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
+				// Feature disabled module-wide (Setup > Deployment servers): hide the field regardless of server settings
+				unset($extrafields->attributes['contrat']['label']['phpversion']);
+			} elseif (is_object($extrafields) && isset($extrafields->attributes['contrat']['label']['phpversion']) && !empty($object->array_options['options_deployment_host'])) {
+				$sqlphpversionoptions = 'SELECT phpversionsavailable, phpversionoverride FROM '.MAIN_DB_PREFIX."sellyoursaas_deploymentserver WHERE ipaddress = '".$db->escape($object->array_options['options_deployment_host'])."'";
+				$resqlphpversionoptions = $db->query($sqlphpversionoptions);
+				if ($resqlphpversionoptions && $db->num_rows($resqlphpversionoptions) > 0) {
+					$objphpversionoptions = $db->fetch_object($resqlphpversionoptions);
+					if (empty($objphpversionoptions->phpversionoverride)) {
+						// Server does not allow overriding its PHP version per instance: hide the field
+						unset($extrafields->attributes['contrat']['label']['phpversion']);
+					} elseif (!empty($objphpversionoptions->phpversionsavailable)) {
+						$newoptions = array('' => 'UseServerDefault');
+						foreach (array_map('trim', explode(',', $objphpversionoptions->phpversionsavailable)) as $tmpphpversion) {
+							if ($tmpphpversion !== '') {
+								$newoptions[$tmpphpversion] = $tmpphpversion;
+							}
+						}
+						$extrafields->attributes['contrat']['param']['phpversion']['options'] = $newoptions;
+					}
+				}
+			}
+
 			if ($action == 'deploy' || $action == 'deployall') {
 				$db->begin();
 

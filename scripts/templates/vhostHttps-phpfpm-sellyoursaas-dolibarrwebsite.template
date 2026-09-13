@@ -1,19 +1,23 @@
-# This wirtual host is used only to deploy a website build by the Dolibarr CMS of a Dolibarr customer instance
+# This virtual host is used only to deploy a website build by the Dolibarr CMS of a Dolibarr customer instance
 <VirtualHost *:443 *:80>
 
         <IfModule mod_apparmor.c>
         AADefaultHatName sellyoursaas-instances
         </IfModule>
 
-        # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir.
-        php_admin_value open_basedir /tmp/:__sellyoursaasScriptsPath__:__osUserPath__/:/usr/local/bin/:/dev/urandom
+        # Indiquer à Apache d'utiliser le socket de PHP-FPM de l'instance (même pool que le
+        # site principal : ce vhost sert seulement un autre DocumentRoot de la même instance)
+        <FilesMatch \.php$>
+            ProxyFCGIBackendType GENERIC
+            SetHandler "proxy:unix:/run/php/php__phpversion__-fpm-__fqn__.sock|fcgi://localhost/"
+        </FilesMatch>
 
         # MaxRequestWorkers = MaxClients
         # MaxClientsVHost is for vhost/itk only
         #MaxClientsVHost 50
         #RLimitMEM 100000000
         #RLimitNProc 50
-        
+
         ServerName __webSiteDomain__
         ServerAdmin __webAdminEmail__
         ServerAlias __webSiteAliases__
@@ -74,8 +78,8 @@
         RewriteEngine On
         RewriteCond %{HTTP_HOST} !^www\. [NC]
         RewriteRule ^(.*)$ %{REQUEST_SCHEME}://www.%{HTTP_HOST}$1 [R=301,L]
-        
-        
+
+
         #SSLProxyEngine on
         # Use ProxyPass
         #ProxyPass /public https://__instanceName__.__domainName__/public
@@ -84,12 +88,12 @@
         # or use RewriteCond/Rule with [P] flag
         #RewriteCond %{HTTP_HOST} ^public\. [NC]
         #RewriteRule "(.*)$" "https://testldr4.with4.dolicloud.com/$1" [P]
-        
+
 		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.crt">
 	        #   SSL Engine Switch:
 	        #   Enable/Disable SSL for this virtual host.
 	        SSLEngine on
-	
+
 	        #RewriteCond %{HTTPS} !=on
 	        # This checks to make sure the connection is not already HTTPS
 		    #RewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]
@@ -97,7 +101,7 @@
 	        # i.e.  http://www.example.com/foo/ to https://www.example.com/foo/
 	        # The leading slash is made optional so that this will work either in httpd.conf
 	        # or .htaccess context
-	
+
 	        SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.crt
 	        SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.key
 	        SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__-intermediate.crt
@@ -105,5 +109,3 @@
         </IfFile>
 
 </VirtualHost>
-     
-        
