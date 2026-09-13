@@ -308,9 +308,9 @@ class SellYourSaasUtils
 		}
 
 		if (!$error) {
-			$this->output .= 'Nb of emails sent : '.$nbMailSend.",\n";
+			$this->output .= 'Nb of emails sent : '.$nbMailSend."\n";
 			if (!empty($errorsMsg)) {
-				$this->output .= implode(', ', $errorsMsg);
+				$this->output .= ", ".implode(', ', $errorsMsg);
 			}
 
 			dol_syslog(__METHOD__." end - ".$this->output, LOG_INFO);
