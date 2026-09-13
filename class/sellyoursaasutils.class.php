@@ -65,10 +65,11 @@ class SellYourSaasUtils
 	 *
 	 *  @param	int			$nbdays				Delay after registration to send reminder
 	 *  @param	int|string	$template			Name (or id) of email template (Must be a template of type 'sellyoursaas')
+	 *  @param	int			$limit				Max number of emails to send (0 = no limit)
 	 *  @param	string		$forcerecipient		Force email of recipient (for example to send the email to an accountant supervisor instead of the customer)
 	 *  @return int         					0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function sendEmailsRemindersAfterRegistration($nbdays = 0, $template = '', $forcerecipient = '')
+	public function sendEmailsRemindersAfterRegistration($nbdays = 0, $template = '', $limit = 0, $forcerecipient = '')
 	{
 		global $conf, $langs, $user;
 
@@ -129,7 +130,7 @@ class SellYourSaasUtils
 					}
 
 					// Select email template according to language of recipient
-					$arraymessage = $formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, (is_numeric($template) ? $template : 0), 1, (is_numeric($template) ? '' : $template));
+					$arraymessage = $formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, (is_numeric($template) ? $template : -2), 1, (is_numeric($template) ? '' : $template));
 					if (is_numeric($arraymessage) && $arraymessage <= 0) {
 						$langs->load("errors");
 						$this->output .= $langs->trans('ErrorFailedToFindEmailTemplate', $template);
@@ -291,6 +292,10 @@ class SellYourSaasUtils
 						}
 
 						$this->db->commit();	// We always commit
+
+						if ($limit && $nbMailSend > $limit) {
+							break;
+						}
 					}
 
 					if ($errormesg) {
