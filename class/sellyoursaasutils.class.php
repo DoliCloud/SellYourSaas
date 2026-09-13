@@ -115,6 +115,7 @@ class SellYourSaasUtils
 			while ($obj = $this->db->fetch_object($resql)) {
 				// Create a loopError that is reset at each loop, this counter is added to the global counter at the end of loop
 				$loopError = 0;
+				$loopWarning = 0;
 
 				// Load event
 				$res = $tmpcompany->fetch($obj->id);
@@ -158,7 +159,7 @@ class SellYourSaasUtils
 					} else {
 						$to = array($tmpcompany->email);
 						if (empty($to)) {
-							$errormesg = "Failed to send remind to thirdparty id=".$tmpcompany->id.". No email defined on prospect.";
+							$errormesg = "Failed to send remind to thirdparty id=".$tmpcompany->id.": No email defined on prospect.\n";
 							$loopError++;
 						}
 					}
@@ -249,7 +250,7 @@ class SellYourSaasUtils
 							$actioncomm->create($user);
 						} else {
 							$errormesg = $cMailFile->error.' : '.$to;
-							$loopError++;
+							$loopWarning++;
 
 							// Add a line into event table
 							require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
@@ -307,13 +308,16 @@ class SellYourSaasUtils
 		}
 
 		if (!$error) {
-			$this->output .= 'Nb of emails sent : '.$nbMailSend;
+			$this->output .= 'Nb of emails sent : '.$nbMailSend.",\n";
+			if (!empty($errorsMsg)) {
+				$this->output .= implode(', ', $errorsMsg);
+			}
 
 			dol_syslog(__METHOD__." end - ".$this->output, LOG_INFO);
 
 			return 0;
 		} else {
-			$this->error = 'Nb of emails sent : '.$nbMailSend.', '.(!empty($errorsMsg) ? implode(', ', $errorsMsg) : 'Error '.$error);
+			$this->error = 'Nb of emails sent : '.$nbMailSend.",\n".(!empty($errorsMsg) ? implode(', ', $errorsMsg) : 'Error '.$error);
 
 			dol_syslog(__METHOD__." end - ".$this->error, LOG_INFO);
 
