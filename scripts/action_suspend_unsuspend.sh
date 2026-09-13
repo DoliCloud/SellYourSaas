@@ -34,6 +34,15 @@ htdocsdir=`grep '^htdocsdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+# php-fpm/apache open_basedir needs read access to the sellyoursaas module's own scripts/
+# directory (eg. for phpsendmail.php/phpsendmailprepend.php) - possibility to change it if
+# the module was not installed into the default /home/admin/wwwroot/dolibarr_sellyoursaas
+sellyoursaasdir=`grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$sellyoursaasdir" == "x" ]]; then
+  sellyoursaasdir="/home/admin/wwwroot/dolibarr_sellyoursaas"
+fi
+sellyoursaasscriptsdir="$sellyoursaasdir/scripts"
 if [[ "x$htdocsdir" == "x" ]]; then
 	export htdocsdir="/htdocs"
 fi
@@ -308,7 +317,8 @@ if [[ "$mode" == "rename" ]]; then
 				sed -e 's;__fqn__;$fqn;g' | \
 				sed -e 's;__instancename__;$instancename;g' | \
 				sed -e 's;__localip__;$localip;g' | \
-		  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+		  sed -e 's;__webAppPath__;$instancedir;g' | \
+		  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $apacheconf"
 	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -329,7 +339,8 @@ if [[ "$mode" == "rename" ]]; then
 				sed -e "s;__fqn__;$fqn;g" | \
 				sed -e "s;__instancename__;$instancename;g" | \
 				sed -e "s;__localip__;$localip;g" | \
-			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+			  sed -e "s;__webAppPath__;$instancedir;g" | \
+			  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $apacheconf
 
 
 	#echo Enable conf with a2ensite $fqn.conf
@@ -450,6 +461,7 @@ if [[ "$mode" == "rename" ]]; then
 						  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 						  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 						  sed -e 's;__webAppPath__;$instancedir;g' | \
+						  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' | \
 						  sed -e 's;__phpversion__;$phpversion;g' | \
 						  sed -e 's;__fqn__;$fqn;g' | \
 						  sed -e 's;__instancename__;$instancename;g' | \
@@ -480,6 +492,7 @@ if [[ "$mode" == "rename" ]]; then
 						  sed -e "s;__instancename__;$instancename;g" | \
 						  sed -e "s;__localip__;$localip;g" | \
 						  sed -e "s;__webAppPath__;$instancedir;g" | \
+						  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" | \
 						  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 			
 			
@@ -595,6 +608,7 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' | \
 				  sed -e 's;__phpversion__;$phpversion;g' | \
 				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__instancename__;$instancename;g' | \
@@ -625,6 +639,7 @@ if [[ "$mode" == "rename" ]]; then
 				  sed -e "s;__instancename__;$instancename;g" | \
 				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 	
 	
@@ -752,7 +767,8 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
         sed -e 's;__fqn__;$fqn;g' | \
         sed -e 's;__instancename__;$instancename;g' | \
         sed -e 's;__localip__;$localip;g' | \
-			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+			  sed -e 's;__webAppPath__;$instancedir;g' | \
+			  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $apacheconf"
 	cat $vhostfiletouse | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -773,7 +789,8 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
         sed -e "s;__fqn__;$fqn;g" | \
         sed -e "s;__instancename__;$instancename;g" | \
         sed -e "s;__localip__;$localip;g" | \
-			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+			  sed -e "s;__webAppPath__;$instancedir;g" | \
+			  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $apacheconf
 
 
 	# Enable conf with ln
@@ -890,6 +907,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 				  sed -e 's;__instancename__;$instancename;g' | \
 				  sed -e 's;__localip__;$localip;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
@@ -911,6 +929,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 				  sed -e "s;__instancename__;$instancename;g" | \
 				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 
 
@@ -996,7 +1015,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__instancename__;$instancename;g' | \
 				  sed -e 's;__localip__;$localip;g' | \
-			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+			  sed -e 's;__webAppPath__;$instancedir;g' | \
+			  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $apacheconf"
 	cat $vhostfiletouse | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -1015,7 +1035,8 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e "s;__fqn__;$fqn;g" | \
 				  sed -e "s;__instancename__;$instancename;g" | \
 				  sed -e "s;__localip__;$localip;g" | \
-			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+			  sed -e "s;__webAppPath__;$instancedir;g" | \
+			  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $apacheconf
 
 
 	# Enable conf with ln
@@ -1129,6 +1150,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e 's;__instancename__;$instancename;g' | \
 				  sed -e 's;__localip__;$localip;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' | \
 				  sed -e 's/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g' > $apacheconf"
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
@@ -1149,6 +1171,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 				  sed -e "s;__instancename__;$instancename;g" | \
 				  sed -e "s;__localip__;$localip;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" | \
 				  sed -e "s/with\.sellyoursaas\.com/$CERTIFFORCUSTOMDOMAIN/g" > $apacheconf
 	
 	
@@ -1253,9 +1276,9 @@ if [[ "$mode" == "suspendredirect" ]]; then
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** If IP for $instancename in DNS files /etc/bind/${ZONE} has changed and is not $REMOTEIP, we must also change the DNS entry."
 
-	echo "Entry $instancename not found into host /etc/bind/${ZONE}, we must add it with: /home/admin/wwwroot/dolibarr/scripts/deployment_update_dnszone.php set ${ZONE} $instancename $REMOTEIP"
+	echo "Entry $instancename not found into host /etc/bind/${ZONE}, we must add it with: $scriptdir/deployment_update_dnszone.php set ${ZONE} $instancename $REMOTEIP"
 
-	/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_update_dnszone.php set "$domainname" "$instancename" "$REMOTEIP"
+	$scriptdir/deployment_update_dnszone.php set "$domainname" "$instancename" "$REMOTEIP"
 
 	if [[ "$?x" != "0x" ]]; then
 		echo error: Failed to update the DNS file.
