@@ -196,6 +196,8 @@ if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
 	cliafter=${cliafter/$olddoldataroot/$newdoldataroot}
 fi
 
+export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
+
 # For debug
 echo `date +'%Y-%m-%d %H:%M:%S'`" input params for $0:"
 echo "mode = $mode"
@@ -269,7 +271,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e 's;__phpversion__;$phpversion;g' | \
 			  sed -e 's;__fqn__;$fqn;g' | \
 			  sed -e 's;__webAppPath__;$instancedir;g' | \
-			  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $apacheconf"
+			  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' | \
+			  sed -e 's;__sellyoursaasLocalCrtPath__;$pathforcertiflocal;g' > $apacheconf"
 	cat $vhostfilewebsite | sed -e "s/__webSiteDomain__/$CUSTOMDOMAIN/g" | \
 			  sed -e "s/__webSiteAliases__/$CUSTOMDOMAIN www.$CUSTOMDOMAIN/g" | \
 			  sed -e "s/__webSiteNamePath__/$WEBSITENAME/g" | \
@@ -292,7 +295,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e "s;__phpversion__;$phpversion;g" | \
 			  sed -e "s;__fqn__;$fqn;g" | \
 			  sed -e "s;__webAppPath__;$instancedir;g" | \
-			  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $apacheconf
+			  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" | \
+			  sed -e "s;__sellyoursaasLocalCrtPath__;$pathforcertiflocal;g" > $apacheconf
 	export vhostko=$?
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
@@ -315,8 +319,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	fi
 
 
-	echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin:admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
-	mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin:admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
+	echo "Create cert directory with mkdir -p $pathforcertiflocal/; chown admin:admin $pathforcertiflocal/;"
+	mkdir -p $pathforcertiflocal/; chown admin:admin $pathforcertiflocal/;
 
 	if [[ ${46} == www.* ]]; then
 		echo certbot certonly -n -v --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
@@ -332,13 +336,13 @@ if [[ "$mode" == "deploywebsite" ]]; then
 
 
 	echo "Link certificate for virtualhost with
-		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
-		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
-		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN.key
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN.crt
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
 	"
-	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
-	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
-	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN.key
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN.crt
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
 
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate being loaded"

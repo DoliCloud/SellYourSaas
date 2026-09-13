@@ -89,7 +89,7 @@
         #RewriteCond %{HTTP_HOST} ^public\. [NC]
         #RewriteRule "(.*)$" "https://testldr4.with4.dolicloud.com/$1" [P]
 
-		<IfFile "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.crt">
+		<IfFile "__sellyoursaasLocalCrtPath__/__instanceName__.__domainName__-__webSiteDomain__.crt">
 	        #   SSL Engine Switch:
 	        #   Enable/Disable SSL for this virtual host.
 	        SSLEngine on
@@ -102,10 +102,10 @@
 	        # The leading slash is made optional so that this will work either in httpd.conf
 	        # or .htaccess context
 
-	        SSLCertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.crt
-	        SSLCertificateKeyFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__.key
-	        SSLCertificateChainFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__-intermediate.crt
-	        SSLCACertificateFile /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/__instanceName__.__domainName__-__webSiteDomain__-intermediate.crt
+	        SSLCertificateFile __sellyoursaasLocalCrtPath__/__instanceName__.__domainName__-__webSiteDomain__.crt
+	        SSLCertificateKeyFile __sellyoursaasLocalCrtPath__/__instanceName__.__domainName__-__webSiteDomain__.key
+	        SSLCertificateChainFile __sellyoursaasLocalCrtPath__/__instanceName__.__domainName__-__webSiteDomain__-intermediate.crt
+	        SSLCACertificateFile __sellyoursaasLocalCrtPath__/__instanceName__.__domainName__-__webSiteDomain__-intermediate.crt
         </IfFile>
 
 </VirtualHost>
