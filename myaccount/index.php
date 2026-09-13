@@ -2191,6 +2191,17 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$error++;
 	}
 	if (!$error) {
+		$otherid = sellyoursaasCheckCustomUrlAlreadyUsed($db, $custom_url, $contractid);
+		if ($otherid > 0) {
+			setEventMessages($langs->trans("ErrorCustomUrlAlreadyUsed", $custom_url), null, 'errors');
+			$error++;
+		}
+	}
+	if (!$error && sellyoursaasCheckCustomUrlDns($custom_url, $object->ref_customer) !== 1) {
+		setEventMessages($langs->trans("ErrorCustomUrlDnsNotPointingHere", $custom_url, $object->ref_customer), null, 'errors');
+		$error++;
+	}
+	if (!$error) {
 		$type_db = $conf->db->type;
 		$hostname_db  = $object->array_options['options_hostname_db'];
 		$username_db  = $object->array_options['options_username_db'];
@@ -2261,26 +2272,30 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		if (!$error) {
 			$object->fetchObjectLinked();
-			$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
-			if (count($arrayfacturerec) != 1) {
-				// TODO: Send mail auto to inform admins of multiples faturerec contract
-				$error ++;
-			} else {
-				$facturerec = $arrayfacturerec[0];
-				$foundlinefacturerec = 0;
-				foreach ($facturerec->lines as $key => $line) {
-					if ($line->description == $descriptionlines && $line->fk_product == $productid) {
-						$foundlinefacturerec ++;
+			if (!empty($object->linkedObjects["facturerec"])) {
+				$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
+				if (count($arrayfacturerec) != 1) {
+					// TODO: Send mail auto to inform admins of multiples faturerec contract
+					$error ++;
+				} else {
+					$facturerec = $arrayfacturerec[0];
+					$foundlinefacturerec = 0;
+					foreach ($facturerec->lines as $key => $line) {
+						if ($line->description == $descriptionlines && $line->fk_product == $productid) {
+							$foundlinefacturerec ++;
+						}
 					}
-				}
-				if (!$foundlinefacturerec) {
-					$result = $facturerec->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
-					if (!$result) {
-						// TODO: Send mail auto to inform admins of error line creation facturRec
-						$error ++;
+					if (!$foundlinefacturerec) {
+						$result = $facturerec->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+						if (!$result) {
+							// TODO: Send mail auto to inform admins of error line creation facturRec
+							$error ++;
+						}
 					}
 				}
 			}
+			// else: no recurring invoice at all for this contract (e.g. a trial) - nothing to add a
+			// line to, same as the uninstall side of this option already tolerates.
 		}
 		if (!$error) {
 			//$object->context["options_websitename"] = $website->ref;
@@ -2376,6 +2391,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$deletedlinecontract = 0; $deletedlinefacturerec = 0;
 	$contractid = GETPOSTINT("instanceid");
 	$productid = GETPOSTINT("productid");
+	// The custom URL "option" can be set directly (by support, or from a time before this option
+	// existed/was purchased) without ever going through the deploycustomurl flow that creates its
+	// contract/facturerec lines below - tolerate having none of those lines for this specific
+	// product instead of reporting a failure for something that isn't actually broken.
+	$isCustomUrlOption = ($productid > 0 && $productid == getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL"));
 	if ($contractid <= 0) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
 		header("Location: ".$backtourl);
@@ -2509,7 +2529,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 
-	if (!$deletedlinecontract || (!$deletedlinefacturerec && !empty($tmpcontract->linkedObjects["facturerec"]))) {
+	if (!$isCustomUrlOption && (!$deletedlinecontract || (!$deletedlinefacturerec && !empty($tmpcontract->linkedObjects["facturerec"])))) {
 		$error ++;
 		setEventMessages("FailedToUninstallOption", null, 'errors');
 	}
