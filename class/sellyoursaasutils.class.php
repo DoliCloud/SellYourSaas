@@ -101,7 +101,7 @@ class SellYourSaasUtils
 		$sql .= " WHERE se.fk_object = s.rowid AND s.status = ".$tmpcompany::STATUS_INACTIVITY;
 		$sql .= " AND s.datec > '".$this->db->idate($now - ($nbdays + 1) * 24 * 60 * 60)."'";
 		$sql .= " AND s.datec <= '".$this->db->idate($now - $nbdays * 24 * 60 * 60)."'";
-		$sql .= " AND s.client IN (2,3)";
+		$sql .= " AND s.client IN (2)";		// Full prospects only
 		$sql .= " AND ( EXISTS (SELECT ck.fk_soc FROM llx_categorie_societe as ck WHERE s.rowid = ck.fk_soc AND ck.fk_categorie = ".getDolGlobalInt("SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG")."))";
 		$sql .= " AND s.entity IN (".getEntity('societe', 0).")";	// One batch processes only one company (no sharing)
 		// TODO Add a date date_last_remind_email in select. We can update date after the result of sendfile() later. To avoid to send it twice if we re-run the batch.
@@ -156,14 +156,9 @@ class SellYourSaasUtils
 					if ($forcerecipient) {	// If a recipient was forced
 						$to = array($forcerecipient);
 					} else {
-						$recipient = $tmpcompany;
-						if ($res > 0) {
-							if (empty($to)) {
-								$errormesg = "Failed to send remind to thirdparty id=".$tmpcompany->id.". No email defined for invoice or customer.";
-								$loopError++;
-							}
-						} else {
-							$errormesg = "Failed to load recipient with thirdparty id=".$tmpcompany->id;
+						$to = array($tmpcompany->email);
+						if (empty($to)) {
+							$errormesg = "Failed to send remind to thirdparty id=".$tmpcompany->id.". No email defined on prospect.";
 							$loopError++;
 						}
 					}
