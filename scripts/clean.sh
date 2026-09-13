@@ -2,7 +2,8 @@
 # Purge data.
 # This script can be run on the master or any deployment servers.
 #
-# Put the following entry into your root cron
+# Put the following entry into your root cron (adjust the path if sellyoursaasdir is
+# customized in /etc/sellyoursaas.conf)
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 
 #set -e
@@ -217,6 +218,21 @@ do
 	fi
 done
 
+echo "***** Clean vhost backups from scripts/switch_instance_phpversion.sh for hosts that are not enabled (safe, never cleaned up before this was fixed)"
+for fic in /etc/apache2/sellyoursaas-available/*.conf.bak-switchphpversion-* /etc/apache2/sellyoursaas-available/*.custom*.conf.bak-switchphpversion-*
+do
+	[ -e "$fic" ] || continue
+	basfic=`basename $fic | sed -E 's/\.bak-switchphpversion-[0-9]+-[0-9]+$//'`
+	if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
+		echo Remove file with rm $fic
+		if [[ $testorconfirm == "confirm" ]]; then
+			rm $fic
+		fi
+	else
+		echo "Site $basfic is enabled, we keep its backup $fic"
+	fi
+done
+
 echo "***** Clean available fpm pool that are not enabled hosts (safe)"
 if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
 	for fic in `ls /etc/apache2/sellyoursaas-fpm-pool/*.*.*.*.conf /etc/apache2/sellyoursaas-fpm-pool/*.home.lan 2>/dev/null`
@@ -232,6 +248,26 @@ if [ -d /etc/apache2/sellyoursaas-fpm-pool ]; then
 		fi
 	done
 fi
+
+echo "***** Clean orphaned php-fpm services/pools (sellyoursaas-php<version>-fpm-<fqn> scheme, not cleaned by undeploy before this was fixed)"
+for svcfile in /etc/systemd/system/sellyoursaas-php*-fpm-*.service
+do
+	[ -e "$svcfile" ] || continue
+	basfic=`basename $svcfile`
+	fqn=`echo $basfic | sed -E 's/^sellyoursaas-php[0-9]+\.[0-9]+-fpm-//; s/\.service$//'`
+	phpver=`echo $basfic | sed -E 's/^sellyoursaas-php([0-9]+\.[0-9]+)-fpm-.*/\1/'`
+	if [ ! -L /etc/apache2/sellyoursaas-online/$fqn.conf ]; then
+		echo "Instance $fqn has no live vhost, removing orphaned php-fpm service $basfic"
+		if [[ $testorconfirm == "confirm" ]]; then
+			systemctl disable --now $basfic 2>/dev/null
+			rm -f $svcfile
+			rm -f /etc/php/$phpver/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf
+			systemctl daemon-reload
+		fi
+	else
+		echo "Instance $fqn is enabled, we keep its php-fpm service $basfic"
+	fi
+done
 
 
 echo "***** Get list of databases of all instances and save it into /tmp/instancefound-dbinsellyoursaas"
@@ -467,6 +503,7 @@ if [ -s /tmp/osutoclean ]; then
 					if [[ $testorconfirm == "confirm" ]]; then
 						mv -f $targetdir/$osusername $archivedirtest 2>/dev/null
 						if [ -d "$targetdir/$osusername" ]; then
+							echo mv failed or left the source dir behind, falling back to cp -pr + rm
 							echo cp -pr $targetdir/$osusername $archivedirtest
 							cp -pr $targetdir/$osusername $archivedirtest
 							rm -fr $targetdir/$osusername
@@ -574,6 +611,15 @@ if [ -s /tmp/osutoclean ]; then
 					echo File /etc/apache2/sellyoursaas-available/$instancename.custom.conf already deleted
 				fi
 
+				echo "   ** Remove leftover vhost backups from scripts/switch_instance_phpversion.sh (never cleaned up before now)"
+				for bakfile in /etc/apache2/sellyoursaas-available/$instancename.conf.bak-switchphpversion-* /etc/apache2/sellyoursaas-available/$instancename.custom*.conf.bak-switchphpversion-*; do
+					[[ -f "$bakfile" ]] || continue
+					echo rm "$bakfile"
+					if [[ $testorconfirm == "confirm" ]]; then
+						rm "$bakfile"
+					fi
+				done
+
 				/usr/sbin/apache2ctl configtest
 				if [[ "x$?" != "x0" ]]; then
 					echo Error when running apache2ctl configtest
@@ -665,6 +711,41 @@ if [[ "x$instanceserver" != "x0" ]]; then
 	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
 	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
 	for fic in `ls -art $targetdir/osu*/.mysql_history 2>/dev/null`; do rm $fic; done
+fi
+
+
+# Clean orphaned Let's Encrypt certificates of removed/renamed custom domains
+# A cert lineage under /etc/letsencrypt/live/ is considered orphaned if no symlink
+# into /etc/apache2 (legacy custom domains, and the platform's own wildcard cert)
+# or into the sellyoursaas_local/crt cache (current custom-URL certs) points into it.
+if [[ "x$instanceserver" != "x0" ]]; then
+	echo "***** We are on a deployment server, so we clean orphaned Let's Encrypt certificates of removed/renamed custom domains"
+
+	export olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	export newdoldataroot=`grep '^newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
+
+	> /tmp/letsencryptprotecteddomains
+	for fic in /etc/apache2/*.crt $pathforcertiflocal/*.crt; do
+		if [ -L "$fic" ]; then
+			# readlink -f fully resolves through certbot's own live/ -> archive/ indirection,
+			# so match either directory to find the domain name.
+			readlink -f "$fic" | sed -n 's#^/etc/letsencrypt/\(live\|archive\)/\([^/]*\)/.*#\2#p' >> /tmp/letsencryptprotecteddomains
+		fi
+	done
+	sort -u -o /tmp/letsencryptprotecteddomains /tmp/letsencryptprotecteddomains
+
+	for livedir in /etc/letsencrypt/live/*/; do
+		domain=`basename "$livedir"`
+		if ! grep -qxF "$domain" /tmp/letsencryptprotecteddomains; then
+			echo "# ----- $domain - not referenced by any symlink into $pathforcertiflocal or /etc/apache2, looks orphaned"
+			echo "certbot delete --cert-name $domain -n"
+			if [[ $testorconfirm == "confirm" ]]; then
+				certbot delete --cert-name "$domain" -n
+			fi
+		fi
+	done
+	rm -f /tmp/letsencryptprotecteddomains
 fi
 
 
