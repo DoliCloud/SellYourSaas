@@ -1,8 +1,8 @@
 <VirtualHost *:443 *:80>
         __VirtualHostHead__
-
-        # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir webAppPath.
-        php_admin_value open_basedir /tmp/:/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/:__webAppPath__/:/usr/local/bin/
+        
+        # Allow access to /tmp and sellyoursaas scripts for mails. Allow also access to user dir.
+        php_admin_value open_basedir /tmp/:__sellyoursaasScriptsPath__:__webAppPath__/:/usr/local/bin/
 
         ServerName __webAppDomain__
         ServerAdmin __webAdminEmail__
@@ -27,7 +27,7 @@
 
         ErrorLog /var/log/apache2/apache_sellyoursaas_maintenance_error.log
         #TransferLog /var/log/apache2/__webAppLogName___access.log
-
+        
         # Compress returned resources of type php pages, text file export, css and javascript
         AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript
 
@@ -57,7 +57,7 @@
 
         RewriteEngine   on
         # This will enable the Rewrite capabilities
-
+        
         RewriteCond     "%{HTTP_USER_AGENT}"   "!__SELLYOURSAAS_LOGIN_FOR_SUPPORT__"
         RewriteRule     ^(.*)$ __webMyAccount__/maintenance.php?instance=%{SERVER_NAME} [L,R]
 		# This redirect to the maintenance page
@@ -76,3 +76,6 @@ SSLCertificateChainFile /etc/apache2/__webSSLCertificateIntermediate__
 SSLCACertificateFile /etc/apache2/__webSSLCertificateIntermediate__
 
 </VirtualHost>
+
+
+
