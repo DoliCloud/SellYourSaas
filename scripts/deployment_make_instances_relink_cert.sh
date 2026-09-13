@@ -10,11 +10,14 @@ export GREEN='\033[0;32m'
 export BLUE='\033[0;34m'
 export YELLOW='\033[0;33m'
 
+# possibility to change the path of sellyoursaas directory
+export newdoldataroot=`grep '^newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 echo "***** $0 $1 $2 $3 *****"
 
 if [ "x$2" == "x" ]; then
-   echo "Relink local certificates found into /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt to link to the provided specific cert files."
+   echo "Relink local certificates found into $pathforcertiflocal to link to the provided specific cert files."
    echo "If local certificates are already links, nothing is done, only hard files are replaced by a link."
    echo
    echo "Usage:   $0  root_of_cert_to_link_to  regex_of_files_to_replace  test|confirm"
@@ -51,8 +54,8 @@ fi
 
 export scriptdir=$(dirname $(realpath ${0}))
 
-echo "Search local cert files to relink with: ls /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/*.key | grep $2"
-for fic in `ls /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/*.key | grep $2`
+echo "Search local cert files to relink with: ls $pathforcertiflocal/*.key | grep $2"
+for fic in `ls $pathforcertiflocal/*.key | grep $2`
 do
 	newfic="${fic%.key}"
 	echo "* Process files $newfic(.key|.crt|-intermediate.crt)"
