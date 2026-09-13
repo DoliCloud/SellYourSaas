@@ -293,7 +293,7 @@ class SellYourSaasUtils
 
 						$this->db->commit();	// We always commit
 
-						if ($limit && $nbMailSend > $limit) {
+						if ($limit && $nbMailSend >= $limit) {
 							break;
 						}
 					}
