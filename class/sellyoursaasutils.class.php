@@ -130,7 +130,7 @@ class SellYourSaasUtils
 					}
 
 					// Select email template according to language of recipient
-					$arraymessage = $formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, (is_numeric($template) ? $template : -2), 1, (is_numeric($template) ? '' : $template));
+					$arraymessage = $formmail->getEMailTemplate($this->db, 'all', $user, $outputlangs, (is_numeric($template) ? $template : -2), 1, (is_numeric($template) ? '' : $template));
 					if (is_numeric($arraymessage) && $arraymessage <= 0) {
 						$langs->load("errors");
 						$this->output .= $langs->trans('ErrorFailedToFindEmailTemplate', $template);
@@ -147,6 +147,7 @@ class SellYourSaasUtils
 
 					// Topic
 					$sendTopic = make_substitutions(empty($arraymessage->topic) ? $outputlangs->transnoentitiesnoconv('InformationMessage') : $arraymessage->topic, $substitutionarray, $outputlangs, 1);
+					dol_syslog("sendTopic=".$sendTopic);
 
 					// Content
 					$content = $outputlangs->transnoentitiesnoconv($arraymessage->content);
