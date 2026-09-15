@@ -3093,6 +3093,9 @@ if ($welcomecid > 0) {
 		}
 		print '
 		</p>
+
+		<br>
+
 		<p>
 		<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).' <span class="fa fa-external-link-alt"></span></a>
 		</p>
