@@ -481,6 +481,13 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/?$/i', $newline)) {
 			continue;
 		}
+		if (preg_match('/^#?mkdir __INSTANCEDIR__\/htdocs/.well-known$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^#?chmod( -R)? [-+ugoarwx]+ __INSTANCEDIR__\/htdocs/.well-known$/i', $newline)) {
+			continue;
+		}
+
 		// TODO enhance list of allowed patterns
 		// ...
 
