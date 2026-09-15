@@ -38,6 +38,9 @@
 
         Options -Indexes +FollowSymLinks
         </Directory>
+        <Directory "__webAppPath__/.well-known">
+        	AllowOverride FileInfo
+        </Directory>
 
         # Possible values include: debug, info, notice, warn, error, crit, alert, emerg.
         LogLevel info
@@ -129,6 +132,9 @@
         </RequireAll>
 
         Options -Indexes +FollowSymLinks
+        </Directory>
+        <Directory "__webAppPath__/.well-known">
+        	AllowOverride FileInfo
         </Directory>
 
         # Possible values include: debug, info, notice, warn, error, crit, alert, emerg.
