@@ -1,4 +1,5 @@
 <VirtualHost *:80>
+		# __ VitualHostHead __ is defined on contract.
         __VirtualHostHead__
 
         <IfModule mod_apparmor.c>
