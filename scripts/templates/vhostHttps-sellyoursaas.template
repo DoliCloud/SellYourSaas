@@ -38,7 +38,7 @@
 
         Options -Indexes +FollowSymLinks
         </Directory>
-        <Directory "__webAppPath__/.well-known">
+        <Directory "__webAppPath__/htdocs/.well-known">
         	AllowOverride FileInfo
         </Directory>
 
@@ -133,7 +133,7 @@
 
         Options -Indexes +FollowSymLinks
         </Directory>
-        <Directory "__webAppPath__/.well-known">
+        <Directory "__webAppPath__/htdocs/.well-known">
         	AllowOverride FileInfo
         </Directory>
 
