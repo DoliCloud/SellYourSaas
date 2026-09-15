@@ -67,6 +67,10 @@ do
 		has_install_lock=''
 		if [[ -f documents/install.lock ]]; then has_install_lock='1'; fi
 		rm -fr documents/*
+		rm -fr .agents
+		rm -f .agentsignore
+		rm -fr .phan
+		rm -f .pre-commit-config.yaml
 		rm -fr test/ doc/ htdocs/includes/ckeditor/ckeditor/adapters htdocs/includes/ckeditor/ckeditor/samples	# Do not include /build or /dev, done later
 		rm -fr htdocs/public/test
 		rm -fr htdocs/includes/sabre/sabre/*/tests htdocs/includes/stripe/tests htdocs/includes/stripe/stripe-php/tests
@@ -74,6 +78,7 @@ do
 		rm -fr htdocs/install/doctemplates/websites/website_template-restaurant*
 		#rm -fr vendor/tecnickcom/tcpdf/fonts/dejavu-fonts-ttf-* vendor/tecnickcom/tcpdf/fonts/freefont-* vendor/tecnickcom/tcpdf/fonts/ae_fonts_*
 		rm -fr files/_cache/*
+		rm -f phpstan.neon.dist
 
 		# We remove subdir of /dev and /build. We need files into build root only.
 		find build/* -depth -type d -exec rm -fr {} +
