@@ -481,10 +481,10 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/?$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^#?mkdir __INSTANCEDIR__\/htdocs\/.well-known$/i', $newline)) {
+		if (preg_match('/^#?mkdir \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/.well-known$/i', $newline)) {
 			continue;
 		}
-		if (preg_match('/^#?chmod( -R)? [-+ugoarwx]+ __INSTANCEDIR__\/htdocs\/\.well-known$/i', $newline)) {
+		if (preg_match('/^#?chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/\.well-known$/i', $newline)) {
 			continue;
 		}
 
