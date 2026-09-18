@@ -637,6 +637,21 @@ if ($resql) {
 							if ($mode == "confirm") {
 								$dbinstance->query($sql7);
 							}
+							$sql8 = 'CREATE TABLE llx_einvoicing_sync_pending (rowid integer AUTO_INCREMENT PRIMARY KEY NOT NULL, entity integer DEFAULT 1 NOT NULL, provider varchar(50) NOT NULL,	flow_id varchar(255) NOT NULL, flow_direction varchar(10), flow_type varchar(64), tracking_idref varchar(255), fk_element_type varchar(100), fk_element_id integer, reason_code varchar(64), reason_message text, action_data mediumtext, action_html mediumtext, match_data mediumtext, flow_updatedat datetime, nb_attempts integer DEFAULT 0, date_lastattempt datetime, status integer DEFAULT 0 NOT NULL, date_creation datetime NOT NULL, tms timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, fk_user_creat integer NOT NULL, fk_user_modif integer) ENGINE = innodb;';
+							print "Run sql8 ".$sql8."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql8);
+							}
+							$sql9 = 'ALTER TABLE llx_einvoicing_sync_pending ADD UNIQUE INDEX uk_einvoicing_sync_pending_flow (entity, provider, flow_id);';
+							print "Run sql9 ".$sql9."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql9);
+							}
+							$sql10 = 'ALTER TABLE llx_einvoicing_sync_pending ADD INDEX idx_einvoicing_sync_pending_status (entity, status, flow_updatedat);';
+							print "Run sql10 ".$sql10."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql10);
+							}
 
 							if ($mode != "confirm") {
 								print "Rollback\n";
