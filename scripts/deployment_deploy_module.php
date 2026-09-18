@@ -632,6 +632,11 @@ if ($resql) {
 							if ($mode == "confirm") {
 								$dbinstance->query($sql6);
 							}
+							$sql7 = 'ALTER TABLE llx_einvoicing_lifecycle_msg ADD COLUMN lc_recipient_roles varchar(50) NULL AFTER lc_reason_code;';
+							print "Run sql7 ".$sql7."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql7);
+							}
 
 							if ($mode != "confirm") {
 								print "Rollback\n";
