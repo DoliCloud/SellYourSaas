@@ -6,7 +6,7 @@
 @import url("myaccount.css");
 
 body{
-	padding: 0px; 
+	padding: 0px;
 }
 
 a{
@@ -26,7 +26,8 @@ div.block header h1 {
 .customregistermain{
     display:flex;
     justify-content:space-around;
-    max-width:100%;
+    max-width:900px;
+    margin: 0 auto;
 }
 .customregistermain > * {
     width:100%;
@@ -52,13 +53,14 @@ form#formregister {
 }
 
 .customregisterheader {
-    display:flex
+    display:flex;
+    max-width: 900px;
+    margin: 0 auto;
 }
 .customregisterheader > h1{
-    margin: auto;
+    margin: auto 0;
     margin-top: 7px;
     margin-bottom: 7px !important;
-    padding-left: 100px;
     padding-top: 5px !important;
     padding-bottom: 5px !important;
 }
