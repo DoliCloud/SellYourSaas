@@ -59,6 +59,7 @@
 * FIX dist/css/alt-myaccount-example.css was missing all the base utility classes from myaccount.css (SELLYOURSAAS_EXTCSS fully replaces the stylesheet, it's not additive) - a reseller using this example as-is would get a broken myaccount dashboard. Now @imports myaccount.css first.
 * FIX dist/css/alt-myaccount-example.css hid page-header-top unconditionally, but that's the only place rendering the #logo image - .customregisterheader has no logo of its own unless the unrelated "options_register_text" product field is also filled in. No logo ever showed otherwise. Now keeps the bar visible (restyled), hiding only its duplicate login/home link.
 * FIX register.php/loginmyaccount.tpl.php/passwordforgotten.tpl.php's form area was never actually constrained to a fixed width (.center in myaccount.css only means text-align:center) - it stretched to the full page width instead of being centered. Constrained .customregistermain/.customregisterheader in dist/css/alt-myaccount-example.css, keeping the full-width colored banners (.page-header-top, div.block header) as originally designed.
+* FIX .customregisterheader's title was flushed to the left edge of the bar, and its two lines (title/subtitle) no longer shared a left edge (leftover text-align:center from .block.medium.center). Centers the title within the bar via absolute positioning, matching the default look, independent of the "already have an account" link's width on the right.
 * SEC When using ssh, a user can't see the OS and package information.
 
 
