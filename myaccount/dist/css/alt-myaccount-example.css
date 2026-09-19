@@ -1,7 +1,12 @@
 /* Alternative CSS for myaccount */
+/* Import the base stylesheet first so this example only needs to define its
+   overrides - without this, SELLYOURSAAS_EXTCSS fully replaces myaccount.css
+   (it is not additive), so utility classes like .maxwidth100, .jnotify-container
+   or .item-status (used on myaccount/index.php) would otherwise disappear. */
+@import url("myaccount.css");
 
 body{
-	padding: 0px; 
+	padding: 0px;
 }
 
 a{
@@ -21,7 +26,8 @@ div.block header h1 {
 .customregistermain{
     display:flex;
     justify-content:space-around;
-    max-width:100%;
+    max-width:900px;
+    margin: 0 auto;
 }
 .customregistermain > * {
     width:100%;
@@ -47,20 +53,37 @@ form#formregister {
 }
 
 .customregisterheader {
-    display:flex
+    display:flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
 }
 .customregisterheader > h1{
-    margin: auto;
-    margin-top: 7px;
-    margin-bottom: 7px !important;
-    padding-left: 100px;
+    text-align: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
     padding-top: 5px !important;
     padding-bottom: 5px !important;
 }
 .defaultheader{
 	display:none;
 }
+/* Keep the default top bar visible: it's the only place that renders the
+   #logo image (partner logo or main service logo) - .customregisterheader
+   below never has a logo of its own, it only gets one when the product's
+   "options_register_text" is also filled in. Hiding page-header-top
+   unconditionally meant no logo ever showed unless that unrelated field
+   was set. Restyle it instead so it matches the rest of this theme, and
+   hide its "already have an account"/home link since .customregisterheader
+   already shows the same one. */
 .page-header-top{
+	background-color: #4c4970;
+}
+.page-header-top .registerheader > div:not(.valignmiddle){
 	display:none;
 }
 
