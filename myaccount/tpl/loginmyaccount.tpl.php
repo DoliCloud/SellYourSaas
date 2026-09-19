@@ -166,13 +166,13 @@ if (empty($linklogo)) {               // Show main logo of Cloud service
 		if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constlogosmall))) {
 			$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/' . getDolGlobalString($constlogosmall));
 		}
-	} elseif (empty($urllogo) && getDolGlobalString($constlogo)) {
+	} elseif (empty($linklogo) && getDolGlobalString($constlogo)) {
 		if (is_readable($conf->mycompany->dir_output.'/logos/' . getDolGlobalString($constlogo))) {
 			$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/' . getDolGlobalString($constlogo));
 		}
-	} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png')) {
+	} elseif (empty($linklogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png')) {
 		$linklogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
-	} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png')) {
+	} elseif (empty($linklogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png')) {
 		$linklogo=DOL_URL_ROOT.'/theme/dolibarr_logo.png';
 	} else {
 		$linklogo=DOL_URL_ROOT.'/theme/common/login_logo.png';

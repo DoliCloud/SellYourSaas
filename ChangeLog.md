@@ -56,6 +56,7 @@
 * FIX Debug master_move_instance.php - Price of old instance is kept/reused.
 * FIX code for email template to use to send email for credit transfer payment.
 * FIX exclusion of modules for upgrade feature was not using the setup.
+* FIX Logo fallback chain on login, register and password-forgotten pages checked a stale/undefined $urllogo instead of $linklogo (copy-paste leftover, harmless today but fragile).
 * SEC When using ssh, a user can't see the OS and package information.
 
 
