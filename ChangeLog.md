@@ -56,6 +56,7 @@
 * FIX Debug master_move_instance.php - Price of old instance is kept/reused.
 * FIX code for email template to use to send email for credit transfer payment.
 * FIX exclusion of modules for upgrade feature was not using the setup.
+* FIX dist/css/alt-myaccount-example.css was missing all the base utility classes from myaccount.css (SELLYOURSAAS_EXTCSS fully replaces the stylesheet, it's not additive) - a reseller using this example as-is would get a broken myaccount dashboard. Now @imports myaccount.css first.
 * SEC When using ssh, a user can't see the OS and package information.
 
 

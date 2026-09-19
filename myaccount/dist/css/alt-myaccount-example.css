@@ -1,4 +1,9 @@
 /* Alternative CSS for myaccount */
+/* Import the base stylesheet first so this example only needs to define its
+   overrides - without this, SELLYOURSAAS_EXTCSS fully replaces myaccount.css
+   (it is not additive), so utility classes like .maxwidth100, .jnotify-container
+   or .item-status (used on myaccount/index.php) would otherwise disappear. */
+@import url("myaccount.css");
 
 body{
 	padding: 0px; 
