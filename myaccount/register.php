@@ -51,7 +51,7 @@ include './mainmyaccount.inc.php';
  * @var Database	$db
  * @var Conf		$conf
  * @var Translate 	$langs
- * @var string 		$urllogo
+ * @var string 		$linklogo
  */
 
 
