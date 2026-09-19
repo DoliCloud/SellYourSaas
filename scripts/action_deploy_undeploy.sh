@@ -39,6 +39,15 @@ templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+# php-fpm/apache open_basedir needs read access to the sellyoursaas module's own scripts/
+# directory (eg. for phpsendmail.php/phpsendmailprepend.php) - possibility to change it if
+# the module was not installed into the default /home/admin/wwwroot/dolibarr_sellyoursaas
+sellyoursaasdir=`grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$sellyoursaasdir" == "x" ]]; then
+  sellyoursaasdir="/home/admin/wwwroot/dolibarr_sellyoursaas"
+fi
+sellyoursaasscriptsdir="$sellyoursaasdir/scripts"
 if [[ "x$templatesdir" != "x" ]]; then
   if [[ "x$phpfpm" != "x" ]]; then
     export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
@@ -180,6 +189,12 @@ fi
 export CUSTOMDOMAIN=${46}
 export cliafterdeployoption=${49}
 
+# Per-instance PHP version override (from contract extrafield "phpversion"), takes priority
+# over the server-wide "phpversion=" read from /etc/sellyoursaas.conf when set.
+export phpversionforinstance=${50//£/ }
+if [[ "x$phpversionforinstance" != "x" && "x$phpversionforinstance" != "x-" ]]; then
+	phpversion=$phpversionforinstance
+fi
 
 
 export ErrorLog='#ErrorLog'
@@ -439,8 +454,8 @@ if [[ "$mode" == "deployall" ]]; then
 									echo "mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername"
 									mv $chrootdir/$privatejailtemplatename $chrootdir/$osusername
 								else
-									echo "jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient"
-									jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient >/dev/null 2>&1
+									echo "jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient acl"
+									jk_init -c /etc/jailkit/jk_init.ini $chrootdir/$osusername extendedshell limitedshell groups sftp rsync editors git php mysqlclient acl >/dev/null 2>&1
 								fi
 							fi
 							echo "mkdir -p $chrootdir/$osusername$targetdir/$osusername"
@@ -477,6 +492,19 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 	rm -f $targetdir/$osusername/$dbname/*.log >/dev/null 2>&1
 	echo rm -f $targetdir/$osusername/$dbname/*.log.*
 	rm -f $targetdir/$osusername/$dbname/*.log.* >/dev/null 2>&1
+
+	# Stop this instance's php-fpm service(s) FIRST, before the jailkit/killall/usermod cleanup
+	# below: the pool service has Restart=always (see poolservice-phpfpm.template), so leaving it
+	# running just has systemd respawn a worker as $osusername within RestartSec, making the
+	# usermod further down fail ("user ... is currently used by process ...") and leave the passwd
+	# home field pointing at the jail directory this same block is about to delete. Match any PHP
+	# version, not just the server's default $phpversion further below: an instance's actual
+	# running version can differ from it via changephpversion.
+	for svc in $(ls /etc/systemd/system/sellyoursaas-php*-fpm-"$fqn".service 2>/dev/null); do
+		svcname=$(basename "$svc")
+		echo "Stop php-fpm service $svcname before jailkit/user cleanup"
+		systemctl disable --now "$svcname" 2>/dev/null
+	done
 
 	if [[ "$sshaccesstype" > "0" ]]; then
 
@@ -1170,7 +1198,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				sed -e 's;__fqn__;$fqn;g' | \
 				sed -e 's;__instancename__;$instancename;g' | \
 				sed -e 's;__localip__;$localip;g' | \
-			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+			  sed -e 's;__webAppPath__;$instancedir;g' | \
+			  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $apacheconf"
 	cat $vhostfile | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 			  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -1191,7 +1220,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				sed -e "s;__fqn__;$fqn;g" | \
 				sed -e "s;__instancename__;$instancename;g" | \
 				sed -e "s;__localip__;$localip;g" | \
-			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+			  sed -e "s;__webAppPath__;$instancedir;g" | \
+			  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $apacheconf
 
 
 	# Enable conf with ln
@@ -1330,6 +1360,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 				  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
 				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' | \
 				  sed -e 's;__phpversion__;$phpversion;g' | \
 				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__instancename__;$instancename;g' | \
@@ -1352,6 +1383,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 				  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
 				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" | \
 				  sed -e "s;__phpversion__;$phpversion;g" | \
 				  sed -e "s;__fqn__;$fqn;g" | \
 				  sed -e "s;__instancename__;$instancename;g" | \
@@ -1397,7 +1429,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e 's;__fqn__;$fqn;g' | \
 				  sed -e 's;__instancename__;$instancename;g' | \
 				  sed -e 's;__localip__;$localip;g' | \
-				  sed -e 's;__webAppPath__;$instancedir;g' > $phpfpmconf"
+				  sed -e 's;__webAppPath__;$instancedir;g' | \
+				  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $phpfpmconf"
 		cat $fpmpoolfiletemplate | sed -e "s/__webAppDomain__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppAliases__/$instancename.$domainname/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
@@ -1418,7 +1451,8 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				  sed -e "s;__fqn__;$fqn;g" | \
 				  sed -e "s;__instancename__;$instancename;g" | \
 				  sed -e "s;__localip__;$localip;g" | \
-				  sed -e "s;__webAppPath__;$instancedir;g" > $phpfpmconf
+				  sed -e "s;__webAppPath__;$instancedir;g" | \
+				  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $phpfpmconf
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create php fpm service $phpfpmservice from $fpmservicefiletemplate"
 		if [[ -s $phpfpmservice ]]
@@ -1557,6 +1591,24 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		fi
 	else
 		echo "Virtual host $apacheconf seems already disabled"
+	fi
+
+	if [[ "x$phpfpm" != "x" ]]; then
+		# The service(s) were already stopped/disabled earlier in this script (before the
+		# jailkit/user cleanup); remove the now-unused unit and pool conf files here so they
+		# don't pile up on disk for every undeployed instance. Match any PHP version, not just
+		# $phpversion: the instance's actual version can differ from it via changephpversion.
+		for phpfpmsvc in $(ls /etc/systemd/system/sellyoursaas-php*-fpm-"$fqn".service 2>/dev/null); do
+			echo "Remove php-fpm service file $phpfpmsvc"
+			rm -f "$phpfpmsvc"
+		done
+		for phpfpmpoolconf in /etc/php/*/fpm/pool.d/sellyoursaas/$fqn.phpfpm.conf; do
+			if [ -f "$phpfpmpoolconf" ]; then
+				echo "Remove php-fpm pool conf $phpfpmpoolconf"
+				rm -f "$phpfpmpoolconf"
+			fi
+		done
+		systemctl daemon-reload
 	fi
 fi
 
