@@ -65,7 +65,18 @@ form#formregister {
 .defaultheader{
 	display:none;
 }
+/* Keep the default top bar visible: it's the only place that renders the
+   #logo image (partner logo or main service logo) - .customregisterheader
+   below never has a logo of its own, it only gets one when the product's
+   "options_register_text" is also filled in. Hiding page-header-top
+   unconditionally meant no logo ever showed unless that unrelated field
+   was set. Restyle it instead so it matches the rest of this theme, and
+   hide its "already have an account"/home link since .customregisterheader
+   already shows the same one. */
 .page-header-top{
+	background-color: #4c4970;
+}
+.page-header-top .registerheader > div:not(.valignmiddle){
 	display:none;
 }
 
