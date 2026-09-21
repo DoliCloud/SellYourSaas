@@ -25,7 +25,7 @@
  * @var ?SellYourSaasUtils $sellyoursaasutils
  * @var string $action
  * @var string $backurl
- * @var string $paymentmode
+ * @var string $paymentmode		'card' or 'ban'
  * @var int $thirdpartyhadalreadyapaymentmode
  * @var int $error
  * @var array $listofcontractid
@@ -39,13 +39,6 @@ if (empty($conf) || ! is_object($conf)) {
 	print "Error, template page can't be called as URL";
 	exit(1);
 }
-
-// $listofcontractid must be defined
-// $error must be defined
-// $paymentmode must be defined to 'card' or 'ban'
-// $backurl
-// $thirdpartyhadalreadyapaymentmode
-// $langscompany
 
 dol_include_once('/sellyoursaas/class/sellyoursaasutils.class.php');
 if (!is_object($sellyoursaasutils)) {
@@ -544,9 +537,9 @@ if (! $error) {
 
 	$db->commit();
 
-	$url=$_SERVER["PHP_SELF"];
+	$url = $_SERVER["PHP_SELF"];
 	if ($backurl) {
-		$url=$backurl;
+		$url = $backurl;
 	}
 
 	if ($thirdpartyhadalreadyapaymentmode > 0) {
@@ -555,7 +548,7 @@ if (! $error) {
 		// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
 		$_SESSION['showconversiontracker']='paymentmodified';
 
-		$url.=(preg_match('/\?/', $url) ? '&' : '?').'paymentmodified=1';
+		$url .= (preg_match('/\?/', $url) ? '&' : '?').'paymentmodified=1';
 
 		// Send to DataDog (metric + event)
 		if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
@@ -580,7 +573,7 @@ if (! $error) {
 		// Set flag 'showconversiontracker' in session to output the js tracker by llxFooter function of customer dashboard.
 		$_SESSION['showconversiontracker']='paymentrecorded';
 
-		$url.=(preg_match('/\?/', $url) ? '&' : '?').'paymentrecorded=1';
+		$url .= (preg_match('/\?/', $url) ? '&' : '?').'paymentrecorded=1';
 
 		// Send to DataDog (metric + event)
 		if (getDolGlobalString('SELLYOURSAAS_DATADOG_ENABLED')) {
