@@ -9,7 +9,7 @@
  */
 
 // if (! empty($_SERVER) && (preg_match('/phpsendmail/', @$_SERVER['SCRIPT_FILENAME']) || preg_match('/phpsendmail/', @$_SERVER['SCRIPT_NAME'])) )
-$tmpactionprepend = @$_POST['action'];
+$tmpactionprepend = isset($_POST['action']) ? (string) $_POST['action'] : '';
 
 /* TODO Enable this by default
 $listofwrappers = stream_get_wrappers();
