@@ -652,6 +652,7 @@ if (! function_exists("llxFooter")) {
 			if ($_SESSION['showconversiontracker'] == 'paymentrecorded') {
 				$msg = getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER');
 				$msg = make_substitutions($msg, $arraysubstitution);
+				dol_syslog("A conversion has been done, we add tag: ".$msg);
 				print $msg;
 				print "\n";
 				$_SESSION['showconversiontracker'] = '';
