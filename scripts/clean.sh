@@ -2,7 +2,8 @@
 # Purge data.
 # This script can be run on the master or any deployment servers.
 #
-# Put the following entry into your root cron
+# Put the following entry into your root cron (adjust the path if sellyoursaasdir is
+# customized in /etc/sellyoursaas.conf)
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 
 #set -e
@@ -214,6 +215,21 @@ do
 		fi
 	else
 		echo "Site $basfic is enabled, we keep it"
+	fi
+done
+
+echo "***** Clean vhost backups from scripts/switch_instance_phpversion.sh for hosts that are not enabled (safe)"
+for fic in /etc/apache2/sellyoursaas-available/*.conf.bak-switchphpversion-*
+do
+	[ -e "$fic" ] || continue
+	basfic=`basename $fic | sed -E 's/\.bak-switchphpversion-[0-9]+-[0-9]+$//'`
+	if [ ! -L /etc/apache2/sellyoursaas-online/$basfic ]; then
+		echo Remove file with rm $fic
+		if [[ $testorconfirm == "confirm" ]]; then
+			rm $fic
+		fi
+	else
+		echo "Site $basfic is enabled, we keep its backup $fic"
 	fi
 done
 
@@ -573,6 +589,15 @@ if [ -s /tmp/osutoclean ]; then
 				else
 					echo File /etc/apache2/sellyoursaas-available/$instancename.custom.conf already deleted
 				fi
+
+				echo "   ** Remove leftover vhost backups from scripts/switch_instance_phpversion.sh"
+				for bakfile in /etc/apache2/sellyoursaas-available/$instancename.conf.bak-switchphpversion-* /etc/apache2/sellyoursaas-available/$instancename.custom*.conf.bak-switchphpversion-*; do
+					[[ -f "$bakfile" ]] || continue
+					echo rm "$bakfile"
+					if [[ $testorconfirm == "confirm" ]]; then
+						rm "$bakfile"
+					fi
+				done
 
 				/usr/sbin/apache2ctl configtest
 				if [[ "x$?" != "x0" ]]; then
