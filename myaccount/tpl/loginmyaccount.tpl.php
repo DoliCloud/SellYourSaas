@@ -27,6 +27,10 @@
  * @var HookManager $hookmanager
  * @var Translate $langs
  *
+ * @var Societe $mythirdparty
+ * @var Societe $partnerthirdparty
+ * @var string $partner
+ * @var string $partnerkey
  * @var string $title
  */
 
@@ -185,7 +189,7 @@ if (!GETPOSTINT('noheader')) {
 	<div class="container">
 	  <div class="registerheader" style="display:flex; justify-content:space-between;">
 		  <div class="valignmiddle" style="padding-right: 25px;">
-		  <a href="<?php echo $homepage ?>"><img class="logoheader"  src="<?php echo $linklogo; ?>" id="logo" /></a><br>
+		  <a href="<?php echo $homepage ?>"><img class="logoheader" src="<?php echo $linklogo; ?>" id="logo" /></a><br>
 		  </div>
 		  <?php if (empty($mythirdparty->id)) {	?>
 		  <div class="paddingtop20" style="float: right;">
@@ -314,14 +318,14 @@ $sellyoursaas2fapending = !empty($_SESSION['sellyoursaas_2fa_pending_socid']);
 <!-- Login -->
 <tr>
 <td class="nowrap center valignmiddle">
-<?php
-if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) {
-	?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php
-}
-if (GETPOST('usernamebis', 'alpha')) {
-	$login=GETPOST('usernamebis', 'alpha');
-}
-?>
+	<?php
+	if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) {
+		?><label for="username" class="hidden"><?php echo $langs->trans("Login"); ?></label><?php
+	}
+	if (GETPOST('usernamebis', 'alpha')) {
+		$login=GETPOST('usernamebis', 'alpha');
+	}
+	?>
 <span class="span-icon-user fa fa-user">
 <input type="email" id="username" maxlength="255" placeholder="<?php echo $langs->trans("LoginEmail"); ?>" name="username" class="flat input-field input-icon-user" value="<?php echo dol_escape_htmltag($login); ?>" tabindex="1" autofocus="autofocus" />
 </span>
@@ -331,7 +335,7 @@ if (GETPOST('usernamebis', 'alpha')) {
 <tr>
 <td class="nowrap center valignmiddle">
 <br>
-<?php if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) { ?><label for="password" class="hidden"><?php echo $langs->trans("Password"); ?></label><?php } ?>
+	<?php if (getDolGlobalString('MAIN_OPTIMIZEFORTEXTBROWSER')) { ?><label for="password" class="hidden"><?php echo $langs->trans("Password"); ?></label><?php } ?>
 <span class="span-icon-password fa fa-lock">
 <input type="password" id="password" maxlength="128" placeholder="<?php echo $langs->trans("Password"); ?>" name="password" class="flat input-field input-icon-password" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="<?php echo getDolGlobalString('MAIN_LOGIN_ENABLE_PASSWORD_AUTOCOMPLETE') ? 'on' : 'off'; ?>" />
 </span>
@@ -341,20 +345,20 @@ if (GETPOST('usernamebis', 'alpha')) {
 <input type="hidden" id="username" name="username" value="<?php echo dol_escape_htmltag($login); ?>" />
 <input type="hidden" id="password" name="password" value="<?php echo dol_escape_htmltag($password); ?>" />
 <!-- Second factor: entirely provided by whichever module implements the
-     'mainmyaccountloginpage' hook context's printSecondFactorFields method
-     (e.g. twofactorauth) - this template has no knowledge of TOTP/WebAuthn
-     or any other specific mechanism. -->
-<?php
-global $hookmanager;
-if (!is_object($hookmanager)) {
-	include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
-	$hookmanager = new HookManager($db);
-}
+	 'mainmyaccountloginpage' hook context's printSecondFactorFields method
+	 (e.g. twofactorauth) - this template has no knowledge of TOTP/WebAuthn
+	 or any other specific mechanism. -->
+	<?php
+	global $hookmanager;
+	if (!is_object($hookmanager)) {
+		include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+		$hookmanager = new HookManager($db);
+	}
 
-$parameters = array('socid' => (int) $_SESSION['sellyoursaas_2fa_pending_socid'], 'mainmyaccountloginpage' => 1);
-$hookmanager->executeHooks('printSecondFactorFields', $parameters);
-echo $hookmanager->resPrint;
-?>
+	$parameters = array('socid' => (int) $_SESSION['sellyoursaas_2fa_pending_socid'], 'mainmyaccountloginpage' => 1);
+	$hookmanager->executeHooks('printSecondFactorFields', $parameters);
+	echo $hookmanager->resPrint;
+	?>
 <?php } ?>
 <?php
 /*

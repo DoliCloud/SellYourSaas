@@ -46,12 +46,11 @@ define('SYSLOG_FILE_ADDSUFFIX', 'register');
 
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
-
 /**
  * @var Database	$db
  * @var Conf		$conf
  * @var Translate 	$langs
- * @var string 		$linklogo
+ * @var string 		$urllogo
  */
 
 
