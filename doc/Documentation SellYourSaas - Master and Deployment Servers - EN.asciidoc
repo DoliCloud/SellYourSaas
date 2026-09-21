@@ -846,8 +846,7 @@ remotebackupuser=admin
 remotebackupdir=/mnt/diskbackup
 
 # Option to use different path for dataroot
-#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
-#newdoldataroot=/new/path/of/documents
+#doldataroot=/home/admin/wwwroot/dolibarr_documents
 # Options to change the directory of vhostfile templates
 #templatesdir=/path/of/vhostfile/templates
 
@@ -4558,7 +4557,7 @@ If you use an external db server (same value of "databasehost" and "databaseport
 If you use an ssh port other than 22
 * SELLYOURSAAS_SSH_SERVER_PORT = port of your ssh server
 
-If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment server (same value of "newdoldataroot" in sellyoursaas.conf)
+If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment server (must be the same value than "doldataroot" in sellyoursaas.conf)
 * SELLYOURSAAS_FORCE_DOL_DATA_ROOT = /path/of/dolibarr/documents/in/deployment/server
 
 To activate Jailkit, a chroot security system (see Jailkit configuration)
