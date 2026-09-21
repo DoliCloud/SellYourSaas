@@ -675,8 +675,8 @@ fi
 if [[ "x$instanceserver" != "x0" ]]; then
 	echo "***** We are on a deployment server, so we clean orphaned Let's Encrypt certificates of removed/renamed custom domains"
 
-	export newdoldataroot=`grep '^newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-	export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
+	export doldataroot=`grep '^doldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	export pathforcertiflocal="${doldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 	> /tmp/letsencryptprotecteddomains
 	for fic in /etc/apache2/*.crt $pathforcertiflocal/*.crt; do
