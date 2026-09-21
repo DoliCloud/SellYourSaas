@@ -13,21 +13,20 @@ a{
     color:#608ef2;
 }
 .customregisterheader a {
-	color: #FFF;		
+	color: #FFF;
 }
 
 div.block header {
 	background-color: #4c4970;
 }
 div.block header h1 {
-	margin-bottom: 0; 
+	margin-bottom: 0;
 }
 
 .customregistermain{
     display:flex;
     justify-content:space-around;
-    max-width:900px;
-    margin: 0 auto;
+    max-width:100%;
 }
 .customregistermain > * {
     width:100%;
@@ -53,37 +52,20 @@ form#formregister {
 }
 
 .customregisterheader {
-    display:flex;
-    justify-content: flex-end;
-    align-items: center;
-    position: relative;
-    max-width: 900px;
-    margin: 0 auto;
+    display:flex
 }
 .customregisterheader > h1{
-    text-align: center;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
+    margin: auto;
+    margin-top: 7px;
+    margin-bottom: 7px !important;
+    padding-left: 100px;
     padding-top: 5px !important;
     padding-bottom: 5px !important;
 }
 .defaultheader{
 	display:none;
 }
-/* Keep the default top bar visible: it's the only place that renders the
-   #logo image (partner logo or main service logo) - .customregisterheader
-   below never has a logo of its own, it only gets one when the product's
-   "options_register_text" is also filled in. Hiding page-header-top
-   unconditionally meant no logo ever showed unless that unrelated field
-   was set. Restyle it instead so it matches the rest of this theme, and
-   hide its "already have an account"/home link since .customregisterheader
-   already shows the same one. */
 .page-header-top{
-	background-color: #4c4970;
-}
-.page-header-top .registerheader > div:not(.valignmiddle){
 	display:none;
 }
 
@@ -106,12 +88,12 @@ textarea, input[type='text'], input[type='password'], input[type='datetime'], in
 
 @media (max-width: 768px) {
     body{
-        padding-top: 0px!important; 
+        padding-top: 0px!important;
     }
 
 	div.block header h1 {
 		margin-bottom: 0;
-		font-size: 1.1em; 
+		font-size: 1.1em;
 	}
 
     .customregistermain{
@@ -127,7 +109,7 @@ textarea, input[type='text'], input[type='password'], input[type='datetime'], in
         max-width:90%;
         padding-left:0px;
     }
-    
+
     form#formregister {
 		padding-right: unset;
 	}
