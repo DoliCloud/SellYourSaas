@@ -1194,7 +1194,7 @@ if ($reshook == 0) {
 
 	<?php
 	// Execute hook getRegisterPageFooter
-	$parameters = array('domainname' => $domainname, 'defaultproduct' => $defaultproduct, 'tmpproduct' => $tmpproduct);
+	$parameters = array('domainname' => $domainname, 'defaultproduct' => $defaultproduct, 'tmpproduct' => $tmpproduct, 'extcss' => $extcss);
 	$reshook = $hookmanager->executeHooks('getRegisterPageFooter', $parameters); // Note that $action and $object may have been modified by some hooks.
 	print $hookmanager->resPrint;
 	?>
