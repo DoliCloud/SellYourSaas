@@ -618,9 +618,13 @@ input.input-field {
 	}
 }
 
-
-/* Ad custom CSS into SellyourSaas setup page */
-
 ";
 
-print getDolGlobalString('SELLYOURSAAS_CSS');
+if (!getDolGlobalString('SELLYOURSAAS_CSS_DISABLED') && getDolGlobalString('SELLYOURSAAS_CSS')) {
+	print "/* Add the embedded custom CSS (defined into SellyourSaas setup page) */";
+	print "\n\n";
+
+	print getDolGlobalString('SELLYOURSAAS_CSS');
+} else {
+	print "/* No embedded custom CSS to add */";
+}
