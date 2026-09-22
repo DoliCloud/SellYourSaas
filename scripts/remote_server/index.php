@@ -487,6 +487,9 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/\.well-known$/i', $newline)) {
 			continue;
 		}
+		if (preg_match('/^#?chown( -R)? [\w_:]+ \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/\.well-known$/i', $newline)) {
+			continue;
+		}
 
 		// TODO enhance list of allowed patterns
 		// ...
