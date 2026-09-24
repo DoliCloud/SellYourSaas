@@ -701,6 +701,69 @@ class ActionsSellyoursaas
 					}
 				}
 			}
+			if ($action == 'reset_einvoicingconf'){
+				$type_db = $conf->db->type;
+
+				$instance = $object->ref_customer;
+				$hostname_db = $object->array_options['options_hostname_db'];
+				$username_db = $object->array_options['options_username_db'];
+				$password_db = $object->array_options['options_password_db'];
+				$database_db = $object->array_options['options_database_db'];
+				$port_db     = $object->array_options['options_port_db'];
+				$username_os = $object->array_options['options_username_os'];
+				$password_os = $object->array_options['options_password_os'];
+				$hostname_os = $object->array_options['options_hostname_os'];
+				$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
+				$newdb->prefix_db = $prefix_db;
+				$substitarray = array(
+					'__INSTANCEDBPREFIX__' => $prefix_db
+				);
+
+				if (is_object($newdb) && $newdb->connected) {
+					$formula = '';
+					$sqltogetpackage = 'SELECT p.sqltoupdateeinvoiceconst FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
+					$sqltogetpackage .= ' WHERE cd.fk_contrat = '.((int) $object->id);
+					$sqltogetpackage .= ' AND cd.fk_product = pe.fk_object';
+					$sqltogetpackage .= " AND pe.app_or_option = 'app'";
+					$sqltogetpackage .= ' AND pe.package = p.rowid';
+					$sqltogetpackage .= ' LIMIT 1';		// We should always have only one contract line with type 'app', so one line linked to a package with a version_formula.
+
+					$resqltogetpackage = $db->query($sqltogetpackage);
+					if ($resqltogetpackage) {
+						$obj = $db->fetch_object($resqltogetpackage);
+						if ($obj) {
+							$formula = $obj->sqltoupdateeinvoiceconst;
+						}
+					} else {
+						setEventMessages('Failed to execute SQL: '.$db->lasterror(), null, 'warnings');
+						$error++;
+					}
+					if(!empty($formula)){
+						$newdb->begin();
+						$formula = make_substitutions($formula, $substitarray);
+						$formula = trim($formula);
+						$arrayofsql=explode(';', $formula);
+						foreach ($arrayofsql as $sqltoexecuteline) {
+							$sqltoexecuteline = trim($sqltoexecuteline);
+							if ($sqltoexecuteline && (strpos($sqltoexecuteline, '--') === false || strpos($sqltoexecuteline, '--') > 0)) {
+								dol_syslog("Execute sql=".$sqltoexecuteline);
+								$resql = $newdb->query($sqltoexecuteline);
+								if(!$resql){
+									$error++;
+								}
+							}
+						}
+						if (!$error) {
+							setEventMessages($langs->trans("EInvoicingConfUpdated"), null, 'mesgs');
+							$newdb->commit();
+						} else {
+							setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
+							$newdb->rollback();
+							$error++;
+						}
+					}
+				}
+			}
 
 			$suspendmaintenancemessage = GETPOST('suspendmaintenancemessage', 'nohtml');
 

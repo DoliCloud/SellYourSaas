@@ -45,6 +45,8 @@ CREATE TABLE llx_packages(
 	sqlafterundeployoption text,
 	crontoadd text,
 	version_formula text,
+	otherinformations_formula text,
+	sqltoupdateeinvoiceconst text,
 	allowoverride varchar(255), 
 	status integer,
 	register_text varchar(255),

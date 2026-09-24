@@ -118,6 +118,8 @@ class Packages extends CommonObject
 		'sqlafterundeployoption' => array('type'=>'text', 'label'=>'Sql after option undeployment', 'visible'=>3, 'enabled'=>1, 'position'=>73, 'notnull'=>-1, 'help'=>'Sql executed after an option is undeployed from (and only from) the customer dashboard'),
 		'allowoverride' => array('type'=>'varchar(255)', 'label'=>'Option string for virtual host', 'visible'=>-1, 'enabled'=>1, 'position'=>75, 'notnull'=>-1, 'help'=>'Any string to add into the Apache virtual host file. For example, keep empty to not allow apache override<br>Use "AllowOverride All" to allow override.'),
 		'version_formula' => array('type'=>'text', 'label'=>"VersionFormula",  'visible'=>3, 'enabled'=>1, 'position'=>76, 'help'=>'VersionFormulaExamples', 'lang'=>'sellyoursaas@sellyoursaas'),
+		'otherinformations_formula' => array('type'=>'text', 'label'=>"OtherInformationsFormula",  'visible'=>3, 'enabled'=>1, 'position'=>77, 'help'=>'OtherInformationsFormulaExamples', 'lang'=>'sellyoursaas@sellyoursaas'),
+		'sqltoupdateeinvoiceconst' => array('type'=>'text', 'label'=>"Sql to update einvoicing const",  'visible'=>3, 'enabled'=>1, 'position'=>78, 'help'=>'SQL to update einvoicing const for proxy', 'lang'=>'sellyoursaas@sellyoursaas'),
 		'date_creation' => array('type'=>'datetime', 'label'=>'DateCreation', 'visible'=>-2, 'enabled'=>1, 'position'=>500, 'notnull'=>1,),
 		'tms' => array('type'=>'timestamp', 'label'=>'DateModification', 'visible'=>-2, 'enabled'=>1, 'position'=>501, 'notnull'=>1,),
 		'fk_user_creat' => array('type'=>'integer', 'label'=>'UserAuthor', 'visible'=>-2, 'enabled'=>1, 'position'=>502, 'notnull'=>1,),
@@ -156,6 +158,8 @@ class Packages extends CommonObject
 	public $allowoverride;
 	public $register_text;
 	public $status;
+	public $otherinformations_formula;
+	public $sqltoupdateeinvoiceconst;
 	// END MODULEBUILDER PROPERTIES
 
 	/**
