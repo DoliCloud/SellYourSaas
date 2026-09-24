@@ -255,6 +255,7 @@ AppOrOption=Type of SaaS service
 PricePerResource=Price per resource
 QuantityCalculationFormula=Qty calculation formula
 VersionFormula=Formula to get version
+OtherInformationsFormula=Formula to get other informations
 PleaseBeSure=You will destroy your instance. All your data stored into this application will be destroyed. Please type the name of instance to destroy (<strong>%s</strong>) before clicking the 'Undeploy and Delete' button. There is no undo. There is no going back!
 Deploy=Deploy
 Redeploy=Re-Deploy
@@ -534,6 +535,8 @@ PaymentDoneOnStripeLive=Payment on Stripe - Live (%s done)
 PayBalance=Pay the balance
 QtyFormulaExamples=<u>Example of rules to calculate quantities:</u><br><br>SQL:select count(rowid) as nb from __INSTANCEDBPREFIX__user where statut = 1 and login != '__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'<br><br>BASH:duc info -b -d /home/jail/home/__OSUSERNAME__/.duc.db 2>/dev/null | awk 'NR>=2 { print $5 }' | php -r '$a=fgets(STDIN)/1000000000; print ($a>0?$a:0).chr(32).($a>5?($a-5):0);<br><br>PHPMETHOD:nameOfMethod;param1;param2  (paramX can be a substitution key, ie __CONTRACTREF__, __INSTANCEDBPREFIX__)
 VersionFormulaExamples=<u>Example of rules to get a version:</u><br><br>SQL:select field as version from __INSTANCEDBPREFIX__config where key = 'version'
+OtherInformationsFormulaExamples=<u>Example of rules to get other informations:</u><br><br>SQL:select field as name, field as value from __INSTANCEDBPREFIX__const where name = 'SELLYOURSAAS'
+EInvoicingConfUpdated=E-Invoicing conf updated successfully
 SourceURLOfEvent=Source URL of event
 SeeOnBackoffice=See on backoffice
 PaymentModeAddedFrom=Payment mode added from
@@ -1003,3 +1006,4 @@ SorryOptionsNotAvailableDuringTestPeriod=Sorry, this feature is not available du
 SectionSoonAvailable=This section is being updated. It will be available soon.
 HavingAtLeastOneInstance=Having at least one instance with
 NoteYouShouldReceiveTheAnswerByEmail=Note: You should receive answers of the tickets by email (check your spam if not received)
+EInvoicingConfVariables=E-Invoicing configuration variables
