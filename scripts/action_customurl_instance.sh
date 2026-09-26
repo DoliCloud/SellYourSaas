@@ -300,11 +300,11 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 		sleep 3
 	fi
 
-	export customcrtfolder="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+	export customcrtfolder="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 	if [[ ! -d $customcrtfolder ]]; then
-		echo "Create cert directory with mkdir $customcrtfolder; chown admin:admin $customcrtfolder;"
-		mkdir $customcrtfolder; chown admin:admin $customcrtfolder;
+		echo "Create cert directory with mkdir -p $customcrtfolder; chown admin:admin $customcrtfolder;"
+		mkdir -p $customcrtfolder; chown admin:admin $customcrtfolder;
 	fi
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Generation of cert file for custom url"
@@ -325,15 +325,15 @@ if [[ "$mode" == "deploycustomurl" ]]; then
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Link of generated cert file for custom url"
 	echo "Link certificate for virtualhost with
-		ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
-		ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
-		ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+		ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem $customcrtfolder/$instancename.$domainname-$customurl.key
+		ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem $customcrtfolder/$instancename.$domainname-$customurl.crt
+		ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem $customcrtfolder/$instancename.$domainname-$customurl-intermediate.crt
 	"
-	ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.key
+	ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem $customcrtfolder/$instancename.$domainname-$customurl.key
 	export certkeyko=$?
-	ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl.crt
+	ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem $customcrtfolder/$instancename.$domainname-$customurl.crt
 	export certcrtko=$?
-	ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$customurl-intermediate.crt
+	ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem $customcrtfolder/$instancename.$domainname-$customurl-intermediate.crt
 	export certinterko=$?
 
 	if [[ "x$certkeyko" != "x0" ]] || [[ "x$certcrtko" != "x0" ]] || [[ "x$certinterko" != "x0" ]]; then
