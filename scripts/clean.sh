@@ -2,7 +2,8 @@
 # Purge data.
 # This script can be run on the master or any deployment servers.
 #
-# Put the following entry into your root cron
+# Put the following entry into your root cron (adjust the path if sellyoursaasdir is
+# customized in /etc/sellyoursaas.conf)
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh confirm
 
 #set -e

@@ -12,8 +12,18 @@
   become_method: sudo
   become_user: root
   tasks:
+  - name: Read sellyoursaasdir from /etc/sellyoursaas.conf
+    shell: "grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2"
+    register: sellyoursaasdir_result
+    changed_when: false
+    failed_when: false
+
+  - name: Fall back to the documented default sellyoursaasdir if not set in /etc/sellyoursaas.conf
+    set_fact:
+      sellyoursaasdir: "{{ sellyoursaasdir_result.stdout if sellyoursaasdir_result.stdout != '' else '/home/admin/wwwroot/dolibarr_sellyoursaas' }}"
+
   - name: Launch clean.sh
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/clean.sh {{command}}"
+    command: "{{ sellyoursaasdir }}/scripts/clean.sh {{command}}"
     register: command_output
 
   - debug:
