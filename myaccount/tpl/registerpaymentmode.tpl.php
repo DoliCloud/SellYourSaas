@@ -375,7 +375,7 @@ print '	<center><div class="form-row" style="max-width: 320px">
 		</div>
 
 		<!-- Used to display form errors. -->
-		<div id="card-errors" role="alert"></div>
+		<div id="card-errors" role="alert" class="paddingtop"></div>
 
 		</div></center>
         ';
