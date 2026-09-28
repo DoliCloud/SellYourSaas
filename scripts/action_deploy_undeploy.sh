@@ -1201,12 +1201,16 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	# Remove and recreate customurl
 	rm -f /etc/apache2/sellyoursaas-available/$fqn.custom.conf
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+	# Also remove any certificate files left from a previous custom domain for this instance
+	# (we don't know the old customurl value here, only $fqn, so match on that prefix instead)
+	rm -f ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-*.crt
+	rm -f ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-*.key
 	if [[ "x$customurl" != "x" ]]; then
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfile"
 
 		export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
-		export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+		export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 		# Delete old custom conf file
 		export apacheconf="/etc/apache2/sellyoursaas-available/$fqn.custom.conf"
@@ -1279,18 +1283,24 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 			# No $CERTIFFORCUSTOMDOMAIN forced (no cert file was created initially), so we will generate one
 			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
 
-			# TODO We must create it using letsencrypt if not yet created. NOTE: This is done in action "rename" (suspen_unsuspend.sh), not sure we must also do it  on deploy.
-			#if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn.crt ]]; then
-					# Generate the letsencrypt certificate
+			# If no cached copy exists yet for this instance's custom domain, but a real
+			# Let's Encrypt certificate for the domain itself already exists (e.g. left
+			# over from a previous custom-URL setup that was removed then recreated),
+			# link it into the cache now instead of silently falling back to the
+			# wildcard below - the wildcard does not cover an external custom domain.
+			if [[ ! -e $pathforcertiflocal/$fqn-custom.crt ]]; then
+				if [[ -e /etc/letsencrypt/live/$customurl/cert.pem ]]; then
+					ln -fs /etc/letsencrypt/live/$customurl/cert.pem $pathforcertiflocal/$fqn-custom.crt
+					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem $pathforcertiflocal/$fqn-custom.key
+					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem $pathforcertiflocal/$fqn-custom-intermediate.crt
+				elif [[ -e /etc/letsencrypt/live/www.$customurl/cert.pem ]]; then
+					ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem $pathforcertiflocal/$fqn-custom.crt
+					ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem $pathforcertiflocal/$fqn-custom.key
+					ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem $pathforcertiflocal/$fqn-custom-intermediate.crt
+				fi
+			fi
 
-					# certbot certonly -n -v --webroot -w $instancedir -d $customurl
-					# create links
-
-					# If links does not exists, we disable SSL
-					#SSLON="Off"
-			#fi
-
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e $pathforcertiflocal/$fqn-custom.crt ]]; then
 				# If custom cert not found, we fallback on the wildcard one for server (it will generate a warning, but it will works and not hangs !)
 				export webCustomSSLCertificateCRT="/etc/apache2/$webSSLCertificateCRT"
 				export webCustomSSLCertificateKEY="/etc/apache2/$webSSLCertificateKEY"
@@ -1298,9 +1308,9 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
 				# We will use the custom cert file
-				export webCustomSSLCertificateCRT=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
-				export webCustomSSLCertificateKEY=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
-				export webCustomSSLCertificateIntermediate=/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
+				export webCustomSSLCertificateCRT=$pathforcertiflocal/$fqn-custom.crt
+				export webCustomSSLCertificateKEY=$pathforcertiflocal/$fqn-custom.key
+				export webCustomSSLCertificateIntermediate=$pathforcertiflocal/$fqn-custom-intermediate.crt
 				export CERTIFFORCUSTOMDOMAIN="$fqn-custom"
 			fi
 			echo "We will use the certificate file webCustomSSLCertificateCRT=$webCustomSSLCertificateCRT (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
@@ -1525,6 +1535,10 @@ if [[ "$mode" == "undeploy" || "$mode" == "undeployall" ]]; then
 		echo Disable conf with a2dissite $fqn.custom.conf
 		#a2dissite $fqn.conf
 		rm /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+
+		echo Remove any custom domain certificate files left for this instance
+		rm -f ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-*.crt
+		rm -f ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-*.key
 
 		echo Disable conf with a2dissite $fqn.website*.conf
 		#a2dissite $fqn.conf
