@@ -145,6 +145,28 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	return $atleastonepaymentmode;
 }
 
+
+/**
+ * Check if a thirdparty has the reserved keyword for Stripe sandbox into its name.
+ * If yes, the payment page (credit card or SEPA mandate) and the payment return circuit of
+ * this thirdparty must use the Stripe sandbox (test) account, must not validate invoices
+ * and must not record payments (the circuit continues like if the payment was done).
+ * The keyword is defined with the constant SELYOURSAAS_STRIPE_SANDBOX_KEYWORD.
+ *
+ * @param 	Societe	$thirdparty		Object thirdparty (the customer account)
+ * @return 	int						1 if the name of the thirdparty contains the reserved keyword, 0 otherwise
+ */
+function sellyoursaasIsSandboxThirdparty($thirdparty)
+{
+	$stripeSandboxKeyword = trim(getDolGlobalString('SELLYOURSAAS_STRIPE_SANDBOX_KEYWORD'));
+
+	if (empty($stripeSandboxKeyword) || !is_object($thirdparty) || empty($thirdparty->name)) {
+		return 0;
+	}
+
+	return (stripos($thirdparty->name, $stripeSandboxKeyword) !== false) ? 1 : 0;
+}
+
 /**
  * Return if instance is a paid instance or not
  * Check if there is an invoice or template invoice (it was a paying customer) or just a template invoice (it is a current paying customer)

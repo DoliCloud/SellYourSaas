@@ -433,7 +433,9 @@ if (! $error) {
 			}
 
 			// A template invoice was just created, we run generation of invoice if template invoice date is already in past
-			if (! $error && !$isfreemodeenabled) {
+			// Note: If the name of the thirdparty contains the reserved keyword for sandbox, we do not generate the
+			// real invoice, so no invoice is validated and no payment is recorded, we continue like if payment was done.
+			if (! $error && !$isfreemodeenabled && ! sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
 				dol_syslog("--- A template invoice was generated with id ".$invoicerecid.", now we run createRecurringInvoices to build real invoice", LOG_DEBUG, 0);
 				$facturerec = new FactureRec($db);
 
@@ -460,10 +462,14 @@ if (! $error) {
 
 				$user->rights->facture->creer = $savperm1;
 				$user->rights->facture->invoice_advance->validate = $savperm2;
+			} elseif (! $error && !$isfreemodeenabled) {
+				dol_syslog("--- The thirdparty has the reserved keyword for sandbox into its name, so we do not generate the real invoice from the template invoice, so no invoice is validated and no payment is recorded", LOG_DEBUG, 0);
 			}
 
 			// Now try to take the payment if payment is OK and payment mode is not a differed payment mode
-			if (! $error && $paymentmode != 'ban' && !$isfreemodeenabled) {
+			// Note: If the name of the thirdparty contains the reserved keyword for sandbox, no payment is taken
+			// and no payment is recorded, we continue like if payment was done.
+			if (! $error && $paymentmode != 'ban' && !$isfreemodeenabled && ! sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
 				if (empty($paymentmode)) {
 					$paymentmode = 'card';
 				}
@@ -535,7 +541,10 @@ if (! $error) {
 
 if (! $error) {
 	// Payment mode successfully recorded
-	if (!$isfreemodeenabled) {
+	if (sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
+		// The name of the thirdparty contains the reserved keyword for sandbox, so no invoice was validated and no payment was recorded
+		setEventMessages($langs->trans("PaymentModeRecordedInSandboxMode"), null, 'mesgs');
+	} elseif (!$isfreemodeenabled) {
 		setEventMessages($langs->trans("PaymentModeRecorded"), null, 'mesgs');
 	} else {
 		setEventMessages($langs->trans("InstanceValidated"), null, 'mesgs');
