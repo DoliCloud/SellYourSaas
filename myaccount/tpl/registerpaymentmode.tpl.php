@@ -76,7 +76,7 @@ print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
 
 // Show a note if we are in Stripe sandbox mode (so if the name of the thirdparty contains the reserved keyword)
 if (sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
-	print '<div class="note note-info justify">'.$langs->trans("PaymentPageInStripeSandboxMode").'</div>';
+	print '<div class="note note-warning justify">'.$langs->trans("PaymentPageInStripeSandboxMode").'</div>';
 	print '<br>';
 }
 
