@@ -146,6 +146,7 @@ if (! $error) {
 
 		$discounttype = '';
 		$discountval = 0;
+		$discountcodefound = 0;
 		$validdiscountcodearray = array();
 		$nbofproductapp = 0;
 
@@ -254,38 +255,38 @@ if (! $error) {
 					}
 					$frequency = $tmpproduct->duration_value;
 					$frequency_unit = $tmpproduct->duration_unit;
+				}
 
-					// Process the discount code
-					if ($tmpproduct->array_options['options_register_discountcode']) {
-						$tmpvaliddiscountcodearray = explode(',', $tmpproduct->array_options['options_register_discountcode']);
-						foreach ($tmpvaliddiscountcodearray as $valdiscount) {
-							$valdiscountarray = explode(':', $valdiscount);
-							$tmpcode = strtoupper(trim($valdiscountarray[0]));
-							if (preg_match('/%/', trim($valdiscountarray[1]))) {	// This is a percent discount
-								$tmpval = (int) str_replace('%', '', trim($valdiscountarray[1]));
-								if ($tmpval > 0 && $tmpval < 100) {
-									$validdiscountcodearray[$tmpcode] = array('code'=>$tmpcode, 'type'=>'percent', 'value'=>$tmpval);
-								} else {
-									dol_syslog("Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
-								}
+				// Process the discount code (each product of a line, app or option, can have its own list of discount codes)
+				if ($discountcode && $tmpproduct->array_options['options_register_discountcode']) {
+					$validdiscountcodearray = array();		// Reset the list of codes so the line is checked with the codes of its own product
+					$tmpvaliddiscountcodearray = explode(',', $tmpproduct->array_options['options_register_discountcode']);
+					foreach ($tmpvaliddiscountcodearray as $valdiscount) {
+						$valdiscountarray = explode(':', $valdiscount);
+						$tmpcode = strtoupper(trim($valdiscountarray[0]));
+						if (preg_match('/%/', trim($valdiscountarray[1]))) {	// This is a percent discount
+							$tmpval = (int) str_replace('%', '', trim($valdiscountarray[1]));
+							if ($tmpval > 0 && $tmpval < 100) {
+								$validdiscountcodearray[$tmpcode] = array('code'=>$tmpcode, 'type'=>'percent', 'value'=>$tmpval);
 							} else {
-								dol_syslog("Error: Type of discount not yet supported for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
+								dol_syslog("Error: Bad definition of discount for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
 							}
-						}
-						// If we entered a discountcode or get it from contract
-						if (! empty($validdiscountcodearray[$discountcode])) {
-							$discounttype = $validdiscountcodearray[$discountcode]['type'];
-							$discountval = $validdiscountcodearray[$discountcode]['value'];
 						} else {
-							$discountcode = '';
+							dol_syslog("Error: Type of discount not yet supported for product id = ".$tmpproduct->id." with value ".$tmpproduct->array_options['options_register_discountcode'], LOG_ERR);
 						}
-						//var_dump($validdiscountcodearray); var_dump($discountcode); var_dump($discounttype); var_dump($discountval); exit;
+					}
+					// If we entered a discountcode or get it from contract
+					if (! empty($validdiscountcodearray[$discountcode])) {
+						$discounttype = $validdiscountcodearray[$discountcode]['type'];
+						$discountval = $validdiscountcodearray[$discountcode]['value'];
+						$discountcodefound++;
 						if ($discounttype == 'percent') {
 							if ($discountval > $discount) {
 								$discount = $discountval;		// If discount with coupon code is higher than the one defined into contract, we use it.
 							}
 						}
 					}
+					//var_dump($validdiscountcodearray); var_dump($discountcode); var_dump($discounttype); var_dump($discountval); exit;
 				}
 
 				// Insert the line
@@ -330,6 +331,11 @@ if (! $error) {
 				if ($result > 0 && $lines[$i]->product_type == 9) {
 					$fk_parent_line = $result;
 				}
+			}
+
+			// If the discount code was not found into the codes of any product of the contract, we discard it
+			if ($discountcode && ! $discountcodefound) {
+				$discountcode = '';
 			}
 		}
 
