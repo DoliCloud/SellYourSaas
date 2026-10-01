@@ -617,6 +617,14 @@ if (! function_exists("llxFooter")) {
 			$arraysubstitution['__THIRDPARTY_ID__'] = $mythirdpartyaccount->id;
 		}
 
+		global $contract;
+
+		if (!empty($contract) && is_object($contract)) {
+			print "\n".'<!-- contract = '.$contract->id.' -->'."\n";
+			$arraysubstitution['__CONTRACT_CUSTOMER_REF__'] = $contract->ref_customer;
+		}
+
+
 		// Show conversion tracker.
 		if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
 			print "\n".'<!-- Conversion tracker for all pages -->'."\n";
