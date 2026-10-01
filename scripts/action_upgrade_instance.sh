@@ -39,6 +39,11 @@ else
 	export vhostfilemaintenance="$scriptdir/templates/vhostHttps-sellyoursaas-maintenance.template"
 fi
 
+# Same flag action_deploy_undeploy.sh uses to pick the phpfpm vhost templates (mpm_event, for
+# HTTP/2) over the mpm_itk ones. Used below to scope the www-data ACL grant to servers that
+# actually need it.
+phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
 if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
 	exit 100
@@ -370,17 +375,20 @@ if [[ "$mode" == "upgrade" ]];then
 
 		# Grant the web server group read+traverse on htdocs only (never on documents/, which is
 		# only ever reached through an authenticated PHP script running under the instance's own
-		# php-fpm pool user). This keeps htdocs servable by Apache whether the server still uses
-		# mpm_itk (harmless, itk already gives full access) or has moved to mpm_event for HTTP/2
-		# (where Apache itself runs as a single shared user and needs this ACL to serve static files).
-		if command -v setfacl >/dev/null 2>&1; then
-			echo `date +'%Y-%m-%d %H:%M:%S'`" Grant www-data traverse-only on the instance directories and read+traverse on htdocs"
-			setfacl -m g:www-data:--x "$targetdir/$osusername"
-			setfacl -m g:www-data:--x "$targetdir/$osusername/$dbname"
-			setfacl -R -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
-			setfacl -d -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
-		else
-			echo `date +'%Y-%m-%d %H:%M:%S'`" Warning: setfacl not found (acl package not installed), skipping www-data ACL on htdocs - static files will only be servable while this server still uses mpm_itk"
+		# php-fpm pool user). Only needed once this server has moved to mpm_event for HTTP/2:
+		# Apache then runs as a single shared user instead of switching per-vhost like mpm_itk
+		# does, so without this ACL it gets a 403 on every static asset. A server still on
+		# mpm_itk (phpfpm not set) is left untouched - it never needs www-data to read anything.
+		if [[ "x$phpfpm" != "x" ]]; then
+			if command -v setfacl >/dev/null 2>&1; then
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Grant www-data traverse-only on the instance directories and read+traverse on htdocs"
+				setfacl -m g:www-data:--x "$targetdir/$osusername"
+				setfacl -m g:www-data:--x "$targetdir/$osusername/$dbname"
+				setfacl -R -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
+				setfacl -d -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
+			else
+				echo `date +'%Y-%m-%d %H:%M:%S'`" Warning: setfacl not found (acl package not installed), skipping www-data ACL on htdocs - static files on this mpm_event server will not be servable until the acl package is installed"
+			fi
 		fi
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/"
