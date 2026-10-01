@@ -1397,7 +1397,7 @@ class ActionsSellyoursaas
 				print_liste_field_titre("TrialOrPaid", $_SERVER["PHP_SELF"], '', '', $param, ' align="center"', $sortfield, $sortorder);
 			}
 			if (!getDolGlobalString('SELLYOURSAAS_DISABLE_PAYMENT_MODE_SAVED')) {
-				print_liste_field_titre("PaymentModeSaved", $_SERVER["PHP_SELF"], '', '', $param, ' align="center"', $sortfield, $sortorder);
+				print_liste_field_titre("PaymentModeRecorded", $_SERVER["PHP_SELF"], '', '', $param, ' align="center"', $sortfield, $sortorder);
 			}
 		}
 		if ($parameters['currentcontext'] == 'thirdpartybancard') {
