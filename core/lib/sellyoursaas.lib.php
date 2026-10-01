@@ -588,6 +588,7 @@ function updateInstanceInfo($object)
 
 	$lastloginadmin = '';
 	$lastpassadmin = '';
+	$other_informations = array();
 
 	if (is_object($newdb) && $newdb->connected) {
 		// Get $lastloginadmin, $lastpassadmin, $stringoflistofmodules
@@ -723,6 +724,48 @@ function updateInstanceInfo($object)
 				$object->array_options['options_instancemodules'] = $stringoflistofmodules;	// Version has changed, we must save it.
 			}
 		}
+
+		// Get other informations from database
+		$other_informations = array();
+		$formula = '';
+		$sqltogetpackage = 'SELECT p.otherinformations_formula FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
+		$sqltogetpackage .= ' WHERE cd.fk_contrat = '.((int) $object->id);
+		$sqltogetpackage .= ' AND cd.fk_product = pe.fk_object';
+		$sqltogetpackage .= " AND pe.app_or_option = 'app'";
+		$sqltogetpackage .= ' AND pe.package = p.rowid';
+		$sqltogetpackage .= ' LIMIT 1';		// We should always have only one contract line with type 'app', so one line linked to a package with a version_formula.
+
+		$resqltogetpackage = $db->query($sqltogetpackage);
+		if ($resqltogetpackage) {
+			$obj = $db->fetch_object($resqltogetpackage);
+			if ($obj) {
+				$formula = $obj->otherinformations_formula;
+			}
+		} else {
+			setEventMessages('Failed to execute SQL: '.$db->lasterror(), null, 'warnings');
+			$error++;
+		}
+
+		if (preg_match('/SQL:/', $formula)) {
+			// Set $stringofversion with result of sql defined into formula to get version of instance. This sql must return a field "version" and a field "name" (name of version).
+			$formula = preg_replace('/SQL:/', '', $formula);
+			$formula = make_substitutions($formula, $substitarray);
+			$resqlformula = $newdb->query($formula);
+
+			if ($resqlformula) {
+				$num = $newdb->num_rows($resqlformula);
+
+				$i=0;
+				while ($i < $num) {
+					$obj = $newdb->fetch_object($resqlformula);
+					$other_informations[$obj->name] = $obj->value;
+					$i++;
+				}
+			} else {
+				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
+				$error++;
+			}
+		}
 	}
 
 	// We have value that has changed, we saved them
@@ -733,6 +776,6 @@ function updateInstanceInfo($object)
 	if ($error) {
 		return -1;
 	} else {
-		return array($lastloginadmin, $lastpassadmin);
+		return array("lastloginadmin" => $lastloginadmin, "lastpassadmin" => $lastpassadmin, "other_informations"=>$other_informations);
 	}
 }

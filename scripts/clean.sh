@@ -467,6 +467,7 @@ if [ -s /tmp/osutoclean ]; then
 					if [[ $testorconfirm == "confirm" ]]; then
 						mv -f $targetdir/$osusername $archivedirtest 2>/dev/null
 						if [ -d "$targetdir/$osusername" ]; then
+							echo mv failed or left the source dir behind, falling back to cp -pr + rm
 							echo cp -pr $targetdir/$osusername $archivedirtest
 							cp -pr $targetdir/$osusername $archivedirtest
 							rm -fr $targetdir/$osusername
@@ -675,8 +676,8 @@ fi
 if [[ "x$instanceserver" != "x0" ]]; then
 	echo "***** We are on a deployment server, so we clean orphaned Let's Encrypt certificates of removed/renamed custom domains"
 
-	export newdoldataroot=`grep '^newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-	export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
+	export doldataroot=`grep '^doldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	export pathforcertiflocal="${doldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 	> /tmp/letsencryptprotecteddomains
 	for fic in /etc/apache2/*.crt $pathforcertiflocal/*.crt; do

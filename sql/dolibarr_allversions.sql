@@ -207,3 +207,5 @@ ALTER TABLE llx_packages ADD COLUMN sqlafterundeployoption text;
 UPDATE llx_extrafields SET enabled = 'isModEnabled("sellyoursaas")' WHERE enabled = '$conf->sellyoursaas->enabled';
 ALTER TABLE llx_packages ADD COLUMN cliafterdeployoption text;
 
+ALTER TABLE llx_packages ADD COLUMN otherinformations_formula text;
+ALTER TABLE llx_packages ADD COLUMN sqltoupdateeinvoiceconst text;
