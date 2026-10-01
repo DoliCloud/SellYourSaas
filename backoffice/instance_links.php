@@ -109,7 +109,7 @@ $result = restrictedArea($user, 'sellyoursaas', 0, '', '');
  *	Actions
  */
 
-// Call actions in hook like 'refresh', 'refreshfilesonly'
+// Call actions in hook like 'refresh', 'refreshmetrics', 'refreshfilesonly', 'recreateauthorizedkeys', 'recreatelocks', ...
 $parameters=array('id'=>$id);
 $reshook=$hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) {
@@ -123,8 +123,11 @@ if (empty($reshook)) {
 		exit;
 	}
 
+
 	// Manage action 'addauthorizedkey', 'addinstalllock', etc...
+	// Note: This does SSH actions and update master database according to result.
 	require 'refresh_action.inc.php';
+
 
 	if ($action == 'markasspamandclose') {
 		$db->begin();
@@ -368,6 +371,7 @@ $formcompany = new FormCompany($db);
 
 $lastloginadmin = '';
 $lastpassadmin = '';
+$other_informations = array();
 
 $countrynotdefined = $langs->trans("ErrorSetACountryFirst").' ('.$langs->trans("SeeAbove").')';
 
@@ -392,11 +396,21 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 	$object->fetch_thirdparty();
 
-	$restmp = updateInstanceInfo($object);
+	// This connect to remote instance database to get some information
+	$alwaysdoremotecheck = 1;
+	if ($alwaysdoremotecheck || $action =='refresh') {
+		$restmp = updateInstanceInfo($object);
+	} else {
+		// Set the nb of users from the qty of contract lines with the 'User' resource (qty is the value refreshed by the 'refresh' action)
+		dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+		$tmpdataofcontract = sellyoursaasGetExpirationDate($object, 0);
+		$object->nbofusers = $tmpdataofcontract['nbusers'];
+	}
 
 	if (is_array($restmp)) {
 		$lastloginadmin = $restmp['lastloginadmin'];
 		$lastpassadmin = $restmp['lastpassadmin'];
+		$other_informations = $restmp['other_informations'];
 	} else {
 		$error = $restmp;
 	}
@@ -468,176 +482,6 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 
 if ($id > 0) {
 	dol_fiche_end();
-}
-
-
-// If properties for $object was not already loaded, we do it now (values may have been calculated into refresh.lib.php)
-if (empty($object->nbofusers)) {
-	// Try to get data
-	if (is_object($newdb) && $newdb->connected) {
-		$contract = $object;
-
-		//var_dump($object->lines);
-		foreach ($object->lines as $contractline) {
-			if (empty($contractline->fk_product)) {
-				continue;
-			}
-			$producttmp = new Product($db);
-			$producttmp->fetch($contractline->fk_product, '', '', '', 1, 1, 1);
-
-			// If this is a line for a metric
-			if ($producttmp->array_options['options_app_or_option'] == 'system' && $producttmp->array_options['options_resource_formula']
-				&& ($producttmp->array_options['options_resource_label'] == 'User' || preg_match('/user/i', $producttmp->ref))) {
-				$generatedunixlogin=$contract->array_options['options_username_os'];
-				$generatedunixpassword=$contract->array_options['options_password_os'];
-				$tmp=explode('.', $object->ref_customer, 2);
-				$sldAndSubdomain=$tmp[0];
-				$domainname=$tmp[1];
-				$generateddbname      =$contract->array_options['options_database_db'];
-				$generateddbport      =($contract->array_options['options_port_db'] ? $contract->array_options['options_port_db'] : 3306);
-				$generateddbusername  =$contract->array_options['options_username_db'];
-				$generateddbpassword  =$contract->array_options['options_password_db'];
-				$generateddbprefix    =($contract->array_options['options_prefix_db'] ? $contract->array_options['options_prefix_db'] : 'llx_');
-				$generatedunixhostname=$contract->array_options['options_hostname_os'];
-				$generateddbhostname  =$contract->array_options['options_hostname_db'];
-				$generateduniquekey   =getRandomPassword(true);
-
-				// Replace __INSTANCEDIR__, __INSTALLHOURS__, __INSTALLMINUTES__, __OSUSERNAME__, __APPUNIQUEKEY__, __APPDOMAIN__, ...
-				$substitarray=array(
-					/*'__INSTANCEDIR__'=>$targetdir.'/'.$generatedunixlogin.'/'.$generateddbname,*/
-					'__INSTANCEDBPREFIX__'=>$generateddbprefix,
-					'__DOL_DATA_ROOT__'=>DOL_DATA_ROOT,
-					'__INSTALLHOURS__'=>dol_print_date($now, '%H'),			// GMT
-					'__INSTALLMINUTES__'=>dol_print_date($now, '%M'),		// GMT
-					'__OSHOSTNAME__'=>$generatedunixhostname,
-					'__OSUSERNAME__'=>$generatedunixlogin,
-					'__OSPASSWORD__'=>$generatedunixpassword,
-					'__DBHOSTNAME__'=>$generateddbhostname,
-					'__DBNAME__'=>$generateddbname,
-					'__DBPORT__'=>$generateddbport,
-					'__DBUSER__'=>$generateddbusername,
-					'__DBPASSWORD__'=>$generateddbpassword,
-					/*'__PACKAGEREF__'=> $tmppackage->ref,
-					'__PACKAGENAME__'=> $tmppackage->label,
-					'__APPUSERNAME__'=>$appusername,
-					'__APPUSERNAME_URLENCODED__'=>urlencode($appusername),
-					'__APPEMAIL__'=>$email,
-					'__APPPASSWORD__'=>$password,
-					'__APPPASSWORD0__'=>$password0,
-					'__APPPASSWORDMD5__'=>$passwordmd5,
-					'__APPPASSWORDSHA256__'=>$passwordsha256,
-					'__APPPASSWORDPASSWORD_HASH__'=>$passwordpassword_hash,
-					'__APPPASSWORD0SALTED__'=>$password0salted,
-					'__APPPASSWORDMD5SALTED__'=>$passwordmd5salted,
-					'__APPPASSWORDSHA256SALTED__'=>$passwordsha256salted,*/
-					'__APPUNIQUEKEY__'=>$generateduniquekey,
-					'__APPDOMAIN__'=>$sldAndSubdomain.'.'.$domainname,
-					'__SELLYOURSAAS_LOGIN_FOR_SUPPORT__'=>getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT')
-				);
-
-				$newqty = 0;
-				$newcommentonqty = '';
-
-				$tmparray=explode(':', $producttmp->array_options['options_resource_formula'], 2);
-				if ($tmparray[0] == 'SQL') {
-					$sqlformula = make_substitutions($tmparray[1], $substitarray);
-
-					//$serverdeployment = $this->getRemoteServerDeploymentIp($domainname);
-					$serverdeployment = $contract->array_options['options_deployment_host'];
-
-					dol_syslog("instance_links.php: Try to connect to remote instance database (at ".$generateddbhostname.") to execute formula calculation (from tools link page)");
-
-					$serverdb = $serverdeployment;
-					// hostname_db value is an IP, so we use it in priority instead of ip of deployment server
-					if (filter_var($generateddbhostname, FILTER_VALIDATE_IP) !== false) {
-						$serverdb = $generateddbhostname;
-					}
-
-					//var_dump($generateddbhostname);	// fqn name dedicated to instance in dns
-					//var_dump($serverdeployment);		// just ip of deployment server
-					//$dbinstance = @getDoliDBInstance('mysqli', $generateddbhostname, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-					$dbinstance = @getDoliDBInstance('mysqli', $serverdb, $generateddbusername, $generateddbpassword, $generateddbname, $generateddbport);
-
-					if (! $dbinstance || ! $dbinstance->connected) {
-						$error++;
-						setEventMessages($dbinstance->error, $dbinstance->errors, 'errors');
-					} else {
-						$sqlformula = trim($sqlformula);
-
-						dol_syslog("instance_links.php: Execute sql=".$sqlformula);
-
-						$resql = $dbinstance->query($sqlformula);
-						if ($resql) {
-							if (preg_match('/^select count/i', $sqlformula)) {
-								// If request is a simple SELECT COUNT
-								$objsql = $dbinstance->fetch_object($resql);
-								if ($objsql) {
-									$newqty = $objsql->nb;
-									$newcommentonqty .= '';
-								} else {
-									$error++;
-									/*$this->error = 'SQL to get resource return nothing';
-									$this->errors[] = 'SQL to get resource return nothing';*/
-									setEventMessages('instance_links.php: SQL to get resources returns error for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
-								}
-							} else {
-								// If request is a SELECT nb, fieldlogin as comment
-								$num = $dbinstance->num_rows($resql);
-								if ($num > 0) {
-									$itmp = 0;
-									$arrayofcomment = array();
-									while ($itmp < $num) {
-										// If request is a list to count
-										$objsql = $dbinstance->fetch_object($resql);
-										if ($objsql) {
-											if (empty($newqty)) {
-												$newqty = 0;	// To have $newqty not null and allow addition just after
-											}
-											$newqty += (isset($objsql->nb) ? $objsql->nb : 1);
-											if (isset($objsql->comment)) {
-												$arrayofcomment[] = $objsql->comment;
-											}
-										}
-										$itmp++;
-									}
-									$newcommentonqty .= 'Qty '.$producttmp->ref.' = '.$newqty."\n";
-									$newcommentonqty .= 'Note: '.join(', ', $arrayofcomment)."\n";
-								} else {
-									$error++;
-									/*$this->error = 'SQL to get resource return nothing';
-									$this->errors[] = 'SQL to get resource return nothing';*/
-									setEventMessages('instance_links.php: SQL to get resource list returns empty list for '.$object->ref.' - '.$producttmp->ref.' - '.$sqlformula, null, 'errors');
-								}
-							}
-
-							$object->nbofusers += $newqty;
-							$object->array_options['options_latestresupdate_date'] = dol_now();
-							$object->array_options['options_commentonqty'] = $newcommentonqty;
-						} else {
-							$error++;
-							setEventMessages($dbinstance->lasterror(), $dbinstance->errors, 'errors');
-						}
-
-						$dbinstance->close();
-					}
-				} else {
-					$error++;
-					setEventMessages('No SQL formula found for this metric', null, 'errors');
-				}
-			}
-		}
-		/*$sql="SELECT COUNT(login) as nbofusers FROM llx_user WHERE statut <> 0 AND login <> '".$conf->global->SELLYOURSAAS_LOGIN_FOR_SUPPORT."'";
-		$resql=$newdb->query($sql);
-		if ($resql)
-		{
-			$obj = $newdb->fetch_object($resql);
-			$object->nbofusers	= $obj->nbofusers;
-		}
-		else
-		{
-			setEventMessages('Failed to read remote customer instance: '.$newdb->lasterror(), null, 'warnings');
-		}*/
-	}
 }
 
 
@@ -717,6 +561,25 @@ print '<tr>';
 print '<td>'.$langs->trans("Modules").'</td>';
 print '<td colspan="3"><span class="small">'.$object->modulesenabled.'</span></td>';
 print '</tr>';
+
+if (getDolGlobalString('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC')) {
+	// Electronic Billing
+	$einvoicing_superpdp_viapartner = $other_informations["EINVOICING_SUPERPDP_VIAPARTNER"];
+	$einvoicing_superpdp_viapartner_oauth_url = $other_informations["EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL"];
+
+	print '<tr><td width="20%">'.$langs->trans("EInvoicingConfVariables").'</td>';
+	print '<td>';
+	$stringtoshow = "EINVOICING_SUPERPDP_VIAPARTNER = ".(!empty($einvoicing_superpdp_viapartner) ? dol_escape_htmltag($einvoicing_superpdp_viapartner) : "");
+	$stringtoshow .= "<br> EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL = ".(!empty($einvoicing_superpdp_viapartner_oauth_url) ? dol_escape_htmltag($einvoicing_superpdp_viapartner_oauth_url) : "");
+	print $stringtoshow;
+	print '</td>';
+	print '<td></td><td>';
+	if (! $object->user_id && $user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
+		print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=reset_einvoicingconf&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
+	}
+	print '</td>';
+	print '</tr>';
+}
 
 print "</table>";
 

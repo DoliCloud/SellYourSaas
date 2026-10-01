@@ -46,7 +46,6 @@ define('SYSLOG_FILE_ADDSUFFIX', 'register');
 
 // Add specific definition to allow a dedicated session management
 include './mainmyaccount.inc.php';
-
 /**
  * @var Database	$db
  * @var Conf		$conf
@@ -132,6 +131,8 @@ $domainname = getDomainFromURL($_SERVER["SERVER_NAME"], 1);
 
 $productid = GETPOST('service', 'int');
 $productref = (GETPOST('productref', 'alpha') ? GETPOST('productref', 'alpha') : '');
+
+dol_syslog("register.php: productid=".$productid." productref=".$productref." plan=".$plan." sldAndSubdomain=".$sldAndSubdomain." tldid=".$tldid." partner=".$partner." partnerkey=".$partnerkey." domainname=".$domainname);
 
 $defaultproduct = '';
 
@@ -413,13 +414,13 @@ if ($reshook == 0) {
 				if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constlogosmall))) {
 					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/' . getDolGlobalString($constlogosmall));
 				}
-			} elseif (empty($urllogo) && getDolGlobalString($constlogo)) {
+			} elseif (empty($linklogo) && getDolGlobalString($constlogo)) {
 				if (is_readable($conf->mycompany->dir_output.'/logos/' . getDolGlobalString($constlogo))) {
 					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/' . getDolGlobalString($constlogo));
 				}
-			} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png')) {
+			} elseif (empty($linklogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png')) {
 				$linklogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
-			} elseif (empty($urllogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png')) {
+			} elseif (empty($linklogo) && is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png')) {
 				$linklogo=DOL_URL_ROOT.'/theme/dolibarr_logo.png';
 			} else {
 				$linklogo=DOL_URL_ROOT.'/theme/login_logo.png';
@@ -1194,7 +1195,7 @@ if ($reshook == 0) {
 
 	<?php
 	// Execute hook getRegisterPageFooter
-	$parameters = array('domainname' => $domainname, 'defaultproduct' => $defaultproduct, 'tmpproduct' => $tmpproduct);
+	$parameters = array('domainname' => $domainname, 'defaultproduct' => $defaultproduct, 'tmpproduct' => $tmpproduct, 'extcss' => $extcss);
 	$reshook = $hookmanager->executeHooks('getRegisterPageFooter', $parameters); // Note that $action and $object may have been modified by some hooks.
 	print $hookmanager->resPrint;
 	?>

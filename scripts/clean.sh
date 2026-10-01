@@ -467,6 +467,7 @@ if [ -s /tmp/osutoclean ]; then
 					if [[ $testorconfirm == "confirm" ]]; then
 						mv -f $targetdir/$osusername $archivedirtest 2>/dev/null
 						if [ -d "$targetdir/$osusername" ]; then
+							echo mv failed or left the source dir behind, falling back to cp -pr + rm
 							echo cp -pr $targetdir/$osusername $archivedirtest
 							cp -pr $targetdir/$osusername $archivedirtest
 							rm -fr $targetdir/$osusername
@@ -665,6 +666,40 @@ if [[ "x$instanceserver" != "x0" ]]; then
 	for fic in `ls -art $targetdir/osu*/dbn*/documents/dolibarr*.log 2>/dev/null`; do > $fic; done
 	for fic in `ls -art $targetdir/osu*/dbn*/htdocs/files/_log/*.log 2>/dev/null`; do > $fic; done
 	for fic in `ls -art $targetdir/osu*/.mysql_history 2>/dev/null`; do rm $fic; done
+fi
+
+
+# Clean orphaned Let's Encrypt certificates of removed/renamed custom domains
+# A cert lineage under /etc/letsencrypt/live/ is considered orphaned if no symlink
+# into /etc/apache2 (legacy custom domains, and the platform's own wildcard cert)
+# or into the sellyoursaas_local/crt cache (current custom-URL certs) points into it.
+if [[ "x$instanceserver" != "x0" ]]; then
+	echo "***** We are on a deployment server, so we clean orphaned Let's Encrypt certificates of removed/renamed custom domains"
+
+	export doldataroot=`grep '^doldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+	export pathforcertiflocal="${doldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
+
+	> /tmp/letsencryptprotecteddomains
+	for fic in /etc/apache2/*.crt $pathforcertiflocal/*.crt; do
+		if [ -L "$fic" ]; then
+			# readlink -f fully resolves through certbot's own live/ -> archive/ indirection,
+			# so match either directory to find the domain name.
+			readlink -f "$fic" | sed -n 's#^/etc/letsencrypt/\(live\|archive\)/\([^/]*\)/.*#\2#p' >> /tmp/letsencryptprotecteddomains
+		fi
+	done
+	sort -u -o /tmp/letsencryptprotecteddomains /tmp/letsencryptprotecteddomains
+
+	for livedir in /etc/letsencrypt/live/*/; do
+		domain=`basename "$livedir"`
+		if ! grep -qxF "$domain" /tmp/letsencryptprotecteddomains; then
+			echo "# ----- $domain - not referenced by any symlink into $pathforcertiflocal or /etc/apache2, looks orphaned"
+			echo "certbot delete --cert-name $domain -n"
+			if [[ $testorconfirm == "confirm" ]]; then
+				certbot delete --cert-name "$domain" -n
+			fi
+		fi
+	done
+	rm -f /tmp/letsencryptprotecteddomains
 fi
 
 

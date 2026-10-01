@@ -13,7 +13,7 @@ This document describes the technical and functional implementation of a server 
 
 == Introduction ==
 
-This document explains how to install the optionnal web portal server of Sell-Your-Saas.
+This document explains how to install the optional web portal server of Sell-Your-Saas.
 
 
 == Installation of the machine and OS
@@ -42,7 +42,7 @@ mkdir /home/admin/wwwroot; chown admin:admin /home/admin/wwwroot
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
- 
+
 
 Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to log in.
 
@@ -146,7 +146,7 @@ To test a ssh config, you can run
 sshd -T -C user=mylogin -C host=clienthost -C addr=clientaddr
 ---------------
 
-Then reload ssh 
+Then reload ssh
 
 [source, conf]
 ---------------
@@ -213,7 +213,7 @@ passwd root
 passwd admin
 ---------------
 
-Run *ssh-keygen* for all these acounts : *root*, *admin* and *myunixlogin*
+Run *ssh-keygen* for all these accounts : *root*, *admin* and *myunixlogin*
 
 
 === Deletion of information files at login
@@ -222,7 +222,7 @@ In order not to give information to users doing SSH, on the server:
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove
 rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
 
@@ -246,7 +246,7 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
- 
+
 Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
 
 [source, conf]
@@ -262,7 +262,7 @@ network:
 			gateway6: "1234:41d0:1234:1000::1"
 ---------------
 Note: Use 4 spaces for tabulation.
- 
+
 [source, bash]
 ---------------
 netplan try
@@ -370,7 +370,7 @@ chown -R admin:admin /home/admin/wwwroot/dolibarr
 [source,bash]
 ---------------
 cd /home/admin/wwwroot
-git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas 
+git clone https://github.com/dolicloud/sellyoursaas dolibarr_sellyoursaas
 ---------------
 
 
@@ -395,10 +395,10 @@ With the following content:
 # domain du service
 domain=mysaasdomainname.com
 
-# Set to 1 if this server is the master server, 
+# Set to 1 if this server is the master server,
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
 masterserver=0
-# Set to 1 if this server host instances for the pool (deployment server), 
+# Set to 1 if this server host instances for the pool (deployment server),
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
 instanceserver=0
 # Set to 1 if this server hosts a dns for the pool (deployment server)
@@ -448,8 +448,7 @@ remotebackupuser=admin
 remotebackupdir=/mnt/diskbackup
 
 # Option to use different path for dataroot
-#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
-#newdoldataroot=/new/path/of/documents
+#doldataroot=/home/admin/wwwroot/dolibarr_documents
 # Options to change the directory of vhostfile templates
 #templatesdir=/path/of/vhostfile/templates
 
@@ -476,7 +475,7 @@ mkdir -p /etc/sellyoursaas.d
 
 
 * Optional: If you want to restrict access to some IP (to the web admin on *Master server* or to ssh or mysql to the *Deployment servers*), you can also
-create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only) 
+create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only)
 
 [source,conf]
 ---------------
@@ -519,7 +518,7 @@ sudo apt install mailutils postfix
 ---------------
 sudo apt update
 sudo apt install systemd-timesyncd git gzip zip zstd memcached ncdu ufw sudo
-sudo apt install mariadb-server mariadb-client 
+sudo apt install mariadb-server mariadb-client
 sudo apt install php php-cli apache2 php-pear apache2-bin libapache2-mod-php php-fpm php-gd php-json php-ldap php-mysql php-curl php-memcached php-rrd php-imagick php-geoip php-intl php-zip php-bz2 php-ssh2 php-mbstring php-dev libmcrypt-dev
 sudo apt install watchdog cpulimit apparmor apparmor-profiles apparmor-utils rkhunter chkrootkit
 sudo apt install spamc spamassassin clamav clamav-daemon
@@ -536,7 +535,7 @@ On active les *modules* pour un fonctionnement avec PHP FPM:
 [source,bash]
 ---------------
 a2enmod expires fcgid filter headers http2 mime mpm_event negotiation proxy proxy_fcgi proxy_http reqtimeout rewrite setenvif socache_shmcb ssl status vhost_alias
-a2enmod access_compat actions alias auth_basic authn_core authn_file authz_core authz_groupfile authz_host authz_user autoindex cgi deflate dir env 
+a2enmod access_compat actions alias auth_basic authn_core authn_file authz_core authz_groupfile authz_host authz_user autoindex cgi deflate dir env
 ---------------
 
 On active les *configurations* pour un fonctionnement avec PHP FPM:
@@ -610,9 +609,9 @@ ufw enable
 * Installation of fail2ban and activation of the following fail2ban rules:
   *apache-shellshock*, *php-url-fopen*, *pam-generic*, *postfix-sasl*, *mysqld-auth*, *xinetd-fail*
   *apache-badbots*, *apache-noscript*, *apache-overflows*, *apache-nohome*, *apache-botsearch*
-  
+
 * As well as the specific rules for sellyoursaas:
-  
+
   *web-dol-passforgotten*, *web-dol-bruteforce*, *web-dol-registerinstance*
 
 
@@ -898,7 +897,7 @@ exclude_suffix := tmp old bak
 [source,bash]
 ---------------
 # used by cron job (afick_cron)
-# define the mail adress to send cron job result
+# define the mail address to send cron job result
 @@define MAILTO supervision@mysaasdomainname.com
 # truncate the result sended by mail to the number of lines (avoid too long mails)
 @@define LINES 1000
@@ -911,7 +910,7 @@ exclude_suffix := tmp old bak
 # = 1 to allow cron job, = 0 to suppress cron job
 @@define BATCH 1
 # if set to 0, keep all archives, else define the number of days to keep
-# with the syntaxe nS , n for a number, S for the scale
+# with the syntax nS , n for a number, S for the scale
 # (d for day, w for week, m for month, y for year)
 # ex : for 5 months : 5m
 @@define ARCHIVE_RETENTION 6m
@@ -982,7 +981,7 @@ Test que l'exécution par la crontab fonctionne correctent en lançant sous root
 Ignore if you have error when sending emails, sending emails is setup later.
 
 
-=== Setup of cpulimit (optional) 
+=== Setup of cpulimit (optional)
 
 * Lancement de cpulimit au démarrage pour exécuter:
 
@@ -1101,7 +1100,7 @@ Modifier son enregistrement de domaine, pour ajouter SPF et DKIM et DMARC
 
  mysaasdomainname.com.		600	IN	TXT	"v=spf1 a mx ip4:91.121.9.47 ip4:147.135.135.4 ip4:147.135.135.36 ip4:147.135.135.37 include:spf.sendinblue.com include:_spf.google.com ~all"
 
-* DKIM permet de signer certaines informations du mail.
+* DKIM to sign some information in email.
 
  dkim._domainkey.mysaasdomainname.com. 1000 IN	TXT	"v=DKIM1; k=rsa; p=MIGfMA0GCSrGSIb3DQEBAQUAA4GNADCBiQKBgQC6xSkwtlnAkegCARg5US7KHdoTlUS2MsXFPMy7ykwG88XK8vKEYPGuN56/6+YoxGLxtN2CZy/MVagQUOYcA3VAjBEPP5vJPrUnDsVY0OC8U+dK383g+DDW0tcAqrMXJI7Y/jXUJXh/ydI5aloiqT59JGo9Ane1C3XmoJz3bkVsKwIDAQAB"
 
@@ -1165,7 +1164,7 @@ smtp_generic_maps = hash:/etc/postfix/generic
 #smtp_tls_security_level = encrypt
 #header_size_limit = 4096000
 #relayhost = [smtp.sendgrid.net]:2525
-# Ou mettre relayhost à vide pour utiliser le serveur local commant agent d'envoi des emails.
+# Ou mettre relayhost à vide pour utiliser le serveur local comme agent d'envoi des emails.
 relayhost =
 
 smtpd_recipient_limit = 100
@@ -1204,7 +1203,7 @@ smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, che
 !!! IMPORTANT
 
 Pensez à modifier dans */etc/postfix/main.cf*, les entrées :
- 
+
 [source,bash]
 ---------------
 inet_interfaces = ip_publique_associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
@@ -1246,7 +1245,7 @@ mech_list: plain login
 ---------------
 
 To use SMTPS, create a certificate:
- 
+
 [source,bash]
 ---------------
 cd /etc/postfix
@@ -1285,10 +1284,10 @@ broken_sasl_auth_clients = yes
 
 ==== Setup
 
-Edit config file 
-*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql) 
+Edit config file
+*/etc/mysql/mysql.conf.d/mysqld.cnf* (if mysql)
 or
-*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb) 
+*/etc/mysql/mariadb.conf.d/50-server.cnf* (if mariadb)
 to change:
 
 [source,bash]
@@ -1324,7 +1323,7 @@ SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
 For MariaDb: The plugin is *unix_socket* and is set by default on Ubuntu OS.
 
 
-To switch in mode authentification by password / by unix socket account :
+To switch in mode authentication by password / by unix socket account :
 
 For Mysql:
 
@@ -1376,7 +1375,7 @@ FLUSH PRIVILEGES;
 
 ==== Create a user for supervision (optional)
 
-If you use a supervision agent like *DataDog* to superize the database, create an accunt to access localy to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
+If you use a supervision agent like *DataDog* to superize the database, create an account to access locally to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
 
 [source,sql]
 ---------------
@@ -1472,7 +1471,7 @@ Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/
 
 ==== Define size of upload and session duration
 
-Create a file */etc/php/sellyoursaas.ini* 
+Create a file */etc/php/sellyoursaas.ini*
 
 [source,bash]
 ---------------
@@ -1550,7 +1549,7 @@ logrotate -f logrotate_sellyoursaas_log
 
 Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
 
-* Editer le fichier */etc/systemd/journald.conf* pour définir une taille max aux journaux systemd
+* Edit file */etc/systemd/journald.conf* to define the max size of file journal systemd
 
 [source,conf]
 ---------------
@@ -1612,7 +1611,7 @@ sudo systemctl status apport.service
 Note: Les rapports sont dans */var/crash*
 
 
-=== Installer certbot (pour les certificats SSL)
+=== Install certbot (for certificates SSL)
 
 [source,bash]
 ---------------
@@ -1644,7 +1643,7 @@ The complete logs of certbot are into /var/log/letsencrypt/...
 === Create a SSL certificate from LetsEncrypt for all web sites
 
 * To generate certificates, launch certbot and choose the virtual host of the web server yoy want a certificate of:
-    
+
 [source,bash]
 ---------------
 certbot
@@ -1664,7 +1663,7 @@ certbot certificates
 certbot renew -v [--dry-run]
 or
 certbot renew --force-renewal [--cert-name=...]
-or 
+or
 certbot renew --cert-name admin.mysellyoursaasdomain.com --dry-run
 ---------------
 
@@ -1700,7 +1699,7 @@ Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide.
 
 ==== Check that launching of cron is ok
 
-Reprendre du fichier */etc/crontab*, les commandes pour tester le lancement de crontab journalière, hebdo et mensuelles et tester en lançant en manuel. Par exemple par:
+Reprendre du fichier */etc/crontab*, les commandes pour tester le lancement de crontab journalière, hebdo et mensuelles et tester en lançant en manuel. For example with:
 
 [source,bash]
 ---------------
@@ -1771,14 +1770,14 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/c
 DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 ---------------
 
-* Copy the datadog config file to supervize *mysql/mariadb*. 
+* Copy the datadog config file to supervize *mysql/mariadb*.
 
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
 ---------------
 
-Edit the file to enter the datadog password for mariadb. 
+Edit the file to enter the datadog password for mariadb.
 
 * Copy the datadog config file to supervize *apache*.
 
@@ -1840,7 +1839,7 @@ instances:
 cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
 ---------------
 
-Editer le pour suivre les process suivants:
+Edit it to follow this processes:
 
 [source,bash]
 ---------------
@@ -1861,7 +1860,7 @@ instances:
     search_string: ['/usr/sbin/cron']
     exact_match: False
     thresholds:
-      critical: [1, 5000]      
+      critical: [1, 5000]
 ---------------
 
 
@@ -1874,7 +1873,7 @@ sudo service datadog-agent start
 ---------------
 
 
-== Installation composants Backups/Synchro
+== Installation of components Backups/Synchro
 
 === Synchro des filesystems /home
 
@@ -1920,7 +1919,7 @@ From OVH's "Snapshots" interface, you can restore a VM image on a server or a di
 
 See chapter in Master and Deployment Servers doc.
 
-Note une fois une restauration faite, si elle a été faite sur un autre serveur, il faut:
+Note that once restoration is done, if ir is done an another server, you must:
 
 * Log into ssh: Change apache virtual host to set new host name
 * If VM is a backup VM, disabled also root cron tasks
@@ -1938,7 +1937,7 @@ Et si le serveur avait des services complémentaires:
 
 - The configuration of the server and the system database is done locally via the cron task of *root* :
 
-*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm* 
+*/home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm*
 
 See <<installing_cron_tasks>>. This will write backup files into */home/admin/backup/conf* and */home/admin/backup/mysql*
 
@@ -1952,7 +1951,7 @@ The script will read the file */etc/sellyoursaas.conf* to find the list of the n
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1*
 
-See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter). 
+See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter).
 
 The script will read the file */etc/sellyoursaas.conf* to find the list of the name of backup servers where to push the backup to.
 
@@ -1979,7 +1978,7 @@ See the chapter available into the *Documentation SellYourSaas - Master and Depl
 
 == Error when launching dkim daemon: opendkim.service: Can't open PID file /var/run/opendkim/opendkim.pid
 
-Open the file */etc/opendkim.conf* and add the line 
+Open the file */etc/opendkim.conf* and add the line
 
 PidFile                 /run/opendkim/opendkim.pid
 
@@ -2005,5 +2004,3 @@ Check into /etc/apache2/conf-enabled that the correct version of php-fpm is enab
 ---------------
 /usr/sbin/a2disconf php7.4-fpm; /usr/sbin/a2enconf php8.1-fpm;
 ---------------
-
-

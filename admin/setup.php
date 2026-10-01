@@ -157,6 +157,8 @@ if ($action == 'set') {
 			dolibarr_set_const($db, "SELLYOURSAAS_PRICES_URL".$suffix, GETPOST("SELLYOURSAAS_PRICES_URL".$suffix), 'chaine', 0, '', $conf->entity);
 		}
 
+		dolibarr_set_const($db, "SELLYOURSAAS_STRIPE_SANDBOX_KEYWORD", GETPOST("SELLYOURSAAS_STRIPE_SANDBOX_KEYWORD", 'alphanohtml'), 'chaine', 0, '', $conf->entity);
+
 		dolibarr_set_const($db, "SELLYOURSAAS_MYACCOUNT_FOOTER", GETPOST("SELLYOURSAAS_MYACCOUNT_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_START_TRIAL_FOOTER", GETPOST("SELLYOURSAAS_START_TRIAL_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_CONVERSION_FOOTER", GETPOST("SELLYOURSAAS_CONVERSION_FOOTER", 'none'), 'chaine', 0, '', $conf->entity);
@@ -239,6 +241,7 @@ $error=0;
 $head = sellyoursaas_admin_prepare_head();
 print dol_get_fiche_head($head, "setup", "SellYouSaasSetup", -1, "sellyoursaas@sellyoursaas");
 
+print '<div class="info">';
 print '<span class="opacitymedium">'.$langs->trans("Prerequisites")." :</span><br>\n";
 print 'Function <b>idn_to_ascii</b> available: '.(function_exists('idn_to_ascii') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
 print 'Function <b>checkdnsrr</b> available: '.(function_exists('checkdnsrr') ? img_picto('', 'tick', 'class="paddingrightonly"').yn(1) : img_picto('', 'warning', 'class="paddingrightonly"').yn(0)).'<br>';
@@ -259,7 +262,8 @@ if (in_array('shell_exec', $arrayoffunctionsdisabled)) {
 } else {
 	print 'Parameter <b>disable_functions</b>: '.img_picto('', 'error', 'class="paddingrightonly"').' Bad. shell_exec is no more used by /usr/local/bin/phpsendmail.php<br>';
 }
-print "<br>\n";
+print '</div>';
+//print "<br>\n";
 
 print '<form enctype="multipart/form-data" method="POST" action="'.$_SERVER["PHP_SELF"].'" name="form_index" spellcheck="false">';
 print '<input type="hidden" name="token" value="'.newToken().'">';
@@ -277,6 +281,13 @@ print '<td>';
 print ajax_constantonoff('SELLYOURSAAS_FORCE_STRIPE_TEST', array(), $conf->entity, 0, 0, 1);
 print '</td>';
 print '<td><span class="opacitymedium small">1</span></td>';
+print '</tr>';
+
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_STRIPE_SANDBOX_KEYWORD"), $langs->trans("SELLYOURSAAS_STRIPE_SANDBOX_KEYWORD_Help")).'</td>';
+print '<td>';
+print '<input type="text" name="SELLYOURSAAS_STRIPE_SANDBOX_KEYWORD" value="'.getDolGlobalString('SELLYOURSAAS_STRIPE_SANDBOX_KEYWORD').'" class="minwidth300">';
+print '</td>';
+print '<td><span class="opacitymedium small">sandbox</span></td>';
 print '</tr>';
 
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("SellYourSaasName").'</td>';
@@ -443,7 +454,7 @@ print '</tr>';
 print '<tr class="oddeven"><td class="fieldrequired">'.$langs->trans("AnonymousUser").'</td>';
 print '<td>';
 print img_picto('', 'user', 'class="pictofixedwidth"');
-print $form->select_dolusers(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'), 'SELLYOURSAAS_ANONYMOUSUSER', 1);
+print $form->select_dolusers(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'), 'SELLYOURSAAS_ANONYMOUSUSER', 1, array(), 0, '', '', 0, 0, 0, '', 0, '', 'minwidth200 maxwidth400 widthcentpercentminusx');
 print '</td>';
 print '<td><span class="opacitymedium small">User used for all anonymous action (registering, actions from customer dashboard, ...)</span></td>';
 print '</tr>';

@@ -17,6 +17,7 @@ $signature_key = '';
 $dnsserver = '';
 $instanceserver = '';
 $backupdir = '';
+$dolibarrdir = '';
 
 // Read /etc/sellyoursaas.conf file
 $fp = @fopen('/etc/sellyoursaas.conf', 'r');
@@ -40,10 +41,22 @@ if ($fp) {
 		if ($tmpline[0] == 'backupdir') {
 			$backupdir = $tmpline[1];
 		}
+		if ($tmpline[0] == 'dolibarrdir') {
+			$dolibarrdir = $tmpline[1];
+		}
 	}
 } else {
 	print "Failed to open /etc/sellyoursaas.conf file\n";
 	exit;
+}
+
+// remote_server_launcher.sh already cd's into the mounted scripts directory before starting
+// php -S, but that only holds if it survives however the init/service manager forks and
+// daemonizes the process (observed to NOT survive a systemd-wrapped LSB service start/restart,
+// leaving this process's cwd at whatever systemd's default WorkingDirectory is instead) - so
+// set it here too, unconditionally, rather than relying on the launcher alone.
+if (!empty($dolibarrdir)) {
+	@chdir($dolibarrdir.'/htdocs/custom/sellyoursaas/scripts');
 }
 //if (! in_array('127.0.0.1', $allowed_hosts_array)) {
 //	$allowed_hosts_array[] = '127.0.0.1';	// Add localhost if not present
@@ -92,7 +105,12 @@ $dbusername = $tmpparam[6];
 $cliafter = $tmpparam[18];
 $cliafterpaid = $tmpparam[46];
 $cliafterdeployoption = $tmpparam[47];
-$signature = empty($tmpparam[48]) ? '' : $tmpparam[48];		// Extract the signature received
+// The signature is always the last parameter appended by the caller (see sellyoursaasRemoteAction()),
+// whatever the total number of parameters sent for this action. preg_split() leaves a trailing empty
+// element because paramspacenoquotes always ends with a separator space, so the signature is the
+// element right before that one.
+$signatureindex = count($tmpparam) - 2;
+$signature = ($signatureindex >= 0 && !empty($tmpparam[$signatureindex])) ? $tmpparam[$signatureindex] : '';
 
 // Recalculate the signature with message received
 // TODO Replace with hash('sha256', $contentsigned.$signature_key); or use asymmetric signature.
@@ -426,6 +444,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 			break;
 		}
 		// Check allowed pattern
+		/*
 		if (preg_match('/^#?touch __INSTANCEDIR__\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
@@ -447,7 +466,7 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?cd __INSTANCEDIR__\/htdocs\/install; php upgrade2\.php 0\.0\.0 0\.0\.0 [a-z_,]+$/i', $newline)) {
 			continue;
 		}
-		// Check more patterns
+		*/
 		if (preg_match('/^#?touch \/home\/jail\/home\/osu[a-z0-9]+\/[\/a-z0-9_\.]+$/i', $newline)) {
 			continue;
 		}
@@ -481,6 +500,16 @@ function checkScriptFile($scriptfile, $fh, $params)
 		if (preg_match('/^#?cd \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/install\/?$/i', $newline)) {
 			continue;
 		}
+		if (preg_match('/^#?mkdir \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/.well-known$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^#?chmod( -R)? [-+ugoarwx]+ \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/\.well-known$/i', $newline)) {
+			continue;
+		}
+		if (preg_match('/^#?chown( -R)? [\w_:]+ \/home\/jail\/home\/osu[a-z0-9]+\/dbn[a-z0-9]+\/htdocs\/\.well-known$/i', $newline)) {
+			continue;
+		}
+
 		// TODO enhance list of allowed patterns
 		// ...
 

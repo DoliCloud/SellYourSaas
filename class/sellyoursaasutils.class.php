@@ -65,10 +65,11 @@ class SellYourSaasUtils
 	 *
 	 *  @param	int			$nbdays				Delay after registration to send reminder
 	 *  @param	int|string	$template			Name (or id) of email template (Must be a template of type 'sellyoursaas')
+	 *  @param	int			$limit				Max number of emails to send (0 = no limit)
 	 *  @param	string		$forcerecipient		Force email of recipient (for example to send the email to an accountant supervisor instead of the customer)
 	 *  @return int         					0 if OK, <>0 if KO (this function is used also by cron so only 0 is OK)
 	 */
-	public function sendEmailsRemindersAfterRegistration($nbdays = 0, $template = '', $forcerecipient = '')
+	public function sendEmailsRemindersAfterRegistration($nbdays = 0, $template = '', $limit = 0, $forcerecipient = '')
 	{
 		global $conf, $langs, $user;
 
@@ -97,11 +98,13 @@ class SellYourSaasUtils
 		dol_syslog(__METHOD__." start", LOG_INFO);
 
 		// Select all action comm reminder
-		$sql = "SELECT rowid as id FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."societe_extrafields as se";
-		$sql .= " WHERE se.fk_object = s.rowid AND s.statut = ".$tmpcompany::STATUS_INACTIVITY;
-		$sql .= " AND s.date_regitration > '".$this->db->idate($now - $nbdays * 24 * 60 * 60)."'";
-		$sql .= " AND s.date_regitration <= '".$this->db->idate($now - ($nbdays + 1) * 24 * 60 * 60)."'";
-		$sql .= " AND f.entity IN (".getEntity('facture', 0).")";	// One batch processes only one company (no sharing)
+		$sql = "SELECT s.rowid as id FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."societe_extrafields as se";
+		$sql .= " WHERE se.fk_object = s.rowid AND s.status = ".$tmpcompany::STATUS_INACTIVITY;
+		$sql .= " AND s.datec > '".$this->db->idate($now - ($nbdays + 1) * 24 * 60 * 60)."'";
+		$sql .= " AND s.datec <= '".$this->db->idate($now - $nbdays * 24 * 60 * 60)."'";
+		$sql .= " AND s.client IN (2)";		// Full prospects only
+		$sql .= " AND ( EXISTS (SELECT ck.fk_soc FROM llx_categorie_societe as ck WHERE s.rowid = ck.fk_soc AND ck.fk_categorie = ".getDolGlobalInt("SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG")."))";
+		$sql .= " AND s.entity IN (".getEntity('societe', 0).")";	// One batch processes only one company (no sharing)
 		// TODO Add a date date_last_remind_email in select. We can update date after the result of sendfile() later. To avoid to send it twice if we re-run the batch.
 
 		$resql = $this->db->query($sql);
@@ -113,6 +116,7 @@ class SellYourSaasUtils
 			while ($obj = $this->db->fetch_object($resql)) {
 				// Create a loopError that is reset at each loop, this counter is added to the global counter at the end of loop
 				$loopError = 0;
+				$loopWarning = 0;
 
 				// Load event
 				$res = $tmpcompany->fetch($obj->id);
@@ -126,7 +130,7 @@ class SellYourSaasUtils
 					}
 
 					// Select email template according to language of recipient
-					$arraymessage = $formmail->getEMailTemplate($this->db, 'facture_send', $user, $outputlangs, (is_numeric($template) ? $template : 0), 1, (is_numeric($template) ? '' : $template));
+					$arraymessage = $formmail->getEMailTemplate($this->db, 'all', $user, $outputlangs, (is_numeric($template) ? $template : -2), 1, (is_numeric($template) ? '' : $template));
 					if (is_numeric($arraymessage) && $arraymessage <= 0) {
 						$langs->load("errors");
 						$this->output .= $langs->trans('ErrorFailedToFindEmailTemplate', $template);
@@ -143,6 +147,7 @@ class SellYourSaasUtils
 
 					// Topic
 					$sendTopic = make_substitutions(empty($arraymessage->topic) ? $outputlangs->transnoentitiesnoconv('InformationMessage') : $arraymessage->topic, $substitutionarray, $outputlangs, 1);
+					dol_syslog("sendTopic=".$sendTopic);
 
 					// Content
 					$content = $outputlangs->transnoentitiesnoconv($arraymessage->content);
@@ -154,14 +159,9 @@ class SellYourSaasUtils
 					if ($forcerecipient) {	// If a recipient was forced
 						$to = array($forcerecipient);
 					} else {
-						$recipient = $tmpcompany;
-						if ($res > 0) {
-							if (empty($to)) {
-								$errormesg = "Failed to send remind to thirdparty id=".$tmpcompany->id.". No email defined for invoice or customer.";
-								$loopError++;
-							}
-						} else {
-							$errormesg = "Failed to load recipient with thirdparty id=".$tmpcompany->id;
+						$to = array($tmpcompany->email);
+						if (empty($to)) {
+							$errormesg = "Failed to send remind to thirdparty id=".$tmpcompany->id.": No email defined on prospect.\n";
 							$loopError++;
 						}
 					}
@@ -252,7 +252,7 @@ class SellYourSaasUtils
 							$actioncomm->create($user);
 						} else {
 							$errormesg = $cMailFile->error.' : '.$to;
-							$loopError++;
+							$loopWarning++;
 
 							// Add a line into event table
 							require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
@@ -293,6 +293,10 @@ class SellYourSaasUtils
 						}
 
 						$this->db->commit();	// We always commit
+
+						if ($limit && $nbMailSend >= $limit) {
+							break;
+						}
 					}
 
 					if ($errormesg) {
@@ -310,13 +314,16 @@ class SellYourSaasUtils
 		}
 
 		if (!$error) {
-			$this->output .= 'Nb of emails sent : '.$nbMailSend;
+			$this->output .= 'Nb of emails sent : '.$nbMailSend."\n";
+			if (!empty($errorsMsg)) {
+				$this->output .= ", ".implode(', ', $errorsMsg);
+			}
 
 			dol_syslog(__METHOD__." end - ".$this->output, LOG_INFO);
 
 			return 0;
 		} else {
-			$this->error = 'Nb of emails sent : '.$nbMailSend.', '.(!empty($errorsMsg) ? implode(', ', $errorsMsg) : $error);
+			$this->error = 'Nb of emails sent : '.$nbMailSend.",\n".(!empty($errorsMsg) ? implode(', ', $errorsMsg) : 'Error '.$error);
 
 			dol_syslog(__METHOD__." end - ".$this->error, LOG_INFO);
 

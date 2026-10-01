@@ -1842,22 +1842,37 @@ llxHeader($head, $title, '', '', 0, 0, array(), array('../dist/css/myaccount.css
 			$constlogosmall=$constlogosmallalt;
 		}
 
-		if (empty($linklogo) && getDolGlobalString($constlogosmall)) {
-			if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constlogosmall))) {
-				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/' . getDolGlobalString($constlogosmall));
+		if (GETPOST('partner', 'alpha')) {
+			$partnerthirdparty = new Societe($db);
+			$partnerthirdparty->fetch(GETPOST('partner', 'alpha'));
+			if ($partnerthirdparty->id > 0 && !empty($partnerthirdparty->logo)) {     // Show logo of partner
+				require_once DOL_DOCUMENT_ROOT.'/ecm/class/ecmfiles.class.php';
+				$ecmfile=new EcmFiles($db);
+				$relativepath = $conf->societe->multidir_output[$conf->entity]."/".$partnerthirdparty->id."/logos/".$partnerthirdparty->logo;
+				$relativepath = preg_replace('/^'.preg_quote(DOL_DATA_ROOT, '/').'/', '', $relativepath);
+				$relativepath = preg_replace('/[\\/]$/', '', $relativepath);
+				$relativepath = preg_replace('/^[\\/]/', '', $relativepath);
+
+				$ecmfile->fetch(0, '', $relativepath);
+				if ($ecmfile->id > 0) {
+					$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=societe&hashp='.$ecmfile->share;
+				}
 			}
-		} elseif (empty($linklogo) && getDolGlobalString($constlogo)) {
-			if (is_readable($conf->mycompany->dir_output.'/logos/' . getDolGlobalString($constlogo))) {
-				$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/' . getDolGlobalString($constlogo));
-			}
-		} else {
-			$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.getDolGlobalString('SELLYOURSAAS_LOGO_SMALL', 'notdefined.png'));
 		}
 
-		if (GETPOST('partner', 'alpha')) {
-			$tmpthirdparty = new Societe($db);
-			$result = $tmpthirdparty->fetch(GETPOST('partner', 'alpha'));
-			$logo = $tmpthirdparty->logo;
+		if (empty($linklogo)) {
+			if (getDolGlobalString($constlogosmall)) {
+				if (is_readable($conf->mycompany->dir_output.'/logos/thumbs/' . getDolGlobalString($constlogosmall))) {
+					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/thumbs/' . getDolGlobalString($constlogosmall));
+				}
+			} elseif (getDolGlobalString($constlogo)) {
+				if (is_readable($conf->mycompany->dir_output.'/logos/' . getDolGlobalString($constlogo))) {
+					$linklogo=DOL_URL_ROOT.'/viewimage.php?cache=1&modulepart=mycompany&file='.urlencode('logos/' . getDolGlobalString($constlogo));
+				}
+			}
+			if (empty($linklogo)) {
+				$linklogo = DOL_URL_ROOT.'/viewimage.php?modulepart=mycompany&file='.urlencode('logos/thumbs/'.getDolGlobalString('SELLYOURSAAS_LOGO_SMALL', 'notdefined.png'));
+			}
 		}
 		print '<img style="center" class="logoheader"  src="'.$linklogo.'" id="logo" />';
 		?>

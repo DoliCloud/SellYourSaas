@@ -142,6 +142,7 @@ ConfirmResetPassword=Etes vous sur de vouloir réinitialiser le mot de passe de 
 SEPAMandate=Mandat SEPA
 SepaMandateForSellYourSaas=Mandat SEPA pour SellYourSaas
 FooterContent=Contenu du pied de page de toutes les pages du site Web "myaccount" (y compris la page de conversion)
+StartTrialContent=Content of footer on the "start trial page" (once an instance has been created)
 ConversionContent=Contenu du pied de page sur la « page de conversion » (uniquement une fois qu'un premier mode de paiement a été enregistré)
 InstallingInstance=Installation de votre instance en cours...
 PleaseWait=Merci de patienter.
@@ -365,6 +366,7 @@ AnnounceMaintenanceInProgress=Une maintenance technique est en cours.<br>Votre i
 CommandToManageRemoteDeploymentAgent=Commande pour démarrer/arrêter l'agent de déploiement
 CommandToPutInstancesOnOffline=Commande pour mettre toutes les instances en ligne / hors ligne
 CommandToMoveInstanceOnAnotherDeploymentServer=Commande pour déplacer plusieurs ou toutes les instances vers un autre serveur de déploiement
+CommandToDeployAModuleOptionOnAllInstances=Command to deploy a module option on some or all instances of the deployment server
 InstanceWasDeployed=L'instance a été déployée
 YourPaymentModeWillExpireFixItSoon=Votre mode de paiement a expiré ou est sur le point d'expirer. Veuillez <a href="%s">mettre à jour votre mode de paiement</a> pour éviter toute interruption de service.
 ResellerArea=Espace revendeur
@@ -380,7 +382,7 @@ ErrorYouDontOwnTheInstanceYouTryToDelete=Erreur, vous ne possédez pas l'instanc
 FirstRecord=Premier enregistrement
 LastRecord=Dernier enregistrement
 InstanceName=Nom de l'instance
-ResellerProgram=Fonctionnalités du revendeur ou du fournisseur de modules
+ResellerProgram=Fonctions revendeur ou fournisseur de modules
 Reseller=Revendeur
 PartnerCommission=Commission comme revendeur (%%)
 PartnerCommissionForThisInvoice=Commission revendeur pour cette facture
@@ -489,15 +491,17 @@ CreateMyAccount=Créer mon compte
 YouDontHaveCustomersYet=Vous n'avez pas encore de clients. Promouvez le lien fourni en haut de cette page pour trouver des prospects ou clients...
 ManualCollection=Facturation manuelle
 NoEmailSentToInformCustomer=Aucun email a été envoyé pour informer l'utilisateur
-SellYourSaasNewAdminPasswordAfterRedeploy=Le mot de passe admin stocké pour ce contrat était vide (effacé après le premier déploiement), un nouveau a été généré pour ce redéploiement et n'est pas envoyé par email : %s
+SellYourSaasNewAdminPasswordAfterRedeploy=The admin password stored for this contract was empty (cleared after the first deploy), so a new one was generated for this redeploy and is not sent by email: %s
 EvilUser=Utilisateur déloyal ou spammeur
 DisableEmailToCustomer=Ne pas envoyer d'e-mail au client
 CommissionsOnOldSystem=Commissions sur l'ancienne plateforme
 InvoiceBeforeAreAvailableOnDemandAt=Les factures d'avant le %s sont disponibles par demande email à %s
 MyAcountDesc=Cet espace est dédié à la gestion de vos abonnements à <a href="%s" target="sellyoursaas"> %s </a> . Vous pouvez créer de nouvelles instances d'applications, choisir des options, obtenir vos factures d'abonnement, contacter l'équipe de support ou annuler votre compte.
 YourCustomUrl=Votre URL personnalisée
-AddCustomUrlDone=Votre domaine personnalisé a été demandé. Cela peut prendre quelques minutes pour devenir actif.
-ErrorAddCustomUrl=Échec de la configuration de votre domaine personnalisé. Merci de réessayer ou de contacter le support.
+AddCustomUrlDone=Your custom domain has been requested. It may take a few minutes to become active.
+ErrorAddCustomUrl=Failed to set up your custom domain. Please try again or contact support.
+ErrorCustomUrlAlreadyUsed=The domain name '%s' is already used as a custom URL by another instance. Please choose another one.
+ErrorCustomUrlDnsNotPointingHere=The domain name '%s' does not currently resolve to the same IP address as %s. Please point its DNS record to your instance before saving, then try again.
 CustomURL=URL personnalisée
 CustomUrlDesc=Avoir une URL personnalisée ajoutera un deuxième fichier virtualhost pour l'instance mais se terminant par .custom.conf. <br> Exemple : /etc/apache2/sellyoursaas-available/yourname.withX.domainname.com.custom.conf <br> Si des fichiers de certificat SSL sont trouvés (sur le master dans /home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt), ils seront utilisés. Sinon, ils peuvent être générés par letsencrypt. En cas d'erreur, les fichiers de certificat génériques pour *.withX.domainname.com seront utilisés.
 NextInvoice=Prochaine facture
@@ -534,6 +538,7 @@ SourceURLOfEvent=URL source de l'événement
 SeeOnBackoffice=Voir via le backoffice
 PaymentModeAddedFrom=Mode de paiement ajouté depuis
 ErrorBadValueForIntraVAT=Erreur: la valeur '%s', entrée pour le champ '%s' n''est pas valide pour votre pays (%s).<br>Veuillez corriger votre pays ou votre numéro de TVA intracommunautaire (Vous pouvez également décocher le champ '%s' si vous n’êtes pas une entreprise ou si vous n’avez pas votre numéro de TVA intracommunautaire, une TVA pourra alors être ajoutée lors de la facturation du service afin de respecter les règles européennes de TVA applicables aux ventes B to C).
+CustomerDashboardLogin=also your customer dashboard login
 LoginForSupport=Login pour le support
 PasswordForSupport=Mot de passe pour l'assistance
 SSHPublicKey=SSH public keys à deployer
@@ -579,7 +584,7 @@ PaymentChargedButReversedByBank=Paiement encaissé puis annulé illégitimement 
 StripeAccount=Compte Stripe
 StripeAccountForCustomerHelp=Le compte Stripe à utiliser pour collecter les factures clients. Remplissez quelque chose ici uniquement si vous devez collecter de l'argent en utilisant un autre compte Stripe que la valeur par défaut.<br>Exemple : cus_testABCD@pk_test_1234567:sk_test_1234567-cus_liveABCD@pk_live_1234567:sk_live_1234567
 MaxNbOfInstances=Nb max d'instances
-ShowMoreParametersForRegisterUrls=Vous pouvez utiliser plus de paramètres sur l'URL : <br> &country=XX to force the country <br>&forcesubdomain=with.mysaasdomainname pour forcer le domaine d'une IP <br> &extcss=mycssurl pour utiliser votre propre CSS (exemple : &extcss=myaccount.mysaasdomainname/dist/css/alt-myaccount-example.css ) <br> &disablecustomeremail=1 pour désactiver l'e-mail au client pour la confirmation de l'inscription
+ShowMoreParametersForRegisterUrls=You can use more parameters on URL:<br>&country=XX to force the country<br>&forcesubdomain=with.mysaasdomainname to force the domain of an IP<br>&extcss=mycssurl to use your own CSS (example: &extcss=https://myaccount.mysaasdomainname/dist/css/alt-myaccount-example.css)<br>&disablecustomeremail=1 To disable the email to the customer for confirmation of registration
 AFirstInvoiceOfWillBeDone=Compte tenu de la formule choisie et des données de votre ou vos instances existantes, votre abonnement débutera avec une première facture de <span class="nowrap bold">%s TTC</span>, hors remises
 SeeOurPrices=Voir les prix de chaque formule <a href="%s" target="_blank">ici</a>
 NoInstanceYet=Il semble que vous ne disposiez d'aucune instance disponible pour le moment. Par conséquent, choisir un mode de paiement maintenant sera sans effet. Si vous possédiez des instances par le passé, elles ont probablement été désactivées et leurs données supprimées ; il est donc impossible de les restaurer. Nous vous recommandons de créer une nouvelle instance avant de choisir un mode de paiement.
@@ -597,8 +602,9 @@ BackupNow=Sauvegarder maintenant
 BackupOK=Sauvegarde réussie
 ArchiveInstanceDesc=Répertoire où l'instance sera archivée lorsqu'elle sera détruite.
 ArchiveTestInstanceDesc=AVERTISSEMENT: vérifiez que la fonctionnalité est activée en ayant l'entrée archivetestinstance=1 dans le fichier sellyoursaas.conf
-ToCreateDBUserManualy=Pour créer un utilisateur db manuellement sur SELECT uniquement, vous pouvez faire <br> GRANT SELECT ON nom_base_de_données.* to 'nom_utilisateur_en lecture seule@%%' IDENTIFIED PAR 'mot de passe'; FLUSH PRIVILEGES;
-ToUpdateDBPassword=Pour mettre à jour le mot de passe d'un utilisateur de base de données, vous pouvez faire <br>SET PASSWORD FOR 'dbu...'@'%%' = PASSWORD('nouveau mot de passe'); SET PASSWORD FOR 'dbu...'@'localhost' = PASSWORD('newpassword'); FLUSH PRIVILEGES ;
+ToCreateDBUserManualy=To create a Read only db user manually, enter here its login and do<br>GRANT SELECT ON database_name.* to 'read-only_user_name'@'%%' IDENTIFIED BY 'password'; FLUSH PRIVILEGES;<br>Don't forget to also set password field.
+ToUpdateDBPassword=To update the password of a db user, you can modify it here and run in sql:<br>SET PASSWORD FOR 'dbu...'@'%%' = PASSWORD('newpassword'); SET PASSWORD FOR 'dbu...'@'localhost' = PASSWORD('newpassword'); FLUSH PRIVILEGES;<br>Then update the config file of the application to use the new password.
+ToUpdateSSHPassword=To update the SSH password of a user, you can modify it here and run as root:<br>passwd dbu...<br>Then update the config file of the application to use the new password.
 LatestBackupMessage=Dernier message de sauvegarde
 SELLYOURSAAS_ACCEPT_DISCOUNTCODE=Accepter un code de réduction lors de l'entrée d'un mode de paiement
 SELLYOURSAAS_ENABLE_OPTINMESSAGES=Ajouter une case à cocher d'acceptation « Accepter les offres commerciales » (lors de l'inscription et sur le tableau de bord client).
@@ -728,7 +734,12 @@ ErrorOnMigration=Une erreur s'est produite lors de la tentative de migration de 
 ErrorOnSqlDumpForge=Erreur de format de vidage SQL
 ErrorOnSqlPrefix=Erreur de préxif de table SQL
 KeepEmptyToUseMainEmail=Il s'agit d'un e-mail alternatif auquel vous souhaitez que nous envoyions vos factures. Gardez vide si l'envoi à l'e-mail principal est suffisant.
-SourceUtm=Source (premier accès)
+SourceUtm=Source tracker (first access)
+SourceUtmHelp=Value for the parameter utm_source added in the URL used to reach the web site the first time.
+SourceRegistration=Source (registration)
+SourceRegistrationHelp=Value of the tracker source found in URL used to reach the registration page.
+SourceChoice=Source (set by user)
+SourceChoiceHelp=Value of the source set by the user on the registration page among the list of possible value defined into dictionary (the least appears only if there is 2 or more value set in dictionary).
 SELLYOURSAAS_MINAMOUNT_TO_CLAIM=Montant minimum gagné par le revendeur pour pouvoir réclamer de l'argent
 SELLYOURSAAS_RESELLER_EMAIL=E-mail de contact pour le programme revendeur
 SELLYOURSAAS_RESELLER_ALLOW_CUSTOM_PRICE=Autoriser les revendeurs à définir des prix personnalisés
@@ -801,7 +812,7 @@ WhitelistipDesc=Ajoutez des adresses IP qui doivent être autorisées à enregis
 WhitelistemailDesc=Ajoutez des adresses e-mail qui doivent être autorisées à s'inscrire même si la vérification de validité (syntaxe ou enregistrement MX) échoue.
 BlacklistipDesc=Ajoutez une IP dans cette liste pour bloquer toute création de nouveau compte ou d'instances à partir de cette IP. La liste des IP est également utilisée comme source globale pour générer le fichier local des IP sur liste noire utilisé par le wrapper PHP pour envoyer des e-mails.
 BlacklistXDesc=La liste des e-mails répertoriés ici est utilisée comme source globale pour générer le fichier local des e-mails sur liste noire utilisé dans l'en-tête <b> %s </b> pour les e-mails envoyés par le wrapper PHP.
-BlacklistdirDesc=Liste des répertoires ou fichiers (signature des kits de phishing = scamas) qui ne sont pas autorisés dans une instance. Le script batch_detect_evil_instances.php l'utilisera pour signaler les avertissements.
+BlacklistdirDesc=List of directories or files (signature of phishing kits=scamas) that are not allowed into an instance. The script deployment_batch_detect_evil_instances.php will use it to report warnings.
 BlacklistcontentDesc=Liste des mots-clés utilisés comme source globale pour générer le fichier local des mots-clés de la liste noire vérifiés par le wrapper PHP pour envoyer des e-mails. La vérification est effectuée à la fois dans l'en-tête et dans le corps de l'e-mail.
 Searchkeys=Touches de recherche
 NoBlackListIf=Pas de liste noire pour le chemin
@@ -991,3 +1002,4 @@ SEPADoesNotUnsupendInstantly=Veuillez noter que le paiement SEPA ne permet pas d
 SorryOptionsNotAvailableDuringTestPeriod=Désolé, cette fonctionnalité n'est pas disponible pendant la période de test. Veuillez confirmer votre instance en saisissant votre mode de paiement dans le menu <b>%s</b> pour activer l'installation des options
 SectionSoonAvailable=Cette section est en cours de mise à jour. Elle sera bientôt disponible.
 HavingAtLeastOneInstance=Ayant au moins une instance avec
+NoteYouShouldReceiveTheAnswerByEmail=Remarque : Vous devriez recevoir les réponses à vos tickets par e-mail (vérifiez votre dossier de courriers indésirables si vous ne les recevez pas).

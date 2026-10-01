@@ -482,7 +482,8 @@ $servicestatusstripe = 0;
 if (isModEnabled('stripe')) {
 	$service = 'StripeTest';
 	$servicestatusstripe = 0;
-	if (getDolGlobalString('STRIPE_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+	if (getDolGlobalString('STRIPE_LIVE') /* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST') && !sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
+		// We use the Live account, except if the name of the thirdparty contains the reserved keyword for sandbox
 		$service = 'StripeLive';
 		$servicestatusstripe = 1;
 	}
@@ -1308,7 +1309,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			$companybankaccount->fetch(GETPOSTINT('bankid'));
 			$service = 'StripeTest';
 			$servicestatus = 0;
-			if (getDolGlobalString('STRIPE_LIVE')/* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+			if (getDolGlobalString('STRIPE_LIVE')/* && !GETPOST('forcesandbox', 'alpha') */ && !getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST') && !sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
+				// We use the Live account, except if the name of the thirdparty contains the reserved keyword for sandbox
 				$service = 'StripeLive';
 				$servicestatus = 1;
 			}
@@ -1476,7 +1478,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
 			global $stripearrayofkeysbyenv;
 			// Reforce the $stripearrayofkeys because content may change depending on option
-			if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+			// Also use the Test account if the name of the thirdparty contains the reserved keyword for sandbox
+			if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST') || sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
 				$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
 			} else {
 				$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
@@ -1662,27 +1665,33 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			// Loop on each pending invoices of the thirdparty and try to pay them with payment = remain amount of invoice.
 			// Note that when contract is in trial mode (running or suspended), it may have no pending invoice yet. First invoice will be created later.
 			if (! $error) {
-				dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
-
-				$sellyoursaasutils = new SellYourSaasUtils($db);
-
-				$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
-				if ($result != 0) {
-					$erroronstripecharge++;
-					$error++;
-					setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
-					dol_syslog("--- Error when taking payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+				if (sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
+					// The name of the thirdparty contains the reserved keyword for sandbox, so we do not take payment
+					// of the pending invoices (so no invoice is validated and no payment is recorded), we continue like if payment was done.
+					dol_syslog("--- The thirdparty has the reserved keyword for sandbox into its name, so we do not pay the pending invoices, we continue like if payment was done", LOG_DEBUG, 0);
 				} else {
-					dol_syslog("--- Success to take payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION", LOG_DEBUG, 0);
-				}
+					dol_syslog("--- Now we search pending invoices for thirdparty to pay them (Note that it may have no pending invoice yet when contract is in trial mode)", LOG_DEBUG, 0);
 
-				// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
-				if ($sellyoursaasutils->stripechargedone > 0) {
-					dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
+					$sellyoursaasutils = new SellYourSaasUtils($db);
 
-					$db->commit();
+					$result = $sellyoursaasutils->doTakePaymentStripeForThirdparty($service, $servicestatusstripe, $mythirdpartyaccount->id, $companypaymentmode, null, 1, 1, 1, 1);	// Include draft invoices
+					if ($result != 0) {
+						$erroronstripecharge++;
+						$error++;
+						setEventMessages($sellyoursaasutils->error, $sellyoursaasutils->errors, 'errors');
+						dol_syslog("--- Error when taking payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION ".$sellyoursaasutils->error, LOG_DEBUG, 0);
+					} else {
+						dol_syslog("--- Success to take payment for pending invoices in mode STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION", LOG_DEBUG, 0);
+					}
 
-					$db->begin();
+					// If some payment was really done, we force commit to be sure to validate invoices payment done by stripe, whatever is global result of doTakePaymentStripeForThirdparty
+					if ($sellyoursaasutils->stripechargedone > 0) {
+						dol_syslog("--- Force commit to validate payments recorded after real Stripe charges", LOG_DEBUG, 0);
+
+						$db->commit();
+
+						$db->begin();
+					}
 				}
 			}
 
@@ -2115,7 +2124,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			}
 		}
 		if (!$foundlinecontract) {
-			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end);
+			$rangnewline = $object->line_max() + 1;
+
+			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end, 'HT', 0, 0, null, 0, array(), null, $rangnewline);
 			if ($idlinecontract <= 0) {
 				// TODO: Send mail auto to inform admins of error line creation
 				$error ++;
@@ -2189,6 +2200,17 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$error++;
 	}
 	if (!$error) {
+		$otherid = sellyoursaasCheckCustomUrlAlreadyUsed($db, $custom_url, $contractid);
+		if ($otherid > 0) {
+			setEventMessages($langs->trans("ErrorCustomUrlAlreadyUsed", $custom_url), null, 'errors');
+			$error++;
+		}
+	}
+	if (!$error && sellyoursaasCheckCustomUrlDns($custom_url, $object->ref_customer) !== 1) {
+		setEventMessages($langs->trans("ErrorCustomUrlDnsNotPointingHere", $custom_url, $object->ref_customer), null, 'errors');
+		$error++;
+	}
+	if (!$error) {
 		$type_db = $conf->db->type;
 		$hostname_db  = $object->array_options['options_hostname_db'];
 		$username_db  = $object->array_options['options_username_db'];
@@ -2228,7 +2250,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$duration_unit = $tmparray['duration_unit'];
 		$date_start = dol_now();
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
-		$descriptionlines = "Websiteref = ".$website->ref;
+		$descriptionlines = "CustomURL = ".$custom_url;
 		$foundlinecontract = 0;
 
 		$object->array_options['options_custom_url'] = urlencode($custom_url);
@@ -2240,7 +2262,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 			}
 		}
 		if (!$foundlinecontract) {
-			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end);
+			$rangnewline = $object->line_max() + 1;
+
+			$idlinecontract = $object->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, $date_start, $date_end, 'HT', 0, 0, null, 0, array(), null, $rangnewline);
 			if ($idlinecontract <= 0) {
 				// TODO: Send mail auto to inform admins of error line creation
 				$error ++;
@@ -2257,26 +2281,30 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 
 		if (!$error) {
 			$object->fetchObjectLinked();
-			$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
-			if (count($arrayfacturerec) != 1) {
-				// TODO: Send mail auto to inform admins of multiples faturerec contract
-				$error ++;
-			} else {
-				$facturerec = $arrayfacturerec[0];
-				$foundlinefacturerec = 0;
-				foreach ($facturerec->lines as $key => $line) {
-					if ($line->description == $descriptionlines && $line->fk_product == $productid) {
-						$foundlinefacturerec ++;
+			if (!empty($object->linkedObjects["facturerec"])) {
+				$arrayfacturerec = array_values($object->linkedObjects["facturerec"]);
+				if (count($arrayfacturerec) != 1) {
+					// TODO: Send mail auto to inform admins of multiples faturerec contract
+					$error ++;
+				} else {
+					$facturerec = $arrayfacturerec[0];
+					$foundlinefacturerec = 0;
+					foreach ($facturerec->lines as $key => $line) {
+						if ($line->description == $descriptionlines && $line->fk_product == $productid) {
+							$foundlinefacturerec ++;
+						}
 					}
-				}
-				if (!$foundlinefacturerec) {
-					$result = $facturerec->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
-					if (!$result) {
-						// TODO: Send mail auto to inform admins of error line creation facturRec
-						$error ++;
+					if (!$foundlinefacturerec) {
+						$result = $facturerec->addLine($descriptionlines, $product->price, 1, $product->tva_tx, $product->localtax1_tx, $product->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+						if (!$result) {
+							// TODO: Send mail auto to inform admins of error line creation facturRec
+							$error ++;
+						}
 					}
 				}
 			}
+			// else: no recurring invoice at all for this contract (e.g. a trial) - nothing to add a
+			// line to, same as the uninstall side of this option already tolerates.
 		}
 		if (!$error) {
 			//$object->context["options_websitename"] = $website->ref;
@@ -2372,6 +2400,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$deletedlinecontract = 0; $deletedlinefacturerec = 0;
 	$contractid = GETPOSTINT("instanceid");
 	$productid = GETPOSTINT("productid");
+	// The custom URL "option" can be set directly (by support, or from a time before this option
+	// existed/was purchased) without ever going through the deploycustomurl flow that creates its
+	// contract/facturerec lines below - tolerate having none of those lines for this specific
+	// product instead of reporting a failure for something that isn't actually broken.
+	$isCustomUrlOption = ($productid > 0 && $productid == getDolGlobalInt("SELLYOURSAAS_PRODUCT_ID_FOR_CUSTOM_URL"));
 	if ($contractid <= 0) {
 		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Id")), null, 'errors');
 		header("Location: ".$backtourl);
@@ -2505,7 +2538,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		}
 	}
 
-	if (!$deletedlinecontract || (!$deletedlinefacturerec && !empty($tmpcontract->linkedObjects["facturerec"]))) {
+	if (!$isCustomUrlOption && (!$deletedlinecontract || (!$deletedlinefacturerec && !empty($tmpcontract->linkedObjects["facturerec"])))) {
 		$error ++;
 		setEventMessages("FailedToUninstallOption", null, 'errors');
 	}
@@ -2561,8 +2594,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$duration_unit = $tmparray['duration_unit'];
 		$date_start = dol_now();
 		$date_end = dol_time_plus_duree($now, $duration_value, $duration_unit) - 1;
+
 		// Create service line(s) from contract
-		$idlinecontract = $tmpcontract->addline($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, $date_start, $date_end);
+		$rangnewline = $tmpcontract->line_max() + 1;
+
+		$idlinecontract = $tmpcontract->addline($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, $date_start, $date_end, 'HT', 0, 0, null, 0, array(), null, $rangnewline);
 		if ($idlinecontract <= 0) {
 			setEventMessages($contract->error, null, 'errors');
 			$error++;
@@ -3066,6 +3102,9 @@ if ($welcomecid > 0) {
 		}
 		print '
 		</p>
+
+		<br>
+
 		<p>
 		<a class="btn btn-primary wordbreak" target="_blank" rel="noopener" href="https://'.$contract->ref_customer.'?username='.urlencode($_SESSION['initialapplogin']).'">'.$langs->trans("TakeMeTo", $productlabel).' <span class="fa fa-external-link-alt"></span></a>
 		</p>

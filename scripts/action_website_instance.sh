@@ -29,6 +29,11 @@ export scriptdir=$(dirname $(realpath ${0}))
 
 # possibility to change the directory of vhostfile templates
 templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+
+# php-fpm/apache open_basedir needs read access to the sellyoursaas module's own scripts/
+# directory (eg. for phpsendmail.php/phpsendmailprepend.php). Keep the trailing slash: an
+# open_basedir entry without one is a prefix, not a directory restriction.
+sellyoursaasscriptsdir="/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/"
 if [[ "x$templatesdir" != "x" ]]; then
 	export vhostfile="$templatesdir/vhostHttps-sellyoursaas.template"
 	export vhostfilesuspended="$templatesdir/vhostHttps-sellyoursaas-suspended.template"
@@ -159,9 +164,9 @@ if [[ "x$webSSLCertificateIntermediate" == "x" ]]; then
 fi
 
 # possibility to change the path of sellyoursass directory
-olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-newdoldataroot=`grep '^newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
+olddoldataroot="/home/admin/wwwroot/dolibarr_documents"
+newdoldataroot=`grep '^doldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$newdoldataroot" != "x" ]]; then
 	fileforconfig1=${fileforconfig1/$olddoldataroot/$newdoldataroot}
 	dirwithdumpfile=${dirwithdumpfile/$olddoldataroot/$newdoldataroot}
 	dirwithsources1=${dirwithsources1/$olddoldataroot/$newdoldataroot}
@@ -170,6 +175,8 @@ if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
 	cronfile=${cronfile/$olddoldataroot/$newdoldataroot}
 	cliafter=${cliafter/$olddoldataroot/$newdoldataroot}
 fi
+
+export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 # For debug
 echo `date +'%Y-%m-%d %H:%M:%S'`" input params for $0:"
@@ -241,7 +248,9 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e 's;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g' | \
 			  sed -e 's;#ErrorLog;$ErrorLog;g' | \
 			  sed -e 's;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g' | \
-			  sed -e 's;__webAppPath__;$instancedir;g' > $apacheconf"
+			  sed -e 's;__webAppPath__;$instancedir;g' | \
+			  sed -e 's;__sellyoursaasLocalCrtPath__;$pathforcertiflocal;g' | \
+			  sed -e 's;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g' > $apacheconf"
 	cat $vhostfilewebsite | sed -e "s/__webSiteDomain__/$CUSTOMDOMAIN/g" | \
 			  sed -e "s/__webSiteAliases__/$CUSTOMDOMAIN www.$CUSTOMDOMAIN/g" | \
 			  sed -e "s/__webSiteNamePath__/$WEBSITENAME/g" | \
@@ -261,7 +270,9 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \
 			  sed -e "s;#ErrorLog;$ErrorLog;g" | \
 			  sed -e "s;__webMyAccount__;$SELLYOURSAAS_ACCOUNT_URL;g" | \
-			  sed -e "s;__webAppPath__;$instancedir;g" > $apacheconf
+			  sed -e "s;__webAppPath__;$instancedir;g" | \
+			  sed -e "s;__sellyoursaasLocalCrtPath__;$pathforcertiflocal;g" | \
+			  sed -e "s;__sellyoursaasScriptsPath__;$sellyoursaasscriptsdir;g" > $apacheconf
 	export vhostko=$?
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Result of generation of file $apacheconf = $vhostko"
@@ -284,8 +295,8 @@ if [[ "$mode" == "deploywebsite" ]]; then
 	fi
 
 
-	echo "Create cert directory with mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin:admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;"
-	mkdir /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/; chown admin:admin /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/;
+	echo "Create cert directory with mkdir -p $pathforcertiflocal/; chown admin:admin $pathforcertiflocal/;"
+	mkdir -p $pathforcertiflocal/; chown admin:admin $pathforcertiflocal/;
 
 	if [[ ${46} == www.* ]]; then
 		echo certbot certonly -n -v --webroot -w $instancedir/documents/website/$WEBSITENAME -d www.$CUSTOMDOMAIN
@@ -301,13 +312,13 @@ if [[ "$mode" == "deploywebsite" ]]; then
 
 
 	echo "Link certificate for virtualhost with
-		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
-		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
-		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN.key
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN.crt
+		ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
 	"
-	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.key
-	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN.crt
-	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/privkey.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN.key
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/cert.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN.crt
+	ln -fs /etc/letsencrypt/live/www.$CUSTOMDOMAIN/fullchain.pem $pathforcertiflocal/$instancename.$domainname-$CUSTOMDOMAIN-intermediate.crt
 
 
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Restart apache to have the new certificate being loaded"

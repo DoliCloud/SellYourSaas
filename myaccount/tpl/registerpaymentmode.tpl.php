@@ -23,6 +23,7 @@
  *
  * @var string $backtourl
  * @var Societe $mythirdpartyaccount
+ * @var array $listofcontractid
  * @var int $nowyear
  * @var int $nowmonth
  */
@@ -72,6 +73,12 @@ print '<input type="hidden" name="action" value="createpaymentmode">'."\n";
 print '<input type="hidden" name="mode" value="registerpaymentmode">'."\n";
 print '<input type="hidden" name="backtourl" value="'.$backtourl.'">';
 //print '<input type="hidden" name="thirdparty_id" value="'.$mythirdpartyaccount->id.'">';
+
+// Show a note if we are in Stripe sandbox mode (so if the name of the thirdparty contains the reserved keyword)
+if (sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
+	print '<div class="note note-warning justify">'.$langs->trans("PaymentPageInStripeSandboxMode").'</div>';
+	print '<br>';
+}
 
 $tmp = $mythirdpartyaccount->getOutstandingBills('customer');
 $outstandingTotalIncTax = $tmp['opened'];
@@ -319,7 +326,8 @@ if (getDolGlobalString('STRIPE_USE_INTENT_WITH_AUTOMATIC_CONFIRMATION')) {	// Us
 
 	$service = 'StripeLive';
 	$servicestatus = 1;
-	if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+	if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST') || sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
+		// Also use the Test account if the name of the thirdparty contains the reserved keyword for Stripe sandbox
 		$service = 'StripeTest';
 		$servicestatus = 0;
 	}
@@ -353,7 +361,8 @@ print '</div></div>';
 
 require_once DOL_DOCUMENT_ROOT.'/stripe/config.php';
 // Reforce the $stripearrayofkeys because content may have been changed by the include of config.php
-if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST')) {
+// Also use the Test account if the name of the thirdparty contains the reserved keyword for Stripe sandbox
+if (!getDolGlobalString('STRIPE_LIVE') /* || GETPOST('forcesandbox', 'alpha') */ || getDolGlobalString('SELLYOURSAAS_FORCE_STRIPE_TEST') || sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
 	$stripearrayofkeys = $stripearrayofkeysbyenv[0];	// Test
 } else {
 	$stripearrayofkeys = $stripearrayofkeysbyenv[1];	// Live
@@ -366,7 +375,7 @@ print '	<center><div class="form-row" style="max-width: 320px">
 		</div>
 
 		<!-- Used to display form errors. -->
-		<div id="card-errors" role="alert"></div>
+		<div id="card-errors" role="alert" class="paddingtop"></div>
 
 		</div></center>
         ';
@@ -737,7 +746,7 @@ if ($mythirdpartyaccount->isInEEC()) {
 	}
 
 	$enabledformtoentersepa = getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA');
-	$enabledformtoentersepaforids = explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID'));	// To test by enabling only on a given thirdparty, use SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID = 'id1,id2...' of thirparty.
+	$enabledformtoentersepaforids = explode(',', getDolGlobalString('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID'));	// To test by enabling only on a given third party, use SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID = 'id1,id2...' of third party.
 	//$enabledformtoentersepa = 1;
 
 	if (empty($enabledformtoentersepaforids[0])) {

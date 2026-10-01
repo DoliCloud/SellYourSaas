@@ -538,6 +538,8 @@ function command_exists($command)
 
 /**
  * Update instance info by connecting to it and getting some info like version, list of modules, last admin user/pass, etc.
+ * Saving data is also done if something has changed.
+ * It also sets ->nbofusers from the qty of the contract line with the 'User' resource (value refreshed by the 'refresh' action).
  *
  * @param	Object	$object		Object instance to update
  * @return 	int					Return <0if KO, >0 if OK
@@ -578,6 +580,11 @@ function updateInstanceInfo($object)
 	$object->username_web = $username_web;
 	$object->password_web = $password_web;
 
+	// Set the nb of users from the qty of contract lines with the 'User' resource (qty is the value refreshed by the 'refresh' action)
+	dol_include_once('/sellyoursaas/lib/sellyoursaas.lib.php');
+	$tmpdataofcontract = sellyoursaasGetExpirationDate($object, 0);
+	$object->nbofusers = $tmpdataofcontract['nbusers'];
+
 	// Connect to remote instance
 	$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 	$newdb->prefix_db = $prefix_db;
@@ -588,12 +595,15 @@ function updateInstanceInfo($object)
 
 	$lastloginadmin = '';
 	$lastpassadmin = '';
+	$other_informations = array();
 
 	if (is_object($newdb) && $newdb->connected) {
 		// Get $lastloginadmin, $lastpassadmin, $stringoflistofmodules
 		$stringoflistofmodules='';
 
-		$fordolibarr = 1;
+		// Define actions specific to some deployed applications (off by default).
+		$fordolibarr = getDolGlobalString('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC') ? 1 : 0;
+		$forglpi = 0;
 		if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 			$fordolibarr = 0;
 			$forglpi = 1;
@@ -723,6 +733,48 @@ function updateInstanceInfo($object)
 				$object->array_options['options_instancemodules'] = $stringoflistofmodules;	// Version has changed, we must save it.
 			}
 		}
+
+		// Get other information from database
+		$other_informations = array();
+		$formula = '';
+		$sqltogetpackage = 'SELECT p.otherinformations_formula FROM '.$db->prefix().'packages as p, '.$db->prefix().'contratdet as cd, '.$db->prefix().'product_extrafields as pe';
+		$sqltogetpackage .= ' WHERE cd.fk_contrat = '.((int) $object->id);
+		$sqltogetpackage .= ' AND cd.fk_product = pe.fk_object';
+		$sqltogetpackage .= " AND pe.app_or_option = 'app'";
+		$sqltogetpackage .= ' AND pe.package = p.rowid';
+		$sqltogetpackage .= ' LIMIT 1';		// We should always have only one contract line with type 'app', so one line linked to a package with a version_formula.
+
+		$resqltogetpackage = $db->query($sqltogetpackage);
+		if ($resqltogetpackage) {
+			$obj = $db->fetch_object($resqltogetpackage);
+			if ($obj) {
+				$formula = $obj->otherinformations_formula;
+			}
+		} else {
+			setEventMessages('Failed to execute SQL: '.$db->lasterror(), null, 'warnings');
+			$error++;
+		}
+
+		if (preg_match('/SQL:/', $formula)) {
+			// Set $stringofversion with result of sql defined into formula to get version of instance. This sql must return a field "version" and a field "name" (name of version).
+			$formula = preg_replace('/SQL:/', '', $formula);
+			$formula = make_substitutions($formula, $substitarray);
+			$resqlformula = $newdb->query($formula);
+
+			if ($resqlformula) {
+				$num = $newdb->num_rows($resqlformula);
+
+				$i=0;
+				while ($i < $num) {
+					$obj = $newdb->fetch_object($resqlformula);
+					$other_informations[$obj->name] = $obj->value;
+					$i++;
+				}
+			} else {
+				setEventMessages('Failed to execute SQL: '.$newdb->lasterror(), null, 'warnings');
+				$error++;
+			}
+		}
 	}
 
 	// We have value that has changed, we saved them
@@ -733,6 +785,6 @@ function updateInstanceInfo($object)
 	if ($error) {
 		return -1;
 	} else {
-		return array($lastloginadmin, $lastpassadmin);
+		return array("lastloginadmin" => $lastloginadmin, "lastpassadmin" => $lastpassadmin, "other_informations"=>$other_informations);
 	}
 }

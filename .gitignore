@@ -1,3 +1,5 @@
+*.swp
+.cache
 .buildpath
 .project
 .settings/
@@ -5,3 +7,5 @@
 .vscode
 /.asciidoctorconfig.adoc
 /ansible-py38/
+/.vibe
+/.vibeignore

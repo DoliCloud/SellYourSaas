@@ -126,9 +126,9 @@ export fqn=$instancename.$domainname
 export fqnold=$instancenameold.$domainnameold
 
 # possibility to change the path of sellyoursass directory
-olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-newdoldataroot=`grep '^newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-if [[ "x$olddoldataroot" != "x" && "x$newdoldataroot" != "x" ]]; then
+olddoldataroot="/home/admin/wwwroot/dolibarr_documents"
+newdoldataroot=`grep '^doldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$newdoldataroot" != "x" ]]; then
 	fileforconfig1=${fileforconfig1/$olddoldataroot/$newdoldataroot}
 	dirwithdumpfile=${dirwithdumpfile/$olddoldataroot/$newdoldataroot}
 	dirwithsources1=${dirwithsources1/$olddoldataroot/$newdoldataroot}

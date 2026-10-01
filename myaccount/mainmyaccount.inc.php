@@ -602,13 +602,28 @@ if (! function_exists("llxFooter")) {
 		print "\n<!-- A div to allow dialog popup -->\n";
 		print '<div id="dialogforpopup" style="display: none;"></div>'."\n";
 
-		$arraysubstitution = array();
 		global $mythirdpartyaccount;
-		if (is_object($mythirdpartyaccount)) {
+
+		dol_syslog("Show footers of page mythirdpartyaccount", LOG_DEBUG);
+
+		$arraysubstitution = array();
+		if (!empty($mythirdpartyaccount) && is_object($mythirdpartyaccount)) {
 			print "\n".'<!-- mythirdparty = '.$mythirdpartyaccount->id.' -->'."\n";
-			$arraysubstitution['__SHA256_THIRPARTY_EMAIL__'] = hash('sha256', $mythirdpartyaccount->email);
-			$arraysubstitution['__THIRPARTY_ID__'] = $mythirdpartyaccount->id;
+			$arraysubstitution['__SHA256_THIRDPARTY_EMAIL__'] = hash('sha256', $mythirdpartyaccount->email);
+			$arraysubstitution['__SHA256_THIRDPARTY_FIRSTNAME__'] = hash('sha256', $mythirdpartyaccount->array_options['options_firstname']);
+			$arraysubstitution['__SHA256_THIRDPARTY_LASTNAME__'] = hash('sha256', $mythirdpartyaccount->array_options['options_lastname']);
+			$arraysubstitution['__SHA256_THIRDPARTY_PHONE__'] = hash('sha256', $mythirdpartyaccount->phone);
+			$arraysubstitution['__THIRDPARTY_COUNTRY_CODE__'] = $mythirdpartyaccount->country_code;
+			$arraysubstitution['__THIRDPARTY_ID__'] = $mythirdpartyaccount->id;
 		}
+
+		global $contract;
+
+		if (!empty($contract) && is_object($contract)) {
+			print "\n".'<!-- contract = '.$contract->id.' -->'."\n";
+			$arraysubstitution['__CONTRACT_CUSTOMER_REF__'] = $contract->ref_customer;
+		}
+
 
 		// Show conversion tracker.
 		if (getDolGlobalString('SELLYOURSAAS_MYACCOUNT_FOOTER')) {
@@ -638,6 +653,7 @@ if (! function_exists("llxFooter")) {
 			if ($_SESSION['showconversiontracker'] == 'paymentrecorded') {
 				$msg = getDolGlobalString('SELLYOURSAAS_CONVERSION_FOOTER');
 				$msg = make_substitutions($msg, $arraysubstitution);
+				dol_syslog("A conversion (paymentrecorded) has been done, we add tag: ".$msg);
 				print $msg;
 				print "\n";
 				$_SESSION['showconversiontracker'] = '';

@@ -223,14 +223,15 @@ repos:
           - -x
           - dev/tools/codespell/codespell-lines-ignore.txt
         exclude_types: [image]
-        exclude: (?x)^(.phan/stubs/.*|phpstan\.neon.*)$
+        # Language files are checked only for en_US by the codespell-lang-en_US hook
+        exclude: (?x)^(.phan/stubs/.*|phpstan\.neon.*|langs/.*\.lang)$
         additional_dependencies: [tomli]
       - alias: codespell-lang-en_US
         # Only for translations with specialised exceptions
         # -D contains predefined conversion dictionaries
         # -L is to ignore some words
         id: codespell
-        files: ^htdocs/langs/en_US/.*$
+        files: ^langs/en_US/.*$
         args:
           - -D
           - "-"

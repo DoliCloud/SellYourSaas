@@ -145,6 +145,28 @@ function sellyoursaasThirdpartyHasPaymentMode($thirdpartyidtotest)
 	return $atleastonepaymentmode;
 }
 
+
+/**
+ * Check if a thirdparty has the reserved keyword for Stripe sandbox into its name.
+ * If yes, the payment page (credit card or SEPA mandate) and the payment return circuit of
+ * this thirdparty must use the Stripe sandbox (test) account, must not validate invoices
+ * and must not record payments (the circuit continues like if the payment was done).
+ * The keyword is defined with the constant SELYOURSAAS_STRIPE_SANDBOX_KEYWORD.
+ *
+ * @param 	Societe	$thirdparty		Object thirdparty (the customer account)
+ * @return 	int						1 if the name of the thirdparty contains the reserved keyword, 0 otherwise
+ */
+function sellyoursaasIsSandboxThirdparty($thirdparty)
+{
+	$stripeSandboxKeyword = trim(getDolGlobalString('SELLYOURSAAS_STRIPE_SANDBOX_KEYWORD'));
+
+	if (empty($stripeSandboxKeyword) || !is_object($thirdparty) || empty($thirdparty->name)) {
+		return 0;
+	}
+
+	return (stripos($thirdparty->name, $stripeSandboxKeyword) !== false) ? 1 : 0;
+}
+
 /**
  * Return if instance is a paid instance or not
  * Check if there is an invoice or template invoice (it was a paying customer) or just a template invoice (it is a current paying customer)
@@ -404,6 +426,64 @@ function sellyoursaasIsSuspended($contract)
 	}
 
 	return false;
+}
+
+/**
+ * Check that a custom domain name currently resolves (public DNS) to the same IP address(es)
+ * as the instance's own default domain name, so we know a Let's Encrypt HTTP-01 challenge
+ * against it has a chance to succeed.
+ *
+ * @param	string	$customurl	Custom domain name to check (without protocol)
+ * @param	string	$reffqdn	Instance's own default domain name (Contrat->ref_customer)
+ * @return	int					1 if customurl resolves to the same IP(s) than reffqdn, 0 if not, -1 if we failed to resolve reffqdn itself
+ */
+function sellyoursaasCheckCustomUrlDns($customurl, $reffqdn)
+{
+	$ipref = @gethostbynamel($reffqdn);
+	if (empty($ipref)) {
+		// Should not happen: reffqdn is the instance's own working domain name.
+		return -1;
+	}
+
+	$ipcustom = @gethostbynamel($customurl);
+	if (empty($ipcustom)) {
+		return 0;
+	}
+
+	if (count(array_intersect($ipref, $ipcustom)) > 0) {
+		return 1;
+	}
+
+	return 0;
+}
+
+/**
+ * Check if a custom domain name is already used by another contract, whatever its deployment server.
+ *
+ * @param	DoliDB	$db					Database handler
+ * @param	string	$customurl			Custom domain name to check
+ * @param	int		$excludecontractid	Contract id to exclude from the search (the one being edited)
+ * @return	int							Id of the other contract already using this custom url, 0 if not used, -1 if error
+ */
+function sellyoursaasCheckCustomUrlAlreadyUsed($db, $customurl, $excludecontractid = 0)
+{
+	$sql = "SELECT ce.fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields as ce";
+	$sql .= " WHERE ce.custom_url = '".$db->escape($customurl)."'";
+	if ($excludecontractid > 0) {
+		$sql .= " AND ce.fk_object != ".((int) $excludecontractid);
+	}
+	$sql .= " LIMIT 1";
+
+	$resql = $db->query($sql);
+	if (!$resql) {
+		return -1;
+	}
+	$obj = $db->fetch_object($resql);
+	if ($obj) {
+		return (int) $obj->fk_object;
+	}
+
+	return 0;
 }
 
 /**

@@ -213,9 +213,21 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 					$nametotest = $object->ref_customer;
 					// @TODO
 
-					// Test that custom url is not already used
-					$nametotest = $object->array_options['options_custom_url'];
-					// @TODO
+					// Test that custom url is not already used by another contract, and that its DNS
+					// currently points to the same IP(s) than this instance's own default domain name
+					// (otherwise the Let's Encrypt HTTP-01 challenge triggered by the remote action
+					// 'rename' below can only fail, silently falling back to the platform's wildcard cert).
+					if (!empty($object->array_options['options_custom_url'])) {
+						$nametotest = $object->array_options['options_custom_url'];
+						$otherid = sellyoursaasCheckCustomUrlAlreadyUsed($this->db, $nametotest, $object->id);
+						if ($otherid > 0) {
+							$this->errors[] = $langs->trans("ErrorCustomUrlAlreadyUsed", $nametotest);
+							$testok = 0;
+						} elseif (sellyoursaasCheckCustomUrlDns($nametotest, $object->ref_customer) !== 1) {
+							$this->errors[] = $langs->trans("ErrorCustomUrlDnsNotPointingHere", $nametotest, $object->ref_customer);
+							$testok = 0;
+						}
+					}
 
 					if ($testok) {
 						if ($object->oldcopy->array_options['options_deployment_status'] != 'undeployed') {

@@ -846,8 +846,7 @@ remotebackupuser=admin
 remotebackupdir=/mnt/diskbackup
 
 # Option to use different path for dataroot
-#olddoldataroot=/home/admin/wwwroot/dolibarr_documents
-#newdoldataroot=/new/path/of/documents
+#doldataroot=/home/admin/wwwroot/dolibarr_documents
 # Options to change the directory of vhostfile templates
 #templatesdir=/path/of/vhostfile/templates
 
@@ -1515,8 +1514,7 @@ systemctl status remote_server_launcher
 
 Note: The agent is launched on port 8080 and is waiting master orders.
 
-
-To use systemd create a file */etc/systemd/system/remote-server-launcher.service* :
+* To use systemd instead of initd, create a file */etc/systemd/system/remote-server-launcher.service* :
 
 [source,bash]
 ---------------
@@ -1547,6 +1545,20 @@ systemctl enable remote-server-launcher.service
 systemctl start remote-server-launcher.service
 systemctl status remote-server-launcher.service
 systemctl stop remote-server-launcher.service
+---------------
+
+
+Note: If the *dolibarrdir=* is not the default value and is on a separate mount filesystem, you can add a drop-in so the
+service still starts in the right order (replace */mnt/example* with that mount point):
+
+[source, bash]
+---------------
+mkdir -p /etc/systemd/system/remote_server_launcher.service.d
+cat > /etc/systemd/system/remote_server_launcher.service.d/mount-order.conf << 'EOF'
+[Unit]
+RequiresMountsFor=/mnt/example
+EOF
+systemctl daemon-reload
 ---------------
 
 
@@ -4558,7 +4570,7 @@ If you use an external db server (same value of "databasehost" and "databaseport
 If you use an ssh port other than 22
 * SELLYOURSAAS_SSH_SERVER_PORT = port of your ssh server
 
-If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment server (same value of "newdoldataroot" in sellyoursaas.conf)
+If the path of "documents" directory (DOL_DATA_ROOT) is different in deployment server (must be the same value than "doldataroot" in sellyoursaas.conf)
 * SELLYOURSAAS_FORCE_DOL_DATA_ROOT = /path/of/dolibarr/documents/in/deployment/server
 
 To activate Jailkit, a chroot security system (see Jailkit configuration)

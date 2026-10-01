@@ -56,6 +56,10 @@
 * FIX Debug master_move_instance.php - Price of old instance is kept/reused.
 * FIX code for email template to use to send email for credit transfer payment.
 * FIX exclusion of modules for upgrade feature was not using the setup.
+* FIX Logo fallback chain on login, register and password-forgotten pages checked a stale/undefined $urllogo instead of $linklogo (copy-paste leftover, harmless today but fragile).
+* FIX dist/css/alt-myaccount-example.css was missing all the base utility classes from myaccount.css (SELLYOURSAAS_EXTCSS fully replaces the stylesheet, it's not additive) - a reseller using this example as-is would get a broken myaccount dashboard. Now @imports myaccount.css first.
+* FIX register.php/loginmyaccount.tpl.php/passwordforgotten.tpl.php's form area was never actually constrained to a fixed width (.center in myaccount.css only means text-align:center) - it stretched to the full page width instead of being centered. Constrained .customregistermain/.customregisterheader in dist/css/alt-myaccount-example.css, keeping the full-width colored banners (.page-header-top, div.block header) as originally designed.
+* FIX .customregisterheader's title was flushed to the left edge of the bar, and its two lines (title/subtitle) no longer shared a left edge (leftover text-align:center from .block.medium.center). Centers the title within the bar via absolute positioning, matching the default look, independent of the "already have an account" link's width on the right.
 * SEC When using ssh, a user can't see the OS and package information.
 
 
