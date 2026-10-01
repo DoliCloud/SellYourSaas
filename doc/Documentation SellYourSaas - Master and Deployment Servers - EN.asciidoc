@@ -1515,6 +1515,8 @@ systemctl status remote_server_launcher
 
 Note: The agent is launched on port 8080 and is waiting master orders.
 
+* To use systemd instead of initd, create a file */etc/systemd/system/remote-server-launcher.service* :
+
 [source,bash]
 ---------------
 # /etc/systemd/system/remote-server-launcher.service
