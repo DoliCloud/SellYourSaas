@@ -688,7 +688,7 @@ class ActionsSellyoursaas
 						setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
 					}
 					if ($action == 'refreshfilesonly') {
-						setEventMessages($langs->trans("FilesStatusUpdate"), null, 'mesgs');
+						setEventMessages($langs->trans("FilesStatusComputed"), null, 'mesgs');
 					}
 					if ($action == 'recreateauthorizedkeys') {
 						setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
