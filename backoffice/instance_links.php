@@ -720,22 +720,24 @@ print '<td>'.$langs->trans("Modules").'</td>';
 print '<td colspan="3"><span class="small">'.$object->modulesenabled.'</span></td>';
 print '</tr>';
 
-// Electronic Billing
-$einvoicing_superpdp_viapartner = $other_informations["EINVOICING_SUPERPDP_VIAPARTNER"];
-$einvoicing_superpdp_viapartner_oauth_url = $other_informations["EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL"];
+if (getDolGlobalString('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC')) {
+	// Electronic Billing
+	$einvoicing_superpdp_viapartner = $other_informations["EINVOICING_SUPERPDP_VIAPARTNER"];
+	$einvoicing_superpdp_viapartner_oauth_url = $other_informations["EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL"];
 
-print '<tr><td width="20%">'.$langs->trans("EInvoicingConfVariables").'</td>';
-print '<td>';
-$stringtoshow = "EINVOICING_SUPERPDP_VIAPARTNER = ".(!empty($einvoicing_superpdp_viapartner) ? dol_escape_htmltag($einvoicing_superpdp_viapartner) : "");
-$stringtoshow .= "<br> EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL = ".(!empty($einvoicing_superpdp_viapartner_oauth_url) ? dol_escape_htmltag($einvoicing_superpdp_viapartner_oauth_url) : "");
-print $stringtoshow;
-print '</td>';
-print '<td></td><td>';
-if (! $object->user_id && $user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
-	print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=reset_einvoicingconf&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
+	print '<tr><td width="20%">'.$langs->trans("EInvoicingConfVariables").'</td>';
+	print '<td>';
+	$stringtoshow = "EINVOICING_SUPERPDP_VIAPARTNER = ".(!empty($einvoicing_superpdp_viapartner) ? dol_escape_htmltag($einvoicing_superpdp_viapartner) : "");
+	$stringtoshow .= "<br> EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL = ".(!empty($einvoicing_superpdp_viapartner_oauth_url) ? dol_escape_htmltag($einvoicing_superpdp_viapartner_oauth_url) : "");
+	print $stringtoshow;
+	print '</td>';
+	print '<td></td><td>';
+	if (! $object->user_id && $user->hasRight('sellyoursaas', 'write') && $object->array_options['options_deployment_status'] !== 'undeployed') {
+		print ' <a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&action=reset_einvoicingconf&token='.newToken().'">'.img_picto($langs->trans("Refresh"), 'refresh').'</a>';
+	}
+	print '</td>';
+	print '</tr>';
 }
-print '</td>';
-print '</tr>';
 
 print "</table>";
 
