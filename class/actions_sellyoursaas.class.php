@@ -77,7 +77,7 @@ class ActionsSellyoursaas
 
 
 	/**
-	 *    Return URL formated
+	 *    Return URL formatted
 	 *
 	 *    @param	array			$parameters		Array of parameters
 	 *    @param	CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
@@ -184,7 +184,7 @@ class ActionsSellyoursaas
 	}
 
 	/**
-	 *    Return ref customer formated
+	 *    Return ref customer formatted
 	 *
 	 *    @param	array			$parameters		Array of parameters
 	 *    @param	CommonObject    $object         The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
@@ -688,7 +688,7 @@ class ActionsSellyoursaas
 						setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
 					}
 					if ($action == 'refreshfilesonly') {
-						setEventMessages($langs->trans("ResourceComputed"), null, 'mesgs');
+						setEventMessages($langs->trans("FilesStatusUpdate"), null, 'mesgs');
 					}
 					if ($action == 'recreateauthorizedkeys') {
 						setEventMessages($langs->trans("FileCreated"), null, 'mesgs');
@@ -701,7 +701,7 @@ class ActionsSellyoursaas
 					}
 				}
 			}
-			if ($action == 'reset_einvoicingconf'){
+			if ($action == 'reset_einvoicingconf') {
 				$type_db = $conf->db->type;
 
 				$instance = $object->ref_customer;
@@ -738,7 +738,7 @@ class ActionsSellyoursaas
 						setEventMessages('Failed to execute SQL: '.$db->lasterror(), null, 'warnings');
 						$error++;
 					}
-					if(!empty($formula)){
+					if (!empty($formula)) {
 						$newdb->begin();
 						$formula = make_substitutions($formula, $substitarray);
 						$formula = trim($formula);
@@ -748,7 +748,7 @@ class ActionsSellyoursaas
 							if ($sqltoexecuteline && (strpos($sqltoexecuteline, '--') === false || strpos($sqltoexecuteline, '--') > 0)) {
 								dol_syslog("Execute sql=".$sqltoexecuteline);
 								$resql = $newdb->query($sqltoexecuteline);
-								if(!$resql){
+								if (!$resql) {
 									$error++;
 								}
 							}
@@ -1015,7 +1015,7 @@ class ActionsSellyoursaas
 								$blacklistip->status = Blacklistip::STATUS_ENABLED;
 								$blacklistip->date_use = $tmpcontract->array_options['options_deployment_date_start'];
 								$blacklistip->content = $tmpcontract->array_options['options_deployment_ip'];
-								$blacklistip->comment = "Flagged as Spammer (from a massaction in the backoffice by ".$user->login."), after manual analyzis of the user activity";
+								$blacklistip->comment = "Flagged as Spammer (from a massaction in the backoffice by ".$user->login."), after manual analysis of the user activity";
 
 								$result2 = $blacklistip->create($user);
 								if ($result2 <= 0) {
@@ -1186,22 +1186,22 @@ class ActionsSellyoursaas
 						// nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
 						if (! $object->nbofservicesclosed) {
 							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_SUSPEND');
-							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Paid services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
+							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planned for end of service">Paid services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
 						}
 						if ($object->nbofservicesclosed) {
 							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_PAID_UNDEPLOYMENT');
-							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Paid instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
+							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planned for end of service">Paid instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
 						}
 					} else {
 						$ret .= '<span class="badge badge-status5 badge-status valignmiddle inline-block" style="font-size: 1em">'.$langs->trans("TrialMode").'</span>';
 						// nbofserviceswait, nbofservicesopened, nbofservicesexpired and nbofservicesclosed
 						if (! $object->nbofservicesclosed) {
 							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_SUSPEND');
-							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Test services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
+							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planned for end of service">Test services will be suspended<br>'.$daysafterexpiration.' days after expiration.</span>';
 						}
 						if ($object->nbofservicesclosed) {
 							$daysafterexpiration = getDolGlobalString('SELLYOURSAAS_NBDAYS_AFTER_EXPIRATION_BEFORE_TRIAL_UNDEPLOYMENT');
-							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planed for end of service">Test instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
+							$ret.='<span class="badge2 small marginleftonly valignmiddle inline-block" title="Expiration = Date planned for end of service">Test instance will be undeployed<br>'.$daysafterexpiration.' days after expiration.</span>';
 						}
 					}
 				}
@@ -1664,7 +1664,7 @@ class ActionsSellyoursaas
 				$nbtotalofrecords = $objforcount->nbtotalofrecords;
 				$db->free($resql);
 			} else {
-			    dol_print_error($db);
+				dol_print_error($db);
 			}
 
 			if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
@@ -1725,7 +1725,7 @@ class ActionsSellyoursaas
 	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
 	 * @return  int 		      			  	=0
 	 */
-	public function completeFieldsToSearchAll($parameters, $object, $action, $aa)
+	public function completeFieldsToSearchAll($parameters, $object, $action, $hookmanager)
 	{
 		if ($object->element == 'societe') {
 			$this->results['fieldstosearchall']['ef.firstname'] = 'Firstname';
