@@ -40,7 +40,16 @@ $idcontract = "0";
 if (GETPOST('instanceselect', 'alpha')) {
 	$instanceselect = GETPOST('instanceselect', 'alpha');
 	$instanceselect = explode("_", $instanceselect);
-	$idcontract = $instanceselect[1];
+	$idcontract = empty($instanceselect[1]) ? 0 : (int) $instanceselect[1];
+	// The instance must be one of the logged thirdparty (never trust the id received)
+	if ($idcontract > 0 && !isset($listofcontractid[$idcontract])) {
+		dol_syslog("ErrorInvalidInstanceSurelyAHackAttempt automigration on contract id=".$idcontract." refused for thirdparty id=".$mythirdpartyaccount->id, LOG_WARNING);
+		setEventMessages($langs->trans("ErrorForbidden"), null, 'errors');
+		$idcontract = 0;
+		if (in_array($action, array('fileverification', 'automigration'))) {
+			$action = '';
+		}
+	}
 }
 $uploaddirname = "automigration_".$idcontract.".tmp";
 $upload_dir = $conf->sellyoursaas->dir_temp.'/'.$uploaddirname;
@@ -172,12 +181,15 @@ if ($action == 'automigration') {
 	$utils = new Utils($db);
 
 	$sellyoursaasutils = new SellYourSaasUtils($db);
-	$instanceselect = GETPOST('instanceselect', 'alpha');
-	$instanceselect = explode("_", $instanceselect);
-	$idcontract = $instanceselect[1];
+	// $idcontract was already checked at the top of this file to be an instance of the logged thirdparty
 
 	$object = new SellYourSaasContract($db);
 	$object->fetch($idcontract);
+	if (empty($object->id) || $object->socid != $mythirdpartyaccount->id) {
+		setEventMessages($langs->trans("ErrorForbidden"), null, 'errors');
+		header("Location: ".$_SERVER["PHP_SELF"]."?mode=support");
+		exit;
+	}
 
 	$hostname_db  = $object->array_options['options_hostname_db'];
 	$username_db  = $object->array_options['options_username_db'];

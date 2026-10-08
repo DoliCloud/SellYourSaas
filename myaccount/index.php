@@ -764,6 +764,10 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		// Create a recurring invoice (+real invoice + contract renewal) if there is no recurring invoice yet
 		if (! $error) {
 			$result = $contract->fetch(GETPOST('contractid', 'int'));
+			if ($result > 0 && $contract->socid != $mythirdpartyaccount->id) {
+				dol_syslog("ErrorInvalidInstanceSurelyAHackAttempt validatefreemode on contract id=".$contract->id." refused for thirdparty id=".$mythirdpartyaccount->id, LOG_WARNING);
+				$result = 0;
+			}
 			if ($result > 0) {
 				$savlistofcontractid = $listofcontractid;
 
@@ -2448,6 +2452,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		setEventMessages($tmpcontract->error, null, 'errors');
 		$error++;
 	}
+	if (!$error && $tmpcontract->socid != $mythirdpartyaccount->id) {
+		dol_syslog("ErrorInvalidInstanceSurelyAHackAttempt action ".$action." on contract id=".$contractid." refused for thirdparty id=".$mythirdpartyaccount->id, LOG_WARNING);
+		setEventMessages($langs->trans("ErrorForbidden"), null, 'errors');
+		$error++;
+	}
 	$tmplineforremoteaction = null;
 	if (!$error) {
 		foreach ($tmpcontract->lines as $key => $line) {
@@ -2599,6 +2608,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$res = $tmpcontract->fetch($contractid);
 	if ($res <= 0) {
 		setEventMessages($tmpcontract->error, null, 'errors');
+		$error++;
+	}
+	if (!$error && $tmpcontract->socid != $mythirdpartyaccount->id) {
+		dol_syslog("ErrorInvalidInstanceSurelyAHackAttempt action ".$action." on contract id=".$contractid." refused for thirdparty id=".$mythirdpartyaccount->id, LOG_WARNING);
+		setEventMessages($langs->trans("ErrorForbidden"), null, 'errors');
 		$error++;
 	}
 	if (!$error) {
@@ -2796,8 +2810,14 @@ if ($welcomecid > 0) {
 	$contract->fetch($welcomecid);
 	$listofcontractid[$welcomecid] = $contract;
 	// Add a protection to avoid to see dashboard of others by changing welcomecid.
-	if (($mythirdpartyaccount->isareseller == 0 && $contract->socid != $_SESSION['dol_loginsellyoursaas'])           // Not reseller, and contract is for another thirdparty
-	|| ($mythirdpartyaccount->isareseller == 1 && array_key_exists($contract->socid, $listofcustomeridreseller))) { // Is a reseller and contract is for a company that is a customer of reseller
+	$welcomecidallowed = ($contract->socid == $_SESSION['dol_loginsellyoursaas']);		// Contract is for the logged thirdparty
+	if (!$welcomecidallowed && $mythirdpartyaccount->isareseller == 1 && $contract->socid > 0) {
+		// Is a reseller and contract is for a company that is a customer of the reseller
+		$sqlcheck = "SELECT rowid FROM ".MAIN_DB_PREFIX."societe WHERE rowid = ".((int) $contract->socid)." AND parent = ".((int) $mythirdpartyaccount->id);
+		$resqlcheck = $db->query($sqlcheck);
+		$welcomecidallowed = ($resqlcheck && $db->num_rows($resqlcheck) > 0);
+	}
+	if (!$welcomecidallowed) {
 		dol_print_error_email('DEPLOY-WELCOMEID'.$welcomecid, 'Bad value for welcomeid. Try to remove the parameter welcomeid from your URL.', null, 'alert alert-error');
 		exit;
 	}
