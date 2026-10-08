@@ -230,13 +230,25 @@ if ($partner) {
 }
 
 
+// This public page must not disclose data of a thirdparty or contract that is not the one of the logged customer.
+$socidinsession = empty($_SESSION['dol_loginsellyoursaas']) ? 0 : (int) $_SESSION['dol_loginsellyoursaas'];
+if ($socid > 0 && $socid != $socidinsession) {
+	$socid = 0;
+}
+
 if ($reusecontractid) {
 	$contract = new Contrat($db);
 	$contract->fetch($reusecontractid);
-	$socid = ($contract->socid > 0 ? $contract->socid : $contract->fk_soc);
-	$tmparray=explode('.', $contract->ref_customer, 2);
-	$sldAndSubdomain=strtolower($tmparray[0]);
-	$tldid='.'.$tmparray[1];
+	$socidofcontract = ($contract->socid > 0 ? $contract->socid : $contract->fk_soc);
+	if ($socidinsession > 0 && $socidofcontract == $socidinsession) {
+		$socid = $socidofcontract;
+		$tmparray=explode('.', $contract->ref_customer, 2);
+		$sldAndSubdomain=strtolower($tmparray[0]);
+		$tldid='.'.(isset($tmparray[1]) ? $tmparray[1] : '');
+	} else {
+		dol_syslog("register.php: reusecontractid=".$reusecontractid." ignored, contract not owned by thirdparty in session", LOG_WARNING);
+		$reusecontractid = 0;
+	}
 }
 
 $mythirdparty = new Societe($db);
@@ -545,7 +557,7 @@ if ($reshook == 0) {
 			  <!-- the utm_source_cookie=<?php echo dol_escape_htmltag(empty($_COOKIE["utm_source_cookie"]) ? '' : $_COOKIE["utm_source_cookie"]); ?> will be saved into options_source_utm -->
 
 			  <input type="hidden" name="disablecustomeremail" value="<?php echo dol_escape_htmltag($disablecustomeremail); ?>" />
-			  <!-- _SESSION['dol_loginsellyoursaas'] = <?php echo(empty($_SESSION['dol_loginsellyoursaas']) ? '' : $_SESSION['dol_loginsellyoursaas']); ?> -->
+			  <!-- _SESSION['dol_loginsellyoursaas'] = <?php echo (empty($_SESSION['dol_loginsellyoursaas']) ? '' : $_SESSION['dol_loginsellyoursaas']); ?> -->
 
 			<?php
 			if ($productref == 'array') {

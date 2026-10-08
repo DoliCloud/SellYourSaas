@@ -205,8 +205,21 @@ if (GETPOSTISSET('reset')) {
 $fromsocid=GETPOST('fromsocid', 'int');
 
 // Id of connected thirdparty
-$socid = GETPOST('socid', 'int') ? GETPOST('socid', 'int') : $_SESSION['dol_loginsellyoursaas'];
-$idforfetch = $fromsocid > 0 ? $fromsocid : $socid;
+// The id of the thirdparty must come from the session only, never from the URL (avoid IDOR).
+$socid = empty($_SESSION['dol_loginsellyoursaas']) ? 0 : (int) $_SESSION['dol_loginsellyoursaas'];
+$idforfetch = $socid;
+if ($fromsocid > 0 && $fromsocid != $socid && $socid > 0) {
+	// fromsocid is accepted only if it is the thirdparty in session or a customer of the thirdparty in session (reseller)
+	$sqlcheck = "SELECT rowid FROM ".MAIN_DB_PREFIX."societe WHERE rowid = ".((int) $fromsocid)." AND parent = ".((int) $socid);
+	$resqlcheck = $db->query($sqlcheck);
+	if ($resqlcheck && $db->num_rows($resqlcheck) > 0) {
+		$idforfetch = $fromsocid;
+	} else {
+		dol_syslog("ErrorInvalidFromSocidSurelyAHackAttempt fromsocid=".$fromsocid." is not allowed for thirdparty in session id=".$socid, LOG_WARNING);
+	}
+} elseif ($fromsocid > 0) {
+	$idforfetch = $fromsocid == $socid ? $socid : 0;
+}
 if ($idforfetch > 0) {
 	$result = $mythirdpartyaccount->fetch($idforfetch);					// fromid set if creation from reseller dashboard else we use socid
 	if ($result <= 0) {

@@ -323,15 +323,32 @@ dol_syslog("Start actions of register_instance (reusecontractid = ".$reusecontra
 $newurl=preg_replace('/register_instance\.php/', 'register.php', $_SERVER["PHP_SELF"]);
 
 if ($reusecontractid) {
-	// When we use the "Restart deploy" from the contract after error into the backoffice
-
-	// Check we are logged in backoffice and that reusecontractid is not forged
-	// TODO
+	// When we use the "Restart deploy" from the contract after error, into the myaccount dashboard.
 
 	$newurl=preg_replace('/register_instance/', 'index', $newurl);
 	if (! preg_match('/\?/', $newurl)) {
 		$newurl.='?';
 	}
+
+	// Check we are logged and that reusecontractid is not forged (contract must be one of the thirdparty in session or one of its customers if reseller)
+	if (substr($sapi_type, 0, 3) != 'cli') {
+		$socidinsession = empty($_SESSION['dol_loginsellyoursaas']) ? 0 : (int) $_SESSION['dol_loginsellyoursaas'];
+		$isowner = false;
+		if ($socidinsession > 0) {
+			$sqlcheck = "SELECT c.rowid FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s";
+			$sqlcheck .= " WHERE c.fk_soc = s.rowid AND c.rowid = ".((int) $reusecontractid);
+			$sqlcheck .= " AND (s.rowid = ".((int) $socidinsession)." OR s.parent = ".((int) $socidinsession).")";
+			$resqlcheck = $db->query($sqlcheck);
+			$isowner = ($resqlcheck && $db->num_rows($resqlcheck) > 0);
+		}
+		if (!$isowner) {
+			dol_syslog("ErrorInvalidReuseIDSurelyAHackAttempt Restart of contract id=".((int) $reusecontractid)." blocked for ".getUserRemoteIP()." - thirdparty in session is ".$socidinsession, LOG_WARNING);
+			setEventMessages("Error, you try to restart an instance on an account you don't own", null, 'errors');
+			header("Location: ".$newurl);
+			exit(247);
+		}
+	}
+
 	$newurl.='&mode=instances';
 	$newurl.='&reusecontractid='.((int) $reusecontractid);
 } elseif ($reusesocid) {	// Can be >= 0, but also -1
