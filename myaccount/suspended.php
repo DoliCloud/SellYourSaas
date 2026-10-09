@@ -94,6 +94,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+dol_include_once('sellyoursaas/class/deploymentserver.class.php');
 
 
 $instance = GETPOST('instance', 'aZ09');	// example: testldr3.with.mysaasdomainname.com
@@ -152,7 +153,27 @@ top_htmlhead('', 'Suspension Page');
 <?php
 print $langs->trans("SorryInstanceSuspended", dol_escape_htmltag($instance));
 print '<br>';
-print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
+// Show a link only if instance is a name into one of the managed domains
+$isanurlofasellyoursaasinstance = false;
+if (!getDolGlobalString('SELLYOURSAAS_OBJECT_DEPLOYMENT_SERVER_MIGRATION')) {
+	$tmparray = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
+} else {
+	$staticdeploymentserver = new Deploymentserver($db);
+	$tmparray = $staticdeploymentserver->fetchAllDomains();
+}
+foreach ($tmparray as $tmp) {
+	$newtmp = preg_replace('/:.*$/', '', $tmp);
+	if ($newtmp && preg_match('/'.preg_quote('.'.$newtmp, '/').'$/i', $instance)) {
+		$isanurlofasellyoursaasinstance = true;
+		break;
+	}
+}
+
+if ($isanurlofasellyoursaasinstance) {
+	print '<a href="https://'.dol_escape_htmltag($instance).'">'.$langs->trans("ClickToCheckAgain").'</a><br>';
+} else {
+	print $langs->trans("PleaseWaitAndCheckAgainLater").'<br>';
+}
 print '<br>';
 print '<br>';
 print $langs->trans("GoOnYourDashboardToGetMoreInfo", $_SERVER['SERVER_NAME'], $_SERVER['SERVER_NAME']);
