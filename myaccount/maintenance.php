@@ -86,14 +86,16 @@ if (! $res && file_exists("../../../main.inc.php")) {
 if (! $res) {
 	die("Include of main fails");
 }
-
+/**
+ * @var DoliDB $db
+ */
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
-$instance = GETPOST('instance');	// example: 'testldr3.with.mysaasdomainname.com', 'myaccount'
+$instance = GETPOST('instance', 'aZ09');	// example: 'testldr3.with.mysaasdomainname.com', 'myaccount'
 
 // SEarch instance
 $contract = new Contrat($db);

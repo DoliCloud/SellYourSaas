@@ -96,7 +96,7 @@ require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
 
-$instance = GETPOST('instance');	// example: testldr3.with.mysaasdomainname.com
+$instance = GETPOST('instance', 'aZ09');	// example: testldr3.with.mysaasdomainname.com
 
 // SEarch instance
 $contract = new Contrat($db);

@@ -21,7 +21,9 @@
  * @var HookManager $hookmanager
  * @var Translate $langs
  *
+ * @var Societe $mythirdpartyaccount
  * @var string $action
+ * @var mixed $listofcontractid
  */
 
 // Protection to avoid direct call of template
