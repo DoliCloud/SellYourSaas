@@ -27,7 +27,7 @@ if [ "x$7" == "x" ]; then
 	echo "         [instancefilter] is the instance filter (e.g. * for all instances)"
 	echo "         [master_instance_id] is the master instance ID"
 	echo "         [countrycode] is optional country code (e.g. FR)"
-	echo "         [nocache] is optional"
+	echo "         [nocache] is optional. It forces the rebuild of the local archive used as the cached package to deploy"
 	echo
 	echo "Example: $0  myhosts  deployment  test     REFMODULENAME  'abc*'  abc1234"
 	echo "Example: $0  myhosts  deployment  confirm  REFMODULENAME  '*abc.mydomain.com'  abc1234  FR  nocache"
