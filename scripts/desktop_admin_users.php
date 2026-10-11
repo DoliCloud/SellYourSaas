@@ -74,7 +74,7 @@ if (! $res) {
 // Load user and its permissions
 //$result=$user->fetch('','admin');	// Load user for login 'admin'. Comment line to run as anonymous user.
 //if (! $result > 0) { dol_print_error('',$user->error); exit; }
-//$user->getrights();
+//$user->loadRights();
 
 $date = new DateTime();
 print "***** ".$script_file." (".$version.") - ".$date->format('Ymd-H:i:s')." *****\n";
