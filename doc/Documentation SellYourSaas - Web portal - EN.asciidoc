@@ -20,10 +20,10 @@ This document explains how to install the optional web portal server of Sell-You
 
 === Choice of the machine and OS and create it ===
 
-Avec Amazon Standard Medium:
-Server *m1.medium* hosted in EU @ $0.18 per hour plus $10 for storage and bandwidth puis passage à *m1.large* @ $0.18 per hour
+With Amazon Standard Medium:
+Server *m1.medium* hosted in EU @ $0.18 per hour plus $10 for storage and bandwidth then upgrade to *m1.large* @ $0.18 per hour
 
-Avec OVH Public Cloud:
+With OVH Public Cloud:
 1 core.
 
 
@@ -64,7 +64,7 @@ ln -fs /bin/bash /usr/bin/sh
 
 ==== SSH setup
 
-Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
+Fix permissions on */etc/ssh/sshd_config* so only root has read and write access:
 
 [source,conf]
 ---------------
@@ -97,7 +97,7 @@ PermitEmptyPasswords no
 # Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
 ChallengeResponseAuthentication no
 
-# Define list of allowed method to authenticate
+# Define list of allowed methods to authenticate
 PasswordAuthentication no   # This will be allowed for osu users only into main sshd_config file with a Match User rule
 PubkeyAuthentication yes
 
@@ -122,12 +122,12 @@ Please note: replace *myunixlogin* with the correct value before taking changes 
 
 
 
-Now add this at end of file */etc/ssh/sshd_config* (ssh does not allow Match Rules into the custom file)
+Now add this at the end of file */etc/ssh/sshd_config* (ssh does not allow Match Rules into the custom file)
 
 [source, conf]
 ---------------
 # BEGIN Block for SellYourSaas
-# Warning Match rule works only insshd_config not into include files
+# Warning Match rule works only in sshd_config, not in include files
 # You can test a Match User rule with ssd -T -C user=aaa | grep param
 #Match User osu*
 #  ChrootDirectory "/home/jail/home/"
@@ -139,7 +139,7 @@ Match User osu*
 # END Block for SellYourSaas
 ---------------
 
-To test a ssh config, you can run
+To test an ssh config, you can run
 
 [source, conf]
 ---------------
@@ -166,7 +166,7 @@ Create a file */etc/sudoers.d/myunixlogin* with the content
 [source, conf]
 ---------------
 myunixlogin ALL=(ALL) ALL
-# You can also add this lines to avoid users to re-enter a password when switching to 'admin' or 'osu*'
+# You can also add these lines to avoid users having to re-enter a password when switching to 'admin' or 'osu*'
 #myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - admin
 #myunixlogin ALL=(ALL) NOPASSWD:/usr/bin/su - osu*
 ---------------
@@ -179,7 +179,7 @@ sudo su - admin
 ---------------
 
 
-And set the *root*.*root* and the permissions *r--r-----*
+And set the owner *root*.*root* and the permissions *r--r-----*
 
 [source, conf]
 ---------------
@@ -205,7 +205,7 @@ ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
 
-Define or redefine the password for *root*, *admin* with a secured password saved into your password manager.
+Define or redefine the password for *root*, *admin* with a secure password saved into your password manager.
 
 [source,bash]
 ---------------
@@ -213,7 +213,7 @@ passwd root
 passwd admin
 ---------------
 
-Run *ssh-keygen* for all these accounts : *root*, *admin* and *myunixlogin*
+Run *ssh-keygen* for all these accounts: *root*, *admin* and *myunixlogin*
 
 
 === Deletion of information files at login
@@ -240,14 +240,14 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 
 
 
-=== Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
+=== Add support for IPv6 (optional, if ipv6 wanted but not yet enabled)
 
 ==== With netplan (Ubuntu 18.04 +)
 
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
 
-Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
+Example for an IPv6 1234:41d0:1234:1000::1234 with gateway 1234:41d0:1234:1000::1
 
 [source, conf]
 ---------------
@@ -276,7 +276,7 @@ Rem: *eth0* can be something else, for example *ens3*.
 
 - Add the virtual IP via the OVH manager.
 
-- Add and remove the virtual network interface on the server dynamically (for test).
+- Add and remove the virtual network interface on the server dynamically (for testing).
 
 Addition:
 
@@ -292,7 +292,7 @@ Deletion:
 ifconfig eth0: 0 down
 ---------------
 
-- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
+- For a definition persistent across reboots, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
 
 Example for 2 virtual IPs:
 
@@ -347,9 +347,9 @@ ln -fs /mnt/diskhome/backup /mnt/diskbackup/backup
 ---------------
 
 
-=== Getting files of Dolibarr and SellYourSaas application
+=== Getting files of Dolibarr and SellYourSaas applications
 
-* Under the *root* login, install git tool:
+* Under the *root* login, install the git tool:
 
 [source,bash]
 ---------------
@@ -392,13 +392,13 @@ With the following content:
 ---------------
 # File /etc/sellyoursaas.conf
 
-# domain du service
+# domain of the service
 domain=mysaasdomainname.com
 
 # Set to 1 if this server is the master server,
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
 masterserver=0
-# Set to 1 if this server host instances for the pool (deployment server),
+# Set to 1 if this server hosts instances for the pool (deployment server),
 # or 2 if the ssh and mysql access are restricted to ips into /etc/sellyoursaas.d/sellyoursaas-allowed-ip.conf only
 instanceserver=0
 # Set to 1 if this server hosts a dns for the pool (deployment server)
@@ -417,13 +417,13 @@ databasehost=ipOfMasterServer or localhost if on master server
 databaseport=3306
 # Set database name of the web server
 database=databaseNameOnMasterServer
-# Set list of more database if there is
+# Set list of more databases if any
 #databasemore=database2,database3...
 # Set a credential for an access to the master database (each server can have a different account to access the master database)
 databaseuser=sellyoursaas
 databasepass=xxxxx
 
-# Set compress format (gzip or zstd) (zstd need Ubuntu >= 20 or Debian >= 10)
+# Set compress format (gzip or zstd) (zstd needs Ubuntu >= 20 or Debian >= 10)
 usecompressformatforarchive=zstd
 
 # Set this to directory where dolibarr repository is installed
@@ -431,7 +431,7 @@ dolibarrdir=/home/admin/wwwroot/dolibarr
 # Set directory where instances are stored (default is /home/jail/home)
 #targetdir=/home/jail/home
 
-# Set directory where backup are stored
+# Set directory where backups are stored
 backupdir=/mnt/diskbackup/backup
 
 # Set option to exclude some tables for some instances in backup
@@ -463,7 +463,7 @@ remotebackupdir=/mnt/diskbackup
 #commonjailtemplatename=commonjail
 ---------------
 
-Put *masterserver*, *dnsserver* and *instanceserver* to 0
+Set *masterserver*, *dnsserver* and *instanceserver* to 0
 
 
 * Create also an empty directory:
@@ -474,7 +474,7 @@ mkdir -p /etc/sellyoursaas.d
 ---------------
 
 
-* Optional: If you want to restrict access to some IP (to the web admin on *Master server* or to ssh or mysql to the *Deployment servers*), you can also
+* Optional: If you want to restrict access to some IPs (to the web admin on *Master server* or to ssh or mysql to the *Deployment servers*), you can also
 create a file */etc/sellyoursaas.d/**-allowed-ip.conf* (http, ssh and mysql) or */etc/sellyoursaas.d/**-allowed-ip-ssh.conf* (ssh only) or */etc/sellyoursaas.d/**-allowed-ip-mysql.conf* (mysql only)
 
 [source,conf]
@@ -495,7 +495,7 @@ Once such a file is created/removed or modified, you must run the *scripts/firew
 
 === Installation of packages
 
-* Installation des packages Ubuntu *18.04-*
+* Installation of Ubuntu packages *18.04-*
 
 [source,bash]
 ---------------
@@ -512,7 +512,7 @@ sudo apt install soffice libreoffice-common libreoffice-writer
 sudo apt install mailutils postfix
 ---------------
 
-* Installation des packages Ubuntu *20.04+*
+* Installation of Ubuntu packages *20.04+*
 
 [source,bash]
 ---------------
@@ -528,9 +528,9 @@ sudo apt install mailutils postfix
 ---------------
 
 
-=== Activation des modules apache
+=== Activation of apache modules
 
-On active les *modules* pour un fonctionnement avec PHP FPM:
+Enable the *modules* to work with PHP FPM:
 
 [source,bash]
 ---------------
@@ -538,7 +538,7 @@ a2enmod expires fcgid filter headers http2 mime mpm_event negotiation proxy prox
 a2enmod access_compat actions alias auth_basic authn_core authn_file authz_core authz_groupfile authz_host authz_user autoindex cgi deflate dir env
 ---------------
 
-On active les *configurations* pour un fonctionnement avec PHP FPM:
+Enable the *configurations* to work with PHP FPM:
 
 [source,bash]
 ---------------
@@ -546,7 +546,7 @@ a2enconf charset localized-error-pages other-vhosts-access-log security serve-cg
 a2enconf php7.2-fpm|php7.4-fpm
 ---------------
 
-On modifie la configuration du module *mpm_event* en éditant le fichier */etc/apache2/mods-enabled/mpm_event.conf*:
+Modify the configuration of the *mpm_event* module by editing the file */etc/apache2/mods-enabled/mpm_event.conf*:
 
 [source,bash]
 ---------------
@@ -564,7 +564,7 @@ On modifie la configuration du module *mpm_event* en éditant le fichier */etc/a
 
 === Installation of unix watchdog (optional) ===
 
-* Installation and activation of watchdog Linux with configs in */etc/watchdog*
+* Installation and activation of Linux watchdog with configs in */etc/watchdog*
 
 [source,bash]
 ---------------
@@ -582,7 +582,7 @@ systemctl stop watchdog
 systemctl start watchdog
 ---------------
 
-When load become very high or when memory is very low, the watchdog will launch the repair script that will track status of server into files */var/log/repair...log* and then reboot the server. Note: This should never happen.
+When load becomes very high or when memory is very low, the watchdog will launch the repair script that will track the status of the server into files */var/log/repair...log* and then reboot the server. Note: This should never happen.
 
 
 === Installation of firewall
@@ -603,7 +603,7 @@ ufw enable
 
 === Installation of fail2ban
 
-* Installation et activation de fail2ban avec les configs dans */etc/fail2ban*
+* Installation and activation of fail2ban with the configs in */etc/fail2ban*
 
 
 * Installation of fail2ban and activation of the following fail2ban rules:
@@ -619,7 +619,7 @@ To do this, first create a */etc/fail2ban/jail.local* file with this content:
 
 NOTE: The rules available may vary depending on the version of the OS installed.
 
-NOTE: Remember to also modify *mybusinessips* by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
+NOTE: Remember to also replace *mybusinessips* with your ip(s) separated by spaces as well as the parameter *destemail* with the supervision email of your company.
 
 
 [source, bash]
@@ -719,7 +719,7 @@ enabled = true
 
 [postfix-sasl]
 
-# Overwrite param port since it is wrong into file jail.conf because it contains 'imap3' instead of 'imap' that does not exists
+# Overwrite param port since it is wrong into file jail.conf because it contains 'imap3' instead of 'imap' that does not exist
 port    = smtp,465,submission,imap,imaps,pop3,pop3s
 enabled = true
 
@@ -836,7 +836,7 @@ ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolib
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas/etc/fail2ban/filter.d/web-dolibarr-rulesbruteforce.conf
 ---------------
 
-Relaunch fail2ban and check errors into */var/log/fail2ban.log*
+Relaunch fail2ban and check errors in */var/log/fail2ban.log*
 
 
 
@@ -844,7 +844,7 @@ Relaunch fail2ban and check errors into */var/log/fail2ban.log*
 
 The processes *freshclam* and *clamd* should be running. If not, launch them manually (for example */etc/init.d/clamav-freshclam start* or */etc/init.d/clamav-daemon start* to launch them).
 
-Test them: To test clamav tool, create a file */tmp/testvirus* with content
+Test them: To test the clamav tool, create a file */tmp/testvirus* with content
 
 [source,bash]
 ---------------
@@ -870,7 +870,7 @@ service apache2 stop
 service apache2 start
 ---------------
 
-You should see into the status of apparmor a line saying that Profile *usr/sbin/clamd* is disabled.
+You should see in the status of apparmor a line saying that Profile *usr/sbin/clamd* is disabled.
 Note: It seems we must also restart apache to have this effective inside apache.
 
 
@@ -884,7 +884,7 @@ wget -O afick.deb https://sourceforge.net/projects/afick/files/afick/3.7.0/afick
 dpkg -i afick.deb
 ---------------
 
-* Comment the lines that exclude suffix we want to keep in */etc/afick.conf*.
+* Comment the lines that exclude suffixes we want to keep in */etc/afick.conf*.
 
 [source,bash]
 ---------------
@@ -899,7 +899,7 @@ exclude_suffix := tmp old bak
 # used by cron job (afick_cron)
 # define the mail address to send cron job result
 @@define MAILTO supervision@mysaasdomainname.com
-# truncate the result sended by mail to the number of lines (avoid too long mails)
+# truncate the result sent by mail to the number of lines (avoid too long mails)
 @@define LINES 1000
 # REPORT = 1 to enable mail reports, =0 to disable report
 @@define REPORT 1
@@ -921,7 +921,7 @@ exclude_suffix := tmp old bak
 [source,bash]
 ---------------
 ############################################
-# to allow easier upgrade, my advice is too separate
+# to allow easier upgrade, my advice is to separate
 # the default configuration file (above) from your
 # local configuration (below).
 # default configuration will be upgraded
@@ -971,29 +971,29 @@ exclude_suffix := cache
 ---------------
 
 
-Test que l'exécution par la crontab fonctionne correctent en lançant sous root:
+Test that the execution by the crontab works correctly by running as root:
 
 [source,bash]
 ---------------
 /etc/cron.daily/afick_cron
 ---------------
 
-Ignore if you have error when sending emails, sending emails is setup later.
+Ignore any error when sending emails; sending emails is set up later.
 
 
 === Setup of cpulimit (optional)
 
-* Lancement de cpulimit au démarrage pour exécuter:
+* Launch cpulimit at startup to run:
 
-Voir script *cpulimit_daemon* à mettre dans */etc/init.d*.
+See script *cpulimit_daemon* to put into */etc/init.d*.
 
 cpulimit launched with script  cpulimit --exe=apache2 --limit=20
 
 
 
-=== Installation de Open DKIM (port 12345)
+=== Installation of Open DKIM (port 12345)
 
-Voir http://lea-linux.org/documentations/DKIM_SPF_Postfix or
+See http://lea-linux.org/documentations/DKIM_SPF_Postfix or
 
 [source,bash]
 ---------------
@@ -1035,7 +1035,7 @@ Create file */etc/opendkim/KeyTable*
 
 [source,bash]
 ---------------
-# nom de domaine        nom de domaine  selector   fichier clef priv
+# domain name           domain name     selector   private key file
 dkim._domainkey.mysellyoursaasdomain.com            mysellyoursaasdomain.com:dkim:/etc/opendkim/opendkim.key
 mysellyoursaasdomain.com             				mysellyoursaasdomain.com:dkim:/etc/opendkim/opendkim.key
 ---------------
@@ -1047,7 +1047,7 @@ Create file */etc/opendkim/SigningTable*
 
 [source,bash]
 ---------------
-# nom de domaine        nom de domaine  selector   fichier clef priv
+# domain name           domain name     selector   private key file
 *@mysellyoursaasdomain.com             mysellyoursaasdomain.com
 ---------------
 
@@ -1075,7 +1075,7 @@ non_smtpd_milters = inet:localhost:12345
 
 
 To test DKIM, send an email to  check-auth@verifier.port25.com, you will receive a response with success or failure.
-To test SPF + DKIM + spam analysis of an email,  send an email to email suggested by  https://www.mail-tester.com
+To test SPF + DKIM + spam analysis of an email,  send an email to the email address suggested by  https://www.mail-tester.com
 
 [source,bash]
 ---------------
@@ -1084,19 +1084,19 @@ mail -aFrom:test@mysellyoursaasdomain.com test-email@test-email-service.com
 
 
 
-Setup of domains to protect are into */etc/opendkim/*
+Setup of domains to protect is in */etc/opendkim/*
 
-Note: SPF a besoin d'une entrée séparé pour chaque domain utilisé @mysellyoursaasmydomain.com et pour chaque sous-domaines @mysubdomain.mysellyoursaasmydomain.com
-
-
+Note: SPF needs a separate entry for each domain used @mysellyoursaasmydomain.com and for each subdomain @mysubdomain.mysellyoursaasmydomain.com
 
 
 
-=== Configuration du nom de domain
 
-Modifier son enregistrement de domaine, pour ajouter SPF et DKIM et DMARC
 
-* SPF permet de lister les serveurs autorisés à envoyer des email avec comme émetteur: mysaasdomainname.com
+=== Configuration of the domain name
+
+Modify your domain record to add SPF, DKIM and DMARC
+
+* SPF allows listing the servers authorized to send emails with sender: mysaasdomainname.com
 
  mysaasdomainname.com.		600	IN	TXT	"v=spf1 a mx ip4:91.121.9.47 ip4:147.135.135.4 ip4:147.135.135.36 ip4:147.135.135.37 include:spf.sendinblue.com include:_spf.google.com ~all"
 
@@ -1104,16 +1104,16 @@ Modifier son enregistrement de domaine, pour ajouter SPF et DKIM et DMARC
 
  dkim._domainkey.mysaasdomainname.com. 1000 IN	TXT	"v=DKIM1; k=rsa; p=MIGfMA0GCSrGSIb3DQEBAQUAA4GNADCBiQKBgQC6xSkwtlnAkegCARg5US7KHdoTlUS2MsXFPMy7ykwG88XK8vKEYPGuN56/6+YoxGLxtN2CZy/MVagQUOYcA3VAjBEPP5vJPrUnDsVY0OC8U+dK383g+DDW0tcAqrMXJI7Y/jXUJXh/ydI5aloiqT59JGo9Ane1C3XmoJz3bkVsKwIDAQAB"
 
-Attention, certains hébergeurs DNS comme OVH n'accepte que des clés de 1024 et pas plus à la saisie via leur interface d'administration DNS.
+Warning: some DNS hosts like OVH only accept keys of 1024 bits, not more, when entered through their DNS administration interface.
 
-* DMARC permet d'indiquer que le domaine est protégé par SPF et/ou DKIM
+* DMARC allows indicating that the domain is protected by SPF and/or DKIM
 
  _dmarc.mysaasdomainname.com	 "v=DMARC1; p=none; rua=mailto:supervision@mysaasdomainname.com; ruf=mailto:supervision@mysaasdomainname.com; fo=1;"
 
 
 === Setup of Postfix
 
-Create a file */etc/postfix/generic* to add binding between email used to send email by the system that has a "from" empty and the email to use that is authorized to send emails officially (postfix will do the replacement).
+Create a file */etc/postfix/generic* to add a binding between the email used by the system to send emails with an empty "from" and the email to use that is authorized to send emails officially (postfix will do the replacement).
 
 [source,bash]
 ---------------
@@ -1149,22 +1149,22 @@ myhostname = myservername.mysaasdomainname.com
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
-# mynetworks contains only localhost. Allowed external host are allowed with firewall on port 25 + because we use sasl authentication
+# mynetworks contains only localhost. Allowed external hosts are allowed with firewall on port 25 + because we use sasl authentication
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 204800000
 recipient_delimiter = +
-inet_interfaces = ip.public.du.serveur
+inet_interfaces = public.ip.of.server
 inet_protocols = ipv4
 smtp_generic_maps = hash:/etc/postfix/generic
 
-# Activer ces lignes pour utiliser SendGrid comme serveur envoi pour les envois d'emails depuis les instances utilisateurs
+# Enable these lines to use SendGrid as the sending server for emails sent from user instances
 #smtp_sasl_auth_enable = yes
 #smtp_sasl_password_maps = static:apikey:abc1234567890abc12345678901234567890
 #smtp_sasl_security_options = noanonymous
 #smtp_tls_security_level = encrypt
 #header_size_limit = 4096000
 #relayhost = [smtp.sendgrid.net]:2525
-# Ou mettre relayhost à vide pour utiliser le serveur local comme agent d'envoi des emails.
+# Or set relayhost to empty to use the local server as the email sending agent.
 relayhost =
 
 smtpd_recipient_limit = 100
@@ -1176,21 +1176,21 @@ message_size_limit = 20480000
 
 #header_checks = regexp:/etc/postfix/header_checks
 
-# Liste des emails virtuelles
+# List of virtual emails
 #----------------------------
 #virtual_alias_maps = hash:/etc/postfix/virtual
 
-# Liste des clients bloques
+# List of blocked clients
 #-----------------------------
 smtpd_client_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access
 
-# Liste des emetteurs bloques
+# List of blocked senders
 #----------------------------
 # Here we declare we want mail from specific email, mail not rejected by rbl, otherwise refused
 #smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access,  check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_rbl_client cbl.abuseat.org, reject_rbl_client bl.spamcop.net, reject_unknown_sender_domain
 smtpd_sender_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_sender_access hash:/etc/postfix/access_from, reject_non_fqdn_sender, reject_unknown_sender_domain
 
-# Liste des recepteurs bloques
+# List of blocked recipients
 #-----------------------------
 # Here we declare we want mail to my domain, to specific email with SA filtering, otherwise refuse.
 smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, check_client_access hash:/etc/postfix/access, check_recipient_access hash:/etc/postfix/access_to, reject_unauth_destination
@@ -1202,23 +1202,23 @@ smtpd_recipient_restrictions = permit_sasl_authenticated, permit_mynetworks, che
 
 !!! IMPORTANT
 
-Pensez à modifier dans */etc/postfix/main.cf*, les entrées :
+Remember to modify, in */etc/postfix/main.cf*, the entries:
 
 [source,bash]
 ---------------
-inet_interfaces = ip_publique_associe_au_nom_de_la_resolution_du_reverse_dns_du_serveur
+inet_interfaces = public_ip_associated_with_the_reverse_dns_name_of_the_server
 inet_protocols = ipv4
 ---------------
 
 
 === Configuring Postfix for a secured external SMTP authentication (optional)
 
-If you need to use postix from an external (and thus authenticated) access
+If you need to use postfix from an external (and thus authenticated) access
 
 [source,bash]
 ---------------
 sudo apt install sasl2-bin
-vi /etc/default/saslauthd  pour mettre START=yes
+vi /etc/default/saslauthd  to set START=yes
 ---------------
 
 Check that user postfix is in the *sasl* group. If not, add it:
@@ -1309,7 +1309,7 @@ FLUSH PRIVILEGES;
 
 ==== Secure the root account (optional)
 
-In order not to allow brutal force cracking, if it is not already the case, put the user *root* of the database in authentication
+In order not to allow brute force cracking, if it is not already the case, put the user *root* of the database in authentication
 from the system root account only (using *auth_socket* or *unix_socket*):
 
 For Mysql: The plugin is *auth_socket* and you have to install it manually. More info on: https://dev.mysql.com/doc/refman/5.7/en/socket-pluggable-authentication.html
@@ -1323,7 +1323,7 @@ SELECT PLUGIN_NAME, PLUGIN_STATUS FROM INFORMATION_SCHEMA.PLUGINS;
 For MariaDb: The plugin is *unix_socket* and is set by default on Ubuntu OS.
 
 
-To switch in mode authentication by password / by unix socket account :
+To switch to authentication mode by password / by unix socket account:
 
 For Mysql:
 
@@ -1334,7 +1334,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '...';
 # Identification by unix socket
 ALTER USER 'root'@'localhost' IDENTIFIED WITH auth_socket;
 ---------------
-You must stop/start database server to validate this change.
+You must stop/start the database server to validate this change.
 
 For MariaDb:
 
@@ -1345,10 +1345,10 @@ update mysql.user set plugin='' where user='root' and host='localhost';
 # Identification by unix socket
 update mysql.user set plugin='unix_socket' where user='root' and host='localhost';
 ---------------
-You must stop/start database server to validate this change.
+You must stop/start the database server to validate this change.
 
 
-Note: The show specific parameters that are not the default values, you can launch:
+Note: To show specific parameters that are not the default values, you can launch:
 
 [source,bash]
 ---------------
@@ -1367,15 +1367,15 @@ Give access rights on the database server to allow remote administration on all 
 
 [source,sql]
 ---------------
-CREATE USER 'yourremotelogin'@'ip.poste.admin.distant' IDENTIFIED BY '...passwordforyourlogin...';
-GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
-GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.poste.admin.distant';
+CREATE USER 'yourremotelogin'@'ip.of.remote.admin.workstation' IDENTIFIED BY '...passwordforyourlogin...';
+GRANT CREATE USER,GRANT OPTION,RELOAD ON *.* TO 'yourremotelogin'@'ip.of.remote.admin.workstation';
+GRANT CREATE,CREATE TEMPORARY TABLES,CREATE VIEW,DROP,DELETE,INSERT,SELECT,UPDATE,ALTER,INDEX,LOCK TABLES,REFERENCES,SHOW VIEW ON *.* TO 'yourremotelogin'@'ip.of.remote.admin.workstation';
 FLUSH PRIVILEGES;
 ---------------
 
 ==== Create a user for supervision (optional)
 
-If you use a supervision agent like *DataDog* to superize the database, create an account to access locally to the database (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
+If you use a supervision agent like *DataDog* to supervise the database, create an account to access the database locally (the password is the one defined into */etc/datadog-agent/conf.d/mysql.d/conf.yaml*):
 
 [source,sql]
 ---------------
@@ -1386,14 +1386,14 @@ FLUSH PRIVILEGES;
 ---------------
 
 
-=== Configuration de apparmor
+=== Configuration of apparmor
 
 ...
 
 
-=== Securisation rep session PHP
+=== Securing the PHP session directory
 
-Vérifier ou Mettre les droits en *drwx-wx-wt* sur le rep des sessions php */dev/shm/* ou */var/lib/php/sessions*
+Check or set the permissions *drwx-wx-wt* on the PHP sessions directory */dev/shm/* or */var/lib/php/sessions*
 
 
 === Create a virtual host for the web portal
@@ -1447,14 +1447,14 @@ vi */etc/apache2/sites-available/mysellyoursaasdomain.com.conf*
 </VirtualHost>
 ---------------
 
-Note: Penser à ajouter la ligne suivante pour gérer le http2
+Note: Remember to add the following line to handle http2
 
 [source,bash]
 ---------------
 Protocols h2 h2c http/1.1
 ---------------
 
-Activer le virtual host par
+Enable the virtual host with
 
 [source,bash]
 ---------------
@@ -1464,9 +1464,9 @@ a2ensite  mysellyoursaasdomain.com
 
 === Setup of PHP
 
-==== Secure the directory of sessions PHP
+==== Secure the directory of PHP sessions
 
-Mettre les droits en *drwx-wx-wt* sur le répertoire des sessions php */dev/shm/* et/ou */var/lib/php/sessions*
+Set the permissions *drwx-wx-wt* on the PHP sessions directory */dev/shm/* and/or */var/lib/php/sessions*
 
 
 ==== Define size of upload and session duration
@@ -1478,7 +1478,7 @@ Create a file */etc/php/sellyoursaas.ini*
 include::repository_root/etc/apparmor.d/usr.bin.secureBash[]
 ---------------
 
-But comment the line related to parameter *auto_prepend_file* and *sendmail_path*.
+But comment the lines related to parameters *auto_prepend_file* and *sendmail_path*.
 
 Then enable it by adding the symlinks into *`/etc/php/*.*/*/php.ini+`* (the one for *apache*, the one for *cli* and for the *fpm*) to allow upload of bigger files:
 
@@ -1490,7 +1490,7 @@ cd /etc/php/8.1/fpm/conf.d/; ln -fs /etc/php/sellyoursaas.ini;
 
 === Setup of logrotate
 
-* Ajouter une ligne si non déjà présente dans le fichier */etc/logrotate.conf*
+* Add a line, if not already present, into the file */etc/logrotate.conf*
 
 [source,bash]
 ---------------
@@ -1499,7 +1499,7 @@ su root syslog
 ---------------
 
 
-* Créer un fichier */etc/logrotate.d/logrotate_admin_log*
+* Create a file */etc/logrotate.d/logrotate_admin_log*
 
 [source,conf]
 ---------------
@@ -1519,7 +1519,7 @@ su root syslog
 ---------------
 
 
-* Créer un fichier */etc/logrotate.d/logrotate_sellyoursaas_log*
+* Create a file */etc/logrotate.d/logrotate_sellyoursaas_log*
 
 [source,conf]
 ---------------
@@ -1535,7 +1535,7 @@ su root syslog
 }
 ---------------
 
-* Pour tester la rotation immédiatement:
+* To test the rotation immediately:
 
 [source,bash]
 ---------------
@@ -1545,11 +1545,11 @@ logrotate -f logrotate_sellyoursaas_log
 ---------------
 
 
-=== Configuration de journalctl
+=== Configuration of journalctl
 
 Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
 
-* Edit file */etc/systemd/journald.conf* to define the max size of file journal systemd
+* Edit file */etc/systemd/journald.conf* to define the max size of systemd journal files
 
 [source,conf]
 ---------------
@@ -1560,7 +1560,7 @@ SystemMaxFileSize=5M
 ...
 ---------------
 
-Prendre en compte la modification
+Apply the change
 
 [source,bash]
 ---------------
@@ -1568,7 +1568,7 @@ systemctl stop systemd-journald
 systemctl start systemd-journald
 ---------------
 
-Pour forcer le vidage d'un journal:
+To force flushing a journal:
 
 [source,bash]
 ---------------
@@ -1577,7 +1577,7 @@ journalctl --vacuum-size=1G
 journalctl --vacuum-time=1d
 ---------------
 
-Pour lire les journaux:
+To read the journals:
 
 [source,bash]
 ---------------
@@ -1590,7 +1590,7 @@ journalctl -r --file user-XXX.journal
 
 === Disable or enable apport (optional, "on" recommended)
 
-Pour activer:
+To enable:
 
 [source,bash]
 ---------------
@@ -1599,7 +1599,7 @@ sudo systemctl start apport.service
 sudo systemctl status apport.service
 ---------------
 
-Pour désactiver:
+To disable:
 
 [source,bash]
 ---------------
@@ -1608,10 +1608,10 @@ sudo systemctl stop apport.service
 sudo systemctl status apport.service
 ---------------
 
-Note: Les rapports sont dans */var/crash*
+Note: Reports are in */var/crash*
 
 
-=== Install certbot (for certificates SSL)
+=== Install certbot (for SSL certificates)
 
 [source,bash]
 ---------------
@@ -1636,13 +1636,13 @@ systemctl list-units | grep certbot
 systemctl status snap.certbot.renew.timer
 ---------------
 
-The complete logs of certbot are into /var/log/letsencrypt/...
+The complete logs of certbot are in /var/log/letsencrypt/...
 
 
 [[creation_certificat_ssl]]
-=== Create a SSL certificate from LetsEncrypt for all web sites
+=== Create an SSL certificate from LetsEncrypt for all web sites
 
-* To generate certificates, launch certbot and choose the virtual host of the web server yoy want a certificate of:
+* To generate certificates, launch certbot and choose the virtual host of the web server you want a certificate of:
 
 [source,bash]
 ---------------
@@ -1699,7 +1699,7 @@ Note: *securitykeydefinedinscheduledjobsetup* is the value of the key to decide.
 
 ==== Check that launching of cron is ok
 
-Reprendre du fichier */etc/crontab*, les commandes pour tester le lancement de crontab journalière, hebdo et mensuelles et tester en lançant en manuel. For example with:
+Take from the file */etc/crontab* the commands that launch the daily, weekly and monthly crontabs, and test them by running them manually. For example with:
 
 [source,bash]
 ---------------
@@ -1723,7 +1723,7 @@ chown -R admin:admin /home/admin/wwwroot/dolibarr
 Warning: Choose, during the installation wizard, the name of the document directory as */home/admin/wwwroot/dolibarr_documents* rather than
 */home/admin/wwwroot/dolibarr/documents*
 
-* If you will add feature to send email from web portal using a SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
+* If you add a feature to send emails from the web portal using an SMTP relay like Google or SendGrid, remember to update the IPs (v4 and v6) authorized by the relay on the console of the SMTP relay service.
 
 * Activate the "Cron / Scheduled Jobs" module and set the cron security key to the same value as what was set in the parameter of the call to *cron_run_jobs.php*
 
@@ -1746,7 +1746,7 @@ git clone https://github.com/eldy/sellyoursaas dolibarr_sellyoursaas
 ln -fs /home/admin/wwwroot/dolibarr_sellyoursaas /home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas
 ---------------
 
-* Create a symbolic link called *source* into directory *myaccount* that point to */home/admin/wwwroot/dolibarr/htdocs* :
+* Create a symbolic link called *source* into directory *myaccount* that points to */home/admin/wwwroot/dolibarr/htdocs* :
 
 [source,bash]
 ---------------
@@ -1763,14 +1763,14 @@ ln -fs /home/admin/wwwroot/dolibarr/htdocs /home/admin/wwwroot/dolibarr/htdocs/c
 
 * Create an account on DataDog.
 
-* Install the agent on serveur with:
+* Install the agent on the server with:
 
 [source,bash]
 ---------------
 DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 ---------------
 
-* Copy the datadog config file to supervize *mysql/mariadb*.
+* Copy the datadog config file to supervise *mysql/mariadb*.
 
 [source,bash]
 ---------------
@@ -1779,7 +1779,7 @@ cp /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d
 
 Edit the file to enter the datadog password for mariadb.
 
-* Copy the datadog config file to supervize *apache*.
+* Copy the datadog config file to supervise *apache*.
 
 [source,bash]
 ---------------
@@ -1787,7 +1787,7 @@ cp /etc/datadog-agent/conf.d/apache.d/conf.yaml.example /etc/datadog-agent/conf.
 ---------------
 
 
-* Copy the datadog config file to supervize *postfix*.
+* Copy the datadog config file to supervise *postfix*.
 
 [source,bash]
 ---------------
@@ -1804,7 +1804,7 @@ dd-agent ALL=(postfix) NOPASSWD:/usr/bin/find
 ---------------
 
 
-* Copy the datadog config file to supervize *memcached*.
+* Copy the datadog config file to supervise *memcached*.
 
 [source,bash]
 ---------------
@@ -1832,14 +1832,14 @@ instances:
 
 
 
-* Copy the datadog config file to supervize *process*.
+* Copy the datadog config file to supervise *process*.
 
 [source,bash]
 ---------------
 cp /etc/datadog-agent/conf.d/process.d/conf.yaml.example /etc/datadog-agent/conf.d/process.d/conf.yaml
 ---------------
 
-Edit it to follow this processes:
+Edit it to follow these processes:
 
 [source,bash]
 ---------------
@@ -1864,7 +1864,7 @@ instances:
 ---------------
 
 
-Relancer datadog
+Restart datadog
 
 [source,bash]
 ---------------
@@ -1875,19 +1875,19 @@ sudo service datadog-agent start
 
 == Installation of components Backups/Synchro
 
-=== Synchro des filesystems /home
+=== Synchro of /home filesystems
 
-- Utilisation de Lsyncd
-- ??? quid dns
+- Use of Lsyncd
+- ??? what about dns
 
 
-=== IP virtuelle et test de bascule
+=== Virtual IP and failover test
 
-- Ajout d'une IP virtuelle via le manager OVH
+- Add a virtual IP via the OVH manager
 
-- Déclaration de l'interface dans /etc/network/interfaces
+- Declare the interface in /etc/network/interfaces
 
-Example pour les 2 ip virtuelles:
+Example for the 2 virtual IPs:
 
 auto eth0:0
 iface eth0:0 inet static
@@ -1919,12 +1919,12 @@ From OVH's "Snapshots" interface, you can restore a VM image on a server or a di
 
 See chapter in Master and Deployment Servers doc.
 
-Note that once restoration is done, if ir is done an another server, you must:
+Note that once restoration is done, if it is done on another server, you must:
 
 * Log into ssh: Change apache virtual host to set new host name
-* If VM is a backup VM, disabled also root cron tasks
+* If VM is a backup VM, also disable root cron tasks
 
-Et si le serveur avait des services complémentaires:
+And if the server had additional services:
 
 * For Prestashop sites, if VM has a new url, go into database to set correct url into table ps_configuration (var PS_SHOP_DOMAIN, PS_SHOP_DOMAIN_SSL, CANONICAL_URL) and ps_shop_url
 * For Mediawiki sites, if VM has a new url, go into database to set correct url into file LocalSettings.php
@@ -1939,7 +1939,7 @@ Et si le serveur avait des services complémentaires:
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_mysql_system.sh confirm*
 
-See <<installing_cron_tasks>>. This will write backup files into */home/admin/backup/conf* and */home/admin/backup/mysql*
+See <<installation_des_taches_cron>>. This will write backup files into */home/admin/backup/conf* and */home/admin/backup/mysql*
 
 The script will read the file */etc/sellyoursaas.conf* to find the list of the name of backup servers where to push the backup to.
 
@@ -1951,12 +1951,12 @@ The script will read the file */etc/sellyoursaas.conf* to find the list of the n
 
 */home/admin/wwwroot/dolibarr/htdocs/custom/sellyoursaas/scripts/backup_backups.php confirm none --delete >/home/admin/logs/backup_backups.log 2>&1*
 
-See <<installing_cron_tasks>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter).
+See <<installation_des_taches_cron>>. This will copy local files from */mnt/diskbackup/backup* to */mnt/diskbackup/backup_sourceServer* (to another server in another datacenter).
 
 The script will read the file */etc/sellyoursaas.conf* to find the list of the name of backup servers where to push the backup to.
 
 
-- For a remote backup as AWS:
+- For a remote backup like AWS:
 
 [source,bash]
 ---------------
@@ -1972,9 +1972,9 @@ pip install awscli --upgrade --user
 
 == Annexes
 
-== TroubleShooting
+== Troubleshooting
 
-See the chapter available into the *Documentation SellYourSaas - Master and Deployment servers*
+See the chapter available in the *Documentation SellYourSaas - Master and Deployment servers*
 
 == Error when launching dkim daemon: opendkim.service: Can't open PID file /var/run/opendkim/opendkim.pid
 
@@ -1982,23 +1982,23 @@ Open the file */etc/opendkim.conf* and add the line
 
 PidFile                 /run/opendkim/opendkim.pid
 
-The PIDFile is defined into the */lib/systemd/system/opendkim.service* but seems not taken into account correctly. You must force it into the /etc/opendkim.conf
+The PIDFile is defined in */lib/systemd/system/opendkim.service* but seems not to be taken into account correctly. You must force it into /etc/opendkim.conf
 
 
 == Error postfix/cleanup[14215]: warning: connect to Milter service inet:localhost:12345: Connection refused
 
-We can see this error into */var/log/syslog.log*.
+We can see this error in */var/log/syslog.log*.
 
 Check the configuration file */etc/default/opendkim* and verify that the socket is SOCKET="inet:12345@localhost"
 
 == Error fpm after upgrade
 
-If you have such kind of error:
+If you have this kind of error:
 
 [Tue Aug 20 11:25:18.555744 2024] [proxy:error] [pid 1741] (2)No such file or directory: AH02454: FCGI: attempt to connect to Unix domain socket /run/php/php7.4-fpm.sock (*) failed
 [Tue Aug 20 11:25:18.555877 2024] [proxy_fcgi:error] [pid 1741] [client 82.64.109.15:46810] AH01079: failed to make connection to backend: httpd-UDS
 
-Check into /etc/apache2/conf-enabled that the correct version of php-fpm is enabled. If not, switch to the correct version, example:
+Check in /etc/apache2/conf-enabled that the correct version of php-fpm is enabled. If not, switch to the correct version, for example:
 
 [source,bash]
 ---------------

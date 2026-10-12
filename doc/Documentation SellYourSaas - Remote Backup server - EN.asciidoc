@@ -2,7 +2,7 @@
 This document describes the technical and functional implementation of Sell-Your-Saas - automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...) - Laurent Destailleur - www.sellyoursaas.org
 :source-highlighter: red
 :title: Document installation and operation of SellYourSaas
-:subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sale system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
+:subject: This document describes the technical and functional implementation of SellYourSaas (automated deployment and sales system in SaaS of a WAMP application (like Dolibarr ERP CRM, GLPI, ...).
 :keywords: sellyoursaas, saas, dolibarr, wamp, glpi
 :imagesdir: ./img
 :toc: manual
@@ -14,31 +14,31 @@ This document describes the technical and functional implementation of Sell-Your
 
 == Introduction ==
 
-This document present how to install a remote server for Backups in a SellYourSaas environement.
+This document presents how to install a remote server for Backups in a SellYourSaas environment.
 
 
 <<<<
 
 === Choice of machine and OS and create it
 
-* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximu *24.04*)
+* Obtain a server with SSH access that can pass root (We will use Ubuntu LTS minimum *18.04* to maximum *24.04*)
 
 * Add DNS entries of the server(s) (Entry A for IP4 and entry AAAA for IP6)
 
 
 [[adding_disk]]
-=== Adding the harddisk of data (home of user instances and home of backups)
+=== Adding the hard disk of data (home of user instances and home of backups)
 
 We will add on the *RemoteBackupServer*, an independent disk for user instances and backups.
 
 With OVH Public Cloud or ScaleWay:
 
-* Create the disk of data from backoffice. You can imagine to reserve 250MB for each customer instance so choose a size in consideration.
+* Create the disk of data from backoffice. You can plan to reserve 250MB for each customer instance, so choose a size accordingly.
 
 * Associate the disk with the server (each additional disk is added in /dev/vdb, /dev/vdc, /dev/vdd, ...).
 Note, the disk becomes visible with *fdisk -l* and *lsblk*
 
-* If it is a disk never partitioned, add the partition on the disk (Linux type) and format it by doing:
+* If it is a disk that has never been partitioned, add the partition on the disk (Linux type) and format it by doing:
 
 [source, bash]
 ---------------
@@ -54,7 +54,7 @@ mkfs.btrfs /dev/vdxY
 
 Whether the disk has just been formatted or whether it is an added disk already formatted, the rest of the procedure is identical:
 
-* Recover the value of the UUID at the end of the formatting which is displayed, otherwise, recover it with the command 
+* Retrieve the value of the UUID displayed at the end of the formatting, otherwise, retrieve it with the command
 
 [source, bash]
 ---------------
@@ -68,7 +68,7 @@ blkid
 UUID=94817f83-a2ad-46c4-81e0-06e6dd0e95f1 /mnt/diskX btrfs noatime,nofail 0 0 (does not block the server from starting)
 ---------------
 
-* Mount disk manually the first time
+* Mount the disk manually the first time
 
 [source, bash]
 ---------------
@@ -78,9 +78,9 @@ mount /dev/vdxZ /mnt/diskbackup
 blkid
 ---------------
 
-Note: A reboot may be required if disk or mount is not visible.
+Note: A reboot may be required if the disk or mount is not visible.
 
-* Optimize filesystem it by removing the update of the "atime" read access
+* Optimize the filesystem by removing the update of the "atime" read access
 
 To see options for optimizing filesystems:
 
@@ -113,7 +113,7 @@ To check:
 cat /proc/mounts | grep diskX
 ---------------
 
-Rem: If you need to recover data files from another disk, use:
+Note: If you need to recover data files from another disk, use:
 
 [source, bash]
 ---------------
@@ -138,7 +138,7 @@ chown admin:admin /mnt/diskbackup; chown admin:admin /mnt/diskbackup/.snapshots;
 ---------------
 
 Check that the id of this user *admin* is greater than or equal to 1000.
- 
+
 
 Create a user account for yourself (or other administrators), for example: *myunixlogin*. It will be used to log in.
 
@@ -150,7 +150,7 @@ adduser myunixlogin
 
 ==== ssh setup
 
-Fix permission on */etc/ssh/sshd_config* so only root has read and write access:
+Fix permissions on */etc/ssh/sshd_config* so only root has read and write access:
 
 [source,conf]
 ---------------
@@ -175,8 +175,8 @@ PermitRootLogin no
 PermitEmptyPasswords no
 # Do not support the "keyboard-interactive" authentication scheme defined in RFC-4256.
 ChallengeResponseAuthentication no
- 
-# Define list of allowed method to authenticate
+
+# Define list of allowed methods to authenticate
 PasswordAuthentication yes
 PubkeyAuthentication yes
 
@@ -220,7 +220,7 @@ Add your public key to your unix account.
 ssh-copy-id myunixlogin@x.y.z.a
 ---------------
 
-Warning: Sometime ssh-copy-id copy the dss key instead of rsa key and ssh fails with dss.
+Warning: Sometimes ssh-copy-id copies the dss key instead of the rsa key and ssh fails with dss.
 
 
 Define or redefine the password for *root*, *admin* with a secure password.
@@ -231,12 +231,12 @@ passwd root
 passwd admin
 ---------------
 
-Launch *ssh-keygen* on each of thee 3 accounts *root*, *admin* and *myunixlogin*
+Launch *ssh-keygen* on each of the 3 accounts *root*, *admin* and *myunixlogin*
 
 
 ==== Default shell
 
-Modify the default shell to use bash (instead of dh sh or dash)
+Modify the default shell to use bash (instead of sh or dash)
 
 [source, bash]
 ---------------
@@ -250,7 +250,7 @@ In order not to give information to users doing SSH, on the deployment servers:
 
 [source, bash]
 ---------------
-rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove 
+rm /etc/update-motd.d/10-help-text /etc/update-motd.d/20-runabove
 rm /etc/update-motd.d/50-landscape-sysinfo /etc/update-motd.d/50-landscape-sysinfo
 rm /etc/update-motd.d/9*-update*-available /etc/update-motd.d/92-unattended-upgrades
 ---------------
@@ -268,11 +268,11 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 
 === Hostname and IP configuration
 
-Add an entry from the new server to the DNS provided by the domain provider.
+Add an entry for the new server to the DNS provided by the domain provider.
 
 Go to the OVH IP management interface, to add the reverse on the server IP.
 
-Go to the management interface of OVH servers, to modify their short name. This will modify the */etc/hostname* file automatically (if not manually modify) with the short name. The file will then have as sole content:
+Go to the management interface of OVH servers, to modify their short name. This will modify the */etc/hostname* file automatically (if not, modify it manually) with the short name. The file will then have as sole content:
 
 [source, bash]
 ---------------
@@ -288,14 +288,14 @@ main.ip.of.server nameofserver.mysaasdomainname.com
 ---------------
 
 
-=== Added support for IP v6 (optional, if ipv6 wanted but not yet enabled)
+=== Adding support for IP v6 (optional, if ipv6 wanted but not yet enabled)
 
 ==== With netplan (Ubuntu 18.04 +)
 
 Add a conf file */etc/netplan/51-ipv6-ovh.yaml*.
 Note: OVH provides a /128 for ipv6 but netplan wants /64
- 
-Example for an IPv6 1234:41d0:1234:1000::1234 with as gateway 1234:41d0:1234:1000::1
+
+Example for an IPv6 1234:41d0:1234:1000::1234 with gateway 1234:41d0:1234:1000::1
 
 [source, conf]
 ---------------
@@ -309,22 +309,22 @@ network:
 				- "1234:41d0:1234:1000::1234/64"
 			gateway6: "1234:41d0:1234:1000::1"
 ---------------
-Note: Use 4 spaces for tabulation.
- 
+Note: Use 4 spaces for indentation.
+
 [source, bash]
 ---------------
 netplan try
 netplan apply
 ---------------
 
-Rem: *eth0* can be something else, for example *ens3*.
+Note: *eth0* can be something else, for example *ens3*.
 
 
 === Add virtual IP (optional)
 
 - Add the virtual IP via the OVH manager.
 
-- Add and remove the virtual network interface on the server dynamically (for test).
+- Add and remove the virtual network interface on the server dynamically (for testing).
 
 Addition:
 
@@ -340,7 +340,7 @@ Deletion:
 ifconfig eth0: 0 down
 ---------------
 
-- For a persistent reboot definition, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
+- For a definition persistent across reboots, declare the interface in */etc/network/interfaces* or in a file in */etc/network/interfaces.d* (Ubuntu <17.10)
 
 Example for 2 virtual IPs:
 
@@ -360,7 +360,7 @@ iface eth0: 1 inet static
             broadcast e.f.g.h
 ---------------
 
-Rem: *eth0* can be something else, for example *ens3*.
+Note: *eth0* can be something else, for example *ens3*.
 
 To take this into account, try this, otherwise, reboot.
 
@@ -377,14 +377,14 @@ To take this into account, try this, otherwise, reboot.
 Only */mnt/diskbackup*, already created previously, is required, so no creation of directory has to be done.
 
 
-  
+
 <<<<
 
 == Installation of system and application components
 
 === Installation of packages
 
-There are two scenario depending on your version of Ubuntu. Follow the instruction *18.04-* OR the *20.04+* one
+There are two scenarios depending on your version of Ubuntu. Follow the *18.04-* instructions OR the *20.04+* ones
 
 * Installation of the 20.04+ Ubuntu packages
 
@@ -407,7 +407,7 @@ systemctl daemon-reload
 ---------------
 
 
-=== Disabling automatic update
+=== Disabling automatic updates
 
 Uninstall the package *unattended-upgrades* if it was installed.
 
@@ -433,20 +433,20 @@ ufw status
 ufw enable
 ---------------
 
-Port 22 is for SSH input, NTP is 123/upd, 53 if for DNS, 443 is to allow monitoring agents to push reporting data
+Port 22 is for SSH input, NTP is 123/udp, 53 is for DNS, 443 is to allow monitoring agents to push reporting data
 
 
 === Installation of fail2ban ===
 
 * Installation of fail2ban and activation of the following fail2ban rules:
   *pam-generic*, *xinetd-fail*
-  
+
 
 To do this, first create a */etc/fail2ban/jail.local* file with this content:
 
 NOTE: The rules available may vary depending on the version of the OS installed.
 
-NOTE: Remember to also modify "mybusinessips" by your ip(s) separated by spaces as well as the parameter *destemail* by the supervision email of your company.
+NOTE: Remember to also replace "mybusinessips" with your IP(s) separated by spaces as well as the parameter *destemail* with the supervision email of your company.
 
 
 [source, bash]
@@ -551,9 +551,9 @@ Then place the filter files supplied with the project in *etc/fail2ban/filter.d*
 
 === Test spamassassin ===
 
-The process *spamd* must be running. Start it manually if it is not the case the first time.
+The process *spamd* must be running. Start it manually the first time if it is not running.
 
-To test that spamassassin client is working, create a file */tmp/testspam* with content
+To test that the spamassassin client is working, create a file */tmp/testspam* with content
 
     Subject: Test spam mail (GTUBE)
     Message-ID: <GTUBE1.1010101@example.net>
@@ -593,9 +593,9 @@ echo $?
 
 === Installation of ClamAV
 
-The process *freshclam* and *clamd* must be running. Start them manually the first time.
+The processes *freshclam* and *clamd* must be running. Start them manually the first time.
 
-To test clamav tool, create a file */tmp/testvirus* with content
+To test the clamav tool, create a file */tmp/testvirus* with content
 
 [source,bash]
 ---------------
@@ -616,13 +616,13 @@ clamdscan /tmp/testvirus --fdpass
 aa-status
 ---------------
 
-You should see into the status a line saying that Profile *usr/sbin/clamd* is disabled.
+You should see in the status a line saying that Profile *usr/sbin/clamd* is disabled.
 
 
 
 === Setup of logrotate
 
-* Add a line if not already present into file */etc/logrotate.conf*
+* Add a line if not already present in the file */etc/logrotate.conf*
 
 [source,bash]
 ---------------
@@ -633,7 +633,7 @@ su root syslog
 
 === Setup of journalctl (optional)
 
-Journals are stored into */var/log/journal/* (or into memory */run/log/journal/*)
+Journals are stored in */var/log/journal/* (or in memory */run/log/journal/*)
 
 * Edit the file */etc/systemd/journald.conf* to define the max size for systemd journals
 
@@ -644,7 +644,7 @@ SystemMaxUse=1G
 ...
 ---------------
 
-Take into account the change with
+Apply the change with
 
 [source,bash]
 ---------------
@@ -652,7 +652,7 @@ systemctl stop systemd-journald
 systemctl start systemd-journald
 ---------------
 
-To force clear of journal:
+To force clearing of the journal:
 
 [source,bash]
 ---------------
@@ -661,7 +661,7 @@ journalctl --vacuum-size=1G
 journalctl --vacuum-time=1d
 ---------------
 
-To read journal:
+To read the journal:
 
 [source,bash]
 ---------------
@@ -670,9 +670,9 @@ journalctl --header
 ---------------
 
 
-=== Désactivation ou activation de apport (optionnel, "on" recommandé)
+=== Disabling or enabling apport (optional, "on" recommended)
 
-Pour activer:
+To enable:
 
 [source,bash]
 ---------------
@@ -681,7 +681,7 @@ sudo systemctl start apport.service
 sudo systemctl status apport.service
 ---------------
 
-Pour désactiver:
+To disable:
 
 [source,bash]
 ---------------
@@ -690,12 +690,12 @@ sudo systemctl stop apport.service
 sudo systemctl status apport.service
 ---------------
 
-Note: Reports are into */var/crash*
+Note: Reports are in */var/crash*
 
 
 === Installation of cron tasks
 
-Delete very old files daily by adding the crontab task:
+Delete very old files daily by adding the crontab tasks:
 
 [source,bash]
 ---------------
@@ -703,29 +703,29 @@ Delete very old files daily by adding the crontab task:
 #0 18 * * 1 find /mnt/diskbackup/*/backupold_* -type d -empty -ls -delete > /var/log/find_delete_empty_dir.log 2>&1
 # Make a snapshot of the complete main backup dir (that contains all repositories modified during last year)
 55 23 * * * btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >/var/log/sellyoursaas_btrfs.log; btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` >>/var/log/sellyoursaas_btrfs.log; rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +\%j`/.snapshots >>/var/log/sellyoursaas_btrfs.log; btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +\%j` ro true >>/var/log/sellyoursaas_btrfs.log;
-# We keep data files on main backup dir for 1 years
+# We keep data files on main backup dir for 1 year
 0 0 * * * find "/mnt/diskbackup/" -maxdepth 2 -path "/mnt/diskbackup/backup_*/osu*" -type d -mtime +365 -exec rm -fr {} \; >>/var/log/sellyoursaas_btrfs.log
-# We keep snapshots for 60 days (but a snapshot is of all main backup dir)
+# We keep snapshots for 60 days (but a snapshot covers the whole main backup dir)
 0 1 * * * find /mnt/diskbackup/.snapshots -maxdepth 1 -type d -mtime +60 -exec btrfs subvolume delete {} \; >>/var/log/sellyoursaas_btrfs.log;
 ---------------
 
 
 <<<<
 
-== Installation d'outils externes
+== Installation of external tools
 
-=== Installation of DataDog (optionnel pour supervision)
+=== Installation of DataDog (optional, for monitoring)
 
 * Create an account on DataDog.
 
-* Install the agent on serveur with:
+* Install the agent on the server with:
 
 [source,bash]
 ---------------
 DD_AGENT_MAJOR_VERSION=7 DD_API_KEY=YOURDATADOGAPIKEY bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 ---------------
 
-Relancer datadog
+Restart datadog
 
 [source,bash]
 ---------------
@@ -736,27 +736,27 @@ sudo service datadog-agent start
 
 <<<<
 
-== Exploitation - Supervision
+== Operation - Monitoring
 
-=== Backup / Restauration
+=== Backup / Restore
 
 ==== Backup system
 
-La sauvegarde du serveur+bases peut se faire par un snapshot d'image de la VM.
-Il est aussi possible de ne faire un snapshot que des disques complémentaires.
+The backup of the server+databases can be done with a snapshot of the VM image.
+It is also possible to snapshot only the additional disks.
 
-Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+See chapter <<cloning_a_server_instance>>
 
-==== Restauration system
+==== Restore system
 
-Depuis l'espace "Snapshots" d'OVH, on peut demander à le restaurer sur un serveur (pour une image VM) ou sur un aute disque (pour une image disque complémentaire), à condition que la cible (serveur ou disque) soit supérieure ou égale en terme de capacité de stockage.
+From the OVH "Snapshots" area, you can request to restore it on a server (for a VM image) or on another disk (for an additional disk image), provided that the target (server or disk) is greater than or equal in terms of storage capacity.
 
-Voir chapitre <<Clonage d une instance serveur pour production bis ou pour développement>>
+See chapter <<cloning_a_server_instance>>
 
 
 === Increase size of disk
 
-* Faire le snapshot du disque à redimensionner pour sauvegarde. Créer un nouveau disque depuis ce snapshot et le rattacher à un autre serveur (voir chapitre <<ajout_de_disque>>) pour s'assurer qu'il est lisible et ainsi avoir les fichiers de la sauvegarde sous la main.
+* Take a snapshot of the disk to resize, as a backup. Create a new disk from this snapshot and attach it to another server (see chapter <<adding_disk>>) to make sure it is readable and to have the backup files at hand.
 
 * Unmount the filesystem:
 
@@ -765,29 +765,29 @@ Voir chapitre <<Clonage d une instance serveur pour production bis ou pour déve
 umount /mnt/disk/
 ---------------
 
-Rem: Pour voir les fichiers ouverts sur un disque si le démontage échoue:
+Note: To see the open files on a disk if unmounting fails:
 
 [source,bash]
 ---------------
 lsof | grep "/mnt/disk"
 ---------------
 
-* Détacher le disque du serveur. S'assurer que son nom ne contient pas d'espaces ou caractères spéciaux. Changer la taille du disque depuis le manager du Public Cloud et le réattacher au serveur.
+* Detach the disk from the server. Make sure its name does not contain spaces or special characters. Change the size of the disk from the Public Cloud manager and reattach it to the server.
 
-* Agrandir la partition en lançant: 
+* Extend the partition by running:
 
 [source,bash]
 ---------------
 fdisk -l
-parted /dev/vdX    (X=a, b, !!! SANS le chiffre, on veut le disque complet)
+parted /dev/vdX    (X=a, b, !!! WITHOUT the digit, we want the whole disk)
 print all
-resizepart 
+resizepart
 Y
-999GB    (Ne pas saisir la valeur proposé par défaut mais la valeur max du disque qui a été affiché par le "print all")
+999GB    (Do not enter the value proposed by default but the max value of the disk that was displayed by "print all")
 q
 ---------------
 
-* Remonter le disque pour prise en compte et augmenter le formatage du filesystem sans effacement.
+* Remount the disk to take the change into account and extend the filesystem without erasing data.
 
 [source,bash]
 ---------------
@@ -798,7 +798,7 @@ resize2fs /dev/vdX9
 
 === Upgrade OS
 
-Pour mettre à jour Ubuntu x.y vers z.w sur un serveur SellYourSaas:
+To upgrade Ubuntu x.y to z.w on a SellYourSaas server:
 
 [source,sql]
 ---------------
@@ -806,11 +806,11 @@ apt dist-upgrade
 ---------------
 
 
-=== Passage en mode rescue d'un serveur
+=== Switching a server to rescue mode
 
-Aller sur l'interface du service Cloud pour passer en mode rescue. Le serveur sera rebooté et un lien pour se logué sera fourni.
+Go to the Cloud service interface to switch to rescue mode. The server will be rebooted and a link to log in will be provided.
 
-Trouver les disques attachées et montez le disque système.
+Find the attached disks and mount the system disk.
 
 [source,bash]
 ---------------
@@ -818,12 +818,12 @@ lsblk
 mount /dev/sdXY /mnt
 ---------------
 
-Il est alors possible d'agir sur le disque en écriture accessible dans /mnt
+It is then possible to work on the disk, accessible in write mode in /mnt
 
 
-=== Migrate a ext4 partition into btrfs
+=== Migrate an ext4 partition into btrfs
 
-Run command to see partition types:
+Run the commands to see partition types:
 
 [source,bash]
 ---------------
@@ -839,7 +839,7 @@ btrfs-convert -p /dev/vdX
 lsblk -f
 ---------------
 
-Then edit he */etc/fstab* to the type *ext4* to *btrfs* (change the UUID if it was changed)
+Then edit the */etc/fstab* to change the type *ext4* to *btrfs* (change the UUID if it was changed)
 
 Then you create a subvolume for each directory you want to be able to make snapshots.
 
@@ -877,8 +877,8 @@ mv /mnt/diskbackup/$dirtoconvert /mnt/diskbackup/$dirtoconvert-old; cp -ax --ref
 ---------------
 
 
--- Example of CLI to convert directoris not btrfs into btrfs subvolume
--- btrfs subvolume show /mnt/diskbackup/not 2>&1 | grep -c "Not a Btrfs subvolume" && mv /mnt/diskbackup/not /mnt/diskbackup/not-old && btrfs subvolume create /mnt/diskbackup/not && cp -ax --reflink=always /mnt/diskbackup/not-old/. /mnt/diskbackup/not && rm -fr /mnt/diskbackup/not-old  
+-- Example of CLI to convert directories not in btrfs into btrfs subvolumes
+-- btrfs subvolume show /mnt/diskbackup/not 2>&1 | grep -c "Not a Btrfs subvolume" && mv /mnt/diskbackup/not /mnt/diskbackup/not-old && btrfs subvolume create /mnt/diskbackup/not && cp -ax --reflink=always /mnt/diskbackup/not-old/. /mnt/diskbackup/not && rm -fr /mnt/diskbackup/not-old
 
 
 
@@ -886,19 +886,19 @@ To create a readonly snapshot
 
 [source,bash]
 ---------------
-btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +%j`; 
+btrfs subvolume snapshot /mnt/diskbackup /mnt/diskbackup/.snapshots/diskbackup-`date +%j`;
 rm -fr /mnt/diskbackup/.snapshots/diskbackup-`date +%j`/.snapshots;
 btrfs property set -ts /mnt/diskbackup/.snapshots/diskbackup-`date +%j` ro true;
 ---------------
 
-To delete a readonly snapshot of a day. Note: space is not freed immediatly.
+To delete a readonly snapshot of a day. Note: space is not freed immediately.
 
 [source,bash]
 ---------------
 btrfs subvolume delete /mnt/diskbackup/.snapshots/diskbackup-`date +%j`;
 ---------------
 
-To delete all old snapshot
+To delete all old snapshots
 
 [source,bash]
 ---------------
@@ -908,5 +908,4 @@ find /mnt/diskbackup/.snapshots -maxdepth 1 -type d -mtime +60 -exec btrfs subvo
 
 == TroubleShooting
 
-See the chapter available into the *Documentation SellYourSaas - Master and Deployment servers*
-
+See the chapter available in the *Documentation SellYourSaas - Master and Deployment servers*

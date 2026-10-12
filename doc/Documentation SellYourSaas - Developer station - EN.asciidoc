@@ -31,13 +31,13 @@ to configure the server with a local domain.
 
      host home.lan 127.0.0.1 should then work
 
-Ensure the client performs resolutions using local server 127.0.0.1 automatically
+Ensure the client performs resolutions using the local server 127.0.0.1 automatically
 
      host home.lan should also work
 
-Otherwise, check the */etc/resolv.conf* file and deactivate systemd-resolver to give control to NetWorkManager (see next point)
+Otherwise, check the */etc/resolv.conf* file and deactivate systemd-resolver to give control to NetworkManager (see next point)
 
-* Disable *systemd-resolver* to let NetWorkManager populate the *resolv.conf* file
+* Disable *systemd-resolver* to let NetworkManager populate the *resolv.conf* file
 
 [source,bash]
 ---------------
@@ -72,7 +72,7 @@ Create the *mailhog* launch script to put in */etc/init.d*
 # You can use sh -x instead of sh -e to activate debug
 
 DAEMON="/media/HDDATA1_LD/My Linux Apps/MailHog/mailhog_linux64" #program command line. The program name must not exceed 15 characters.
-daemon_OPT="" #argument to use by the program
+daemon_OPT="" #argument to be used by the program
 DAEMONUSER="myoslogin" #program user
 daemon_NAME="mailhog_linux64" #Program name (must be the same as the executable)
 
@@ -123,12 +123,12 @@ esac
 exit 0
 ---------------
 
-Try to connect to webhog on: http://localhost:8025
+Try to connect to mailhog on: http://localhost:8025
 
 
 === Installing postfix
 
-Install postfix by apt.
+Install postfix with apt.
 
 Edit the postfix configuration file */etc/postfix/main.cf* to enable relaying to *mailhog*. Thus any email sent will be captured by mailhog.
 
@@ -150,7 +150,7 @@ apt install ansible
 
 Install clamav and clamav-daemon
 
-Creation virus test file. Create a file with this content
+Creating a virus test file. Create a file with this content
 
 [source,bash]
 ---------------
@@ -177,7 +177,7 @@ Edit the macro file "~/.xbindkeysrc" to add your macro instruction
 #keystate_scrolllock = enable
 #keystate_capslock = enable
 
-# Macro 1 to ouptu string to show then Enter
+# Macro 1 to output the string to show, then Enter
 "xte 'usleep 300000' 'str stringtoshow' 'key Return'"
     m:0x11 + c:61
     Shift+Mod2 + exclam + Release
@@ -186,9 +186,9 @@ Edit the macro file "~/.xbindkeysrc" to add your macro instruction
 # End of xbindkeys configuration
 ---------------
 
-Replace the "stringtoshow" with your sentence to output.
+Replace "stringtoshow" with your sentence to output.
 
-Note: Because, the stringtoshow must be entered in Qwerty, it is easier to have it recorded by editing the macro file with xbindkeys-config (notavailable on some distrib)
+Note: Because the stringtoshow must be entered in QWERTY, it is easier to have it recorded by editing the macro file with xbindkeys-config (not available on some distributions)
 
 
 To test the macro file, run:
@@ -198,13 +198,13 @@ To test the macro file, run:
 xbindkeys -n
 ---------------
 
-and type the command key onto another terminal.
-If it's ok, you can launch at startup the command *xbindkeys*.
+and type the command key in another terminal.
+If it's OK, you can launch the command *xbindkeys* at startup.
 
 
 === Add alias
 
-Add at the end of */etc/bash.bashrc*, add alias to get a fast ps result and exclude some commands from the history:
+At the end of */etc/bash.bashrc*, add an alias to get a fast ps result and exclude some commands from the history:
 
 [source, bash]
 ---------------
@@ -234,7 +234,7 @@ adduser cloud-print-connector
 /usr/bin/gcp-connector-util i
 ---------------
 
-Correct the paths in *~/gcp-cups-connector.config.json* if necessary and set the rights.
+Correct the paths in *~/gcp-cups-connector.config.json* if necessary and set the permissions.
 
 chmod ug+rw ~/gcp-cups-connector.config.json
 chgrp cloud-print-connector ~/gcp-cups-connector.config.json
@@ -267,7 +267,7 @@ User=cloud-print-connector
 WantedBy=multi-user.target
 ---------------
 
-And install the launch by
+And install the launcher with
 
      sudo install -o root -m 0664 cloud-print-connector.service /etc/systemd/system
      sudo systemctl enable cloud-print-connector.service
@@ -289,44 +289,44 @@ gsettings set org.gnome.Vino require-encryption false
 ---------------
 
 
-=== Add json or xml formatter to your text editor like Geany
+=== Add a JSON or XML formatter to your text editor like Geany
 
 sudo apt update && sudo apt install geany-plugins
 
 Then in Geany, Edit - Format - Send to.
 
-Ajouter la commande "jq" pour le formatage de JSON.
-Ajouter la commande "xmllint --format -"  pour le formatage de XML.
+Add the command "jq" for JSON formatting.
+Add the command "xmllint --format -"  for XML formatting.
 
 
 
 == Clone your workstation to another
 Prerequisites:
-- You must have a remote ssh access to store the backup and you must be able to access it with
+- You must have remote ssh access to store the backup and you must be able to access it with
    ssh username@servername
 - The computer must have a LAN internet connection
 
 Prepare the USB boot key:
-- Download the amd64 (x86-64) version of Clonezilla Live zip file from (https://clonezilla.org/)
+- Download the amd64 (x86-64) version of the Clonezilla Live zip file from (https://clonezilla.org/)
 - unzip the file
 - copy all files into the root of the USB key.
 
 Make the image of the partition to save:
 - Start the computer with the CloneZilla USB key as boot
 - Choose to start CloneZilla then choose the SSH for the media storing the image.
-- Choose *saveparts* (or saveddisks)
+- Choose *saveparts* (or savedisk)
 
 Restore:
 
 - Start the computer with the CloneZilla USB key as boot
 - Choose to start CloneZilla then choose the SSH for the media storing the image.
-- Choose *restoreparts* (or restoredisks)
-- If the target partition is larger, don't forget to check during restoration option that the auto-resize option is set.
+- Choose *restoreparts* (or restoredisk)
+- If the target partition is larger, don't forget to check, in the restoration options, that the auto-resize option is set.
 
-After the restoration, you can do some check and fix keeping problems:
-Reboot from a Live ubuntu) and then you can:
+After the restoration, you can do some checks and fix remaining problems:
+Reboot from a Live Ubuntu and then you can:
 
-Rename the UUID if it is already used by another partition on same disk. If not, fix this with
+Rename the UUID if it is already used by another partition on the same disk. If not, fix this with
 [source,bash]
 ---------------
 tune2fs
@@ -344,10 +344,10 @@ Reinstall grub (if something is wrong)
 update-grub
 ---------------
 
-You can also: Check/modify the /etc/fstab to automount the new partition.
+You can also check/modify the /etc/fstab to automount the new partition.
 
 
-If after a final reboot, you reach a grub prompt, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a Live Ubunu. Then:
+If after a final reboot, you reach a grub prompt, without choice, you must reinstall grub. You can do it with boot-repair. For this, start on a Live Ubuntu. Then:
 
 [source,bash]
 ---------------
@@ -360,44 +360,44 @@ sudo boot-repair
 
 == Connect to a server via a bastion with remmina
 
-When you are using a SSH bastion to connect to your production server and the ssh command is
+When you are using an SSH bastion to connect to your production server and the ssh command is
 
 ssh bastionuser@bastion.mysaasdomain.com -t -oRemoteCommand="my.remote.production.server"
 
-(So connection to the bastion with ssh bastionuser@bastion.mysaasdomain.com then connecting to the remote server with ssh my.remote.production.server)
+(So connecting to the bastion with ssh bastionuser@bastion.mysaasdomain.com then connecting to the remote server with ssh my.remote.production.server)
 
-You can setup Remmina with:
+You can set up Remmina with:
 - Server = Address of bastion server
 - User name = bastionuser
 - Opening command = ssh my.remote.production.server
 
 
 
-== Troubelshooting
+== Troubleshooting
 
 === Error when running ansible
 
-If you got this error:
+If you get this error:
 ModuleNotFoundError: No module named 'ansible.module_utils.six.moves'
 
 or
 
-If you got this error:
+If you get this error:
 "The following modules failed to execute: ansible.legacy.setup"
 
 
-It probably means you try to execute a remote ansible rule on a new version of ansible, from an old version of ansible.
-See compatible version on this page:
+It probably means you are trying to execute a remote ansible rule on a new version of ansible, from an old version of ansible.
+See compatible versions on this page:
 https://docs.ansible.com/ansible/latest/reference_appendices/release_and_maintenance.html#ansible-core-support-matrix
 
-Check ansible version:
+Check the ansible version:
 
 [source,bash]
 ---------------
 ansible --version
 ---------------
 
-If ansible version is not compatible with python versions (local and remote), you must update ansible:
+If the ansible version is not compatible with python versions (local and remote), you must update ansible:
 
 [source,bash]
 ---------------
@@ -414,12 +414,12 @@ sudo ansible --version
 ---------------
 
 
-If ansible is not using the correct version of python, you can force to use the python3 by adding this in your host:
+If ansible is not using the correct version of python, you can force it to use python3 by adding this in your hosts file:
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3
 
-=== Error ansible on paramiko
+=== Ansible error on paramiko
 
 For this error:
 
@@ -437,7 +437,7 @@ pip install --upgrade paramiko
 
 === Error on push/pull from Eclipse IDE with Ubuntu 26.04
 
-Add this into the .ssh/config to force the protocol to use for SSH. Ubuntu 26.04 use a more secured one with "publickey-hostbound@openssh.com" not supported by Egit.
+Add this into the .ssh/config to force the protocol to use for SSH. Ubuntu 26.04 uses a more secure one with "publickey-hostbound@openssh.com", not supported by EGit.
 Then restart Eclipse.
 
 [source,bash]
@@ -452,7 +452,7 @@ Host github.com
     StrictHostKeyChecking yes
 ---------------
 
-Note: The commande *ssh-agent -s* must return something like this:
+Note: The command *ssh-agent -s* must return something like this:
 
 [source,bash]
 ---------------
@@ -461,4 +461,9 @@ SSH_AGENT_PID=461316; export SSH_AGENT_PID;
 echo Agent pid 461316;
 ---------------
 
-You can force the addition of the key with :  ssh-add ~/.ssh/id_rsa or ssh-add ~/.ssh/id_ed25519
+You can force the addition of the key with:  ssh-add ~/.ssh/id_rsa or ssh-add ~/.ssh/id_ed25519
+
+
+=== Error on login with lightdm and Ubuntu 26.04
+
+Check that permission of file ~/.Xauthority is 600.
