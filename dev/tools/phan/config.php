@@ -56,11 +56,7 @@ return [
 		'dev/tools/phan/stubs',
 	],
 	//'exclude_file_regex' => '@^vendor/.*/(tests?|Tests?)/@',
-	'exclude_file_regex' => '@^('
-		.'nonexisting'
-		.'|htdocs/myaccount/source/.*'
-		.')$@',
-
+	'exclude_file_regex' => '@^(nonexisting|.*htdocs/myaccount/source/.*|.*htdocs/custom(/.*|$))$@',
 
 
 	// A list of plugin files to execute.
