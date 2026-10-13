@@ -561,13 +561,13 @@ if (getDolGlobalString('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC')) {
 // Version
 print '<tr>';
 print '<td>'.$langs->trans("Version").'</td>';
-print '<td colspan="3">'.dol_escape_htmltag($object->version).'</td>';
+print '<td colspan="3">'.dolPrintHTML($object->version).'</td>';
 print '</tr>';
 
 // Modules
 print '<tr>';
 print '<td>'.$langs->trans("Modules").'</td>';
-print '<td colspan="3"><span class="small">'.dol_escape_htmltag($object->modulesenabled).'</span></td>';
+print '<td colspan="3"><span class="small">'.dolPrintHTML($object->modulesenabled).'</span></td>';
 print '</tr>';
 
 if (getDolGlobalString('SELLYOURSAAS_ALLOW_DOLIBARR_SPECIFIC')) {

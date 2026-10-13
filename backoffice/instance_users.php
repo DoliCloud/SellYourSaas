@@ -797,6 +797,7 @@ function print_user_table($newdb, $object)
 {
 	global $db, $langs, $form, $hookmanager;
 	global $search, $id, $contextpage, $param;
+	global $conf, $mode;
 
 	$sortfield = GETPOST('sortfield', 'aZ09comma');
 	$sortorder = GETPOST('sortorder', 'aZ09comma');
@@ -1059,7 +1060,7 @@ function print_user_table($newdb, $object)
 				$obj = $newdb->fetch_object($resql);
 
 				global $object;
-				$url='https://'.$object->ref_customer.'?username='.urlencode($obj->login).'&amp;password='.urlencode($obj->pass);
+				$url='https://'.$object->ref_customer.'?username='.urlencode($obj->login);
 				print '<tr class="oddeven">';
 				// Action column
 				if ($conf->main_checkbox_left_column) {
