@@ -86,7 +86,7 @@ $limit = GETPOST('limit', 'int') ? GETPOST('limit', 'int') : $conf->liste_limit;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
-$emailtotest = GETPOST('emailtotest');
+$emailtotest = GETPOST('emailtotest', 'email');
 $keytodesactivate	= GETPOST('key', 'alpha');
 $value	= GETPOST('value', 'alpha');
 

@@ -141,7 +141,7 @@ $formother = new FormOther($db);
 $formcompany = new FormCompany($db);
 
 
-print '<form mode="POST" action="'.$_SERVER["PHP_SELF"].'">';
+print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 
 print_fiche_titre($langs->trans("NewInstance"));
 
