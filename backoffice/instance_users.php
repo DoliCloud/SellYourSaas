@@ -355,9 +355,9 @@ if (empty($reshook)) {
 			}
 
 			setEventMessages('Password for user <b>'.$loginforsupport.'</b> set to <b>'.$password.'</b>', null, 'warnings');
+		} else {
+			setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 		}
-	} else {
-		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 	if ($action == "deletesupportuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
@@ -400,9 +400,9 @@ if (empty($reshook)) {
 					dol_print_error($newdb);
 				}
 			}
+		} else {
+			setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 		}
-	} else {
-		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 
 	if ($action == "disableuser") {
@@ -427,9 +427,9 @@ if (empty($reshook)) {
 			} else {
 				setEventMessages("UserDisabled", null, 'mesgs');
 			}
+		} else {
+			setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 		}
-	} else {
-		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 	if ($action == "enableuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
@@ -453,9 +453,9 @@ if (empty($reshook)) {
 			} else {
 				setEventMessages("UserEnabled", null, 'mesgs');
 			}
+		} else {
+			setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 		}
-	} else {
-		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 
 	if ($action == "confirm_resetpassword" && GETPOST('confirm') != 'no') {
@@ -527,9 +527,9 @@ if (empty($reshook)) {
 			} else {
 				setEventMessages("PasswordModified", null, 'mesgs');
 			}
+		} else {
+			setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 		}
-	} else {
-		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 
 	if (! in_array($action, array('resetpassword', 'confirm_resetpassword', 'createsupportuser', 'deletesupportuser'))) {
