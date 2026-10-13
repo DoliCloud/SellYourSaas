@@ -216,7 +216,7 @@ if (empty($reshook)) {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
 		$newdb->prefix_db = $prefix_db;
 
-		if (is_object($newdb)) {
+		if (is_object($newdb) && $newdb->connected) {
 			// Get login and password for support
 			$loginforsupport = getDolGlobalString('SELLYOURSAAS_LOGIN_FOR_SUPPORT');
 
@@ -356,6 +356,8 @@ if (empty($reshook)) {
 
 			setEventMessages('Password for user <b>'.$loginforsupport.'</b> set to <b>'.$password.'</b>', null, 'warnings');
 		}
+	} else {
+		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 	if ($action == "deletesupportuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
@@ -366,7 +368,7 @@ if (empty($reshook)) {
 			setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 		}
 
-		if (is_object($newdb)) {
+		if (is_object($newdb) && $newdb->connected) {
 			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
 				$fordolibarr = 0;
@@ -399,11 +401,13 @@ if (empty($reshook)) {
 				}
 			}
 		}
+	} else {
+		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 
 	if ($action == "disableuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
-		if (is_object($newdb)) {
+		if (is_object($newdb) && $newdb->connected) {
 			// TODO Set definition to disable a user into the package
 			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
@@ -424,10 +428,12 @@ if (empty($reshook)) {
 				setEventMessages("UserDisabled", null, 'mesgs');
 			}
 		}
+	} else {
+		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 	if ($action == "enableuser") {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
-		if (is_object($newdb)) {
+		if (is_object($newdb) && $newdb->connected) {
 			// TODO Set definition to disable a user into the package
 			$fordolibarr = 1;
 			if (preg_match('/glpi.*\.cloud/', $object->ref_customer)) {
@@ -448,11 +454,13 @@ if (empty($reshook)) {
 				setEventMessages("UserEnabled", null, 'mesgs');
 			}
 		}
+	} else {
+		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 
 	if ($action == "confirm_resetpassword" && GETPOST('confirm') != 'no') {
 		$newdb = getDoliDBInstance($type_db, $hostname_db, $username_db, $password_db, $database_db, $port_db);
-		if (is_object($newdb)) {
+		if (is_object($newdb) && $newdb->connected) {
 			$password=GETPOST('newpassword', 'none');
 
 			$fordolibarr = 1;
@@ -520,6 +528,8 @@ if (empty($reshook)) {
 				setEventMessages("PasswordModified", null, 'mesgs');
 			}
 		}
+	} else {
+		setEventMessages($langs->trans("FailedToConnectMayBeOldInstance"), null, 'errors');
 	}
 
 	if (! in_array($action, array('resetpassword', 'confirm_resetpassword', 'createsupportuser', 'deletesupportuser'))) {
