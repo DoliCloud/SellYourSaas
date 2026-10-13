@@ -102,11 +102,18 @@ $serverprice = !getDolGlobalString('SELLYOURSAAS_INFRA_COST') ? '100' : $conf->g
  *	Actions
  */
 
+// Security check - Actions to change setup need write permission
+$arrayofprotectedactions = array('update', 'setSELLYOURSAAS_DASHBOARD_OFF', 'setSELLYOURSAAS_DISABLE_NEW_INSTANCES', 'setSELLYOURSAAS_ANNOUNCE_ON');
+if ((in_array($action, $arrayofprotectedactions) || GETPOST('saveannounce', 'alpha')) && ! $user->hasRight('sellyoursaas', 'write')) {
+	setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+	$action = '';
+}
+
 if ($action == 'update') {
 	dolibarr_set_const($db, "NLTECHNO_NOTE", GETPOST("NLTECHNO_NOTE", 'none'), 'chaine', 0, '', $conf->entity);
 }
 
-if (GETPOST('saveannounce', 'alpha')) {
+if (GETPOST('saveannounce', 'alpha') && $user->hasRight('sellyoursaas', 'write')) {
 	dolibarr_set_const($db, "SELLYOURSAAS_ANNOUNCE", GETPOST("SELLYOURSAAS_ANNOUNCE", 'none'), 'chaine', 0, '', $conf->entity);
 }
 
@@ -448,7 +455,7 @@ if (!empty($rep) && is_array($rep['listofinstancespaying'])) {
 print "\n".'-->';
 print '</td></tr>';
 print '<tr class="oddeven"><td class="wordwrap wordbreak">';
-print $langs->trans("NbOfSuspendedInstances").' '.$langs->trans("payed").' | '.$langs->trans("test");
+print $langs->trans("NbOfSuspendedInstances").' '.$langs->trans("PayedMode").' | '.$langs->trans("TrialMode");
 print '</td><td align="right">';
 if (! empty($_SESSION['stats_totalusers'])) {
 	print '<font size="+2">'.$totalinstancessuspendedpaying.' | '.$totalinstancessuspendedfree.'</font>';

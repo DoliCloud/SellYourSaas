@@ -115,6 +115,13 @@ if (GETPOST('editinstance', 'alpha')) {
  *	Actions
  */
 
+// Security check - Actions to change setup need write permission
+$arrayofprotectedactions = array('setSELLYOURSAAS_DISABLE_INSTANCE', 'setSELLYOURSAAS_ANNOUNCE_ON', 'setSELLYOURSAAS_ANNOUNCE');
+if (in_array($action, $arrayofprotectedactions) && ! $user->hasRight('sellyoursaas', 'write')) {
+	setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+	$action = '';
+}
+
 if ($action == 'setSELLYOURSAAS_DISABLE_INSTANCE') {
 	$listofdomains = explode(',', getDolGlobalString('SELLYOURSAAS_SUB_DOMAIN_NAMES'));
 	// move the x part in domain:x into domain:closed:x

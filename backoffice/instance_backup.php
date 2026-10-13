@@ -259,6 +259,12 @@ if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
+// Security check - Action needs read permission
+if ($action == 'backupinstance' && ! $user->hasRight('sellyoursaas', 'read')) {
+	setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+	$action = 'view';
+}
+
 if (empty($reshook)) {
 	// Cancel
 	if (GETPOST('cancel', 'alpha') && ! empty($backtopage)) {

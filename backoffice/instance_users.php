@@ -180,6 +180,13 @@ if ($reshook < 0) {
 	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 }
 
+// Security check - Actions need write permission
+$arrayofprotectedactions = array('createsupportuser', 'deletesupportuser', 'disableuser', 'enableuser', 'resetpassword', 'confirm_resetpassword');
+if (in_array($action, $arrayofprotectedactions) && ! $user->hasRight('sellyoursaas', 'write')) {
+	setEventMessages($langs->trans("NotEnoughPermissions"), null, 'errors');
+	$action = 'view';
+}
+
 if (empty($reshook)) {
 	// Cancel
 	if (GETPOST('cancel', 'alpha') && ! empty($backtopage)) {
