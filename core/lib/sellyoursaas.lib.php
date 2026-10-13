@@ -357,7 +357,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$mysqlblockallowremoteip .= " DROP USER '".$object->username_db."'@'".$ipofmaster."';";
 	$links.='<span class="fa fa-database"></span> ';
 	$links.='Mysql sql command to block/allow remote IP access:<br>';
-	$links.='<textarea id="mysqlblockallowremoteip" name="mysqlblockallowremoteip" class="quatrevingtpercent" rows="'.ROWS_3.'" spellcheck="false">'.$mysqlblockallowremoteip.'</textarea>';
+	$links.='<textarea id="mysqlblockallowremoteip" name="mysqlblockallowremoteip" class="quatrevingtpercent" rows="'.ROWS_6.'" spellcheck="false">'.$mysqlblockallowremoteip.'</textarea>';
 	//if ($conf->use_javascript_ajax) $links.=ajax_autoselect("mysqlblockallowremoteip", 0);
 	$links.='<br><br>';
 
@@ -397,7 +397,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	// Upgrade link
 	$upgradestringtoshow=$upgradestring.' test';
 	$links.='<span class="fa fa-arrow-up"></span> ';
-	$links.='Upgrade version line string';
+	$links.=$langs->trans("UpgradeMainApplication");
 	$links.='<span class="opacitymedium"> (to run on the master server, replace "test" with "confirmunlock" to execute really)</span><br>';
 	$links.='<input type="text" id="upgradestring" name="upgradestring" value="'.$upgradestringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
@@ -405,10 +405,21 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	}
 	$links.='<br>';
 
+	// Deploy module command
+	$deploymodulestring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test PRODUCTREF '.$object->ref_customer.' deny '.(empty($conf->file->instance_unique_id) ? 'masteruniquekey' : $conf->file->instance_unique_id);
+	$links.='<span class="fa fa-cubes"></span> ';
+	$links.=$langs->trans("UpgradeAModule");
+	$links.='<span class="opacitymedium"> (to run as root on the deployment server, replace "test" with "confirm" to execute really)</span><br>';
+	$links.='<input type="text" id="deploymodulestring" name="deploymodulestring" value="'.dol_escape_htmltag($deploymodulestring).'" class="quatrevingtpercent" spellcheck="false"><br>';
+	if ($conf->use_javascript_ajax) {
+		$links.=ajax_autoselect("deploymodulestring", 0);
+	}
+	$links.='<br>';
+
 	// Purge data
 	$purgestringtoshow=$purgestring;
 	$links.='<span class="fa fa-eraser"></span> ';
-	$links.='Purge command line string';
+	$links.=$langs->trans("PurgeDataCommand");
 	$links.='<span class="opacitymedium"> (to run on the master server, replace "test" with "confirm" to execute really)</span><br>';
 	$links.='<input type="text" id="purgestring" name="purgestring" value="'.$purgestringtoshow.'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
