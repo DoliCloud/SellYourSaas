@@ -21,6 +21,9 @@ on:
         description: "Base branch of the PR (empty = default branch)"
         required: false
         type: string
+  # Every day at 23:00 Paris time in winter (CET), 00:00 in summer (cron is in UTC)
+  schedule:
+    - cron: "0 22 * * *"
 
 permissions:
   contents: write
@@ -45,7 +48,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.base_branch || github.event.repository.default_branch }}
+          ref: ${{ inputs.base_branch || github.event.repository.default_branch || github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -67,7 +70,7 @@ jobs:
           ISSUE_NUMBER: ${{ steps.fix.outputs.issue_number }}
           PR_TITLE: ${{ steps.fix.outputs.pr_title }}
           PR_BODY_FILE: ${{ steps.fix.outputs.pr_body_file }}
-          BASE_BRANCH: ${{ inputs.base_branch || github.event.repository.default_branch }}
+          BASE_BRANCH: ${{ inputs.base_branch || github.event.repository.default_branch || github.ref_name }}
         run: |
           if [ -z "$(git status --porcelain)" ]; then
             echo "::error::Mistral returned edits but the working tree is unchanged"

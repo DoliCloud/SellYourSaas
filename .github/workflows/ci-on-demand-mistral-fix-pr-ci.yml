@@ -19,6 +19,9 @@ on:
         required: false
         default: "mistral-large-latest"
         type: string
+  # Every day at 23:00 Paris time in winter (CET), 00:00 in summer (cron is in UTC)
+  schedule:
+    - cron: "0 22 * * *"
 
 permissions:
   contents: write
