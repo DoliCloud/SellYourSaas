@@ -138,6 +138,50 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 			}
 			$this->db->free($resql);
 
+			$nbinvoicesmixedvat = 0;
+			$sql = "SELECT COUNT(*) as nb";
+			$sql .= " FROM (";
+			$sql .= " SELECT fd.fk_facture";
+			$sql .= " FROM ".$this->db->prefix()."facture as f, ".$this->db->prefix()."facturedet as fd";
+			$sql .= " WHERE fd.fk_facture = f.rowid";
+			$sql .= " AND f.entity IN (".getEntity('facture').")";
+			$sql .= " GROUP BY fd.fk_facture";
+			$sql .= " HAVING COUNT(DISTINCT fd.tva_tx) > 1";
+			$sql .= " ) as tcount";
+
+			$resql = $this->db->query($sql);
+			if ($resql) {
+				$obj = $this->db->fetch_object($resql);
+				if ($obj) {
+					$nbinvoicesmixedvat = $obj->nb;
+				}
+			} else {
+				$error++;
+			}
+			$this->db->free($resql);
+
+			$nbinvoicerecmixedvat = 0;
+			$sql = "SELECT COUNT(*) as nb";
+			$sql .= " FROM (";
+			$sql .= " SELECT fd.fk_facture";
+			$sql .= " FROM ".$this->db->prefix()."facture_rec as f, ".$this->db->prefix()."facturedet_rec as fd";
+			$sql .= " WHERE fd.fk_facture = f.rowid";
+			$sql .= " AND f.entity IN (".getEntity('invoice').")";
+			$sql .= " GROUP BY fd.fk_facture";
+			$sql .= " HAVING COUNT(DISTINCT fd.tva_tx) > 1";
+			$sql .= " ) as tcount";
+
+			$resql = $this->db->query($sql);
+			if ($resql) {
+				$obj = $this->db->fetch_object($resql);
+				if ($obj) {
+					$nbinvoicerecmixedvat = $obj->nb;
+				}
+			} else {
+				$error++;
+			}
+			$this->db->free($resql);
+
 
 			if (!$error) {
 				// Line for information on local backup
@@ -219,6 +263,58 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 						'tooltip' => $langs->trans("NbOfPendingReseller"),
 					);
 				}
+
+				// Line for information on invoices with mixed VAT rates
+				$textinvoicesmixedvat = "";
+				if (!$nbinvoicesmixedvat) {
+					$textinvoicesmixedvat .= '<div class="badge badge-status4 nounderline">'.$nbinvoicesmixedvat.'</div>';
+				} else {
+					$textinvoicesmixedvat .= '<div class="badge badge-danger nounderlineimp"><i class="fa fa-exclamation-triangle"></i> '.$nbinvoicesmixedvat.'</div>';
+				}
+				$line++;
+				$this->info_box_contents[$line][] = array(
+					'td' => 'width="16"',
+					'url' => dol_buildpath('/sellyoursaas/invoices_list_mixedvat.php', 1),
+					'logo' => 'bill',
+					'tooltip' => $langs->trans("InvoicesWithMixedVATRates"),
+					);
+				$this->info_box_contents[$line][] = array(
+					'td' => '',
+					'text' => $langs->trans("InvoicesWithMixedVATRates"),
+					'tooltip' => $langs->trans("InvoicesWithMixedVATRates"),
+					);
+				$this->info_box_contents[$line][] = array(
+					'td' => 'class="right"',
+					'text' => $textinvoicesmixedvat,
+					'url' => dol_buildpath('/sellyoursaas/invoices_list_mixedvat.php', 1),
+					'tooltip' => $langs->trans("InvoicesWithMixedVATRates"),
+					);
+
+				// Line for information on recurring invoices with mixed VAT rates
+				$textinvoicerecmixedvat = "";
+				if (!$nbinvoicerecmixedvat) {
+					$textinvoicerecmixedvat .= '<div class="badge badge-status4 nounderline">'.$nbinvoicerecmixedvat.'</div>';
+				} else {
+					$textinvoicerecmixedvat .= '<div class="badge badge-danger nounderlineimp"><i class="fa fa-exclamation-triangle"></i> '.$nbinvoicerecmixedvat.'</div>';
+				}
+				$line++;
+				$this->info_box_contents[$line][] = array(
+					'td' => 'width="16"',
+					'url' => dol_buildpath('/sellyoursaas/invoices_list_mixedvat.php', 1).'?mode=rec',
+					'logo' => 'bill',
+					'tooltip' => $langs->trans("RecurringInvoicesWithMixedVATRates"),
+					);
+				$this->info_box_contents[$line][] = array(
+					'td' => '',
+					'text' => $langs->trans("RecurringInvoicesWithMixedVATRates"),
+					'tooltip' => $langs->trans("RecurringInvoicesWithMixedVATRates"),
+					);
+				$this->info_box_contents[$line][] = array(
+					'td' => 'class="right"',
+					'text' => $textinvoicerecmixedvat,
+					'url' => dol_buildpath('/sellyoursaas/invoices_list_mixedvat.php', 1).'?mode=rec',
+					'tooltip' => $langs->trans("RecurringInvoicesWithMixedVATRates"),
+					);
 			} else {
 				$this->info_box_contents[0][0] = array(
 					'td' => '',

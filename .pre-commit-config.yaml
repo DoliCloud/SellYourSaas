@@ -261,6 +261,7 @@ repos:
     rev: 4.0.4
     hooks:
       - id: sqlfluff-lint
+        args: [--dialect, mysql]
         stages: [pre-commit, manual]  # manual needed for ci
         exclude: (?x)^
           (dev/initdemo/mysqldump_.*\.sql
