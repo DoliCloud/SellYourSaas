@@ -209,16 +209,47 @@ def mistral(label, system, user, history=None):
 	status, data = http_json(MISTRAL_API, headers, payload, "POST")
 	if status != 200:
 		fail(f"Mistral API error {status}: {data}")
-	content = data["choices"][0]["message"]["content"]
+	content, thinking = message_text(data["choices"][0]["message"]["content"])
 	usage = data.get("usage") or {}
 	log(f"Mistral answered in {time.time() - start:.1f}s "
 		f"(tokens: prompt {usage.get('prompt_tokens', '?')}, answer {usage.get('completion_tokens', '?')})")
+	if thinking:
+		group(f"Reasoning of Mistral ({label})", thinking)
 	group(f"Answer of Mistral ({label})", content)
 	messages.append({"role": "assistant", "content": content})
 	try:
 		return json.loads(content), messages
 	except json.JSONDecodeError:
+		pass
+	# Some models ignore response_format and surround the JSON with text or a ```json block
+	first, last = content.find("{"), content.rfind("}")
+	try:
+		return json.loads(content[first:last + 1] if 0 <= first < last else content), messages
+	except json.JSONDecodeError:
 		fail(f"Mistral returned invalid JSON: {content[:2000]}")
+
+
+def message_text(content):
+	"""
+	Return (answer, reasoning) from the content of a message. The content is a string, or with reasoning models
+	a list of chunks like [{"type": "thinking", "thinking": [{"type": "text", "text": "..."}]}, {"type": "text", "text": "..."}].
+	"""
+	if isinstance(content, str):
+		return content, ""
+	answer = []
+	thinking = []
+	for chunk in content or []:
+		if not isinstance(chunk, dict):
+			continue
+		if chunk.get("type") == "text":
+			answer.append(chunk.get("text") or "")
+		elif chunk.get("type") == "thinking":
+			sub = chunk.get("thinking")
+			if isinstance(sub, list):
+				thinking.extend(x.get("text") or "" for x in sub if isinstance(x, dict))
+			elif isinstance(sub, str):
+				thinking.append(sub)
+	return "".join(answer), "\n".join(thinking)
 
 
 def normalize(line):
