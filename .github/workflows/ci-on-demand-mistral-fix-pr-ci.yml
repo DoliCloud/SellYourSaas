@@ -4,7 +4,8 @@
 # Requires the repository secret MISTRAL_API_KEY.
 # Optional secret AI_PUSH_TOKEN: a token of a maintainer (classic PAT with "public_repo"), needed only
 # to push on PRs from forks (GITHUB_TOKEN can't push on a fork). Without it, PRs from forks are skipped
-# and only PRs whose branch is in this repository are processed.
+# and only PRs whose branch is in this repository are processed. The fix pushed with it also starts the CI of the
+# PR at once, while a fix pushed with GITHUB_TOKEN waits for the approval of a maintainer ("Approve and run" button).
 name: "Mistral - Fix CI of oldest PR"
 
 on:
