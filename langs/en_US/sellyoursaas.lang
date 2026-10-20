@@ -371,7 +371,8 @@ CommandToPutInstancesOnOffline=Command to put all instances online/offline
 CommandToMoveInstanceOnAnotherDeploymentServer=Command to move several or all instances into another deployment server
 CommandToDeployAModuleOptionOnAllInstances=Command to deploy a module option on some or all instances of the deployment server
 InstanceWasDeployed=Instance has been deployed
-YourPaymentModeWillExpireFixItSoon=Your payment mode has expired or is about to expire. Please <a href="%s">update your payment mode</a> to avoid any interruption of service.
+YourPaymentModeWillExpireFixItSoon=Your payment mode has expired or is about to expire.
+YourPaymentModeWillExpireFixItSoon2=Please <a href="%s">update your payment mode</a> to avoid any interruption of service.
 ResellerArea=Reseller Area
 YouAreAReseller=You are a reseller
 ModuleProviderArea=Module provider area

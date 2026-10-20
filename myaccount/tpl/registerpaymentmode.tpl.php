@@ -305,7 +305,7 @@ foreach ($arrayofcompanypaymentmode as $companypaymentmodetemp) {
 		if ($companypaymentmodetemp->exp_date_year < $nowyear ||
 		($companypaymentmodetemp->exp_date_year == $nowyear && $companypaymentmodetemp->exp_date_month <= $nowmonth)) {
 			print '<br>';
-			print img_warning().' '.$langs->trans("YourPaymentModeWillExpireFixItSoon", $urltoenterpaymentmode);
+			print img_warning().' '.$langs->trans("YourPaymentModeWillExpireFixItSoon");
 		}
 	}
 }

@@ -15,6 +15,7 @@ RUN apt-get update \
 		gh \
 		ghostscript \
 		git \
+		golang-go \
         graphviz \
         gzip \
 		hurl \
