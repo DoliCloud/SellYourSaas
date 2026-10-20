@@ -198,6 +198,7 @@ If possible:
 
 ## What the Agent MUST Do
 
+- Before starting, load the skill `skill-doli-devmodule`
 - Read this file before any modification
 - Check if an equivalent function already exists before writing new code
 - Minimize the impact of changes

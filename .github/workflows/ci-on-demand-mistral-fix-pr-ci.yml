@@ -1,0 +1,130 @@
+---
+# Take the oldest open pull request with a failed CI check, send the errors to the
+# Mistral API and push the proposed fix on the branch of the pull request.
+# Requires the repository secret MISTRAL_API_KEY.
+# Optional secret AI_PUSH_TOKEN: a token of a maintainer (classic PAT with "public_repo"), needed only
+# to push on PRs from forks (GITHUB_TOKEN can't push on a fork). Without it, PRs from forks are skipped
+# and only PRs whose branch is in this repository are processed. The fix pushed with it also starts the CI of the
+# PR at once, while a fix pushed with GITHUB_TOKEN waits for the approval of a maintainer ("Approve and run" button).
+name: "Mistral - Fix CI of oldest PR"
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to process (empty = oldest open PR with a failed check)"
+        required: false
+        type: string
+      model:
+        description: "Mistral model"
+        required: false
+        default: "mistral-large-latest"
+        type: string
+  # Every day at 23:00 Paris time in winter (CET), 00:00 in summer (cron is in UTC)
+  schedule:
+    - cron: "0 22 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+  actions: read
+
+concurrency:
+  group: mistral-fix-pr-ci
+  cancel-in-progress: false
+
+env:
+  PROJECT_DESCRIPTION: "SellYourSaas, an external module for the Dolibarr ERP/CRM to sell and deploy SaaS instances (customer dashboard in myaccount/, deployment and maintenance scripts in scripts/). The root of the repository is the directory of the module."
+  # Directory with one subdirectory per module (empty = the repository is a single module)
+  MODULES_DIR: ""
+  FAILED_LABEL: ai-ci-fix-failed
+  # Checks that can't be fixed by a change of code (comma separated names)
+  IGNORED_CHECKS: ""
+
+jobs:
+  fix-pr-ci:
+    name: Fix CI of oldest PR with Mistral
+    runs-on: ubuntu-latest
+    steps:
+      # The scripts are always taken from the branch of the workflow, never from the PR
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Select the PR
+        id: select
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MISTRAL_MODEL: ${{ inputs.model }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          HAS_PUSH_TOKEN: ${{ secrets.AI_PUSH_TOKEN != '' }}
+        run: python3 .github/scripts/mistral_fix_pr_ci.py select
+
+      - name: Checkout the branch of the PR
+        if: steps.select.outputs.found == 'true'
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.select.outputs.head_repo }}
+          ref: ${{ steps.select.outputs.head_ref }}
+          token: ${{ secrets.AI_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+          path: pr
+
+      - name: Ask Mistral for a fix
+        id: fix
+        if: steps.select.outputs.found == 'true'
+        working-directory: pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          MISTRAL_MODEL: ${{ inputs.model }}
+          PR_NUMBER: ${{ steps.select.outputs.pr_number }}
+        run: python3 "$GITHUB_WORKSPACE/.github/scripts/mistral_fix_pr_ci.py" fix
+
+      - name: Push the fix on the PR
+        if: steps.select.outputs.found == 'true' && steps.fix.outputs.fixed == 'true'
+        working-directory: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.select.outputs.pr_number }}
+          HEAD_REF: ${{ steps.select.outputs.head_ref }}
+          COMMIT_FILE: ${{ steps.fix.outputs.commit_file }}
+          COMMENT_FILE: ${{ steps.fix.outputs.comment_file }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -F "$COMMIT_FILE"
+          # No force: the push fails if the branch received new commits meanwhile
+          git push origin "HEAD:$HEAD_REF"
+          sha=$(git rev-parse --short HEAD)
+          echo "Fix pushed on PR #${PR_NUMBER} (commit ${sha})" >> "$GITHUB_STEP_SUMMARY"
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body-file "$COMMENT_FILE"
+
+      # Runs also when a previous step crashed, so the same PR is never processed twice
+      - name: Report failure to fix
+        if: always() && steps.select.outputs.found == 'true' && (steps.fix.outputs.fixed != 'true' || failure())
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.select.outputs.pr_number }}
+          REASON: ${{ steps.fix.outputs.reason }}
+        run: |
+          {
+            echo "### Mistral could not fix the CI of PR #${PR_NUMBER}"
+            echo
+            echo "${REASON:-The workflow failed, see the logs of the previous steps.}"
+          } >> "$GITHUB_STEP_SUMMARY"
+          # Flag the PR so next runs move on to the next PR
+          gh label create "$FAILED_LABEL" --repo "$GITHUB_REPOSITORY" --color b60205 --description "AI failed to fix the CI" --force
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label "$FAILED_LABEL"
+
+      - name: No PR found
+        if: steps.select.outputs.found == 'false'
+        run: echo "No open PR with a failed check to process." >> "$GITHUB_STEP_SUMMARY"

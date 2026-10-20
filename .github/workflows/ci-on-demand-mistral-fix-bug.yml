@@ -1,0 +1,116 @@
+---
+# Take the oldest open issue of type/label "Bug", send it to the Mistral API
+# and open a pull request with the proposed fix.
+# Requires the repository secret MISTRAL_API_KEY and the setting
+# "Settings > Actions > General > Allow GitHub Actions to create and approve pull requests".
+# Optional secret AI_PUSH_TOKEN: a token of a maintainer (classic PAT with "public_repo"). When defined, the branch
+# is pushed and the PR created with it, so the CI of the PR starts at once. Without it, they are done with
+# GITHUB_TOKEN and the CI of the PR waits for the approval of a maintainer ("Approve and run" button).
+name: "Mistral - Fix oldest bug"
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to process (empty = oldest open Bug issue)"
+        required: false
+        type: string
+      model:
+        description: "Mistral model"
+        required: false
+        default: "mistral-large-latest"
+        type: string
+      base_branch:
+        description: "Base branch of the PR (empty = default branch)"
+        required: false
+        type: string
+  # Every day at 23:00 Paris time in winter (CET), 00:00 in summer (cron is in UTC)
+  schedule:
+    - cron: "0 22 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: mistral-fix-bug
+  cancel-in-progress: false
+
+env:
+  PROJECT_DESCRIPTION: "SellYourSaas, an external module for the Dolibarr ERP/CRM to sell and deploy SaaS instances (customer dashboard in myaccount/, deployment and maintenance scripts in scripts/). The root of the repository is the directory of the module."
+  # Directory with one subdirectory per module (empty = the repository is a single module)
+  MODULES_DIR: ""
+  DONE_LABEL: ai-pr
+  FAILED_LABEL: ai-pr-failed
+
+jobs:
+  fix-bug:
+    name: Fix oldest bug with Mistral
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.base_branch || github.event.repository.default_branch || github.ref_name }}
+          # Token used by the "git push" of the PR branch
+          token: ${{ secrets.AI_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Ask Mistral for a fix
+        id: fix
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          MISTRAL_MODEL: ${{ inputs.model }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: python3 .github/scripts/mistral_fix_bug.py
+
+      - name: Create pull request
+        if: steps.fix.outputs.found == 'true' && steps.fix.outputs.fixed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.AI_PUSH_TOKEN || secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ steps.fix.outputs.issue_number }}
+          PR_TITLE: ${{ steps.fix.outputs.pr_title }}
+          PR_BODY_FILE: ${{ steps.fix.outputs.pr_body_file }}
+          BASE_BRANCH: ${{ inputs.base_branch || github.event.repository.default_branch || github.ref_name }}
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "::error::Mistral returned edits but the working tree is unchanged"
+            exit 1
+          fi
+          branch="ai/fix-issue-${ISSUE_NUMBER}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add -A
+          git commit -m "$PR_TITLE" -m "Fix #${ISSUE_NUMBER}" -m "Generated with the Mistral API."
+          git push origin "$branch"
+          pr_url=$(gh pr create --base "$BASE_BRANCH" --head "$branch" --title "$PR_TITLE" --body-file "$PR_BODY_FILE")
+          echo "PR created: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          gh label create "$DONE_LABEL" --color 5319e7 --description "A PR was proposed by AI" --force
+          gh issue edit "$ISSUE_NUMBER" --add-label "$DONE_LABEL"
+          gh issue comment "$ISSUE_NUMBER" --body "A fix was proposed automatically by Mistral AI in $pr_url (to be reviewed)."
+
+      # Runs also when a previous step crashed, so the same issue is never processed twice
+      - name: Report failure to fix
+        if: always() && steps.fix.outputs.found == 'true' && (steps.fix.outputs.fixed != 'true' || failure())
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ steps.fix.outputs.issue_number }}
+          REASON: ${{ steps.fix.outputs.reason }}
+        run: |
+          {
+            echo "### Mistral could not fix issue #${ISSUE_NUMBER}"
+            echo
+            echo "${REASON:-The workflow failed, see the logs of the previous steps.}"
+          } >> "$GITHUB_STEP_SUMMARY"
+          # Flag the issue so next runs move on to the next bug
+          gh label create "$FAILED_LABEL" --color b60205 --description "AI failed to propose a fix" --force
+          gh issue edit "$ISSUE_NUMBER" --add-label "$FAILED_LABEL"
+
+      - name: No bug found
+        if: steps.fix.outputs.found == 'false'
+        run: echo "No open Bug issue to process." >> "$GITHUB_STEP_SUMMARY"
