@@ -604,10 +604,11 @@ if (! function_exists("llxFooter")) {
 
 		global $mythirdpartyaccount;
 
-		dol_syslog("Show footers of page mythirdpartyaccount", LOG_DEBUG);
+		dol_syslog("Show footers of page", LOG_DEBUG);
 
 		$arraysubstitution = array();
 		if (!empty($mythirdpartyaccount) && is_object($mythirdpartyaccount)) {
+			dol_syslog("Show footers of page mythirdpartyaccount=".$mythirdpartyaccount->id, LOG_DEBUG);
 			print "\n".'<!-- mythirdparty = '.$mythirdpartyaccount->id.' -->'."\n";
 			$arraysubstitution['__SHA256_THIRDPARTY_EMAIL__'] = hash('sha256', $mythirdpartyaccount->email);
 			$arraysubstitution['__SHA256_THIRDPARTY_FIRSTNAME__'] = hash('sha256', $mythirdpartyaccount->array_options['options_firstname']);
@@ -620,6 +621,7 @@ if (! function_exists("llxFooter")) {
 		global $contract;
 
 		if (!empty($contract) && is_object($contract)) {
+			dol_syslog("Show footers of page contract=".$contract->id, LOG_DEBUG);
 			print "\n".'<!-- contract = '.$contract->id.' -->'."\n";
 			$arraysubstitution['__CONTRACT_CUSTOMER_REF__'] = $contract->ref_customer;
 		}
@@ -639,6 +641,7 @@ if (! function_exists("llxFooter")) {
 			if ($_SESSION['showstarttrialtracker'] == 'trialstarted') {
 				$msg = getDolGlobalString('SELLYOURSAAS_START_TRIAL_FOOTER');
 				$msg = make_substitutions($msg, $arraysubstitution);
+				dol_syslog("A showstarttrialtracker has been done, we add tag: ".$msg);
 				print $msg;
 				print "\n";
 				$_SESSION['showstarttrialtracker'] = '';
