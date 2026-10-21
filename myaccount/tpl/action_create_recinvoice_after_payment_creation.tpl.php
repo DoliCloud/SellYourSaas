@@ -427,6 +427,17 @@ if (! $error) {
 					$error++;
 					setEventMessages($oldinvoice->error, $oldinvoice->errors, 'errors');
 				}
+
+				// If the thirdparty contains the reserved keyword for sandbox, we suspend the template invoice
+				// so no real invoice will be generated later by the recurring invoice batch
+				if (! $error && ! $isfreemodeenabled && sellyoursaasIsSandboxThirdparty($mythirdpartyaccount)) {
+					dol_syslog("--- The thirdparty has the reserved keyword for sandbox into its name, so we suspend the template invoice with id ".$invoice_rec->id, LOG_DEBUG, 0);
+					$result = $invoice_rec->setStatut(FactureRec::STATUS_SUSPENDED);
+					if ($result <= 0) {
+						$error++;
+						setEventMessages($invoice_rec->error, $invoice_rec->errors, 'errors');
+					}
+				}
 			} else {
 				$error++;
 				setEventMessages($invoice_rec->error, $invoice_rec->errors, 'errors');
