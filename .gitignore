@@ -9,3 +9,5 @@
 /ansible-py38/
 /.vibe
 /.vibeignore
+/.claudeignore
+/.claude
