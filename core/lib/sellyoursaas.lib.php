@@ -406,7 +406,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Deploy module command
-	$deploymodulestring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test PRODUCTREF '.$object->ref_customer.' deny '.(empty($conf->file->instance_unique_id) ? 'masteruniquekey' : $conf->file->instance_unique_id);
+	$deploymodulestring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test PRODUCTREF '.$object->ref_customer.' onlypaid '.(empty($conf->file->instance_unique_id) ? 'masteruniquekey' : $conf->file->instance_unique_id);
 	$links.='<span class="fa fa-cubes"></span> ';
 	$links.=$langs->trans("UpgradeAModule");
 	$links.='<span class="opacitymedium"> (to run as root on the deployment server, replace "test" with "confirm" to execute really)</span><br>';

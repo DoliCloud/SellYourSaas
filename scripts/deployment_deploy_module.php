@@ -173,7 +173,7 @@ $nocache ='';
 $mode=isset($argv[1]) ? $argv[1] : 'test';
 $productref=isset($argv[2]) ? $argv[2] : '';
 $instancefilter = isset($argv[3]) ? $argv[3] : '';
-$allowdeployforfree = isset($argv[4]) ? $argv[4] : 'deny';
+$allowdeployforfree = isset($argv[4]) ? $argv[4] : 'onlypaid';
 $decryptkey = isset($argv[5]) ? $argv[5] : '';
 if (isset($argv[6])) {
 	$tmp = $argv[6];
@@ -215,10 +215,10 @@ if (0 != posix_getuid()) {
 if (empty($productref)) {
 	print "Deploy a specific module for all deployed instances.\n";
 	print "Script must be ran from each deployment server with login root.\n";
-	print "allow|deny param is used to deploy on free instances or not (default deny).\n";
+	print "onlypaid|alsofree param is used to deploy on free instances or not (default onlypaid).\n";
 	print "\n";
-	print "Usage:   ".$script_file." test|confirm productref instancefilter allow|deny masteruniquekey [countrycode] [nocache]\n";
-	print "Example: ".$script_file." test TESTMODULE 'aa*' deny abc123456789 FR\n";
+	print "Usage:   ".$script_file." test|confirm productref instancefilter onlypaid|alsofree masteruniquekey [countrycode] [nocache]\n";
+	print "Example: ".$script_file." test TESTMODULE 'aa*' onlypaid abc123456789 FR\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	print "\n";
 	exit(-1);
@@ -324,7 +324,7 @@ if ($resql) {
 				if (! $ispaid) {
 					$payment_status='TRIAL';
 				}
-				if ($payment_status == "TRIAL" && $allowdeployforfree != "allow") {
+				if ($payment_status == "TRIAL" && $allowdeployforfree != "alsofree") {
 					print("Instance ".$instance." is in free mode so we do nothing\n");
 					$nbdeploynothingdone++;
 					continue;
