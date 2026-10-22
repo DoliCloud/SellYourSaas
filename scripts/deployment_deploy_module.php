@@ -215,9 +215,9 @@ if (0 != posix_getuid()) {
 if (empty($productref)) {
 	print "Deploy a specific module for all deployed instances.\n";
 	print "Script must be ran from each deployment server with login root.\n";
-	print "onlypaid|alsofree param is used to deploy on free instances or not (default onlypaid).\n";
+	print "onlypaid|alsotrial param is used to deploy on trial instances or not (default onlypaid).\n";
 	print "\n";
-	print "Usage:   ".$script_file." test|confirm productref instancefilter onlypaid|alsofree masteruniquekey [countrycode] [nocache]\n";
+	print "Usage:   ".$script_file." test|confirm productref instancefilter onlypaid|alsotrial masteruniquekey [countrycode] [nocache]\n";
 	print "Example: ".$script_file." test TESTMODULE 'aa*' onlypaid abc123456789 FR\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	print "\n";
@@ -324,7 +324,7 @@ if ($resql) {
 				if (! $ispaid) {
 					$payment_status='TRIAL';
 				}
-				if ($payment_status == "TRIAL" && $allowdeployforfree != "alsofree") {
+				if ($payment_status == "TRIAL" && $allowdeployforfree != "alsotrial") {
 					print("Instance ".$instance." is in free mode so we do nothing\n");
 					$nbdeploynothingdone++;
 					continue;
