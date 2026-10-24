@@ -271,14 +271,6 @@ if (empty($EMAILTO)) {
 
 $OPTIONS = "-4 --prune-empty-dirs --stats -rlt --chmod=u=rwX";
 
-if (`rsync --help | grep -- --open-noatime`) {
-	$OPTIONS = $OPTIONS.' --open-noatime';
-} elseif (`rsync --help | grep -- --noatime`) {
-	$OPTIONS = $OPTIONS." --noatime";
-} else {
-	// no evidence rsync supports --noatime => we don't use the option at all
-}
-
 if ($RSYNCDELETE == 1) {
 	$OPTIONS = $OPTIONS." --delete --delete-excluded";
 }
@@ -325,6 +317,21 @@ if ($dbmaster) {
 }
 if (empty($db)) {
 	$db = $dbmaster;
+}
+
+$utils = new Utils($db);
+
+// Detect options supported by rsync (use executeCli that uses exec() instead of the shell_exec backtick operator)
+$result = $utils->executeCli("rsync --help | grep -- --open-noatime", "", 0, null, 1);
+if (trim($result["output"]) != '') {
+	$OPTIONS = $OPTIONS.' --open-noatime';
+} else {
+	$result = $utils->executeCli("rsync --help | grep -- --noatime", "", 0, null, 1);
+	if (trim($result["output"]) != '') {
+		$OPTIONS = $OPTIONS." --noatime";
+	} else {
+		// no evidence rsync supports --noatime => we don't use the option at all
+	}
 }
 
 $user = new User($dbmaster);
