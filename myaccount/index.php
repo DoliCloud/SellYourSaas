@@ -2576,6 +2576,8 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	header('Location: '.$_SERVER["PHP_SELF"].'?mode=instances&tab=resources_'.$object->id);
 	exit();
 } elseif ($action == 'install') {
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+
 	$error = 0;
 	$sellyoursaasutils = new SellYourSaasUtils($db);
 	$contractid = GETPOSTINT("instanceid");
@@ -2625,7 +2627,11 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		// Create service line(s) from contract
 		$rangnewline = $tmpcontract->line_max() + 1;
 
-		$idlinecontract = $tmpcontract->addline($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, $date_start, $date_end, 'HT', 0, 0, null, 0, array(), null, $rangnewline);
+		$vat = get_default_tva($mysoc, $mythirdpartyaccount, $tmpproduct->id);
+		$localtax1_tx = get_default_localtax($mysoc, $mythirdpartyaccount, 1, 0);
+		$localtax2_tx = get_default_localtax($mysoc, $mythirdpartyaccount, 2, 0);
+
+		$idlinecontract = $tmpcontract->addline($tmpproduct->description, $tmpproduct->price, 1, $vat, $localtax1_tx, $localtax2_tx, $productid, 0, $date_start, $date_end, 'HT', 0, 0, null, 0, array(), null, $rangnewline);
 		if ($idlinecontract <= 0) {
 			setEventMessages($contract->error, null, 'errors');
 			$error++;
@@ -2649,7 +2655,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 					$error ++;
 				} else {
 					$facturerec = $arrayfacturerec[0];
-					$result = $facturerec->addLine($tmpproduct->description, $tmpproduct->price, 1, $tmpproduct->tva_tx, $tmpproduct->localtax1_tx, $tmpproduct->localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
+					$result = $facturerec->addLine($tmpproduct->description, $tmpproduct->price, 1, $vat, $localtax1_tx, $localtax2_tx, $productid, 0, 'HT', 0, '', 0, 0, -1, 0, '', null, 0, 1, 1);
 					if (!$result) {
 						// TODO: Send mail auto to inform admins of error line creation facturRec
 						$error ++;
