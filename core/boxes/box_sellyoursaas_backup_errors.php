@@ -303,7 +303,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$textmixedvatsince = '<form method="GET" action="'.dolPrintHTMLForAttribute($_SERVER["PHP_SELF"]).'" class="inline-block">';
 				$textmixedvatsince .= $langs->trans("InvoicesWithMixedVATRatesSince").' ';
 				$textmixedvatsince .= $form->selectDate($datemixedvatsince, 'mixedvatsince', 0, 0, 0, '', 1, 0, 0, '', '', '', '', 1, '', '', 'tzuserrel');
-				$textmixedvatsince .= ' <button type="submit" class="button buttongen smallpaddingimp">'.$langs->trans("Refresh").'</button>';
+				$textmixedvatsince .= ' <button type="submit" class="button buttongen verysmallpaddingimp">'.$langs->trans("Refresh").'</button>';
 				$textmixedvatsince .= '</form>';
 				$this->info_box_contents[$line][] = array(
 					'td' => '',
@@ -335,7 +335,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 				$textmixedvatsince = '<form method="GET" action="'.dolPrintHTMLForAttribute($_SERVER["PHP_SELF"]).'" class="inline-block">';
 				$textmixedvatsince .= $langs->trans("RecurringInvoicesWithMixedVATRatesSince").' ';
 				$textmixedvatsince .= $form->selectDate($datemixedvatrecsince, 'mixedvatrecsince', 0, 0, 0, '', 1, 0, 0, '', '', '', '', 1, '', '', 'tzuserrel');
-				$textmixedvatsince .= ' <button type="submit" class="button buttongen smallpaddingimp">'.$langs->trans("Refresh").'</button>';
+				$textmixedvatsince .= ' <button type="submit" class="button buttongen verysmallpaddingimp">'.$langs->trans("Refresh").'</button>';
 				$textmixedvatsince .= '</form>';
 				$this->info_box_contents[$line][] = array(
 					'td' => '',
