@@ -440,14 +440,14 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 	if ($mode == 'test') {
 		print "\n";
 		print "Simulation has finished to copy files from the backup server in local /tmp/restore_instance.\n";
-		print "You should after this one run the script from user 'admin' with this parameters:\n";
+		print "You should, after this, run the script from user 'admin' with this parameters:\n";
 	} else {
 		print "\n";
 		print "Data have been copied from the backup server in local /tmp/restore_instance.\n";
 		print "You must now run the script from user 'admin' with this parameters:\n";
-
-		print __FILE__." /tmp/restore_instance/".$fromusername."/".$fromdbname." autoscan ".$instance." ".$mode."\n";
 	}
+	print __FILE__." /tmp/restore_instance/".$fromusername."/".$fromdbname." autoscan ".$instance." ".$mode."\n";
+
 	print "\n";
 
 	exit(0);
