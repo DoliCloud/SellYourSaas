@@ -128,7 +128,7 @@ class Deploymentserver extends CommonObject
 		//'nb_instances' => array('type'=>'integer', 'label'=>'NbOfOpenInstances', 'enabled'=>'1', 'position'=>60, 'visible'=>1, 'index'=>1),
 		//'fk_country' => array('type'=>'integer:Ccountry:core/class/ccountry.class.php', 'label'=>'Country', 'enabled'=>'1', 'position'=>52, 'notnull'=>0, 'visible'=>-1, 'picto'=>'country', 'css'=>'maxwidth500 '),
 		'status' => array('type'=>'integer', 'label'=>'OpenCloseStatus', 'enabled'=>'1', 'position'=>100, 'notnull'=>1, 'visible'=>1, 'index'=>1, 'arrayofkeyval'=>array('0'=>'Closed', '1'=>'Opened'), 'validate'=>'1',),
-		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>-1, 'cssview'=>'wordbreak', 'csslist'=>'small', 'validate'=>'1',),
+		'note_private' => array('type'=>'html', 'label'=>'NotePrivate', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>-1, 'cssview'=>'wordbreak', 'validate'=>'1',),
 		'note_public' => array('type'=>'html', 'label'=>'NotePublic', 'enabled'=>'1', 'position'=>200, 'notnull'=>0, 'visible'=>-1, 'cssview'=>'wordbreak', 'csslist'=>'small', 'validate'=>'1',),
 		'servercustomerannouncestatus' => array('type'=>'integer', 'label'=>'ServerCustomerAnnounceStatus', 'enabled'=>'1', 'default'=>0, 'position'=>162, 'notnull'=>1, 'visible'=>1, 'arrayofkeyval'=>array('0'=>'Disabled', '1'=>'Enabled'), 'csslist'=>'center'),
 		'servercustomerannounce' => array('type'=>'text', 'label'=>'ServerCustomerAnnounce', 'enabled'=>'1', 'position'=>163, 'notnull'=>0, 'visible'=>1, 'help'=>"ServerCustomerAnnounceInfo", 'csslist'=>'small tdoverflowmax200'),
