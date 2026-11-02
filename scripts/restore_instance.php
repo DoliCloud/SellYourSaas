@@ -679,7 +679,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 		}
 	}
 
-	$output=array();
+	$output = array();
 	$fullcommandwithoutpass = preg_replace('/\-p"(..).*"$/', '-p\1***hidden***', $fullcommand); // Hide password except the 2 first chars
 	print dol_print_date(dol_now('gmt'), "%Y%m%d-%H%M%S", 'gmt').' '.$fullcommandwithoutpass."\n";
 	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
@@ -694,7 +694,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 
 	// Add file tag
 	if ($mode == 'confirm' || $mode == 'confirmdatabase') {
-		$handle=fopen($dirroot.'/../last_mysqlrestore_'.$instance.'.txt', 'w');
+		$handle = fopen($dirroot.'/../last_mysqlrestore_'.$instance.'.txt', 'w');
 		if ($handle) {
 			fwrite($handle, 'File created after mysql load into '.$instance.". return_varmysql=".$return_varmysql."\n");
 			fwrite($handle, 'The dump file restored was: '.$dirroot.'/../'.$dumpfiletoload."\n");
@@ -705,7 +705,7 @@ if ($mode == 'testdatabase' || $mode == 'test' || $mode == 'confirmdatabase' || 
 	}
 }
 
-$now=dol_now();
+$now = dol_now();
 
 // Update database
 if (!sellyoursaasIsPaidInstance($object)) {
@@ -767,6 +767,8 @@ if (empty($return_var) && empty($return_varmysql)) {
 				// No action
 			}
 		}
+
+		print $msg;
 	}
 } else {
 	if (! empty($return_var)) {
