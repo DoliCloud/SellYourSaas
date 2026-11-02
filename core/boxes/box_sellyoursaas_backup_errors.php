@@ -75,6 +75,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 		global $user, $langs;
 
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+		require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 
 		$langs->loadLangs(array("sellyoursaas@sellyoursaas", "other"));
 
@@ -138,6 +139,23 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 			}
 			$this->db->free($resql);
 
+			// Start dates for the count of invoices with mixed VAT rates (default is today - 1 month, kept in session)
+			$defaultdatemixedvat = dol_time_plus_duree(dol_get_first_hour(dol_now(), 'tzuserrel'), -1, 'm');
+			$datemixedvatsince = '';
+			if (GETPOSTISSET('mixedvatsinceyear') || !empty($_SESSION['DOLDATE_boxmixedvatsince_year'])) {
+				$datemixedvatsince = GETPOSTDATE('mixedvatsince', '', 'tzuserrel', 'boxmixedvatsince');
+			}
+			if (empty($datemixedvatsince)) {
+				$datemixedvatsince = $defaultdatemixedvat;
+			}
+			$datemixedvatrecsince = '';
+			if (GETPOSTISSET('mixedvatrecsinceyear') || !empty($_SESSION['DOLDATE_boxmixedvatrecsince_year'])) {
+				$datemixedvatrecsince = GETPOSTDATE('mixedvatrecsince', '', 'tzuserrel', 'boxmixedvatrecsince');
+			}
+			if (empty($datemixedvatrecsince)) {
+				$datemixedvatrecsince = $defaultdatemixedvat;
+			}
+
 			$nbinvoicesmixedvat = 0;
 			$sql = "SELECT COUNT(*) as nb";
 			$sql .= " FROM (";
@@ -145,6 +163,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 			$sql .= " FROM ".$this->db->prefix()."facture as f, ".$this->db->prefix()."facturedet as fd";
 			$sql .= " WHERE fd.fk_facture = f.rowid";
 			$sql .= " AND f.entity IN (".getEntity('facture').")";
+			$sql .= " AND f.datef >= '".$this->db->idate($datemixedvatsince)."'";
 			$sql .= " GROUP BY fd.fk_facture";
 			$sql .= " HAVING COUNT(DISTINCT fd.tva_tx) > 1";
 			$sql .= " ) as tcount";
@@ -167,6 +186,7 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 			$sql .= " FROM ".$this->db->prefix()."facture_rec as f, ".$this->db->prefix()."facturedet_rec as fd";
 			$sql .= " WHERE fd.fk_facture = f.rowid";
 			$sql .= " AND f.entity IN (".getEntity('invoice').")";
+			$sql .= " AND f.date_when >= '".$this->db->idate($datemixedvatrecsince)."'";
 			$sql .= " GROUP BY fd.fk_facture";
 			$sql .= " HAVING COUNT(DISTINCT fd.tva_tx) > 1";
 			$sql .= " ) as tcount";
@@ -184,6 +204,8 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 
 
 			if (!$error) {
+				$form = new Form($this->db);
+
 				// Line for information on local backup
 				$textbackup = "";
 				if (!$nbinstancebackuperror) {
@@ -278,9 +300,15 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 					'logo' => 'bill',
 					'tooltip' => $langs->trans("InvoicesWithMixedVATRates"),
 					);
+				$textmixedvatsince = '<form method="GET" action="'.dolPrintHTMLForAttribute($_SERVER["PHP_SELF"]).'" class="inline-block">';
+				$textmixedvatsince .= $langs->trans("InvoicesWithMixedVATRatesSince").' ';
+				$textmixedvatsince .= $form->selectDate($datemixedvatsince, 'mixedvatsince', 0, 0, 0, '', 1, 0, 0, '', '', '', '', 1, '', '', 'tzuserrel');
+				$textmixedvatsince .= ' <button type="submit" class="button buttongen smallpaddingimp">'.$langs->trans("Refresh").'</button>';
+				$textmixedvatsince .= '</form>';
 				$this->info_box_contents[$line][] = array(
 					'td' => '',
-					'text' => $langs->trans("InvoicesWithMixedVATRates"),
+					'text' => $textmixedvatsince,
+					'asis' => 1,
 					'tooltip' => $langs->trans("InvoicesWithMixedVATRates"),
 					);
 				$this->info_box_contents[$line][] = array(
@@ -304,9 +332,15 @@ class box_sellyoursaas_backup_errors extends ModeleBoxes
 					'logo' => 'bill',
 					'tooltip' => $langs->trans("RecurringInvoicesWithMixedVATRates"),
 					);
+				$textmixedvatsince = '<form method="GET" action="'.dolPrintHTMLForAttribute($_SERVER["PHP_SELF"]).'" class="inline-block">';
+				$textmixedvatsince .= $langs->trans("RecurringInvoicesWithMixedVATRatesSince").' ';
+				$textmixedvatsince .= $form->selectDate($datemixedvatrecsince, 'mixedvatrecsince', 0, 0, 0, '', 1, 0, 0, '', '', '', '', 1, '', '', 'tzuserrel');
+				$textmixedvatsince .= ' <button type="submit" class="button buttongen smallpaddingimp">'.$langs->trans("Refresh").'</button>';
+				$textmixedvatsince .= '</form>';
 				$this->info_box_contents[$line][] = array(
 					'td' => '',
-					'text' => $langs->trans("RecurringInvoicesWithMixedVATRates"),
+					'text' => $textmixedvatsince,
+					'asis' => 1,
 					'tooltip' => $langs->trans("RecurringInvoicesWithMixedVATRates"),
 					);
 				$this->info_box_contents[$line][] = array(
