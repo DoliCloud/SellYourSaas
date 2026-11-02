@@ -103,6 +103,25 @@ $restorestringpretoshow = '';
 $restorestringposttoshow = '';
 $moveinstancestringtoshow = '';
 
+// Get the hostname of the deployment server from its IP, to build the remote backup path
+$servershorthostname = 'yyy';
+if (!empty($object->array_options['options_deployment_host'])) {
+	$sql = "SELECT hostname FROM ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver";
+	$sql .= " WHERE ipaddress = '".$db->escape($object->array_options['options_deployment_host'])."'";
+	$sql .= " AND entity IN (".getEntity('sellyoursaas_deploymentserver').")";
+	$sql .= $db->plimit(1);
+	$resql = $db->query($sql);
+	if ($resql) {
+		$obj = $db->fetch_object($resql);
+		if ($obj && !empty($obj->hostname)) {
+			$servershorthostname = preg_replace('/\..*$/', '', $obj->hostname);
+		}
+		$db->free($resql);
+	} else {
+		dol_syslog("Failed to get hostname of deployment server: ".$db->lasterror(), LOG_WARNING);
+	}
+}
+
 $ispaid = sellyoursaasIsPaidInstance($object);
 if ($ispaid) {
 	if ($object->array_options['options_deployment_status'] != 'undeployed') {
@@ -126,7 +145,6 @@ if ($ispaid) {
 		$restorestringfromarchiveshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan';
 		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_PAID_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer.' (test|confirm)';
 
-		$servershorthostname = 'yyy';
 
 		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remotebackup:/mnt/diskbackup/.snapshots/diskbackup-DAYNUMBER/backup_'.$servershorthostname.'/'.$object->array_options['options_username_os'].' autoscan '.$object->ref_customer.' (test|confirm)';
 		$restorestringfromremotebackup .= "\n".$langs->trans("or")."\n";
@@ -181,7 +199,6 @@ if ($ispaid) {
 		$restorestringfromarchiveshort = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan ';
 		$restorestringfromarchive = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php ' . getDolGlobalString('SELLYOURSAAS_TEST_ARCHIVES_PATH').'/'.$object->array_options['options_username_os'].'/'.$object->array_options['options_database_db'].' autoscan '.$object->ref_customer.' (test|confirm)';
 
-		$servershorthostname = 'yyy';
 
 		$restorestringfromremotebackup = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/restore_instance.php remotebackup:/mnt/diskbackup/.snapshots/diskbackup-DAYNUMBER/backup_'.$servershorthostname.'/'.$object->array_options['options_username_os'].' autoscan '.$object->ref_customer.' (test|confirm)';
 		$restorestringfromremotebackup .= "\n".$langs->trans("or")."\n";
@@ -424,8 +441,8 @@ if ($id > 0 && $action != 'edit' && $action != 'create') {
 	print '<div class="fichecenter">';
 
 	$backupdir = getDolGlobalString('DOLICLOUD_BACKUP_PATH');
-	$backupdirremote = '/mnt/diskbackup/backup_yyy';
-	$backupdirremote2 = '/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_yyy';
+	$backupdirremote = '/mnt/diskbackup/backup_'.$servershorthostname;
+	$backupdirremote2 = '/mnt/diskbackup/.snapshots/diskbackup-xxx/backup_'.$servershorthostname;
 
 	$login = $username_os;
 	$password = $password_os;
