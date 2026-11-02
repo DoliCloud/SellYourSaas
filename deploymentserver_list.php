@@ -838,6 +838,10 @@ while ($i < $imaxinloop) {
 					}
 				} elseif ($key == 'rowid') {
 					print $object->showOutputField($val, $key, $object->id, '');
+				} elseif ($key == 'note_private') {
+					print '<div class="small lineheightsmall twolinesmax-normallineheight">';
+					print $object->showOutputField($val, $key, $object->$key, '');
+					print '</div>';
 				} else {
 					print $object->showOutputField($val, $key, $object->$key, '');
 				}
