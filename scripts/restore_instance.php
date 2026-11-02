@@ -367,9 +367,10 @@ if (preg_match('/:/', $dirroot)) {	// $dirroot = 'remoteserer:/mnt/diskbackup/ba
 	print 'rsync -r admin@'.$dirroot.' /tmp/restore_instance'."\n";
 	$command="rsync";
 	$param=array();
-	if ($mode != 'confirm' && $mode != 'confirmrsync') {
-		$param[]="-n";
-	}
+	// We disable -n, this operation is safe
+	//if ($mode != 'confirm' && $mode != 'confirmrsync') {
+	//	$param[]="-n";
+	//}
 	//$param[]="-a";
 	$param[]="-rltz";
 	//$param[]="-vv";
