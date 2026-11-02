@@ -352,23 +352,6 @@ class modSellYourSaas extends DolibarrModules
 			'user'=>0);
 		$r++;
 
-		/*
-		$this->menu[$r]=array(
-			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=mysaas_packages',
-			'type'=>'left',
-			'titre'=>'LiveRefsInstances',
-			'mainmenu'=>'sellyoursaas',
-			'leftmenu'=>'mysaas_live',
-			'url'=>'__[SELLYOURSAAS_REFS_URL]__',
-			'langs'=>'sellyoursaas@sellyoursaas',
-			'position'=>212,
-			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->hasRight("sellyoursaas", "read")',
-			'target'=>'_refs',
-			'user'=>0);
-		$r++;
-		*/
-
 		// Products - Services
 		$this->menu[$r]=array(
 			'fk_menu'=>'fk_mainmenu=sellyoursaas',
