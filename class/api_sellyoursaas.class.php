@@ -42,6 +42,16 @@ class Sellyoursaasapi extends DolibarrApi
 	public $packages;
 
 	/**
+	 * @var array<string,string> Type of whitelist => class name
+	 */
+	private static $whitelistClasses = array('ip' => 'Whitelistip', 'email' => 'Whitelistemail');
+
+	/**
+	 * @var array<string,string> Type of blacklist => class name
+	 */
+	private static $blacklistClasses = array('ip' => 'Blacklistip', 'content' => 'Blacklistcontent', 'from' => 'Blacklistfrom', 'to' => 'Blacklistto', 'dir' => 'Blacklistdir');
+
+	/**
 	 * Constructor
 	 *
 	 * @url     GET /
@@ -379,6 +389,184 @@ class Sellyoursaasapi extends DolibarrApi
 
 
 	/**
+	 * List entries of a whitelist
+	 *
+	 * Get the list of the whitelisted IPs (type ip) or emails (type email), allowed to register an instance or to send emails
+	 *
+	 * @param string	$type			Type of whitelist {@choice ip,email}
+	 * @param string	$sortfield		Sort field
+	 * @param string	$sortorder		Sort order
+	 * @param int		$limit			Limit for list
+	 * @param int		$page			Page number
+	 * @param string	$sqlfilters		Other criteria to filter answers separated by a comma. Syntax example "(t.content:like:'1.2.%') and (t.status:=:1)"
+	 * @return array					Array of whitelist entries
+	 *
+	 * @throws RestException
+	 *
+	 * @url	GET whitelist/{type}
+	 */
+	public function listWhitelist($type, $sortfield = "t.rowid", $sortorder = 'ASC', $limit = 100, $page = 0, $sqlfilters = '')
+	{
+		return $this->_listEntries(self::$whitelistClasses, $type, $sortfield, $sortorder, $limit, $page, $sqlfilters);
+	}
+
+	/**
+	 * Get an entry of a whitelist
+	 *
+	 * @param string	$type	Type of whitelist {@choice ip,email}
+	 * @param int		$id		ID of the entry
+	 * @return array|mixed		Data without useless information
+	 *
+	 * @url	GET whitelist/{type}/{id}
+	 *
+	 * @throws RestException 401 Not allowed
+	 * @throws RestException 404 Not found
+	 */
+	public function getWhitelist($type, $id)
+	{
+		return $this->_getEntry(self::$whitelistClasses, $type, $id);
+	}
+
+	/**
+	 * Create an entry into a whitelist
+	 *
+	 * @param string	$type			Type of whitelist {@choice ip,email}
+	 * @param array		$request_data	Request data (content, comment, status)
+	 * @return int						ID of the new entry
+	 *
+	 * @throws RestException
+	 *
+	 * @url	POST whitelist/{type}
+	 */
+	public function postWhitelist($type, $request_data = null)
+	{
+		return $this->_createEntry(self::$whitelistClasses, $type, $request_data);
+	}
+
+	/**
+	 * Update an entry of a whitelist
+	 *
+	 * @param string	$type			Type of whitelist {@choice ip,email}
+	 * @param int		$id				ID of the entry to update
+	 * @param array		$request_data	Data (content, comment, status)
+	 * @return array|mixed				The updated entry
+	 *
+	 * @throws RestException
+	 *
+	 * @url	PUT whitelist/{type}/{id}
+	 */
+	public function putWhitelist($type, $id, $request_data = null)
+	{
+		return $this->_updateEntry(self::$whitelistClasses, $type, $id, $request_data);
+	}
+
+	/**
+	 * Delete an entry of a whitelist
+	 *
+	 * @param string	$type	Type of whitelist {@choice ip,email}
+	 * @param int		$id		ID of the entry to delete
+	 * @return array
+	 *
+	 * @throws RestException
+	 *
+	 * @url	DELETE whitelist/{type}/{id}
+	 */
+	public function deleteWhitelist($type, $id)
+	{
+		return $this->_deleteEntry(self::$whitelistClasses, $type, $id);
+	}
+
+	/**
+	 * List entries of a blacklist
+	 *
+	 * Get the list of the blacklisted IPs (type ip), email contents (type content), sender emails (type from),
+	 * recipient emails (type to) or dirs/files on disk (type dir)
+	 *
+	 * @param string	$type			Type of blacklist {@choice ip,content,from,to,dir}
+	 * @param string	$sortfield		Sort field
+	 * @param string	$sortorder		Sort order
+	 * @param int		$limit			Limit for list
+	 * @param int		$page			Page number
+	 * @param string	$sqlfilters		Other criteria to filter answers separated by a comma. Syntax example "(t.content:like:'%spam%') and (t.status:=:1)"
+	 * @return array					Array of blacklist entries
+	 *
+	 * @throws RestException
+	 *
+	 * @url	GET blacklist/{type}
+	 */
+	public function listBlacklist($type, $sortfield = "t.rowid", $sortorder = 'ASC', $limit = 100, $page = 0, $sqlfilters = '')
+	{
+		return $this->_listEntries(self::$blacklistClasses, $type, $sortfield, $sortorder, $limit, $page, $sqlfilters);
+	}
+
+	/**
+	 * Get an entry of a blacklist
+	 *
+	 * @param string	$type	Type of blacklist {@choice ip,content,from,to,dir}
+	 * @param int		$id		ID of the entry
+	 * @return array|mixed		Data without useless information
+	 *
+	 * @url	GET blacklist/{type}/{id}
+	 *
+	 * @throws RestException 401 Not allowed
+	 * @throws RestException 404 Not found
+	 */
+	public function getBlacklist($type, $id)
+	{
+		return $this->_getEntry(self::$blacklistClasses, $type, $id);
+	}
+
+	/**
+	 * Create an entry into a blacklist
+	 *
+	 * @param string	$type			Type of blacklist {@choice ip,content,from,to,dir}
+	 * @param array		$request_data	Request data (content, status, comment for ip, noblacklistif for dir)
+	 * @return int						ID of the new entry
+	 *
+	 * @throws RestException
+	 *
+	 * @url	POST blacklist/{type}
+	 */
+	public function postBlacklist($type, $request_data = null)
+	{
+		return $this->_createEntry(self::$blacklistClasses, $type, $request_data);
+	}
+
+	/**
+	 * Update an entry of a blacklist
+	 *
+	 * @param string	$type			Type of blacklist {@choice ip,content,from,to,dir}
+	 * @param int		$id				ID of the entry to update
+	 * @param array		$request_data	Data (content, status, comment for ip, noblacklistif for dir)
+	 * @return array|mixed				The updated entry
+	 *
+	 * @throws RestException
+	 *
+	 * @url	PUT blacklist/{type}/{id}
+	 */
+	public function putBlacklist($type, $id, $request_data = null)
+	{
+		return $this->_updateEntry(self::$blacklistClasses, $type, $id, $request_data);
+	}
+
+	/**
+	 * Delete an entry of a blacklist
+	 *
+	 * @param string	$type	Type of blacklist {@choice ip,content,from,to,dir}
+	 * @param int		$id		ID of the entry to delete
+	 * @return array
+	 *
+	 * @throws RestException
+	 *
+	 * @url	DELETE blacklist/{type}/{id}
+	 */
+	public function deleteBlacklist($type, $id)
+	{
+		return $this->_deleteEntry(self::$blacklistClasses, $type, $id);
+	}
+
+
+	/**
 	 * Get properties of a packages object
 	 *
 	 * Return an array with packages information
@@ -512,5 +700,207 @@ class Sellyoursaasapi extends DolibarrApi
 			$packages[$field] = $data[$field];
 		}
 		return $packages;
+	}
+
+	/**
+	 * Return a new empty object of a whitelist or blacklist type
+	 *
+	 * @param	array<string,string>	$classes	Type => class name
+	 * @param	string					$type		Type of list
+	 * @return	CommonObject						New object
+	 *
+	 * @throws	RestException
+	 */
+	private function _newEntryObject($classes, $type)
+	{
+		if (!isset($classes[$type])) {
+			throw new RestException(400, 'Bad value for type. Must be one of: '.implode(', ', array_keys($classes)));
+		}
+		$classname = $classes[$type];
+		dol_include_once('/sellyoursaas/class/'.dol_strtolower($classname).'.class.php');
+
+		return new $classname($this->db);
+	}
+
+	/**
+	 * List entries of a whitelist or blacklist
+	 *
+	 * @param	array<string,string>	$classes		Type => class name
+	 * @param	string					$type			Type of list
+	 * @param	string					$sortfield		Sort field
+	 * @param	string					$sortorder		Sort order
+	 * @param	int						$limit			Limit for list
+	 * @param	int						$page			Page number
+	 * @param	string					$sqlfilters		Universal search filter
+	 * @return	array									Array of entries
+	 *
+	 * @throws	RestException
+	 */
+	private function _listEntries($classes, $type, $sortfield, $sortorder, $limit, $page, $sqlfilters)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'read')) {
+			throw new RestException(401);
+		}
+		$tmpobject = $this->_newEntryObject($classes, $type);
+
+		if ($sqlfilters) {
+			$errormessage = '';
+			if (!DolibarrApi::_checkFilters($sqlfilters, $errormessage)) {
+				throw new RestException(503, 'Error when validating parameter sqlfilters -> '.$errormessage);
+			}
+		}
+		$offset = ($limit > 0 && $page > 0) ? ((int) $limit * (int) $page) : 0;
+
+		$records = $tmpobject->fetchAll($sortorder, $sortfield, (int) $limit, $offset, (string) $sqlfilters);
+		if (!is_array($records)) {
+			throw new RestException(503, 'Error when retrieving list: '.implode(', ', $tmpobject->errors));
+		}
+
+		$obj_ret = array();
+		foreach ($records as $record) {
+			$obj_ret[] = $this->_cleanObjectDatas($record);
+		}
+		return $obj_ret;
+	}
+
+	/**
+	 * Get an entry of a whitelist or blacklist
+	 *
+	 * @param	array<string,string>	$classes	Type => class name
+	 * @param	string					$type		Type of list
+	 * @param	int						$id			ID of the entry
+	 * @return	array|mixed							Data without useless information
+	 *
+	 * @throws	RestException
+	 */
+	private function _getEntry($classes, $type, $id)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'read')) {
+			throw new RestException(401);
+		}
+		$tmpobject = $this->_newEntryObject($classes, $type);
+		if ($tmpobject->fetch((int) $id) <= 0) {
+			throw new RestException(404, 'Entry not found');
+		}
+
+		return $this->_cleanObjectDatas($tmpobject);
+	}
+
+	/**
+	 * Copy the writable fields of request data on an entry of a whitelist or blacklist
+	 *
+	 * @param	CommonObject		$tmpobject		Object to fill
+	 * @param	array<string,mixed>	$request_data	Request data
+	 * @return	void
+	 */
+	private function _setEntryFields($tmpobject, $request_data)
+	{
+		foreach ($request_data as $field => $value) {
+			if (!isset($tmpobject->fields[$field]) || in_array($field, array('rowid', 'entity', 'date_creation', 'tms', 'fk_user_creat', 'fk_user_modif', 'import_key'))) {
+				continue;	// Unknown or technical field (id, type...)
+			}
+			$tmpobject->$field = $this->_checkValForAPI($field, $value, $tmpobject);
+		}
+	}
+
+	/**
+	 * Create an entry into a whitelist or blacklist
+	 *
+	 * @param	array<string,string>	$classes		Type => class name
+	 * @param	string					$type			Type of list
+	 * @param	array|null				$request_data	Request data
+	 * @return	int										ID of the new entry
+	 *
+	 * @throws	RestException
+	 */
+	private function _createEntry($classes, $type, $request_data)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'write')) {
+			throw new RestException(403);
+		}
+		if (!is_array($request_data)) {
+			throw new RestException(400, 'No data provided');
+		}
+		$tmpobject = $this->_newEntryObject($classes, $type);
+
+		$this->_setEntryFields($tmpobject, $request_data);
+		if (empty($tmpobject->content)) {
+			throw new RestException(400, 'content field missing');
+		}
+		if (!isset($tmpobject->status) || $tmpobject->status === '') {
+			$tmpobject->status = 1;	// Enabled by default
+		}
+
+		if ($tmpobject->create(DolibarrApiAccess::$user) < 0) {
+			throw new RestException(500, 'Error creating entry', array_merge(array($tmpobject->error), $tmpobject->errors));
+		}
+		return $tmpobject->id;
+	}
+
+	/**
+	 * Update an entry of a whitelist or blacklist
+	 *
+	 * @param	array<string,string>	$classes		Type => class name
+	 * @param	string					$type			Type of list
+	 * @param	int						$id				ID of the entry
+	 * @param	array|null				$request_data	Request data
+	 * @return	array|mixed								The updated entry
+	 *
+	 * @throws	RestException
+	 */
+	private function _updateEntry($classes, $type, $id, $request_data)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'write')) {
+			throw new RestException(403);
+		}
+		$tmpobject = $this->_newEntryObject($classes, $type);
+		if ($tmpobject->fetch((int) $id) <= 0) {
+			throw new RestException(404, 'Entry not found');
+		}
+		if (!is_array($request_data)) {
+			throw new RestException(400, 'No data provided');
+		}
+
+		$this->_setEntryFields($tmpobject, $request_data);
+		if (empty($tmpobject->content)) {
+			throw new RestException(400, 'content field can not be empty');
+		}
+
+		if ($tmpobject->update(DolibarrApiAccess::$user) < 0) {
+			throw new RestException(500, 'Error updating entry', array_merge(array($tmpobject->error), $tmpobject->errors));
+		}
+		return $this->_getEntry($classes, $type, $id);
+	}
+
+	/**
+	 * Delete an entry of a whitelist or blacklist
+	 *
+	 * @param	array<string,string>	$classes	Type => class name
+	 * @param	string					$type		Type of list
+	 * @param	int						$id			ID of the entry
+	 * @return	array
+	 *
+	 * @throws	RestException
+	 */
+	private function _deleteEntry($classes, $type, $id)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'delete')) {
+			throw new RestException(403);
+		}
+		$tmpobject = $this->_newEntryObject($classes, $type);
+		if ($tmpobject->fetch((int) $id) <= 0) {
+			throw new RestException(404, 'Entry not found');
+		}
+
+		if ($tmpobject->delete(DolibarrApiAccess::$user) < 0) {
+			throw new RestException(500, 'Error when deleting entry: '.$tmpobject->error);
+		}
+
+		return array(
+			'success' => array(
+				'code' => 200,
+				'message' => 'Entry deleted'
+			)
+		);
 	}
 }

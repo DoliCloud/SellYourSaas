@@ -766,23 +766,6 @@ class modSellYourSaas extends DolibarrModules
 			'user'=>0
 		);
 		$r++;
-
-		$this->menu[$r]=array(
-			'fk_menu'=>'fk_mainmenu=sellyoursaas,fk_leftmenu=sellyoursaas_blacklist',
-			'type'=>'left',
-			'titre'=>'BlacklistMails',
-			'prefix' => '',
-			'mainmenu'=>'sellyoursaas',
-			'leftmenu'=>'sellyoursaas_blacklistmails',
-			'url'=>'/sellyoursaas/blacklistmail_list.php',
-			'langs'=>'',
-			'position'=>657,
-			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
-			'perms'=>'$user->hasRight("sellyoursaas", "read")',
-			'target'=>'',
-			'user'=>0
-		);
-		$r++;
 	}
 
 	/**
