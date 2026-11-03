@@ -209,6 +209,15 @@ if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
 	*/
 
 	print '</div>'."\n";
+
+	// Option to receive invoices through the e-invoicing channel (France only)
+	if (isModEnabled('einvoicing') && getDolGlobalString('EINVOICING_DISABLE_SYNC_DOLI_TO_AP') && $mythirdpartyaccount->country_code == 'FR') {
+		print '<div class="form-group paddingtop">'."\n";
+		print '<input type="hidden" name="enable_invoicing_shown" value="1">'."\n";
+		print '<input type="checkbox" class="form-control inline valignmiddle" style="margin-top: 0" value="1"'.(empty($mythirdpartyaccount->array_options['options_enable_invoicing']) ? '' : ' checked').' id="enable_invoicing" name="enable_invoicing">'."\n";
+		print '<label for="enable_invoicing" class="valignmiddle nobold inline">'.$form->textwithpicto($langs->trans("SendMeTheEInvoice"), $langs->trans("SendMeTheEInvoiceHelp")).'</label>'."\n";
+		print '</div>'."\n";
+	}
 }
 
 				print '

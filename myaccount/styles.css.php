@@ -497,14 +497,14 @@ color: #8a6d3b;
 }
 
 .note {
-margin: 0 0 30px 0;
+margin: 0 0 20px 0;
 padding: 15px 30px 15px 15px;
-border-left: 5px solid #eee;
--webkit-border-radius: 0 4px 4px 0;
--moz-border-radius: 0 4px 4px 0;
--ms-border-radius: 0 4px 4px 0;
--o-border-radius: 0 4px 4px 0;
-border-radius: 0 4px 4px 0;
+border-left: 5px solid #ddd;
+-webkit-border-radius: 6px;
+-moz-border-radius: 6px;
+-ms-border-radius: 6px;
+-o-border-radius: 6px;
+border-radius: 6px;
 }
 
 .urlofinstancetodestroy {

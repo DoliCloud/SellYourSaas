@@ -1102,6 +1102,9 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$mythirdpartyaccount->tva_assuj = $vatassuj;
 	$mythirdpartyaccount->tva_intra = preg_replace('/\s/', '', $vatnumber);
 	$mythirdpartyaccount->idprof1 = $profid;
+	if (GETPOSTINT('enable_invoicing_shown') && isModEnabled('einvoicing') && getDolGlobalString('EINVOICING_DISABLE_SYNC_DOLI_TO_AP') && $mythirdpartyaccount->country_code == 'FR') {
+		$mythirdpartyaccount->array_options['options_enable_invoicing'] = (GETPOSTINT('enable_invoicing') ? 1 : 0);
+	}
 
 	if ($mythirdpartyaccount->tva_assuj && $mythirdpartyaccount->tva_intra) {
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';

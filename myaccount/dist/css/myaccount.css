@@ -129,6 +129,10 @@ input.form-control::-moz-placeholder { /* Firefox 19+ */
     -webkit-box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.25) !important;
     box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.25) !important;
 }
+.btnpaymentmode {
+    -webkit-box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.25);
+    box-shadow: 0 0 0 2px rgba(2, 117, 216, 0.25);
+}
 a.btnalreadyanaccount {
     padding-top: 3px;
     padding-bottom: 3px;
@@ -148,16 +152,17 @@ a.btnalreadyanaccount {
 
 .note.note-info {
     background: #f6f6f6;
+    color: #555;
 }
 .note {
-    margin: 0 0 30px 0;
+    margin: 0 0 20px 0;
     padding: 15px 30px 15px 15px;
-    border-left: 5px solid #eee;
-    -webkit-border-radius: 0 4px 4px 0;
-    -moz-border-radius: 0 4px 4px 0;
-    -ms-border-radius: 0 4px 4px 0;
-    -o-border-radius: 0 4px 4px 0;
-    border-radius: 0 4px 4px 0;
+    border-left: 5px solid #ddd;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    -ms-border-radius: 6px;
+    -o-border-radius: 6px;
+    border-radius: 6px;
 }
 
 .fa-file-text-o, .fa-file-code-o, .fa-file-powerpoint-o, .fa-file-excel-o, .fa-file-word-o, .fa-file-o, .fa-file-image-o, .fa-file-video-o, .fa-file-audio-o, .fa-file-archive-o, .fa-file-pdf-o {
@@ -240,6 +245,7 @@ a.btnalreadyanaccount {
     display: inline-block;
     float: left;
     padding: 5px 0 10px 0;
+    margin-top: 20px;
 }
 
 .row {
@@ -251,6 +257,7 @@ a.btnalreadyanaccount {
     display: inline-block;
     float: left;
     padding: 5px 0 10px 0;
+    margin-top: 20px;
 }
 .page-head .page-title > h1 {
     color: #697882;

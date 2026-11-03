@@ -217,7 +217,7 @@ if (count($listofcontractid) > 0) {
 
 
 				print '
-					            <div class="row" style="margin-top:20px">
+					            <div class="row" style="margin-top:10px">
 
 					            <!-- Ref invoice -->
 								<div class="col-12 col-md-4 nowraponall">
@@ -271,12 +271,12 @@ if (count($listofcontractid) > 0) {
 							';
 			}
 			/*if (!empty($draftinvoices)) {
-				print '			<div class="row" style="margin-top:20px">
+				print '			<div class="row" style="margin-top:10px">
 								<span class="opacitymedium">'.($langs->trans("UpcomingPayments")).'</span>
 								</div>';
 				foreach ($draftinvoices as $key => $draftinvoice) {
 					print '
-								<div class="row" style="margin-top:20px">
+								<div class="row" style="margin-top:10px">
 									<!-- Ref invoice -->
 									<div class="col-12 col-md-4 nowraponall">
 									'.($langs->trans("UpcomingPaymentNumber", $key+1)).'
@@ -309,7 +309,7 @@ if (count($listofcontractid) > 0) {
 			}*/
 		} else {
 			print '
-					            <div class="row" style="margin-top:20px">
+					            <div class="row" style="margin-top:10px">
 
 					              <div class="col-md-12">
 								<span class="opacitymedium">'.$langs->trans("NoInvoice").'</span>
@@ -325,7 +325,7 @@ if (count($listofcontractid) > 0) {
 	}
 } else {
 	print '
-					            <div class="row" style="margin-top:20px">
+					            <div class="row" style="margin-top:10px">
 
 					              <div class="col-md-12">
 								<span class="opacitymedium">'.$langs->trans("NoInvoice").'</span>
@@ -487,7 +487,7 @@ if ($mythirdpartyaccount->array_options['options_checkboxnonprofitorga'] != 'non
 
 	print '
 	                <br><br>
-	                <center><a href="'.$urltoenterpaymentmode.'" class="wordbreak btn default green-stripe">';
+	                <center><a href="'.$urltoenterpaymentmode.'" class="wordbreak btn default green-stripe btnpaymentmode">';
 	if ($nbpaymentmodeok) {
 		print $langs->trans("ModifyPaymentMode").'...';
 	} else {
