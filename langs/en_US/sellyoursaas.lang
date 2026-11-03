@@ -1025,3 +1025,7 @@ SectionSoonAvailable=This section is being updated. It will be available soon.
 HavingAtLeastOneInstance=Having at least one instance with
 NoteYouShouldReceiveTheAnswerByEmail=Note: You should receive answers to your tickets by email (check your spam folder if not received)
 EInvoicingConfVariables=E-Invoicing configuration variables
+SellYourSaasAIPreviewCreatePackage=Create the SellYourSaas package %s (%s)%s
+SellYourSaasAIPreviewUpdatePackage=Update the SellYourSaas package with id %s%s
+SellYourSaasAIPackageNotFound=SellYourSaas package with id %s not found
+SellYourSaasAIPackageRefAlreadyExists=A SellYourSaas package with ref %s already exists

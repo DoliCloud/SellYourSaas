@@ -1807,4 +1807,141 @@ class ActionsSellyoursaas
 		}
 		return $res;
 	}
+
+	/**
+	 * Overloading the addMcpApiBridgeEnrichments function : expose the packages API methods as AI assistant tools
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   Object          $object         The MCP API bridge
+	 * @param   string          $action         Current action
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0
+	 */
+	public function addMcpApiBridgeEnrichments($parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs;
+
+		$langs->load("sellyoursaas@sellyoursaas");	// For the confirmation messages of write tools
+
+		// Business fields of the package can be written by the AI assistant. Technical fields and fields
+		// containing code executed on servers (shell, sql, cron, config files, vhost) are excluded.
+		dol_include_once('/sellyoursaas/class/packages.class.php');
+		$tmppackage = new Packages($this->db);
+		$protectedfields = array('cliafter', 'cliafterpaid', 'sqlpasswordreset', 'sqlafterundeployoption', 'cliafterdeployoption', 'sqlafter', 'crontoadd', 'conffile1', 'allowoverride', 'otherinformations_formula', 'sqltoupdateeinvoiceconst', 'sqlafterpaid', 'version_formula');
+		$writableparams = array();
+		foreach ($tmppackage->fields as $fieldname => $fielddef) {
+			if (in_array($fieldname, array('rowid', 'entity', 'date_creation', 'tms', 'fk_user_creat', 'fk_user_modif', 'import_key')) || in_array($fieldname, $protectedfields)) {
+				continue;
+			}
+			$fielddesc = $langs->transnoentitiesnoconv($fielddef['label']);
+			if (!empty($fielddef['help'])) {
+				$fielddesc .= '. '.dol_string_nohtmltag(str_replace('<br>', "\n", $langs->transnoentitiesnoconv($fielddef['help'])));
+			}
+			if (!empty($fielddef['arrayofkeyval'])) {
+				$fielddesc .= ' (values: '.implode(', ', array_map(function ($k, $v) {
+					return $k.'='.$v;
+				}, array_keys($fielddef['arrayofkeyval']), $fielddef['arrayofkeyval'])).')';
+			}
+			$writableparams[$fieldname] = $fielddesc;
+		}
+
+		$this->results['sellyoursaas'] = array(
+			'sellyoursaas' => array(
+				'label' => 'SellYourSaas packages (definition of the applications deployed for SaaS instances)',
+				'methods' => array(
+					'index' => array(
+						'suffix' => 'packages_list',
+						'default_properties' => 'id,ref,label,restrict_domains,status',
+						'description' => "List the SellYourSaas packages. Filter with sqlfilters on t.ref, t.label or t.status (1=Active, 0=Disabled).",
+						'params' => array(
+							'sqlfilters' => "Universal filter, e.g. (t.ref:like:'Dolibarr%') or (t.status:=:1)"
+						)
+					),
+					'get' => array(
+						'suffix' => 'packages_get',
+						'description' => "Get one SellYourSaas package by its rowid (id) or by its exact ref (ref).",
+						'get_by' => array('ref' => 'getByRef'),
+						'params' => array(
+							'id' => "Rowid of the package (use 0 when identifying by ref).",
+							'ref' => "Exact ref of the package, alternative to id."
+						)
+					),
+					'post' => array(
+						'suffix' => 'packages_create',
+						'description' => "Create a new SellYourSaas package. Returns the rowid of the new package. The user confirms before anything is written.",
+						'write' => array(
+							'preview' => 'SellYourSaasAIPreviewCreatePackage',
+							'required' => array('ref'),
+							'args' => array('ref', 'label'),
+							'defaults' => array('status' => 0),	// Field status is mandatory for the API
+							'right' => array('sellyoursaas', 'write')
+						),
+						'params' => $writableparams
+					),
+					'put' => array(
+						'suffix' => 'packages_update',
+						'description' => "Update an existing SellYourSaas package. Give 'id' (rowid of the package, use packages_get with ref to find it) and ONLY the fields to change. The user confirms before anything is written.",
+						'write' => array(
+							'preview' => 'SellYourSaasAIPreviewUpdatePackage',
+							'required' => array('id'),
+							'args' => array('id'),
+							'right' => array('sellyoursaas', 'write')
+						),
+						'params' => array_merge(array('id' => "Rowid of the package to update."), $writableparams)
+					)
+				)
+			)
+		);
+
+		return 0;
+	}
+
+	/**
+	 * Overloading the checkMcpApiBridgeWrite function : refuse a write of an AI tool on packages before its confirmation
+	 *
+	 * @param   array           $parameters     Hook metadatas (context, etc...)
+	 * @param   Object|null     $object         Object the write is about, if known by the bridge
+	 * @param   string          $action         Operation ('create', 'update', ...)
+	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
+	 * @return  int 		      			  	=0 if OK, <0 to refuse the write
+	 */
+	public function checkMcpApiBridgeWrite($parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs;
+
+		$tool = (string) $parameters['tool'];
+		if (!in_array($tool, array('api_sellyoursaas_packages_create', 'api_sellyoursaas_packages_update'))) {
+			return 0;
+		}
+
+		$langs->load("sellyoursaas@sellyoursaas");
+		$this->errors = array();
+
+		dol_include_once('/sellyoursaas/class/packages.class.php');
+		$args = (array) $parameters['args'];
+
+		if ($tool == 'api_sellyoursaas_packages_update') {
+			$package = new Packages($this->db);
+			if (empty($args['id']) || $package->fetch((int) $args['id']) <= 0) {
+				$this->errors[] = $langs->transnoentitiesnoconv("SellYourSaasAIPackageNotFound", (string) ($args['id'] ?? ''));
+				return -1;
+			}
+			// A ref changed to the one of another package is refused
+			if (isset($args['ref']) && (string) $args['ref'] !== '' && $args['ref'] != $package->ref) {
+				$otherpackage = new Packages($this->db);
+				if ($otherpackage->fetch(0, (string) $args['ref']) > 0) {
+					$this->errors[] = $langs->transnoentitiesnoconv("SellYourSaasAIPackageRefAlreadyExists", (string) $args['ref']);
+					return -1;
+				}
+			}
+		} else {
+			$package = new Packages($this->db);
+			if (!empty($args['ref']) && $package->fetch(0, (string) $args['ref']) > 0) {
+				$this->errors[] = $langs->transnoentitiesnoconv("SellYourSaasAIPackageRefAlreadyExists", (string) $args['ref']);
+				return -1;
+			}
+		}
+
+		return 0;
+	}
 }

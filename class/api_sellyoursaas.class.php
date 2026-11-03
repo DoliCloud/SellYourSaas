@@ -131,6 +131,33 @@ class Sellyoursaasapi extends DolibarrApi
 		return $this->_cleanObjectDatas($this->packages);
 	}
 
+	/**
+	 * Get properties of a packages object by its ref
+	 *
+	 * Return an array with packages information
+	 *
+	 * @param 	string 	$ref 	Ref of packages
+	 * @return 	array|mixed 	data without useless information
+	 *
+	 * @url	GET packages/ref/{ref}
+	 *
+	 * @throws RestException 401 Not allowed
+	 * @throws RestException 404 Not found
+	 */
+	public function getByRef($ref)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'read')) {
+			throw new RestException(401);
+		}
+
+		$result = $this->packages->fetch(0, $ref);
+		if ($result <= 0) {
+			throw new RestException(404, 'Packages not found');
+		}
+
+		return $this->_cleanObjectDatas($this->packages);
+	}
+
 
 	/**
 	 * List packages
@@ -256,6 +283,9 @@ class Sellyoursaasapi extends DolibarrApi
 		if (!DolibarrApiAccess::$user->hasRight('sellyoursaas', 'write')) {
 			throw new RestException(403);
 		}
+		if (!is_array($request_data)) {
+			throw new RestException(400, 'No data provided');
+		}
 		// Check mandatory fields
 		$result = $this->_validate($request_data);
 
@@ -286,8 +316,11 @@ class Sellyoursaasapi extends DolibarrApi
 		}
 
 		$result = $this->packages->fetch($id);
-		if (!$result) {
+		if ($result <= 0) {
 			throw new RestException(404, 'Packages not found');
+		}
+		if (!is_array($request_data)) {
+			throw new RestException(400, 'No data provided');
 		}
 
 		/*if (!DolibarrApi::_checkAccessToResource('packages', $this->packages->id, 'sellyoursaas_packages')) {
