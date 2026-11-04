@@ -32,9 +32,9 @@ then
     for dir in `find langs/$3* -type d`
     do
     	dirshort=`basename $dir`
-    	
+
     	#echo $dirshort
-    	
+
 		export aa=`echo $dirshort | nawk -F"_" '{ print $1 }'`
         export bb=`echo $dirshort | nawk -F"_" '{ print $2 }'`
         aaupper=`echo $dirshort | nawk -F"_" '{ print toupper($1) }'`
@@ -45,11 +45,11 @@ then
         if [ $aaupper = "EL" ]
         then
         	aaupper="GR"
-        fi        
+        fi
         if [ $bb = "EG" ]
         then
         	aaupper="SA"
-        fi        
+        fi
 
     	bblower=`echo $dirshort | nawk -F"_" '{ print tolower($2) }'`
 
@@ -63,14 +63,14 @@ then
     			echo $dirshort is an alternative language of $reflang
     			echo ./dev/translation/strip_language_file.php $aa"_"$aaupper $aa"_"$bb $2
     			./dev/translation/strip_language_file.php $aa"_"$aaupper $aa"_"$bb $2
-    			for fic in `ls langs/${aa}_${bb}/*.delta`; do f=`echo $fic | sed -e 's/\.delta//'`; echo $f; mv $f.delta $f; done 
-    			for fic in `ls langs/${aa}_${bb}/*.lang`; 
-    			do f=`cat $fic | wc -l`; 
-    			    #echo $f lines into file $fic; 
-    			    if [ $f = 1 ] 
-    			    then 
-    			        echo Only one line remainging into file $fic, we delete it;
-    			        rm $fic 
+    			for fic in `ls langs/${aa}_${bb}/*.delta`; do f=`echo $fic | sed -e 's/\.delta//'`; echo $f; mv $f.delta $f; done
+    			for fic in `ls langs/${aa}_${bb}/*.lang`;
+    			do f=`cat $fic | wc -l`;
+    			    #echo $f lines into file $fic;
+    			    if [ $f = 1 ]
+    			    then
+    			        echo Only one line remaining into file $fic, we delete it;
+    			        rm $fic
     			    fi;
     			done
     		fi
