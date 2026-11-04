@@ -385,7 +385,7 @@ if [[ "$mode" == "upgrade" ]];then
 				setfacl -m g:www-data:--x "$targetdir/$osusername"
 				setfacl -m g:www-data:--x "$targetdir/$osusername/$dbname"
 				setfacl -R -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
-				setfacl -d -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
+				setfacl -R -d -m g:www-data:rX "$targetdir/$osusername/$dbname/htdocs"
 			else
 				echo `date +'%Y-%m-%d %H:%M:%S'`" Warning: setfacl not found (acl package not installed), skipping www-data ACL on htdocs - static files on this mpm_event server will not be servable until the acl package is installed"
 			fi
