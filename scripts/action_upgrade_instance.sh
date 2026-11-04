@@ -176,8 +176,11 @@ fi
 export usecompressformatforarchive=`grep '^usecompressformatforarchive=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 # possibility to change the path of sellyoursass directory
-olddoldataroot="/home/admin/wwwroot/dolibarr_documents"
+# olddoldataroot is the master's dataroot, as found in the paths sent by the master
+olddoldataroot=`grep '^olddoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+olddoldataroot=${olddoldataroot:-/home/admin/wwwroot/dolibarr_documents}
 newdoldataroot=`grep '^doldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+newdoldataroot=${newdoldataroot:-`grep '^newdoldataroot=' /etc/sellyoursaas.conf | cut -d '=' -f 2`}
 if [[ "x$newdoldataroot" != "x" ]]; then
 	fileforconfig1=${fileforconfig1/$olddoldataroot/$newdoldataroot}
 	dirwithdumpfile=${dirwithdumpfile/$olddoldataroot/$newdoldataroot}
