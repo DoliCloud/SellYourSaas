@@ -28,6 +28,12 @@ if [[ "x$backupdir" == "x" ]]; then
 	export backupdir="/mnt/diskbackup/backup"
 fi
 
+# possibility to change the directory where the sellyoursaas module/repository itself is installed
+export sellyoursaasdir=`grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+if [[ "x$sellyoursaasdir" == "x" ]]; then
+	export sellyoursaasdir="/home/admin/wwwroot/dolibarr_sellyoursaas"
+fi
+
 echo "Search to know if we are a master server in /etc/sellyoursaas.conf"
 masterserver=`grep '^masterserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 instanceserver=`grep '^instanceserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -119,10 +125,10 @@ if [ -d /home/admin/wwwroot/dolibarr_nltechno ]; then
 	chmod -R u+w /home/admin/wwwroot/dolibarr_nltechno/.git 2>/dev/null
 fi
 
-if [ -d /home/admin/wwwroot/dolibarr_sellyoursaas ]; then
-	echo Set owner and permission on /home/admin/wwwroot/dolibarr_sellyoursaas
-	chmod -R a-w /home/admin/wwwroot/dolibarr_sellyoursaas 2>/dev/null
-	chmod -R u+w /home/admin/wwwroot/dolibarr_sellyoursaas/.git 2>/dev/null
+if [ -d "$sellyoursaasdir" ]; then
+	echo Set owner and permission on $sellyoursaasdir
+	chmod -R a-w "$sellyoursaasdir" 2>/dev/null
+	chmod -R u+w "$sellyoursaasdir/.git" 2>/dev/null
 fi
 
 echo Set owner and permission on /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php
