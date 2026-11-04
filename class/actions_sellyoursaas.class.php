@@ -1891,7 +1891,7 @@ class ActionsSellyoursaas
 					)
 				)
 			),
-			'sellyoursaaswhitelist' => array(
+			'sellyoursaas_whitelists' => array(
 				'endpoint' => 'sellyoursaas',
 				'label' => 'SellYourSaas whitelists (IPs and emails allowed to register an instance or to send emails)',
 				'methods' => $this->getMcpListMethods(
@@ -1906,7 +1906,7 @@ class ActionsSellyoursaas
 					)
 				)
 			),
-			'sellyoursaasblacklist' => array(
+			'sellyoursaas_blacklists' => array(
 				'endpoint' => 'sellyoursaas',
 				'label' => 'SellYourSaas blacklists (forbidden IPs, email contents, email senders, email recipients and dirs on disk)',
 				'methods' => $this->getMcpListMethods(
@@ -2009,7 +2009,7 @@ class ActionsSellyoursaas
 
 		$tool = (string) $parameters['tool'];
 		$reg = array();
-		if (preg_match('/^api_sellyoursaas(whitelist|blacklist)_(create|update|delete)$/', $tool, $reg)) {
+		if (preg_match('/^api_sellyoursaas_(whitelist|blacklist)s_(create|update|delete)$/', $tool, $reg)) {
 			return $this->checkMcpListWrite($reg[1], $reg[2], (array) $parameters['args']);
 		}
 		if (!in_array($tool, array('api_sellyoursaas_packages_create', 'api_sellyoursaas_packages_update'))) {
