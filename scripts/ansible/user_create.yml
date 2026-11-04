@@ -16,19 +16,29 @@
   #become_method: sudo
   become_user: root
   tasks:
+  - name: Read sellyoursaasdir from /etc/sellyoursaas.conf
+    shell: "grep '^sellyoursaasdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2"
+    register: sellyoursaasdir_result
+    changed_when: false
+    failed_when: false
+
+  - name: Fall back to the documented default sellyoursaasdir if not set in /etc/sellyoursaas.conf
+    set_fact:
+      sellyoursaasdir: "{{ sellyoursaasdir_result.stdout if sellyoursaasdir_result.stdout != '' else '/home/admin/wwwroot/dolibarr_sellyoursaas' }}"
+
   - name: Check if SellYourSaas is installed on this sevrer
-    stat: 
-      path: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php
+    stat:
+      path: "{{ sellyoursaasdir }}/scripts/ansible/info_users.php"
     register: sellyoursaas_installed_rules
 
   - name: Get the user main public ip into the variable command_for_userip
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php ip {{login}}"
+    command: "{{ sellyoursaasdir }}/scripts/ansible/info_users.php ip {{login}}"
     register: command_for_userip
     when: sellyoursaas_installed_rules.stat.exists == True
     changed_when: false
 
   - name: Get the user public key into the variable command_for_userpublickey if userpublickey not provided as parameter
-    command: "/home/admin/wwwroot/dolibarr_sellyoursaas/scripts/ansible/info_users.php public_key {{login}}"
+    command: "{{ sellyoursaasdir }}/scripts/ansible/info_users.php public_key {{login}}"
     register: command_for_userpublickey
     when: 
       - sellyoursaas_installed_rules.stat.exists == True
