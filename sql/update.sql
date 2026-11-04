@@ -204,3 +204,7 @@ ALTER TABLE llx_packages ADD COLUMN cliafterdeployoption text;
 
 ALTER TABLE llx_packages ADD COLUMN otherinformations_formula text;
 ALTER TABLE llx_packages ADD COLUMN sqltoupdateeinvoiceconst text;
+
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN phpversiondefault varchar(8);
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN phpversionoverride integer DEFAULT 0 NOT NULL;
+ALTER TABLE llx_sellyoursaas_deploymentserver ADD COLUMN phpversionsavailable varchar(128);
