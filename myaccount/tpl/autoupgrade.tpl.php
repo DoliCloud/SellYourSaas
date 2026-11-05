@@ -244,7 +244,13 @@ if ($action == "autoupgrade") {
 			$confinstance->setValues($newdb);
 			$lastinstallinstance = isset($confinstance->global->MAIN_VERSION_LAST_INSTALL) ? explode(".", $confinstance->global->MAIN_VERSION_LAST_INSTALL)[0] : "0";
 			$lastupgradeinstance = isset($confinstance->global->MAIN_VERSION_LAST_UPGRADE) ? explode(".", $confinstance->global->MAIN_VERSION_LAST_UPGRADE)[0] : "0";
-			$lastversiondolibarrinstance = max($lastinstallinstance, $lastupgradeinstance);
+			// Values come from the tenant database, so they must be validated before being sent to the root upgrade script
+			if (!ctype_digit((string) $lastinstallinstance) || !ctype_digit((string) $lastupgradeinstance)) {
+				$errortab[] = $langs->trans("ErrorInvalidVersionInInstance");
+				$errors++;
+			} else {
+				$lastversiondolibarrinstance = max((int) $lastinstallinstance, (int) $lastupgradeinstance);
+			}
 		}
 
 		if ($dataofcontract['appproductid'] > 0) {
@@ -257,7 +263,7 @@ if ($action == "autoupgrade") {
 			foreach ($filelist as $key => $value) {
 				$version = explode("-", $value["name"])[1];
 				$version = explode(".", $version)[0];
-				$laststableupgradeversion = max($laststableupgradeversion, $version);
+				$laststableupgradeversion = max($laststableupgradeversion, (int) $version);
 			}
 			$object->array_options["dirforexampleforsources"] = $dirforexampleforsources;
 			$object->array_options["laststableupgradeversion"] = $laststableupgradeversion;

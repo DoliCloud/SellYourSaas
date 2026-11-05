@@ -76,6 +76,7 @@ SELLYOURSAAS_TEST_ARCHIVES_PATH=Dir for archives of test instances
 SELLYOURSAAS_PAID_ARCHIVES_PATH=Dir for archives of paid instances
 ErrorConnectOkButFailedToCreateFile=SSH connection OK, but failed to create file
 ErrorInvalidValue=Invalid value for field "%s"
+ErrorInvalidVersionInInstance=The version recorded into the instance database is not valid. Upgrade is not possible.
 DeleteDeploymentServerFromList=Remove server
 ConfirmDeleteDeploymentServerFromList=Are you sure you want to remove the deployment server from the server list?
 Welcome=Welcome

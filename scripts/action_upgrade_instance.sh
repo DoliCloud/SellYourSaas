@@ -147,6 +147,10 @@ fi
 export dirforexampleforsources=${43}
 export laststableupgradeversion=${44}
 export lastversiondolibarrinstance=${45}
+if [[ ! "$laststableupgradeversion" =~ ^[0-9]+$ || ! "$lastversiondolibarrinstance" =~ ^[0-9]+$ ]]; then
+	echo "Invalid parameter 44 or 45 - versions must be integers" 1>&2
+	exit 45
+fi
 
 export CUSTOMDOMAIN=${46}
 
