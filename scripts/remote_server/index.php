@@ -50,6 +50,18 @@ if ($fp) {
 	exit;
 }
 
+// Refuse to run any action if the signature key is missing or too weak (an empty key would make the signature forgeable)
+if (strlen($signature_key) < 16) {
+	fwrite($fh, "\n".date('Y-m-d H:i:s')." The 'signature_key' in /etc/sellyoursaas.conf is missing or too short (16 chars min). Request refused.\n");
+	fclose($fh);
+
+	http_response_code(503);
+
+	print "The 'signature_key' in /etc/sellyoursaas.conf is missing or too short (16 chars min). Request refused.\n";
+
+	exit();
+}
+
 // remote_server_launcher.sh already cd's into the mounted scripts directory before starting
 // php -S, but that only holds if it survives however the init/service manager forks and
 // daemonizes the process (observed to NOT survive a systemd-wrapped LSB service start/restart,

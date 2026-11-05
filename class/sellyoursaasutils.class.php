@@ -4999,6 +4999,13 @@ class SellYourSaasUtils
 
 				// Add a signature of message at end of message
 				$signaturekey = $this->getRemoteServerSignatureKey($domainname);
+				if (dol_strlen($signaturekey) < 16) {
+					// Never send an action signed with an empty or weak key
+					$error++;
+					$this->error = 'The signature key of deployment server '.$domainname.' (or the default SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY) is missing or too short (16 chars min)';
+					$this->errors[] = $this->error;
+					dol_syslog($this->error, LOG_ERR);
+				}
 
 				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymmetric signature.
 				$commandurl.= '&'.md5($commandurl.$signaturekey);
