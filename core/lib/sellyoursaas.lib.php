@@ -203,8 +203,14 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 				$urlmyaccount = preg_replace('/' . getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME').'/', $thirdparty->array_options['options_domain_registration_page'], $urlmyaccount);
 			}
 		}
-		$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH') . $thirdparty->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
-		$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.urlencode($thirdparty->email).'&login_hash='.urlencode($dol_login_hash);	// Note that password may have change and not being the one of dolibarr admin user
+		$magiclinkkey = getDolGlobalString('SELLYOURSAAS_KEYFORHASH');
+		if (dol_strlen($magiclinkkey) >= 32) {
+			$dol_login_hash=dol_hash($magiclinkkey . $thirdparty->email.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one hour
+			$url=$urlmyaccount.'?mode=logout_dashboard&password=&username='.urlencode($thirdparty->email).'&login_hash='.urlencode($dol_login_hash);	// Note that password may have change and not being the one of dolibarr admin user
+		} else {
+			// No magic login link without a strong secret key
+			$url=$urlmyaccount.'?mode=logout_dashboard&username='.urlencode($thirdparty->email);
+		}
 	}
 
 	$link = '<input type="text" class="quatrevingtpercentminusx" value="'.$url.'" spellcheck="false"> <a class="wordwrap" href="'.$url.'" target="_blank" id="dashboardlink">'.img_picto('', 'globe').'</a>';

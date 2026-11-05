@@ -54,11 +54,19 @@ function check_user_password_sellyoursaas($usertotest, $passwordtotest, $entityt
 
 		// Test with hash
 		if (GETPOST('login_hash', 'alpha', 1)) {
-			$dol_login_hash=dol_hash(getDolGlobalString('SELLYOURSAAS_KEYFORHASH').$usertotest.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one day
+			// Magic login link is disabled if no strong dedicated secret key is defined
+			$magiclinkkey = getDolGlobalString('SELLYOURSAAS_KEYFORHASH');
+			if (dol_strlen($magiclinkkey) < 32) {
+				dol_syslog("functions_sellyoursaas::check_user_password_sellyoursaas Login with login_hash rejected because SELLYOURSAAS_KEYFORHASH is not set or too short", LOG_ERR);
+				$_SESSION["dol_loginmesg"] = '<!-- No message -->';		// Set invisible message
+				return '';
+			}
+
+			$dol_login_hash=dol_hash($magiclinkkey.$usertotest.dol_print_date(dol_now(), 'dayrfc'), 5);	// hash is valid one day
 			//var_dump(GETPOST('login_hash', 'alpha', 1));
 			//var_dump($dol_login_hash);exit;
 
-			if (GETPOST('login_hash', 'alpha', 1) == $dol_login_hash) {
+			if (hash_equals($dol_login_hash, (string) GETPOST('login_hash', 'alpha', 1))) {
 				$tmpuser = new User($db);
 				$tmpuser->fetch(getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER'));
 				if ($tmpuser->login) {

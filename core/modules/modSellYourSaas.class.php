@@ -788,6 +788,11 @@ class modSellYourSaas extends DolibarrModules
 
 		$langs->load("sellyoursaas@sellyoursaas");
 
+		// Generate a strong secret key for magic login links if not defined yet
+		if (dol_strlen(getDolGlobalString('SELLYOURSAAS_KEYFORHASH')) < 32) {
+			dolibarr_set_const($this->db, 'SELLYOURSAAS_KEYFORHASH', bin2hex(random_bytes(32)), 'chaine', 0, 'Secret key used to forge the magic login links to the customer dashboard', 0);
+		}
+
 		// Create product category DefaultPOSCatLabel if not configured yet
 		$categories = new Categorie($this->db);
 		$cate_arbo = $categories->get_full_arbo('product', 0, 1);

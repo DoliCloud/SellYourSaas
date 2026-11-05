@@ -194,6 +194,12 @@ if ($action == 'set') {
 		dolibarr_set_const($db, "SELLYOURSAAS_HASHALGOFORPASSWORD", GETPOST("SELLYOURSAAS_HASHALGOFORPASSWORD", 'alpha'), 'chaine', 0, '', $conf->entity);
 		dolibarr_set_const($db, "SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", GETPOST("SELLYOURSAAS_SALTFORPASSWORDENCRYPTION", 'alpha'), 'chaine', 0, '', $conf->entity);
 
+		$magiclinkkey = GETPOST("SELLYOURSAAS_KEYFORHASH", 'alpha');
+		if ($magiclinkkey != '' && dol_strlen($magiclinkkey) < 32) {
+			setEventMessages($langs->trans("SELLYOURSAAS_KEYFORHASHTooShort"), null, 'warnings');
+		}
+		dolibarr_set_const($db, "SELLYOURSAAS_KEYFORHASH", $magiclinkkey, 'chaine', 0, '', $conf->entity);
+
 		dolibarr_set_const($db, "SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", GETPOST("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", 'alpha'), 'chaine', 0, '', $conf->entity);
 
 		dolibarr_set_const($db, "SELLYOURSAAS_SSH2_HOSTKEYALGO", GETPOST("SELLYOURSAAS_SSH2_HOSTKEYALGO", 'alpha'), 'chaine', 0, '', $conf->entity);
@@ -545,6 +551,22 @@ if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON') || getDolGlobalString('SELL
 	print '<td><span class="opacitymedium small">2</span></td>';
 	print '</tr>';
 }
+
+// Key to generate the magic login links to the customer dashboard
+print '<tr class="liste_titre"><td colspan="3">Seed to generate the login the Magic Link for admin to connect to a user dashboard</td></tr>';
+
+print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_KEYFORHASH").'</td>';
+print '<td class="nowraponall">';
+print '<input type="text" class="width300" name="SELLYOURSAAS_KEYFORHASH" id="SELLYOURSAAS_KEYFORHASH" value="'.dolPrintHTMLForAttribute(getDolGlobalString('SELLYOURSAAS_KEYFORHASH')).'">';
+if (!empty($conf->use_javascript_ajax)) {
+	print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_keyforhash" class="linkobject"');
+	// Add button to autosuggest a key
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+	print dolJSToSetRandomPassword("SELLYOURSAAS_KEYFORHASH", "generate_keyforhash");
+}
+print '</td>';
+print '<td><span class="opacitymedium small">'.$langs->trans("SELLYOURSAAS_KEYFORHASHDesc").'</span></td>';
+print '</tr>';
 
 // Key to sign message on each deployment servers
 print '<tr class="liste_titre"><td colspan="3">Security for communication from master to deployment servers (Deprecated. Use instead a different key on each deployment server)</td></tr>';
