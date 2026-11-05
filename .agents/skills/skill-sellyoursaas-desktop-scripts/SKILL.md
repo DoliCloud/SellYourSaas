@@ -1,6 +1,6 @@
 ---
 name: skill-sellyoursaas-desktop-scripts
-description: "Use when asked how to use, run, debug or modify the SellYourSaas admin desktop tools scripts/desktop_*.sh and scripts/desktop_*.php (remote apt upgrade, clean, git update, config change, crontab, fail2ban banned IPs, unix users admin, module deployment, install check) and their Ansible playbooks in scripts/ansible/. The agent only gives the command line to launch and never runs these tools itself."
+description: "Use when asked how to use, run, debug or modify the SellYourSaas admin desktop tools scripts/desktop_*.sh and scripts/desktop_*.php (remote apt upgrade, clean, git update, config change, crontab, fail2ban banned IPs, unix users admin, module deployment or update on instances, install check) and their Ansible playbooks in scripts/ansible/. The agent only gives the command line to launch and never runs these tools itself."
 license: MIT
 user-invocable: true
 allowed-tools:
@@ -62,7 +62,7 @@ and `/etc/lsb-release` present (sourced by every `.sh` script).
 | `desktop_crontab_server.sh` | `hostfile target root\|osusername` | `change_crontab_server.yml` | Edits `/var/spool/cron/crontabs/<username>` (fixes known lines: `backup_backup.sh`, `perms.ksh` → `perms.sh`). |
 | `desktop_bannedip.sh` | `hostfile target list\|unban\|ban [IP] [jail]` | `bannedip_list.yml`, `bannedip_unban.yml`, `bannedip_ban.yml` | Fail2ban: `list` shows whitelisted (`ignoreip`) and banned IPs per jail, `unban` removes an IP from all jails, `ban` bans an IP in a given jail. |
 | `desktop_install_check.sh` | `hostfile [target] [apache\|php70..php84\|all]` (default `master`) | `launch_install_check.yml` | Checks/fixes the setup of master and deployment servers: OS accounts (admin groups), PAM password policy, apt packages, and optionally apache or a given PHP version (`all` = apache + php74). Refuses `web` and `remotebackup` targets. |
-| `desktop_deploy_module.sh` | `hostsfile target test\|confirm productref instancefilter master_instance_id [countrycode] [nocache]` | `launch_deployment_deploy_module.yml` | Runs `scripts/deployment_deploy_module.php` on deployment servers to deploy the package `productref` on instances matching `instancefilter` (e.g. `'abc*'`, quote it), trials included. `nocache` forces the rebuild of the cached archive. |
+| `desktop_deploy_module.sh` | `hostsfile target test\|confirm productref instancefilter master_instance_id [countrycode] [nocache]` | `launch_deployment_deploy_module.yml` | Runs `scripts/deployment_deploy_module.php` on deployment servers to deploy (or update) the package of the service `productref` (e.g. `CLOUD-MOD-EInvoicing`) on instances matching `instancefilter` (e.g. `'abc*'`, quote it), trials included. `master_instance_id` is the master's `dolibarr_main_instance_unique_id` (see below). `nocache` forces the rebuild of the cached archive. |
 | `desktop_admin_users.php` | `hostfile target create\|update\|deactivate\|reactivate\|remove login [loginforansible] [userroot=0\|1] [userip=...] [userpublickey="..."] [userpassword="..."]` (default target `master,deployment,web`) | `user_create.yml` (create and update), `user_deactivate.yml`, `user_reactivate.yml`, `user_remove.yml` | Manages personal unix sysadmin accounts on all servers. `create` requires `userroot`; `userroot=1` also requires `userpassword`. The password is hashed locally (SHA-512 `crypt`, `$6$salt$...`) before being sent to Ansible. The 5th argument is taken as `loginforansible` (`--user=` for SSH) only if it contains no `=`. Runs with `ansible-playbook -v`. |
 
 Local tools (no Ansible):
@@ -72,6 +72,20 @@ Local tools (no Ansible):
 | `desktop_switchipv6.sh` | `sudo desktop_switchipv6.sh enable\|disable` | Enables/disables IPv6 on the desktop with `sysctl` (needs root), then shows interfaces. |
 | `desktop_fix_unzip.php` | run inside the directory to fix, no argument | Fixes an archive badly unzipped (e.g. a Windows zip giving files named `dir\sub\file`): recreates the real sub-directories, moves files into them, then removes empty directories. Works on the current directory. |
 
+## Deploying or updating a module on instances (`desktop_deploy_module.sh`)
+
+- `productref` is the ref of a service on the master whose extrafield `app_or_option` is `option` and that has a
+  package, e.g. `CLOUD-MOD-EInvoicing`. Add `nocache` after an update of the module, otherwise the cached archive
+  is deployed again.
+- `master_instance_id` is the value of `$dolibarr_main_instance_unique_id` in
+  `/home/admin/wwwroot/dolibarr/htdocs/conf/conf.php` on the master server, i.e. the host of the `[master]` section
+  of `scripts/ansible/hosts-<hostfile>` (read this file to name it). Give the user this command to read it:
+  ```bash
+  cd scripts/ansible && ansible master -i hosts-myhosts -b -K -m command -a "grep '^\$dolibarr_main_instance_unique_id' /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php"
+  ```
+- This key is a secret (it decrypts passwords stored on the master): it is visible in the shell history, in the
+  printed command and in `ps` on the servers. Never write its value in files or answers.
+
 ## Examples
 
 ```bash
@@ -80,7 +94,7 @@ Local tools (no Ansible):
 ./scripts/desktop_update_sellyoursaas.sh myhosts master,deployment
 ./scripts/desktop_config_sellyoursaas.sh myhosts master,deployment usecompressformatforarchive zstd
 ./scripts/desktop_bannedip.sh myhosts withX.mysellyoursaasdomain.com unban 1.2.3.4
-./scripts/desktop_deploy_module.sh myhosts deployment test REFMODULENAME 'abc*' abc1234 FR
+./scripts/desktop_deploy_module.sh myhosts deployment test CLOUD-MOD-EInvoicing 'abc*' abc1234 FR
 ./scripts/desktop_admin_users.php myhosts master,deployment,web create jdoe userroot=0 userip=1.2.3.4 userpublickey="ssh-ed25519 AAAA..." userpassword=...
 ```
 
