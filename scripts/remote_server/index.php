@@ -4,13 +4,23 @@
  * This script is called by a tiny web server and run as root.
  */
 
+// If 1, all parameters are written into the log file (passwords are masked)
 $DEBUG = 1;
+
+// Max allowed difference (in seconds) between the timestamp of a request and the agent clock
+$requestmaxage = 300;
+// Directory used to store the nonces already used (to reject replayed requests)
+$noncedir = '/run/sellyoursaas-nonces';
+
+// Files created by this agent (log, nonces) must not be readable by other users
+umask(077);
 
 $fh = fopen('/var/log/remote_server.log', 'a+');
 if (empty($fh)) {
 	http_response_code(501);
 	exit();
 }
+@chmod('/var/log/remote_server.log', 0600);
 
 $allowed_hosts_array = array();
 $signature_key = '';
@@ -88,21 +98,32 @@ if (empty($allowed_hosts_array) || ! in_array($_SERVER['REMOTE_ADDR'], $allowed_
 $allowed_hosts=join(',', $allowed_hosts_array);
 
 // Build param string
-$param = preg_replace('/^\//', '', $_SERVER['REQUEST_URI']);
-$tmparray = explode('?', $param, 2);
+// $tmparray[0] is the action (path of URL), $tmparray[1] is the urlencoded list of parameters (POST body).
+if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>> Call done with method '.$_SERVER['REQUEST_METHOD'].' by '.$_SERVER['REMOTE_ADDR']." refused. Only signed POST requests are allowed.\n");
+	fclose($fh);
+
+	http_response_code(405);
+
+	print "Only signed POST requests are allowed. Upgrade the SellYourSaas master server.\n";
+
+	exit();
+}
+$tmparray = array(trim((string) parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'), (string) file_get_contents('php://input'));
 
 $contentsigned = '';
 $paramspace = '';			// The string to use as parameter for CLI scripts
 $paramspacenoquotes = '';
+$paramspaceforlog = '';		// Same as $paramspace but with passwords (param 1 = ospassword, param 7 = dbpassword) masked
 $paramarray = array();
 if (! empty($tmparray[1])) {
-	// Remove the last param that is the signature to get the message signed
-	$contentsigned = preg_replace('/&[a-z0-9]+$/i', '', urldecode($tmparray[1]));
+	$contentsigned = $tmparray[1];
 	// Generate array of parameters
 	$paramarray = explode('&', urldecode($tmparray[1]));
-	foreach ($paramarray as $val) {
+	foreach ($paramarray as $key => $val) {
 		$paramspace .= escapeshellarg($val != '' ? $val : '-');	// Use ' to avoid problems with spaces in parameters, and replace '' by '-'
 		$paramspace .= " ";
+		$paramspaceforlog .= (in_array($key, array(1, 7)) ? 'XXXXXX' : escapeshellarg($val != '' ? $val : '-'))." ";
 		$paramspacenoquotes .= ($val != '' ? $val : '-');	// Replace '' by '-'
 		$paramspacenoquotes .= " ";
 	}
@@ -117,16 +138,12 @@ $dbusername = $tmpparam[6];
 $cliafter = $tmpparam[18];
 $cliafterpaid = $tmpparam[46];
 $cliafterdeployoption = $tmpparam[47];
-// The signature is always the last parameter appended by the caller (see sellyoursaasRemoteAction()),
-// whatever the total number of parameters sent for this action. preg_split() leaves a trailing empty
-// element because paramspacenoquotes always ends with a separator space, so the signature is the
-// element right before that one.
-$signatureindex = count($tmpparam) - 2;
-$signature = ($signatureindex >= 0 && !empty($tmpparam[$signatureindex])) ? $tmpparam[$signatureindex] : '';
+$requesttimestamp = isset($_SERVER['HTTP_X_SELLYOURSAAS_TIMESTAMP']) ? (string) $_SERVER['HTTP_X_SELLYOURSAAS_TIMESTAMP'] : '';
+$requestnonce = isset($_SERVER['HTTP_X_SELLYOURSAAS_NONCE']) ? (string) $_SERVER['HTTP_X_SELLYOURSAAS_NONCE'] : '';
+$signature = isset($_SERVER['HTTP_X_SELLYOURSAAS_SIGNATURE']) ? (string) $_SERVER['HTTP_X_SELLYOURSAAS_SIGNATURE'] : '';
 
-// Recalculate the signature with message received
-// TODO Replace with hash('sha256', $contentsigned.$signature_key); or use asymmetric signature.
-$recalculatedsignature = hash('md5', $contentsigned.$signature_key);
+// Recalculate the signature with action, timestamp, nonce and body received
+$recalculatedsignature = hash_hmac('sha256', $tmparray[0]."\n".$requesttimestamp."\n".$requestnonce."\n".$contentsigned, $signature_key);
 
 
 /*
@@ -137,7 +154,7 @@ $output='';
 $return_var=0;
 
 if ($DEBUG) {
-	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> index.php Call for action '.$tmparray[0].' by '.$_SERVER['REMOTE_ADDR'].' URI='.$_SERVER['REQUEST_URI']."\n");
+	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> index.php Call for action '.$tmparray[0].' by '.$_SERVER['REMOTE_ADDR'].' URI='.parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)."\n");
 } else {
 	fwrite($fh, "\n".date('Y-m-d H:i:s').' >>>>>>>>>>>>>>>>>>>> index.php Call for action '.$tmparray[0]." by ".$_SERVER['REMOTE_ADDR']."\n");
 }
@@ -145,7 +162,8 @@ if ($DEBUG) {
 fwrite($fh, date('Y-m-d H:i:s').' dnsserver='.$dnsserver.", instanceserver=".$instanceserver.", allowed_hosts=".$allowed_hosts."\n");
 //fwrite($fh, date('Y-m-d H:i:s').' contentsigned='.$contentsigned."\n");
 //fwrite($fh, date('Y-m-d H:i:s').' signature_key='.$signature_key."\n");
-fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignature=".$recalculatedsignature."\n");
+// Never log the full recalculated signature: it would give a valid signature to anyone able to read the log
+fwrite($fh, date('Y-m-d H:i:s').' signature='.$signature.", recalculatedsignature=".substr($recalculatedsignature, 0, 8)."...\n");
 
 // Compare signature and recalculatedsignature
 if (!hash_equals($recalculatedsignature, $signature)) {
@@ -157,9 +175,40 @@ if (!hash_equals($recalculatedsignature, $signature)) {
 	exit();
 }
 
+// Reject expired or replayed requests
+if (!ctype_digit($requesttimestamp) || abs(time() - (int) $requesttimestamp) > $requestmaxage || !preg_match('/^[a-f0-9]{32}$/', $requestnonce)) {
+	fwrite($fh, date('Y-m-d H:i:s')." The request timestamp is expired or the nonce is not valid (timestamp=".$requesttimestamp.", agent time=".time().").\n");
+	fclose($fh);
+
+	http_response_code(401);
+	print "The request timestamp is expired (check clocks of master and deployment server are synchronized) or the nonce is not valid.\n";
+	exit();
+}
+
+if (!is_dir($noncedir)) {
+	@mkdir($noncedir, 0700, true);
+}
+// Purge the nonces older than the accepted time window
+foreach ((array) @scandir($noncedir) as $noncefile) {
+	if (preg_match('/^[a-f0-9]{64}$/', $noncefile) && @filemtime($noncedir.'/'.$noncefile) < (time() - 2 * $requestmaxage)) {
+		@unlink($noncedir.'/'.$noncefile);
+	}
+}
+// Mode 'x' fails if the file already exists, so a nonce can be used only once
+$noncehandle = @fopen($noncedir.'/'.hash('sha256', $requestnonce), 'x');
+if ($noncehandle === false) {
+	fwrite($fh, date('Y-m-d H:i:s')." The nonce of the request was already used. Replayed request refused.\n");
+	fclose($fh);
+
+	http_response_code(409);
+	print "The nonce of the request was already used. Replayed request refused.\n";
+	exit();
+}
+fclose($noncehandle);
+
 if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployall', 'undeployall', 'undeployoption'))) {
 	if ($DEBUG) {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspace."\n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' '.$paramspaceforlog."\n");
 	} else {
 		fwrite($fh, date('Y-m-d H:i:s').' ./action_deploy_undeploy.sh '.$tmparray[0].' ...'."\n");
 	}
@@ -191,7 +240,7 @@ if (in_array($tmparray[0], array('deploy', 'undeploy', 'deployoption', 'deployal
 }
 if (in_array($tmparray[0], array('rename', 'suspend', 'suspendmaintenance', 'suspendredirect', 'unsuspend', 'unsuspend'))) {
 	if ($DEBUG) {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' '.$paramspace."\n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' '.$paramspaceforlog."\n");
 	} else {
 		fwrite($fh, date('Y-m-d H:i:s').' ./action_suspend_unsuspend.sh '.$tmparray[0].' ...'."\n");
 	}
@@ -261,7 +310,7 @@ if (in_array($tmparray[0], array('test'))) {
 
 if (in_array($tmparray[0], array('migrate'))) {
 	if ($DEBUG) {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_migrate_instance.sh '.$tmparray[0].' '.$paramspace."\n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_migrate_instance.sh '.$tmparray[0].' '.$paramspaceforlog."\n");
 	} else {
 		fwrite($fh, date('Y-m-d H:i:s').' ./action_migrate_instance.sh '.$tmparray[0].' ...'."\n");
 	}
@@ -291,9 +340,9 @@ if (in_array($tmparray[0], array('migrate'))) {
 
 if (in_array($tmparray[0], array('upgrade'))) {
 	if ($DEBUG) {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_upgrade_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_upgrade_instance.sh '.$tmparray[0].' '.$paramspaceforlog." \n");
 	} else {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_upgrade_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_upgrade_instance.sh '.$tmparray[0].' ...'."\n");
 	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
@@ -321,9 +370,9 @@ if (in_array($tmparray[0], array('upgrade'))) {
 
 if (in_array($tmparray[0], array('deploywebsite'))) {
 	if ($DEBUG) {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_website_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_website_instance.sh '.$tmparray[0].' '.$paramspaceforlog." \n");
 	} else {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_website_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_website_instance.sh '.$tmparray[0].' ...'."\n");
 	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
@@ -351,9 +400,9 @@ if (in_array($tmparray[0], array('deploywebsite'))) {
 
 if (in_array($tmparray[0], array('deploycustomurl'))) {
 	if ($DEBUG) {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' '.$paramspaceforlog." \n");
 	} else {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_customurl_instance.sh '.$tmparray[0].' ...'."\n");
 	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 
@@ -381,9 +430,9 @@ if (in_array($tmparray[0], array('deploycustomurl'))) {
 
 if (in_array($tmparray[0], array('actionafterpaid'))) {
 	if ($DEBUG) {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspaceforlog." \n");
 	} else {
-		fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' '.$paramspace." \n");
+		fwrite($fh, date('Y-m-d H:i:s').' ./action_after_instance.sh '.$tmparray[0].' ...'."\n");
 	}
 	fwrite($fh, date('Y-m-d H:i:s')." getcwd() = ".getcwd()."\n");
 

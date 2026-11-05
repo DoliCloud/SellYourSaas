@@ -5007,16 +5007,29 @@ class SellYourSaasUtils
 					dol_syslog($this->error, LOG_ERR);
 				}
 
-				// TODO Replace with $commandurl.= '&'.hash('sha256', $commandurl.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')); or use asymmetric signature.
-				$commandurl.= '&'.md5($commandurl.$signaturekey);
+				// Parameters are sent into the POST body (never into URL). The HMAC covers action, timestamp, nonce and body
+				// so a request can't be replayed or sent to another action.
+				$requesttimestamp = (string) dol_now();
+				$requestnonce = bin2hex(random_bytes(16));
+				$requestbody = urlencode($commandurl);
+				$requestsignature = hash_hmac('sha256', $remoteaction."\n".$requesttimestamp."\n".$requestnonce."\n".$requestbody, $signaturekey);
+				$requestheaders = array(
+					'Content-Type: text/plain',
+					'X-SellYourSaas-Timestamp: '.$requesttimestamp,
+					'X-SellYourSaas-Nonce: '.$requestnonce,
+					'X-SellYourSaas-Signature: '.$requestsignature
+				);
 
 				$conf->global->MAIN_USE_RESPONSE_TIMEOUT = ($timeout >= 2 ? $timeout : 90);	// Timeout of call of external URL to make remote action
 
 				// Execute remote action
 				if (! $error) {
-					$urltoget='http://'.$serverdeployment.':8080/'.$remoteaction.'?'.urlencode($commandurl);
+					// Use SELLYOURSAAS_REMOTE_ACTION_PROTOCOL=https and SELLYOURSAAS_REMOTE_ACTION_PORT when the agent is behind a TLS proxy (stunnel, nginx...)
+					$remoteactionprotocol = (getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_PROTOCOL') == 'https' ? 'https' : 'http');
+					$remoteactionport = getDolGlobalInt('SELLYOURSAAS_REMOTE_ACTION_PORT', 8080);
+					$urltoget = $remoteactionprotocol.'://'.$serverdeployment.':'.$remoteactionport.'/'.$remoteaction;
 					include_once DOL_DOCUMENT_ROOT.'/core/lib/geturl.lib.php';
-					$retarray = getURLContent($urltoget, 'GET', '', 0, array(), array('http', 'https'), 2);   // Timeout is defined before into $conf->global->MAIN_USE_RESPONSE_TIMEOUT
+					$retarray = getURLContent($urltoget, 'POSTALREADYFORMATED', $requestbody, 0, $requestheaders, array('http', 'https'), 2);   // Timeout is defined before into $conf->global->MAIN_USE_RESPONSE_TIMEOUT
 
 					if (!empty($retarray['curl_error_no']) || $retarray['http_code'] != 200) {
 						$error++;

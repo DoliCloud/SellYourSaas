@@ -20,7 +20,7 @@ export nowfile=`date +'%Y%m%d-%H%M%S'`
 echo
 echo
 echo "####################################### ${0} ${1}"
-echo "${0} ${@}"
+echo "${0} ${1} ... (other parameters not shown, they contain passwords)"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
@@ -352,7 +352,7 @@ if [[ "$mode" == "deployall" ]]; then
 		useradd -m -d $targetdir/$osusername -p "$passcrypted" -s '/bin/secureBash' $osusername
 		if [[ "$?x" != "0x" ]]; then
 			echo Error failed to create user $osusername
-			echo "Failed to deployall instance $instancename.$domainname with: useradd -m -d $targetdir/$osusername -p $ospassword -s '/bin/secureBash' $osusername" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
+			echo "Failed to deployall instance $instancename.$domainname with: useradd -m -d $targetdir/$osusername -p XXXXXX -s '/bin/secureBash' $osusername" | mail -aFrom:$EMAILFROM -s "[Alert] Pb in deployment" $EMAILTO
 			exit 13
 		fi
 		chmod -R go-rwx $targetdir/$osusername
@@ -1683,7 +1683,7 @@ if [[ "$mode" == "deploy" || "$mode" == "deployall" ]]; then
 	echo "$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -pXXXXXX -e \"$SQL\""
 	$MYSQL -A -h $dbserverhost -P $dbserverport -u$dbadminuser -p$dbadminpass -e "$SQL"
 
-	echo "You can test with mysql $dbname -h $dbserverhost -P $dbserverport -u $dbusername -p$dbpassword"
+	echo "You can test with mysql $dbname -h $dbserverhost -P $dbserverport -u $dbusername -pXXXXXX"
 
 	# Load dump file
 	echo `date +'%Y-%m-%d %H:%M:%S'`" Search dumpfile into $dirwithdumpfile"
