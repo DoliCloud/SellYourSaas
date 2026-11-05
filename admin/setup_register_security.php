@@ -214,6 +214,22 @@ if ($action == 'set') {
 	}
 }
 
+// Generate a new random key after confirmation
+if (($action == 'confirm_setnewkeyforhash' || $action == 'confirm_setnewremoteactionsignaturekey') && GETPOST('confirm', 'alpha') == 'yes') {
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+
+	if ($action == 'confirm_setnewkeyforhash') {
+		$result = dolibarr_set_const($db, "SELLYOURSAAS_KEYFORHASH", getRandomPassword(true, null, 64), 'chaine', 0, '', $conf->entity);
+	} else {
+		$result = dolibarr_set_const($db, "SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", getRandomPassword(true), 'chaine', 0, '', $conf->entity);
+	}
+	if ($result > 0) {
+		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
+	} else {
+		setEventMessages($langs->trans("Error"), null, 'errors');
+	}
+}
+
 
 /*
  * View
@@ -557,12 +573,15 @@ print '<tr class="liste_titre"><td colspan="3">Seed to generate the login the Ma
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_KEYFORHASH").'</td>';
 print '<td class="nowraponall">';
-print '<input type="text" class="width300" name="SELLYOURSAAS_KEYFORHASH" id="SELLYOURSAAS_KEYFORHASH" value="'.dolPrintHTMLForAttribute(getDolGlobalString('SELLYOURSAAS_KEYFORHASH')).'">';
-if (!empty($conf->use_javascript_ajax)) {
+print '<input type="password" class="width300" name="SELLYOURSAAS_KEYFORHASH" id="SELLYOURSAAS_KEYFORHASH" value="'.dolPrintHTMLForAttribute(getDolGlobalString('SELLYOURSAAS_KEYFORHASH')).'" autocomplete="new-password" spellcheck="false">';
+include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
+if (function_exists('showEyeForField')) {
+	print '&nbsp;'.showEyeForField('eyeSELLYOURSAAS_KEYFORHASH', 'SELLYOURSAAS_KEYFORHASH');
+}
+if (!empty($conf->use_javascript_ajax) && empty($conf->dol_use_jmobile)) {
 	print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_keyforhash" class="linkobject"');
-	// Add button to autosuggest a key
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
-	print dolJSToSetRandomPassword("SELLYOURSAAS_KEYFORHASH", "generate_keyforhash");
+	// Add a confirmation popup before generating and saving a new key
+	print $form->formconfirm($_SERVER["PHP_SELF"], $langs->trans('Generate'), $langs->trans('ConfirmGenerateNewKeyForHash'), 'confirm_setnewkeyforhash', '', 0, 'generate_keyforhash', 0, 500);
 }
 print '</td>';
 print '<td><span class="opacitymedium small">'.$langs->trans("SELLYOURSAAS_KEYFORHASHDesc").'</span></td>';
@@ -573,13 +592,22 @@ print '<tr class="liste_titre"><td colspan="3">Security for communication from m
 
 print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY").'</td>';
 print '<td class="nowraponall">';
-print '<input type="text" class="width300" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" id="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY').'">';
+print '<input type="password" class="width300" name="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" id="SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY" value="'.dolPrintHTMLForAttribute(getDolGlobalString('SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY')).'" autocomplete="new-password" spellcheck="false">';
+if (function_exists('showEyeForField')) {
+	print '&nbsp;'.showEyeForField('eyeSELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY', 'SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY');
+}
 if (!empty($conf->use_javascript_ajax)) {
-	// TODO Set the type of input in password and add a button "show"
-	print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token" class="linkobject"');
-	// Add button to autosuggest a key
-	include_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
-	print dolJSToSetRandomPassword("SELLYOURSAAS_REMOTE_ACTION_SIGNATURE_KEY", "generate_token");
+	/*
+	print "\n<br>aaa&amp;b<b>b</b>b => \n";
+	print dolPrintHTMLForAttribute('aaa&amp;b<b>b</b>b');
+	print "\n<br>aaa&bbb => \n";
+	print dolPrintHTMLForAttribute('aaa&bbb');
+	*/
+	if (empty($conf->dol_use_jmobile)) {
+		print '&nbsp;'.img_picto($langs->trans('Generate'), 'refresh', 'id="generate_token" class="linkobject"');
+		// Add a confirmation popup before generating and saving a new key
+		print $form->formconfirm($_SERVER["PHP_SELF"], $langs->trans('Generate'), $langs->trans('ConfirmGenerateNewRemoteActionSignatureKey'), 'confirm_setnewremoteactionsignaturekey', '', 0, 'generate_token', 0, 500);
+	}
 }
 print '</td>';
 print '<td><span class="opacitymedium small">Define a value to add a security signature of messages. This key must also be added into all deployment servers into file /etc/sellyoursaas.conf on key "signature_key=..."</span></td>';
