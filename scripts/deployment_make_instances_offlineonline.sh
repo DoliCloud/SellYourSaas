@@ -118,22 +118,52 @@ fi
 
 if [ "x$2" = "xoffline" ]; then
 	# Make offline
-	rm /etc/apache2/sellyoursaas-enabled
+	if [ -d /etc/apache2/sellyoursaas-enabled -a ! -L /etc/apache2/sellyoursaas-enabled ]; then
+		echo "Error: /etc/apache2/sellyoursaas-enabled is a real directory and not a symbolic link. Fix this manually first."
+		exit 3
+	fi
+	rm -f /etc/apache2/sellyoursaas-enabled
 	echo Create link /etc/apache2/sellyoursaas-enabled pointing to /etc/apache2/sellyoursaas-offline
-	ln -fs /etc/apache2/sellyoursaas-offline /etc/apache2/sellyoursaas-enabled
+	ln -fsn /etc/apache2/sellyoursaas-offline /etc/apache2/sellyoursaas-enabled
+
+	echo Check Apache config with apache2ctl configtest
+	/usr/sbin/apache2ctl configtest
+	if [ "x$?" != "x0" ]; then
+		echo "Error when running apache2ctl configtest. Apache was NOT reloaded, so the switch to offline is not effective."
+		exit 4
+	fi
 
 	echo Reload Apache
 	/etc/init.d/apache2 reload
+	if [ "x$?" != "x0" ]; then
+		echo "Error when reloading Apache, so the switch to offline may not be effective."
+		exit 5
+	fi
 fi
 
 if [ "x$2" = "xonline" ]; then
 	# Make online
-	rm /etc/apache2/sellyoursaas-enabled
+	if [ -d /etc/apache2/sellyoursaas-enabled -a ! -L /etc/apache2/sellyoursaas-enabled ]; then
+		echo "Error: /etc/apache2/sellyoursaas-enabled is a real directory and not a symbolic link. Fix this manually first."
+		exit 3
+	fi
+	rm -f /etc/apache2/sellyoursaas-enabled
 	echo Create link /etc/apache2/sellyoursaas-enabled pointing to /etc/apache2/sellyoursaas-online
-	ln -fs /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
+	ln -fsn /etc/apache2/sellyoursaas-online /etc/apache2/sellyoursaas-enabled
+
+	echo Check Apache config with apache2ctl configtest
+	/usr/sbin/apache2ctl configtest
+	if [ "x$?" != "x0" ]; then
+		echo "Error when running apache2ctl configtest. Apache was NOT reloaded, so the switch to online is not effective."
+		exit 4
+	fi
 
 	echo Reload Apache
 	/etc/init.d/apache2 reload
+	if [ "x$?" != "x0" ]; then
+		echo "Error when reloading Apache, so the switch to online may not be effective."
+		exit 5
+	fi
 fi
 
 if [ "x$2" != "xoffline" -a "x$2" != "xonline" ]; then
