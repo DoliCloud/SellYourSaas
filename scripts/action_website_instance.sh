@@ -224,6 +224,19 @@ testorconfirm="confirm"
 
 if [[ "$mode" == "deploywebsite" ]]; then
 
+	# Refuse to enable a vhost for a hostname already served by another enabled vhost (lock released at script exit)
+	#exec 9>/run/lock/sellyoursaas-vhost.lock
+	#flock -x 9
+	#for hostnametocheck in $CUSTOMDOMAIN www.$CUSTOMDOMAIN; do
+	#	for enabledconf in /etc/apache2/sellyoursaas-online/*.conf; do
+	#		[[ -e "$enabledconf" && "$enabledconf" != "/etc/apache2/sellyoursaas-online/$fqn.website-$CUSTOMDOMAIN.conf" ]] || continue
+	#		if awk -v requested="${hostnametocheck,,}" 'tolower($1) == "servername" || tolower($1) == "serveralias" { for (i = 2; i <= NF; i++) { h = tolower($i); sub(/:[0-9]+$/, "", h); if (h == requested) found = 1 } } END { exit(found ? 0 : 1) }' "$enabledconf"; then
+	#			echo "Error: hostname $hostnametocheck is already used by the enabled virtual host $enabledconf"
+	#			exit 79
+	#		fi
+	#	done
+	#done
+
 	export apacheconf="/etc/apache2/sellyoursaas-available/$instancename.$domainname.website-$CUSTOMDOMAIN.conf"
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Create apache conf $apacheconf from $vhostfilewebsite"
 	if [[ -s $apacheconf ]]
