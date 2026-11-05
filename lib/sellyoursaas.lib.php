@@ -458,29 +458,45 @@ function sellyoursaasCheckCustomUrlDns($customurl, $reffqdn)
 }
 
 /**
- * Check if a custom domain name is already used by another contract, whatever its deployment server.
+ * Check if a hostname is already used by another contract, whatever its deployment server.
+ * The hostname (with and without www.) is compared, case insensitively, to the default instance hostname
+ * (ref_customer), the custom url and the website domain names of all other contracts.
  *
  * @param	DoliDB	$db					Database handler
  * @param	string	$customurl			Custom domain name to check
  * @param	int		$excludecontractid	Contract id to exclude from the search (the one being edited)
- * @return	int							Id of the other contract already using this custom url, 0 if not used, -1 if error
+ * @return	int							Id of the other contract already using this hostname, 0 if not used, -1 if error
  */
 function sellyoursaasCheckCustomUrlAlreadyUsed($db, $customurl, $excludecontractid = 0)
 {
-	$sql = "SELECT ce.fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields as ce";
-	$sql .= " WHERE ce.custom_url = '".$db->escape($customurl)."'";
-	if ($excludecontractid > 0) {
-		$sql .= " AND ce.fk_object != ".((int) $excludecontractid);
+	$basename = preg_replace('/^www\./', '', dol_strtolower(trim($customurl)));
+	if ($basename === '') {
+		return 0;
 	}
-	$sql .= " LIMIT 1";
+	$listofnames = array($basename, 'www.'.$basename);
+	$sqlinnames = "'".$db->escape($listofnames[0])."', '".$db->escape($listofnames[1])."'";
 
-	$resql = $db->query($sql);
-	if (!$resql) {
-		return -1;
-	}
-	$obj = $db->fetch_object($resql);
-	if ($obj) {
-		return (int) $obj->fk_object;
+	$listofsql = array();
+	// Default hostname of instances
+	$listofsql[] = "SELECT c.rowid as fk_object FROM ".MAIN_DB_PREFIX."contrat as c WHERE LOWER(c.ref_customer) IN (".$sqlinnames.")".($excludecontractid > 0 ? " AND c.rowid <> ".((int) $excludecontractid) : "");
+	// Custom urls
+	$listofsql[] = "SELECT ce.fk_object FROM ".MAIN_DB_PREFIX."contrat_extrafields as ce WHERE LOWER(ce.custom_url) IN (".$sqlinnames.")".($excludecontractid > 0 ? " AND ce.fk_object <> ".((int) $excludecontractid) : "");
+	// Website domain names (stored into the contract line description as "WebsiteRef=xxx, WebsiteDomainName=yyy")
+	$sqlwebsite = "SELECT cd.fk_contrat as fk_object FROM ".MAIN_DB_PREFIX."contratdet as cd WHERE (";
+	$sqlwebsite .= "LOWER(cd.description) LIKE '%websitedomainname=".$db->escape($db->escapeforlike($listofnames[0]))."'";
+	$sqlwebsite .= " OR LOWER(cd.description) LIKE '%websitedomainname=".$db->escape($db->escapeforlike($listofnames[1]))."')";
+	$sqlwebsite .= ($excludecontractid > 0 ? " AND cd.fk_contrat <> ".((int) $excludecontractid) : "");
+	$listofsql[] = $sqlwebsite;
+
+	foreach ($listofsql as $sql) {
+		$resql = $db->query($sql.$db->plimit(1));
+		if (!$resql) {
+			return -1;
+		}
+		$obj = $db->fetch_object($resql);
+		if ($obj) {
+			return (int) $obj->fk_object;
+		}
 	}
 
 	return 0;

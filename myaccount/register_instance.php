@@ -1097,7 +1097,8 @@ if ($reusecontractid) {
 
 	if ($productref != 'none') {
 		$result = $contract->fetch(0, '', $fqdninstance);
-		if ($result > 0) {
+		// Also refuse a name already used as a custom url or website domain name by another contract
+		if ($result > 0 || sellyoursaasCheckCustomUrlAlreadyUsed($db, $fqdninstance) != 0) {
 			if (substr($sapi_type, 0, 3) != 'cli') {
 				// Instance ref already exists, we redirect to register page with appropriate error message
 				setEventMessages($langs->trans("InstanceNameAlreadyExists", $fqdninstance), null, 'errors');

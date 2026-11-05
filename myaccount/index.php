@@ -2092,6 +2092,13 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 		$error++;
 	}
 	if (!$error) {
+		$otherid = sellyoursaasCheckCustomUrlAlreadyUsed($db, $domainnamewebsite, $contractid);
+		if ($otherid != 0) {
+			setEventMessages($langs->trans("ErrorCustomUrlAlreadyUsed", $domainnamewebsite), null, 'errors');
+			$error++;
+		}
+	}
+	if (!$error) {
 		$type_db = $conf->db->type;
 		$hostname_db  = $object->array_options['options_hostname_db'];
 		$username_db  = $object->array_options['options_username_db'];
