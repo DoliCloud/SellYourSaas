@@ -39,6 +39,11 @@ templatesdir=`grep '^templatesdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpfpm=`grep '^phpfpm=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 phpversion=`grep '^phpversion=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 localip=`grep '^localip=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
+# Not always set in /etc/sellyoursaas.conf: an empty value produces "<VirtualHost :443 :80>",
+# which apache2ctl configtest refuses, so every vhost reload fails on that server.
+if [[ "x$localip" == "x" ]]; then
+	localip="*"
+fi
 if [[ "x$templatesdir" != "x" ]]; then
   if [[ "x$phpfpm" != "x" ]]; then
     export vhostfile="$templatesdir/vhostHttps-phpfpm-sellyoursaas.template"
