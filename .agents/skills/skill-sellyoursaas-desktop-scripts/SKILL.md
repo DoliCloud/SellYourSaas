@@ -25,6 +25,9 @@ utilities (`desktop_switchipv6.sh`, `desktop_fix_unzip.php`), they are thin wrap
 - For any request to use one of these tools, answer with the **exact command line to launch** (with the arguments
   filled from the request, and a safe variant first when available, e.g. `test` mode or a single host target),
   and let the user run it.
+- The user is usually at the root of the sellyoursaas project: always write the commands relative to it, starting
+  with `./scripts/desktop_...` (never `cd` into `scripts/` first). The scripts `cd` into `scripts/ansible/`
+  themselves, so they work from any directory.
 - Reading the scripts and playbooks, or editing them when asked, is allowed.
 
 ## Common mechanism (all Ansible wrappers)
@@ -72,13 +75,13 @@ Local tools (no Ansible):
 ## Examples
 
 ```bash
-cd ~/git/sellyoursaas/scripts
-./desktop_clean.sh myhosts deployment test
-./desktop_update_sellyoursaas.sh myhosts master,deployment
-./desktop_config_sellyoursaas.sh myhosts master,deployment usecompressformatforarchive zstd
-./desktop_bannedip.sh myhosts withX.mysellyoursaasdomain.com unban 1.2.3.4
-./desktop_deploy_module.sh myhosts deployment test REFMODULENAME 'abc*' abc1234 FR
-./desktop_admin_users.php myhosts master,deployment,web create jdoe userroot=0 userip=1.2.3.4 userpublickey="ssh-ed25519 AAAA..." userpassword=...
+# From the root of the sellyoursaas project
+./scripts/desktop_clean.sh myhosts deployment test
+./scripts/desktop_update_sellyoursaas.sh myhosts master,deployment
+./scripts/desktop_config_sellyoursaas.sh myhosts master,deployment usecompressformatforarchive zstd
+./scripts/desktop_bannedip.sh myhosts withX.mysellyoursaasdomain.com unban 1.2.3.4
+./scripts/desktop_deploy_module.sh myhosts deployment test REFMODULENAME 'abc*' abc1234 FR
+./scripts/desktop_admin_users.php myhosts master,deployment,web create jdoe userroot=0 userip=1.2.3.4 userpublickey="ssh-ed25519 AAAA..." userpassword=...
 ```
 
 ## Pitfalls to know
