@@ -131,6 +131,8 @@ export VIRTUALHOSTHEAD=${35//£/ }
 if [ "x$VIRTUALHOSTHEAD" == "x-" ]; then
 	VIRTUALHOSTHEAD=""
 fi
+# Escape chars that have a special meaning in the replacement of a sed 's;;;' command, to avoid sed injection
+export VIRTUALHOSTHEADFORSED=$(printf '%s' "$VIRTUALHOSTHEAD" | tr -d '\r\n' | sed -e 's/[\\;&]/\\&/g')
 export ispaidinstance=${36}
 export SELLYOURSAAS_LOGIN_FOR_SUPPORT=${37}
 export directaccess=${38}
@@ -264,7 +266,7 @@ if [[ "$mode" == "deploywebsite" ]]; then
 			  sed -e "s/__osUsername__/$osusername/g" | \
 			  sed -e "s/__osGroupname__/$osusername/g" | \
 			  sed -e "s;__osUserPath__;$targetdir/$osusername/$dbname;g" | \
-			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEAD;g" | \
+			  sed -e "s;__VirtualHostHead__;$VIRTUALHOSTHEADFORSED;g" | \
 			  sed -e "s;__AllowOverride__;$ALLOWOVERRIDE;g" | \
 			  sed -e "s;__IncludeFromContract__;$INCLUDEFROMCONTRACT;g" | \
 			  sed -e "s;__SELLYOURSAAS_LOGIN_FOR_SUPPORT__;$SELLYOURSAAS_LOGIN_FOR_SUPPORT;g" | \

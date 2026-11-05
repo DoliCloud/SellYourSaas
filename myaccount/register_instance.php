@@ -212,6 +212,12 @@ $fromsocid=GETPOST('fromsocid', 'int');
 $reusecontractid = GETPOST('reusecontractid', 'int');
 $reusesocid = GETPOST('reusesocid', 'int');
 $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
+// The timezone is injected into the Apache virtual host and shell scripts, so only a strict TZ charset is allowed
+$tzstring = GETPOST('tz_string', 'alpha');
+if ($tzstring != '' && !preg_match('/^[a-zA-Z0-9_\+\-\/]{1,64}$/', $tzstring)) {
+	dol_syslog("Bad value for tz_string, value is ignored: ".dol_escape_htmltag($tzstring), LOG_WARNING);
+	$tzstring = '';
+}
 
 $service=GETPOST('service', 'int');
 $productid=GETPOST('service', 'int');
@@ -473,7 +479,7 @@ if ($reusecontractid) {
 	$hookmanager->initHooks(array('sellyoursaas-register-instance'));
 
 	$http_referer = $_SERVER['HTTP_REFERER'];
-	$tzstring = GETPOST('tz_string');
+	// $tzstring was already read and validated at top of page
 	$humanprint = (empty($_SESSION['humanprint']) ? '' : $_SESSION['humanprint']);
 
 	dol_syslog("Registration from the page register.php: http_referer=".dol_escape_htmltag($http_referer)." tzstring=".$tzstring." humanprint=".$humanprint);
@@ -1346,14 +1352,14 @@ if ($reusecontractid) {
 		//$contract->array_options['options_nb_gb'] = 0.01;
 
 		// TODO Remove hardcoded code here
-		if (preg_match('/glpi|flyve/i', $productref) && GETPOST("tz_string")) {
-			$contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.GETPOST("tz_string").'"';
+		if (preg_match('/glpi|flyve/i', $productref) && $tzstring) {
+			$contract->array_options['options_custom_virtualhostline'] = 'php_value date.timezone "'.$tzstring.'"';
 		}
 
 		$user_agent = (empty($_SERVER["HTTP_USER_AGENT"]) ? '' : $_SERVER["HTTP_USER_AGENT"]);
 		$user_language = (empty($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? '' : $_SERVER["HTTP_ACCEPT_LANGUAGE"]);
 
-		$contract->array_options['options_timezone'] = GETPOST("tz_string");
+		$contract->array_options['options_timezone'] = $tzstring;
 		$contract->array_options['options_deployment_ip'] = $remoteip;
 		$contract->array_options['options_deployment_ua'] = (($user_agent || $user_language) ? dol_trunc($user_agent.(($user_agent && $user_language) ? ' - ' : '').$user_language, 250) : '');
 
