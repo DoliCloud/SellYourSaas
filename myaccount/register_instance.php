@@ -209,6 +209,9 @@ $partnerkey = GETPOST('partnerkey', 'alpha');		// md5 of partner name_alias
 $customurl = '';
 
 $fromsocid=GETPOST('fromsocid', 'int');
+// fromsocid (reseller id) is trusted only if it is the thirdparty already authenticated in session
+$loggedthirdpartyid = empty($_SESSION['dol_loginsellyoursaas']) ? 0 : (int) $_SESSION['dol_loginsellyoursaas'];
+$authenticatedfromsocid = ($fromsocid > 0 && (int) $fromsocid === $loggedthirdpartyid) ? $loggedthirdpartyid : 0;
 $reusecontractid = GETPOST('reusecontractid', 'int');
 $reusesocid = GETPOST('reusesocid', 'int');
 $disablecustomeremail = GETPOST('disablecustomeremail', 'alpha');
@@ -1597,8 +1600,8 @@ if (! $error && $productref != 'none') {
 
 	$contract->context['deployallwasjustdone']=1;		// Add a key so trigger into activateAll will know we have just made a "deployall"
 
-	if ($fromsocid) {
-		$comment = 'Activation after deployment from instance creation by reseller id='.$fromsocid;
+	if ($authenticatedfromsocid > 0) {
+		$comment = 'Activation after deployment from instance creation by reseller id='.$authenticatedfromsocid;
 	} else {
 		$comment = 'Activation after deployment from online registration or dashboard';
 	}
@@ -1660,18 +1663,20 @@ if (! $error) {
 	// First time we go at end of process, so we send en email.
 
 	if ($productref == 'none') {
+		// tmpthirdparty is either the new thirdparty or a reused one already validated against the session
 		$fromsocid = $tmpthirdparty->id;
+		$authenticatedfromsocid = (int) $tmpthirdparty->id;
 	}
 
 	$newurl = $_SERVER["PHP_SELF"];
-	$newurl = preg_replace('/register_instance\.php/', 'index.php?welcomecid='.$contract->id.(($fromsocid > 0) ? '&fromsocid='.$fromsocid : ''), $newurl);
+	$newurl = preg_replace('/register_instance\.php/', 'index.php?welcomecid='.$contract->id.(($authenticatedfromsocid > 0) ? '&fromsocid='.$authenticatedfromsocid : ''), $newurl);
 
 	$anonymoususer = new User($db);
 	$anonymoususer->fetch(getDolGlobalString('SELLYOURSAAS_ANONYMOUSUSER'));
 	$_SESSION['dol_login'] = $anonymoususer->login;				// Set dol_login in session so for next page index.php we will load, we are already logged.
 
-	if ($fromsocid > 0) {
-		$_SESSION['dol_loginsellyoursaas'] = $fromsocid;
+	if ($authenticatedfromsocid > 0) {
+		$_SESSION['dol_loginsellyoursaas'] = $authenticatedfromsocid;
 	} else {
 		$_SESSION['dol_loginsellyoursaas'] = $contract->thirdparty->id;
 	}
