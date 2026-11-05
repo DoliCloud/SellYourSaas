@@ -116,11 +116,11 @@ if ($id > 0 || !empty($ref)) {
 
 // There is several ways to check permission.
 // Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = 0;
+$enablepermissioncheck = 1;
 if ($enablepermissioncheck) {
-	$permissiontoread = $user->rights->sellyoursaas->deploymentserver->read;
-	$permissiontoadd = $user->rights->sellyoursaas->deploymentserver->write;
-	$permissionnote = $user->rights->sellyoursaas->deploymentserver->write; // Used by the include of actions_setnotes.inc.php
+	$permissiontoread = $user->hasRight('sellyoursaas', 'read');
+	$permissiontoadd = $user->hasRight('sellyoursaas', 'write');
+	$permissionnote = $user->hasRight('sellyoursaas', 'write'); // Used by the include of actions_setnotes.inc.php
 } else {
 	$permissiontoread = 1;
 	$permissiontoadd = 1;
@@ -128,6 +128,10 @@ if ($enablepermissioncheck) {
 }
 
 // Security check (enable the most restrictive one)
+// Reject external users and the internal user shared by all customers of the myaccount dashboard
+if ($user->socid > 0 || $user->id == getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER')) {
+	accessforbidden();
+}
 //if ($user->socid > 0) accessforbidden();
 //if ($user->socid > 0) $socid = $user->socid;
 //$isdraft = (($object->status == $object::STATUS_DRAFT) ? 1 : 0);

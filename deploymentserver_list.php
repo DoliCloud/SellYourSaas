@@ -196,11 +196,11 @@ $arrayfields = dol_sort_array($arrayfields, 'position');
 
 // There is several ways to check permission.
 // Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = 0;
+$enablepermissioncheck = 1;
 if ($enablepermissioncheck) {
-	$permissiontoread = $user->hasRight('sellyoursaas', 'deploymentserver', 'read');
-	$permissiontoadd = $user->hasRight('sellyoursaas', 'deploymentserver', 'write');
-	$permissiontodelete = $user->hasRight('sellyoursaas', 'deploymentserver', 'delete');
+	$permissiontoread = $user->hasRight('sellyoursaas', 'read');
+	$permissiontoadd = $user->hasRight('sellyoursaas', 'write');
+	$permissiontodelete = $user->hasRight('sellyoursaas', 'delete');
 } else {
 	$permissiontoread = 1;
 	$permissiontoadd = 1;
@@ -208,7 +208,8 @@ if ($enablepermissioncheck) {
 }
 
 // Security check (enable the most restrictive one)
-if ($user->socid > 0) {
+// Reject external users and the internal user shared by all customers of the myaccount dashboard
+if ($user->socid > 0 || $user->id == getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER')) {
 	accessforbidden();
 }
 //if ($user->socid > 0) accessforbidden();

@@ -125,13 +125,13 @@ include DOL_DOCUMENT_ROOT.'/core/actions_fetchobject.inc.php'; // Must be includ
 
 // There is several ways to check permission.
 // Set $enablepermissioncheck to 1 to enable a minimum low level of checks
-$enablepermissioncheck = 0;
+$enablepermissioncheck = 1;
 if ($enablepermissioncheck) {
-	$permissiontoread = $user->rights->sellyoursaas->deploymentserver->read;
-	$permissiontoadd = $user->rights->sellyoursaas->deploymentserver->write; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
-	$permissiontodelete = $user->rights->sellyoursaas->deploymentserver->delete || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
-	$permissionnote = $user->rights->sellyoursaas->deploymentserver->write; // Used by the include of actions_setnotes.inc.php
-	$permissiondellink = $user->rights->sellyoursaas->deploymentserver->write; // Used by the include of actions_dellink.inc.php
+	$permissiontoread = $user->hasRight('sellyoursaas', 'read');
+	$permissiontoadd = $user->hasRight('sellyoursaas', 'write'); // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
+	$permissiontodelete = $user->hasRight('sellyoursaas', 'delete') || ($permissiontoadd && isset($object->status) && $object->status == $object::STATUS_DRAFT);
+	$permissionnote = $user->hasRight('sellyoursaas', 'write'); // Used by the include of actions_setnotes.inc.php
+	$permissiondellink = $user->hasRight('sellyoursaas', 'write'); // Used by the include of actions_dellink.inc.php
 } else {
 	$permissiontoread = 1;
 	$permissiontoadd = 1; // Used by the include of actions_addupdatedelete.inc.php and actions_lineupdown.inc.php
@@ -143,6 +143,10 @@ if ($enablepermissioncheck) {
 $upload_dir = $conf->sellyoursaas->multidir_output[isset($object->entity) ? $object->entity : 1].'/deploymentserver';
 
 // Security check (enable the most restrictive one)
+// Reject external users and the internal user shared by all customers of the myaccount dashboard
+if ($user->socid > 0 || $user->id == getDolGlobalInt('SELLYOURSAAS_ANONYMOUSUSER')) {
+	accessforbidden();
+}
 //if ($user->socid > 0) accessforbidden();
 //if ($user->socid > 0) $socid = $user->socid;
 //$isdraft = (isset($object->status) && ($object->status == $object::STATUS_DRAFT) ? 1 : 0);
