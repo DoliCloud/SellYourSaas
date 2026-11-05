@@ -229,9 +229,15 @@ if [[ "$mode" == "migrate" ]]; then
 			cd $automigrationtmpdir
 			case "$automigrationdocumentarchivename" in
 					*.zip)
-							echo "unzip $automigrationdocumentarchivename -r $instancedir/documents/"
-							unzip "$automigrationdocumentarchivename" -r "$instancedir/"
-							if [ $? -eq 0 ]
+							# Extract as the instance user (never as root) from a copy readable by this user
+							automigrationziptmp=$(mktemp)
+							cat "$automigrationdocumentarchivename" > "$automigrationziptmp"
+							chown $osusername "$automigrationziptmp"
+							echo "runuser -u $osusername -- unzip -o $automigrationziptmp -d $instancedir/"
+							runuser -u "$osusername" -- unzip -o "$automigrationziptmp" -d "$instancedir/"
+							unzipresult=$?
+							rm -f "$automigrationziptmp"
+							if [ $unzipresult -eq 0 ]
 							then
 									echo "Successfully file migration"
 							else
@@ -240,8 +246,9 @@ if [[ "$mode" == "migrate" ]]; then
 							fi
 							;;
 					*.tbz2|*.tar.bz2)
-							echo "tar -C $instancedir/documents/ -xjvf $automigrationdocumentarchivename"
-							tar -C "$instancedir/" -xjvf "$automigrationdocumentarchivename"
+							# Extract as the instance user (never as root) so owner and permissions of archive are not restored
+							echo "runuser -u $osusername -- tar -C $instancedir/ --no-same-owner --no-same-permissions -xjvf - < $automigrationdocumentarchivename"
+							runuser -u "$osusername" -- tar -C "$instancedir/" --no-same-owner --no-same-permissions -xjvf - < "$automigrationdocumentarchivename"
 							if [ $? -eq 0 ]
 							then
 									echo "Successfully file migration"
@@ -251,8 +258,9 @@ if [[ "$mode" == "migrate" ]]; then
 							fi
 							;;
 					*.tgz|*.tar.gz)
-							echo "tar -C $instancedir/documents/ -zxvf $automigrationdocumentarchivename"
-							tar -C "$instancedir/" -zxvf "$automigrationdocumentarchivename"
+							# Extract as the instance user (never as root) so owner and permissions of archive are not restored
+							echo "runuser -u $osusername -- tar -C $instancedir/ --no-same-owner --no-same-permissions -zxvf - < $automigrationdocumentarchivename"
+							runuser -u "$osusername" -- tar -C "$instancedir/" --no-same-owner --no-same-permissions -zxvf - < "$automigrationdocumentarchivename"
 							if [ $? -eq 0 ]
 							then
 									echo "Successfully file migration"
