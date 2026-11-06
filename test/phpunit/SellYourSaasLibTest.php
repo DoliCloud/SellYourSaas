@@ -176,4 +176,51 @@ class SellYourSaasLibTest extends PHPUnit\Framework\TestCase
 
 		return $result;
 	}
+
+	/**
+	 * testSellyoursaasCheckCustomUrlAlreadyUsed
+	 * Check that a custom url matching the ref of a deployment server is refused,
+	 * and that an unused custom url is accepted.
+	 *
+	 * @return  int
+	 */
+	public function testSellyoursaasCheckCustomUrlAlreadyUsed()
+	{
+		global $conf,$user,$langs,$db;
+		$conf=$this->savconf;
+		$user=$this->savuser;
+		$langs=$this->savlangs;
+		$db=$this->savdb;
+
+		$testref = 'zztestsellyoursaas.withX.unusedtestdomain.org';
+
+		// Insert a deployment server with ref = $testref
+		$sql = "INSERT INTO ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver (ref, entity, ipaddress, status, date_creation)";
+		$sql .= " VALUES ('".$db->escape($testref)."', ".((int) $conf->entity).", '127.0.0.1', 0, '".$db->idate(dol_now())."')";
+		$resql = $db->query($sql);
+		$this->assertTrue((bool) $resql, 'Failed to insert test deployment server');
+		$serverid = $db->last_insert_id(MAIN_DB_PREFIX."sellyoursaas_deploymentserver");
+
+		// Check a custom url that matches the ref of the deployment server
+		$result = sellyoursaasCheckCustomUrlAlreadyUsed($db, $testref);
+		print __METHOD__." result with url matching deployment server ref=".$result."\n";
+		$this->assertEquals($serverid, $result);
+
+		// Check a custom url that matches the ref of the deployment server with www prefix
+		$result = sellyoursaasCheckCustomUrlAlreadyUsed($db, 'www.'.$testref);
+		print __METHOD__." result with www prefix url matching deployment server ref=".$result."\n";
+		$this->assertEquals($serverid, $result);
+
+		// Check a custom url that matches no record
+		$result = sellyoursaasCheckCustomUrlAlreadyUsed($db, 'zztestsellyoursaas.withX.notuseddomain.org');
+		print __METHOD__." result with unused url=".$result."\n";
+		$this->assertEquals(0, $result);
+
+		// Clean test data
+		$sql = "DELETE FROM ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver WHERE rowid = ".((int) $serverid);
+		$resql = $db->query($sql);
+		$this->assertTrue((bool) $resql, 'Failed to delete test deployment server');
+
+		return $result;
+	}
 }

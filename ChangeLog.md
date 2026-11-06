@@ -3,6 +3,7 @@
 
 ## 3.0 Unreleased
 
+* NEW Add a tab Instances on a server card
 * NEW Can use * in instance name for batch_customers.php script
 * NEW Add extrafield to store the list of enabled modules
 * NEW Add Profid (SIRET) in company profile. Ask to fill it if mandatory (For France).
@@ -61,7 +62,8 @@
 * FIX register.php/loginmyaccount.tpl.php/passwordforgotten.tpl.php's form area was never actually constrained to a fixed width (.center in myaccount.css only means text-align:center) - it stretched to the full page width instead of being centered. Constrained .customregistermain/.customregisterheader in dist/css/alt-myaccount-example.css, keeping the full-width colored banners (.page-header-top, div.block header) as originally designed.
 * FIX .customregisterheader's title was flushed to the left edge of the bar, and its two lines (title/subtitle) no longer shared a left edge (leftover text-align:center from .block.medium.center). Centers the title within the bar via absolute positioning, matching the default look, independent of the "already have an account" link's width on the right.
 * SEC When using ssh, a user can't see the OS and package information.
-
+* SEC several fixes
+ 
 
 ## 2.1
 

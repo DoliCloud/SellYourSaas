@@ -460,12 +460,13 @@ function sellyoursaasCheckCustomUrlDns($customurl, $reffqdn)
 /**
  * Check if a hostname is already used by another contract, whatever its deployment server.
  * The hostname (with and without www.) is compared, case insensitively, to the default instance hostname
- * (ref_customer), the custom url and the website domain names of all other contracts.
+ * (ref_customer), the custom url and the website domain names of all other contracts,
+ * and to the ref (hostname) of all deployment servers.
  *
  * @param	DoliDB	$db					Database handler
  * @param	string	$customurl			Custom domain name to check
  * @param	int		$excludecontractid	Contract id to exclude from the search (the one being edited)
- * @return	int							Id of the other contract already using this hostname, 0 if not used, -1 if error
+ * @return	int							Id of the other contract or deployment server already using this hostname, 0 if not used, -1 if error
  */
 function sellyoursaasCheckCustomUrlAlreadyUsed($db, $customurl, $excludecontractid = 0)
 {
@@ -487,6 +488,10 @@ function sellyoursaasCheckCustomUrlAlreadyUsed($db, $customurl, $excludecontract
 	$sqlwebsite .= " OR LOWER(cd.description) LIKE '%websitedomainname=".$db->escape($db->escapeforlike($listofnames[1]))."')";
 	$sqlwebsite .= ($excludecontractid > 0 ? " AND cd.fk_contrat <> ".((int) $excludecontractid) : "");
 	$listofsql[] = $sqlwebsite;
+	// Deployment servers (the ref is a hostname like "withX.mydomain.com" used by deployment servers)
+	$sqldeploymentserver = "SELECT ts.rowid as fk_object FROM ".MAIN_DB_PREFIX."sellyoursaas_deploymentserver as ts";
+	$sqldeploymentserver .= " WHERE LOWER(ts.ref) IN (".$sqlinnames.") AND ts.entity IN (".getEntity('sellyoursaas_deploymentserver').")";
+	$listofsql[] = $sqldeploymentserver;
 
 	foreach ($listofsql as $sql) {
 		$resql = $db->query($sql.$db->plimit(1));

@@ -46,6 +46,11 @@ function deploymentserverPrepareHead($object)
 	$head[$h][2] = 'card';
 	$h++;
 
+	$head[$h][0] = dol_buildpath("/sellyoursaas/deploymentserver_instances.php", 1).'?id='.$object->id;
+	$head[$h][1] = $langs->trans("Instances");
+	$head[$h][2] = 'instances';
+	$h++;
+
 	if ($showtabofpagecontact) {
 		$head[$h][0] = dol_buildpath("/sellyoursaas/deploymentserver_contact.php", 1).'?id='.$object->id;
 		$head[$h][1] = $langs->trans("Contacts");
