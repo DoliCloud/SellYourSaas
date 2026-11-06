@@ -574,7 +574,7 @@ if ($resql) {
 						$error++;
 					}
 
-					$ADDEINVOICESETUP = ($product->ref == 'DOLICLOUD-MOD-EInvoicing' ? 1 : 0);
+					$ADDEINVOICESETUP = (preg_match('/einvoicing/i', $product->ref) ? 1 : 0);
 					if ($ADDEINVOICESETUP) {
 						$localhostnamedb = 'localhost';
 						$dbinstance = getDoliDBInstance($type_db, $localhostnamedb, $username_db, $password_db, $database_db, $port_db);
