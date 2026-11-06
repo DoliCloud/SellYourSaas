@@ -676,6 +676,7 @@ if ($resql) {
 								}
 								$arrayofdescriptortofile = array($deploy["src"]."/core/modules/modEInvoicing.class.php", $deploy["src"]."/einvoicing/core/modules/modEInvoicing.class.php");
 								foreach ($arrayofdescriptortofile as $descriptortofile) {
+									print "Search in file ".$descriptortofile."\n";
 									if (dol_is_file($descriptortofile)) {
 										$contentfile = file_get_contents($descriptortofile);
 										$reg = array();
