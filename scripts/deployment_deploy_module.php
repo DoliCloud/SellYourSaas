@@ -678,12 +678,15 @@ if ($resql) {
 								foreach ($arrayofdescriptortofile as $descriptortofile) {
 									print "Search in file ".$descriptortofile."\n";
 									if (dol_is_file($descriptortofile)) {
+										print "File found\n";
 										$contentfile = file_get_contents($descriptortofile);
 										$reg = array();
 										if (preg_match('/\$this->version\s*=\s*[\'"]([^\'"]+)[\'"]/', $contentfile, $reg)) {
 											$einvoicingmoduleversion = $reg[1];
 											break 2;
 										}
+									} else {
+										print "File NOT found\n";
 									}
 								}
 							}
