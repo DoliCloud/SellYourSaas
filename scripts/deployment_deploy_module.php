@@ -653,17 +653,17 @@ if ($resql) {
 								$dbinstance->query($sql10);
 							}
 							$sql11 = 'ALTER TABLE llx_einvoicing_call MODIFY COLUMN request_body mediumtext;';
-							print "Run sql10 ".$sql11."\n";
+							print "Run sql11 ".$sql11."\n";
 							if ($mode == "confirm") {
 								$dbinstance->query($sql11);
 							}
 							$sql12 = 'ALTER TABLE llx_einvoicing_call MODIFY COLUMN response mediumtext;';
-							print "Run sql10 ".$sql12."\n";
+							print "Run sql12 ".$sql12."\n";
 							if ($mode == "confirm") {
 								$dbinstance->query($sql12);
 							}
 							$sql13 = 'ALTER TABLE llx_einvoicing_call MODIFY COLUMN processing_result mediumtext;';
-							print "Run sql10 ".$sql13."\n";
+							print "Run sql13 ".$sql13."\n";
 							if ($mode == "confirm") {
 								$dbinstance->query($sql13);
 							}
