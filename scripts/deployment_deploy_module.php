@@ -584,7 +584,7 @@ if ($resql) {
 								'EINVOICING_PDP' => 'SUPERPDPViaPartner',	// Set the AP provider
 								'EINVOICING_LIVE' => 1,
 								'EINVOICING_SUPERPDP_VIAPARTNER' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_TEMPLATE'),						// Example: 'DoliCloud'
-								'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL_TEMPLATE'),	// Example: 'https://admin.nltechno.com/custom/einvoicing/public/proxy_oauth.php'
+								'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL' => dolibarr_get_const($dbmaster, 'EINVOICING_SUPERPDP_VIAPARTNER_OAUTH_URL_TEMPLATE'),	// Example: 'https://admin.myserver.com/custom/einvoicing/public/proxy_oauth.php'
 								'EINVOICING_DISABLE_SYNC_DOLI_TO_AP' => '1'
 							);
 
@@ -668,6 +668,30 @@ if ($resql) {
 								$dbinstance->query($sql13);
 							}
 
+							// Update the note of constant MAIN_MODULE_EINVOICING with the version of module at time of deployment
+							$einvoicingmoduleversion = 'unknown';
+							foreach ($deployarray as $deploy) {
+								if (empty($deploy["src"])) {
+									continue;
+								}
+								$arrayofdescriptortofile = array($deploy["src"]."/core/modules/modEInvoicing.class.php", $deploy["src"]."/einvoicing/core/modules/modEInvoicing.class.php");
+								foreach ($arrayofdescriptortofile as $descriptortofile) {
+									if (dol_is_file($descriptortofile)) {
+										$contentfile = file_get_contents($descriptortofile);
+										$reg = array();
+										if (preg_match('/\$this->version\s*=\s*[\'"]([^\'"]+)[\'"]/', $contentfile, $reg)) {
+											$einvoicingmoduleversion = $reg[1];
+											break 2;
+										}
+									}
+								}
+							}
+							$noteofconstant = json_encode(array('authorid' => "0", 'ip' => "127.0.0.1", 'lastactivationversion' => $einvoicingmoduleversion));
+							$sql14 = "UPDATE llx_const SET note = '".$dbinstance->escape($noteofconstant)."' WHERE name = '".$dbinstance->escape('MAIN_MODULE_EINVOICING')."'";
+							print "Run sql14 ".$sql14."\n";
+							if ($mode == "confirm") {
+								$dbinstance->query($sql14);
+							}
 
 							if ($mode != "confirm") {
 								print "Rollback\n";
@@ -701,7 +725,7 @@ if ($resql) {
 	}
 } else {
 	$error++;
-	$nboferrors++;
+	//$nboferrors++;
 	dol_print_error($db);
 }
 
