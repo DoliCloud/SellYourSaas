@@ -254,10 +254,10 @@ testorconfirm="confirm"
 
 
 # Create target directory /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt if it does not exists
-export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 if [[ ! -d $pathforcertiflocal ]]; then
-	echo "Create cert directory with mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;"
-	mkdir $pathforcertiflocal; chown admin:admin $pathforcertiflocal;
+	echo "Create cert directory with mkdir -p $pathforcertiflocal; chown admin:admin $pathforcertiflocal;"
+	mkdir -p $pathforcertiflocal; chown admin:admin $pathforcertiflocal;
 fi
 
 
@@ -348,11 +348,15 @@ if [[ "$mode" == "rename" ]]; then
 	# Remove and recreate customurl
 	rm -f /etc/apache2/sellyoursaas-available/$fqn.custom.conf
 	rm -f /etc/apache2/sellyoursaas-online/$fqn.custom.conf
+	# Also remove any certificate files left from a previous custom domain for this instance
+	# (we don't know the old customurl value here, only $fqn, so match on that prefix instead)
+	rm -f ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-*.crt
+	rm -f ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-*.key
 	if [[ "x$customurl" != "x" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and mode=rename, we will create a new custom virtual name $fqn.custom"
 
 		export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
-		export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+		export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists and create them if not (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 		if [[ "x$CERTIFFORCUSTOMDOMAIN" != "x" ]]; then
@@ -399,7 +403,7 @@ if [[ "$mode" == "rename" ]]; then
 			export domainnameorcustomurl=`echo $customurl | cut -d "." -f 1`
 
 			# We must create the custom CRT file using letsencrypt if not yet created
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			if [[ ! -e ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
 				# When we rename, it may be because we change abc.with... into def.with..., or
 				# because we added a custom url.
 
@@ -443,9 +447,9 @@ if [[ "$mode" == "rename" ]]; then
 				echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 						  sed -e 's/__webAppAliases__/$customurl/g' | \
 						  sed -e 's/__webAppLogName__/$instancename/g' | \
-		                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
-		                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
-		                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
+		                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
+		                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
+		                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
 						  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 						  sed -e 's/__osUsername__/$osusername/g' | \
 						  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -465,9 +469,9 @@ if [[ "$mode" == "rename" ]]; then
 				cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 						  sed -e "s/__webAppAliases__/$customurl/g" | \
 						  sed -e "s/__webAppLogName__/$instancename/g" | \
-		                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
-		                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
-		                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
+		                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
+		                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
+		                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
 						  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 						  sed -e "s/__osUsername__/$osusername/g" | \
 						  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -537,20 +541,21 @@ if [[ "$mode" == "rename" ]]; then
 					ls -l "/etc/letsencrypt/live/$customurl/cert.pem"
 
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Link of generated cert file for custom url"
+					mkdir -p ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt
 					echo "Link certificate for the virtualhost of the custom url with
-						ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
-						ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
-						ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
+						ln -fs /etc/letsencrypt/live/$customurl/privkey.pem ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-custom.key
+						ln -fs /etc/letsencrypt/live/$customurl/cert.pem ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-custom.crt
+						ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
 					"
-					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.key
-					ln -fs /etc/letsencrypt/live/$customurl/cert.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt
-					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
+					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-custom.key
+					ln -fs /etc/letsencrypt/live/$customurl/cert.pem ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-custom.crt
+					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem ${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-custom-intermediate.crt
 				else
 					echo `date +'%Y-%m-%d %H:%M:%S'`" File /etc/letsencrypt/live/$customurl/cert.pem generated by certbot was not found (should not happen if certbot was not launched in dry-run)"
 				fi
 			fi
 
-			if [[ ! -e "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt" ]]; then
+			if [[ ! -e "${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt/$fqn-custom.crt" ]]; then
 				# If custom cert not found, we fallback on the wildcard one for server (it will generate a warning, but it will works and not hangs !)
 				export pathforcertiflocal="/etc/apache2"
 				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
@@ -559,7 +564,7 @@ if [[ "$mode" == "rename" ]]; then
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
 				# We will use the custom cert file
-				export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+				export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 				export webCustomSSLCertificateCRT="$fqn-custom.crt"
 				export webCustomSSLCertificateKEY="$fqn-custom.key"
 				export webCustomSSLCertificateIntermediate="$fqn-custom-intermediate.crt"
@@ -588,9 +593,9 @@ if [[ "$mode" == "rename" ]]; then
 		echo "cat $vhostfile | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -610,9 +615,9 @@ if [[ "$mode" == "rename" ]]; then
 		cat $vhostfile | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -792,7 +797,7 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and mode=suspend..., we create also a new custom virtual file named $fqn.custom.conf"
 
         export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
-        export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+        export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists to reuse them (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 
@@ -842,7 +847,26 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 			# We must create the custom CRT file using letsencrypt if not yet created
 			# Canceled: When we suspend, there is no need to generate the cert for the custom URL. Cert should already exists if a custom url has been defined.
 
-			if [[ ! -e /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt ]]; then
+			export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
+
+			# If no cached copy exists yet for this instance's custom domain, but a real
+			# Let's Encrypt certificate for the domain itself already exists (e.g. left
+			# over from a previous custom-URL setup that was removed then recreated),
+			# link it into the cache now instead of silently falling back to the
+			# wildcard below - the wildcard does not cover an external custom domain.
+			if [[ ! -e $pathforcertiflocal/$fqn-custom.crt ]]; then
+				if [[ -e /etc/letsencrypt/live/$customurl/cert.pem ]]; then
+					ln -fs /etc/letsencrypt/live/$customurl/cert.pem $pathforcertiflocal/$fqn-custom.crt
+					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem $pathforcertiflocal/$fqn-custom.key
+					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem $pathforcertiflocal/$fqn-custom-intermediate.crt
+				elif [[ -e /etc/letsencrypt/live/www.$customurl/cert.pem ]]; then
+					ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem $pathforcertiflocal/$fqn-custom.crt
+					ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem $pathforcertiflocal/$fqn-custom.key
+					ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem $pathforcertiflocal/$fqn-custom-intermediate.crt
+				fi
+			fi
+
+			if [[ ! -e $pathforcertiflocal/$fqn-custom.crt ]]; then
 				# If custom cert not found, we fallback on the wildcard one for server (it will generate a warning, but it will works and not hangs !)
 				export pathforcertiflocal="/etc/apache2"
 				export webCustomSSLCertificateCRT=$webSSLCertificateCRT
@@ -851,7 +875,6 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 				export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
 				# We will use the custom cert file
-				export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
 				export webCustomSSLCertificateCRT="$fqn-custom.crt"
 				export webCustomSSLCertificateKEY="$fqn-custom.key"
 				export webCustomSSLCertificateIntermediate="$fqn-custom-intermediate.crt"
@@ -880,9 +903,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 		echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -901,9 +924,9 @@ if [[ "$mode" == "suspend" || $mode == "suspendmaintenance" || $mode == "suspend
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
@@ -1034,7 +1057,7 @@ if [[ "$mode" == "unsuspend" ]]; then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" ***** For instance in $targetdir/$osusername/$dbname and mode=unsuspend, we will create a new custom virtual name $fqn.custom"
 
         export pathforcertifmaster="/home/admin/wwwroot/dolibarr_documents/sellyoursaas/crt"
-        export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+        export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Check that SSL files for $fqn.custom exists to reuse them (CERTIFFORCUSTOMDOMAIN=$CERTIFFORCUSTOMDOMAIN)"
 
@@ -1084,15 +1107,34 @@ if [[ "$mode" == "unsuspend" ]]; then
 			# We must create the custom CRT file using letsencrypt if not yet created
 			# Canceled: When we unsuspend, there is no need to generate the cert for the custom URL. Cert should already exists if a custom url has been defined.
 
+			export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
+
+			# If no cached copy exists yet for this instance's custom domain, but a real
+			# Let's Encrypt certificate for the domain itself already exists (e.g. left
+			# over from a previous custom-URL setup that was removed then recreated),
+			# link it into the cache now instead of silently falling back to the
+			# wildcard below - the wildcard does not cover an external custom domain.
+			if [[ ! -e $pathforcertiflocal/$fqn-custom.crt ]]; then
+				if [[ -e /etc/letsencrypt/live/$customurl/cert.pem ]]; then
+					ln -fs /etc/letsencrypt/live/$customurl/cert.pem $pathforcertiflocal/$fqn-custom.crt
+					ln -fs /etc/letsencrypt/live/$customurl/privkey.pem $pathforcertiflocal/$fqn-custom.key
+					ln -fs /etc/letsencrypt/live/$customurl/fullchain.pem $pathforcertiflocal/$fqn-custom-intermediate.crt
+				elif [[ -e /etc/letsencrypt/live/www.$customurl/cert.pem ]]; then
+					ln -fs /etc/letsencrypt/live/www.$customurl/cert.pem $pathforcertiflocal/$fqn-custom.crt
+					ln -fs /etc/letsencrypt/live/www.$customurl/privkey.pem $pathforcertiflocal/$fqn-custom.key
+					ln -fs /etc/letsencrypt/live/www.$customurl/fullchain.pem $pathforcertiflocal/$fqn-custom-intermediate.crt
+				fi
+			fi
+
 			# If custom cert not found, we fallback on the wildcard one for server (will generate a warning, but it will works !)
-			if [[ ! -e "/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt/$fqn-custom.crt" ]]; then
+			if [[ ! -e $pathforcertiflocal/$fqn-custom.crt ]]; then
 				export pathforcertiflocal="/etc/apache2"
 	            export webCustomSSLCertificateCRT=$webSSLCertificateCRT
     	        export webCustomSSLCertificateKEY=$webSSLCertificateKEY
         	    export webCustomSSLCertificateIntermediate=$webSSLCertificateIntermediate
             	export CERTIFFORCUSTOMDOMAIN="with.sellyoursaas.com"
 			else
-				export pathforcertiflocal="/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/crt"
+				export pathforcertiflocal="${newdoldataroot:-/home/admin/wwwroot/dolibarr_documents}/sellyoursaas_local/crt"
 				export webCustomSSLCertificateCRT="$fqn-custom.crt"
 				export webCustomSSLCertificateKEY="$fqn-custom.key"
 				export webCustomSSLCertificateIntermediate="$fqn-custom-intermediate.crt"
@@ -1120,9 +1162,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 		echo "cat $vhostfiletouse | sed -e 's/__webAppDomain__/$customurl/g' | \
 				  sed -e 's/__webAppAliases__/$customurl/g' | \
 				  sed -e 's/__webAppLogName__/$instancename/g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
-                  sed -e 's;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g' | \
+                  sed -e 's;\(/etc/apache2/\)\{0,1\}__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g' | \
 				  sed -e 's/__webAdminEmail__/$EMAILFROM/g' | \
 				  sed -e 's/__osUsername__/$osusername/g' | \
 				  sed -e 's/__osGroupname__/$osusername/g' | \
@@ -1140,9 +1182,9 @@ if [[ "$mode" == "unsuspend" ]]; then
 		cat $vhostfiletouse | sed -e "s/__webAppDomain__/$customurl/g" | \
 				  sed -e "s/__webAppAliases__/$customurl/g" | \
 				  sed -e "s/__webAppLogName__/$instancename/g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
-                  sed -e "s;/etc/apache2/__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateCRT__;$pathforcertiflocal/$webCustomSSLCertificateCRT;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateKEY__;$pathforcertiflocal/$webCustomSSLCertificateKEY;g" | \
+                  sed -e "s;\(/etc/apache2/\)\{0,1\}__webSSLCertificateIntermediate__;$pathforcertiflocal/$webCustomSSLCertificateIntermediate;g" | \
 				  sed -e "s/__webAdminEmail__/$EMAILFROM/g" | \
 				  sed -e "s/__osUsername__/$osusername/g" | \
 				  sed -e "s/__osGroupname__/$osusername/g" | \
