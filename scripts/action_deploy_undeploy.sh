@@ -634,6 +634,10 @@ if [[ "$dnsserver" == "1" ]]; then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
 
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Restore ownership and permission of zone file, lost by the mv (mv keeps umask permission of the tmp file)"
+			chown root:bind /etc/bind/${ZONE}
+			chmod 644 /etc/bind/${ZONE}
+
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Reload dns with rndc reload $domainname"
 			rndc reload $domainname
 			#/etc/init.d/bind9 reload
@@ -708,6 +712,10 @@ if [[ "$dnsserver" == "1" ]]; then
 
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Move new host file with mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}"
 			mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+
+			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Restore ownership and permission of zone file, lost by the mv (mv keeps umask permission of the tmp file)"
+			chown root:bind /etc/bind/${ZONE}
+			chmod 644 /etc/bind/${ZONE}
 
 			echo `date +'%Y-%m-%d %H:%M:%S'`" **** Reload dns with rndc reload $domainname"
 			rndc reload $domainname

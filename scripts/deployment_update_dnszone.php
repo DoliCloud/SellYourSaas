@@ -383,6 +383,8 @@ if ($mode == 'set') {
 	}
 	if (!$test) {
 		dol_move($tmpfile, $fullpathdnszonefile, 0, 1, 0, 0);
+		// Restore permission lost by the move (the move keeps umask permission of the tmp file)
+		dolChmod($fullpathdnszonefile, '0644');
 	}
 
 	// Restart DNS server

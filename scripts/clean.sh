@@ -533,6 +533,9 @@ if [ -s /tmp/osutoclean ]; then
 							echo mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
 							if [[ $testorconfirm == "confirm" ]]; then
 								mv -fu /tmp/${ZONE}.$PID /etc/bind/${ZONE}
+								# Restore ownership and permission lost by the mv (mv keeps umask permission of the tmp file)
+								chown root:bind /etc/bind/${ZONE}
+								chmod 644 /etc/bind/${ZONE}
 							fi
 
 							echo "   ** Reload dns with rndc reload ${ZONENOHOST}"
