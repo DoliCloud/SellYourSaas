@@ -674,6 +674,17 @@ if ($resql) {
 								if (empty($deploy["src"])) {
 									continue;
 								}
+								// The VERSION file in src contains the raw module version, for example 1.5.0
+								$versionfile = $deploy["src"]."/VERSION";
+								if (dol_is_file($versionfile)) {
+									print "Search in file ".$versionfile."\n";
+									$contentfile = trim(file_get_contents($versionfile));
+									if (!empty($contentfile)) {
+										print "File found with version ".$contentfile."\n";
+										$einvoicingmoduleversion = $contentfile;
+										break;
+									}
+								}
 								$arrayofdescriptortofile = array($deploy["src"]."/core/modules/modEInvoicing.class.php", $deploy["src"]."/einvoicing/core/modules/modEInvoicing.class.php");
 								foreach ($arrayofdescriptortofile as $descriptortofile) {
 									print "Search in file ".$descriptortofile."\n";
