@@ -266,7 +266,7 @@ print '
 		<br>
 ';
 
-if (count(sellyoursaasGetSuspendedContracts($mythirdpartyaccount)) > 0) {
+if (count(sellyoursaasGetSuspendedContracts($mythirdpartyaccount->id)) > 0) {
 	print '<div class="note note-warning linksepa justify hidden">';
 	print $langs->trans("SEPADoesNotUnsupendInstantly");
 	print '</div>';
