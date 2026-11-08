@@ -1451,7 +1451,7 @@ class ActionsSellyoursaas
 	 */
 	public function printFieldListValue($parameters, &$object)
 	{
-		global $langs;
+		global $conf, $langs;
 		global $db;
 		global $contextpage;
 
@@ -1492,7 +1492,12 @@ class ActionsSellyoursaas
 				if (!empty($parameters['obj']->options_deployment_status)) {
 					dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
 
-					$atleastonepaymentmode = sellyoursaasThirdpartyHasPaymentMode($parameters['obj']->socid);
+					// Cache the result per thirdparty, because a thirdparty can have several contracts in the list
+					$socidforcache = (int) $parameters['obj']->socid;
+					if (!isset($conf->cache['sellyoursaas_thirdpartyhaspaymentmode'][$socidforcache])) {
+						$conf->cache['sellyoursaas_thirdpartyhaspaymentmode'][$socidforcache] = sellyoursaasThirdpartyHasPaymentMode($socidforcache);
+					}
+					$atleastonepaymentmode = $conf->cache['sellyoursaas_thirdpartyhaspaymentmode'][$socidforcache];
 
 					if ($atleastonepaymentmode) {
 						print $langs->trans("Yes");
