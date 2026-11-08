@@ -201,7 +201,7 @@ class ActionsSellyoursaas
 	 */
 	public function getFormatedCustomerRef($parameters, &$object, &$action)
 	{
-		global $langs;
+		global $conf, $langs;
 
 		if (! empty($parameters['objref'])) {
 			$isanurlofasellyoursaasinstance=false;
@@ -214,8 +214,12 @@ class ActionsSellyoursaas
 					}
 				}
 			} else {
-				$staticdeploymentserver = new Deploymentserver($this->db);
-				$tmparray = $staticdeploymentserver->fetchAllDomains();
+				// Cache the list of domains, this hook is called for each line of lists
+				if (!isset($conf->cache['sellyoursaas_alldomains'])) {
+					$staticdeploymentserver = new Deploymentserver($this->db);
+					$conf->cache['sellyoursaas_alldomains'] = $staticdeploymentserver->fetchAllDomains();
+				}
+				$tmparray = $conf->cache['sellyoursaas_alldomains'];
 				foreach ($tmparray as $tmp) {
 					$newtmp = preg_replace('/:.*$/', '', $tmp);
 					if (preg_match('/'.preg_quote('.'.$newtmp, '/').'$/', $parameters['objref'])) {
