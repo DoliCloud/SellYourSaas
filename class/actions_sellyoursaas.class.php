@@ -1371,6 +1371,30 @@ class ActionsSellyoursaas
 
 
 	/**
+	 * Complete SQL by adding fields in SELECT
+	 *
+	 * @param	array	$parameters		Array of parameters
+	 * @param	object	$object			Object
+	 * @return	int						0
+	 */
+	public function printFieldListSelect($parameters, &$object)
+	{
+		global $contextpage;
+
+		if ($parameters['currentcontext'] == 'contractlist' && in_array($contextpage, array('sellyoursaasinstances','sellyoursaasinstancesvtwo'))) {
+			if (!getDolGlobalString('SELLYOURSAAS_DISABLE_TRIAL_OR_PAID')) {
+				// Count invoices and template invoices linked to the contract (same test than sellyoursaasIsPaidInstance() with mode 0)
+				$this->resprints = ", (SELECT COUNT(ees.rowid) FROM ".$this->db->prefix()."element_element as ees";
+				$this->resprints .= " WHERE ees.fk_source = c.rowid AND ees.sourcetype = 'contrat' AND ees.targettype IN ('facture', 'facturerec'))";
+				$this->resprints .= " + (SELECT COUNT(eet.rowid) FROM ".$this->db->prefix()."element_element as eet";
+				$this->resprints .= " WHERE eet.fk_target = c.rowid AND eet.targettype = 'contrat' AND eet.sourcetype IN ('facture', 'facturerec')) as sellyoursaas_nblinkedinvoices";
+			}
+		}
+
+		return 0;
+	}
+
+	/**
 	 * Complete SQL by adding tables in FROM
 	 *
 	 * @param	array	$parameters		Array of parameters
@@ -1470,7 +1494,11 @@ class ActionsSellyoursaas
 						dol_include_once('sellyoursaas/lib/sellyoursaas.lib.php');
 
 						$ret = '<div class="bold">';
-						$ispaid = sellyoursaasIsPaidInstance($contractmpforloop);	// This call fetchObjectLinked
+						if (isset($parameters['obj']->sellyoursaas_nblinkedinvoices)) {	// Value loaded by the hook printFieldListSelect
+							$ispaid = ($parameters['obj']->sellyoursaas_nblinkedinvoices > 0 ? 1 : 0);
+						} else {
+							$ispaid = sellyoursaasIsPaidInstance($contractmpforloop);	// This call fetchObjectLinked
+						}
 						if ($ispaid) {
 							if (getDolGlobalString("SELLYOURSAAS_ENABLE_FREE_PAYMENT_MODE")) {
 								$ret .= '<span class="badge badge-status4" style="font-size: 1em;">'.$langs->trans("PayedOrConfirmedMode").'</span>';
