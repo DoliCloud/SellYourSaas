@@ -514,6 +514,13 @@ alias psld='ps -fax -eo user:12,pid,ppid,pcpu,pmem,vsz:12,size:12,tty,start_time
 HISTIGNORE='-*'
 ---------------
 
+and, to launch the Vibe AI agent into its dedicated container (see *dev/build/docker-vibe/README.md*) from any directory, the alias:
+
+[source, bash]
+---------------
+alias vibes='/home/admin/wwwroot/dolibarr/dev/build/docker-vibe/vibes.sh'
+---------------
+
 
 
 === Adding support for IPv6 (optional, if wanted but not enabled yet)
