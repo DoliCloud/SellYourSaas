@@ -263,10 +263,15 @@ repos:
     rev: 4.0.4
     hooks:
       - id: sqlfluff-lint
-        args: [--dialect, mysql]
+        args: [--config=dev/setup/sqlfluff/config]
         stages: [pre-commit, manual]  # manual needed for ci
+        # Same approach as Dolibarr core that excludes its migration scripts from sqlfluff:
+        # module migration scripts contain legacy SQL style that must not be rewritten,
+        # schema files (llx_*.sql, *.key.sql) remain checked.
         exclude: (?x)^
-          (dev/initdemo/mysqldump_.*\.sql
+          (sql/update\.sql
+          |sql/dolibarr_allversions\.sql
+          |dev/initdemo/mysqldump_.*\.sql
           |htdocs/core/menus/init_menu_auguria\.sql
           |htdocs/includes/.*
           |htdocs/install/doctemplates/websites/.*_template

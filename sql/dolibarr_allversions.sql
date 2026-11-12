@@ -200,5 +200,5 @@ ALTER TABLE llx_packages ADD COLUMN otherinformations_formula text;
 ALTER TABLE llx_packages ADD COLUMN sqltoupdateeinvoiceconst text;
 
 -- Remove duplicated rows with same code into llx_c_sellyoursaas_source_choice (keep the most recent row, so with the label matching the latest data.sql) before adding the unique index
-DELETE FROM llx_c_sellyoursaas_source_choice WHERE rowid NOT IN (SELECT rowid FROM (SELECT MAX(rowid) AS rowid FROM llx_c_sellyoursaas_source_choice GROUP BY code) AS tmp_keep);
+DELETE FROM llx_c_sellyoursaas_source_choice WHERE rowid NOT IN (SELECT keep.rid FROM (SELECT MAX(rowid) AS rid FROM llx_c_sellyoursaas_source_choice GROUP BY code) AS keep);
 ALTER TABLE llx_c_sellyoursaas_source_choice ADD UNIQUE INDEX uk_c_sellyoursaas_source_choice_code (code);
