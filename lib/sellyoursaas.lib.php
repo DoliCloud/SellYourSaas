@@ -831,6 +831,42 @@ function getRemoteCheck($remoteip, $whitelisted, $email, $checkcaptcha = 1)
 		}
 	}
 
+	// Evaluate VPN probability with VPNDetection
+	if (empty($abusetest) && getDolGlobalString('SELLYOURSAAS_VPNDETECTION_ON')) {
+		dol_syslog("getRemoteCheck Check using VPNDetection", LOG_DEBUG);
+
+		$url = 'https://api.vpndetection.io/'.urlencode($remoteip);
+		$result = getURLContent($url, 'GET', '', 1, array(), array('https'), 0);
+		$resultjson = (is_array($result) && $result['http_code'] == 200 && isset($result['content'])) ? json_decode($result['content'], true) : null;
+		if (is_array($resultjson) && isset($resultjson['is_vpn'])) {
+			// 1 for a VPN or a Tor exit, 0 otherwise. Keep the highest probability when GetIPIntel ran too.
+			$vpndetectionproba = (empty($resultjson['is_vpn']) && empty($resultjson['is_tor'])) ? 0 : 1;
+			if (!is_numeric($vpnproba) || $vpndetectionproba > $vpnproba) {
+				$vpnproba = $vpndetectionproba;
+			}
+			$ipquality .= 'vpnd-vpn='.(empty($resultjson['is_vpn']) ? 0 : 1).';vpnd-tor='.(empty($resultjson['is_tor']) ? 0 : 1).';';
+		} else {
+			$ipquality .= 'vpnd-check failed. http_code = '.dol_trunc(is_array($result) ? $result['http_code'] : '', 100).';';
+		}
+
+		// Refused if VPN probability from VPNDetection is too high
+		if (!$whitelisted && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED')) {
+			$conf->global->SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED = 85;
+
+			if (!getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON')) {
+				$fraudscoreip = 99;		// no other test with IPQuality, so VPNDetection decides
+			} else {
+				$fraudscoreip = 1;		// IPQuality decides, we set a fraudscore always lower than the threshold
+			}
+
+			if (is_numeric($vpnproba) && $vpnproba >= (float) getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED') && ($fraudscoreip >= (float) getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'))) {
+				// Output the key "Instance creation blocked for"
+				dol_syslog("Instance creation blocked for ".$remoteip." - VPN probability ".$vpnproba." is higher or equal than " . getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').' with a fraudscore '.$fraudscoreip.' >= ' . getDolGlobalString('SELLYOURSAAS_VPN_FRAUDSCORE_REFUSED'));
+				$abusetest = 1;
+			}
+		}
+	}
+
 	// Evaluate VPN probability with IPQualityScore but also TOR or bad networks and email
 	if (getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON') && empty($abusetest) && getDolGlobalString('SELLYOURSAAS_IPQUALITY_KEY')) {
 		dol_syslog("getRemoteCheck Check using IP Quality", LOG_DEBUG);

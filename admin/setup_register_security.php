@@ -169,6 +169,9 @@ if ($action == 'set') {
 		if (GETPOSTISSET("SELLYOURSAAS_GETIPINTEL_EMAIL")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_GETIPINTEL_EMAIL", GETPOST("SELLYOURSAAS_GETIPINTEL_EMAIL", 'alpha'), 'chaine', 0, '', $conf->entity);
 		}
+		if (GETPOSTISSET("SELLYOURSAAS_VPNDETECTION_ON")) {
+			dolibarr_set_const($db, "SELLYOURSAAS_VPNDETECTION_ON", GETPOST("SELLYOURSAAS_VPNDETECTION_ON", 'alpha'), 'chaine', 0, '', $conf->entity);
+		}
 		if (GETPOSTISSET("SELLYOURSAAS_IPQUALITY_ON")) {
 			dolibarr_set_const($db, "SELLYOURSAAS_IPQUALITY_ON", GETPOST("SELLYOURSAAS_IPQUALITY_ON", 'alpha'), 'chaine', 0, '', $conf->entity);
 		}
@@ -521,6 +524,29 @@ if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON')) {
 }
 
 
+// Enable VPNDetection
+print '<tr class="liste_titre">';
+print '<td>VPNDetection (free)</td>';
+print '<td></td>';
+print '<td></td>';
+print "</tr>\n";
+
+print '<tr class="oddeven"><td>'.$form->textwithpicto($langs->trans("SELLYOURSAAS_VPNDETECTION_ON"), 'This is a useful component to fight against spam instances').'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_VPNDETECTION_ON', array(), null, 0, 0, 1);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_VPNDETECTION_ON')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=setSELLYOURSAAS_VPNDETECTION_ON&token='.newToken().'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=delSELLYOURSAAS_VPNDETECTION_ON&token='.newToken().'">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td></td>';
+print '</tr>';
+
+
 // Enable IPQualityScore
 print '<tr class="liste_titre">';
 print '<td>IPQuality</td>';
@@ -552,7 +578,7 @@ if (getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON')) {
 	print '</tr>';
 }
 
-if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON') || getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON')) {
+if (getDolGlobalString('SELLYOURSAAS_GETIPINTEL_ON') || getDolGlobalString('SELLYOURSAAS_VPNDETECTION_ON') || getDolGlobalString('SELLYOURSAAS_IPQUALITY_ON')) {
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_VPN_PROBA_REFUSED").'</td>';
 	print '<td>';
 	print '<input class="maxwidth50" type="text" name="SELLYOURSAAS_VPN_PROBA_REFUSED" value="'.getDolGlobalString('SELLYOURSAAS_VPN_PROBA_REFUSED').'">';

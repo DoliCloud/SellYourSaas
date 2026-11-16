@@ -632,6 +632,7 @@ OptinForCommercialMessagesOnMyAccount=I agree to receive messages from %s includ
 SELLYOURSAAS_BLOCK_DISPOSABLE_EMAIL_ENABLED=Use the service DisposableEmail to detect malicious emails
 SELLYOURSAAS_GETIPINTEL_ON=Use the free service GetIPIntel to detect VPN
 SELLYOURSAAS_GETIPINTEL_EMAIL=API Key (email) to use GetIPIntel service
+SELLYOURSAAS_VPNDETECTION_ON=Use the free service VPNDetection to detect VPN and TOR (no key needed)
 SELLYOURSAAS_IPQUALITY_ON=Use service IPQualityScore to detect TOR, malicious VPN or malicious emails
 SELLYOURSAAS_API_KEY=API Key to use %s
 SELLYOURSAAS_EMAIL_ADDRESSES_BANNED=List of email addresses or domain names that you want to deny during registration (separated by commas)
