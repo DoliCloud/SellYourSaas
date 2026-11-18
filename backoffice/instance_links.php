@@ -649,7 +649,7 @@ print '<br>';
 print_barre_liste($langs->trans("ChainOfRegistrations"), '', '', '', '', '', '', '', 0);
 
 print '<div class="div-table-responsive-no-min">';
-print '<table class="noborder entpercent">';
+print '<table class="noborder centpercent">';
 
 print '<tr>';
 print '<td>'.$langs->trans("Instance").'</td>';
