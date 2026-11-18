@@ -328,7 +328,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => img_picto('', 'label', 'class="paddingright pictofixedwidth"'),
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_packages',
-			'url'=>'/sellyoursaas/packages_list.php',
+			'url'=>'/sellyoursaas/packages_list.php?leftmenu=mysaas_packages',
 			'langs'=>'',
 			'position'=>210,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -343,7 +343,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'NewPackage',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_createpackage',
-			'url'=>'/sellyoursaas/packages_card.php?action=create',
+			'url'=>'/sellyoursaas/packages_card.php?action=create&leftmenu=mysaas_packages',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>211,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -360,7 +360,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => img_picto('', 'service', 'class="paddingright pictofixedwidth"'),
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_products',
-			'url'=>'/product/list.php?contextpage=sellyoursaasproducts&type=1&search_category_product_list[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
+			'url'=>'/product/list.php?contextpage=sellyoursaasproducts&type=1&search_category_product_list[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__&leftmenu=mysaas_products',
 			'langs'=>'',
 			'position'=>220,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -376,7 +376,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'NewService',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_createproduct',
-			'url'=>'/product/card.php?type=1&action=create&categories[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
+			'url'=>'/product/card.php?type=1&action=create&categories[]=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__&leftmenu=mysaas_products',
 			'langs'=>'',
 			'position'=>221,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -395,7 +395,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => img_picto('', 'generic', 'class="paddingright pictofixedwidth"'),
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_registration',
-			'url'=>'/sellyoursaas/registrationlinks_list.php',
+			'url'=>'/sellyoursaas/registrationlinks_list.php?leftmenu=mysaas_products',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>229,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -413,7 +413,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => img_picto('', 'company', 'class="paddingright pictofixedwidth"'),
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_customers',
-			'url'=>'/societe/list.php?contextpage=sellyoursaasprospectsclients&search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&sortfield=s.tms&sortorder=desc',
+			'url'=>'/societe/list.php?contextpage=sellyoursaasprospectsclients&search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&sortfield=s.tms&sortorder=desc&leftmenu=mysaas_customers',
 			'langs'=>'',
 			'position'=>230,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -428,7 +428,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'NewCustomer',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_customers_create',
-			'url'=>'/societe/card.php?action=create&type=c&custcats[]=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__',
+			'url'=>'/societe/card.php?action=create&type=c&custcats[]=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&leftmenu=mysaas_customers',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>231,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -444,7 +444,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'Prospects',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_customers_prospects',
-			'url'=>'/societe/list.php?contextpage=sellyoursaasprospects&search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=2,3&sortfield=s.tms&sortorder=desc',
+			'url'=>'/societe/list.php?contextpage=sellyoursaasprospects&search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=2,3&sortfield=s.tms&sortorder=desc&leftmenu=mysaas_customers',
 			'langs'=>'',
 			'position'=>233,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -460,7 +460,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'Customers',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_customers_customers',
-			'url'=>'/societe/list.php?contextpage=sellyoursaasclients&search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=1,3&sortfield=s.tms&sortorder=desc',
+			'url'=>'/societe/list.php?contextpage=sellyoursaasclients&search_categ_cus=__[SELLYOURSAAS_DEFAULT_CUSTOMER_CATEG]__&search_type=1,3&sortfield=s.tms&sortorder=desc&leftmenu=mysaas_customers',
 			'langs'=>'',
 			'position'=>234,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -495,7 +495,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'NewInstance',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_instances_create',
-			'url'=>'/sellyoursaas/backoffice/newcustomerinstance.php?action=create',
+			'url'=>'/sellyoursaas/backoffice/newcustomerinstance.php?action=create&leftmenu=mysaas_instances',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>241,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -550,7 +550,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => img_picto('', 'company', 'class="paddingright pictofixedwidth"'),
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_resellerlist',
-			'url'=>'/societe/list.php?contextpage=sellyoursaasresellers&search_categ_sup=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
+			'url'=>'/societe/list.php?contextpage=sellyoursaasresellers&search_categ_sup=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__&leftmenu=mysaas_resellerlist',
 			'langs'=>'',
 			'position'=>601,
 			'enabled'=>'isModEnabled("sellyoursaas") && getDolGlobalInt(\'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM\')',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -565,7 +565,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'NewReseller',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_createreseller',
-			'url'=>'/societe/card.php?action=create&type=f&options_dolicloud=no&suppcats[]=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__',
+			'url'=>'/societe/card.php?action=create&type=f&options_dolicloud=no&suppcats[]=__[SELLYOURSAAS_DEFAULT_RESELLER_CATEG]__&leftmenu=mysaas_resellerlist',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>602,
 			'enabled'=>'isModEnabled("sellyoursaas") && getDolGlobalInt(\'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM\')',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -580,7 +580,7 @@ class modSellYourSaas extends DolibarrModules
 			'titre'=>'PendingResellers',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'mysaas_pendingreseller',
-			'url'=>'/societe/list.php?contextpage=sellyoursaasresellers&search_categ_sup=-2&search_options_date_apply_for_reseller_startday=1&search_options_date_apply_for_reseller_startmonth=1&search_options_date_apply_for_reseller_startyear=2000',
+			'url'=>'/societe/list.php?contextpage=sellyoursaasresellers&search_categ_sup=-2&search_options_date_apply_for_reseller_startday=1&search_options_date_apply_for_reseller_startmonth=1&search_options_date_apply_for_reseller_startyear=2000&leftmenu=mysaas_resellerlist',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>602,
 			'enabled'=>'isModEnabled("sellyoursaas") && getDolGlobalInt(\'SELLYOURSAAS_ALLOW_RESELLER_PROGRAM\')',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -617,7 +617,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_evilthidparties',
-			'url'=>'/societe/list.php?contextpage=sellyoursaasevilthirdparties&search_options_spammer=1',
+			'url'=>'/societe/list.php?contextpage=sellyoursaasevilthirdparties&search_options_spammer=1&leftmenu=sellyoursaas_blacklist',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>621,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -634,7 +634,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_evilinstances',
-			'url'=>'/contrat/list.php?contextpage=sellyoursaasevilinstances&search_options_spammer=1&search_product_category=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__',
+			'url'=>'/contrat/list.php?contextpage=sellyoursaasevilinstances&search_options_spammer=1&search_product_category=__[SELLYOURSAAS_DEFAULT_PRODUCT_CATEG]__&leftmenu=sellyoursaas_blacklist',
 			'langs'=>'sellyoursaas@sellyoursaas',
 			'position'=>622,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -653,7 +653,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_whitelistip',
-			'url'=>'/sellyoursaas/whitelistip_list.php',
+			'url'=>'/sellyoursaas/whitelistip_list.php?leftmenu=sellyoursaas_blacklist',
 			'langs'=>'',
 			'position'=>641,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -670,7 +670,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_whitelistemail',
-			'url'=>'/sellyoursaas/whitelistemail_list.php',
+			'url'=>'/sellyoursaas/whitelistemail_list.php?leftmenu=sellyoursaas_blacklist',
 			'langs'=>'',
 			'position'=>642,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -689,7 +689,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_blacklistip',
-			'url'=>'/sellyoursaas/blacklistip_list.php',
+			'url'=>'/sellyoursaas/blacklistip_list.php?leftmenu=sellyoursaas_blacklist',
 			'langs'=>'',
 			'position'=>652,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -706,7 +706,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_blacklistfrom',
-			'url'=>'/sellyoursaas/blacklistfrom_list.php',
+			'url'=>'/sellyoursaas/blacklistfrom_list.php?leftmenu=sellyoursaas_blacklist',
 			'langs'=>'',
 			'position'=>653,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -723,7 +723,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_blacklistto',
-			'url'=>'/sellyoursaas/blacklistto_list.php',
+			'url'=>'/sellyoursaas/blacklistto_list.php?leftmenu=sellyoursaas_blacklist',
 			'langs'=>'',
 			'position'=>654,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -740,7 +740,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_blacklistdir',
-			'url'=>'/sellyoursaas/blacklistdir_list.php',
+			'url'=>'/sellyoursaas/blacklistdir_list.php?leftmenu=sellyoursaas_blacklist',
 			'langs'=>'',
 			'position'=>655,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
@@ -757,7 +757,7 @@ class modSellYourSaas extends DolibarrModules
 			'prefix' => '',
 			'mainmenu'=>'sellyoursaas',
 			'leftmenu'=>'sellyoursaas_blacklistcontent',
-			'url'=>'/sellyoursaas/blacklistcontent_list.php',
+			'url'=>'/sellyoursaas/blacklistcontent_list.php?leftmenu=sellyoursaas_blacklist',
 			'langs'=>'',
 			'position'=>656,
 			'enabled'=>'isModEnabled("sellyoursaas")',         // Define condition to show or hide menu entry. Use '$conf->NewsSubmitter->enabled' if entry must be visible if module is enabled.
