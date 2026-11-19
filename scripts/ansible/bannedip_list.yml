@@ -11,19 +11,51 @@
   become: yes
   
   tasks:
+    # Output a JSON object {"file": ["ip1", "ip2"]} from the ignoreip entries found into /etc/fail2ban/
     - name: Get whitelisted IP
-      ansible.builtin.shell: grep -r "^ignoreip" "/etc/fail2ban/"
+      ansible.builtin.shell: |
+        printf '{'
+        grep -r "^ignoreip" "/etc/fail2ban/" | {
+          sep=""
+          while IFS= read -r line; do
+            file=$(echo "$line" | cut -d: -f1)
+            ips=$(echo "$line" | cut -d: -f2- | sed 's/^ignoreip[^=]*=//' | tr ',\t' '  ' | sed 's/^ *//;s/ *$//')
+            list=""
+            if [ -n "$ips" ]; then
+              list="\"$(echo "$ips" | sed 's/  */", "/g')\""
+            fi
+            printf '%s"%s": [%s]' "$sep" "$file" "$list"
+            sep=", "
+          done
+        }
+        printf '}'
       register: whitelist_ips
 
     - name: Show whitelisted IP
       ansible.builtin.debug:
-        msg: "{{ whitelist_ips.stdout_lines }}"
+        msg: "{{ whitelist_ips.stdout | from_json }}"
 
+    # Output a JSON object {"jail": ["ip1", "ip2"]}. When target contains several hosts, jails without banned IP are hidden
     - name: Get IP banned by Fail2Ban
-      ansible.builtin.shell: fail2ban-client status | grep "Jail list:" | sed 's/.*Jail list://' | tr -d '[:space:]' | tr ',' '\n' | xargs -I {} sh -c 'echo "{}:"; fail2ban-client status {} | grep "Banned IP list"' 
+      ansible.builtin.shell: |
+        sep=""
+        printf '{'
+        for j in $(fail2ban-client status | grep "Jail list:" | sed 's/.*Jail list://' | tr -d '[:space:]' | tr ',' ' '); do
+          ips=$(fail2ban-client status "$j" | grep "Banned IP list" | sed 's/.*Banned IP list://' | tr '\t' ' ' | sed 's/^ *//;s/ *$//')
+          if [ "{{ '1' if (ansible_play_hosts_all | length > 1) else '0' }}" = "1" ] && [ -z "$ips" ]; then
+            continue
+          fi
+          list=""
+          if [ -n "$ips" ]; then
+            list="\"$(echo "$ips" | sed 's/  */", "/g')\""
+          fi
+          printf '%s"%s": [%s]' "$sep" "$j" "$list"
+          sep=", "
+        done
+        printf '}'
       register: banned_ips
 
     - name: Show banned IP
       ansible.builtin.debug:
-        msg: "{{ banned_ips.stdout_lines }}"
+        msg: "{{ banned_ips.stdout | from_json }}"
         

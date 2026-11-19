@@ -301,7 +301,7 @@ password        [success=1 default=ignore]      pam_unix.so obscure sha512 minle
 
 ==== Unix personal sysadmin account
 
-Note: All the following steps can also be done for other sysadmin users later with the script *desktop_admin_users.php*, but you must do it manually for the first one.
+Note: All the following steps can also be done for other sysadmin users later with the script *desktop_admin_users.php* (you can get the command line to launch from *scripts/sys.php*), but you must do it manually for the first one.
 
 Create your personal user login account, for yourself (or for other administrators), for example: *mylastnamefirstname*. It will be used to login remotely to the server.
 
@@ -1847,7 +1847,7 @@ fail2ban-client set nameofjail banip IP.to.unban
 Note: To unban an IP, run this on the server:
 fail2ban-client unban IP.to.unban
 
-or use the script:
+or use the script from your desktop (the easiest way is to get the command line to launch from *scripts/sys.php*):
 
 [source,bash]
 ---------------
