@@ -225,6 +225,11 @@ if [[ "$mode" == "migrate" ]]; then
 	echo `date +'%Y-%m-%d %H:%M:%S'`" ***** Migrate document directory"
         if [ -f "$automigrationtmpdir/$automigrationdocumentarchivename" ];
         then
+			# The archive is read as root, so we refuse a symbolic link that could point to any file of the server
+			if [ -L "$automigrationtmpdir/$automigrationdocumentarchivename" ]; then
+				echo "File $automigrationdocumentarchivename is a symbolic link, this is not allowed"
+				exit 214
+			fi
 			echo "cd $automigrationtmpdir"
 			cd $automigrationtmpdir
 			case "$automigrationdocumentarchivename" in
@@ -271,9 +276,18 @@ if [[ "$mode" == "migrate" ]]; then
 							;;
 			esac
 
+			# The instance user owns $targetdir/$osusername, so $dbname may have been replaced by a symbolic link to redirect
+			# the chown done as root. So we go into the instance dir, check it is the real one, then use a relative path.
+			realinstancedir="$(realpath "$targetdir")/$osusername/$dbname"
+			cd "$instancedir/" || exit 215
+			if [ "$(pwd -P)" != "$realinstancedir" ]; then
+				echo "Error: $instancedir is not the real directory $realinstancedir (symbolic link ?)"
+				exit 215
+			fi
+
 			# Set user owner instead of root used to copy files
 			echo "chown -R $osusername:$osusername $instancedir/documents"
-            chown -R $osusername:$osusername "$instancedir/documents"
+            chown -R $osusername:$osusername documents
 	else
 			echo "File $automigrationdocumentarchivename not found"
 			exit 210

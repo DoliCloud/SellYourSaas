@@ -105,16 +105,23 @@ for fic in `ls -A`; do
 
 	if [ "x$1" == "xupdate" ]; then
 		echo Update duc with: duc index $homedir/$fic -x -m 3 -d \"$homedir/$fic/.duc.db\"
-		duc index $homedir/$fic -x -m 3 -d "$homedir/$fic/.duc.db"
-		chown $fic:$fic "$homedir/$fic/.duc.db"
+		# duc runs as root, so it writes into a file of the root owned dir $homedir that is then moved (mv does not follow
+		# a symbolic link set by the user as .duc.db, it replaces it)
+		rm -f "$homedir/.duc.db.$fic.tmp"
+		duc index $homedir/$fic -x -m 3 -d "$homedir/.duc.db.$fic.tmp"
+		mv -f -T "$homedir/.duc.db.$fic.tmp" "$homedir/$fic/.duc.db"
+		chown -h $fic:$fic "$homedir/$fic/.duc.db"
 		echo done
 	fi
 
 	if [ "x$1" == "xupdateifnotfound" ]; then
 		if [ ! -f "$fic/.duc.db" ]; then
 			echo Update duc with: duc index $homedir/$fic -x -m 3 -d \"$homedir/$fic/.duc.db\"
-			duc index $homedir/$fic -x -m 3 -d "$homedir/$fic/.duc.db"
-			chown $fic:$fic "$homedir/$fic/.duc.db"
+			# Same than for update: index into a root owned dir then move
+			rm -f "$homedir/.duc.db.$fic.tmp"
+			duc index $homedir/$fic -x -m 3 -d "$homedir/.duc.db.$fic.tmp"
+			mv -f -T "$homedir/.duc.db.$fic.tmp" "$homedir/$fic/.duc.db"
+			chown -h $fic:$fic "$homedir/$fic/.duc.db"
 			echo done
 		fi
 	fi

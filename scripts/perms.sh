@@ -81,7 +81,7 @@ do
 	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d ! -perm -2320 -exec chmod u+wx,g+ws {} +
 done
 if [ -d /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf ]; then
-	chown www-data:www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
+	chown -h www-data:www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
 fi
 
 if [[ "x$masterserver" == "x1" ]]; then
@@ -178,21 +178,23 @@ fi
 
 echo "Check files for antispam system and create them if not found"
 # Note: just after we redo it using $pathtospamdir variable
+# The spam dir is writable by everybody, so cp uses --remove-destination to replace a symbolic link instead of writing through it
 [ -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam ] || mkdir -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam;
-[ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
-[ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
-[ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
-[ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
-chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmod a+rw /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/* >/dev/null 2>&1;
-chown admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/* >/dev/null 2>&1;
+[ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail ] || cp -p --remove-destination /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistmail /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip ] || cp -p --remove-destination /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistip /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom ] || cp -p --remove-destination /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistfrom /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+[ ! -d /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -o -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent ] || cp -p --remove-destination /home/admin/wwwroot/dolibarr_documents/sellyoursaas/spam/blacklistcontent /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/;
+# The spam dir is writable by everybody, so we must not follow symbolic links created into it (chmod has no -h option)
+chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; find /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam -mindepth 1 -maxdepth 1 -type f -exec chmod a+rw {} + >/dev/null 2>&1;
+chown -h admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/* >/dev/null 2>&1;
 # If $pathtospamdir is default (/home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam) we do the same than previously
 [ -d $pathtospamdir ] || mkdir $pathtospamdir;
-[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail -o -s $pathtospamdir/blacklistmail ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail $pathtospamdir/;
-[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip -o -s $pathtospamdir/blacklistip ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip $pathtospamdir/;
-[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom -o -s $pathtospamdir/blacklistfrom ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom $pathtospamdir/;
-[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent -o -s $pathtospamdir/blacklistcontent ] || cp -p /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent $pathtospamdir/;
-chmod a+rwx $pathtospamdir; chmod a+rw $pathtospamdir/* >/dev/null 2>&1
-chown admin:www-data $pathtospamdir/* >/dev/null 2>&1
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail -o -s $pathtospamdir/blacklistmail ] || cp -p --remove-destination /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistmail $pathtospamdir/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip -o -s $pathtospamdir/blacklistip ] || cp -p --remove-destination /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistip $pathtospamdir/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom -o -s $pathtospamdir/blacklistfrom ] || cp -p --remove-destination /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistfrom $pathtospamdir/;
+[ -s /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent -o -s $pathtospamdir/blacklistcontent ] || cp -p --remove-destination /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam/blacklistcontent $pathtospamdir/;
+chmod a+rwx $pathtospamdir; find "$pathtospamdir" -mindepth 1 -maxdepth 1 -type f -exec chmod a+rw {} + >/dev/null 2>&1
+chown -h admin:www-data $pathtospamdir/* >/dev/null 2>&1
 
 
 echo "Set permission on sellyoursaas_local dir"

@@ -406,15 +406,16 @@ if [[ "$mode" == "rename" ]]; then
 				if [[ ! -d $instancedir$htdocsdir/.well-known ]]; then
                 	echo "mkdir $instancedir$htdocsdir/.well-known"
                 	mkdir $instancedir$htdocsdir/.well-known
-                	echo "chown $osusername:$osusername $instancedir$htdocsdir/.well-known"
-					chown $osusername:$osusername $instancedir$htdocsdir/.well-known
+                	echo "chown -h $osusername:$osusername $instancedir$htdocsdir/.well-known"
+					# -h so a symbolic link set by the instance user is not followed (mkdir fails if it points to a file)
+					chown -h $osusername:$osusername $instancedir$htdocsdir/.well-known
 				fi
 
 				if [[ ! -d $instancedir$htdocsdir/.well-known/acme-challenge ]]; then
                 	echo "mkdir $instancedir$htdocsdir/.well-known/acme-challenge"
                 	mkdir $instancedir$htdocsdir/.well-known/acme-challenge
-                	echo "chown $osusername:$osusername $instancedir$htdocsdir/.well-known/acme-challenge"
-					chown $osusername:$osusername $instancedir$htdocsdir/.well-known/acme-challenge
+                	echo "chown -h $osusername:$osusername $instancedir$htdocsdir/.well-known/acme-challenge"
+					chown -h $osusername:$osusername $instancedir$htdocsdir/.well-known/acme-challenge
 				fi
 
 

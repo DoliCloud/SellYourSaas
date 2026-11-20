@@ -254,6 +254,19 @@ if [[ "$mode" == "upgrade" ]];then
 		echo "Version too old."
 		exit 220
 	fi
+
+	# The instance user owns $targetdir/$osusername, so $dbname may have been replaced by a symbolic link to redirect
+	# actions done as root. So we go into the instance dir and check it is the real one before working on it.
+	realinstancedir="$(realpath "$targetdir")/$osusername/$dbname"
+	function cdrealinstancedir() {
+		cd "$instancedir/" || exit 225
+		if [ "$(pwd -P)" != "$realinstancedir" ]; then
+			echo "Error: $instancedir is not the real directory $realinstancedir (symbolic link ?)"
+			exit 225
+		fi
+	}
+	echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/ and check it is a real directory"
+	cdrealinstancedir
 	if [ -d "$dirforexampleforsources" ]
 	then
 		# First try with sourcefile.tar.zst/.tgz that is into tmp cache dir /tmp/cache/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git/xxx.tar.zst/.tgz
@@ -368,18 +381,19 @@ if [[ "$mode" == "upgrade" ]];then
 		echo `date +'%Y-%m-%d %H:%M:%S'`" Force permissions and owner on $targetdir/$osusername/$dbname"
 		chown $osusername:$osusername $targetdir/$osusername
 		echo `date +'%Y-%m-%d %H:%M:%S'`" chown -R $osusername:$osusername $targetdir/$osusername/$dbname"
-		chown -R $osusername:$osusername $targetdir/$osusername/$dbname
+		# Current dir is still the checked instance dir, so we use "." (chmod -R follows a symbolic link given as argument)
+		chown -R $osusername:$osusername .
 		echo `date +'%Y-%m-%d %H:%M:%S'`" chmod -R go-rwxs $targetdir/$osusername/$dbname"
-		chmod -R go-rwxs $targetdir/$osusername/$dbname
+		chmod -R go-rwxs .
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/"
-        cd $instancedir/
+        cdrealinstancedir
 
 		if [ ! -d "$instancedir/documents/admin/temp" ]
 		then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" mkdir -p $instancedir/documents/admin/temp"
-			mkdir -p "$instancedir/documents/admin/temp"
-			chown -R $osusername:$osusername "$instancedir/documents/admin/temp"
+			# Created by the instance user (never by root) because this directory is controlled by the instance user
+			runuser -u "$osusername" -- mkdir -p "$instancedir/documents/admin/temp"
 		fi
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/htdocs/install/"
@@ -388,58 +402,62 @@ if [[ "$mode" == "upgrade" ]];then
 		fileoutputhtml="output-"`date +'%Y%m%d%H%M%S'`".html"
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" clean the output file $instancedir/documents/admin/temp/$fileoutputhtml"
-		> "$instancedir/documents/admin/temp/$fileoutputhtml"
-		chown $osusername:$osusername "$instancedir/documents/admin/temp/$fileoutputhtml"
+		# Created by the instance user (never by root) because this directory is controlled by the instance user
+		runuser -u "$osusername" -- truncate -s 0 "$instancedir/documents/admin/temp/$fileoutputhtml"
 
 
-		# Note: if target is version 19, we must start with migration from 18 to 19, so
+		# Note: if target is version x, we must start with migration from x-1 to x, so
 		# we manage the case the instance has a minor version lower.
 		versionfrom=$(( $lastversiondolibarrinstance - 1 ))
 		versionto=$(( $versionfrom + 1 ))
 		echo `date +'%Y-%m-%d %H:%M:%S'`" versionfrom=$versionfrom versionto=$versionto"
 
 		# Run the first pass of upgrade
+		upgradeerror=0
 		while [ $versionto -le $laststableupgradeversion ]
 		do
 			if [ -f "$instancedir/documents/install.lock" ]
 			then
 				echo `date +'%Y-%m-%d %H:%M:%S'`" rm $instancedir/documents/install.lock"
-				rm "$instancedir/documents/install.lock"
+				runuser -u "$osusername" -- rm "$instancedir/documents/install.lock"
 			fi
 
 			echo `date +'%Y-%m-%d %H:%M:%S'`" upgrade from version $versionfrom.0.0 to version $versionto.0.0 (or last minor version)"
 
-			echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
-			php upgrade.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/$fileoutputhtml"
-			echo >> "$instancedir/documents/admin/temp/$fileoutputhtml"
+			# Run php scripts and write their output as the instance user (never as root): they load files owned by this user (conf.php...)
+			echo `date +'%Y-%m-%d %H:%M:%S'`" runuser -u $osusername -- php upgrade.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
+			runuser -u "$osusername" -- sh -c 'php upgrade.php "$1" "$2" >> "$3"; ret=$?; echo >> "$3"; exit $ret' _ "$versionfrom.0.0" "$versionto.0.0" "$instancedir/documents/admin/temp/$fileoutputhtml"
 
 			if [ $? -eq 0 ]
 			then
-				echo `date +'%Y-%m-%d %H:%M:%S'`" php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
-				php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/$fileoutputhtml"
-				echo >> "$instancedir/documents/admin/temp/$fileoutputhtml"
+				echo `date +'%Y-%m-%d %H:%M:%S'`" runuser -u $osusername -- php upgrade2.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
+				runuser -u "$osusername" -- sh -c 'php upgrade2.php "$1" "$2" >> "$3"; ret=$?; echo >> "$3"; exit $ret' _ "$versionfrom.0.0" "$versionto.0.0" "$instancedir/documents/admin/temp/$fileoutputhtml"
 
 				if [ $? -eq 0 ]
 				then
-					echo `date +'%Y-%m-%d %H:%M:%S'`" php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
-					php step5.php $versionfrom.0.0 $versionto.0.0 >> "$instancedir/documents/admin/temp/$fileoutputhtml"
-					echo >> "$instancedir/documents/admin/temp/$fileoutputhtml"
+					echo `date +'%Y-%m-%d %H:%M:%S'`" runuser -u $osusername -- php step5.php $versionfrom.0.0 $versionto.0.0 >> $instancedir/documents/admin/temp/$fileoutputhtml"
+					runuser -u "$osusername" -- sh -c 'php step5.php "$1" "$2" >> "$3"; ret=$?; echo >> "$3"; exit $ret' _ "$versionfrom.0.0" "$versionto.0.0" "$instancedir/documents/admin/temp/$fileoutputhtml"
 
 					if [ $? -eq 0 ]
 					then
 						echo "Successfully upgraded to version $versionto"
 					else
 						echo "Error on step5.php"
-						exit 224
+						upgradeerror=224
 					fi
 
 				else
 					echo "Error on upgrade2.php"
-					exit 223
+					upgradeerror=223
 				fi
 			else
 				echo "Error on upgrade.php"
-				exit 222
+				upgradeerror=222
+			fi
+
+			# On error, stop the upgrade but exit only after the install.lock file has been recreated
+			if [ $upgradeerror -ne 0 ]; then
+				break
 			fi
 
 			versionfrom=$(( $versionfrom + 1 ))
@@ -447,21 +465,25 @@ if [[ "$mode" == "upgrade" ]];then
 		done
 
 		echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/"
-		cd $instancedir/
+		cdrealinstancedir
 
 		if [ ! -f "documents/install.lock" ]
 		then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Recreate the lock file documents/install.lock"
-			touch documents/install.lock
-			chmod o-w documents/install.lock
-			chown $osusername:$osusername documents/install.lock
+			# Created by the instance user (never by root) so a symbolic link set by this user can't be followed as root
+			runuser -u "$osusername" -- sh -c 'touch documents/install.lock && chmod o-w documents/install.lock'
 		fi
 
 		# Restore user owner on all files into documents
 		# because the upgrade/upgrade2/step5 may have created new files owned by root (because they were run with root).
 		# This may be very long (from 1s to 10mn) so we execute it in background
 		echo `date +'%Y-%m-%d %H:%M:%S'`" find $instancedir/documents ! -user $osusername -exec chown -h $osusername:$osusername {} +"
-		find "$instancedir/documents" ! -user $osusername -exec chown -h $osusername:$osusername {} + &
+		find documents ! -user $osusername -exec chown -h $osusername:$osusername {} + &
+
+		if [ $upgradeerror -ne 0 ]; then
+			echo `date +'%Y-%m-%d %H:%M:%S'`" Upgrade failed, see $instancedir/documents/admin/temp/$fileoutputhtml - exit $upgradeerror"
+			exit $upgradeerror
+		fi
 	fi
 fi
 
