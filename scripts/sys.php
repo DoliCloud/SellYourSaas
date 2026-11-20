@@ -37,8 +37,9 @@ $selfname = basename(__FILE__);
 if (isset($argv[1]) && in_array($argv[1], array('-h', '--help'))) {
 	print "Usage: ".$selfname."\n";
 	print "Text UI to choose a SellYourSaas desktop tool (scripts/desktop_*), fill its parameters and get the command\n";
-	print "line to launch. The command is never executed: copy it (key c or F5) or quit (F10) to get it printed.\n";
+	print "line to launch. The command is never executed: copy it (key c or F6) or quit (F10) to get it printed.\n";
 	print "The mouse is supported to browse and select (click, wheel, right click = Esc).\n";
+	print "When a value entry is open, you can paste with the paste of your terminal (often Ctrl+Shift+V), or with F5 (or a click on Paste in the keys bar).\n";
 	exit(0);
 }
 if (!function_exists('posix_isatty') || !posix_isatty(STDIN) || !posix_isatty(STDOUT)) {
@@ -76,6 +77,7 @@ function getToolDefinitions()
 {
 	$targethelp = "Group(s) or server name(s) of the inventory. Space to select several.";
 	$hostfilehelp = "Ansible inventory: 'xxx' means the file scripts/ansible/hosts-xxx.";
+	$masteruniqueidcommand = 'cd scripts/ansible && ansible master -i hosts-{hostsfile} -b -K -m command -a \'grep ^$dolibarr_main_instance_unique_id /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php\'';
 
 	return array(
 		'desktop_apt_upgrade.sh' => array(
@@ -168,12 +170,22 @@ function getToolDefinitions()
 		'desktop_install_check.sh' => array(
 			'summary' => 'Check/fix the setup of servers',
 			'desc' => "Check and fix the setup of master and deployment servers (playbook launch_install_check.yml): OS accounts (admin groups), PAM password policy, apt packages, and optionally apache or a given PHP version ('all' = apache + php74).",
-			'usage' => 'hostfile [target] [apache|php70..php84|all]',
+			'usage' => 'hostfile [target] [apache|php74..php84|all]',
 			'notes' => array("Targets 'web' and 'remotebackup' are refused."),
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'default' => 'master', 'groups' => array('master', 'deployment'), 'help' => "Group(s) master, deployment or server name(s). Space to select several."),
-				array('name' => 'option', 'type' => 'choice', 'values' => array('' => 'base checks only', 'apache' => 'also check apache', 'php70' => '', 'php72' => '', 'php74' => '', 'php80' => '', 'php81' => '', 'php82' => '', 'php83' => '', 'php84' => '', 'all' => 'apache + php74'), 'help' => 'Optional additional component to check.'),
+				array('name' => 'option', 'type' => 'choice', 'values' => array('' => 'base checks only', 'apache' => 'also check apache', 'php74' => '', 'php80' => '', 'php81' => '', 'php82' => '', 'php83' => '', 'php84' => '', 'all' => 'apache + php74'), 'help' => 'Optional additional component to check.'),
+			),
+		),
+		'desktop_get_master_unique_id' => array(
+			'virtual' => 1,
+			'summary' => 'Build the command to get the master unique id',
+			'desc' => "Virtual tool (no shell script, no ansible playbook): build the command line to launch from your desktop, from the root of the sellyoursaas project, to read the value of \$dolibarr_main_instance_unique_id into the conf.php of the master server.\nThis value is the master_instance_id required by the tool desktop_deploy_module.sh.\nIt is a secret (it decrypts the passwords stored on the master): it will be visible in your shell history and in the process list of the servers.",
+			'usage' => 'hostsfile',
+			'commandtemplate' => $masteruniqueidcommand,
+			'params' => array(
+				array('name' => 'hostsfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 			),
 		),
 		'desktop_deploy_module.sh' => array(
@@ -182,13 +194,14 @@ function getToolDefinitions()
 			'usage' => 'hostsfile target test|confirm productref instancefilter master_instance_id [countrycode] [nocache]',
 			'notes' => array("Use 'test' first.", 'The master_instance_id is a secret: it will be visible in your shell history and in the process list of the servers.', 'Add nocache after an update of the module, otherwise the cached archive is deployed again.'),
 			'atleastone' => array('countrycode', 'nocache'),
+			'helper' => array('param' => 'master_instance_id', 'command' => $masteruniqueidcommand),
 			'params' => array(
 				array('name' => 'hostsfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'required' => 1, 'default' => 'deployment', 'groups' => array('deployment'), 'help' => "Group deployment or name(s) of deployment server(s). Space to select several."),
 				array('name' => 'command', 'type' => 'choice', 'required' => 1, 'default' => 'test', 'values' => array('test' => 'dry run', 'confirm' => 'really deploy'), 'help' => "Use 'test' first, then 'confirm'."),
 				array('name' => 'productref', 'type' => 'text', 'required' => 1, 'values' => array('CLOUD-MOD-EInvoicing' => ''), 'help' => "Ref of the service (option with a package) on the master, e.g. CLOUD-MOD-EInvoicing."),
 				array('name' => 'instancefilter', 'type' => 'text', 'required' => 1, 'values' => array('*' => 'all instances', 'abc*' => 'instances starting with abc'), 'help' => "Filter on instance names, e.g. 'abc*' (it will be quoted)."),
-				array('name' => 'master_instance_id', 'type' => 'text', 'required' => 1, 'help' => 'Value of $dolibarr_main_instance_unique_id of the master server (secret).'),
+				array('name' => 'master_instance_id', 'type' => 'text', 'required' => 1, 'help' => 'Value of $dolibarr_main_instance_unique_id of the master server (secret). Use the tool desktop_get_master_unique_id to build the command to get it.'),
 				array('name' => 'countrycode', 'type' => 'text', 'values' => array('FR' => '', 'BE' => '', 'CH' => '', 'ES' => '', 'IT' => '', 'DE' => ''), 'help' => 'Country code. countrycode or nocache must be provided.'),
 				array('name' => 'nocache', 'type' => 'choice', 'values' => array('' => 'use the cached archive', 'nocache' => 'rebuild the cached archive'), 'help' => 'Force the rebuild of the cached archive of the package.'),
 			),
@@ -260,6 +273,18 @@ function getTools($scriptdir, $selfname)
 		$tool['file'] = $file;
 		$tools[] = $tool;
 	}
+	// Virtual tools: no script file behind, they only present a command line to launch by hand
+	foreach ($definitions as $name => $tool) {
+		if (empty($tool['virtual'])) {
+			continue;
+		}
+		$tool['name'] = $name;
+		$tool['file'] = '';
+		$tools[] = $tool;
+	}
+	usort($tools, function ($a, $b) {
+		return strcmp($a['name'], $b['name']);
+	});
 	return $tools;
 }
 
@@ -562,6 +587,11 @@ function buildCommand($tool, $vals, &$warnings)
 		}
 	}
 
+	// Virtual tool (no script file behind): the command line is given by the template
+	if (!empty($tool['commandtemplate'])) {
+		return fillTemplate($tool['commandtemplate'], $vals);
+	}
+
 	// Remove trailing empty optional arguments
 	while (count($args) && $args[count($args) - 1]['value'] === '' && !$args[count($args) - 1]['required']) {
 		array_pop($args);
@@ -590,6 +620,39 @@ function buildCommand($tool, $vals, &$warnings)
 		$command .= ' '.implode(' ', $parts);
 	}
 	return $command;
+}
+
+
+/**
+ * Fill the {paramname} placeholders of a command template with the current values
+ *
+ * @param	string					$template	Template (with {paramname} placeholders)
+ * @param	array<string,string>	$vals		Values of parameters
+ * @return	string								Filled template
+ */
+function fillTemplate($template, $vals)
+{
+	return preg_replace_callback('/\{([a-z]+)\}/', function ($matches) use ($vals) {
+		$name = $matches[1];
+		$value = isset($vals[$name]) ? $vals[$name] : '';
+		return ($value !== '') ? shellQuote($value) : '<'.$name.'>';
+	}, $template);
+}
+
+
+/**
+ * Build the helper command line of a tool (command to run before the tool itself to get the value of a parameter)
+ *
+ * @param	array<string,mixed>		$tool		Tool definition
+ * @param	array<string,string>	$vals		Values of parameters
+ * @return	string								Helper command line, or '' if the tool has no helper command
+ */
+function buildHelperCommand($tool, $vals)
+{
+	if (empty($tool['helper']['command'])) {
+		return '';
+	}
+	return fillTemplate($tool['helper']['command'], $vals);
 }
 
 
@@ -875,6 +938,8 @@ class DesktopMenu
 		fwrite(STDOUT, "\033[?1049h\033[?25l");
 		// Enable the mouse: 1000 = button press/release tracking, 1006 = SGR coordinates
 		fwrite(STDOUT, "\033[?1000;1006h");
+		// Enable the bracketed paste: the pasted text is received between \033[200~ and \033[201~
+		fwrite(STDOUT, "\033[?2004h");
 		$this->updateSize();
 	}
 
@@ -888,7 +953,7 @@ class DesktopMenu
 		if ($this->sttySaved === null) {
 			return;
 		}
-		fwrite(STDOUT, C_RESET."\033[?1006;1000l\033[?25h\033[?1049l");
+		fwrite(STDOUT, C_RESET."\033[?1006;1000l\033[?2004l\033[?25h\033[?1049l");
 		if ($this->sttySaved !== '') {
 			shell_exec('stty '.escapeshellarg($this->sttySaved).' < /dev/tty 2>/dev/null');
 		} else {
@@ -946,6 +1011,22 @@ class DesktopMenu
 				$this->inbuf .= (string) fread(STDIN, 1024);
 			}
 		}
+		// Bracketed paste (mode 2004): the pasted text is received between \033[200~ and \033[201~
+		if (strncmp($this->inbuf, "\033[200~", 6) === 0) {
+			$end = strpos($this->inbuf, "\033[201~", 6);
+			if ($end === false) {
+				// Wait briefly: the terminal writes a paste in one burst
+				$read = array(STDIN);
+				if (@stream_select($read, $write, $except, 0, 50000)) {
+					$this->inbuf .= (string) fread(STDIN, 4096);
+				}
+				$end = strpos($this->inbuf, "\033[201~", 6);
+			}
+			$paste = ($end === false) ? (string) substr($this->inbuf, 6) : (string) substr($this->inbuf, 6, $end - 6);
+			$this->inbuf = ($end === false) ? '' : (string) substr($this->inbuf, $end + 6);
+			$paste = (string) preg_replace('/[\x00-\x1f\x7f]/', '', $paste);	// Remove the control chars so a paste can not inject key sequences
+			return 'PASTE:'.$paste;
+		}
 		$c = $this->inbuf[0];
 		if ($c == "\033") {
 			// SGR mouse events: \033[<button;col;rowM for a press, \033[<button;col;rowm for a release
@@ -973,7 +1054,7 @@ class DesktopMenu
 			$map = array(
 				'[A' => 'UP', '[B' => 'DOWN', '[C' => 'RIGHT', '[D' => 'LEFT', 'OA' => 'UP', 'OB' => 'DOWN', 'OC' => 'RIGHT', 'OD' => 'LEFT',
 				'[5~' => 'PGUP', '[6~' => 'PGDN', '[H' => 'HOME', '[F' => 'END', 'OH' => 'HOME', 'OF' => 'END', '[1~' => 'HOME', '[4~' => 'END',
-				'[3~' => 'DEL', '[Z' => 'BTAB', '[15~' => 'F5', '[21~' => 'F10', '' => 'ESC',
+				'[3~' => 'DEL', '[Z' => 'BTAB', '[15~' => 'F5', '[17~' => 'F6', '[21~' => 'F10', '' => 'ESC',
 			);
 			return isset($map[$seq]) ? $map[$seq] : 'UNKNOWN';
 		}
@@ -1214,6 +1295,14 @@ class DesktopMenu
 		foreach (hardWrap($command, $inner) as $l) {
 			$lines[] = array('text' => $l, 'style' => C_HIGHLIGHT);
 		}
+		$helper = buildHelperCommand($tool, $vals);
+		if ($helper !== '') {
+			$lines[] = array('text' => '');
+			$lines[] = array('text' => 'To get the value of '.$tool['helper']['param'].', you can run first:', 'style' => C_BOLD);
+			foreach (hardWrap($helper, $inner) as $l) {
+				$lines[] = array('text' => $l, 'style' => C_HIGHLIGHT);
+			}
+		}
 		$lines[] = array('text' => '');
 		foreach ($warnings as $warning) {
 			foreach (wrapText('! '.$warning, $inner) as $l) {
@@ -1224,7 +1313,7 @@ class DesktopMenu
 			$lines[] = array('text' => 'All mandatory parameters are set.', 'style' => C_OK);
 		}
 		$lines[] = array('text' => '');
-		foreach (wrapText('F5 (or c): copy to clipboard. F10 (or q, or Enter here): quit and print the command.', $inner) as $l) {
+		foreach (wrapText('F5: paste the clipboard into the value entry (you can also use the paste of your terminal, often Ctrl+Shift+V). F6 (or c): copy to clipboard. F10 (or q, or Enter here): quit and print the command.', $inner) as $l) {
 			$lines[] = array('text' => $l, 'style' => C_DIM);
 		}
 		if ($this->status !== '') {
@@ -1245,7 +1334,7 @@ class DesktopMenu
 		for ($i = 0; $i < $bh; $i++) {
 			$screen[] = $boxParams[$i].$boxCmd[$i];
 		}
-		$keys = array('Tab' => 'Panel', '↑↓' => 'Move', 'Enter' => 'Select', 'Del' => 'Clear', 'Esc' => 'Back', 'F5' => 'Copy', 'F10' => 'Quit');
+		$keys = array('Tab' => 'Panel', '↑↓' => 'Move', 'Enter' => 'Select', 'Del' => 'Clear', 'Esc' => 'Back', 'F5' => 'Paste', 'F6' => 'Copy', 'F10' => 'Quit');
 		$bar = '';
 		$barwidth = 0;
 		$this->keyBarPieces = array();		// Keep the geometry so clicks on the bar can be mapped
@@ -1301,6 +1390,73 @@ class DesktopMenu
 			}
 		}
 		return 'Command sent to the clipboard with the terminal OSC 52 sequence (if your terminal supports it). Otherwise quit with F10 to get it printed.';
+	}
+
+	/**
+	 * Paste a text into the opened value entry (same behaviour as characters typed on the keyboard)
+	 *
+	 * @param	string	$text	Text to paste
+	 * @return	string			Status message ('' when the paste has been applied)
+	 */
+	public function applyPaste($text)
+	{
+		$param = $this->currentParam();
+		if ($text !== '') {
+			if ($this->focus == 'values') {
+				$this->filter .= $text;
+				$this->valueIdx = 0;
+				return '';
+			} elseif ($this->focus == 'params' && $param && in_array($param['type'], array('text', 'kv', 'cwd', 'raw', 'target'))) {
+				$this->focus = 'values';
+				$this->filter = $text;
+				$this->valueIdx = 0;
+				return '';
+			}
+			return 'Paste: select the parameter to fill first.';
+		}
+		return '';
+	}
+
+	/**
+	 * Read the clipboard and paste it into the opened value entry
+	 *
+	 * @return	string		Status message
+	 */
+	public function pasteFromClipboard()
+	{
+		$candidates = array();
+		if (getenv('WAYLAND_DISPLAY')) {
+			$candidates[] = array('wl-paste', '--no-newline');
+		}
+		if (getenv('DISPLAY')) {
+			$candidates[] = array('xclip', '-o', '-selection', 'clipboard');
+			$candidates[] = array('xsel', '--clipboard', '--output');
+		}
+		foreach ($candidates as $cmd) {
+			$path = trim((string) shell_exec('command -v '.escapeshellarg($cmd[0]).' 2>/dev/null'));
+			if ($path === '') {
+				continue;
+			}
+			$cmd[0] = $path;
+			$proc = proc_open(implode(' ', array_map('escapeshellarg', $cmd)), array(0 => array('file', '/dev/null', 'r'), 1 => array('pipe', 'w'), 2 => array('file', '/dev/null', 'w')), $pipes);
+			if (!is_resource($proc)) {
+				continue;
+			}
+			$text = (string) stream_get_contents($pipes[1]);
+			fclose($pipes[1]);
+			$code = proc_close($proc);
+			if ($text === '' && $code != 0) {
+				continue;	// The tool failed (no display or no clipboard available): try the next one
+			}
+			// Keep the first line and remove the control chars so the clipboard content can not inject key sequences
+			$text = trim((string) preg_replace('/[\x00-\x1f\x7f]/', '', strtok($text, "\n")));
+			if ($text === '') {
+				return 'The clipboard is empty.';
+			}
+			$status = $this->applyPaste($text);
+			return ($status === '') ? 'Clipboard pasted into the value entry (with '.basename($path).').' : $status;
+		}
+		return 'Can not read the clipboard (no wl-paste, xclip or xsel available): use the paste of your terminal instead.';
 	}
 
 
@@ -1398,7 +1554,7 @@ class DesktopMenu
 			$this->updateSize();
 			return true;
 		}
-		if ($key == 'F5' || ($key == 'c' && $this->focus != 'values')) {
+		if ($key == 'F6' || ($key == 'c' && $this->focus != 'values')) {
 			$warnings = array();
 			$this->status = $this->copyToClipboard(buildCommand($tool, $this->values[$tool['name']], $warnings));
 			return true;
@@ -1415,6 +1571,16 @@ class DesktopMenu
 
 		if (strncmp($key, 'MOUSE', 5) === 0 || strncmp($key, 'MWHEEL', 6) === 0) {
 			return $this->handleMouse($key);
+		}
+
+		// Bracketed paste: the pasted text becomes the value being typed (or completes it)
+		if (strncmp($key, 'PASTE:', 6) === 0) {
+			$this->status = $this->applyPaste(substr($key, 6));
+			return true;
+		}
+		if ($key == 'F5') {
+			$this->status = $this->pasteFromClipboard();
+			return true;
 		}
 
 		switch ($this->focus) {
@@ -1605,7 +1771,7 @@ class DesktopMenu
 
 		if ($row == $this->rows) {
 			// Click on the keys bar: same as pressing the key
-			$map = array('Tab' => 'TAB', 'Enter' => 'ENTER', 'Del' => 'DEL', 'Esc' => 'ESC', 'F5' => 'F5', 'F10' => 'F10');
+			$map = array('Tab' => 'TAB', 'Enter' => 'ENTER', 'Del' => 'DEL', 'Esc' => 'ESC', 'F5' => 'F5', 'F6' => 'F6', 'F10' => 'F10');
 			foreach ($this->keyBarPieces as $piece) {
 				if ($col >= $piece['from'] && $col <= $piece['to'] && isset($map[$piece['key']])) {
 					return $this->handleKey($map[$piece['key']]);
