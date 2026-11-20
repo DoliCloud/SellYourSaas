@@ -550,7 +550,7 @@ Enable the *configurations* to work with PHP FPM:
 [source,bash]
 ---------------
 a2enconf charset localized-error-pages other-vhosts-access-log security serve-cgi-bin
-a2enconf php7.2-fpm|php7.4-fpm
+a2enconf php7.4-fpm
 ---------------
 
 Modify the configuration of the *mpm_event* module by editing the file */etc/apache2/mods-enabled/mpm_event.conf*:

@@ -40,10 +40,10 @@ fi
 # Go into a safe dir
 cd /tmp
 
-#echo "Remplacement user apache par www-data"
+#echo "Replacement user apache by www-data"
 #find . -user apache -exec chown www-data {} \;
 
-#echo "Remplacement group apache par www-data"
+#echo "Replacement group apache by www-data"
 #find . -group apache -exec chgrp www-data {} \;
 
 # Owner root on logs and backups dir
@@ -55,9 +55,9 @@ echo "Set owner and permission on logs and backup directory"
 [ -d /home/admin/backup/mysql ] || mkdir /home/admin/backup/mysql;
 [ -d /home/admin/wwwroot ] || mkdir /home/admin/wwwroot;
 chmod a+rx /home/admin;
-chown root:admin /home/admin/logs; chmod 770 /home/admin/logs; 
-chown admin:admin /mnt/diskbackup; 
-chown admin:admin /home/admin/backup; chown admin:admin /home/admin/backup/conf; chown admin:admin /home/admin/backup/mysql; 
+chown root:admin /home/admin/logs; chmod 770 /home/admin/logs;
+chown admin:admin /mnt/diskbackup;
+chown admin:admin /home/admin/backup; chown admin:admin /home/admin/backup/conf; chown admin:admin /home/admin/backup/mysql;
 chown admin:admin /home/admin/wwwroot
 
 # Permissions on SSH config and private key files
@@ -65,19 +65,20 @@ echo "Set owner and permission on admin ssh files"
 [ -s /home/admin/.ssh/config ] && chmod go-rwx /home/admin/.ssh/config && chown admin:admin /home/admin/.ssh/config
 [ -s /home/admin/.ssh/id_rsa ] && chmod go-rwx /home/admin/.ssh/id_rsa && chown admin:admin /home/admin/.ssh/id_rsa
 [ -s /home/admin/.ssh/id_rsa.pub ] && chmod go-wx /home/admin/.ssh/id_rsa.pub && chown admin:admin /home/admin/.ssh/id_rsa.pub
-[ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas && chown admin:admin /home/admin/.ssh/id_rsa_sellyoursaas 
-[ -s /home/admin/.ssh/id_rsa_sellyoursaas.pub ] && chmod go-wx /home/admin/.ssh/id_rsa_sellyoursaas.pub && chown admin:admin /home/admin/.ssh/id_rsa_sellyoursaas.pub 
+[ -s /home/admin/.ssh/id_rsa_sellyoursaas ] && chmod go-rwx /home/admin/.ssh/id_rsa_sellyoursaas && chown admin:admin /home/admin/.ssh/id_rsa_sellyoursaas
+[ -s /home/admin/.ssh/id_rsa_sellyoursaas.pub ] && chmod go-wx /home/admin/.ssh/id_rsa_sellyoursaas.pub && chown admin:admin /home/admin/.ssh/id_rsa_sellyoursaas.pub
 
 
 echo "Set owner and permission on /home/admin/wwwroot/dolibarr_documents/ (except sellyoursaas)"
 chmod g+ws /home/admin/wwwroot/dolibarr_documents/
 chown admin:www-data /home/admin/wwwroot/dolibarr_documents
-for fic in `ls /home/admin/wwwroot/dolibarr_documents | grep -v sellyoursaas`; 
-do 
-	chown -R admin:www-data "/home/admin/wwwroot/dolibarr_documents/$fic"
-	chmod -R ug+rw "/home/admin/wwwroot/dolibarr_documents/$fic"
-	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d -exec chmod u+wx {} \;
-	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d -exec chmod g+ws {} \;
+for fic in `ls /home/admin/wwwroot/dolibarr_documents | grep -v sellyoursaas`;
+do
+	# Change only entries not already correct, to avoid rewriting all inodes (same result as chown -R / chmod -R)
+	find "/home/admin/wwwroot/dolibarr_documents/$fic" \( ! -user admin -o ! -group www-data \) -exec chown -h admin:www-data {} +
+	find "/home/admin/wwwroot/dolibarr_documents/$fic" ! -type l ! -perm -0660 -exec chmod ug+rw {} +
+	# Only dirs missing u+wx or g+ws (2320), with chmod called in batch (+) instead of one process per dir (\;)
+	find "/home/admin/wwwroot/dolibarr_documents/$fic" -type d ! -perm -2320 -exec chmod u+wx,g+ws {} +
 done
 if [ -d /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf ]; then
 	chown www-data:www-data /home/admin/wwwroot/dolibarr_documents/users/temp/odtaspdf
@@ -132,8 +133,8 @@ if [ -f /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php ]; then
 fi
 
 echo Set owner and permission on SSL certificates /etc/apache2/*.key and /etc/lestencrypt
-for fic in `ls /etc/apache2/ | grep '.key$'`; 
-do 
+for fic in `ls /etc/apache2/ | grep '.key$'`;
+do
 	chown root:www-data /etc/apache2/$fic
 	chmod ug+r /etc/apache2/$fic
 	chmod o-rwx /etc/apache2/$fic
@@ -142,7 +143,7 @@ chmod go+x /etc/letsencrypt/archive
 chmod go+x /etc/letsencrypt/live
 
 if [[ "x$masterserver" == "x1" ]]; then
-	echo We are on a master server, so we clean old temp files 
+	echo We are on a master server, so we clean old temp files
 	find /home/admin/wwwroot/dolibarr_documents/sellyoursaas/temp -maxdepth 1 -name "*.tmp" -type f -mtime +3 -delete
 fi
 
@@ -204,7 +205,7 @@ chown -R admin:www-data /home/admin/wwwroot/dolibarr_documents/sellyoursaas_loca
 # Clean some files
 if [ "x$instanceserver" != "x0" -a "x$instanceserver" != "x" ]; then
 	IFS=$(echo -en "\n\b")
-	echo We are on a deployment server, so we clean log files 
+	echo We are on a deployment server, so we clean log files
 	echo "Clean web server logs $targetdir/osu*/dbn*/*_error.log"
 	for fic in `ls -Adp $targetdir/osu*/dbn*/*_error.log 2>/dev/null | grep -v '/$'`; do > "$fic"; done
 	echo "Clean applicative log files in $targetdir/osu*/dbn*/..."
@@ -231,7 +232,7 @@ fi
 chmod a+w /tmp/test.txt
 echo "Content of tmp/test.txt file. This files should not be readable from web context except if owner of file is the same as the web server user." > /tmp/test.txt
 chown www-data:www-data /tmp/test.txt
-echo "Content of test.txt file. This files should not be readable from web context." > /test.txt 
+echo "Content of test.txt file. This files should not be readable from web context." > /test.txt
 chown root:root /test.txt
 
 # TODO Try to change permission on this files to remove this ?

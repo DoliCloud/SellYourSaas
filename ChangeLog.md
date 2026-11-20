@@ -3,6 +3,7 @@
 
 ## 3.0 Unreleased
 
+* NEW Add command line tool sys.php to manage all command line tools
 * NEW Add a tab Instances on a server card
 * NEW Can use * in instance name for batch_customers.php script
 * NEW Add extrafield to store the list of enabled modules
@@ -61,6 +62,7 @@
 * FIX dist/css/alt-myaccount-example.css was missing all the base utility classes from myaccount.css (SELLYOURSAAS_EXTCSS fully replaces the stylesheet, it's not additive) - a reseller using this example as-is would get a broken myaccount dashboard. Now @imports myaccount.css first.
 * FIX register.php/loginmyaccount.tpl.php/passwordforgotten.tpl.php's form area was never actually constrained to a fixed width (.center in myaccount.css only means text-align:center) - it stretched to the full page width instead of being centered. Constrained .customregistermain/.customregisterheader in dist/css/alt-myaccount-example.css, keeping the full-width colored banners (.page-header-top, div.block header) as originally designed.
 * FIX .customregisterheader's title was flushed to the left edge of the bar, and its two lines (title/subtitle) no longer shared a left edge (leftover text-align:center from .block.medium.center). Centers the title within the bar via absolute positioning, matching the default look, independent of the "already have an account" link's width on the right.
+* DOC Purge documentation
 * SEC When using ssh, a user can't see the OS and package information.
 * SEC several fixes
  
