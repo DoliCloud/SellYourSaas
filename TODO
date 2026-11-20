@@ -1,0 +1,3 @@
+- Force disabling of user ubuntu
+- Do not add admin in AllowUsers of ssh (except for backup platforms)
+- Clean removal of old php versions
