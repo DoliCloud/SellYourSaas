@@ -1,3 +1,4 @@
 - Force disabling of user ubuntu
 - Do not add admin in AllowUsers of ssh (except for backup platforms)
+- Update the sudoers: #includedir /etc/sudoers.d -> @includedir /etc/sudoers.d
 - Clean removal of old php versions
