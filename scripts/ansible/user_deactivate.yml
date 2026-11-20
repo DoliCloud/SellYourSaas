@@ -11,8 +11,10 @@
   become: yes
   become_user: root
   tasks:
+  # Expire the account today (UTC date of the server) instead of -E0, so the date of deactivation is kept.
+  # The account is refused as soon as the current UTC day is >= the expiration day, so it is blocked immediately.
   - name: Deactivate system user
-    command: "chage -E0 {{login}}"
+    shell: "chage -E $(date -u +%Y-%m-%d) {{ login | quote }}"
     register: command_output
 
   - debug:

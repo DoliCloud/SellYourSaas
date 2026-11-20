@@ -1,0 +1,125 @@
+---
+# Script to get information on servers (read only): OS and precise version, PHP version,
+# users allowed to sudo as root (with their sudo rule) and users allowed to sudo as admin (sudo su - admin).
+#
+# Examples to run the script:
+# ansible-playbook -K info_servers.yml -i hosts-xxx -e 'target=targethost'
+# ansible-playbook -K info_servers.yml -i hosts-xxx -e 'target=master,deployment'
+#
+
+- name: Get information on servers
+  hosts: '{{target}}'
+  become: yes
+  gather_facts: no
+
+  tasks:
+    # Output a JSON object with OS, PHP and sudo information.
+    # Candidate users are the users and members of the %groups found into /etc/sudoers and /etc/sudoers.d/*.
+    # Their effective rules are then read with "sudo -l -U login" (so includes, groups and aliases are resolved).
+    - name: Get OS, PHP and sudo information
+      ansible.builtin.shell: |
+        esc() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\t/ /g'; }
+        jsonlist() { local sep="" s; printf '['; for s in "$@"; do printf '%s"%s"' "$sep" "$(esc "$s")"; sep=", "; done; printf ']'; }
+
+        osname=""
+        if [ -r /etc/os-release ]; then
+          osname=$(. /etc/os-release; echo "$PRETTY_NAME")
+        fi
+        osdetail=""
+        if [ -r /etc/debian_version ]; then
+          osdetail="debian_version $(cat /etc/debian_version)"
+        fi
+        kernel=$(uname -r)
+
+        phpcli="not found"
+        if command -v php >/dev/null 2>&1; then
+          phpcli=$(php -n -r 'echo PHP_VERSION;' 2>/dev/null)
+        fi
+        phpinstalled=$(ls -1 /etc/php 2>/dev/null | grep -E '^[0-9]+\.[0-9]+$' | tr '\n' ' ' | sed 's/ *$//')
+
+        # List of candidate users
+        cands=""
+        for tok in $(cat /etc/sudoers /etc/sudoers.d/* 2>/dev/null | grep -vE '^[[:space:]]*($|#|@|Defaults|[A-Z_]+_Alias)' | grep -vE '^[[:space:]]' | awk '{print $1}' | sort -u); do
+          case "$tok" in
+            %*)
+              grp="${tok#%}"
+              gid=$(getent group "$grp" | cut -d: -f3)
+              if [ -n "$gid" ]; then
+                cands="$cands $(getent group "$grp" | cut -d: -f4 | tr ',' ' ') $(awk -F: -v g="$gid" '$4==g {print $1}' /etc/passwd | tr '\n' ' ')"
+              fi
+              ;;
+            *)
+              cands="$cands $tok"
+              ;;
+          esac
+        done
+
+        rootlist=()
+        adminlist=()
+        today=$(( $(date +%s) / 86400 ))
+        for u in $(echo "$cands" | tr ' ' '\n' | grep -v '^$' | sort -u); do
+          id -u "$u" >/dev/null 2>&1 || continue
+          # Account expired (deactivated with chage -E by desktop_admin_users.php). -E0 (old versions) gives no real date.
+          label="$u"
+          expire=$(getent shadow "$u" | cut -d: -f8)
+          if [ -n "$expire" ] && [ "$expire" -ge 0 ] 2>/dev/null && [ "$expire" -le "$today" ]; then
+            if [ "$expire" -eq 0 ]; then
+              label="$u (disabled)"
+            else
+              label="$u (disabled since $(date -u -d "@$(( expire * 86400 ))" +%Y-%m-%d))"
+            fi
+          fi
+          isroot=0
+          isadmin=0
+          while IFS= read -r rule; do
+            [ -z "$rule" ] && continue
+            runas="${rule%%)*}"
+            runas="${runas#(}"
+            cmds="${rule#*) }"
+            hasroot=0
+            hasadmin=0
+            IFS=',' read -ra cmdarr <<< "$cmds"
+            for c in "${cmdarr[@]}"; do
+              c=$(echo "$c" | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; s/^([A-Z_]+:[[:space:]]*)+//')
+              if echo "$runas" | grep -qE '(^|[ :])(ALL|root)( |$)'; then
+                if echo "$c" | grep -qE '^ALL$|(^|/)su( +(-|-l|--login))?( +root)?$|(^|/)(ba|da|z)?sh$'; then
+                  hasroot=1
+                fi
+                if echo "$c" | grep -qE '(^|/)su +((-|-l|--login) +)?admin$'; then
+                  hasadmin=1
+                fi
+              fi
+              if echo "$runas" | grep -qE '(^|[ :])admin( |$)' && [ "$c" = "ALL" ]; then
+                hasadmin=1
+              fi
+            done
+            if [ $hasroot -eq 1 ]; then
+              rootlist+=("$label: $rule")
+              isroot=1
+            fi
+            if [ $hasadmin -eq 1 ]; then
+              adminlist+=("$label: $rule")
+              isadmin=1
+            fi
+          done < <(sudo -l -U "$u" 2>/dev/null | sed -n '/may run the following commands/,$p' | tail -n +2 | sed 's/^[[:space:]]*//')
+          # A user with a full root access can also do sudo su - admin
+          if [ $isroot -eq 1 ] && [ $isadmin -eq 0 ]; then
+            adminlist+=("$label: (allowed through its root access)")
+          fi
+        done
+
+        printf '{"os": "%s", "os_detail": "%s", "kernel": "%s", "php_cli": "%s", "php_installed": "%s", "sudo_root": %s, "sudo_admin": %s}' \
+          "$(esc "$osname")" "$(esc "$osdetail")" "$(esc "$kernel")" "$(esc "$phpcli")" "$(esc "$phpinstalled")" \
+          "$(jsonlist "${rootlist[@]}")" "$(jsonlist "${adminlist[@]}")"
+      args:
+        executable: /bin/bash
+      register: info_servers_raw
+      changed_when: false
+
+    - name: Store information
+      ansible.builtin.set_fact:
+        info_server: "{{ info_servers_raw.stdout | from_json }}"
+
+    - name: Show information
+      ansible.builtin.debug:
+        msg: "{{ info_server }}"

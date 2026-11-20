@@ -1918,13 +1918,13 @@ iface eth0:1 inet static
 A backup of the server+bases can be done with a VM snapshot.
 It is also possible to snapshot only extra disks.
 
-See chapter in Master and Deployment Servers doc.
+See chapter in Master Server doc.
 
 ==== Restoration system
 
 From OVH's "Snapshots" interface, you can restore a VM image on a server or a disk image on a disk, provided the target has at least the same amount of storage.
 
-See chapter in Master and Deployment Servers doc.
+See chapter in Master Server doc.
 
 Note that once restoration is done, if it is done on another server, you must:
 
@@ -1981,7 +1981,7 @@ pip install awscli --upgrade --user
 
 == Troubleshooting
 
-See the chapter available in the *Documentation SellYourSaas - Master and Deployment servers*
+See the chapter available in the *Documentation SellYourSaas - Master Server*
 
 == Error when launching dkim daemon: opendkim.service: Can't open PID file /var/run/opendkim/opendkim.pid
 

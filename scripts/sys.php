@@ -155,6 +155,15 @@ function getToolDefinitions()
 				array('name' => 'jail', 'type' => 'text', 'requiredif' => array('action' => array('ban')), 'values' => array('sshd' => '', 'apache-shellshock' => '', 'web-dol-bruteforce' => '', 'web-accesslog-limit403' => '', 'email-dol-blacklist' => '', 'email-dol-perso' => '', 'email-dol-perso-perday' => ''), 'help' => 'Jail where to ban the IP (for action ban only).'),
 			),
 		),
+		'desktop_info_servers.sh' => array(
+			'summary' => 'Get OS, PHP and sudo users of servers',
+			'desc' => "Get information on the remote servers, read only (playbook info_servers.yml):\n- OS and precise version (and kernel),\n- PHP version (CLI and installed branches),\n- users allowed to sudo as root, with their sudo rule,\n- users allowed to sudo as admin (sudo su - admin), with their sudo rule.",
+			'usage' => 'hostfile [target]',
+			'params' => array(
+				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
+				array('name' => 'target', 'type' => 'target', 'default' => 'all', 'help' => $targethelp." 'all' for all servers of the inventory."),
+			),
+		),
 		'desktop_install_check.sh' => array(
 			'summary' => 'Check/fix the setup of servers',
 			'desc' => "Check and fix the setup of master and deployment servers (playbook launch_install_check.yml): OS accounts (admin groups), PAM password policy, apt packages, and optionally apache or a given PHP version ('all' = apache + php74).",
@@ -777,6 +786,15 @@ class DesktopMenu
 				}
 			}
 			$allowedgroups = empty($param['groups']) ? null : $param['groups'];
+			// Ansible pattern 'all' (all hosts of the inventory), only when the groups are not restricted
+			if ($allowedgroups === null && !isset($inventory['all'])) {
+				$allhosts = array();
+				foreach ($inventory as $hosts) {
+					$allhosts = array_merge($allhosts, $hosts);
+				}
+				$nball = count(array_unique($allhosts));
+				$candidates[] = array('value' => 'all', 'label' => 'all  [all servers of the inventory, '.$nball.' host'.($nball > 1 ? 's' : '').']', 'search' => 'all');
+			}
 			foreach ($inventory as $group => $hosts) {
 				if ($allowedgroups !== null && !in_array($group, $allowedgroups)) {
 					continue;
@@ -1449,6 +1467,12 @@ class DesktopMenu
 						$list = ($current === '') ? array() : explode(',', $current);
 						$pos = array_search($item['value'], $list, true);
 						if ($pos === false) {
+							// 'all' already includes every server, so it is exclusive with other values
+							if ($item['value'] == 'all') {
+								$list = array();
+							} else {
+								$list = array_diff($list, array('all'));
+							}
 							$list[] = $item['value'];
 						} else {
 							unset($list[$pos]);
