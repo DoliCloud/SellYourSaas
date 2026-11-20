@@ -37,6 +37,21 @@
         fi
         phpinstalled=$(ls -1 /etc/php 2>/dev/null | grep -E '^[0-9]+\.[0-9]+$' | tr '\n' ' ' | sed 's/ *$//')
 
+        # PHP used by Apache: enabled mod_php modules and php-fpm referenced into enabled conf/sites, with package version
+        phpapache=""
+        if [ -d /etc/apache2 ]; then
+          for v in $(ls -1 /etc/apache2/mods-enabled/ 2>/dev/null | sed -n -E 's/^php([0-9]+\.[0-9]+)\.load$/\1/p' | sort -u); do
+            phpapache="$phpapache, mod_php $v ($(dpkg-query -W -f='${Version}' "libapache2-mod-php$v" 2>/dev/null))"
+          done
+          for v in $(grep -rhoE 'php[0-9]+\.[0-9]+-fpm' /etc/apache2/conf-enabled/ /etc/apache2/sites-enabled/ 2>/dev/null | sed -E 's/^php//; s/-fpm$//' | sort -u); do
+            phpapache="$phpapache, fpm $v ($(dpkg-query -W -f='${Version}' "php$v-fpm" 2>/dev/null))"
+          done
+          phpapache=$(echo "${phpapache#, }" | sed "s/ ()//g")
+          [ -z "$phpapache" ] && phpapache="no PHP enabled into Apache"
+        else
+          phpapache="Apache not found"
+        fi
+
         # List of candidate users
         cands=""
         for tok in $(cat /etc/sudoers /etc/sudoers.d/* 2>/dev/null | grep -vE '^[[:space:]]*($|#|@|Defaults|[A-Z_]+_Alias)' | grep -vE '^[[:space:]]' | awk '{print $1}' | sort -u); do
@@ -108,8 +123,8 @@
           fi
         done
 
-        printf '{"os": "%s", "os_detail": "%s", "kernel": "%s", "php_cli": "%s", "php_installed": "%s", "sudo_root": %s, "sudo_admin": %s}' \
-          "$(esc "$osname")" "$(esc "$osdetail")" "$(esc "$kernel")" "$(esc "$phpcli")" "$(esc "$phpinstalled")" \
+        printf '{"os": "%s", "os_detail": "%s", "kernel": "%s", "php_cli": "%s", "php_installed": "%s", "php_apache": "%s", "sudo_root": %s, "sudo_admin": %s}' \
+          "$(esc "$osname")" "$(esc "$osdetail")" "$(esc "$kernel")" "$(esc "$phpcli")" "$(esc "$phpinstalled")" "$(esc "$phpapache")" \
           "$(jsonlist "${rootlist[@]}")" "$(jsonlist "${adminlist[@]}")"
       args:
         executable: /bin/bash

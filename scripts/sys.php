@@ -157,7 +157,7 @@ function getToolDefinitions()
 		),
 		'desktop_info_servers.sh' => array(
 			'summary' => 'Get OS, PHP and sudo users of servers',
-			'desc' => "Get information on the remote servers, read only (playbook info_servers.yml):\n- OS and precise version (and kernel),\n- PHP version (CLI and installed branches),\n- users allowed to sudo as root, with their sudo rule,\n- users allowed to sudo as admin (sudo su - admin), with their sudo rule.",
+			'desc' => "Get information on the remote servers, read only (playbook info_servers.yml):\n- OS and precise version (and kernel),\n- PHP version (CLI, installed branches and PHP used by Apache),\n- users allowed to sudo as root, with their sudo rule,\n- users allowed to sudo as admin (sudo su - admin), with their sudo rule.",
 			'usage' => 'hostfile [target]',
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
