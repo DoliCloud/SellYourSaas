@@ -38,6 +38,7 @@ if (isset($argv[1]) && in_array($argv[1], array('-h', '--help'))) {
 	print "Usage: ".$selfname."\n";
 	print "Text UI to choose a SellYourSaas desktop tool (scripts/desktop_*), fill its parameters and get the command\n";
 	print "line to launch. The command is never executed: copy it (key c or F5) or quit (F10) to get it printed.\n";
+	print "The mouse is supported to browse and select (click, wheel, right click = Esc).\n";
 	exit(0);
 }
 if (!function_exists('posix_isatty') || !posix_isatty(STDIN) || !posix_isatty(STDOUT)) {
@@ -161,7 +162,7 @@ function getToolDefinitions()
 			'usage' => 'hostfile [target]',
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
-				array('name' => 'target', 'type' => 'target', 'default' => 'all', 'help' => $targethelp." 'all' for all servers of the inventory."),
+				array('name' => 'target', 'type' => 'target', 'default' => 'master,deployment,web', 'help' => $targethelp." 'all' for all servers of the inventory."),
 			),
 		),
 		'desktop_install_check.sh' => array(
@@ -623,6 +624,12 @@ class DesktopMenu
 	public $paramOffset = 0;
 	/** @var int */
 	public $descOffset = 0;
+	/** @var int Number of param lines held by the params box in the last rendering */
+	public $paramRows = 0;
+	/** @var int Number of help lines held by the params box in the last rendering */
+	public $nbHelpLines = 0;
+	/** @var array<int,array<string,mixed>> Pieces of the bottom keys bar of the last rendering (from, to, key) */
+	public $keyBarPieces = array();
 	/** @var string */
 	public $filter = '';
 	/** @var string */
@@ -866,6 +873,8 @@ class DesktopMenu
 		}
 		register_shutdown_function(array($this, 'stop'));
 		fwrite(STDOUT, "\033[?1049h\033[?25l");
+		// Enable the mouse: 1000 = button press/release tracking, 1006 = SGR coordinates
+		fwrite(STDOUT, "\033[?1000;1006h");
 		$this->updateSize();
 	}
 
@@ -879,7 +888,7 @@ class DesktopMenu
 		if ($this->sttySaved === null) {
 			return;
 		}
-		fwrite(STDOUT, C_RESET."\033[?25h\033[?1049l");
+		fwrite(STDOUT, C_RESET."\033[?1006;1000l\033[?25h\033[?1049l");
 		if ($this->sttySaved !== '') {
 			shell_exec('stty '.escapeshellarg($this->sttySaved).' < /dev/tty 2>/dev/null');
 		} else {
@@ -930,8 +939,8 @@ class DesktopMenu
 				return null;
 			}
 		}
-		if ($this->inbuf === "\033") {
-			// Wait a little to know if it is the Esc key or the start of a sequence
+		if ($this->inbuf === "\033" || preg_match('/^\033(\[[\d;]*|\[<[\d;]*)$/', $this->inbuf)) {
+			// Wait a little to know if it is the Esc key or an incomplete sequence
 			$read = array(STDIN);
 			if (@stream_select($read, $write, $except, 0, 50000)) {
 				$this->inbuf .= (string) fread(STDIN, 1024);
@@ -939,6 +948,21 @@ class DesktopMenu
 		}
 		$c = $this->inbuf[0];
 		if ($c == "\033") {
+			// SGR mouse events: \033[<button;col;rowM for a press, \033[<button;col;rowm for a release
+			if (preg_match('/^\033\[<(\d+);(\d+);(\d+)([Mm])/', $this->inbuf, $regs)) {
+				$this->inbuf = (string) substr($this->inbuf, strlen($regs[0]));
+				if ($regs[4] == 'm') {
+					return null;	// Button release: ignored
+				}
+				if ((int) $regs[1] == 64) {
+					return 'MWHEELUP:'.$regs[2].':'.$regs[3];
+				} elseif ((int) $regs[1] == 65) {
+					return 'MWHEELDN:'.$regs[2].':'.$regs[3];
+				} elseif ((int) $regs[1] <= 2) {
+					return 'MOUSE'.$regs[1].':'.$regs[2].':'.$regs[3];
+				}
+				return null;
+			}
 			if (preg_match('/^\033(\[[0-9;]*[~A-Za-z]|O[A-Za-z])/', $this->inbuf, $reg)) {
 				$seq = $reg[1];
 				$this->inbuf = (string) substr($this->inbuf, strlen($reg[0]));
@@ -1072,8 +1096,10 @@ class DesktopMenu
 		// Top left: tools
 		$visible = $th - 2;
 		$this->toolOffset = self::scrollOffset($this->toolIdx, $this->toolOffset, $visible);
+		$nbtools = count($this->tools);
+		$lasttool = min($nbtools, $this->toolOffset + $visible);
 		$lines = array();
-		for ($i = $this->toolOffset; $i < min(count($this->tools), $this->toolOffset + $visible); $i++) {
+		for ($i = $this->toolOffset; $i < $lasttool; $i++) {
 			$style = C_TEXT;
 			if ($i == $this->toolIdx) {
 				$style = ($this->focus == 'tools') ? C_CURSOR : C_CURSOR_NOFOCUS;
@@ -1124,6 +1150,9 @@ class DesktopMenu
 		$nbparams = count($tool['params']);
 		$minvalues = max(3, min(count($items), 6));
 		$paramrows = max(2, min($nbparams, $bh - 2 - ($param ? 2 + count($helplines) + $minvalues : 0)));
+		// Keep the geometry so mouse clicks can be mapped onto the rendered lines
+		$this->paramRows = $paramrows;
+		$this->nbHelpLines = count($helplines);
 		$this->paramOffset = self::scrollOffset($this->paramIdx, $this->paramOffset, $paramrows);
 		$this->paramOffset = min($this->paramOffset, max(0, $nbparams - $paramrows));
 		foreach ($tool['params'] as $i => $param) {
@@ -1159,7 +1188,8 @@ class DesktopMenu
 			$this->valueOffset = self::scrollOffset($this->valueIdx, $this->valueOffset, $visible);
 			$current = $this->getValue($param['name']);
 			$selected = $multi ? explode(',', $current) : array($current);
-			for ($i = $this->valueOffset; $i < min(count($items), $this->valueOffset + $visible); $i++) {
+			$lastvalue = min(count($items), $this->valueOffset + $visible);
+			for ($i = $this->valueOffset; $i < $lastvalue; $i++) {
 				$item = $items[$i];
 				$mark = '  ';
 				if ($item['selectable'] && in_array($item['value'], $selected, true) && !preg_match('/^» /', $item['label'])) {
@@ -1218,12 +1248,14 @@ class DesktopMenu
 		$keys = array('Tab' => 'Panel', '↑↓' => 'Move', 'Enter' => 'Select', 'Del' => 'Clear', 'Esc' => 'Back', 'F5' => 'Copy', 'F10' => 'Quit');
 		$bar = '';
 		$barwidth = 0;
+		$this->keyBarPieces = array();		// Keep the geometry so clicks on the bar can be mapped
 		foreach ($keys as $key => $label) {
 			$piece = strWidth($key) + strWidth($label) + 2;
 			if ($barwidth + $piece > $this->cols) {
 				break;
 			}
 			$bar .= C_KEY.$key.C_BAR.$label.' '.C_KEY.' ';
+			$this->keyBarPieces[] = array('from' => $barwidth + 1, 'to' => $barwidth + $piece, 'key' => $key);
 			$barwidth += $piece;
 		}
 		$bar .= C_KEY.str_repeat(' ', max(0, $this->cols - $barwidth));
@@ -1381,6 +1413,10 @@ class DesktopMenu
 			return true;
 		}
 
+		if (strncmp($key, 'MOUSE', 5) === 0 || strncmp($key, 'MWHEEL', 6) === 0) {
+			return $this->handleMouse($key);
+		}
+
 		switch ($this->focus) {
 			case 'tools':
 				if (in_array($key, $movekeys)) {
@@ -1463,22 +1499,7 @@ class DesktopMenu
 				} elseif ($key == 'SPACE' && $param['type'] == 'target') {
 					$item = isset($items[$this->valueIdx]) ? $items[$this->valueIdx] : null;
 					if ($item && $item['selectable']) {
-						$current = $this->getValue($param['name']);
-						$list = ($current === '') ? array() : explode(',', $current);
-						$pos = array_search($item['value'], $list, true);
-						if ($pos === false) {
-							// 'all' already includes every server, so it is exclusive with other values
-							if ($item['value'] == 'all') {
-								$list = array();
-							} else {
-								$list = array_diff($list, array('all'));
-							}
-							$list[] = $item['value'];
-						} else {
-							unset($list[$pos]);
-						}
-						$this->setValue($param['name'], implode(',', $list));
-						$this->multiTouched = true;
+						$this->toggleTargetValue($item);
 						$this->valueIdx = min(count($items) - 1, $this->valueIdx + 1);
 					}
 				} elseif ($key == 'BACKSPACE') {
@@ -1496,6 +1517,178 @@ class DesktopMenu
 				}
 				break;
 		}
+		return true;
+	}
+
+	/**
+	 * Toggle an item of the multi selection of a target parameter
+	 * ('all' already includes every server, so it is exclusive with the other values).
+	 *
+	 * @param	array<string,mixed>	$item	Item of the list of values
+	 * @return	void
+	 */
+	public function toggleTargetValue($item)
+	{
+		$param = $this->currentParam();
+		$current = $this->getValue($param['name']);
+		$list = ($current === '') ? array() : explode(',', $current);
+		$pos = array_search($item['value'], $list, true);
+		if ($pos === false) {
+			if ($item['value'] == 'all') {
+				$list = array();
+			} else {
+				$list = array_diff($list, array('all'));
+			}
+			$list[] = $item['value'];
+		} else {
+			unset($list[$pos]);
+		}
+		$this->setValue($param['name'], implode(',', $list));
+		$this->multiTouched = true;
+	}
+
+	/**
+	 * Handle a mouse event received by readKey (MOUSE0/1/2:col:row, MWHEELUP/MWHEELDN:col:row).
+	 * Column and row are the 1-based coordinates of the click into the rendered screen.
+	 *
+	 * @param	string	$key	Mouse event
+	 * @return	bool			Always true (a mouse event never quits)
+	 */
+	public function handleMouse($key)
+	{
+		$parts = explode(':', $key);
+		$event = array_shift($parts);
+		$col = (int) $parts[0];
+		$row = (int) $parts[1];
+		$tool = $this->currentTool();
+		$param = $this->currentParam();
+		list($lw, $th, $bh) = $this->layout();
+		$step = 3;		// Lines scrolled by one wheel move
+
+		if ($event == 'MWHEELUP' || $event == 'MWHEELDN') {
+			$dir = ($event == 'MWHEELUP') ? 'PGUP' : 'PGDN';
+			if ($row >= 2 && $row <= $th + 1) {
+				// Top boxes: tools (left) and description (right)
+				if ($col <= $lw) {
+					$new = self::moveCursor($dir, $this->toolIdx, count($this->tools), $step);
+					if ($new != $this->toolIdx) {
+						$this->toolIdx = $new;
+						$this->descOffset = 0;
+						$this->initToolValues();
+					}
+				} else {
+					$this->descOffset = self::moveCursor($dir, $this->descOffset, 1000, $step);
+				}
+			} elseif ($row > $th + 1 && $row <= $th + $bh + 1) {
+				// Bottom left box: parameters or values depending on the focus
+				if ($col <= $lw && $param) {
+					if ($this->focus == 'values') {
+						$this->valueIdx = self::moveCursor($dir, $this->valueIdx, count($this->getValueItems()), $step);
+					} else {
+						$new = self::moveCursor($dir, $this->paramIdx, count($tool['params']), $step);
+						if ($new != $this->paramIdx) {
+							$this->paramIdx = $new;
+							$this->resetValueList();
+						}
+					}
+				}
+			}
+			return true;
+		}
+
+		if ($event == 'MOUSE2') {
+			return $this->handleKey('ESC');		// Right click: back
+		}
+		if ($event != 'MOUSE0') {
+			return true;		// Middle click: ignored
+		}
+
+		if ($row == $this->rows) {
+			// Click on the keys bar: same as pressing the key
+			$map = array('Tab' => 'TAB', 'Enter' => 'ENTER', 'Del' => 'DEL', 'Esc' => 'ESC', 'F5' => 'F5', 'F10' => 'F10');
+			foreach ($this->keyBarPieces as $piece) {
+				if ($col >= $piece['from'] && $col <= $piece['to'] && isset($map[$piece['key']])) {
+					return $this->handleKey($map[$piece['key']]);
+				}
+			}
+			return true;
+		}
+		if ($row < 2) {
+			return true;		// Title bar
+		}
+
+		if ($row <= $th + 1) {
+			// Click into a top box: tools (left) or description (right)
+			if ($col > $lw) {
+				$this->focus = 'desc';
+				return true;
+			}
+			$this->focus = 'tools';
+			$local = $row - 3;		// Content lines start under the top border of the box
+			if ($local >= 0 && $local < $th - 2) {
+				$i = $this->toolOffset + $local;
+				if ($i < count($this->tools) && $i != $this->toolIdx) {
+					$this->toolIdx = $i;
+					$this->descOffset = 0;
+					$this->initToolValues();
+				}
+			}
+			return true;
+		}
+
+		// Click into a bottom box: parameters/values (left) or command (right)
+		if ($col > $lw) {
+			$this->focus = 'cmd';
+			return true;
+		}
+		if (!$param) {
+			return true;
+		}
+		$local = $row - ($th + 3);		// Content lines start under the top border of the box
+		if ($local < 0) {
+			$this->focus = 'params';
+			return true;
+		}
+		$nbparams = count($tool['params']);
+		$nbvisibleparams = max(0, min($nbparams, $this->paramOffset + $this->paramRows) - $this->paramOffset);
+		if ($local < $nbvisibleparams) {
+			// Click on a parameter line
+			$new = $this->paramOffset + $local;
+			if ($new != $this->paramIdx) {
+				$this->paramIdx = $new;
+				$this->resetValueList();
+			}
+			if ($this->focus == 'values') {
+				$this->focus = 'params';
+			}
+			return true;
+		}
+
+		// Then, in the params box: a separator, the help lines, the hint line, and the list of values
+		$visiblevalues = max(1, $bh - 2 - ($nbvisibleparams + 3 + $this->nbHelpLines));
+		$items = $this->getValueItems();
+		$nbvisiblevalues = max(0, min(count($items), $this->valueOffset + $visiblevalues) - $this->valueOffset);
+		$v = $local - ($nbvisibleparams + 1 + $this->nbHelpLines + 1);
+		if ($v >= 0 && $v < $nbvisiblevalues) {
+			$item = $items[$this->valueOffset + $v];
+			if ($item['selectable']) {
+				$this->focus = 'values';
+				$this->valueIdx = $this->valueOffset + $v;
+				if ($param['type'] == 'target') {
+					// Multi selection: toggle the clicked value and stay into the list
+					$this->toggleTargetValue($item);
+				} else {
+					$this->setValue($param['name'], $item['value']);
+					$this->focus = 'params';
+					if ($this->paramIdx < $nbparams - 1) {
+						$this->paramIdx++;
+					}
+					$this->resetValueList();
+				}
+				return true;
+			}
+		}
+		$this->focus = 'params';
 		return true;
 	}
 

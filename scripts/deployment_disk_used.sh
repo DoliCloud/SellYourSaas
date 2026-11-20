@@ -17,7 +17,7 @@ export YELLOW='\033[0;33m'
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 #echo
-#echo "**** ${0}"
+#echo "***** ${0}"
 #echo "${0} ${@}"
 #echo "# user id --------> $(id -u)"
 #echo "# now ------------> $now"

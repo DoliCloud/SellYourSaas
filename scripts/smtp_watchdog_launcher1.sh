@@ -16,12 +16,12 @@
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
-echo "**** ${0}"
+echo "***** ${0}"
 #echo "${0} ${@}"
 #echo "# User id --------> $(id -u)"
 #echo "# Now ------------> $now"
 #echo "# PID ------------> ${$}"
-#echo "# PWD ------------> $PWD" 
+#echo "# PWD ------------> $PWD"
 #echo "# arguments ------> ${@}"
 #echo "# path to me -----> ${0}"
 #echo "# parent path ----> ${0%/*}"
@@ -61,7 +61,7 @@ if [ "x$1" == "xstart" ]; then
 	if [ "x$pid" == "x" ]; then
 		echo Switch on directory $scriptdir
 		cd $scriptdir
-		
+
 		#./smtp_watchdog_daemon1.sh 2>&1 &
 		if [ "x$dolibarrdir" != "x" ]; then
 			echo "Launch $dolibarrdir/htdocs/custom/sellyoursaas/scripts/smtp_watchdog_daemon1.php"
@@ -103,5 +103,5 @@ if [ "x$1" == "xstatus" ]; then
 	else
 		echo smtp_watchdog_daemon1 run with PID $pid - found among running processes
 	fi
-	
+
 fi

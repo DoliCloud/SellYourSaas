@@ -173,7 +173,7 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/utils.class.php';
 $dolibarr_main_restrict_os_commands = ($dolibarr_main_restrict_os_commands ? $dolibarr_main_restrict_os_commands.', find, grep, ps, awk, ss, lynx, netstat, tail, cut' : '');
 
 
-file_put_contents($logfile, date('Y-m-d H:i:s') . " **** $script_file started\n", FILE_APPEND);
+file_put_contents($logfile, date('Y-m-d H:i:s') . " ***** $script_file started\n", FILE_APPEND);
 file_put_contents($logfile, date('Y-m-d H:i:s') . " Try to detect a smtp connection from $WDLOGFILE and log who do it\n", FILE_APPEND);
 
 if (empty($MAXPERDAY)) {

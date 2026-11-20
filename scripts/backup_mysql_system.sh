@@ -17,12 +17,12 @@ export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 
 echo
-echo "**** ${0}"
+echo "***** ${0}"
 echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
-echo "# PWD ------------> $PWD" 
+echo "# PWD ------------> $PWD"
 echo "# arguments ------> ${@}"
 echo "# path to me -----> ${0}"
 echo "# parent path ----> ${0%/*}"
@@ -34,8 +34,8 @@ echo "# realname dir ---> $(dirname $(realpath ${0}))"
 export PID=${$}
 export scriptdir=$(dirname $(realpath ${0}))
 export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-export targetdir="/home/admin/backup/mysql"				
-export targetdir2="/home/admin/backup/conf"				
+export targetdir="/home/admin/backup/mysql"
+export targetdir2="/home/admin/backup/conf"
 
 export DATABASE=`grep '^database=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 export DATABASEMORE=`grep '^databasemore=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
@@ -98,35 +98,35 @@ if [[ -x /usr/bin/zstd && "x$usecompressformatforarchive" == "xzstd" ]]; then
 	rm -f $targetdir2/conffiles.tar.gz
 	rm -f $targetdir2/conffiles.tar.bz2
 
-	export dbname="mysql" 
+	export dbname="mysql"
 	rm "$targetdir/${dbname}.sql.zst"
 	echo "Do a dump of database $dbname into $targetdir/${dbname}.sql.zst"
 	echo "$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst"
 	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | zstd -z -9 -q > $targetdir/${dbname}.sql.zst
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}.sql.zst")
 	if (( "$FILESIZE" < 50 )); then
-		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
+		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" locally failed - Command was $MYSQLDUMP"
 	fi
 	chown root:admin $targetdir/${dbname}.sql.zst
 	chmod o-rwx $targetdir/${dbname}.sql.zst
 	rm -f $targetdir/${dbname}.sql.gz
 	rm -f $targetdir/${dbname}.sql.bz2
-	
-    export foundmasterdatabase=0;  
+
+    export foundmasterdatabase=0;
     if [ "x$DATABASE" != "x" -a "x$masterserver" == "x1" ]; then
             foundmasterdatabase=1;
     fi
     if [ "x$DATABASE" != "x" -a "x$webserver" == "x1" ]; then
             foundmasterdatabase=1;
     fi
-    if [ "x$foundmasterdatabase" == "x1" ]; then	
+    if [ "x$foundmasterdatabase" == "x1" ]; then
 		export listofdb=$DATABASE
 		if [ "x$DATABASEMORE" != "x" ]; then
 			listofdb="$listofdb,$DATABASEMORE"
 		fi
 		export now=`date +'%Y-%m-%d %H:%M:%S'`
 
-		IFS=','	
+		IFS=','
 
         for dbname in $listofdb; do
 		rm "$targetdir/${dbname}.sql.zst"
@@ -148,41 +148,41 @@ else
 	chown root:admin $targetdir2/conffiles.tar.gz
 	chmod o-rwx $targetdir2/conffiles.tar.gz
 	rm -f $targetdir2/conffiles.tar.bz2
-	
+
 	export dbname="mysql"
 	export now=`date +'%Y-%m-%d %H:%M:%S'`
-	
+
 	rm "$targetdir/${dbname}.sql.gz"
 	echo "$now Do a dump of database $dbname into $targetdir/${dbname}.sql.gz"
 	echo "$now $MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}.sql.gz"
 	$MYSQLDUMP --no-tablespaces --quick --skip-extended-insert $dbname | gzip > $targetdir/${dbname}.sql.gz
 	FILESIZE=$(stat -c%s "$targetdir/${dbname}.sql.gz")
 	if (( "$FILESIZE" < 50 )); then
-		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" localy failed - Command was $MYSQLDUMP"
+		export errstring="$errstring\n"`date '+%Y-%m-%d %H:%M:%S'`" The backup of system for "`hostname`" locally failed - Command was $MYSQLDUMP"
 	fi
 	chown root:admin $targetdir/${dbname}.sql.gz
 	chmod o-rwx $targetdir/${dbname}.sql.gz
 	rm -f $targetdir/${dbname}.sql.bz2
 	rm -f $targetdir/${dbname}.sql.zst
-	
-    export foundmasterdatabase=0;  
+
+    export foundmasterdatabase=0;
     if [ "x$DATABASE" != "x" -a "x$masterserver" != "x" -a "x$masterserver" != "x0" ]; then
             foundmasterdatabase=1;
     fi
     if [ "x$DATABASE" != "x" -a "x$webserver" != "x" -a "x$webserver" != "x0" ]; then
             foundmasterdatabase=1;
     fi
-    
-    echo 
-    
-    if [ "x$foundmasterdatabase" == "x1" ]; then	
-		export listofdb=$DATABASE 
+
+    echo
+
+    if [ "x$foundmasterdatabase" == "x1" ]; then
+		export listofdb=$DATABASE
 		if [ "x$DATABASEMORE" != "x" ]; then
 			listofdb="$listofdb,$DATABASEMORE"
 		fi
 		export now=`date +'%Y-%m-%d %H:%M:%S'`
 
-		IFS=','	
+		IFS=','
 
         for dbname in $listofdb; do
 		rm "$targetdir/${dbname}.sql.gz"

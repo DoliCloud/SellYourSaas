@@ -4,7 +4,7 @@
 # Put the following entry into the cron of a user that can rsync to the remote server with its public key.
 # /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_pull_backups.php  remotelogin  (test|confirm)  [remotebackupserversrc]  [localdirtarget]  >/.../backup_backup_backups.log
 #
-# On a NAS (Synology, ...), after beeing logged in ssh (for example with "ssh -p 1022 -l mylogin ip.of.nas) the file can be stored into:
+# On a NAS (Synology, ...), after being logged in ssh (for example with "ssh -p 1022 -l mylogin ip.of.nas) the file can be stored into:
 # ~/backup_pull_backups.sh
 # and add in the GUI task scheduler from user mylogin, a command
 # "/var/services/homes/mylogin/backup_pull_backups.sh" admin confirm 2>&1 >/volume2/NASBACKUPXXX/backup_pull_backups.log
@@ -13,7 +13,7 @@
 #remotebackupserver=name.of.backup.server
 #remotebackupuser=admin
 #emailfrom=noreply@mydomain.com
-#emailsupervision=supervision@mydomain.com 
+#emailsupervision=supervision@mydomain.com
 
 
 #set -e
@@ -28,7 +28,7 @@ export YELLOW='\033[0;33m'
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
-echo "**** ${0} started"
+echo "***** ${0} started"
 echo
 
 if [ "x$1" == "x" ]; then
@@ -50,7 +50,7 @@ echo "${0} ${@}"
 echo "# user id --------> $(id -u)"
 echo "# now ------------> $now"
 echo "# PID ------------> ${$}"
-echo "# PWD ------------> $PWD" 
+echo "# PWD ------------> $PWD"
 echo "# arguments ------> ${@}"
 echo "# path to me -----> ${0}"
 echo "# parent path ----> ${0%/*}"
@@ -64,13 +64,13 @@ if [ "x$3" != "x" ]; then
 	export remotebackupserver=`echo $3 | cut -d ':' -f 1`
 	export remotebackupserverport=`echo $3 | cut -d ':' -f 2 | cut -d '/' -f 1`
 	export remotebackupdir=`echo $3 | sed -s 's/^[^\/]*//'`
-	
+
 	export backupdir=$4
 else
 	export remotebackupserver=`grep '^remotebackupserver=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 	export remotebackupserverport=`grep '^remotebackupserverport=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 	export remotebackupdir=`grep '^remotebackupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
-	
+
 	export backupdir=`grep '^backupdir=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 fi
 
@@ -93,9 +93,9 @@ fi
 #export DISTRIB_RELEASE=`lsb_release -r -s`
 #if [ "x$DISTRIB_RELEASE" == "x20.10" ]; then
 #	# Version must be 20.10+ on both side !
-#	#export OPTIONS="$OPTIONS --open-noatime" 
+#	#export OPTIONS="$OPTIONS --open-noatime"
 #	export OPTIONS="$OPTIONS"
-#else 
+#else
 #	export OPTIONS="$OPTIONS --noatime"
 #fi
 
@@ -148,9 +148,9 @@ cd "$scriptdir"
 
 if [ "x$3" != "x" -a "x$4" != "x" ]; then
 	# Generic usage
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in generic mode" 
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in generic mode"
 
-	>/var/log/$script.generic.log 
+	>/var/log/$script.generic.log
 	if [ ! -w /var/log/$script.generic.log ]; then
 		echo User has no permission to write into log file /var/log/$script.generic.log
 		export ret1=1
@@ -160,18 +160,18 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 		echo User has no permission to write into err file /var/log/$script.generic.err
 		export ret1=1
 	fi
-	
+
 	# Source
 	export SERVSOURCE=$remotebackupserver
 	export SERVPORTSOURCE=$remotebackupserverport
 	export DIRSOURCE="$remotebackupdir";
-	
+
 	# Target
 	export DIRDESTI="$backupdir";
 
 	export RSYNC_RSH="ssh -p $SERVPORTSOURCE"
 	export OPTIONS="$OPTIONS --exclude=.debris --exclude=*.qcow --exclude=*.qcow2 --exclude=*.fsa --exclude=VirtualBox*VMs/"
-	
+
 	# Note: for pulling a backup, we do not exclude backup_backups.exclude, so image is like the backup server.
 	export command="rsync -x $OPTIONS $USER@$SERVSOURCE:$DIRSOURCE/* $DIRDESTI1";
 	echo "$command";
@@ -198,9 +198,9 @@ if [ "x$3" != "x" -a "x$4" != "x" ]; then
 	fi
 else
 	# Usage for sellyoursaas
-	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in SellYourSaas mode (using parameters from /etc/sellyoursaas.conf)" 
+	echo `date +'%Y-%m-%d %H:%M:%S'`" Start execution in SellYourSaas mode (using parameters from /etc/sellyoursaas.conf)"
 
-	>/var/log/$script.log 
+	>/var/log/$script.log
 	if [ ! -w /var/log/$script.log ]; then
 		echo User has no permission to write into log file /var/log/$script.log
 		export ret1=1
@@ -210,16 +210,16 @@ else
 		echo User has no permission to write into err file /var/log/$script.err
 		export ret1=1
 	fi
-	
+
 	# Source
 	export SERVSOURCE=$remotebackupserver
 	export SERVPORTSOURCE=$remotebackupserverport
 	export DIRSOURCE="$remotebackupdir";
-	
+
 	# Target
 	export DIRDESTI="$backupdir";
-		
-	
+
+
 	# Loop on each target server
 	for SERVSOURCECURSOR in `echo $SERVSOURCE | sed -e 's/,/ /g'`
 	do
@@ -233,10 +233,10 @@ else
 	  		echo
 	   		export ret1=1;
 		fi
-	
+
 		# Now loop on each backup directory
-		for fic in `cat /tmp/backup_list_dirs | awk ' $1 ~ /^d/ && $5 !~ /^\./ { print $5 } '`; do 
-	
+		for fic in `cat /tmp/backup_list_dirs | awk ' $1 ~ /^d/ && $5 !~ /^\./ { print $5 } '`; do
+
 			# Case of /mnt/diskbackup/backup*x
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE/$fic to $DIRDESTI/$fic ..."
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Do rsync of customer directories on $SERVSOURCECURSOR:$DIRSOURCE/$fic to $DIRDESTI/$fic ..." >>/var/log/$script.log
@@ -252,7 +252,7 @@ else
 					echo >>/var/log/$script.log
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2/"
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Process directory $SERVSOURCECURSOR:$DIRSOURCE/$fic/$fic2/" >>/var/log/$script.log
-					
+
 					# Test if we force backup on a given dir
 					#if [ "x$2" != "x" ]; then
 					#	if [ "x$2" != "xosu$i" ]; then
@@ -288,14 +288,14 @@ else
 			done
 
 			sleep 2
-			
+
 			echo End of copy of dir /mnt/diskbackup/$fic
 		done
-		
+
 		echo
 		echo -e `date +'%Y-%m-%d %H:%M:%S'`" End ret1=$ret1 errstring=$errstring"
 		echo
-	
+
 	done
 fi
 
@@ -309,37 +309,37 @@ find "$backupdir/" -maxdepth 2 -path "*backup_*/osu*" -type d -mtime +730 -exec 
 
 if [ "x$ret1" != "x0" ]; then
 	echo "Send email to $EMAILTO to inform about backup error ret1=$ret1"
-	
+
 	#echo -e "Backup pulled of a backup for "`hostname`" failed - End ret1=$ret1\n$errstring" | mail -aFrom:$EMAILFROM -s "[Warning] Backup pulled of a backup - "`hostname`" failed" $EMAILTO
 
 	export body="Backup pulled from a backup by "`hostname`" failed - End ret1=$ret1<br>$errstring"
-	export subject="[Warning] Backup pulled from a backup - "`hostname`" failed" 
-	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8'; 
+	export subject="[Warning] Backup pulled from a backup - "`hostname`" failed"
+	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8';
 	# Run php with -r (no need of ? tag)
-	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
-	
+	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');";
+
 	#if [ -s /usr/syno/bin/synodsmnotify ]; then
-		#/usr/syno/bin/synodsmnotify "@administrators" "System Event" "$subject $body"; 
+		#/usr/syno/bin/synodsmnotify "@administrators" "System Event" "$subject $body";
 	#fi
-	
+
 	echo
 
 	exit 1
-else 
+else
 	echo "Send email to $EMAILTO to inform about backup success"
 
 	#echo -e "Backup pulled of a backup for "`hostname`" succeed - End ret1=0\n$errstring" | mail -aFrom:$EMAILFROM -s "[Backup pulled of a Backup - "`hostname`"] Backup pulled of a backup succeed" $EMAILTO
 
 	export body="Backup pulled from a backup by "`hostname`" succeed - End ret1=$ret1<br>$errstring"
-	export subject="[Backup pulled from a Backup - "`hostname`"] Backup pulled from a backup succeed" 
-	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8'; 
+	export subject="[Backup pulled from a Backup - "`hostname`"] Backup pulled from a backup succeed"
+	export headers='From: '${EMAILFROM}$'\nContent-type: text/html;charset=UTF-8';
 	# Run php with -r (no need of ? tag)
-	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');"; 
+	/usr/bin/php -r "mail('$EMAILTO', '$subject', '$body', '$headers');";
 
 	#if [ -s /usr/syno/bin/synodsmnotify ]; then
 		#/usr/syno/bin/synodsmnotify "@administrators" "System Event" "$subject $body";
 	#fi
-	
+
 	echo
 fi
 

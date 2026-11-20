@@ -18,7 +18,7 @@ export YELLOW='\033[0;33m'
 if [ "x$1" == "x" ]; then
    echo "***** Get information (OS, PHP, sudo users) on remote servers *****"
    echo "Usage:   $0  hostfile  [hostgrouporname]"
-   echo "         [hostgrouporname] can be 'all' (default), 'master', 'deployment', 'web', 'remotebackup', or list separated with comma like 'master,deployment'"
+   echo "         [hostgrouporname] can be 'master', 'deployment', 'web', 'remotebackup', 'all', or list separated with comma like 'master,deployment' (default 'master,deployment,web')"
    echo "Example: $0  myhostfile  master,deployment"
    echo "Example: $0  myhostfile  withX.mysellyoursaasdomain.com"
    exit 1
@@ -26,7 +26,7 @@ fi
 
 target=$2
 if [ "x$target" == "x" ]; then
-	target="all"
+	target="master,deployment,web"
 fi
 
 export currentpath=$(dirname "$0")

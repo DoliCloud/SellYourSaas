@@ -17,12 +17,12 @@
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
-echo "**** ${0}"
+echo "***** ${0}"
 #echo "${0} ${@}"
 #echo "# User id --------> $(id -u)"
 #echo "# Now ------------> $now"
 #echo "# PID ------------> ${$}"
-#echo "# PWD ------------> $PWD" 
+#echo "# PWD ------------> $PWD"
 #echo "# arguments ------> ${@}"
 #echo "# path to me -----> ${0}"
 #echo "# parent path ----> ${0%/*}"
@@ -60,16 +60,16 @@ if [ "x$1" == "xstart" ]; then
 	if [ "x$pid" == "x" ]; then
 		echo Switch on directory $scriptdir
 		cd $scriptdir
-		
+
 		export phpversion=`php -v | head -n 1 | cut -c 5-7`
 		export abc="remote_server/index.php"
-		if [[ "x$phpversion" == "x7.0" ]]; then 
+		if [[ "x$phpversion" == "x7.0" ]]; then
 			export abc="index.php"
 		fi
-		
+
 		php -S $remoteserverlistenip:$remoteserverlistenport -t remote_server $abc 2>&1 &
 		echo "Server started with php -S $remoteserverlistenip:$remoteserverlistenport -t remote_server $abc"
-		
+
 		echo "Logs of server will be in /var/log/remote_server.log"
 		echo "Server for deployment agent started - $now" >> /var/log/remote_server.log
 	else
@@ -80,7 +80,7 @@ fi
 
 if [ "x$1" == "xstop" ]; then
 	#killall socat
-	
+
 	pid=$(ps ax | grep "php -S $remoteserverlistenip" | grep -v grep | awk ' { print $1 } ')
 	if [ "x$pid" == "x" ]; then
 		echo Server not started
@@ -94,7 +94,7 @@ fi
 
 if [ "x$1" == "xstatus" ]; then
 	#killall socat
-	
+
 	pid=$(ps ax | grep "php -S $remoteserverlistenip" | grep -v grep | awk ' { print $1 } ')
 	if [ "x$pid" == "x" ]; then
 		echo Server not started

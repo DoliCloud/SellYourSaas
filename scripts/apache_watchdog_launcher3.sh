@@ -16,12 +16,12 @@
 export now=`date +'%Y-%m-%d %H:%M:%S'`
 
 echo
-echo "**** ${0}"
+echo "***** ${0}"
 #echo "${0} ${@}"
 #echo "# User id --------> $(id -u)"
 #echo "# Now ------------> $now"
 #echo "# PID ------------> ${$}"
-#echo "# PWD ------------> $PWD" 
+#echo "# PWD ------------> $PWD"
 #echo "# arguments ------> ${@}"
 #echo "# path to me -----> ${0}"
 #echo "# parent path ----> ${0%/*}"
@@ -48,10 +48,10 @@ if [ "x$1" == "xstart" ]; then
 	if [ "x$pid" == "x" ]; then
 		echo Switch on directory $scriptdir
 		cd $scriptdir
-		
+
 		echo "apache_watchdog_daemon3 started"
 		./apache_watchdog_daemon3.sh 2>&1 &
-		
+
 	else
 		echo apache_watchdog_daemon3 is already running with PID $pid
 	fi
@@ -84,5 +84,5 @@ if [ "x$1" == "xstatus" ]; then
 	else
 		echo apache_watchdog_daemon3 run with PID $pid
 	fi
-	
+
 fi

@@ -10,15 +10,15 @@ export WDLOGFILE='/var/log/apache2/other_vhosts_error.log'
 export DOMAIN=`grep '^domain=' /etc/sellyoursaas.conf | cut -d '=' -f 2`
 
 echo >> /var/log/apache_watchdog3.log
-echo "**** ${0} started" >> /var/log/apache_watchdog3.log
+echo "***** ${0} started" >> /var/log/apache_watchdog3.log
 #echo $now" Try to detect an apache crash file in /var/crash" >> /var/log/apache_watchdog3.log
-echo $now" Try to detect lines 'AH00060: seg fault or similar nasty error detected in the parent process' into $WDLOGFILE" >> /var/log/apache_watchdog3.log 
+echo $now" Try to detect lines 'AH00060: seg fault or similar nasty error detected in the parent process' into $WDLOGFILE" >> /var/log/apache_watchdog3.log
 
 #echo "${0} ${@}"
 #echo "# User id --------> $(id -u)"
 #echo "# Now ------------> $now"
 #echo "# PID ------------> ${$}"
-#echo "# PWD ------------> $PWD" 
+#echo "# PWD ------------> $PWD"
 #echo "# arguments ------> ${@}"
 #echo "# path to me -----> ${0}"
 #echo "# parent path ----> ${0%/*}"
@@ -47,7 +47,7 @@ echo "PID=$PID" >> /var/log/apache_watchdog3.log
 #while [ 1 ] ; do
 #sleep 30
 #if [ -f /var/crash/_usr_sbin_apache2.0.crash ] ; then
-tail -F $WDLOGFILE | grep --line-buffered 'AH00060: seg fault or similar nasty error detected in the parent process' | 
+tail -F $WDLOGFILE | grep --line-buffered 'AH00060: seg fault or similar nasty error detected in the parent process' |
 while read ; do
     sleep 5
 	export now=`date '+%Y-%m-%d %H:%M:%S'`
@@ -67,7 +67,7 @@ while read ; do
 	sleep 2
 	echo "ps fauxww | grep apache2 | grep start" >> /var/log/apache_watchdog3.log 2>&1
 	ps fauxww | grep apache2 | grep start >> /var/log/apache_watchdog3.log 2>&1
-	
+
 	echo "/etc/init.d/apache2 status" >> /var/log/apache_watchdog3.log 2>&1
 	/etc/init.d/apache2 status >> /var/log/apache_watchdog3.log 2>&1
 
