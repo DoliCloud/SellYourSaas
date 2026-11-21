@@ -146,6 +146,9 @@ if ($action == 'set') {
 		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_SEPA')) {
 			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA', GETPOST("SELLYOURSAAS_ENABLE_SEPA", 'int'), 'chaine', 0, '', $conf->entity);
 		}
+		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
+			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE', GETPOST("SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE", 'int'), 'chaine', 0, '', $conf->entity);
+		}
 		if (GETPOSTISSET('SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID')) {
 			dolibarr_set_const($db, 'SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID', GETPOST("SELLYOURSAAS_ENABLE_SEPA_FOR_THIRDPARTYID", 'intcomma'), 'chaine', 0, '', $conf->entity);
 		}
@@ -495,6 +498,22 @@ if ($conf->use_javascript_ajax) {
 }
 print '</td>';
 print '<td><span class="opacitymedium small">Set to yes to add Sepa as a Payment method.</td>';
+print '</tr>';
+
+// Allow per-instance PHP version override (Deployment server fields + contract PhpVersion field)
+print '<tr class="oddeven"><td>'.$langs->trans("EnablePhpVersionOverride").'</td>';
+print '<td>';
+if ($conf->use_javascript_ajax) {
+	print ajax_constantonoff('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE', array(), null, 0, 0, 1);
+} else {
+	if (!getDolGlobalString('SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE')) {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE&token='.newToken().'">'.img_picto($langs->trans("Disabled"), 'off').'</a>';
+	} else {
+		print '<a href="'.$_SERVER['PHP_SELF'].'?action=SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE&token='.newToken().'">'.img_picto($langs->trans("Enabled"), 'on').'</a>';
+	}
+}
+print '</td>';
+print '<td><span class="opacitymedium small">'.$langs->trans("EnablePhpVersionOverrideDesc").'</span></td>';
 print '</tr>';
 
 // Allow SEPA Payment for ?
