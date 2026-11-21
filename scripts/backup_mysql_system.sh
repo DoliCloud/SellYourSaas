@@ -1,7 +1,8 @@
 #!/bin/bash
 # Purge data
 #
-# Put the following entry into your root cron
+# Put the following entry into your root cron (adjust the path if sellyoursaasdir is
+# customized in /etc/sellyoursaas.conf)
 #40 4 4 * * /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/backup_mysql_system.sh databasename confirm
 
 #set -e
