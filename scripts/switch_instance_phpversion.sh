@@ -6,9 +6,8 @@
 # each needs its own SSL cert) - whether the instance is already on php-fpm (switching
 # version) or still on mod_php (first-time migration, no existing SetHandler to replace).
 #
-# Used by both action_customurl_instance.sh (mode changephpversion, one instance at a time
-# from a contract change) and deployment_migrate_server_http2.sh (looping over every remaining
-# mod_php instance on a server before it can drop mpm_itk for HTTP/2).
+# Used by action_customurl_instance.sh (mode changephpversion, one instance at a time
+# from a contract change). Can also be run by hand on the deployment server.
 #
 # Usage: switch_instance_phpversion.sh <fqn> <osusername> <instancedir> <newphpversion>
 #
@@ -210,16 +209,6 @@ while IFS= read -r onevhost; do
 		sed -i 's/^\([[:space:]]*\)php_admin_value open_basedir/\1#php_admin_value open_basedir/' "$onevhost"
 	fi
 done <<< "$apacheconfs"
-
-# Grant www-data read+traverse on htdocs (needed if/when this server later drops mpm_itk
-# for HTTP/2 - harmless additive ACL, itk already has full access via the socket owner).
-if command -v setfacl >/dev/null 2>&1; then
-	grandparent=$(dirname "$instancedir")
-	setfacl -m g:www-data:--x "$grandparent" 2>/dev/null || true
-	setfacl -m g:www-data:--x "$instancedir" 2>/dev/null || true
-	setfacl -R -m g:www-data:rX "$instancedir/htdocs" 2>/dev/null || true
-	setfacl -R -d -m g:www-data:rX "$instancedir/htdocs" 2>/dev/null || true
-fi
 
 apache2ctl configtest
 service apache2 reload

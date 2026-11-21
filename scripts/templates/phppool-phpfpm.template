@@ -12,8 +12,7 @@ group = __osGroupname__
 
 listen = /run/php/php__phpversion__-fpm-__fqn__.sock
 listen.owner = __osUsername__
-listen.group = www-data
-listen.mode = 0660
+listen.group = __osGroupname__
 request_terminate_timeout = 0
 
 pm = dynamic

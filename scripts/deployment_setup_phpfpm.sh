@@ -1,8 +1,9 @@
 #!/bin/bash
 #
 # One-time preparation of a deployment server for PHP-FPM with one or more PHP
-# versions, before any instance is switched and before scripts/deployment_migrate_server_http2.sh
-# can run. Idempotent: safe to re-run, eg. to add one more PHP version later.
+# versions, before any instance is switched. Apache stays on mpm_itk, so static files are
+# still served as the instance's own OS user. Idempotent: safe to re-run, eg. to add one
+# more PHP version later.
 #
 # Usage: deployment_setup_phpfpm.sh <default_version> <version> [version...]
 # Example: deployment_setup_phpfpm.sh 8.3 8.1 8.2 8.3 8.4
@@ -17,10 +18,9 @@
 #     plus whatever PHP version mod_php is currently serving (if any - existing instances
 #     keep using it until migrated). Skipped entirely if this server isn't using jailkit.
 #
-# What this script does NOT do: touch any existing vhost, or run
-# scripts/deployment_migrate_server_http2.sh's MPM switch. Existing instances keep running
-# under mod_php until migrated individually (contract PHP version field, which
-# calls scripts/switch_instance_phpversion.sh) or in bulk later.
+# What this script does NOT do: touch any existing vhost, or change the Apache MPM.
+# Existing instances keep running under mod_php until migrated individually (contract
+# PHP version field, which calls scripts/switch_instance_phpversion.sh).
 
 set -e
 
@@ -238,7 +238,7 @@ else
 
 	rm -rf /home/jail/chroot/template
 	mkdir /home/jail/chroot/template
-	jk_init -c /etc/jailkit/jk_init.ini -j /home/jail/chroot/template extendedshell limitedshell groups sftp rsync editors git php mysqlclient acl
+	jk_init -c /etc/jailkit/jk_init.ini -j /home/jail/chroot/template extendedshell limitedshell groups sftp rsync editors git php mysqlclient
 	mkdir -p /home/jail/chroot/template/home /home/jail/chroot/template/tmp
 	chmod 1777 /home/jail/chroot/template/tmp
 
@@ -301,4 +301,4 @@ else
 fi
 
 echo "$(date +'%Y-%m-%d %H:%M:%S') ***** Done. This server is now ready: switch existing instances individually"
-echo "(contract PHP version field, or scripts/deployment_migrate_server_http2.sh once all of them are on PHP-FPM)."
+echo "(contract PHP version field, or scripts/switch_instance_phpversion.sh run by hand)."

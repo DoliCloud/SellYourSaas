@@ -2570,11 +2570,6 @@ comment = mysql client
 executables = /usr/bin/mysql, /usr/bin/mysqldump
 paths = /usr/lib/x86_64-linux-gnu/libmariadb.so.3
 regularfiles = /etc/mysql/my.cf, /etc/mysql/conf.d/, /etc/mysql/mariadb.conf.d/
-
-[acl]
-comment = ACL utilities (needed on mpm_event/php-fpm servers so Apache, running as a single
-  shared www-data user, can still read the instance's own htdocs static files)
-paths = /usr/bin/setfacl, /usr/bin/getfacl
 ---------------
 
 Only list the `executables` (php and mysqlclient libs) that actually exist on this server - `ls /usr/bin/php*` and `ldconfig -p | grep libmariadb` first. When adding or removing a PHP-FPM version on the server later (see the PHP-FPM per-instance section), update this list and rebuild the jail template (next section) so SSH/SFTP users get a matching `phpX.Y` binary for their instance's version.
@@ -2598,7 +2593,7 @@ mkdir /home/jail/chroot/template
 
 [source,bash]
 ---------------
-jk_init -c /etc/jailkit/jk_init.ini -j /home/jail/chroot/template extendedshell limitedshell groups sftp rsync editors git php mysqlclient acl
+jk_init -c /etc/jailkit/jk_init.ini -j /home/jail/chroot/template extendedshell limitedshell groups sftp rsync editors git php mysqlclient
 mkdir /home/jail/chroot/template/home
 mkdir /home/jail/chroot/template/tmp
 chmod 1777 /home/jail/chroot/template/tmp
@@ -2914,15 +2909,17 @@ chmod a+rwx /home/admin/wwwroot/dolibarr_documents/sellyoursaas_local/spam; chmo
 
 ---------------
 
-==== PHP-FPM per instance and HTTP/2 migration
+==== PHP-FPM per instance
 
-On **Deployment servers**, an instance can run under mod_php (default) or under its own PHP-FPM pool, one systemd service per instance (`sellyoursaas-php<version>-fpm-<fqn>.service`), letting different instances run different PHP versions on the same server. Set `phpfpm=1` and `phpversion=<default version>` in `/etc/sellyoursaas.conf` to make new deployments use PHP-FPM (with that default version, overridable per contract); existing mod_php instances are not affected until switched individually (contract PHP version field, or in bulk with `scripts/deployment_migrate_server_http2.sh`, see below).
+On **Deployment servers**, an instance can run under mod_php (default) or under its own PHP-FPM pool, one systemd service per instance (`sellyoursaas-php<version>-fpm-<fqn>.service`), letting different instances run different PHP versions on the same server. Set `phpfpm=1` and `phpversion=<default version>` in `/etc/sellyoursaas.conf` to make new deployments use PHP-FPM (with that default version, overridable per contract); existing mod_php instances are not affected until switched individually (contract PHP version field, see below).
 
-All three scripts below (`deployment_setup_phpfpm.sh`, `deployment_migrate_server_http2.sh`, `switch_instance_phpversion.sh`) connect back to the **master** database directly, using the same `databasehost=`/`databaseport=`/`databaseuser=`/`databasepass=`/`database=` credentials as `/etc/sellyoursaas.conf` already carries for other scripts (eg. `batch_customers.php`), and the table prefix read from `dolibarr_main_db_prefix` in the local Dolibarr's `conf.php` (`dolibarrdir=`), falling back to `llx_` like Dolibarr itself does if that is not set. They refuse to run at all if that prefix does not actually resolve to a real table on the master, or if `SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE` is not enabled there (see step 1 below) - **enable that setting before running any of them**.
+Apache stays on `mpm_itk`: the `AssignUserID` block of the vhost templates still switches to the instance's own OS user, so static files are served as that user and `.php` requests go to the instance's own pool through its socket. Files stay owned by the instance's OS user and group, with no right given to `www-data`.
+
+Both scripts below (`deployment_setup_phpfpm.sh`, `switch_instance_phpversion.sh`) connect back to the **master** database directly, using the same `databasehost=`/`databaseport=`/`databaseuser=`/`databasepass=`/`database=` credentials as `/etc/sellyoursaas.conf` already carries for other scripts (eg. `batch_customers.php`), and the table prefix read from `dolibarr_main_db_prefix` in the local Dolibarr's `conf.php` (`dolibarrdir=`), falling back to `llx_` like Dolibarr itself does if that is not set. They refuse to run at all if that prefix does not actually resolve to a real table on the master, or if `SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE` is not enabled there (see step 1 below) - **enable that setting before running any of them**.
 
 ===== Step 1: enable the feature on the master
 
-On the **Master server**, *Home - Setup - Other*, set `SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE = 1`. While disabled (the default), none of the *Deployment server* or contract fields described below exist on screen - it is not just that they are left empty - and none of the three scripts in this section will run.
+On the **Master server**, *Home - Setup - Other*, set `SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE = 1`. While disabled (the default), none of the *Deployment server* or contract fields described below exist on screen - it is not just that they are left empty - and none of the scripts in this section will run.
 
 NOTE: the *Home - Setup - Other* toggle, the *Deployment server* fields (*PhpVersionsAvailable*/*PhpVersionDefault*/*AllowPhpVersionOverride*) and the contract *PhpVersion* dropdown described under "Contract-side configuration" below ship in a companion module update, proposed as a separate PR from the scripts documented here. In the meantime the underlying constant can be set directly (`UPDATE llx_const SET value='1' WHERE name='SELLYOURSAAS_ENABLE_PHPVERSION_OVERRIDE' AND entity=1`, or inserted if the row does not exist yet) to use the scripts standalone.
 
@@ -2934,10 +2931,10 @@ If the server is still on an Ubuntu release too old for Sury's PPA (`deployment_
 . Bring the system fully up to date first: `do-release-upgrade` refuses to start otherwise (prints "Please install all available updates for your release before upgrading" and exits, without actually erroring out). Run `apt-get update && apt-get upgrade -y && apt-get dist-upgrade -y && apt-get autoremove -y`.
 . Drop a `Dpkg::Options { "--force-confdef"; "--force-confold"; }` snippet into `/etc/apt/apt.conf.d/` so config-file-conflict prompts default to keeping the existing file instead of hanging waiting for input, then run `DEBIAN_FRONTEND=noninteractive do-release-upgrade -m server -f DistUpgradeViewNonInteractive`. It still needs supervising (watch the log for anything unexpected) even in this frontend - it is not safe to fire-and-forget.
 . Once it finishes, check `/var/run/reboot-required` and reboot deliberately (not automatically) - the point where the server briefly drops off the network entirely.
-. If the old PHP version's Apache module (mod_php) got fully purged by the OS upgrade (it usually does, since the new release's repositories no longer carry the old PHP branch), every vhost's `php_admin_value open_basedir` line - the same one `scripts/deployment_migrate_server_http2.sh` neutralizes later in the normal flow - is now invalid and breaks `apache2ctl configtest` immediately, before `deployment_setup_phpfpm.sh` even gets to enabling `mod_proxy_fcgi`. Comment those lines out (`sed -i 's/^\([[:space:]]*\)php_admin_value open_basedir/\1#php_admin_value open_basedir/'` across every vhost) *before* running `deployment_setup_phpfpm.sh` below, not after.
-. Existing instances were running under whatever single mod_php version was active before the upgrade - request that version explicitly in `deployment_setup_phpfpm.sh`'s version list alongside the new default, and switch each instance to it individually (`switch_instance_phpversion.sh`), rather than letting `scripts/deployment_migrate_server_http2.sh` bulk-switch every still-mod_php vhost to the new server default - existing instances keep the PHP version they were actually running, same policy as everywhere else in this section.
+. If the old PHP version's Apache module (mod_php) got fully purged by the OS upgrade (it usually does, since the new release's repositories no longer carry the old PHP branch), every vhost's `php_admin_value open_basedir` line - the same one `scripts/switch_instance_phpversion.sh` neutralizes when it switches an instance - is now invalid and breaks `apache2ctl configtest` immediately, before `deployment_setup_phpfpm.sh` even gets to enabling `mod_proxy_fcgi`. Comment those lines out (`sed -i 's/^\([[:space:]]*\)php_admin_value open_basedir/\1#php_admin_value open_basedir/'` across every vhost) *before* running `deployment_setup_phpfpm.sh` below, not after.
+. Existing instances were running under whatever single mod_php version was active before the upgrade - request that version explicitly in `deployment_setup_phpfpm.sh`'s version list alongside the new default, and switch each instance to it individually (`switch_instance_phpversion.sh`) - existing instances keep the PHP version they were actually running, same policy as everywhere else in this section.
 
-`scripts/deployment_setup_phpfpm.sh <default_version> <version> [version...]` does everything a server needs *before* any instance can be switched or `scripts/deployment_migrate_server_http2.sh` can run. Example, to install PHP 8.1 to 8.4 with 8.3 as the default:
+`scripts/deployment_setup_phpfpm.sh <default_version> <version> [version...]` does everything a server needs *before* any instance can be switched. Example, to install PHP 8.1 to 8.4 with 8.3 as the default:
 
 [source,bash]
 ---------------
@@ -2950,15 +2947,13 @@ Finally, it writes the result straight onto this server's **Deployment server** 
 
 It does not touch any existing vhost, and is idempotent (safe to re-run, eg. to add one more PHP version to a server later).
 
-===== Step 3: migrate existing mod_php instances, and HTTP/2
+===== Step 3: migrate existing mod_php instances
 
-Why HTTP/2 needs more than just installing php-fpm: `mod_http2` refuses to load under `mpm_prefork` (which `mpm_itk` is built on), so HTTP/2 requires `mpm_event`. But `mpm_event` has no per-vhost UID switching like `mpm_itk` does, so Apache then runs every vhost as a single shared user (`www-data`). PHP execution stays isolated per client either way (each php-fpm pool runs as its own OS user via `user=`/`group=` in its pool config), but `www-data` still needs read+traverse access to reach each instance's `htdocs/` and hand `.php` requests to the fcgi socket. `scripts/action_deploy_undeploy.sh` grants this via a POSIX ACL after every deploy, scoped to `htdocs/` only - `documents/` (private Dolibarr data) is never `Alias`ed into any vhost and stays fully unreadable by `www-data`, since it is only ever reached through an authenticated PHP script running under the instance's own pool user.
-
-Once the server is prepared (step 2), `scripts/deployment_migrate_server_http2.sh` does the rest of the one-time, per-server work: switches any still-mod_php instance to the server's default PHP-FPM version (via `scripts/switch_instance_phpversion.sh`, the same script the contract PHP version field calls for a single instance), then does a second pass over every vhost *already* on PHP-FPM (passing each its own current version, a no-op switch) purely so its contract's *PhpVersion* field gets synced too - needed for any instance that was already running PHP-FPM before this tooling existed, since it would otherwise never go through `switch_instance_phpversion.sh` and never get that field written. It then installs `acl` and applies/verifies the htdocs ACL above on every existing instance, and finally switches `mpm_itk`/`mpm_prefork` to `mpm_event` and enables `http2`. It is idempotent and safe to re-run. It refuses to run if `mod_proxy_fcgi` is not enabled, or if `phpfpm=`/`phpversion=` are not set (run step 2 first).
+Once the server is prepared (step 2), switch existing instances one at a time with the contract *PhpVersion* field, or by running `scripts/switch_instance_phpversion.sh <fqn> <osusername> <instancedir> <phpversion>` on the deployment server. Running it again with the version an instance already uses is a no-op switch that only syncs the contract's *PhpVersion* field, which is useful for an instance that was already on PHP-FPM before this tooling existed.
 
 `scripts/switch_instance_phpversion.sh` updates every vhost belonging to the instance, not just the main one: an instance can have extra custom-URL vhosts (one full `<VirtualHost>` per domain, since each needs its own SSL cert - see the *CustomURL* option), and every one of them proxies to the same php-fpm socket. Only one custom URL is ever known to Dolibarr (the contract's `custom_url` field, giving `<fqn>.custom.conf`); further ones added by hand (multi-URL support being deferred) are matched by filename glob (`<fqn>.custom2.conf`, `<fqn>.custom3.conf`...) and get the same treatment. After a successful switch - or after confirming every vhost is already on the target version - it writes that version back to the contract's *PhpVersion* field on the master, so that field always reflects what is actually running without needing a manual check.
 
-If the server needs several PHP versions to keep coexisting for a while (eg. some instances need an old version step 2 also installed, others should move to a newer default) that is fine under PHP-FPM, one pool per instance - but not under mod_php, which only ever runs one version at a time for every instance on the server. Migrate those instances to PHP-FPM individually first (keeping each one on its current PHP version) before running `scripts/deployment_migrate_server_http2.sh`, which needs every instance already off mod_php.
+If the server needs several PHP versions to keep coexisting for a while (eg. some instances need an old version step 2 also installed, others should move to a newer default) that is fine under PHP-FPM, one pool per instance - but not under mod_php, which only ever runs one version at a time for every instance on the server. Migrate those instances to PHP-FPM individually, each one keeping its current PHP version.
 
 ===== Contract-side configuration
 
