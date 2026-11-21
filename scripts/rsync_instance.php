@@ -313,6 +313,48 @@ foreach ($output as $outputline) {
 	print $outputline."\n";
 }
 
+// Grant the web server group read+traverse on htdocs only (never on documents/, which is
+// only ever reached through an authenticated PHP script running under the instance's own
+// php-fpm pool user). Only needed on a server running Apache with mpm_event for HTTP/2, where
+// Apache runs as a single shared user and needs this ACL to serve static files. This script
+// cannot read the target server's /etc/sellyoursaas.conf (it runs in the instance's jail), so
+// the grant is only renewed when htdocs already carries it, as set on such a server: an
+// mpm_itk server never gets any www-data ACL. It must be renewed after every sync since rsync
+// (-rlt, no -a/-p) doesn't preserve permissions/ACLs from the source. Same pattern as used in
+// action_upgrade_instance.sh,
+// except using the numeric GID rather than the "www-data" name: unlike those two scripts, this
+// one runs the command over SSH as the instance's own jailed OS user (the jail's own /etc/group
+// has no www-data entry to resolve the name against, even though the same GID exists and resolves
+// fine on the real host outside the jail) - so resolve the GID here, on the real host, instead of
+// assuming it's always 33 (true on stock Debian/Ubuntu today, but not guaranteed on every system).
+if (in_array($mode, array('confirm', 'confirmunlock', 'confirmwithtestdir', 'confirmclean'))) {
+	$webservergroupinfo = posix_getgrnam('www-data');
+	$webservergroupid = ($webservergroupinfo !== false) ? $webservergroupinfo['gid'] : 33;
+
+	$aclcommand = "if ! command -v getfacl >/dev/null 2>&1 || ! getfacl -n -p ".escapeshellarg($targetdir.'/htdocs')." 2>/dev/null | grep -q '^group:".$webservergroupid.":'; then "
+		."echo 'No web server group ACL on htdocs (mpm_itk server), nothing to renew'; "
+		."elif command -v setfacl >/dev/null 2>&1; then "
+		."setfacl -m g:".$webservergroupid.":--x ".escapeshellarg(dirname($targetdir))." ; "
+		."setfacl -m g:".$webservergroupid.":--x ".escapeshellarg($targetdir)." ; "
+		."setfacl -R -m g:".$webservergroupid.":rX ".escapeshellarg($targetdir.'/htdocs')." ; "
+		."setfacl -R -d -m g:".$webservergroupid.":rX ".escapeshellarg($targetdir.'/htdocs')." ; "
+		// Apache never serves conf/: conf.php and its secrets stay with the instance's own account.
+		."[ ! -d ".escapeshellarg($targetdir.'/htdocs/conf')." ] || setfacl -R -n -x g:".$webservergroupid.",d:g:".$webservergroupid." ".escapeshellarg($targetdir.'/htdocs/conf')." ; "
+		."echo 'ACL grant done'; "
+		."else echo 'Warning: setfacl not found (acl package not installed), skipping www-data ACL on htdocs'; fi";
+	$sshaclcommand = "ssh -p ".$server_port." -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o PasswordAuthentication=no "
+		.$login.'@'.$server." ".escapeshellarg($aclcommand);
+
+	print "Renew the www-data ACL on htdocs so Apache can serve static assets directly (mpm_event servers only)\n";
+	print $sshaclcommand."\n";
+	$acloutput = array();
+	$aclreturn = 0;
+	exec($sshaclcommand, $acloutput, $aclreturn);
+	foreach ($acloutput as $outputline) {
+		print $outputline."\n";
+	}
+}
+
 // Remove install.lock and create upgrade.unlock file if mode confirmunlock
 if ($mode == 'confirmunlock') {
 	// SFTP connect
