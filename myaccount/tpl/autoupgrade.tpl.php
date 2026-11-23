@@ -20,6 +20,11 @@
  * @var DoliDB $db
  * @var HookManager $hookmanager
  * @var Translate $langs
+ *
+ * @var Societe $mythirdpartyaccount
+ * @var $action string
+ * @var $error	int
+ * @var $errors	string
  */
 
 // Protection to avoid direct call of template
