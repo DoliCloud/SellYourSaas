@@ -269,11 +269,35 @@ if [[ "$mode" == "upgrade" ]];then
 			exit 225
 		fi
 	}
+	# Create the local cache /tmp/cache<dirwithsources>.tar.zst|.tgz if it does not exist, the same way as action_deploy_undeploy.sh does.
+	# Files are written into a temporary file then renamed, so a failed or interrupted copy never leaves a truncated cache.
+	function createlocalcacheifmissing() {
+		local dirwithsources="$1"
+		if [ -z "$dirwithsources" ] || [ -f "/tmp/cache$dirwithsources.tar.zst" ] || [ -f "/tmp/cache$dirwithsources.tgz" ]; then
+			return 0
+		fi
+		echo "$(date +'%Y-%m-%d %H:%M:%S') Local cache does not exists, we create local cache from NFS dir"
+		mkdir -p "/tmp/cache$dirwithsources"
+		if [ -f "$dirwithsources.tar.zst" ]; then
+			echo "cp $dirwithsources.tar.zst /tmp/cache$dirwithsources.tar.zst"
+			cp "$dirwithsources.tar.zst" "/tmp/cache$dirwithsources.tar.zst.tmp$$" && mv -f "/tmp/cache$dirwithsources.tar.zst.tmp$$" "/tmp/cache$dirwithsources.tar.zst"
+		elif [ -f "$dirwithsources.tgz" ]; then
+			echo "cp $dirwithsources.tgz /tmp/cache$dirwithsources.tgz"
+			cp "$dirwithsources.tgz" "/tmp/cache$dirwithsources.tgz.tmp$$" && mv -f "/tmp/cache$dirwithsources.tgz.tmp$$" "/tmp/cache$dirwithsources.tgz"
+		else
+			echo "cd $dirwithsources/. && tar c -I gzip --exclude-vcs --exclude-from=$scriptdir/git_update_sources.exclude -f /tmp/cache$dirwithsources.tgz ."
+			# Run into a subshell so the current dir stays the checked instance dir (used later by chown -R .)
+			(cd "$dirwithsources/." && tar c -I gzip --exclude-vcs --exclude-from="$scriptdir/git_update_sources.exclude" -f "/tmp/cache$dirwithsources.tgz.tmp$$" .) && mv -f "/tmp/cache$dirwithsources.tgz.tmp$$" "/tmp/cache$dirwithsources.tgz"
+		fi
+		rm -f "/tmp/cache$dirwithsources.tar.zst.tmp$$" "/tmp/cache$dirwithsources.tgz.tmp$$"
+	}
+
 	echo `date +'%Y-%m-%d %H:%M:%S'`" cd $instancedir/ and check it is a real directory"
 	cdrealinstancedir
 	if [ -d "$dirforexampleforsources" ]
 	then
 		# First try with sourcefile.tar.zst/.tgz that is into tmp cache dir /tmp/cache/home/admin/wwwroot/dolibarr_documents/sellyoursaas/git/xxx.tar.zst/.tgz
+		# If this cache file does not exists, we try to create it from the NFS dir (like during deployment).
 		# If cache file does not exists, use the archive file into NFS dir $dirforexampleforsources/ with tar -I zstd -xf sourcefile.tar.zst --directory $targetdirwithsources1/
 		# If archive file not found, do the rsync.
 
@@ -281,6 +305,7 @@ if [[ "$mode" == "upgrade" ]];then
 		if [ -d $dirwithsources1 ]; then
 			if [[ "x$targetdirwithsources1" != "x" ]]; then
 				mkdir -p $targetdirwithsources1
+				createlocalcacheifmissing "$dirwithsources1"
 				if [[ -f /tmp/cache$dirwithsources1.tar.zst ]]; then
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 1. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/"
 					tar -I zstd -xf /tmp/cache$dirwithsources1.tar.zst --directory $targetdirwithsources1/
@@ -311,6 +336,7 @@ if [[ "$mode" == "upgrade" ]];then
 		if [ ! $archivenotfounddirwithsources -eq 1 ] && [ -d $dirwithsources2 ]; then
 			if [[ "x$targetdirwithsources2" != "x" ]]; then
 				mkdir -p $targetdirwithsources2
+				createlocalcacheifmissing "$dirwithsources2"
 				if [[ -f /tmp/cache$dirwithsources2.tar.zst ]]; then
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 2. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/"
 					tar -I zstd -xf /tmp/cache$dirwithsources2.tar.zst --directory $targetdirwithsources2/
@@ -339,6 +365,7 @@ if [[ "$mode" == "upgrade" ]];then
 		if [ ! $archivenotfounddirwithsources -eq 1 ] && [ -d $dirwithsources3 ]; then
 			if [[ "x$targetdirwithsources3" != "x" ]]; then
 				mkdir -p $targetdirwithsources3
+				createlocalcacheifmissing "$dirwithsources3"
 				if [[ -f /tmp/cache$dirwithsources3.tar.zst ]]; then
 					echo `date +'%Y-%m-%d %H:%M:%S'`" Local zst cache found for src 3. We use it with: tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/"
 					tar -I zstd -xf /tmp/cache$dirwithsources3.tar.zst --directory $targetdirwithsources3/
