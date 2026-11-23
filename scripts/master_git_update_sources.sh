@@ -3,7 +3,7 @@
 # Script to update sources found into a directory
 #
 # To include into cron
-# /pathto/git_update_sources.sh documentdir/sellyoursaas/git all > /pathto/git_update_sources.log 2>&
+# /pathto/master_git_update_sources.sh documentdir/sellyoursaas/git all > /pathto/master_git_update_sources.log 2>&
 #---------------------------------------------------------
 
 source /etc/lsb-release
@@ -27,6 +27,16 @@ export currentpath=$(dirname "$0")
 if [ "$(id -u)" == "0" ]; then
    echo "This script must be run as admin (on master server), not as root" 1>&2
    exit 1
+fi
+
+if [ ! -d "$1" ]; then
+	echo -e "${RED}Error: the directory $1 does not exist.\033[0m" 1>&2
+	exit 1
+fi
+if [ "x$2" != "x" -a "x$2" != "xall" -a ! -d "$1/$2" ]; then
+	echo -e "${RED}Error: the directory $2 does not exist into $1. Available directories are:\033[0m" 1>&2
+	find "$1" -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -printf "%f\n" | sort 1>&2
+	exit 1
 fi
 
 echo "Update git dirs found into $1 and generate the archive file (.zst or .tgz)"

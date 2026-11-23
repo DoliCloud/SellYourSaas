@@ -114,7 +114,7 @@ function getToolDefinitions()
 		),
 		'desktop_update_sources.sh' => array(
 			'summary' => 'Git update of the sources of packages on master',
-			'desc' => "Launch scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git on the master server (playbook launch_git_update_sources.yml) to update the git sources of the packages and rebuild their archives (.zst or .tgz).\nSame as the daily cron of admin on the master, but run on demand.",
+			'desc' => "Launch scripts/master_git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git on the master server (playbook launch_git_update_sources.yml) to update the git sources of the packages and rebuild their archives (.zst or .tgz).\nSame as the daily cron of admin on the master, but run on demand.",
 			'usage' => 'hostfile [target] [subdir|all]',
 			'notes' => array("Only the target 'master' is accepted. The playbook also refuses hosts that are not into the group master."),
 			'params' => array(

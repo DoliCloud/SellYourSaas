@@ -1,6 +1,6 @@
 #!/bin/bash
 #---------------------------------------------------------
-# Script to run remotely the git_update_sources.sh, to update the git sources of the packages
+# Script to run remotely the master_git_update_sources.sh, to update the git sources of the packages
 # found into dolibarr_documents/sellyoursaas/git of the master and to rebuild their archives.
 #
 # /pathto/desktop_update_sources.sh hostfile [hostgrouporname] [subdir|all]
