@@ -16,11 +16,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  * or see http://www.gnu.org/
  *
- * Update an instance on stratus5 server with new ref version.
+ * Update an instance on a remote deployment server, from the master, with a new ref version.
  */
 
 /**
- *      \file       sellyoursaas/scripts/rsync_instance.php
+ *      \file       sellyoursaas/scripts/master_rsync_instance.php
  *		\ingroup    sellyoursaas
  *      \brief      Script to upgrade an instant
  */
@@ -37,7 +37,7 @@ if (!defined('NOREQUIREVIRTUALURL')) {
 
 $sapi_type = php_sapi_name();
 $script_file = basename(__FILE__);
-$path=dirname(__FILE__).'/';
+$path = dirname(__FILE__).'/';
 
 // Test if batch mode
 if (substr($sapi_type, 0, 3) == 'cgi') {
@@ -102,8 +102,15 @@ if (! $res && file_exists("../../../master.inc.php")) {
 if (! $res) {
 	die("Include of master fails\n");
 }
-// After this $db, $mysoc, $langs, $conf and $hookmanager are defined (Opened $db handler to database will be closed at end of file).
-// $user is created but empty.
+/**
+ * @var DoliDB $db
+ * @var Conf $conf
+ * @var User $user
+ * @var Translate $langs
+ * @var HookManager $hookmanager
+ */
+// $user has been created but empty.
+// Opened $db handler to database will be closed at end of file.
 
 dol_include_once("/sellyoursaas/core/lib/sellyoursaas.lib.php");
 include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
@@ -165,7 +172,7 @@ if (empty($db)) {
 }
 
 if (empty($dirroot) || empty($instance) || empty($mode)) {
-	print "Update an instance on remote server with new ref version.\n";
+	print "Update an instance on a remote deployment server with new ref version.\n";
 	print "Usage: $script_file source_root_dir sellyoursaas_instance (test|confirm|confirmunlock|diff|diffadd|diffchange|testclean|confirmclean|confirmwithtestdir)\n";
 	print "\n";
 	print $script_file." source_root_dir sellyoursaas_instance diff|diffadd|diffchange to compare current instance with target to update\n";
@@ -286,9 +293,9 @@ $param[]="--include htdocs/modulebuilder/template/test/";
 if ($mode != 'confirmwithtestdir') {
 	$param[]="--exclude test/";
 }
-$param[]="--exclude htdocs/conf/conf.php*";
-$param[]="--exclude glpi_config/config_db.php*";
-$param[]="--exclude htdocs/inc/downstream.php*";
+$param[]="--exclude 'htdocs/conf/conf.php*'";
+$param[]="--exclude 'glpi_config/config_db.php*'";
+$param[]="--exclude 'htdocs/inc/downstream.php*'";
 $param[]="--exclude htdocs/custom";
 if (! in_array($mode, array('diff','diffadd','diffchange'))) {
 	$param[]="--stats";
@@ -382,7 +389,7 @@ if ($mode != 'test') {
 		}
 		$actioncomm->datep = dol_now('tzserver');
 		$actioncomm->percentage = 100;
-		$actioncomm->label = 'Upgrade from CLI rsync_instance.php, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
+		$actioncomm->label = 'Upgrade from CLI master_rsync_instance.php, instance='.$instance.' dirroot='.$dirroot.' mode='.$mode;
 		$actioncomm->note_private = $actioncomm->label;
 		$actioncomm->fk_element = $object->id;
 		$actioncomm->elementid = $object->id;

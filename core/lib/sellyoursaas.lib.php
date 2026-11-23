@@ -339,7 +339,7 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 
 	$dirforexampleforsources = preg_replace('/__DOL_DATA_ROOT__/', DOL_DATA_ROOT, preg_replace('/\/htdocs\/?$/', '', $tmppackage->srcfile1));
 
-	$upgradestring=getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/rsync_instance.php '.$dirforexampleforsources.' '.$object->hostname_os;
+	$upgradestring=getDolGlobalString('DOLICLOUD_SCRIPTS_PATH') . '/master_rsync_instance.php '.$dirforexampleforsources.' '.$object->hostname_os;
 
 	$purgestring=DOL_DATA_ROOT.'/../dev/initdata/purge-data.php test (all|option) (all|YYYY-MM-DD) mysqli '.$object->hostname_db.' '.$object->username_db.' '.$object->password_db.' '.$object->database_db.' '.($object->database_port ? $object->database_port : 3306);
 

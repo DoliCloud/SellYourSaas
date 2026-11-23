@@ -195,6 +195,7 @@ fi
 export archivenotfounddirwithsources=0
 
 # For debug
+echo
 echo `date +'%Y-%m-%d %H:%M:%S'`" input params for $0:"
 echo "mode = $mode"
 echo "osusername = $osusername"
@@ -202,6 +203,7 @@ echo "ospassword = XXXXXX"
 echo "instancename = $instancename"
 echo "domainname = $domainname"
 echo "fileforconfig1 = $fileforconfig1"
+echo "dirwithsources1 = $dirwithsources1"
 echo "targetdir = $targetdir"
 echo "EMAILTO = $EMAILTO"
 echo "REMOTEIP = $REMOTEIP"
@@ -223,6 +225,7 @@ echo "directaccess = $directaccess"
 echo "sshaccesstype = $sshaccesstype"
 echo "ErrorLog = $ErrorLog"
 
+echo
 echo `date +'%Y-%m-%d %H:%M:%S'`" calculated params:"
 echo "templatesdir (from parameters) = $templatesdir"
 echo "instancedir (from parameters) = $instancedir"
@@ -232,6 +235,7 @@ echo "CRONHEAD = $CRONHEAD"
 echo "dirforexampleforsources = $dirforexampleforsources"
 echo "laststableupgradeversion = $laststableupgradeversion"
 echo "lastversiondolibarrinstance = $lastversiondolibarrinstance"
+echo
 
 
 MYSQL=`which mysql`
@@ -363,8 +367,8 @@ if [[ "$mode" == "upgrade" ]];then
 		# If some cache file not found,
 		if [ $archivenotfounddirwithsources -eq 1 ]; then
 			echo `date +'%Y-%m-%d %H:%M:%S'`" Local cache and remote archive not found for at least 1 dirwithsource."
-			echo `date +'%Y-%m-%d %H:%M:%S'`" We try with $dirforexampleforsources with : rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom"
-			rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude htdocs/conf/conf.php* --exclude htdocs/custom
+			echo `date +'%Y-%m-%d %H:%M:%S'`" We try with $dirforexampleforsources with : rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude 'htdocs/conf/conf.php*' --exclude htdocs/custom"
+			rsync -rlt -p -og --chmod=a+x,g-rwx,o-rwx --chown=$osusername:$osusername $dirforexampleforsources/* $instancedir/ --exclude test/ --exclude .buildpath --exclude .codeclimate.yml --exclude .editorconfig --exclude .git --exclude .github --exclude .gitignore --exclude .gitmessage --exclude .mailmap --exclude .settings --exclude .scrutinizer.yml --exclude .stickler.yml --exclude .project --exclude .travis.yml --exclude .tx --exclude phpstan.neon --exclude build/exe/ --exclude dev/ --exclude documents/ --include htdocs/modulebuilder/template/test/ --exclude test/ --exclude 'htdocs/conf/conf.php*' --exclude htdocs/custom
 			if [ $? -eq 0 ];then
 				archivenotfounddirwithsources=0
 			fi
