@@ -99,6 +99,9 @@ addin
 amountin
 alltime
 
+# Linux command (chage -E to set the expiration date of an account)
+chage
+
 # other
 blacklists
 confirmactionxxx

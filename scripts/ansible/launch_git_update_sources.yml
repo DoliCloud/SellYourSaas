@@ -1,0 +1,25 @@
+---
+# Script to run git_update_sources.sh to update the git sources of the packages (dolibarr_documents/sellyoursaas/git)
+# and rebuild their archives on the master server
+#
+# To run the script:
+# ansible-playbook -K launch_git_update_sources.yml -i hosts-xxx -e 'target=master'
+# ansible-playbook -K launch_git_update_sources.yml -i hosts-xxx -e 'target=master subdir=dolibarr_x.y'
+
+- name: Update git sources of packages on master server
+  hosts: '{{target}}'
+  become: yes
+  become_method: sudo
+  become_user: admin
+  tasks:
+  - name: Check the target is a master server
+    fail:
+      msg: "git_update_sources.sh must be run on a master server only (host not into the group master)"
+    when: "'master' not in group_names"
+
+  - name: Launch git_update_sources.sh
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git {{subdir | default('all')}}
+    register: command_output
+
+  - debug:
+      var: command_output.stdout_lines

@@ -57,6 +57,7 @@ and `/etc/lsb-release` present (sourced by every `.sh` script).
 | `desktop_apt_upgrade.sh` | `hostfile target [reboot]` (default target `master`) | `launch_apt_upgrade.yml` | Switches all instances offline (`deployment_make_instances_offlineonline.sh maintenance.php offline`), runs apt update/upgrade, optionally reboots, then switches instances back online. Asks a key press before starting. Check afterward that the web server is still alive. |
 | `desktop_clean.sh` | `hostfile target [confirm\|test]` (default `confirm`) | `launch_clean.yml` | Runs `scripts/clean.sh <command>` on servers. Use `test` for a dry run. |
 | `desktop_update_sellyoursaas.sh` | `hostfile [target] [unlock]` (default `master,deployment`) | `launch_git_update_sellyoursaas.yml` | Runs `scripts/git_update_sellyoursaas.sh /home/admin/wwwroot/`. With `unlock`, also creates `dolibarr_documents/upgrade.unlock`. |
+| `desktop_update_sources.sh` | `hostfile [master] [subdir\|all]` (default `master`, `all`) | `launch_git_update_sources.yml` | Runs `scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git <subdir>` as admin: git pull of the sources of the packages and rebuild of their archives (same as the daily cron of admin on master). Only the target `master` is accepted (any other value is an error), and the playbook refuses hosts not in the group `master`. |
 | `desktop_config_dolibarr.sh` | `hostfile param value [target]` (default `deployment`) | `change_config_dolibarr.yml` | Sets `$param = value` in `/home/admin/wwwroot/dolibarr/htdocs/conf/conf.php`. Not for the conf files of deployed instances. |
 | `desktop_config_sellyoursaas.sh` | `hostfile target param value [sellyoursaas\|sellyoursaas-public]` | `change_config_sellyoursaas.yml` | Sets `param=value` in `/etc/sellyoursaas.conf` (default) or `/etc/sellyoursaas-public.conf`. Note: argument order differs from `desktop_config_dolibarr.sh` (target is 2nd). |
 | `desktop_crontab_server.sh` | `hostfile target root\|osusername` | `change_crontab_server.yml` | Edits `/var/spool/cron/crontabs/<username>` (fixes known lines: `backup_backup.sh`, `perms.ksh` → `perms.sh`). |
@@ -96,6 +97,7 @@ Local tools (no Ansible):
 # From the root of the sellyoursaas project
 ./scripts/desktop_clean.sh myhosts deployment test
 ./scripts/desktop_update_sellyoursaas.sh myhosts master,deployment
+./scripts/desktop_update_sources.sh myhosts master all
 ./scripts/desktop_config_sellyoursaas.sh myhosts master,deployment usecompressformatforarchive zstd
 ./scripts/desktop_bannedip.sh myhosts withX.mysellyoursaasdomain.com unban 1.2.3.4
 ./scripts/desktop_deploy_module.sh myhosts deployment test CLOUD-MOD-EInvoicing 'abc*' - FR

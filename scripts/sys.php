@@ -112,6 +112,17 @@ function getToolDefinitions()
 				array('name' => 'unlock', 'type' => 'choice', 'values' => array('' => 'do not create upgrade.unlock', 'unlock' => 'create dolibarr_documents/upgrade.unlock'), 'help' => 'Create the upgrade.unlock file after the update.'),
 			),
 		),
+		'desktop_update_sources.sh' => array(
+			'summary' => 'Git update of the sources of packages on master',
+			'desc' => "Launch scripts/git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git on the master server (playbook launch_git_update_sources.yml) to update the git sources of the packages and rebuild their archives (.zst or .tgz).\nSame as the daily cron of admin on the master, but run on demand.",
+			'usage' => 'hostfile [target] [subdir|all]',
+			'notes' => array("Only the target 'master' is accepted. The playbook also refuses hosts that are not into the group master."),
+			'params' => array(
+				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
+				array('name' => 'target', 'type' => 'choice', 'default' => 'master', 'values' => array('master' => 'the master server'), 'help' => "Only the value master is accepted."),
+				array('name' => 'subdir', 'type' => 'text', 'default' => 'all', 'values' => array('all' => 'all directories'), 'help' => 'Name of the directory into dolibarr_documents/sellyoursaas/git to update, or all.'),
+			),
+		),
 		'desktop_config_dolibarr.sh' => array(
 			'summary' => 'Change a parameter of Dolibarr conf.php',
 			'desc' => "Set \$param = value into the Dolibarr config file /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php of the remote servers (playbook change_config_dolibarr.yml).\nNot for the conf files of deployed instances.",
