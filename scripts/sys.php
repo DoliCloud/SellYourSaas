@@ -147,7 +147,7 @@ function getToolDefinitions()
 				array('name' => 'conffile', 'type' => 'choice', 'values' => array('' => '/etc/sellyoursaas.conf (default)', 'sellyoursaas' => '/etc/sellyoursaas.conf', 'sellyoursaas-public' => '/etc/sellyoursaas-public.conf'), 'help' => 'Config file to change.'),
 			),
 		),
-		'desktop_crontab_server.sh' => array(
+		'desktop_config_crontab.sh' => array(
 			'summary' => 'Fix the crontab of remote servers',
 			'desc' => "Edit the crontab /var/spool/cron/crontabs/<username> of the remote servers (playbook change_crontab_server.yml) to fix known lines (backup_backup.sh, perms.ksh -> perms.sh).",
 			'usage' => 'hostfile target root|osusername',

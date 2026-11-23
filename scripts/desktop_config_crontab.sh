@@ -41,11 +41,9 @@ echo "Execute ansible for host group $1 and targets $target"
 pwd
 
 
-command='ansible-playbook -K change_crontab_server.yml -i hosts-'$1' -e "target='$target' username='$username'"' 
+command='ansible-playbook -K change_crontab_server.yml -i hosts-'$1' -e "target='$target' username='$username'"'
 
 echo "$command"
 eval $command
 
 echo "Finished."
-
-
