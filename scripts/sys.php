@@ -946,11 +946,11 @@ class DesktopMenu
 			});
 		}
 		register_shutdown_function(array($this, 'stop'));
-		fwrite(STDOUT, "\033[?1049h\033[?25l");
+		$this->output("\033[?1049h\033[?25l");
 		// Enable the mouse: 1000 = button press/release tracking, 1006 = SGR coordinates
-		fwrite(STDOUT, "\033[?1000;1006h");
+		$this->output("\033[?1000;1006h");
 		// Enable the bracketed paste: the pasted text is received between \033[200~ and \033[201~
-		fwrite(STDOUT, "\033[?2004h");
+		$this->output("\033[?2004h");
 		$this->updateSize();
 	}
 
@@ -964,7 +964,7 @@ class DesktopMenu
 		if ($this->sttySaved === null) {
 			return;
 		}
-		fwrite(STDOUT, C_RESET."\033[?1006;1000l\033[?2004l\033[?25h\033[?1049l");
+		$this->output(C_RESET."\033[?1006;1000l\033[?2004l\033[?25h\033[?1049l");
 		if ($this->sttySaved !== '') {
 			shell_exec('stty '.escapeshellarg($this->sttySaved).' < /dev/tty 2>/dev/null');
 		} else {
@@ -972,6 +972,39 @@ class DesktopMenu
 		}
 		stream_set_blocking(STDIN, true);
 		$this->sttySaved = null;
+	}
+
+	/**
+	 * Write a string on the terminal.
+	 * STDIN and STDOUT share the same terminal, so STDOUT is non blocking too: a big write (large screen) may be
+	 * partial, the end (the keys bar) being lost. So loop, waiting the terminal is writable, until all is written.
+	 *
+	 * @param	string	$s	String to write
+	 * @return	void
+	 */
+	public function output($s)
+	{
+		$len = strlen($s);
+		$done = 0;
+		$nbwait = 0;
+		while ($done < $len) {
+			$nb = @fwrite(STDOUT, $done ? substr($s, $done) : $s);
+			if ($nb === false) {
+				return;
+			}
+			if ($nb > 0) {
+				$done += $nb;
+				$nbwait = 0;
+				continue;
+			}
+			// Output buffer of the terminal is full: wait it is writable (give up if it stays blocked)
+			$read = null;
+			$write = array(STDOUT);
+			$except = null;
+			if (!@stream_select($read, $write, $except, 1, 0) && ++$nbwait >= 5) {
+				return;
+			}
+		}
 	}
 
 	/**
@@ -1178,7 +1211,7 @@ class DesktopMenu
 	public function render()
 	{
 		if ($this->rows < 16 || $this->cols < 60) {
-			fwrite(STDOUT, C_RESET."\033[2J\033[H".'Terminal too small (min 60x16). Resize it or press F10 to quit.');
+			$this->output(C_RESET."\033[2J\033[H".'Terminal too small (min 60x16). Resize it or press F10 to quit.');
 			return;
 		}
 		list($lw, $th, $bh) = $this->layout();
@@ -1365,7 +1398,7 @@ class DesktopMenu
 		foreach ($screen as $i => $line) {
 			$out .= "\033[".($i + 1).";1H".$line.C_RESET;
 		}
-		fwrite(STDOUT, $out);
+		$this->output($out);
 	}
 
 	/**
@@ -1376,7 +1409,7 @@ class DesktopMenu
 	 */
 	public function copyToClipboard($text)
 	{
-		fwrite(STDOUT, "\033]52;c;".base64_encode($text)."\007");
+		$this->output("\033]52;c;".base64_encode($text)."\007");
 		$candidates = array();
 		if (getenv('WAYLAND_DISPLAY')) {
 			$candidates[] = array('wl-copy');
@@ -1490,7 +1523,7 @@ class DesktopMenu
 				if ($this->resized || !function_exists('pcntl_async_signals')) {
 					$this->resized = false;
 					if ($this->updateSize()) {
-						fwrite(STDOUT, "\033[2J");
+						$this->output("\033[2J");
 						$this->render();
 					}
 				}
@@ -1561,7 +1594,7 @@ class DesktopMenu
 			return false;
 		}
 		if ($key == 'CTRLL') {
-			fwrite(STDOUT, "\033[2J");
+			$this->output("\033[2J");
 			$this->updateSize();
 			return true;
 		}
