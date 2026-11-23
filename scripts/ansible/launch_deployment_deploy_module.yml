@@ -4,6 +4,9 @@
 # To run the script:
 # ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-xxx -e 'target=targethost command=test productref=REFMODULENAME instancefilter=* master_instance_id=abc1234'
 # ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-xxx -e 'target=targethost command=test productref=REFMODULENAME instancefilter=* master_instance_id=abc1234 countrycode=FR nocache=nocache' --limit=*.mydomain.com
+#
+# To avoid having the secret master_instance_id in the shell history and process list, put it into a vars file (mode 600)
+# containing "master_instance_id: 'abc1234'" and use: -e @/path/to/secretvarsfile (this is what desktop_deploy_module.sh does)
 
 - name: Deploy module {{productref}} on instances of deployment servers
   hosts: '{{target}}'
@@ -11,9 +14,20 @@
   become_method: sudo
   become_user: root
   tasks:
+  # The secret is sent on stdin (the PHP script reads it when the key parameter is -), so it is not visible with ps on servers.
+  # no_log hides the task arguments (so the secret) in the output, so output and errors are shown by the next tasks.
   - name: Launch deployment_deploy_module.php
-    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_deploy_module.php {{command}} {{productref}} {{instancefilter}} alsotrial {{master_instance_id}} {{countrycode}} {{nocache}}
+    command: /home/admin/wwwroot/dolibarr_sellyoursaas/scripts/deployment_deploy_module.php {{command}} {{productref}} {{instancefilter}} alsotrial - {{countrycode}} {{nocache}}
+    args:
+      stdin: '{{master_instance_id}}'
+    no_log: true
+    failed_when: false
     register: command_output
 
   - debug:
       var: command_output.stdout_lines
+
+  - name: Check result of deployment_deploy_module.php
+    fail:
+      msg: "deployment_deploy_module.php failed with return code {{command_output.rc}}: {{command_output.stderr | default('')}}"
+    when: command_output.rc is not defined or command_output.rc != 0

@@ -175,6 +175,13 @@ $productref=isset($argv[2]) ? $argv[2] : '';
 $instancefilter = isset($argv[3]) ? $argv[3] : '';
 $allowdeployforfree = isset($argv[4]) ? $argv[4] : 'onlypaid';
 $decryptkey = isset($argv[5]) ? $argv[5] : '';
+if ($decryptkey == '-') {
+	// Read the secret key on stdin, so it is not visible in the process list nor in the shell history
+	if (function_exists('posix_isatty') && posix_isatty(STDIN)) {
+		print "Enter the master unique key: ";
+	}
+	$decryptkey = trim((string) fgets(STDIN));
+}
 if (isset($argv[6])) {
 	$tmp = $argv[6];
 	if (strlen($tmp) == 2) {
@@ -219,6 +226,7 @@ if (empty($productref)) {
 	print "\n";
 	print "Usage:   ".$script_file." test|confirm productref instancefilter onlypaid|alsotrial masteruniquekey [countrycode] [nocache]\n";
 	print "Example: ".$script_file." test TESTMODULE 'aa*' onlypaid abc123456789 FR\n";
+	print "Use - as masteruniquekey to read it from stdin (recommended, so it is not visible in the process list nor in the shell history).\n";
 	print "Return code: 0 if success, <> 0 if error\n";
 	print "\n";
 	exit(-1);

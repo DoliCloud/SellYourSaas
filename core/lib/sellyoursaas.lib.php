@@ -424,10 +424,11 @@ function getListOfLinks($object, $lastloginadmin, $lastpassadmin)
 	$links.='<br>';
 
 	// Deploy module command
-	$deploymodulestring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test PRODUCTREF '.$object->ref_customer.' onlypaid '.(empty($conf->file->instance_unique_id) ? 'masteruniquekey' : $conf->file->instance_unique_id);
+	// The master unique key is a secret: with "-" it is prompted (read on stdin), so it is not shown here, nor in shell history or ps
+	$deploymodulestring = getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test PRODUCTREF '.$object->ref_customer.' onlypaid -';
 	$links.='<span class="fa fa-cubes"></span> ';
 	$links.=$langs->trans("UpgradeAModule");
-	$links.='<span class="opacitymedium"> (to run as root on the deployment server, replace "test" with "confirm" to execute really)</span><br>';
+	$links.='<span class="opacitymedium"> (to run as root on the deployment server, replace "test" with "confirm" to execute really, the master unique key will be prompted)</span><br>';
 	$links.='<input type="text" id="deploymodulestring" name="deploymodulestring" value="'.dol_escape_htmltag($deploymodulestring).'" class="quatrevingtpercent" spellcheck="false"><br>';
 	if ($conf->use_javascript_ajax) {
 		$links.=ajax_autoselect("deploymodulestring", 0);

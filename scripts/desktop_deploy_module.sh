@@ -25,12 +25,14 @@ if [ "x$7" == "x" ]; then
 	echo "         [command] is the command to execute (e.g. test, confirm)"
 	echo "         [productref] is the module reference name"
 	echo "         [instancefilter] is the instance filter (e.g. * for all instances)"
-	echo "         [master_instance_id] is the master instance ID"
+	echo "         [master_instance_id] is the master instance ID. Use - to read it from the env var SELLYOURSAAS_MASTER_INSTANCE_ID"
+	echo "                              or, if not defined, to be prompted for it (recommended: the secret is then not visible"
+	echo "                              in the shell history nor in the process list)"
 	echo "         [countrycode] is optional country code (e.g. FR)"
 	echo "         [nocache] is optional. It forces the rebuild of the local archive used as the cached package to deploy"
 	echo
-	echo "Example: $0  myhosts  deployment  test     REFMODULENAME  'abc*'  abc1234"
-	echo "Example: $0  myhosts  deployment  confirm  REFMODULENAME  '*abc.mydomain.com'  abc1234  FR  nocache"
+	echo "Example: $0  myhosts  deployment  test     REFMODULENAME  'abc*'  -  FR"
+	echo "Example: $0  myhosts  deployment  confirm  REFMODULENAME  '*abc.mydomain.com'  -  FR  nocache"
 	echo
 	exit 1
 fi
@@ -57,6 +59,27 @@ if [ "x$8" != "x" ]; then
 	fi
 fi
 
+# Get the secret master_instance_id from env or prompt, so it is not visible in shell history nor in process list
+if [ "x$master_instance_id" == "x-" ]; then
+	if [ "x$SELLYOURSAAS_MASTER_INSTANCE_ID" != "x" ]; then
+		master_instance_id=$SELLYOURSAAS_MASTER_INSTANCE_ID
+	else
+		read -r -s -p "Enter the master instance unique id (\$dolibarr_main_instance_unique_id of the master): " master_instance_id
+		echo
+	fi
+else
+	echo -e "${YELLOW}Warning: the master_instance_id given on command line is visible in your shell history. Use - instead.\033[0m"
+fi
+if [ "x$master_instance_id" == "x" ]; then
+	echo "Error: master_instance_id is empty."
+	exit 1
+fi
+
+# Pass the secret to ansible with a temporary vars file (mode 600) instead of the command line
+secretvarsfile=$(mktemp)
+trap 'rm -f "$secretvarsfile"' EXIT
+printf "master_instance_id: '%s'\n" "${master_instance_id//\'/\'\'}" > "$secretvarsfile"
+
 export currentpath=$(dirname "$0")
 
 cd $currentpath/ansible
@@ -64,7 +87,7 @@ cd $currentpath/ansible
 echo "Execute ansible for inventory hosts-$hostsfile and target $target"
 pwd
 
-ansible_command="ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-$hostsfile -e 'target=$target command=$command productref=$productref instancefilter=$instancefilter master_instance_id=$master_instance_id countrycode=$countrycode nocache=$nocache'"
+ansible_command="ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-$hostsfile -e 'target=$target command=$command productref=$productref instancefilter=$instancefilter countrycode=$countrycode nocache=$nocache' -e '@$secretvarsfile'"
 
 echo "$ansible_command"
 eval $ansible_command

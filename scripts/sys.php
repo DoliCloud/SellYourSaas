@@ -192,7 +192,7 @@ function getToolDefinitions()
 			'summary' => 'Deploy/update a module on instances',
 			'desc' => "Run scripts/deployment_deploy_module.php on the deployment servers (playbook launch_deployment_deploy_module.yml) to deploy or update the package of the service 'productref' (e.g. CLOUD-MOD-EInvoicing) on the instances matching 'instancefilter' (trials included).\n'master_instance_id' is the value of \$dolibarr_main_instance_unique_id in conf.php of the master server.",
 			'usage' => 'hostsfile target test|confirm productref instancefilter master_instance_id [countrycode] [nocache]',
-			'notes' => array("Use 'test' first.", 'The master_instance_id is a secret: it will be visible in your shell history and in the process list of the servers.', 'Add nocache after an update of the module, otherwise the cached archive is deployed again.'),
+			'notes' => array("Use 'test' first.", 'The master_instance_id is a secret: use - to be prompted for it (or to read it from the env var SELLYOURSAAS_MASTER_INSTANCE_ID), so it is not visible in your shell history nor in the process list.', 'Add nocache after an update of the module, otherwise the cached archive is deployed again.'),
 			'atleastone' => array('countrycode', 'nocache'),
 			'helper' => array('param' => 'master_instance_id', 'command' => $masteruniqueidcommand),
 			'params' => array(
@@ -201,7 +201,7 @@ function getToolDefinitions()
 				array('name' => 'command', 'type' => 'choice', 'required' => 1, 'default' => 'test', 'values' => array('test' => 'dry run', 'confirm' => 'really deploy'), 'help' => "Use 'test' first, then 'confirm'."),
 				array('name' => 'productref', 'type' => 'text', 'required' => 1, 'values' => array('CLOUD-MOD-EInvoicing' => ''), 'help' => "Ref of the service (option with a package) on the master, e.g. CLOUD-MOD-EInvoicing."),
 				array('name' => 'instancefilter', 'type' => 'text', 'required' => 1, 'values' => array('*' => 'all instances', 'abc*' => 'instances starting with abc'), 'help' => "Filter on instance names, e.g. 'abc*' (it will be quoted)."),
-				array('name' => 'master_instance_id', 'type' => 'text', 'required' => 1, 'help' => 'Value of $dolibarr_main_instance_unique_id of the master server (secret). Use the tool desktop_get_master_unique_id to build the command to get it.'),
+				array('name' => 'master_instance_id', 'type' => 'text', 'required' => 1, 'help' => 'Value of $dolibarr_main_instance_unique_id of the master server (secret), or - to be prompted for it (recommended). Use the tool desktop_get_master_unique_id to build the command to get it.'),
 				array('name' => 'countrycode', 'type' => 'text', 'values' => array('FR' => '', 'BE' => '', 'CH' => '', 'ES' => '', 'IT' => '', 'DE' => ''), 'help' => 'Country code. countrycode or nocache must be provided.'),
 				array('name' => 'nocache', 'type' => 'choice', 'values' => array('' => 'use the cached archive', 'nocache' => 'rebuild the cached archive'), 'help' => 'Force the rebuild of the cached archive of the package.'),
 			),

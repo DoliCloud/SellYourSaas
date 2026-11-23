@@ -84,8 +84,11 @@ Local tools (no Ansible):
   ```bash
   cd scripts/ansible && ansible master -i hosts-myhosts -b -K -m command -a "grep '^\$dolibarr_main_instance_unique_id' /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php"
   ```
-- This key is a secret (it decrypts passwords stored on the master): it is visible in the shell history, in the
-  printed command and in `ps` on the servers. Never write its value in files or answers.
+- This key is a secret (it decrypts passwords stored on the master). Always propose `-` as `master_instance_id`:
+  the script then reads it from the env var `SELLYOURSAAS_MASTER_INSTANCE_ID` or prompts for it (no echo), passes it to
+  Ansible with a temporary vars file (`-e @file`, mode 600) and the playbook sends it on stdin to
+  `deployment_deploy_module.php` (task with `no_log`), so it is not in the shell history nor in `ps` on the servers.
+  Never write its value in files or answers.
 
 ## Examples
 
@@ -95,7 +98,7 @@ Local tools (no Ansible):
 ./scripts/desktop_update_sellyoursaas.sh myhosts master,deployment
 ./scripts/desktop_config_sellyoursaas.sh myhosts master,deployment usecompressformatforarchive zstd
 ./scripts/desktop_bannedip.sh myhosts withX.mysellyoursaasdomain.com unban 1.2.3.4
-./scripts/desktop_deploy_module.sh myhosts deployment test CLOUD-MOD-EInvoicing 'abc*' abc1234 FR
+./scripts/desktop_deploy_module.sh myhosts deployment test CLOUD-MOD-EInvoicing 'abc*' - FR
 ./scripts/desktop_admin_users.php myhosts master,deployment,web create jdoe userroot=0 userip=1.2.3.4 userpublickey="ssh-ed25519 AAAA..." userpassword=...
 ```
 

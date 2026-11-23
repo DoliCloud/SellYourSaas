@@ -918,9 +918,9 @@ while ($i < $imaxinloop) {
 			$html .= '</div>';
 
 			$html .= '<br>';
-			$html .= $langs->trans("CommandToDeployAModuleOptionOnAllInstances").' <span class="opacitymedium">(to run as root from the deployment server)</span>:<br>';
+			$html .= $langs->trans("CommandToDeployAModuleOptionOnAllInstances").' <span class="opacitymedium">(to run as root from the deployment server, the master unique key will be prompted)</span>:<br>';
 			$html .= '<div class="urllink"><input type="text" class="quatrevingtpercent" spellcheck="false" value="';
-			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test|confirm PRODUCTREF \'afilter*\' alsotrial master_instance_id [FR]';
+			$html .= getDolGlobalString('DOLICLOUD_SCRIPTS_PATH').'/deployment_deploy_module.php test|confirm PRODUCTREF \'afilter*\' alsotrial - [FR]';
 			$html .= '">';
 			$html .= '</div>';
 
