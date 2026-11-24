@@ -15,7 +15,7 @@ export BLUE='\033[0;34m'
 export YELLOW='\033[0;33m'
 
 
-if [ "x$7" == "x" ]; then
+if [ "x$6" == "x" ]; then
 	echo "***** desktop_deployment_deploy_module.sh *****"
 	echo "This script allows to deploy a module on instances of deployment servers"
 	echo
