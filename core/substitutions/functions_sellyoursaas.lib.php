@@ -19,7 +19,7 @@
 /**
  *	\file			htdocs/sellyoursaas/core/substitutions/functions_sellyoursaas.lib.php
  *	\brief			A set of functions for Dolibarr
- *					This file contains the functions for substitions of the plugin sellyoursaas.
+ *					This file contains the functions for substitutions of the plugin sellyoursaas.
  */
 
 
@@ -50,7 +50,7 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		}
 	}
 
-	if ((! empty($parameters['mode'])) && $parameters['mode'] == 'formemail') {	// For exemple when called by FormMail::getAvailableSubstitKey()
+	if ((! empty($parameters['mode'])) && $parameters['mode'] == 'formemail') {	// For example when called by FormMail::getAvailableSubstitKey()
 		if (is_object($object) && get_class($object) == 'Societe') {
 			$companypaymentmode = new CompanyPaymentMode($db);
 			$result = $companypaymentmode->fetch(0, null, $object->id, 'card');
@@ -180,6 +180,6 @@ function sellyoursaas_completesubstitutionarray(&$substitutionarray, $langs, $ob
 		dol_syslog("newsubstiturl = ".$newsubstiturl);
 		$substitutionarray['__ONLINE_PAYMENT_URL__'] = $newsubstiturl;
 
-		dol_syslog("sellyoursaas_completesubstitutionarray: savconf has now savconf->global->SELLYOURSAAS_NAME = ".$savconf->global->SELLYOURSAAS_NAME." savconf->global->SELLYOURSAAS_MAIN_EMAIL = ".$savconf->global->SELLYOURSAAS_MAIN_EMAIL);
+		dol_syslog("sellyoursaas_completesubstitutionarray: conf has now conf->global->SELLYOURSAAS_NAME = ".$conf->global->SELLYOURSAAS_NAME." conf->global->SELLYOURSAAS_MAIN_EMAIL = ".$conf->global->SELLYOURSAAS_MAIN_EMAIL);
 	}
 }
