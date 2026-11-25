@@ -29,6 +29,14 @@ if [ "x$target" == "x" ]; then
 	target="master,deployment,web"
 fi
 
+# Check if 'askvault' was passed as argument to use --ask-vault-pass instead of -K for become password
+askvault=""
+for arg in "$@"; do
+	if [ "x$arg" == "xaskvault" ] || [ "x$arg" == "xaskvault=1" ]; then
+		askvault="1"
+	fi
+done
+
 export currentpath=$(dirname "$0")
 
 cd "$currentpath/ansible" || exit 1
@@ -38,6 +46,9 @@ pwd
 
 command='ansible-playbook -K info_servers.yml -i hosts-'$1' -e "target='$target'"'
 
+if [ "x$askvault" == "x1" ]; then
+	command=${command/"-K"/"--ask-vault-pass"}
+fi
 echo "$command"
 eval $command
 

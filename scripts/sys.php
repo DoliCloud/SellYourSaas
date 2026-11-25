@@ -77,67 +77,73 @@ function getToolDefinitions()
 {
 	$targethelp = "Group(s) or server name(s) of the inventory. Space to select several.";
 	$hostfilehelp = "Ansible inventory: 'xxx' means the file scripts/ansible/hosts-xxx.";
+	$askvaulthelp = "Leave empty to be asked for a unique sudo/become password (-K). Set to 'askvault' to use the become passwords stored in host_vars files encrypted with ansible-vault (--ask-vault-pass).";
 	$masteruniqueidcommand = 'cd scripts/ansible && ansible master -i hosts-{hostsfile} -b -K -m command -a \'grep ^$dolibarr_main_instance_unique_id /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php\'';
 
 	return array(
 		'desktop_apt_upgrade.sh' => array(
 			'summary' => 'apt update/upgrade on remote servers',
 			'desc' => "Launch an apt update and apt upgrade on the remote servers (playbook launch_apt_upgrade.yml).\nOn deployment servers, all instances are switched in maintenance mode during the upgrade and switched back online at the end. Optionally reboot the servers.\nThe script waits for a key press before starting.",
-			'usage' => 'hostfile target [reboot]',
+			'usage' => 'hostfile target [reboot] [askvault]',
 			'notes' => array("All instances of the targeted servers are offline during the run. If interrupted, restore them with deployment_make_instances_offlineonline.sh maintenance.php online.", "Check afterwards that the web server is still alive."),
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'required' => 1, 'default' => 'master', 'help' => $targethelp),
 				array('name' => 'reboot', 'type' => 'choice', 'values' => array('' => 'no reboot', 'reboot' => 'reboot servers after upgrade'), 'help' => 'Reboot the servers after the upgrade.'),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_clean.sh' => array(
 			'summary' => 'Run clean.sh on remote servers',
 			'desc' => "Launch the script scripts/clean.sh on the remote servers (playbook launch_clean.yml) to clean old files, temporary files and archives of removed instances.",
-			'usage' => 'hostfile target [confirm|test]',
+			'usage' => 'hostfile target [confirm|test] [askvault]',
 			'notes' => array("Use the mode 'test' first for a dry run."),
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'required' => 1, 'default' => 'deployment', 'help' => $targethelp),
 				array('name' => 'mode', 'type' => 'choice', 'default' => 'test', 'values' => array('test' => 'dry run, nothing is deleted', 'confirm' => 'really clean'), 'help' => "Use 'test' for a dry run, 'confirm' to really clean."),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_update_sellyoursaas.sh' => array(
 			'summary' => 'Git update of SellYourSaas on servers',
 			'desc' => "Launch scripts/git_update_sellyoursaas.sh /home/admin/wwwroot/ on the remote servers (playbook launch_git_update_sellyoursaas.yml) to update the sources of Dolibarr and SellYourSaas.\nWith 'unlock', the file dolibarr_documents/upgrade.unlock is also created.",
-			'usage' => 'hostfile [target] [unlock]',
+			'usage' => 'hostfile [target] [unlock] [askvault]',
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'default' => 'master,deployment', 'help' => $targethelp),
 				array('name' => 'unlock', 'type' => 'choice', 'values' => array('' => 'do not create upgrade.unlock', 'unlock' => 'create dolibarr_documents/upgrade.unlock'), 'help' => 'Create the upgrade.unlock file after the update.'),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_update_sources.sh' => array(
 			'summary' => 'Git update of the sources of packages on master',
 			'desc' => "Launch scripts/master_git_update_sources.sh /home/admin/wwwroot/dolibarr_documents/sellyoursaas/git on the master server (playbook launch_git_update_sources.yml) to update the git sources of the packages and rebuild their archives (.zst or .tgz).\nSame as the daily cron of admin on the master, but run on demand.",
-			'usage' => 'hostfile [target] [subdir|all]',
+			'usage' => 'hostfile [target] [subdir|all] [askvault]',
 			'notes' => array("Only the target 'master' is accepted. The playbook also refuses hosts that are not into the group master."),
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'choice', 'default' => 'master', 'values' => array('master' => 'the master server'), 'help' => "Only the value master is accepted."),
 				array('name' => 'subdir', 'type' => 'text', 'default' => 'all', 'values' => array('all' => 'all directories'), 'help' => 'Name of the directory into dolibarr_documents/sellyoursaas/git to update, or all.'),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_config_dolibarr.sh' => array(
 			'summary' => 'Change a parameter of Dolibarr conf.php',
 			'desc' => "Set \$param = value into the Dolibarr config file /home/admin/wwwroot/dolibarr/htdocs/conf/conf.php of the remote servers (playbook change_config_dolibarr.yml).\nNot for the conf files of deployed instances.",
-			'usage' => 'hostfile param value [target]',
+			'usage' => 'hostfile param value [target] [askvault]',
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'param', 'type' => 'text', 'required' => 1, 'values' => array('dolibarr_main_data_root' => '', 'dolibarr_main_url_root' => '', 'dolibarr_main_document_root' => '', 'dolibarr_main_db_host' => '', 'dolibarr_main_db_port' => '', 'dolibarr_main_prod' => '', 'dolibarr_main_force_https' => '', 'dolibarr_mailing_limit_sendbyweb' => '', 'dolibarr_mailing_limit_sendbycli' => ''), 'help' => 'Name of the variable in conf.php (without $). Type to filter or enter another name.'),
 				array('name' => 'value', 'type' => 'text', 'required' => 1, 'help' => 'New value of the variable. Type the value then Enter.'),
 				array('name' => 'target', 'type' => 'target', 'default' => 'deployment', 'help' => $targethelp),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_config_sellyoursaas.sh' => array(
 			'summary' => 'Change a parameter of /etc/sellyoursaas.conf',
 			'desc' => "Set param=value into the SellYourSaas config file /etc/sellyoursaas.conf (default) or /etc/sellyoursaas-public.conf of the remote servers (playbook change_config_sellyoursaas.yml).",
-			'usage' => 'hostfile target param value [sellyoursaas|sellyoursaas-public]',
+			'usage' => 'hostfile target param value [sellyoursaas|sellyoursaas-public] [askvault]',
 			'notes' => array('The argument order differs from desktop_config_dolibarr.sh (target is the 2nd argument).'),
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
@@ -145,48 +151,53 @@ function getToolDefinitions()
 				array('name' => 'param', 'type' => 'text', 'required' => 1, 'values' => array('usecompressformatforarchive' => '', 'remotebackupserverport' => '', 'maxemailperday' => '', 'maxemailperdaypaid' => '', 'instanceserver' => '', 'ipserverdeployment' => '', 'masterserver' => '', 'webserver' => '', 'backupdir' => '', 'remotebackupdir' => ''), 'help' => 'Name of the parameter in the conf file. Type to filter or enter another name.'),
 				array('name' => 'value', 'type' => 'text', 'required' => 1, 'help' => 'New value of the parameter. Type the value then Enter.'),
 				array('name' => 'conffile', 'type' => 'choice', 'values' => array('' => '/etc/sellyoursaas.conf (default)', 'sellyoursaas' => '/etc/sellyoursaas.conf', 'sellyoursaas-public' => '/etc/sellyoursaas-public.conf'), 'help' => 'Config file to change.'),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_config_crontab.sh' => array(
 			'summary' => 'Fix the crontab of remote servers',
 			'desc' => "Edit the crontab /var/spool/cron/crontabs/<username> of the remote servers (playbook change_crontab_server.yml) to fix known lines (backup_backup.sh, perms.ksh -> perms.sh).",
-			'usage' => 'hostfile target root|osusername',
+			'usage' => 'hostfile target root|osusername [askvault]',
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'required' => 1, 'help' => $targethelp),
 				array('name' => 'username', 'type' => 'text', 'required' => 1, 'values' => array('root' => '', 'admin' => ''), 'help' => 'Unix user owning the crontab to fix.'),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_bannedip.sh' => array(
 			'summary' => 'List/ban/unban IPs with fail2ban',
 			'desc' => "Manage fail2ban on the remote servers:\n- list: show the whitelisted (ignoreip) and banned IPs of each jail,\n- unban: remove an IP from all jails,\n- ban: ban an IP into a given jail.",
-			'usage' => 'hostfile target list|unban|ban [IP] [jail]',
+			'usage' => 'hostfile target list|unban|ban [IP] [jail] [askvault]',
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'required' => 1, 'help' => $targethelp),
 				array('name' => 'action', 'type' => 'choice', 'required' => 1, 'default' => 'list', 'values' => array('list' => 'list whitelisted and banned IPs', 'unban' => 'unban an IP from all jails', 'ban' => 'ban an IP into a jail'), 'help' => 'Action to do.'),
 				array('name' => 'ip', 'type' => 'text', 'requiredif' => array('action' => array('ban', 'unban')), 'help' => 'IP to ban or unban.'),
 				array('name' => 'jail', 'type' => 'text', 'requiredif' => array('action' => array('ban')), 'values' => array('sshd' => '', 'apache-shellshock' => '', 'web-dol-bruteforce' => '', 'web-accesslog-limit403' => '', 'email-dol-blacklist' => '', 'email-dol-perso' => '', 'email-dol-perso-perday' => ''), 'help' => 'Jail where to ban the IP (for action ban only).'),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_info_servers.sh' => array(
 			'summary' => 'Get OS, PHP and sudo users of servers',
 			'desc' => "Get information on the remote servers, read only (playbook info_servers.yml):\n- OS and precise version (and kernel),\n- PHP version (CLI, installed branches and PHP used by Apache),\n- users allowed to sudo as root, with their sudo rule,\n- users allowed to sudo as admin (sudo su - admin), with their sudo rule.",
-			'usage' => 'hostfile [target]',
+			'usage' => 'hostfile [target] [askvault]',
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'default' => 'master,deployment,web', 'help' => $targethelp." 'all' for all servers of the inventory."),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_install_check.sh' => array(
 			'summary' => 'Check/fix the setup of servers',
 			'desc' => "Check and fix the setup of master and deployment servers (playbook launch_install_check.yml): OS accounts (admin groups), PAM password policy, apt packages, and optionally apache or a given PHP version ('all' = apache + php74).",
-			'usage' => 'hostfile [target] [apache|php74..php84|all]',
+			'usage' => 'hostfile [target] [apache|php74..php84|all] [askvault]',
 			'notes' => array("Targets 'web' and 'remotebackup' are refused."),
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
 				array('name' => 'target', 'type' => 'target', 'default' => 'master', 'groups' => array('master', 'deployment'), 'help' => "Group(s) master, deployment or server name(s). Space to select several."),
 				array('name' => 'option', 'type' => 'choice', 'values' => array('' => 'base checks only', 'apache' => 'also check apache', 'php74' => '', 'php80' => '', 'php81' => '', 'php82' => '', 'php83' => '', 'php84' => '', 'all' => 'apache + php74'), 'help' => 'Optional additional component to check.'),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_get_master_unique_id' => array(
@@ -202,7 +213,7 @@ function getToolDefinitions()
 		'desktop_deploy_module.sh' => array(
 			'summary' => 'Deploy/update a module on instances',
 			'desc' => "Run scripts/deployment_deploy_module.php on the deployment servers (playbook launch_deployment_deploy_module.yml) to deploy or update the package of the service 'productref' (e.g. CLOUD-MOD-EInvoicing) on the instances matching 'instancefilter' (trials included).\n'master_instance_id' is the value of \$dolibarr_main_instance_unique_id in conf.php of the master server.",
-			'usage' => 'hostsfile target test|confirm productref instancefilter master_instance_id [countrycode] [nocache]',
+			'usage' => 'hostsfile target test|confirm productref instancefilter master_instance_id [countrycode] [nocache] [askvault]',
 			'notes' => array("Use 'test' first.", 'The master_instance_id is a secret: use - to be prompted for it (or to read it from the env var SELLYOURSAAS_MASTER_INSTANCE_ID), so it is not visible in your shell history nor in the process list.', 'Add nocache after an update of the module, otherwise the cached archive is deployed again.'),
 			'atleastone' => array('countrycode', 'nocache'),
 			'helper' => array('param' => 'master_instance_id', 'command' => $masteruniqueidcommand),
@@ -215,12 +226,13 @@ function getToolDefinitions()
 				array('name' => 'master_instance_id', 'type' => 'text', 'required' => 1, 'help' => 'Value of $dolibarr_main_instance_unique_id of the master server (secret), or - to be prompted for it (recommended). Use the tool desktop_get_master_unique_id to build the command to get it.'),
 				array('name' => 'countrycode', 'type' => 'text', 'values' => array('FR' => '', 'BE' => '', 'CH' => '', 'ES' => '', 'IT' => '', 'DE' => ''), 'help' => 'Country code. countrycode or nocache must be provided.'),
 				array('name' => 'nocache', 'type' => 'choice', 'values' => array('' => 'use the cached archive', 'nocache' => 'rebuild the cached archive'), 'help' => 'Force the rebuild of the cached archive of the package.'),
+				array('name' => 'askvault', 'type' => 'choice', 'values' => array('' => 'ask for a sudo/become password (-K)', 'askvault' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_admin_users.php' => array(
 			'summary' => 'Manage unix sysadmin users on servers',
 			'desc' => "Create, update, deactivate, reactivate or remove a personal unix sysadmin account on all the servers (playbooks user_create.yml, user_deactivate.yml, user_reactivate.yml, user_remove.yml).\nThe password is hashed locally (SHA-512) before being sent to Ansible.",
-			'usage' => 'hostfile target create|update|deactivate|reactivate|remove login [loginforansible] [userroot=0|1] [userip=...] [userpublickey="..."] [userpassword="..."]',
+			'usage' => 'hostfile target create|update|deactivate|reactivate|remove login [loginforansible] [userroot=0|1] [userip=...] [userpublickey="..."] [userpassword="..."] [askvault=1]',
 			'notes' => array('create requires userroot. userroot=1 also requires userpassword.', 'A password given here is visible in your shell history.'),
 			'params' => array(
 				array('name' => 'hostfile', 'type' => 'hostfile', 'required' => 1, 'help' => $hostfilehelp),
@@ -232,6 +244,7 @@ function getToolDefinitions()
 				array('name' => 'userip', 'type' => 'kv', 'help' => 'IP allowed to connect with this user.'),
 				array('name' => 'userpublickey', 'type' => 'kv', 'help' => 'SSH public key of the user (e.g. ssh-ed25519 AAAA...).'),
 				array('name' => 'userpassword', 'type' => 'kv', 'requiredif' => array('userroot' => array('1')), 'help' => 'Password of the user (mandatory if userroot=1).'),
+				array('name' => 'askvault', 'type' => 'kv', 'values' => array('1' => 'use vault-encrypted passwords (--ask-vault-pass)'), 'help' => $askvaulthelp),
 			),
 		),
 		'desktop_switchipv6.sh' => array(

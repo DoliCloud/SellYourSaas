@@ -37,6 +37,14 @@ if [ "x$subdir" == "x" ]; then
 	subdir="all"
 fi
 
+# Check if 'askvault' was passed as argument to use --ask-vault-pass instead of -K for become password
+askvault=""
+for arg in "$@"; do
+	if [ "x$arg" == "xaskvault" ] || [ "x$arg" == "xaskvault=1" ]; then
+		askvault="1"
+	fi
+done
+
 export currentpath=$(dirname "$0")
 
 cd $currentpath/ansible
@@ -45,6 +53,9 @@ echo "Execute ansible for host group=$1 and targets=$target, subdir=$subdir"
 pwd
 
 command='ansible-playbook -K launch_git_update_sources.yml -i hosts-'$1' -e "target='$target' subdir='$subdir'"'
+if [ "x$askvault" == "x1" ]; then
+	command=${command/"-K"/"--ask-vault-pass"}
+fi
 echo "$command"
 eval $command
 

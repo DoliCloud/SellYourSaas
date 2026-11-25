@@ -5,3 +5,4 @@
 /hosts-sellyoursaas
 /ansible.cfg
 /ssh.cfg
+/host_vars/
