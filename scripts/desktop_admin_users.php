@@ -125,6 +125,7 @@ $userip = '';
 $userpublickey = '';
 $userpassword = '';
 $userroot = '';
+$askvault = '';
 for ($i = 5; $i <= 10; $i++) {
 	$moreparam = empty($argv[$i]) ? '' : $argv[$i];
 	//print $moreparam."\n";
@@ -142,6 +143,9 @@ for ($i = 5; $i <= 10; $i++) {
 			}
 			if ($arrayparam[0] == 'userroot') {
 				$userroot = $arrayparam[1];
+			}
+			if ($arrayparam[0] == 'askvault') {
+				$askvault = $arrayparam[1];
 			}
 		}
 	}
@@ -182,7 +186,12 @@ echo "Go into directory $path./ansible\n";
 
 chdir($path.'/ansible');
 
-$command = "ansible-playbook -v -K ".$scriptyaml." -i hosts-".$hostfile;
+$becomepass = "-K";
+if ($askvault) {
+	$becomepass = "--ask-vault-pass";
+}
+
+$command = "ansible-playbook -v ".$becomepass." ".$scriptyaml." -i hosts-".$hostfile;
 if ($loginforansible) {
 	$command .= " --user=".$loginforansible;
 }

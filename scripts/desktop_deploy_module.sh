@@ -80,6 +80,14 @@ secretvarsfile=$(mktemp)
 trap 'rm -f "$secretvarsfile"' EXIT
 printf "master_instance_id: '%s'\n" "${master_instance_id//\'/\'\'}" > "$secretvarsfile"
 
+# Check if 'askvault' was passed as argument to use --ask-vault-pass instead of -K for become password
+askvault=""
+for arg in "$@"; do
+	if [ "x$arg" == "xaskvault" ] || [ "x$arg" == "xaskvault=1" ]; then
+		askvault="1"
+	fi
+done
+
 export currentpath=$(dirname "$0")
 
 cd $currentpath/ansible
@@ -89,6 +97,9 @@ pwd
 
 ansible_command="ansible-playbook -K launch_deployment_deploy_module.yml -i hosts-$hostsfile -e 'target=$target command=$command productref=$productref instancefilter=$instancefilter countrycode=$countrycode nocache=$nocache' -e '@$secretvarsfile'"
 
+if [ "x$askvault" == "x1" ]; then
+	ansible_command=${ansible_command/"-K"/"--ask-vault-pass"}
+fi
 echo "$ansible_command"
 eval $ansible_command
 
