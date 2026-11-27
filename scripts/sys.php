@@ -903,6 +903,17 @@ class DesktopMenu
 					$candidates[] = array('value' => $host, 'label' => $host.'  ('.$group.')', 'search' => $host.' '.$group);
 				}
 			}
+			// Selected values (e.g. a default group) not found into the inventory are listed too, so they can be unselected
+			$known = array();
+			foreach ($candidates as $candidate) {
+				$known[$candidate['value']] = 1;
+			}
+			$current = $this->getValue($param['name']);
+			foreach (($current === '' ? array() : explode(',', $current)) as $value) {
+				if ($value !== '' && !isset($known[$value])) {
+					$candidates[] = array('value' => $value, 'label' => $value.'  [not found into inventory hosts-'.$hostfile.']', 'search' => $value);
+				}
+			}
 		} elseif (!empty($param['values'])) {
 			foreach ($param['values'] as $value => $hint) {
 				$value = (string) $value;
