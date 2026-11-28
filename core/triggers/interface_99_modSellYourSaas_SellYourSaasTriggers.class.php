@@ -393,11 +393,12 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 				if (isset($object->oldcopy)	&&
 				(($object->oldcopy->tva_intra != $object->tva_intra)
 				|| ($object->oldcopy->tva_assuj != $object->tva_assuj)
-				|| ($object->oldcopy->country_id != $object->country_id))) {
+				|| ($object->oldcopy->country_id != $object->country_id)
+				|| ((int) $object->oldcopy->state_id != (int) $object->state_id))) {
 					include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 					include_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 
-					dol_syslog("We change intra VAT information or country id, so we must also change VAT into contract and into template invoices");
+					dol_syslog("We change intra VAT information, country id or state id, so we must also change VAT into contract and into template invoices");
 
 					$object->country_code = getCountry($object->country_id, 2);
 
@@ -417,8 +418,17 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 							foreach ($contract->lines as $line) {
 								//$newvatrate = get_default_tva($mysoc, $object, $line->fk_product);
 								$newvatrate = get_default_tva($mysoc, $object, 0);
-								if ($newvatrate != $line->tva_tx) {
+
+								// Extract the vat code (get_default_tva can return '8.5 (CODE)')
+								$vat_srccode = '';
+								if (preg_match('/\((.*)\)/', (string) $newvatrate, $reg)) {
+									$vat_srccode = $reg[1];
+									$newvatrate = preg_replace('/\s*\(.*\)/', '', $newvatrate);
+								}
+
+								if ((float) $newvatrate != (float) $line->tva_tx || $vat_srccode != $line->vat_src_code) {
 									$line->tva_tx = $newvatrate;
+									$line->vat_src_code = $vat_srccode;
 									$line->update($user, 1);
 								}
 							}
@@ -440,9 +450,19 @@ class InterfaceSellYourSaasTriggers extends DolibarrTriggers
 												$invoicerecline = new FactureLigneRec($this->db);
 												$invoicerecline->fetch($objsearchline->rowid);
 
-												$invoicerecline->tva_tx = get_default_tva($mysoc, $object, $invoicerecline->fk_product);
+												$newvatrate = get_default_tva($mysoc, $object, $invoicerecline->fk_product);
 
-												$tabprice = calcul_price_total($invoicerecline->qty, $invoicerecline->subprice, $invoicerecline->remise_percent, $invoicerecline->tva_tx, $invoicerecline->localtax1_tx, $invoicerecline->txlocaltax2, 0, 'HT', $invoicerecline->info_bits, $invoicerecline->product_type, $mysoc, array(), 100);
+												// Extract the vat code (get_default_tva can return '8.5 (CODE)')
+												$vat_srccode = '';
+												if (preg_match('/\((.*)\)/', (string) $newvatrate, $reg)) {
+													$vat_srccode = $reg[1];
+													$newvatrate = preg_replace('/\s*\(.*\)/', '', $newvatrate);
+												}
+
+												$invoicerecline->tva_tx = $newvatrate;
+												$invoicerecline->vat_src_code = $vat_srccode;
+
+												$tabprice = calcul_price_total($invoicerecline->qty, $invoicerecline->subprice, $invoicerecline->remise_percent, $invoicerecline->tva_tx, $invoicerecline->localtax1_tx, $invoicerecline->localtax2_tx, 0, 'HT', $invoicerecline->info_bits, $invoicerecline->product_type, $mysoc, array(), 100);
 
 												$invoicerecline->total_ht  = $tabprice[0];
 												$invoicerecline->total_tva = $tabprice[1];
