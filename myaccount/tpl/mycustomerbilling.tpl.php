@@ -441,27 +441,30 @@ print '
 
 		print '</table>';
 
-		print '<br>';
-		print $langs->trans("YouCanClainAmountWhen", price(getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM', 100), 0, $langs, 1, -1, -1, $conf->currency)).'<br>';
-		$labelforcompany = $mysoc->name;
-		$labelforcompany .= ' <span class="opacitymedium">('.$langs->transcountry("ProfId1", $mysoc->country_code).': '.$mysoc->idprof1.', '.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Address").': '.$mysoc->getFullAddress(1, ',').')</span>';
+		// Old claim method by sending an invoice by email. Hidden when the commission claim feature is enabled.
+		if (getDolGlobalInt('SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION') <= 0) {
+			print '<br>';
+			print $langs->trans("YouCanClainAmountWhen", price(getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM', 100), 0, $langs, 1, -1, -1, $conf->currency)).'<br>';
+			$labelforcompany = $mysoc->name;
+			$labelforcompany .= ' <span class="opacitymedium">('.$langs->transcountry("ProfId1", $mysoc->country_code).': '.$mysoc->idprof1.', '.$langs->transnoentitiesnoconv("VATIntra").': '.$mysoc->tva_intra.', '.$langs->trans("Address").': '.$mysoc->getFullAddress(1, ',').')</span>';
 
-		$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
-		if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
-					&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
-			$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
-			if (getDolGlobalString($newnamekey)) {
-				$emailforresellerinvoice = getDolGlobalString($newnamekey);
+			$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_RESELLER_EMAIL');
+			if (! empty($mythirdpartyaccount->array_options['options_domain_registration_page'])
+						&& $mythirdpartyaccount->array_options['options_domain_registration_page'] != getDolGlobalString('SELLYOURSAAS_MAIN_DOMAIN_NAME')) {
+				$newnamekey = 'SELLYOURSAAS_RESELLER_EMAIL-'.$mythirdpartyaccount->array_options['options_domain_registration_page'];
+				if (getDolGlobalString($newnamekey)) {
+					$emailforresellerinvoice = getDolGlobalString($newnamekey);
+				}
 			}
-		}
 
-		if (empty($emailforresellerinvoice)) {
-			$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
+			if (empty($emailforresellerinvoice)) {
+				$emailforresellerinvoice = getDolGlobalString('SELLYOURSAAS_MAIN_EMAIL');
+			}
+			if (empty($emailforresellerinvoice)) {
+				$emailforresellerinvoice = $mysoc->email;
+			}
+			print $langs->trans("SendYourInvoiceTo", $labelforcompany, $emailforresellerinvoice);
 		}
-		if (empty($emailforresellerinvoice)) {
-			$emailforresellerinvoice = $mysoc->email;
-		}
-		print $langs->trans("SendYourInvoiceTo", $labelforcompany, $emailforresellerinvoice);
 		print '</div>';
 
 		print '
@@ -469,6 +472,78 @@ print '
                     </div>
                   </div>
         		';
+
+
+		// Form to request a commission payment (feature visible only if the service for commission invoices is configured)
+		$idproductforcommission = getDolGlobalInt('SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION');
+		if ($idproductforcommission > 0) {
+			$minamounttoclaim = getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM', 100);
+
+			// Total of commissions already claimed with supplier invoices still in draft (pending claims)
+			$sqlclaimeddraft = 'SELECT SUM(f.total_ht) as total';
+			$sqlclaimeddraft .= ' FROM '.MAIN_DB_PREFIX.'facture_fourn as f';
+			$sqlclaimeddraft .= ' WHERE f.fk_soc = '.((int) $mythirdpartyaccount->id);
+			$sqlclaimeddraft .= ' AND f.fk_statut = '.FactureFournisseur::STATUS_DRAFT;
+
+			$totalclaimeddraft = 0;
+			$resqlclaimeddraft = $db->query($sqlclaimeddraft);
+			if ($resqlclaimeddraft) {
+				$objclaimeddraft = $db->fetch_object($resqlclaimeddraft);
+				if ($objclaimeddraft) {
+					$totalclaimeddraft = price2num($objclaimeddraft->total, 'MT');
+				}
+			} else {
+				dol_print_error($db);
+			}
+
+			$amountavailabletoclaim = price2num((empty($commoldystem) ? 0 : $commoldystem) + $totalamountcommission - $totalpaidht - $totalclaimeddraft, 'MT');
+
+			print '
+	<div class="row">
+      <div class="col-md-12">
+		<!-- form to request a commission payment -->
+		<div class="portlet light">
+          <div class="portlet-title">
+            <div class="caption-subject font-green-sharp bold uppercase">'.$langs->trans("RequestCommissionPayment").'</div>
+          </div>
+          <div class="portlet-body">';
+
+			if ($amountavailabletoclaim >= $minamounttoclaim) {
+				print $langs->trans("RequestCommissionPaymentHelp", price($minamounttoclaim, 0, $langs, 1, -1, -1, $conf->currency)).'<br><br>';
+
+				// Get the default VAT rate for a supplier invoice from this reseller to us
+				$tva_tx = get_default_tva($mythirdpartyaccount, $mysoc, $idproductforcommission);
+
+				print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+				print '<input type="hidden" name="token" value="'.newToken().'">';
+				print '<input type="hidden" name="mode" value="mycustomerbilling">';
+				print '<input type="hidden" name="action" value="sendcommissionclaim">';
+
+				print $langs->trans("AmountAvailableToClaim").' : <strong>'.price($amountavailabletoclaim, 0, $langs, 1, -1, -1, $conf->currency).'</strong><br><br>';
+
+				print $langs->trans("AmountToClaim").' : <input type="text" required name="amountclaim" value="'.$amountavailabletoclaim.'" class="width100 right"> '.$conf->currency.'<br><br>';
+
+				print '<span class="opacitymedium">'.$langs->trans("VATAppliedOnCommissionClaim", ((float) $tva_tx).'%').'</span><br><br>';
+
+				print $langs->trans("YourInvoiceRef").' : <input type="text" name="refsupplier" class="minwidth200"><br><br>';
+
+				print $langs->trans("CommentOnCommissionClaim").' :<br>';
+				print '<textarea rows="3" name="commentclaim" class="centpercent"></textarea><br><br>';
+
+				print '<center><input type="submit" name="submit" value="'.$langs->trans("SendCommissionClaimRequest").'" class="btn green-haze btn-circle"></center>';
+
+				print '</form>';
+			} else {
+				print '<span class="opacitymedium">'.$langs->trans("AmountAvailableToClaim").' : <strong>'.price($amountavailabletoclaim, 0, $langs, 1, -1, -1, $conf->currency).'</strong></span>';
+			}
+
+			print '  </div>
+		</div> <!-- END PORTLET -->
+
+      </div> <!-- END COL -->
+    </div> <!-- END ROW -->
+';
+		}
 
 		print '
 

@@ -142,6 +142,9 @@ if ($action == 'set') {
 		if (GETPOSTISSET('SELLYOURSAAS_MINAMOUNT_TO_CLAIM')) {
 			dolibarr_set_const($db, "SELLYOURSAAS_MINAMOUNT_TO_CLAIM", GETPOST("SELLYOURSAAS_MINAMOUNT_TO_CLAIM"), 'chaine', 0, '', $conf->entity);
 		}
+		if (GETPOSTISSET('SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION')) {
+			dolibarr_set_const($db, "SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION", GETPOST("SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION", 'int'), 'chaine', 0, '', $conf->entity);
+		}
 		if (GETPOSTISSET('SELLYOURSAAS_RESELLER_EMAIL')) {
 			dolibarr_set_const($db, "SELLYOURSAAS_RESELLER_EMAIL", GETPOST("SELLYOURSAAS_RESELLER_EMAIL"), 'chaine', 0, '', $conf->entity);
 		}
@@ -251,6 +254,13 @@ if ($allowresellerprogram) {
 	print ' '.$langs->getCurrencySymbol($conf->currency);
 	print '</td>';
 	print '<td><span class="opacitymedium small">100</span></td>';
+	print '</tr>';
+
+	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION").'</td>';
+	print '<td>';
+	print $form->select_produits(getDolGlobalInt('SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION'), "SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION", '1', 0, 0, 1, 2, '', 0, array(), 0, '1', 0, 'minwidth175 maxwidth500 widthcentpercentminusx');
+	print '</td>';
+	print '<td><span class="opacitymedium small">'.$langs->trans("SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSIONHelp").'</span></td>';
 	print '</tr>';
 
 	print '<tr class="oddeven"><td>'.$langs->trans("SELLYOURSAAS_RESELLER_EMAIL").'</td>';
