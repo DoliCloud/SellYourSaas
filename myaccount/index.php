@@ -110,6 +110,7 @@ if (! $res) {
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
@@ -1070,7 +1071,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$address = GETPOST('address', 'alphanohtml');
 	$town = GETPOST('town', 'alphanohtml');
 	$zip = GETPOST('zip', 'alphanohtml');
-	$stateorcounty = GETPOST('stateorcounty', 'alphanohtml');
+	$state_id = GETPOSTINT('state_id');
 	$country_code = GETPOST('country_id', 'aZ09');
 	$vatassuj = (GETPOST('vatassuj', 'alphanohtml') == 'on' ? 1 : 0);
 	$vatnumber = GETPOST('vatnumber', 'alphanohtml');
@@ -1095,6 +1096,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	$mythirdpartyaccount->address = $address;
 	$mythirdpartyaccount->town = $town;
 	$mythirdpartyaccount->zip = $zip;
+	$mythirdpartyaccount->state_id = $state_id;
 	if ($country_id > 0) {
 		$mythirdpartyaccount->country_id = $country_id;
 		$mythirdpartyaccount->country_code = $country_code;
@@ -2814,6 +2816,7 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
  */
 
 $form = new Form($db);
+$formcompany = new FormCompany($db);
 
 
 if ($welcomecid > 0) {
