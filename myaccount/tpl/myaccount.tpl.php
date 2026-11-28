@@ -97,10 +97,6 @@ print '
 	                  <input type="text" class="form-control input-small" value="'.$mythirdpartyaccount->zip.'" name="zip" spellcheck="false">
 	                </div>
 	                <div class="form-group">
-	                  <label>'.$langs->trans("StateOrCounty").'</label>
-	                  <input type="text" class="form-control" name="stateorcounty" value="" spellcheck="false">
-	                </div>
-	                <div class="form-group">
 	                  <label>'.$langs->trans("Country").'</label> &nbsp; ';
 					$countryselected = (GETPOSTISSET('country_id') ? GETPOST('country_id', 'aZ09') : $mythirdpartyaccount->country_id);
 					$exclude_country_code = array();
@@ -110,6 +106,34 @@ if (getDolGlobalString('SELLYOURSAAS_EXCLUDE_COUNTRY_CODES')) {
 					print '<input type="hidden" name="country_id_old" value="'.$countryselected.'">'."\n";
 					print $form->select_country($countryselected, 'country_id', '', 0, 'minwidth300', 'code2', 0, 1, 0, $exclude_country_code);
 					print '</div>'."\n";
+
+					// State/Region (list depends on selected country, like on Dolibarr thirdparty card)
+					$stateselected = (GETPOSTISSET('state_id') ? GETPOSTINT('state_id') : $mythirdpartyaccount->state_id);
+					$countrycodeforstate = (string) $countryselected;			// $countryselected is a country code (option value of select_country is a code)
+					print '<div class="form-group">';
+					if (getDolGlobalInt('MAIN_SHOW_REGION_IN_STATE_SELECT') == 1 || getDolGlobalInt('MAIN_SHOW_REGION_IN_STATE_SELECT') == 2) {
+						print '<label>'.$langs->trans("Region-State").'</label>';
+					} else {
+						print '<label>'.$langs->trans("State").'</label>';
+					}
+					print ' <span id="target_state_id">'."\n";
+					if (!empty($countrycodeforstate)) {
+						print $formcompany->select_state($stateselected, $countrycodeforstate, 'state_id', 'minwidth300');
+					} else {
+						print $langs->trans("ErrorSetACountryFirst");
+					}
+					print '</span>'."\n";
+					print '</div>'."\n";
+
+					// Live refresh of state/region list when country changes (same behavior than Dolibarr thirdparty card)
+					print '<script>'."\n";
+					print '$(document).ready(function() {'."\n";
+					print '	$("select[name=country_id]").change(function() {'."\n";
+					print '		$.get("ajax/state.php", { selected: $("#state_id").val(), country_codeid: $(this).val(), htmlname: "state_id", morecss: "minwidth300" })'."\n";
+					print '		.done(function(msg) { $("#target_state_id").html(msg); });'."\n";
+					print '	});'."\n";
+					print '});'."\n";
+					print '</script>'."\n";
 
 
 if (!getDolGlobalInt('SELLYOURSAAS_ONLY_NON_PROFIT_ORGA')) {
