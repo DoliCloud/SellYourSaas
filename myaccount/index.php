@@ -1063,6 +1063,142 @@ if ($action == 'updateurl') {	// update URL from the tab "Domain"
 	}
 	header("Location: ".$_SERVER['PHP_SELF']);
 	exit;
+} elseif ($action == 'sendcommissionclaim') {
+	if (empty($mythirdpartyaccount->isareseller)) {
+		accessforbidden("Thirdparty is not a reseller.", 1, 1, 1);
+		exit;
+	}
+	if (getDolGlobalInt('SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION') <= 0) {
+		accessforbidden("Commission claim feature is disabled because the service for commission invoices is not configured.", 1, 1, 1);
+		exit;
+	}
+
+	$error = 0;
+
+	$amountclaim = price2num(GETPOST('amountclaim', 'alphanohtml'));
+	$refsupplier = GETPOST('refsupplier', 'alphanohtml');
+	$commentclaim = GETPOST('commentclaim', 'restricthtml');
+	$minamounttoclaim = getDolGlobalInt('SELLYOURSAAS_MINAMOUNT_TO_CLAIM', 100);
+
+	// Calculate the total of commissions earned (paid customer invoices)
+	$sqlcommission = 'SELECT SUM(fe.commission * f.total_ht / 100) as total';
+	$sqlcommission .= ' FROM '.MAIN_DB_PREFIX.'facture as f LEFT JOIN '.MAIN_DB_PREFIX.'facture_extrafields as fe ON fe.fk_object = f.rowid';
+	$sqlcommission .= ' WHERE fe.reseller = '.((int) $mythirdpartyaccount->id);
+	$sqlcommission .= ' AND f.fk_statut <> '.Facture::STATUS_DRAFT;
+	$sqlcommission .= ' AND f.paye = 1';
+
+	$totalamountcommission = 0;
+	$resqlcommission = $db->query($sqlcommission);
+	if ($resqlcommission) {
+		$objcommission = $db->fetch_object($resqlcommission);
+		if ($objcommission) {
+			$totalamountcommission = price2num($objcommission->total, 'MT');
+		}
+	} else {
+		dol_print_error($db);
+		exit;
+	}
+
+	// Add commissions of the old system if found into private note
+	$commoldsystem = 0;
+	if (preg_match('/Commissions old system = ([a-zA-Z0-9\.\,]+)/i', $mythirdpartyaccount->note_private, $reg)) {
+		$commoldsystem = price2num($reg[1]);
+	}
+
+	// Calculate the total of commissions already claimed with supplier invoices (draft included, to avoid duplicate claims)
+	$sqlclaimed = 'SELECT SUM(f.total_ht) as total';
+	$sqlclaimed .= ' FROM '.MAIN_DB_PREFIX.'facture_fourn as f';
+	$sqlclaimed .= ' WHERE f.fk_soc = '.((int) $mythirdpartyaccount->id);
+
+	$totalamountclaimed = 0;
+	$resqlclaimed = $db->query($sqlclaimed);
+	if ($resqlclaimed) {
+		$objclaimed = $db->fetch_object($resqlclaimed);
+		if ($objclaimed) {
+			$totalamountclaimed = price2num($objclaimed->total, 'MT');
+		}
+	} else {
+		dol_print_error($db);
+		exit;
+	}
+
+	$amountavailabletoclaim = price2num($commoldsystem + $totalamountcommission - $totalamountclaimed, 'MT');
+
+	if (!is_numeric($amountclaim) || $amountclaim <= 0) {
+		$error++;
+		setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("AmountToClaim")), null, 'errors');
+	} elseif ($amountclaim < $minamounttoclaim) {
+		$error++;
+		setEventMessages($langs->trans("ErrorCommissionClaimAmountTooLow", price($minamounttoclaim, 0, $langs, 1, -1, -1, $conf->currency)), null, 'errors');
+	} elseif ($amountclaim > $amountavailabletoclaim) {
+		$error++;
+		setEventMessages($langs->trans("ErrorCommissionClaimAmountTooHigh", price($amountavailabletoclaim, 0, $langs, 1, -1, -1, $conf->currency)), null, 'errors');
+	}
+
+	if (!$error) {
+		$db->begin();
+
+		$supplierinvoice = new FactureFournisseur($db);
+		$supplierinvoice->socid = $mythirdpartyaccount->id;
+		$supplierinvoice->type = FactureFournisseur::TYPE_STANDARD;
+		$supplierinvoice->date = dol_now();
+		$supplierinvoice->ref_supplier = $refsupplier;
+		$supplierinvoice->label = $langs->trans("RequestCommissionPayment").' - '.$mythirdpartyaccount->name;
+		$supplierinvoice->cond_reglement_id = $mythirdpartyaccount->cond_reglement_id;
+		$supplierinvoice->mode_reglement_id = $mythirdpartyaccount->mode_reglement_id;
+		$supplierinvoice->note_private = $langs->trans("RequestCommissionPayment").' - ThirdParty ID: '.$mythirdpartyaccount->id.($commentclaim ? "\n".$commentclaim : '');
+		$supplierinvoice->fk_projet = 0;
+
+		$idinvoice = $supplierinvoice->create($user);
+		if ($idinvoice > 0) {
+			// Service to use for the commission line (feature enabled only if configured)
+			$idproductforcommission = getDolGlobalInt('SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION');
+			if ($idproductforcommission > 0) {
+				include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+				$tmpproduct = new Product($db);
+				$resultproduct = $tmpproduct->fetch($idproductforcommission);
+				if ($resultproduct <= 0 || $tmpproduct->type != Product::TYPE_SERVICE) {
+					$idproductforcommission = 0;
+					dol_syslog("SELLYOURSAAS_PRODUCT_ID_FOR_COMMISSION is set to a non existing product id or to a product that is not a service", LOG_WARNING);
+				}
+			}
+			if ($idproductforcommission <= 0) {
+				$error++;
+				setEventMessages($langs->trans("ErrorCommissionClaimServiceNotConfigured"), null, 'errors');
+			} else {
+				// Get the default VAT rate for a supplier invoice from this reseller to us
+				$tva_tx = get_default_tva($mythirdpartyaccount, $mysoc, $idproductforcommission);
+				$descline = $langs->trans("RequestCommissionPayment").' - '.$mythirdpartyaccount->name;
+				$resultline = $supplierinvoice->addline($descline, $amountclaim, $tva_tx, 0, 0, 1, $idproductforcommission);
+				if ($resultline < 0) {
+					$error++;
+					setEventMessages($supplierinvoice->error, $supplierinvoice->errors, 'errors');
+				} else {
+					// Validate the supplier invoice
+					$resultvalidate = $supplierinvoice->validate($user);
+					if ($resultvalidate < 0) {
+						$error++;
+						setEventMessages($supplierinvoice->error, $supplierinvoice->errors, 'errors');
+					}
+				}
+			}
+		} else {
+			$error++;
+			setEventMessages($langs->trans("ErrorCommissionClaimNotFound"), null, 'errors');
+		}
+
+		if (!$error) {
+			$db->commit();
+		} else {
+			$db->rollback();
+		}
+	}
+
+	if (!$error) {
+		setEventMessages($langs->trans("CommissionClaimRequestCreated"), null, 'mesgs');
+	}
+	header("Location: ".$_SERVER['PHP_SELF']."?mode=mycustomerbilling");
+	exit;
 } elseif ($action == 'updatemythirdpartyaccount') {
 	$error = 0;
 
